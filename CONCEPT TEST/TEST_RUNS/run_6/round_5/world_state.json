@@ -1,0 +1,3379 @@
+{
+  "round_num": 5,
+  "countries": {
+    "columbia": {
+      "id": "columbia",
+      "sim_name": "Columbia",
+      "parallel": "United States",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_council",
+        "the_seven"
+      ],
+      "economic": {
+        "gdp": 320.90617208631437,
+        "gdp_growth_rate": 3.3556270734815303,
+        "sectors": {
+          "resources": 5,
+          "industry": 18,
+          "services": 55,
+          "technology": 22
+        },
+        "tax_rate": 0.24,
+        "treasury": 35.0,
+        "inflation": 1.56,
+        "trade_balance": -12,
+        "oil_producer": true,
+        "formosa_dependency": 0.65,
+        "debt_burden": 5,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 54.42,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 3.3556270734815303
+      },
+      "military": {
+        "ground": 22,
+        "naval": 14,
+        "tactical_air": 15,
+        "strategic_missiles": 12,
+        "air_defense": 4,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 15
+        },
+        "maintenance_cost_per_unit": 0.5,
+        "production_capacity": {
+          "ground": 4,
+          "naval": 2,
+          "tactical_air": 3
+        }
+      },
+      "political": {
+        "stability": 8.29,
+        "political_support": 65.14,
+        "dem_rep_split": [
+          47,
+          53
+        ],
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.0040198266649205,
+        "ai_level": 3,
+        "ai_rd_progress": 0.6360295912668033
+      }
+    },
+    "cathay": {
+      "id": "cathay",
+      "sim_name": "Cathay",
+      "parallel": "China",
+      "regime_type": "autocracy",
+      "organizations": [
+        "the_council",
+        "the_league"
+      ],
+      "economic": {
+        "gdp": 257.27250773092794,
+        "gdp_growth_rate": 5.252688856854016,
+        "sectors": {
+          "resources": 8,
+          "industry": 40,
+          "services": 35,
+          "technology": 17
+        },
+        "tax_rate": 0.2,
+        "treasury": 53.24,
+        "inflation": 0.66,
+        "trade_balance": 8,
+        "oil_producer": false,
+        "formosa_dependency": 0.55,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.22,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 5.252688856854016
+      },
+      "military": {
+        "ground": 25,
+        "naval": 8,
+        "tactical_air": 10,
+        "strategic_missiles": 9,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 12
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {
+          "ground": 5,
+          "naval": 2,
+          "tactical_air": 3
+        },
+        "strategic_missile_growth": 1
+      },
+      "political": {
+        "stability": 7.64,
+        "political_support": 69.69,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.803951464933878,
+        "ai_level": 3,
+        "ai_rd_progress": 0.02885366234109341
+      }
+    },
+    "nordostan": {
+      "id": "nordostan",
+      "sim_name": "Nordostan",
+      "parallel": "Russia",
+      "regime_type": "autocracy",
+      "organizations": [
+        "the_council",
+        "the_league",
+        "the_cartel"
+      ],
+      "economic": {
+        "gdp": 22.361753167261785,
+        "gdp_growth_rate": 0.5535074846415314,
+        "sectors": {
+          "resources": 40,
+          "industry": 25,
+          "services": 25,
+          "technology": 10
+        },
+        "tax_rate": 0.22,
+        "treasury": 0,
+        "inflation": 3.77,
+        "trade_balance": 3,
+        "oil_producer": true,
+        "formosa_dependency": 0.15,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 3.94,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 0.5535074846415314
+      },
+      "military": {
+        "ground": 16,
+        "naval": 6,
+        "tactical_air": 8,
+        "strategic_missiles": 12,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 12
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 2
+        }
+      },
+      "political": {
+        "stability": 3.35,
+        "political_support": 53.91,
+        "dem_rep_split": null,
+        "war_tiredness": 6.514349204745794,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.2
+      }
+    },
+    "heartland": {
+      "id": "heartland",
+      "sim_name": "Heartland",
+      "parallel": "Ukraine",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 1.531162681308006,
+        "gdp_growth_rate": -0.7890889470037816,
+        "sectors": {
+          "resources": 15,
+          "industry": 30,
+          "services": 40,
+          "technology": 15
+        },
+        "tax_rate": 0.22,
+        "treasury": 0,
+        "inflation": 5.32,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.1,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.25,
+        "inflation_revenue_erosion": 0.02,
+        "last_growth": -0.7890889470037816
+      },
+      "military": {
+        "ground": 23,
+        "naval": 0,
+        "tactical_air": 5,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {
+          "ground": 3,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 1.0,
+        "political_support": 0.0,
+        "dem_rep_split": null,
+        "war_tiredness": 8.308397564808393,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.15
+      }
+    },
+    "persia": {
+      "id": "persia",
+      "sim_name": "Persia",
+      "parallel": "Iran",
+      "regime_type": "theocracy",
+      "organizations": [
+        "the_league",
+        "the_cartel"
+      ],
+      "economic": {
+        "gdp": 4.512372188204538,
+        "gdp_growth_rate": 1.297383644509756,
+        "sectors": {
+          "resources": 35,
+          "industry": 30,
+          "services": 28,
+          "technology": 7
+        },
+        "tax_rate": 0.18,
+        "treasury": 0,
+        "inflation": 11.09,
+        "trade_balance": 1,
+        "oil_producer": true,
+        "formosa_dependency": 0.1,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.8,
+        "inflation_revenue_erosion": 0.84,
+        "last_growth": 1.297383644509756
+      },
+      "military": {
+        "ground": 8,
+        "naval": 2,
+        "tactical_air": 6,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.25,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 2
+        }
+      },
+      "political": {
+        "stability": 3.17,
+        "political_support": 27.14,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "theocracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.15
+      }
+    },
+    "gallia": {
+      "id": "gallia",
+      "sim_name": "Gallia",
+      "parallel": "France",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_union",
+        "the_council",
+        "the_seven"
+      ],
+      "economic": {
+        "gdp": 32.60658580866904,
+        "gdp_growth_rate": 0.7623688704978587,
+        "sectors": {
+          "resources": 5,
+          "industry": 20,
+          "services": 58,
+          "technology": 17
+        },
+        "tax_rate": 0.45,
+        "treasury": 7.699999999999999,
+        "inflation": 1.1,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.4,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.38,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 0.7623688704978587
+      },
+      "military": {
+        "ground": 4,
+        "naval": 3,
+        "tactical_air": 3,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 15
+        },
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 5.88,
+        "political_support": 32.35,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.3051473726024541,
+        "ai_level": 1,
+        "ai_rd_progress": 0.3966468745663343
+      }
+    },
+    "teutonia": {
+      "id": "teutonia",
+      "sim_name": "Teutonia",
+      "parallel": "Germany",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_union",
+        "the_seven"
+      ],
+      "economic": {
+        "gdp": 46.77498120362806,
+        "gdp_growth_rate": 0.6485704901579588,
+        "sectors": {
+          "resources": 3,
+          "industry": 35,
+          "services": 48,
+          "technology": 14
+        },
+        "tax_rate": 0.38,
+        "treasury": 12.390000000000002,
+        "inflation": 1.24,
+        "trade_balance": 5,
+        "oil_producer": false,
+        "formosa_dependency": 0.5,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.35,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 0.6485704901579588
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 7.02,
+        "political_support": 42.95,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.01843330278304325,
+        "ai_level": 2,
+        "ai_rd_progress": 0.47373323200459005
+      }
+    },
+    "freeland": {
+      "id": "freeland",
+      "sim_name": "Freeland",
+      "parallel": "Poland",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_union"
+      ],
+      "economic": {
+        "gdp": 10.41334383536845,
+        "gdp_growth_rate": 2.221984959537684,
+        "sectors": {
+          "resources": 10,
+          "industry": 35,
+          "services": 45,
+          "technology": 10
+        },
+        "tax_rate": 0.3,
+        "treasury": 0,
+        "inflation": 1.78,
+        "trade_balance": -1,
+        "oil_producer": false,
+        "formosa_dependency": 0.3,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.28,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 2.221984959537684
+      },
+      "military": {
+        "ground": 5,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 8.15,
+        "political_support": 70.67,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.2
+      }
+    },
+    "ponte": {
+      "id": "ponte",
+      "sim_name": "Ponte",
+      "parallel": "Italy",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_union",
+        "the_seven"
+      ],
+      "economic": {
+        "gdp": 23.490806347071217,
+        "gdp_growth_rate": 0.3176074686487717,
+        "sectors": {
+          "resources": 4,
+          "industry": 28,
+          "services": 56,
+          "technology": 12
+        },
+        "tax_rate": 0.42,
+        "treasury": 0,
+        "inflation": 1.24,
+        "trade_balance": 1,
+        "oil_producer": false,
+        "formosa_dependency": 0.35,
+        "debt_burden": 8,
+        "social_spending_baseline": 0.32,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 0.3176074686487717
+      },
+      "military": {
+        "ground": 3,
+        "naval": 2,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 5.68,
+        "political_support": 30.24,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.25
+      }
+    },
+    "albion": {
+      "id": "albion",
+      "sim_name": "Albion",
+      "parallel": "United Kingdom",
+      "regime_type": "democracy",
+      "organizations": [
+        "western_treaty",
+        "the_council",
+        "the_seven"
+      ],
+      "economic": {
+        "gdp": 36.9656046011668,
+        "gdp_growth_rate": 1.1205398815636842,
+        "sectors": {
+          "resources": 5,
+          "industry": 18,
+          "services": 60,
+          "technology": 17
+        },
+        "tax_rate": 0.33,
+        "treasury": 2.0699999999999976,
+        "inflation": 1.33,
+        "trade_balance": -3,
+        "oil_producer": true,
+        "formosa_dependency": 0.4,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.33,
+        "oil_revenue": 6.41,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 1.1205398815636842
+      },
+      "military": {
+        "ground": 3,
+        "naval": 3,
+        "tactical_air": 3,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 15
+        },
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 5.96,
+        "political_support": 38.09,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.3024849695619726,
+        "ai_level": 2,
+        "ai_rd_progress": 0.47238004858761135
+      }
+    },
+    "bharata": {
+      "id": "bharata",
+      "sim_name": "Bharata",
+      "parallel": "India",
+      "regime_type": "democracy",
+      "organizations": [
+        "the_league"
+      ],
+      "economic": {
+        "gdp": 57.01808136782398,
+        "gdp_growth_rate": 5.264150270356275,
+        "sectors": {
+          "resources": 10,
+          "industry": 25,
+          "services": 48,
+          "technology": 17
+        },
+        "tax_rate": 0.18,
+        "treasury": 1.7000000000000002,
+        "inflation": 2.22,
+        "trade_balance": -3,
+        "oil_producer": false,
+        "formosa_dependency": 0.35,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.2,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 5.264150270356275
+      },
+      "military": {
+        "ground": 12,
+        "naval": 3,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.25,
+        "production_capacity": {
+          "ground": 3,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 7.58,
+        "political_support": 97.83,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.40017999917337294,
+        "ai_level": 2,
+        "ai_rd_progress": 0.45371997285076576
+      }
+    },
+    "levantia": {
+      "id": "levantia",
+      "sim_name": "Levantia",
+      "parallel": "Israel",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 5.771205687510641,
+        "gdp_growth_rate": 2.4294079725975504,
+        "sectors": {
+          "resources": 3,
+          "industry": 15,
+          "services": 50,
+          "technology": 32
+        },
+        "tax_rate": 0.32,
+        "treasury": 0,
+        "inflation": 1.56,
+        "trade_balance": -1,
+        "oil_producer": false,
+        "formosa_dependency": 0.3,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.28,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 2.4294079725975504
+      },
+      "military": {
+        "ground": 6,
+        "naval": 1,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 2
+        }
+      },
+      "political": {
+        "stability": 5.9,
+        "political_support": 61.53,
+        "dem_rep_split": null,
+        "war_tiredness": 0.8874106249999998,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.5,
+        "ai_level": 2,
+        "ai_rd_progress": 0.55
+      }
+    },
+    "formosa": {
+      "id": "formosa",
+      "sim_name": "Formosa",
+      "parallel": "Taiwan",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 9.051339808983107,
+        "gdp_growth_rate": 2.433066380522796,
+        "sectors": {
+          "resources": 2,
+          "industry": 30,
+          "services": 35,
+          "technology": 33
+        },
+        "tax_rate": 0.2,
+        "treasury": 0,
+        "inflation": 0.88,
+        "trade_balance": 4,
+        "oil_producer": false,
+        "formosa_dependency": 0.0,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.22,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 2.433066380522796
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 8.6,
+        "political_support": 76.53,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 2,
+        "ai_rd_progress": 0.5
+      }
+    },
+    "phrygia": {
+      "id": "phrygia",
+      "sim_name": "Phrygia",
+      "parallel": "Turkey",
+      "regime_type": "hybrid",
+      "organizations": [
+        "western_treaty"
+      ],
+      "economic": {
+        "gdp": 12.44972665901641,
+        "gdp_growth_rate": 1.8679065989205341,
+        "sectors": {
+          "resources": 8,
+          "industry": 30,
+          "services": 50,
+          "technology": 12
+        },
+        "tax_rate": 0.25,
+        "treasury": 0,
+        "inflation": 19.97,
+        "trade_balance": -3,
+        "oil_producer": false,
+        "formosa_dependency": 0.2,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.22,
+        "inflation_revenue_erosion": 5.49,
+        "last_growth": 1.8679065989205341
+      },
+      "military": {
+        "ground": 6,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 4.08,
+        "political_support": 50.51,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "hybrid"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.25
+      }
+    },
+    "yamato": {
+      "id": "yamato",
+      "sim_name": "Yamato",
+      "parallel": "Japan",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 45.79404389713972,
+        "gdp_growth_rate": 1.2731583430097633,
+        "sectors": {
+          "resources": 2,
+          "industry": 28,
+          "services": 50,
+          "technology": 20
+        },
+        "tax_rate": 0.3,
+        "treasury": 0,
+        "inflation": 1.1,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.55,
+        "debt_burden": 6,
+        "social_spending_baseline": 0.3,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 1.2731583430097633
+      },
+      "military": {
+        "ground": 3,
+        "naval": 4,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 8.51,
+        "political_support": 58.94,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.10066936164426224,
+        "ai_level": 3,
+        "ai_rd_progress": 0.31441650550111894
+      }
+    },
+    "solaria": {
+      "id": "solaria",
+      "sim_name": "Solaria",
+      "parallel": "Saudi Arabia",
+      "regime_type": "autocracy",
+      "organizations": [
+        "the_league",
+        "the_cartel"
+      ],
+      "economic": {
+        "gdp": 12.953091000187406,
+        "gdp_growth_rate": 3.068595502934407,
+        "sectors": {
+          "resources": 45,
+          "industry": 20,
+          "services": 28,
+          "technology": 7
+        },
+        "tax_rate": 0.1,
+        "treasury": 0,
+        "inflation": 0.88,
+        "trade_balance": 8,
+        "oil_producer": true,
+        "formosa_dependency": 0.2,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.25,
+        "oil_revenue": 2.2,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 3.068595502934407
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 8.38,
+        "political_support": 85.27,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.1,
+        "ai_level": 1,
+        "ai_rd_progress": 0.2
+      }
+    },
+    "choson": {
+      "id": "choson",
+      "sim_name": "Choson",
+      "parallel": "North Korea",
+      "regime_type": "autocracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 0.29136453036490373,
+        "gdp_growth_rate": 0.3160904991035449,
+        "sectors": {
+          "resources": 20,
+          "industry": 40,
+          "services": 35,
+          "technology": 5
+        },
+        "tax_rate": 0.5,
+        "treasury": 0,
+        "inflation": 4.44,
+        "trade_balance": -0.5,
+        "oil_producer": false,
+        "formosa_dependency": 0.0,
+        "debt_burden": 0,
+        "social_spending_baseline": 0.1,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 0.3160904991035449
+      },
+      "military": {
+        "ground": 8,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 1,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 1,
+          "naval": 3,
+          "tactical_air": 2,
+          "strategic_missile": 10
+        },
+        "maintenance_cost_per_unit": 0.15,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 3.91,
+        "political_support": 62.26,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.5,
+        "ai_level": 0,
+        "ai_rd_progress": 0.0
+      }
+    },
+    "hanguk": {
+      "id": "hanguk",
+      "sim_name": "Hanguk",
+      "parallel": "South Korea",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 19.790300756508127,
+        "gdp_growth_rate": 1.7600410669927034,
+        "sectors": {
+          "resources": 3,
+          "industry": 33,
+          "services": 42,
+          "technology": 22
+        },
+        "tax_rate": 0.26,
+        "treasury": 0,
+        "inflation": 1.1,
+        "trade_balance": 3,
+        "oil_producer": false,
+        "formosa_dependency": 0.4,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.25,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 1.7600410669927034
+      },
+      "military": {
+        "ground": 5,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 7.11,
+        "political_support": 44.23,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.05,
+        "ai_level": 2,
+        "ai_rd_progress": 0.5
+      }
+    },
+    "caribe": {
+      "id": "caribe",
+      "sim_name": "Caribe",
+      "parallel": "Cuba + Venezuela",
+      "regime_type": "autocracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 1.2141937029299563,
+        "gdp_growth_rate": -0.8363308465156217,
+        "sectors": {
+          "resources": 50,
+          "industry": 20,
+          "services": 25,
+          "technology": 5
+        },
+        "tax_rate": 0.3,
+        "treasury": 0,
+        "inflation": 26.62,
+        "trade_balance": 0,
+        "oil_producer": true,
+        "formosa_dependency": 0.0,
+        "debt_burden": 5,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.23,
+        "inflation_revenue_erosion": 0.85,
+        "last_growth": -0.8363308465156217
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 1,
+        "strategic_missiles": 0,
+        "air_defense": 0,
+        "production_costs": {
+          "ground": 2,
+          "naval": 4,
+          "tactical_air": 3,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.2,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 0
+        }
+      },
+      "political": {
+        "stability": 1.0,
+        "political_support": 16.06,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 0,
+        "ai_rd_progress": 0.0
+      }
+    },
+    "mirage": {
+      "id": "mirage",
+      "sim_name": "Mirage",
+      "parallel": "UAE",
+      "regime_type": "autocracy",
+      "organizations": [
+        "the_league",
+        "the_cartel"
+      ],
+      "economic": {
+        "gdp": 6.024953003196402,
+        "gdp_growth_rate": 3.5109349606433944,
+        "sectors": {
+          "resources": 30,
+          "industry": 15,
+          "services": 45,
+          "technology": 10
+        },
+        "tax_rate": 0.0,
+        "treasury": 3.0400000000000023,
+        "inflation": 0.88,
+        "trade_balance": 5,
+        "oil_producer": true,
+        "formosa_dependency": 0.15,
+        "debt_burden": 0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 1.02,
+        "inflation_revenue_erosion": 0.0,
+        "last_growth": 3.5109349606433944
+      },
+      "military": {
+        "ground": 2,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3,
+          "naval": 5,
+          "tactical_air": 4,
+          "strategic_missile": 0
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        }
+      },
+      "political": {
+        "stability": 9.45,
+        "political_support": 97.07,
+        "dem_rep_split": null,
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.3
+      }
+    }
+  },
+  "zones": {
+    "g_col_continental": {
+      "forces": {
+        "columbia": {
+          "ground": 8,
+          "tactical_air": 5,
+          "strategic_missiles": 6,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_col_alaska": {
+      "forces": {
+        "columbia": {
+          "ground": 1,
+          "strategic_missiles": 3
+        }
+      }
+    },
+    "g_col_hawaii": {
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "tactical_air": 2,
+          "strategic_missiles": 3
+        }
+      }
+    },
+    "g_teutonia": {
+      "forces": {
+        "columbia": {
+          "ground": 4,
+          "tactical_air": 3,
+          "air_defense": 1
+        },
+        "teutonia": {
+          "ground": 4,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_yamato": {
+      "forces": {
+        "columbia": {
+          "ground": 3,
+          "tactical_air": 3,
+          "air_defense": 1
+        },
+        "yamato": {
+          "ground": 3,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_mirage": {
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "tactical_air": 2
+        },
+        "mirage": {
+          "ground": 2,
+          "tactical_air": 2,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_contested_horn": {
+      "forces": {
+        "columbia": {
+          "ground": 1
+        }
+      }
+    },
+    "g_hanguk": {
+      "forces": {
+        "columbia": {
+          "ground": 1
+        },
+        "hanguk": {
+          "ground": 5,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_sea_atlantic_west": {
+      "forces": {
+        "columbia": {
+          "naval": 3
+        }
+      }
+    },
+    "g_sea_north_pacific": {
+      "forces": {
+        "columbia": {
+          "naval": 4
+        },
+        "nordostan": {
+          "naval": 2
+        },
+        "yamato": {
+          "naval": 1
+        }
+      }
+    },
+    "g_sea_persian_gulf": {
+      "forces": {
+        "columbia": {
+          "naval": 2
+        },
+        "mirage": {
+          "naval": 1
+        }
+      }
+    },
+    "g_sea_med_east": {
+      "forces": {
+        "columbia": {
+          "naval": 2
+        },
+        "levantia": {
+          "naval": 1
+        },
+        "phrygia": {
+          "naval": 1
+        }
+      }
+    },
+    "g_sea_east_china": {
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "cathay": {
+          "naval": 3
+        },
+        "formosa": {
+          "naval": 2
+        },
+        "yamato": {
+          "naval": 3
+        },
+        "choson": {
+          "naval": 1
+        },
+        "hanguk": {
+          "naval": 2
+        }
+      }
+    },
+    "g_sea_indian_ocean": {
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "bharata": {
+          "naval": 2
+        }
+      }
+    },
+    "g_sea_gulf_caribbean": {
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "caribe": {
+          "naval": 1
+        }
+      }
+    },
+    "g_cat_eastern": {
+      "forces": {
+        "cathay": {
+          "ground": 10,
+          "tactical_air": 5,
+          "strategic_missiles": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_cat_western": {
+      "forces": {
+        "cathay": {
+          "ground": 8,
+          "tactical_air": 2,
+          "strategic_missiles": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_cat_southern": {
+      "forces": {
+        "cathay": {
+          "ground": 5,
+          "tactical_air": 3,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_contested_central_asia": {
+      "forces": {
+        "cathay": {
+          "ground": 2
+        },
+        "bharata": {
+          "ground": 2
+        }
+      }
+    },
+    "g_sea_south_china": {
+      "forces": {
+        "cathay": {
+          "naval": 3
+        }
+      }
+    },
+    "g_sea_southeast_asia": {
+      "forces": {
+        "cathay": {
+          "naval": 2
+        }
+      }
+    },
+    "g_nor_western": {
+      "forces": {
+        "nordostan": {
+          "ground": 2,
+          "tactical_air": 1,
+          "strategic_missiles": 4,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_nor_central": {
+      "forces": {
+        "nordostan": {
+          "ground": 2,
+          "tactical_air": 1,
+          "strategic_missiles": 6,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_nor_eastern": {
+      "forces": {
+        "nordostan": {
+          "ground": 1,
+          "strategic_missiles": 2
+        }
+      }
+    },
+    "ee_belarus": {
+      "forces": {
+        "nordostan": {
+          "ground": 2
+        }
+      }
+    },
+    "ee_nord_border": {
+      "forces": {
+        "nordostan": {
+          "ground": 2,
+          "tactical_air": 2
+        }
+      }
+    },
+    "ee_east_front_central": {
+      "forces": {
+        "nordostan": {
+          "ground": 1,
+          "tactical_air": 3,
+          "air_defense": 1
+        }
+      }
+    },
+    "ee_east_front_south": {
+      "forces": {
+        "nordostan": {
+          "ground": 3
+        }
+      }
+    },
+    "ee_occupied_south": {
+      "forces": {
+        "nordostan": {
+          "ground": 2
+        }
+      }
+    },
+    "ee_crimea_naval": {
+      "forces": {
+        "nordostan": {
+          "ground": 1,
+          "tactical_air": 1
+        }
+      }
+    },
+    "g_sea_black": {
+      "forces": {
+        "nordostan": {
+          "naval": 2
+        },
+        "phrygia": {
+          "naval": 1
+        }
+      }
+    },
+    "g_sea_baltic": {
+      "forces": {
+        "nordostan": {
+          "naval": 1
+        },
+        "teutonia": {
+          "naval": 2
+        },
+        "freeland": {
+          "naval": 1
+        }
+      }
+    },
+    "g_sea_arctic": {
+      "forces": {
+        "nordostan": {
+          "naval": 1
+        }
+      }
+    },
+    "ee_west_ukr": {
+      "forces": {
+        "heartland": {
+          "ground": 2
+        }
+      }
+    },
+    "ee_east_front_north": {
+      "forces": {
+        "heartland": {
+          "ground": 3,
+          "tactical_air": 2
+        }
+      }
+    },
+    "ee_capital": {
+      "forces": {
+        "heartland": {
+          "ground": 2,
+          "tactical_air": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "ee_central_ukr": {
+      "forces": {
+        "heartland": {
+          "ground": 2
+        }
+      }
+    },
+    "ee_south_ukr": {
+      "forces": {
+        "heartland": {
+          "ground": 2,
+          "tactical_air": 1
+        }
+      }
+    },
+    "ee_dnipro_line": {
+      "forces": {
+        "heartland": {
+          "ground": 2,
+          "tactical_air": 1
+        }
+      }
+    },
+    "ee_kherson": {
+      "forces": {
+        "heartland": {
+          "ground": 1
+        }
+      }
+    },
+    "ee_southwest": {
+      "forces": {
+        "heartland": {
+          "ground": 1
+        }
+      }
+    },
+    "me_persia_west": {
+      "forces": {
+        "persia": {
+          "ground": 3,
+          "tactical_air": 2
+        }
+      }
+    },
+    "me_persia_nuclear": {
+      "forces": {
+        "persia": {
+          "ground": 2,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "me_persia_east": {
+      "forces": {
+        "persia": {
+          "ground": 2,
+          "tactical_air": 1
+        }
+      }
+    },
+    "me_iraq_corridor": {
+      "forces": {
+        "persia": {
+          "ground": 1
+        }
+      }
+    },
+    "me_gulf_hormuz": {
+      "forces": {
+        "persia": {
+          "naval": 2,
+          "tactical_air": 1
+        }
+      }
+    },
+    "g_gallia": {
+      "forces": {
+        "gallia": {
+          "ground": 3,
+          "tactical_air": 3,
+          "strategic_missiles": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "me_syria_lebanon": {
+      "forces": {
+        "gallia": {
+          "ground": 1
+        },
+        "phrygia": {
+          "ground": 1
+        }
+      }
+    },
+    "g_sea_med_west": {
+      "forces": {
+        "gallia": {
+          "naval": 2
+        },
+        "ponte": {
+          "naval": 2
+        }
+      }
+    },
+    "g_sea_atlantic_east": {
+      "forces": {
+        "gallia": {
+          "naval": 1
+        },
+        "albion": {
+          "naval": 2
+        }
+      }
+    },
+    "g_freeland": {
+      "forces": {
+        "freeland": {
+          "ground": 5,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_ponte": {
+      "forces": {
+        "ponte": {
+          "ground": 3,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_albion": {
+      "forces": {
+        "albion": {
+          "ground": 3,
+          "tactical_air": 3,
+          "strategic_missiles": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_sea_giuk": {
+      "forces": {
+        "albion": {
+          "naval": 1
+        }
+      }
+    },
+    "g_bharata": {
+      "forces": {
+        "bharata": {
+          "ground": 10,
+          "tactical_air": 4,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_sea_arabian": {
+      "forces": {
+        "bharata": {
+          "naval": 1
+        }
+      }
+    },
+    "me_levantia_core": {
+      "forces": {
+        "levantia": {
+          "ground": 4,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "me_levantia_north": {
+      "forces": {
+        "levantia": {
+          "ground": 2,
+          "tactical_air": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_formosa": {
+      "forces": {
+        "formosa": {
+          "ground": 4,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_phrygia": {
+      "forces": {
+        "phrygia": {
+          "ground": 5,
+          "tactical_air": 3,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_solaria": {
+      "forces": {
+        "solaria": {
+          "ground": 3,
+          "tactical_air": 2,
+          "air_defense": 2
+        }
+      }
+    },
+    "g_sea_red": {
+      "forces": {
+        "solaria": {
+          "naval": 1
+        }
+      }
+    },
+    "me_yemen": {
+      "forces": {
+        "solaria": {
+          "tactical_air": 1
+        }
+      }
+    },
+    "g_choson": {
+      "forces": {
+        "choson": {
+          "ground": 8,
+          "tactical_air": 2,
+          "strategic_missiles": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "g_caribe": {
+      "forces": {
+        "caribe": {
+          "ground": 3,
+          "tactical_air": 1
+        }
+      }
+    }
+  },
+  "deployments": [
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 8,
+      "zone": "g_col_continental"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "g_col_alaska"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_col_hawaii"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 4,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_mirage"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "g_contested_horn"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "g_hanguk"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 3,
+      "zone": "g_sea_atlantic_west"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 4,
+      "zone": "g_sea_north_pacific"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_persian_gulf"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_med_east"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_indian_ocean"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_gulf_caribbean"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "tactical_air",
+      "count": 5,
+      "zone": "g_col_continental"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_col_hawaii"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_mirage"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "strategic_missiles",
+      "count": 6,
+      "zone": "g_col_continental"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "strategic_missiles",
+      "count": 3,
+      "zone": "g_col_alaska"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "strategic_missiles",
+      "count": 3,
+      "zone": "g_col_hawaii"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_col_continental"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "columbia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "ground",
+      "count": 10,
+      "zone": "g_cat_eastern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "ground",
+      "count": 8,
+      "zone": "g_cat_western"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "ground",
+      "count": 5,
+      "zone": "g_cat_southern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_contested_central_asia"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "naval",
+      "count": 3,
+      "zone": "g_sea_south_china"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "naval",
+      "count": 3,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_southeast_asia"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "tactical_air",
+      "count": 5,
+      "zone": "g_cat_eastern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_cat_southern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_cat_western"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "strategic_missiles",
+      "count": 2,
+      "zone": "g_cat_western"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "strategic_missiles",
+      "count": 2,
+      "zone": "g_cat_eastern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_cat_eastern"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_cat_western"
+    },
+    {
+      "country": "cathay",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_cat_southern"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_nor_western"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_nor_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "g_nor_eastern"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_belarus"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_nord_border"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "ee_east_front_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "ee_east_front_south"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_occupied_south"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "ee_crimea_naval"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_black"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_baltic"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_north_pacific"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_arctic"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "g_nor_western"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "g_nor_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "ee_east_front_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "ee_nord_border"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "ee_crimea_naval"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "strategic_missiles",
+      "count": 6,
+      "zone": "g_nor_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "strategic_missiles",
+      "count": 4,
+      "zone": "g_nor_western"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "strategic_missiles",
+      "count": 2,
+      "zone": "g_nor_eastern"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_nor_western"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_nor_central"
+    },
+    {
+      "country": "nordostan",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "ee_east_front_central"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_west_ukr"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "ee_east_front_north"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_capital"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_central_ukr"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_south_ukr"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "ee_dnipro_line"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "ee_kherson"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "ee_southwest"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "ee_east_front_north"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "ee_capital"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "ee_south_ukr"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "ee_dnipro_line"
+    },
+    {
+      "country": "heartland",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "ee_capital"
+    },
+    {
+      "country": "persia",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "me_persia_west"
+    },
+    {
+      "country": "persia",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "me_persia_nuclear"
+    },
+    {
+      "country": "persia",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "me_persia_east"
+    },
+    {
+      "country": "persia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "me_iraq_corridor"
+    },
+    {
+      "country": "persia",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "me_gulf_hormuz"
+    },
+    {
+      "country": "persia",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "me_persia_west"
+    },
+    {
+      "country": "persia",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "me_persia_nuclear"
+    },
+    {
+      "country": "persia",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "me_persia_east"
+    },
+    {
+      "country": "persia",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "me_gulf_hormuz"
+    },
+    {
+      "country": "persia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "me_persia_nuclear"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_gallia"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "me_syria_lebanon"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_med_west"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_atlantic_east"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_gallia"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "strategic_missiles",
+      "count": 2,
+      "zone": "g_gallia"
+    },
+    {
+      "country": "gallia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_gallia"
+    },
+    {
+      "country": "teutonia",
+      "unit_type": "ground",
+      "count": 4,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "teutonia",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_baltic"
+    },
+    {
+      "country": "teutonia",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "teutonia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_teutonia"
+    },
+    {
+      "country": "freeland",
+      "unit_type": "ground",
+      "count": 5,
+      "zone": "g_freeland"
+    },
+    {
+      "country": "freeland",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_baltic"
+    },
+    {
+      "country": "freeland",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_freeland"
+    },
+    {
+      "country": "freeland",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_freeland"
+    },
+    {
+      "country": "ponte",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_ponte"
+    },
+    {
+      "country": "ponte",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_med_west"
+    },
+    {
+      "country": "ponte",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_ponte"
+    },
+    {
+      "country": "ponte",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_ponte"
+    },
+    {
+      "country": "albion",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_albion"
+    },
+    {
+      "country": "albion",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_atlantic_east"
+    },
+    {
+      "country": "albion",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_giuk"
+    },
+    {
+      "country": "albion",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_albion"
+    },
+    {
+      "country": "albion",
+      "unit_type": "strategic_missiles",
+      "count": 2,
+      "zone": "g_albion"
+    },
+    {
+      "country": "albion",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_albion"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "ground",
+      "count": 10,
+      "zone": "g_bharata"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_contested_central_asia"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_indian_ocean"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_arabian"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "tactical_air",
+      "count": 4,
+      "zone": "g_bharata"
+    },
+    {
+      "country": "bharata",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_bharata"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "ground",
+      "count": 4,
+      "zone": "me_levantia_core"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "me_levantia_north"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_med_east"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "me_levantia_core"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "me_levantia_north"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "me_levantia_core"
+    },
+    {
+      "country": "levantia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "me_levantia_north"
+    },
+    {
+      "country": "formosa",
+      "unit_type": "ground",
+      "count": 4,
+      "zone": "g_formosa"
+    },
+    {
+      "country": "formosa",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "formosa",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_formosa"
+    },
+    {
+      "country": "formosa",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_formosa"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "ground",
+      "count": 5,
+      "zone": "g_phrygia"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "ground",
+      "count": 1,
+      "zone": "me_syria_lebanon"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_med_east"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_black"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_phrygia"
+    },
+    {
+      "country": "phrygia",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_phrygia"
+    },
+    {
+      "country": "yamato",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "yamato",
+      "unit_type": "naval",
+      "count": 3,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "yamato",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_north_pacific"
+    },
+    {
+      "country": "yamato",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "yamato",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_yamato"
+    },
+    {
+      "country": "solaria",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_solaria"
+    },
+    {
+      "country": "solaria",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_red"
+    },
+    {
+      "country": "solaria",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_solaria"
+    },
+    {
+      "country": "solaria",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "me_yemen"
+    },
+    {
+      "country": "solaria",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_solaria"
+    },
+    {
+      "country": "choson",
+      "unit_type": "ground",
+      "count": 8,
+      "zone": "g_choson"
+    },
+    {
+      "country": "choson",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "choson",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_choson"
+    },
+    {
+      "country": "choson",
+      "unit_type": "strategic_missiles",
+      "count": 1,
+      "zone": "g_choson"
+    },
+    {
+      "country": "choson",
+      "unit_type": "air_defense",
+      "count": 1,
+      "zone": "g_choson"
+    },
+    {
+      "country": "hanguk",
+      "unit_type": "ground",
+      "count": 5,
+      "zone": "g_hanguk"
+    },
+    {
+      "country": "hanguk",
+      "unit_type": "naval",
+      "count": 2,
+      "zone": "g_sea_east_china"
+    },
+    {
+      "country": "hanguk",
+      "unit_type": "tactical_air",
+      "count": 3,
+      "zone": "g_hanguk"
+    },
+    {
+      "country": "hanguk",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_hanguk"
+    },
+    {
+      "country": "caribe",
+      "unit_type": "ground",
+      "count": 3,
+      "zone": "g_caribe"
+    },
+    {
+      "country": "caribe",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_gulf_caribbean"
+    },
+    {
+      "country": "caribe",
+      "unit_type": "tactical_air",
+      "count": 1,
+      "zone": "g_caribe"
+    },
+    {
+      "country": "mirage",
+      "unit_type": "ground",
+      "count": 2,
+      "zone": "g_mirage"
+    },
+    {
+      "country": "mirage",
+      "unit_type": "naval",
+      "count": 1,
+      "zone": "g_sea_persian_gulf"
+    },
+    {
+      "country": "mirage",
+      "unit_type": "tactical_air",
+      "count": 2,
+      "zone": "g_mirage"
+    },
+    {
+      "country": "mirage",
+      "unit_type": "air_defense",
+      "count": 2,
+      "zone": "g_mirage"
+    }
+  ],
+  "bilateral": {
+    "meta": {
+      "version": "1.0",
+      "date": "2026-03-25",
+      "tariff_scale": "0 = free trade, 1 = moderate, 2 = heavy, 3 = prohibitive",
+      "sanctions_scale": "-3 = actively helping evade, -2 = significant evasion, -1 = mild evasion, 0 = neutral, 1 = light sanctions, 2 = heavy sanctions, 3 = maximum sanctions",
+      "notes": "Only non-zero pairs listed. All unlisted pairs default to 0. Tariffs are directional (row imposes on column). Sanctions are directional (row sanctions column)."
+    },
+    "tariffs": {
+      "columbia": {
+        "cathay": 3,
+        "nordostan": 2,
+        "caribe": 2,
+        "persia": 2,
+        "choson": 2
+      },
+      "cathay": {
+        "columbia": 3,
+        "yamato": 2,
+        "hanguk": 1
+      },
+      "nordostan": {
+        "columbia": 2,
+        "albion": 2,
+        "gallia": 2,
+        "teutonia": 2,
+        "freeland": 2,
+        "ponte": 1,
+        "heartland": 3
+      },
+      "gallia": {
+        "cathay": 0,
+        "nordostan": 2,
+        "columbia": 2,
+        "albion": 2
+      },
+      "teutonia": {
+        "cathay": 0,
+        "nordostan": 2
+      },
+      "freeland": {
+        "cathay": 1,
+        "nordostan": 2
+      },
+      "ponte": {
+        "nordostan": 2,
+        "gallia": 2,
+        "cathay": 1
+      },
+      "albion": {
+        "cathay": 1,
+        "nordostan": 2,
+        "gallia": 2
+      },
+      "bharata": {
+        "cathay": 2
+      },
+      "levantia": {
+        "persia": 3,
+        "cathay": 1
+      },
+      "formosa": {
+        "cathay": 2
+      },
+      "phrygia": {
+        "solaria": 2,
+        "cathay": 0
+      },
+      "yamato": {
+        "cathay": 2,
+        "formosa": 2,
+        "choson": 2
+      },
+      "solaria": {
+        "persia": 2
+      },
+      "choson": {
+        "columbia": 2,
+        "yamato": 2,
+        "hanguk": 2
+      },
+      "hanguk": {
+        "yamato": 2,
+        "choson": 2,
+        "cathay": 0
+      },
+      "caribe": {
+        "columbia": 2
+      },
+      "mirage": {},
+      "heartland": {
+        "nordostan": 2,
+        "cathay": 1
+      },
+      "persia": {
+        "columbia": 2,
+        "levantia": 3,
+        "solaria": 2,
+        "mirage": 2
+      }
+    },
+    "sanctions": {
+      "_description": "Sanctions imposed BY row ON column. Negative values = evasion/support for target.",
+      "columbia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3,
+        "caribe": 2
+      },
+      "cathay": {
+        "nordostan": -1
+      },
+      "nordostan": {
+        "columbia": 1,
+        "heartland": 3
+      },
+      "gallia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3,
+        "caribe": 2
+      },
+      "teutonia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3,
+        "caribe": 2
+      },
+      "freeland": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3,
+        "caribe": 2
+      },
+      "ponte": {
+        "nordostan": 3,
+        "choson": 3,
+        "persia": 1,
+        "caribe": 1
+      },
+      "albion": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3,
+        "caribe": 2
+      },
+      "bharata": {},
+      "levantia": {
+        "persia": 3,
+        "nordostan": 1
+      },
+      "formosa": {
+        "nordostan": 1
+      },
+      "phrygia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 3
+      },
+      "yamato": {
+        "nordostan": 2,
+        "choson": 3
+      },
+      "solaria": {},
+      "choson": {
+        "columbia": 1,
+        "hanguk": 1,
+        "yamato": 1
+      },
+      "hanguk": {
+        "nordostan": 2,
+        "choson": 3
+      },
+      "caribe": {
+        "columbia": 1
+      },
+      "mirage": {},
+      "heartland": {
+        "nordostan": 3
+      },
+      "persia": {
+        "columbia": 1,
+        "levantia": 3
+      }
+    }
+  },
+  "organizations": [
+    {
+      "id": "western_treaty",
+      "name": "Western Treaty (NATO)",
+      "type": "alliance",
+      "members": [
+        "columbia",
+        "albion",
+        "teutonia",
+        "gallia",
+        "freeland",
+        "ponte",
+        "phrygia"
+      ],
+      "decision_rule": "consensus",
+      "partners": [
+        "yamato",
+        "hanguk"
+      ]
+    },
+    {
+      "id": "the_union",
+      "name": "The Union (EU)",
+      "type": "political_economic",
+      "members": [
+        "gallia",
+        "teutonia",
+        "freeland",
+        "ponte"
+      ],
+      "decision_rule": "consensus"
+    },
+    {
+      "id": "the_council",
+      "name": "The Council (UN Security Council)",
+      "type": "security",
+      "permanent_members": [
+        "columbia",
+        "cathay",
+        "nordostan",
+        "gallia",
+        "albion"
+      ],
+      "rotating_members": [
+        "bharata"
+      ],
+      "decision_rule": "p5_veto"
+    },
+    {
+      "id": "the_league",
+      "name": "The League (BRICS+)",
+      "type": "coordination",
+      "members": [
+        "cathay",
+        "nordostan",
+        "bharata",
+        "solaria",
+        "persia",
+        "mirage"
+      ],
+      "observers": [
+        "phrygia"
+      ],
+      "decision_rule": "loose_consensus"
+    },
+    {
+      "id": "the_cartel",
+      "name": "The Cartel (OPEC+)",
+      "type": "economic",
+      "members": [
+        "solaria",
+        "nordostan",
+        "persia",
+        "mirage"
+      ],
+      "decision_rule": "independent_production"
+    },
+    {
+      "id": "the_seven",
+      "name": "The Seven (G7)",
+      "type": "coordination",
+      "members": [
+        "columbia",
+        "albion",
+        "teutonia",
+        "gallia",
+        "yamato",
+        "ponte"
+      ],
+      "decision_rule": "non_binding"
+    }
+  ],
+  "wars": [
+    {
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "theater": "eastern_europe",
+      "status": "active",
+      "start_round": -8,
+      "occupied_zones": [
+        "ee_east_front_central",
+        "ee_east_front_south",
+        "ee_occupied_south",
+        "ee_crimea_naval"
+      ]
+    }
+  ],
+  "active_theaters": [
+    "eastern_europe",
+    "middle_east"
+  ],
+  "oil_price": 93.48,
+  "oil_price_index": 116.85000000000001,
+  "opec_production": {
+    "solaria": "normal",
+    "nordostan": "high",
+    "persia": "high",
+    "mirage": "normal"
+  },
+  "global_trade_volume_index": 100.0,
+  "chokepoint_status": {
+    "hormuz": "blocked",
+    "malacca": "open",
+    "taiwan_strait": "open",
+    "suez": "open",
+    "bosphorus": "open",
+    "giuk": "open",
+    "caribbean": "open",
+    "south_china_sea": "open"
+  },
+  "round_log": [
+    "=== ROUND 5 PROCESSING BEGINS ===",
+    "--- PASS 1: DETERMINISTIC ---",
+    "  Tariff: heartland -> cathay set to 1",
+    "  Tariff: gallia -> cathay set to 0",
+    "  Tariff: teutonia -> cathay set to 0",
+    "  Tariff: phrygia -> cathay set to 0",
+    "  Tariff: hanguk -> cathay set to 0",
+    "  Tariff: caribe -> columbia set to 2",
+    "  Sanctions: phrygia -> choson set to 3",
+    "  OPEC: nordostan production set to high",
+    "  OPEC: persia production set to high",
+    "  OPEC: solaria production set to normal",
+    "  OPEC: mirage production set to normal",
+    "  Combat ee_east_front_central: heartland(6) vs nordostan(2) -> attacker_losses=1, defender_losses=1",
+    "  Covert cyber by cathay on formosa: SUCCESS, undetected",
+    "  Covert cyber by cathay on columbia: SUCCESS, DETECTED",
+    "  Covert disinformation by cathay on yamato: FAILED, undetected",
+    "  Covert sabotage by levantia on persia: SUCCESS, DETECTED",
+    "  Covert cyber by choson on hanguk: SUCCESS, undetected",
+    "  Oil price: $93.5 (supply_factor=1.10, demand=0.803, disruption=1.60)",
+    "  Sanctions on columbia: damage=0.0371, coalition_coverage=1.235, effectiveness=full",
+    "  Tariffs columbia: imposer_cost=2.647, revenue=11.026, target_cost=4.535, net_cost=0.000",
+    "  Inflation columbia: 1.8% -> 1.6%",
+    "  GDP columbia: 310.49 -> 320.91 (growth +3.36%, factors: tariff=1.000 sanc=0.963 war=1.000 tech=1.150 infl=1.000 block=0.958)",
+    "  Debt columbia: 5.00 -> 5.00 (deficit=0.00)",
+    "  Revenue columbia: 66.88 (base=77.02 oil=0.81 sanc_cost=5.95 infl_erosion=0.00 war=0.00 debt=5.00)",
+    "  Budget columbia: rev=66.88 maint=33.50 social=15.03 mil=9.06 tech=4.29 treasury=35.00",
+    "  Production columbia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability columbia: 8.0 -> 8.3 (delta=+0.27)",
+    "  Support columbia (democracy): 59.8 -> 65.1 (delta=+5.32)",
+    "  Sanctions on cathay: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs cathay: imposer_cost=2.681, revenue=11.032, target_cost=5.290, net_cost=0.000",
+    "  Inflation cathay: 0.8% -> 0.7%",
+    "  GDP cathay: 244.43 -> 257.27 (growth +5.25%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.150 infl=1.000 block=0.860)",
+    "  Debt cathay: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue cathay: 47.45 (base=51.45 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Cathay strategic missile production: +1",
+    "  Budget cathay: rev=47.45 maint=16.50 social=8.69 mil=7.59 tech=6.90 treasury=53.24",
+    "  Production cathay: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability cathay: 7.3 -> 7.6 (delta=+0.37)",
+    "  Support cathay (autocracy): 65.7 -> 69.7 (delta=+3.96)",
+    "  Sanctions on nordostan: damage=0.0076, coalition_coverage=0.327, effectiveness=weak",
+    "  Tariffs nordostan: imposer_cost=0.177, revenue=0.587, target_cost=0.423, net_cost=0.012",
+    "  Inflation nordostan: 4.4% -> 3.8%",
+    "  GDP nordostan: 22.46 -> 22.59 (growth +0.55%, factors: tariff=0.999 sanc=0.992 war=0.920 tech=1.000 infl=0.999 block=0.958)",
+    "  Debt nordostan: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue nordostan: 3.14 (base=4.97 oil=0.46 sanc_cost=0.28 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: nordostan reserves exhausted!",
+    "  Budget nordostan: rev=3.14 maint=13.50 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production nordostan: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability nordostan: 3.8 -> 3.4 (delta=-0.46)",
+    "  Support nordostan (autocracy): 56.4 -> 53.9 (delta=-2.47)",
+    "  Sanctions on heartland: damage=0.0001, coalition_coverage=0.002, effectiveness=weak",
+    "  Tariffs heartland: imposer_cost=0.005, revenue=0.015, target_cost=0.001, net_cost=0.000",
+    "  Inflation heartland: 6.3% -> 5.3%",
+    "  GDP heartland: 1.63 -> 1.61 (growth -0.79%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=0.999 block=0.860)",
+    "  Debt heartland: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue heartland: 0.00 (base=0.36 oil=0.00 sanc_cost=0.00 infl_erosion=0.02 war=0.01 debt=3.00)",
+    "  CRISIS: heartland reserves exhausted!",
+    "  Budget heartland: rev=0.00 maint=8.70 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production heartland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability heartland: 1.0 -> 1.0 (delta=-0.98)",
+    "  Support heartland (democracy): 2.2 -> 0.0 (delta=-8.79)",
+    "  FINANCIAL CRISIS heartland: market_index=23.4, capital_flight=0.04",
+    "  Sanctions on persia: damage=0.0007, coalition_coverage=0.041, effectiveness=weak",
+    "  Tariffs persia: imposer_cost=0.026, revenue=0.088, target_cost=0.062, net_cost=0.000",
+    "  Inflation persia: 13.1% -> 11.1%",
+    "  GDP persia: 4.59 -> 4.65 (growth +1.30%, factors: tariff=1.000 sanc=0.999 war=1.000 tech=1.000 infl=0.998 block=0.958)",
+    "  Debt persia: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue persia: 0.00 (base=0.84 oil=0.08 sanc_cost=0.01 infl_erosion=0.84 war=0.00 debt=1.00)",
+    "  CRISIS: persia reserves exhausted!",
+    "  Budget persia: rev=0.00 maint=4.25 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production persia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability persia: 3.1 -> 3.2 (delta=+0.03)",
+    "  Support persia (theocracy): 29.9 -> 27.1 (delta=-2.74)",
+    "  Sanctions on gallia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs gallia: imposer_cost=0.255, revenue=0.850, target_cost=0.083, net_cost=0.000",
+    "  Inflation gallia: 1.3% -> 1.1%",
+    "  GDP gallia: 32.36 -> 32.61 (growth +0.76%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=0.860)",
+    "  Debt gallia: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue gallia: 10.67 (base=14.67 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Budget gallia: rev=10.67 maint=5.85 social=0.82 mil=0.00 tech=0.00 treasury=7.70",
+    "  Production gallia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability gallia: 5.9 -> 5.9 (delta=-0.04)",
+    "  Support gallia (democracy): 33.3 -> 32.4 (delta=-0.98)",
+    "  Sanctions on teutonia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs teutonia: imposer_cost=0.025, revenue=0.083, target_cost=0.035, net_cost=0.000",
+    "  Inflation teutonia: 1.5% -> 1.2%",
+    "  GDP teutonia: 46.47 -> 46.77 (growth +0.65%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.860)",
+    "  Debt teutonia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue teutonia: 15.77 (base=17.77 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  Budget teutonia: rev=15.77 maint=4.05 social=4.85 mil=2.82 tech=2.05 treasury=12.39",
+    "  Production teutonia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability teutonia: 7.0 -> 7.0 (delta=-0.01)",
+    "  Support teutonia (democracy): 43.0 -> 43.0 (delta=-0.01)",
+    "  Sanctions on freeland: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs freeland: imposer_cost=0.033, revenue=0.095, target_cost=0.008, net_cost=0.000",
+    "  Inflation freeland: 2.1% -> 1.8%",
+    "  GDP freeland: 10.19 -> 10.41 (growth +2.22%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=0.860)",
+    "  Debt freeland: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue freeland: 1.12 (base=3.12 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: freeland reserves exhausted!",
+    "  Budget freeland: rev=1.12 maint=3.15 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production freeland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability freeland: 7.9 -> 8.2 (delta=+0.23)",
+    "  Support freeland (democracy): 67.2 -> 70.7 (delta=+3.48)",
+    "  Sanctions on ponte: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs ponte: imposer_cost=0.086, revenue=0.250, target_cost=0.010, net_cost=0.000",
+    "  Inflation ponte: 1.5% -> 1.2%",
+    "  GDP ponte: 23.42 -> 23.49 (growth +0.32%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=0.860)",
+    "  Debt ponte: 8.00 -> 8.00 (deficit=0.00)",
+    "  Revenue ponte: 1.87 (base=9.87 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=8.00)",
+    "  CRISIS: ponte reserves exhausted!",
+    "  Budget ponte: rev=1.87 maint=3.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production ponte: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability ponte: 5.8 -> 5.7 (delta=-0.07)",
+    "  Support ponte (democracy): 32.1 -> 30.2 (delta=-1.84)",
+    "  Sanctions on albion: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs albion: imposer_cost=0.132, revenue=0.384, target_cost=0.062, net_cost=0.000",
+    "  Inflation albion: 1.6% -> 1.3%",
+    "  GDP albion: 36.56 -> 36.97 (growth +1.12%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.958)",
+    "  Debt albion: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue albion: 8.29 (base=12.20 oil=0.09 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Budget albion: rev=8.29 maint=5.40 social=0.00 mil=0.00 tech=0.00 treasury=2.07",
+    "  Production albion: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability albion: 6.0 -> 6.0 (delta=-0.00)",
+    "  Support albion (democracy): 38.5 -> 38.1 (delta=-0.36)",
+    "  Sanctions on bharata: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs bharata: imposer_cost=0.246, revenue=0.821, target_cost=0.000, net_cost=0.000",
+    "  Inflation bharata: 2.6% -> 2.2%",
+    "  GDP bharata: 54.17 -> 57.02 (growth +5.26%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.860)",
+    "  Debt bharata: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue bharata: 7.26 (base=10.26 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=3.00)",
+    "  Budget bharata: rev=7.26 maint=5.25 social=0.00 mil=0.00 tech=0.00 treasury=1.70",
+    "  Production bharata: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability bharata: 7.2 -> 7.6 (delta=+0.37)",
+    "  Support bharata (democracy): 91.4 -> 97.8 (delta=+6.41)",
+    "  Sanctions on levantia: damage=0.0002, coalition_coverage=0.006, effectiveness=weak",
+    "  Tariffs levantia: imposer_cost=0.014, revenue=0.038, target_cost=0.001, net_cost=0.000",
+    "  Inflation levantia: 1.8% -> 1.6%",
+    "  GDP levantia: 5.63 -> 5.77 (growth +2.43%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.860)",
+    "  Debt levantia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue levantia: 0.00 (base=1.85 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: levantia reserves exhausted!",
+    "  Budget levantia: rev=0.00 maint=5.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production levantia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability levantia: 5.7 -> 5.9 (delta=+0.18)",
+    "  Support levantia (democracy): 60.0 -> 61.5 (delta=+1.54)",
+    "  Sanctions on formosa: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs formosa: imposer_cost=0.034, revenue=0.113, target_cost=0.015, net_cost=0.000",
+    "  Inflation formosa: 1.0% -> 0.9%",
+    "  GDP formosa: 8.84 -> 9.05 (growth +2.43%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.860)",
+    "  Debt formosa: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue formosa: 0.81 (base=1.81 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=1.00)",
+    "  CRISIS: formosa reserves exhausted!",
+    "  Budget formosa: rev=0.81 maint=3.85 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production formosa: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability formosa: 8.3 -> 8.6 (delta=+0.32)",
+    "  Support formosa (democracy): 72.4 -> 76.5 (delta=+4.13)",
+    "  Sanctions on phrygia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs phrygia: imposer_cost=0.003, revenue=0.011, target_cost=0.000, net_cost=0.000",
+    "  Inflation phrygia: 23.5% -> 20.0%",
+    "  GDP phrygia: 12.22 -> 12.45 (growth +1.87%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=0.997 block=0.860)",
+    "  Debt phrygia: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue phrygia: 0.00 (base=3.11 oil=0.00 sanc_cost=0.00 infl_erosion=5.49 war=0.00 debt=3.00)",
+    "  CRISIS: phrygia reserves exhausted!",
+    "  Budget phrygia: rev=0.00 maint=3.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production phrygia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability phrygia: 4.2 -> 4.1 (delta=-0.08)",
+    "  Support phrygia (hybrid): 51.6 -> 50.5 (delta=-1.12)",
+    "  Sanctions on yamato: damage=0.0004, coalition_coverage=0.046, effectiveness=weak",
+    "  Tariffs yamato: imposer_cost=0.199, revenue=0.662, target_cost=0.484, net_cost=0.021",
+    "  Inflation yamato: 1.3% -> 1.1%",
+    "  GDP yamato: 45.22 -> 45.79 (growth +1.27%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.150 infl=1.000 block=0.860)",
+    "  Debt yamato: 6.00 -> 6.00 (deficit=0.00)",
+    "  Revenue yamato: 7.71 (base=13.74 oil=0.00 sanc_cost=0.03 infl_erosion=0.00 war=0.00 debt=6.00)",
+    "  CRISIS: yamato reserves exhausted!",
+    "  Budget yamato: rev=7.71 maint=5.40 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production yamato: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability yamato: 8.4 -> 8.5 (delta=+0.11)",
+    "  Support yamato (democracy): 56.5 -> 58.9 (delta=+2.42)",
+    "  Sanctions on solaria: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs solaria: imposer_cost=0.001, revenue=0.004, target_cost=0.008, net_cost=0.005",
+    "  Inflation solaria: 1.0% -> 0.9%",
+    "  GDP solaria: 12.57 -> 12.95 (growth +3.07%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=0.958)",
+    "  Debt solaria: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue solaria: 0.59 (base=1.30 oil=0.29 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=1.00)",
+    "  CRISIS: solaria reserves exhausted!",
+    "  Budget solaria: rev=0.59 maint=3.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production solaria: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability solaria: 8.1 -> 8.4 (delta=+0.28)",
+    "  Support solaria (autocracy): 80.7 -> 85.3 (delta=+4.53)",
+    "  Sanctions on choson: damage=0.0001, coalition_coverage=0.002, effectiveness=weak",
+    "  Tariffs choson: imposer_cost=0.002, revenue=0.006, target_cost=0.004, net_cost=0.000",
+    "  Inflation choson: 5.2% -> 4.4%",
+    "  GDP choson: 0.29 -> 0.29 (growth +0.32%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=0.999 block=0.860)",
+    "  Debt choson: 0.00 -> 0.00 (deficit=0.00)",
+    "  Revenue choson: 0.15 (base=0.15 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=0.00)",
+    "  CRISIS: choson reserves exhausted!",
+    "  Budget choson: rev=0.15 maint=1.95 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production choson: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability choson: 4.0 -> 3.9 (delta=-0.04)",
+    "  Support choson (autocracy): 63.9 -> 62.3 (delta=-1.63)",
+    "  Sanctions on hanguk: damage=0.0002, coalition_coverage=0.022, effectiveness=weak",
+    "  Tariffs hanguk: imposer_cost=0.016, revenue=0.055, target_cost=0.122, net_cost=0.083",
+    "  Inflation hanguk: 1.3% -> 1.1%",
+    "  GDP hanguk: 19.45 -> 19.79 (growth +1.76%, factors: tariff=0.996 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=0.860)",
+    "  Debt hanguk: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue hanguk: 3.14 (base=5.15 oil=0.00 sanc_cost=0.01 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: hanguk reserves exhausted!",
+    "  Budget hanguk: rev=3.14 maint=4.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production hanguk: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability hanguk: 6.9 -> 7.1 (delta=+0.22)",
+    "  Support hanguk (democracy): 42.5 -> 44.2 (delta=+1.75)",
+    "  Sanctions on caribe: damage=0.0002, coalition_coverage=0.010, effectiveness=weak",
+    "  Tariffs caribe: imposer_cost=0.006, revenue=0.021, target_cost=0.017, net_cost=0.002",
+    "  Inflation caribe: 31.3% -> 26.6%",
+    "  GDP caribe: 1.31 -> 1.30 (growth -0.84%, factors: tariff=0.998 sanc=1.000 war=1.000 tech=1.000 infl=0.996 block=0.958)",
+    "  Debt caribe: 5.00 -> 5.00 (deficit=0.00)",
+    "  Revenue caribe: 0.00 (base=0.39 oil=0.03 sanc_cost=0.00 infl_erosion=0.85 war=0.00 debt=5.00)",
+    "  CRISIS: caribe reserves exhausted!",
+    "  Budget caribe: rev=0.00 maint=1.00 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production caribe: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability caribe: 1.0 -> 1.0 (delta=-0.79)",
+    "  Support caribe (autocracy): 21.6 -> 16.1 (delta=-5.58)",
+    "  FINANCIAL CRISIS caribe: market_index=12.5, capital_flight=0.08",
+    "  Sanctions on mirage: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs mirage: imposer_cost=0.000, revenue=0.000, target_cost=0.001, net_cost=0.001",
+    "  Inflation mirage: 1.0% -> 0.9%",
+    "  GDP mirage: 5.82 -> 6.02 (growth +3.51%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=0.958)",
+    "  Debt mirage: 0.00 -> 0.00 (deficit=0.00)",
+    "  Revenue mirage: 0.09 (base=0.00 oil=0.09 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=0.00)",
+    "  Budget mirage: rev=0.09 maint=2.45 social=0.00 mil=0.00 tech=0.00 treasury=3.04",
+    "  Production mirage: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability mirage: 9.2 -> 9.4 (delta=+0.20)",
+    "  Support mirage (autocracy): 91.5 -> 97.1 (delta=+5.60)",
+    "--- PASS 2: AI CONTEXTUAL ADJUSTMENT ---",
+    "  AI ADJ nordostan: war_fatigue_acceleration \u2014 Prolonged war (13 rounds) accelerates public fatigue.",
+    "  AI ADJ nordostan: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "  AI ADJ heartland: war_fatigue_acceleration \u2014 Prolonged war (13 rounds) accelerates public fatigue.",
+    "  AI ADJ heartland: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ persia: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ choson: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "  AI ADJ caribe: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "--- PASS 3: COHERENCE CHECK ---",
+    "=== ROUND 5 PROCESSING COMPLETE ==="
+  ],
+  "nuclear_used_this_sim": false
+}

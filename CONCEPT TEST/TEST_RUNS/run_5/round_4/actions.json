@@ -1,0 +1,902 @@
+{
+  "columbia": {
+    "budget": {
+      "social_spending": 10.72,
+      "military_total": 8.51,
+      "tech_total": 8.51,
+      "social_spending_ratio": 0.168,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 2.13,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 3.4,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.98,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [
+        {
+          "country": "columbia",
+          "type": "disinformation",
+          "target": "persia"
+        }
+      ],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [
+        {
+          "from": "columbia",
+          "to": "heartland",
+          "amount": 3,
+          "type": "military_aid"
+        }
+      ],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.52,
+      "ai": 4.66
+    }
+  },
+  "cathay": {
+    "budget": {
+      "social_spending": 8.15,
+      "military_total": 7.11,
+      "tech_total": 6.47,
+      "social_spending_ratio": 0.127,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 1.78,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 2.85,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.49,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [
+        {
+          "country": "cathay",
+          "type": "cyber",
+          "target": "formosa"
+        }
+      ],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.4,
+      "ai": 3.63
+    }
+  },
+  "nordostan": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.1,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "opec_production": "high",
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "heartland": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.125,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 2
+    },
+    "sanctions": {},
+    "military": {
+      "combat": [
+        {
+          "attacker": "heartland",
+          "defender": "nordostan",
+          "zone": "ee_east_front_south",
+          "units": 5
+        }
+      ],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "persia": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.1,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "opec_production": "high",
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "gallia": {
+    "budget": {
+      "social_spending": 1.38,
+      "military_total": 1.15,
+      "tech_total": 1.15,
+      "social_spending_ratio": 0.212,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0.46,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.23,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.46,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 1
+    },
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [
+        {
+          "from": "gallia",
+          "to": "heartland",
+          "amount": 0.4,
+          "type": "military_aid"
+        }
+      ],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.07,
+      "ai": 0.62
+    }
+  },
+  "teutonia": {
+    "budget": {
+      "social_spending": 3.69,
+      "military_total": 2.79,
+      "tech_total": 2.79,
+      "social_spending_ratio": 0.215,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 1.12,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.56,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 1.12,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 1
+    },
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [
+        {
+          "from": "teutonia",
+          "to": "heartland",
+          "amount": 0.7,
+          "type": "military_aid"
+        }
+      ],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.35,
+      "ai": 1.38
+    }
+  },
+  "freeland": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.14,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "ponte": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.16,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "albion": {
+    "budget": {
+      "social_spending": 0.73,
+      "military_total": 0.64,
+      "tech_total": 0.64,
+      "social_spending_ratio": 0.175,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0.16,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.26,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.23,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.04,
+      "ai": 0.34
+    }
+  },
+  "bharata": {
+    "budget": {
+      "social_spending": 0.34,
+      "military_total": 0.26,
+      "tech_total": 0.26,
+      "social_spending_ratio": 0.103,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0.1,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.05,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.1,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": [
+        {
+          "type": "trade_deal",
+          "with": "cathay",
+          "description": "Infrastructure investment deal via BRICS+ framework"
+        }
+      ]
+    },
+    "tech": {
+      "nuclear": 0.01,
+      "ai": 0.15
+    }
+  },
+  "levantia": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.14,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [
+        {
+          "country": "levantia",
+          "type": "sabotage",
+          "target": "persia"
+        },
+        {
+          "country": "levantia",
+          "type": "cyber",
+          "target": "persia"
+        }
+      ],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "formosa": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.11,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": [
+        {
+          "type": "diplomatic_campaign",
+          "description": "International semiconductor cooperation agreement to build support"
+        }
+      ]
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "phrygia": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.11,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 1
+    },
+    "sanctions": {
+      "nordostan": 3
+    },
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "yamato": {
+    "budget": {
+      "social_spending": 0.61,
+      "military_total": 0.51,
+      "tech_total": 0.51,
+      "social_spending_ratio": 0.157,
+      "money_printed": 0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0.13,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.2,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.18,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.02,
+      "ai": 0.29
+    }
+  },
+  "solaria": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.125,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "opec_production": "normal",
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "choson": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.05,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "hanguk": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.125,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 1
+    },
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "caribe": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.1,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "columbia": 1
+    },
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  },
+  "mirage": {
+    "budget": {
+      "social_spending": 0.0,
+      "military_total": 0.0,
+      "tech_total": 0.0,
+      "social_spending_ratio": 0.1,
+      "money_printed": 0.0,
+      "deficit": 0,
+      "military": {
+        "ground": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military": {
+      "combat": [],
+      "blockades": [],
+      "missile_strikes": [],
+      "covert_ops": [],
+      "mobilizations": null
+    },
+    "opec_production": "low",
+    "diplomatic": {
+      "arms_transfers": [],
+      "proposals": []
+    },
+    "tech": {
+      "nuclear": 0.0,
+      "ai": 0.0
+    }
+  }
+}

@@ -1,0 +1,1445 @@
+{
+  "round": 5,
+  "deterministic_results": {
+    "gdp": {
+      "columbia": {
+        "old_gdp": 314.8857636308164,
+        "new_gdp": 326.90724081341807,
+        "growth_pct": 3.8177264808630915,
+        "base_growth": 3.4476628542064236,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 0.9631275747816164,
+        "war_factor": 1.0,
+        "tech_factor": 1.15,
+        "inflation_factor": 0.999766,
+        "blockade_factor": 1.0
+      },
+      "cathay": {
+        "old_gdp": 250.83826183188654,
+        "new_gdp": 271.5530313301222,
+        "growth_pct": 8.258217604824129,
+        "base_growth": 7.18176978201201,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.15,
+        "inflation_factor": 0.999901,
+        "blockade_factor": 1.0
+      },
+      "nordostan": {
+        "old_gdp": 19.26353595947897,
+        "new_gdp": 19.38491033887933,
+        "growth_pct": 0.6300732101088498,
+        "base_growth": 0.6902450355501846,
+        "tariff_factor": 0.9991868720430572,
+        "sanctions_factor": 0.9935708442719269,
+        "war_factor": 0.92,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.9994345,
+        "blockade_factor": 1.0
+      },
+      "heartland": {
+        "old_gdp": 1.532958996520343,
+        "new_gdp": 1.513940943039612,
+        "growth_pct": -1.2406107093470733,
+        "base_growth": -1.3644650643327063,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 0.9999503076257718,
+        "war_factor": 0.91,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999202,
+        "blockade_factor": 1.0
+      },
+      "persia": {
+        "old_gdp": 4.554219555242295,
+        "new_gdp": 4.621421330436318,
+        "growth_pct": 1.475593663829136,
+        "base_growth": 1.4790933630004037,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 0.9992962181947077,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.9983365,
+        "blockade_factor": 1.0
+      },
+      "gallia": {
+        "old_gdp": 32.51394431787101,
+        "new_gdp": 32.90365244113446,
+        "growth_pct": 1.1985876565866196,
+        "base_growth": 1.1987854561868903,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999835,
+        "blockade_factor": 1.0
+      },
+      "teutonia": {
+        "old_gdp": 46.65014722342737,
+        "new_gdp": 47.12582717693207,
+        "growth_pct": 1.0196751389153766,
+        "base_growth": 0.9712998416899608,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.999814,
+        "blockade_factor": 1.0
+      },
+      "freeland": {
+        "old_gdp": 10.32617381629109,
+        "new_gdp": 10.686906250375051,
+        "growth_pct": 3.4933794501391127,
+        "base_growth": 3.494312431558339,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999733,
+        "blockade_factor": 1.0
+      },
+      "ponte": {
+        "old_gdp": 23.463103011681707,
+        "new_gdp": 23.580263399354894,
+        "growth_pct": 0.4993388453984739,
+        "base_growth": 0.49943173970205856,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999814,
+        "blockade_factor": 1.0
+      },
+      "albion": {
+        "old_gdp": 36.60965328061367,
+        "new_gdp": 37.076233590127956,
+        "growth_pct": 1.2744734453996023,
+        "base_growth": 1.2140264319870884,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.9998005,
+        "blockade_factor": 1.0
+      },
+      "bharata": {
+        "old_gdp": 55.76301804995729,
+        "new_gdp": 60.378097642690705,
+        "growth_pct": 8.276237108613511,
+        "base_growth": 7.884756203447663,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.999667,
+        "blockade_factor": 1.0
+      },
+      "levantia": {
+        "old_gdp": 5.713119518327736,
+        "new_gdp": 5.931331182603793,
+        "growth_pct": 3.819483621444154,
+        "base_growth": 3.639026513101257,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 0.9998429069778776,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.999766,
+        "blockade_factor": 1.0
+      },
+      "formosa": {
+        "old_gdp": 8.870458265167127,
+        "new_gdp": 9.209774516956413,
+        "growth_pct": 3.825239256484957,
+        "base_growth": 3.6435659568824588,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.999868,
+        "blockade_factor": 1.0
+      },
+      "phrygia": {
+        "old_gdp": 12.36287579710926,
+        "new_gdp": 12.725936554071781,
+        "growth_pct": 2.936701483706677,
+        "base_growth": 2.945524803254827,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.9970045,
+        "blockade_factor": 1.0
+      },
+      "yamato": {
+        "old_gdp": 45.51582534306552,
+        "new_gdp": 46.42628501611306,
+        "growth_pct": 2.0003145415581245,
+        "base_growth": 1.7418959725776968,
+        "tariff_factor": 0.9991492956596948,
+        "sanctions_factor": 0.99958450353648,
+        "war_factor": 1.0,
+        "tech_factor": 1.15,
+        "inflation_factor": 0.999835,
+        "blockade_factor": 1.0
+      },
+      "solaria": {
+        "old_gdp": 12.62030970500735,
+        "new_gdp": 13.06077058738854,
+        "growth_pct": 3.490095668622363,
+        "base_growth": 3.491974373788294,
+        "tariff_factor": 0.9995939398270328,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999868,
+        "blockade_factor": 1.0
+      },
+      "choson": {
+        "old_gdp": 0.30602154492330264,
+        "new_gdp": 0.3075424505130539,
+        "growth_pct": 0.4969929781030323,
+        "base_growth": 0.49735595993093773,
+        "tariff_factor": 1.0,
+        "sanctions_factor": 0.9999361344471229,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999334,
+        "blockade_factor": 1.0
+      },
+      "hanguk": {
+        "old_gdp": 19.845600647164904,
+        "new_gdp": 20.394568549294444,
+        "growth_pct": 2.7661944422325417,
+        "base_growth": 2.647494060678827,
+        "tariff_factor": 0.995444781559966,
+        "sanctions_factor": 0.9997994675311225,
+        "war_factor": 1.0,
+        "tech_factor": 1.05,
+        "inflation_factor": 0.999835,
+        "blockade_factor": 1.0
+      },
+      "caribe": {
+        "old_gdp": 1.3090010356343498,
+        "new_gdp": 1.2965535105313863,
+        "growth_pct": -0.9509178957166551,
+        "base_growth": -0.9566079785386086,
+        "tariff_factor": 0.9982419723093726,
+        "sanctions_factor": 0.9997946416406284,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.996007,
+        "blockade_factor": 1.0
+      },
+      "mirage": {
+        "old_gdp": 5.84847839120158,
+        "new_gdp": 6.082024642566442,
+        "growth_pct": 3.9932822820412293,
+        "base_growth": 3.9943808223227593,
+        "tariff_factor": 0.9998569596997434,
+        "sanctions_factor": 1.0,
+        "war_factor": 1.0,
+        "tech_factor": 1.0,
+        "inflation_factor": 0.999868,
+        "blockade_factor": 1.0
+      }
+    },
+    "sanctions": {
+      "columbia": {
+        "damage": 0.03687242521838358,
+        "costs_to_imposers": {
+          "nordostan": 0.003754753752811201,
+          "choson": 0.0038687849037548636,
+          "caribe": 0.003442686508581869,
+          "persia": 0.0036827449222054994
+        }
+      },
+      "cathay": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "nordostan": {
+        "damage": 0.006429155728073134,
+        "costs_to_imposers": {
+          "columbia": 0.0010500118703141974,
+          "gallia": 0.0007104402192094057,
+          "teutonia": 0.0009742204814287605,
+          "freeland": 0.0009878625022453815,
+          "ponte": 0.0008475573742935487,
+          "albion": 0.0006850605934692375,
+          "levantia": 0.00019377659597836144,
+          "formosa": 0.00025216572488317404,
+          "phrygia": 0.000881736756623083,
+          "yamato": 0.0005473445455408376,
+          "hanguk": 0.0005758328416562969,
+          "heartland": 0.0008661981317885616
+        }
+      },
+      "heartland": {
+        "damage": 4.9692374228227364e-05,
+        "costs_to_imposers": {
+          "nordostan": 6.625649897096983e-05
+        }
+      },
+      "persia": {
+        "damage": 0.0007037818052922788,
+        "costs_to_imposers": {
+          "columbia": 0.0001515392799465978,
+          "gallia": 0.00010048582790750821,
+          "teutonia": 0.00013609475538651936,
+          "freeland": 0.00014045952519334425,
+          "ponte": 5.870007611646897e-05,
+          "albion": 9.677163773025231e-05,
+          "levantia": 0.00012950299314932768,
+          "phrygia": 0.00012482164495968663
+        }
+      },
+      "gallia": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "teutonia": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "freeland": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "ponte": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "albion": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "bharata": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "levantia": {
+        "damage": 0.00015709302212239213,
+        "costs_to_imposers": {
+          "persia": 0.0002094573628298562
+        }
+      },
+      "formosa": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "phrygia": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "yamato": {
+        "damage": 0.00041549646352003914,
+        "costs_to_imposers": {
+          "choson": 0.0005539952846933856
+        }
+      },
+      "solaria": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      },
+      "choson": {
+        "damage": 6.38655528770201e-05,
+        "costs_to_imposers": {
+          "columbia": 1.3764664653577487e-05,
+          "gallia": 8.68385732877503e-06,
+          "teutonia": 1.04072028469567e-05,
+          "freeland": 1.1185604127759935e-05,
+          "ponte": 6.128001354176903e-06,
+          "albion": 8.467717654806713e-06,
+          "phrygia": 6.74897975277209e-06,
+          "yamato": 9.55664468858246e-06,
+          "hanguk": 1.0211398095286161e-05
+        }
+      },
+      "hanguk": {
+        "damage": 0.00020053246887750706,
+        "costs_to_imposers": {
+          "choson": 0.00026737662517000945
+        }
+      },
+      "caribe": {
+        "damage": 0.00020535835937167656,
+        "costs_to_imposers": {
+          "columbia": 4.463239531627181e-05,
+          "gallia": 3.026631746532268e-05,
+          "teutonia": 4.595262137195287e-05,
+          "freeland": 4.617991236115926e-05,
+          "ponte": 3.802644405787147e-05,
+          "albion": 2.8627880946117644e-05,
+          "phrygia": 4.0125574310206365e-05
+        }
+      },
+      "mirage": {
+        "damage": 0.0,
+        "costs_to_imposers": {}
+      }
+    },
+    "tariffs": {
+      "columbia": {
+        "cost_as_imposer": 2.6940961930231846,
+        "revenue_as_imposer": 11.248082084499332,
+        "cost_as_target": 4.624895378179231,
+        "net_gdp_cost": 0.0
+      },
+      "cathay": {
+        "cost_as_imposer": 2.7636322418954453,
+        "revenue_as_imposer": 11.372665188995658,
+        "cost_as_target": 5.471516383396769,
+        "net_gdp_cost": 0.0
+      },
+      "nordostan": {
+        "cost_as_imposer": 0.15034788988205078,
+        "revenue_as_imposer": 0.49891600158652893,
+        "cost_as_target": 0.364231831342702,
+        "net_gdp_cost": 0.015663719638223772
+      },
+      "heartland": {
+        "cost_as_imposer": 0.0048827925584128806,
+        "revenue_as_imposer": 0.013768251083182838,
+        "cost_as_target": 0.0011773449342602758,
+        "net_gdp_cost": 0.0
+      },
+      "persia": {
+        "cost_as_imposer": 0.025790500004542773,
+        "revenue_as_imposer": 0.08644529075737052,
+        "cost_as_target": 0.060449046024022096,
+        "net_gdp_cost": 0.0
+      },
+      "gallia": {
+        "cost_as_imposer": 0.2532971578261373,
+        "revenue_as_imposer": 0.8443238594204578,
+        "cost_as_target": 0.07951026455950284,
+        "net_gdp_cost": 0.0
+      },
+      "teutonia": {
+        "cost_as_imposer": 0.021208846813807313,
+        "revenue_as_imposer": 0.07069615604602439,
+        "cost_as_target": 0.02981764628511025,
+        "net_gdp_cost": 0.0
+      },
+      "freeland": {
+        "cost_as_imposer": 0.033507090057849895,
+        "revenue_as_imposer": 0.0947804777797242,
+        "cost_as_target": 0.006729095680096226,
+        "net_gdp_cost": 0.0
+      },
+      "ponte": {
+        "cost_as_imposer": 0.08528750981249367,
+        "revenue_as_imposer": 0.24785640731138653,
+        "cost_as_target": 0.008216542055797948,
+        "net_gdp_cost": 0.0
+      },
+      "albion": {
+        "cost_as_imposer": 0.13183547283769265,
+        "revenue_as_imposer": 0.38243200373154496,
+        "cost_as_target": 0.0582992721500359,
+        "net_gdp_cost": 0.0
+      },
+      "bharata": {
+        "cost_as_imposer": 0.2587233010576365,
+        "revenue_as_imposer": 0.8624110035254552,
+        "cost_as_target": 0.0,
+        "net_gdp_cost": 0.0
+      },
+      "levantia": {
+        "cost_as_imposer": 0.014118159192475133,
+        "revenue_as_imposer": 0.039365032592469346,
+        "cost_as_target": 0.0008873248306989335,
+        "net_gdp_cost": 0.0
+      },
+      "formosa": {
+        "cost_as_imposer": 0.03480779603993369,
+        "revenue_as_imposer": 0.11602598679977896,
+        "cost_as_target": 0.015363076715368735,
+        "net_gdp_cost": 0.0
+      },
+      "phrygia": {
+        "cost_as_imposer": 0.0033266636463214496,
+        "revenue_as_imposer": 0.011088878821071499,
+        "cost_as_target": 0.0,
+        "net_gdp_cost": 0.0
+      },
+      "yamato": {
+        "cost_as_imposer": 0.20343303028690835,
+        "revenue_as_imposer": 0.6781101009563612,
+        "cost_as_target": 0.5133975808413727,
+        "net_gdp_cost": 0.0387205101719198
+      },
+      "solaria": {
+        "cost_as_imposer": 0.0011849997540633603,
+        "revenue_as_imposer": 0.003949999180211201,
+        "cost_as_target": 0.007889604567861832,
+        "net_gdp_cost": 0.00512460514171399
+      },
+      "choson": {
+        "cost_as_imposer": 0.0020094046476504196,
+        "revenue_as_imposer": 0.006698015492168064,
+        "cost_as_target": 0.004002521741074206,
+        "net_gdp_cost": 0.0
+      },
+      "hanguk": {
+        "cost_as_imposer": 0.016797793402747004,
+        "revenue_as_imposer": 0.05599264467582336,
+        "cost_as_target": 0.12959589729459234,
+        "net_gdp_cost": 0.090401046021516
+      },
+      "caribe": {
+        "cost_as_imposer": 0.006309072287137297,
+        "revenue_as_imposer": 0.021030240957124323,
+        "cost_as_target": 0.017022428737692167,
+        "net_gdp_cost": 0.0023012600677051395
+      },
+      "mirage": {
+        "cost_as_imposer": 0.0,
+        "revenue_as_imposer": 0.0,
+        "cost_as_target": 0.0008365681051216015,
+        "net_gdp_cost": 0.0008365681051216015
+      }
+    },
+    "stability": {
+      "columbia": 8.29,
+      "cathay": 7.64,
+      "nordostan": 3.13,
+      "heartland": 1.0,
+      "persia": 3.29,
+      "gallia": 5.95,
+      "teutonia": 7.19,
+      "freeland": 8.15,
+      "ponte": 5.7,
+      "albion": 6.01,
+      "bharata": 7.58,
+      "levantia": 5.9,
+      "formosa": 8.6,
+      "phrygia": 4.08,
+      "yamato": 8.8,
+      "solaria": 8.38,
+      "choson": 4.0,
+      "hanguk": 7.11,
+      "caribe": 1.0,
+      "mirage": 9.45
+    },
+    "support": {
+      "columbia": 66.45,
+      "cathay": 69.69,
+      "nordostan": 55.66,
+      "heartland": 0.0,
+      "persia": 27.43,
+      "gallia": 33.85,
+      "teutonia": 44.35,
+      "freeland": 74.67,
+      "ponte": 30.85,
+      "albion": 38.62,
+      "bharata": 100.0,
+      "levantia": 65.77,
+      "formosa": 80.67,
+      "phrygia": 53.89,
+      "yamato": 61.54,
+      "solaria": 85.27,
+      "choson": 62.5,
+      "hanguk": 47.3,
+      "caribe": 16.06,
+      "mirage": 97.07
+    },
+    "oil_price": 61.27,
+    "revenue": {
+      "columbia": 67.43,
+      "cathay": 50.31,
+      "nordostan": 2.06,
+      "heartland": 0.0,
+      "persia": 0.0,
+      "gallia": 10.81,
+      "teutonia": 15.91,
+      "freeland": 1.21,
+      "ponte": 1.9,
+      "albion": 8.24,
+      "bharata": 7.87,
+      "levantia": 0.0,
+      "formosa": 0.84,
+      "phrygia": 0.0,
+      "yamato": 7.9,
+      "solaria": 0.31,
+      "choson": 0.15,
+      "hanguk": 3.3,
+      "caribe": 0.0,
+      "mirage": 0.0
+    },
+    "budget": {
+      "columbia": {
+        "revenue": 67.43,
+        "mandatory": 38.5,
+        "maintenance": 33.5,
+        "discretionary": 28.930000000000007,
+        "social_spending": 15.16,
+        "military_budget": 9.13,
+        "tech_budget": 4.640000000000006,
+        "reserves_added": 0.0,
+        "surplus_deficit": 0.0,
+        "new_treasury": 35.0
+      },
+      "cathay": {
+        "revenue": 50.31,
+        "mandatory": 20.5,
+        "maintenance": 16.5,
+        "discretionary": 29.810000000000002,
+        "social_spending": 9.08,
+        "military_budget": 7.92,
+        "tech_budget": 7.2,
+        "reserves_added": 5.610000000000004,
+        "surplus_deficit": 5.610000000000004,
+        "new_treasury": 56.440000000000005
+      },
+      "nordostan": {
+        "revenue": 2.06,
+        "mandatory": 14.6,
+        "maintenance": 12.6,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -12.54,
+        "new_treasury": 0
+      },
+      "heartland": {
+        "revenue": 0.0,
+        "mandatory": 11.4,
+        "maintenance": 8.4,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -11.4,
+        "new_treasury": 0
+      },
+      "persia": {
+        "revenue": 0.0,
+        "mandatory": 5.25,
+        "maintenance": 4.25,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -5.25,
+        "new_treasury": 0
+      },
+      "gallia": {
+        "revenue": 10.81,
+        "mandatory": 9.850000000000001,
+        "maintenance": 5.8500000000000005,
+        "discretionary": 0.9599999999999991,
+        "social_spending": 0.9599999999999991,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": 0.0,
+        "new_treasury": 7.699999999999999
+      },
+      "teutonia": {
+        "revenue": 15.91,
+        "mandatory": 6.05,
+        "maintenance": 4.05,
+        "discretionary": 9.86,
+        "social_spending": 4.87,
+        "military_budget": 2.83,
+        "tech_budget": 2.1599999999999993,
+        "reserves_added": 0.0,
+        "surplus_deficit": 0.0,
+        "new_treasury": 12.480000000000004
+      },
+      "freeland": {
+        "revenue": 1.21,
+        "mandatory": 5.15,
+        "maintenance": 3.15,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -3.9400000000000004,
+        "new_treasury": 0
+      },
+      "ponte": {
+        "revenue": 1.9,
+        "mandatory": 11.2,
+        "maintenance": 3.2,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -9.299999999999999,
+        "new_treasury": 0
+      },
+      "albion": {
+        "revenue": 8.24,
+        "mandatory": 9.4,
+        "maintenance": 5.4,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -1.1600000000000001,
+        "new_treasury": 1.8299999999999983
+      },
+      "bharata": {
+        "revenue": 7.87,
+        "mandatory": 8.25,
+        "maintenance": 5.25,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -0.3799999999999999,
+        "new_treasury": 2.6900000000000004
+      },
+      "levantia": {
+        "revenue": 0.0,
+        "mandatory": 7.6000000000000005,
+        "maintenance": 5.6000000000000005,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -7.6000000000000005,
+        "new_treasury": 0
+      },
+      "formosa": {
+        "revenue": 0.84,
+        "mandatory": 4.85,
+        "maintenance": 3.8499999999999996,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -4.01,
+        "new_treasury": 0
+      },
+      "phrygia": {
+        "revenue": 0.0,
+        "mandatory": 6.6,
+        "maintenance": 3.5999999999999996,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -6.6,
+        "new_treasury": 0
+      },
+      "yamato": {
+        "revenue": 7.9,
+        "mandatory": 11.4,
+        "maintenance": 5.4,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -3.5,
+        "new_treasury": 0
+      },
+      "solaria": {
+        "revenue": 0.31,
+        "mandatory": 4.6,
+        "maintenance": 3.6,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -4.29,
+        "new_treasury": 0
+      },
+      "choson": {
+        "revenue": 0.15,
+        "mandatory": 1.95,
+        "maintenance": 1.95,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -1.8,
+        "new_treasury": 0
+      },
+      "hanguk": {
+        "revenue": 3.3,
+        "mandatory": 6.199999999999999,
+        "maintenance": 4.199999999999999,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -2.8999999999999995,
+        "new_treasury": 0
+      },
+      "caribe": {
+        "revenue": 0.0,
+        "mandatory": 6.0,
+        "maintenance": 1.0,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -6.0,
+        "new_treasury": 0
+      },
+      "mirage": {
+        "revenue": 0.0,
+        "mandatory": 2.4499999999999997,
+        "maintenance": 2.4499999999999997,
+        "discretionary": 0.0,
+        "social_spending": 0.0,
+        "military_budget": 0.0,
+        "tech_budget": 0.0,
+        "reserves_added": 0.0,
+        "surplus_deficit": -2.4499999999999997,
+        "new_treasury": 2.750000000000003
+      }
+    },
+    "military_production": {
+      "columbia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "cathay": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "nordostan": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "heartland": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "persia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "gallia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "teutonia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "freeland": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "ponte": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "albion": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "bharata": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "levantia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "formosa": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "phrygia": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "yamato": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "solaria": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "choson": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "hanguk": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "caribe": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      },
+      "mirage": {
+        "ground": 0,
+        "naval": 0,
+        "tactical_air": 0
+      }
+    },
+    "tech": {
+      "columbia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "cathay": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "nordostan": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "heartland": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "persia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "gallia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "teutonia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "freeland": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "ponte": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "albion": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "bharata": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "levantia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "formosa": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "phrygia": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "yamato": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "solaria": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "choson": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "hanguk": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "caribe": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      },
+      "mirage": {
+        "nuclear_levelup": false,
+        "ai_levelup": false
+      }
+    },
+    "inflation": {
+      "columbia": 1.56,
+      "cathay": 0.66,
+      "nordostan": 3.77,
+      "heartland": 5.32,
+      "persia": 11.09,
+      "gallia": 1.1,
+      "teutonia": 1.24,
+      "freeland": 1.78,
+      "ponte": 1.24,
+      "albion": 1.33,
+      "bharata": 2.22,
+      "levantia": 1.56,
+      "formosa": 0.88,
+      "phrygia": 19.97,
+      "yamato": 1.1,
+      "solaria": 0.88,
+      "choson": 4.44,
+      "hanguk": 1.1,
+      "caribe": 26.62,
+      "mirage": 0.88
+    },
+    "debt": {
+      "columbia": 5,
+      "cathay": 4,
+      "nordostan": 2,
+      "heartland": 3,
+      "persia": 1,
+      "gallia": 4,
+      "teutonia": 2,
+      "freeland": 2,
+      "ponte": 8,
+      "albion": 4,
+      "bharata": 3,
+      "levantia": 2,
+      "formosa": 1,
+      "phrygia": 3,
+      "yamato": 6,
+      "solaria": 1,
+      "choson": 0,
+      "hanguk": 2,
+      "caribe": 5,
+      "mirage": 0
+    },
+    "combat": [
+      {
+        "attacker": "heartland",
+        "defender": "nordostan",
+        "zone": "ee_east_front_south",
+        "attacker_units": 5,
+        "defender_units": 3,
+        "attacker_losses": 2,
+        "defender_losses": 1,
+        "attacker_remaining": 3,
+        "defender_remaining": 2,
+        "zone_captured": false
+      }
+    ],
+    "financial_crisis": {
+      "columbia": {
+        "market_index": 84.76,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "cathay": {
+        "market_index": 100.0,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "nordostan": {
+        "market_index": 41.92,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "heartland": {
+        "market_index": 21.14,
+        "crisis": true,
+        "capital_flight": 0.04
+      },
+      "persia": {
+        "market_index": 43.28,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "gallia": {
+        "market_index": 60.19,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "teutonia": {
+        "market_index": 65.43,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "freeland": {
+        "market_index": 82.33,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "ponte": {
+        "market_index": 55.38,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "albion": {
+        "market_index": 60.76,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "bharata": {
+        "market_index": 100.0,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "levantia": {
+        "market_index": 72.82,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "formosa": {
+        "market_index": 86.69,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "phrygia": {
+        "market_index": 50.1,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "yamato": {
+        "market_index": 78.45,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "solaria": {
+        "market_index": 83.91,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "choson": {
+        "market_index": 45.26,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "hanguk": {
+        "market_index": 73.83,
+        "crisis": false,
+        "capital_flight": 0.0
+      },
+      "caribe": {
+        "market_index": 11.94,
+        "crisis": true,
+        "capital_flight": 0.08
+      },
+      "mirage": {
+        "market_index": 91.78,
+        "crisis": false,
+        "capital_flight": 0.0
+      }
+    }
+  },
+  "ai_adjustments": {
+    "nordostan": [
+      {
+        "type": "war_fatigue_acceleration",
+        "fatigue_increase": 0.18973832635181923,
+        "justification": "Prolonged war (13 rounds) accelerates public fatigue."
+      },
+      {
+        "type": "capital_flight",
+        "gdp_adjustment": -0.1938491033887933,
+        "justification": "Low stability triggers capital exodus. (capital controls limit outflow)"
+      }
+    ],
+    "heartland": [
+      {
+        "type": "war_fatigue_acceleration",
+        "fatigue_increase": 0.24199216208179783,
+        "justification": "Prolonged war (13 rounds) accelerates public fatigue."
+      },
+      {
+        "type": "capital_flight",
+        "gdp_adjustment": -0.044076414326712846,
+        "justification": "Low stability triggers capital exodus."
+      }
+    ],
+    "persia": [
+      {
+        "type": "capital_flight",
+        "gdp_adjustment": -0.13864263991308953,
+        "justification": "Low stability triggers capital exodus."
+      }
+    ],
+    "caribe": [
+      {
+        "type": "capital_flight",
+        "gdp_adjustment": -0.012184811541821682,
+        "justification": "Low stability triggers capital exodus. (capital controls limit outflow)"
+      }
+    ]
+  },
+  "coherence_flags": [],
+  "narrative": "ROUND 5 WORLD BRIEFING\n========================================\n\nGlobal GDP: 950.7 coins. Oil price: $61/barrel.\n\nACTIVE CONFLICTS:\n  nordostan vs heartland in eastern_europe\n\nTOP ECONOMIES:\n  Columbia: GDP 326.9, growth 3.8%, stability 8/10\n  Cathay: GDP 271.6, growth 8.3%, stability 8/10\n  Bharata: GDP 60.4, growth 8.3%, stability 8/10\n  Teutonia: GDP 47.1, growth 1.0%, stability 7/10\n  Yamato: GDP 46.4, growth 2.0%, stability 9/10\n\nKEY INDICATORS:\n  WARNING: Nordostan stability critical (3.13/10)\n  WARNING: Heartland stability critical (1.0/10)\n  WARNING: Persia stability critical (3.29/10)\n  WARNING: Choson stability critical (4.0/10)\n  WARNING: Caribe stability critical (1.0/10)\n  WARNING: Caribe inflation at 27%\n  Columbia maintains AI Level 3\n  Cathay maintains AI Level 3\n  Yamato maintains AI Level 3",
+  "log": [
+    "=== ROUND 5 PROCESSING BEGINS ===",
+    "--- PASS 1: DETERMINISTIC ---",
+    "  Tariff: heartland -> cathay set to 1",
+    "  Tariff: gallia -> cathay set to 0",
+    "  Tariff: teutonia -> cathay set to 0",
+    "  Tariff: phrygia -> cathay set to 0",
+    "  Tariff: hanguk -> cathay set to 0",
+    "  Tariff: caribe -> columbia set to 2",
+    "  Sanctions: teutonia -> caribe set to 2",
+    "  Sanctions: ponte -> persia set to 1",
+    "  OPEC: nordostan production set to high",
+    "  OPEC: persia production set to high",
+    "  OPEC: solaria production set to normal",
+    "  OPEC: mirage production set to low",
+    "  Combat ee_east_front_south: heartland(5) vs nordostan(3) -> attacker_losses=2, defender_losses=1",
+    "  Covert cyber by cathay on formosa: SUCCESS, DETECTED",
+    "  Covert cyber by cathay on columbia: FAILED, DETECTED",
+    "  Covert sabotage by levantia on persia: FAILED, DETECTED",
+    "  Oil price: $61.3 (supply_factor=1.05, demand=0.804, disruption=1.00)",
+    "  Sanctions on columbia: damage=0.0369, coalition_coverage=1.229, effectiveness=full",
+    "  Tariffs columbia: imposer_cost=2.694, revenue=11.248, target_cost=4.625, net_cost=0.000",
+    "  Inflation columbia: 1.8% -> 1.6%",
+    "  GDP columbia: 314.89 -> 326.91 (growth +3.82%, factors: tariff=1.000 sanc=0.963 war=1.000 tech=1.150 infl=1.000 block=1.000)",
+    "  Debt columbia: 5.00 -> 5.00 (deficit=0.00)",
+    "  Revenue columbia: 67.43 (base=78.46 oil=0.00 sanc_cost=6.03 infl_erosion=0.00 war=0.00 debt=5.00)",
+    "  Budget columbia: rev=67.43 maint=33.50 social=15.16 mil=9.13 tech=4.64 treasury=35.00",
+    "  Production columbia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability columbia: 8.0 -> 8.3 (delta=+0.27)",
+    "  Support columbia (democracy): 60.4 -> 66.4 (delta=+6.02)",
+    "  Sanctions on cathay: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs cathay: imposer_cost=2.764, revenue=11.373, target_cost=5.472, net_cost=0.000",
+    "  Inflation cathay: 0.8% -> 0.7%",
+    "  GDP cathay: 250.84 -> 271.55 (growth +8.26%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.150 infl=1.000 block=1.000)",
+    "  Debt cathay: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue cathay: 50.31 (base=54.31 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Cathay strategic missile production: +1",
+    "  Budget cathay: rev=50.31 maint=16.50 social=9.08 mil=7.92 tech=7.20 treasury=56.44",
+    "  Production cathay: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability cathay: 7.3 -> 7.6 (delta=+0.37)",
+    "  Support cathay (autocracy): 65.7 -> 69.7 (delta=+3.96)",
+    "  Sanctions on nordostan: damage=0.0064, coalition_coverage=0.278, effectiveness=weak",
+    "  Tariffs nordostan: imposer_cost=0.150, revenue=0.499, target_cost=0.364, net_cost=0.016",
+    "  Inflation nordostan: 4.4% -> 3.8%",
+    "  GDP nordostan: 19.26 -> 19.38 (growth +0.63%, factors: tariff=0.999 sanc=0.994 war=0.920 tech=1.000 infl=0.999 block=1.000)",
+    "  Debt nordostan: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue nordostan: 2.06 (base=4.26 oil=0.00 sanc_cost=0.21 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: nordostan reserves exhausted!",
+    "  Budget nordostan: rev=2.06 maint=12.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production nordostan: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability nordostan: 3.6 -> 3.1 (delta=-0.44)",
+    "  Support nordostan (autocracy): 58.5 -> 55.7 (delta=-2.81)",
+    "  Sanctions on heartland: damage=0.0000, coalition_coverage=0.002, effectiveness=weak",
+    "  Tariffs heartland: imposer_cost=0.005, revenue=0.014, target_cost=0.001, net_cost=0.000",
+    "  Inflation heartland: 6.3% -> 5.3%",
+    "  GDP heartland: 1.53 -> 1.51 (growth -1.24%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=0.999 block=1.000)",
+    "  Debt heartland: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue heartland: 0.00 (base=0.33 oil=0.00 sanc_cost=0.00 infl_erosion=0.01 war=0.01 debt=3.00)",
+    "  CRISIS: heartland reserves exhausted!",
+    "  Budget heartland: rev=0.00 maint=8.40 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production heartland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability heartland: 1.0 -> 1.0 (delta=-1.18)",
+    "  Support heartland (democracy): 0.8 -> 0.0 (delta=-11.40)",
+    "  FINANCIAL CRISIS heartland: market_index=21.1, capital_flight=0.04",
+    "  Sanctions on persia: damage=0.0007, coalition_coverage=0.040, effectiveness=weak",
+    "  Tariffs persia: imposer_cost=0.026, revenue=0.086, target_cost=0.060, net_cost=0.000",
+    "  Inflation persia: 13.1% -> 11.1%",
+    "  GDP persia: 4.55 -> 4.62 (growth +1.48%, factors: tariff=1.000 sanc=0.999 war=1.000 tech=1.000 infl=0.998 block=1.000)",
+    "  Debt persia: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue persia: 0.00 (base=0.83 oil=0.00 sanc_cost=0.01 infl_erosion=0.83 war=0.00 debt=1.00)",
+    "  CRISIS: persia reserves exhausted!",
+    "  Budget persia: rev=0.00 maint=4.25 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production persia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability persia: 3.2 -> 3.3 (delta=+0.09)",
+    "  Support persia (theocracy): 30.0 -> 27.4 (delta=-2.56)",
+    "  Sanctions on gallia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs gallia: imposer_cost=0.253, revenue=0.844, target_cost=0.080, net_cost=0.000",
+    "  Inflation gallia: 1.3% -> 1.1%",
+    "  GDP gallia: 32.51 -> 32.90 (growth +1.20%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=1.000)",
+    "  Debt gallia: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue gallia: 10.81 (base=14.81 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Budget gallia: rev=10.81 maint=5.85 social=0.96 mil=0.00 tech=0.00 treasury=7.70",
+    "  Production gallia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability gallia: 6.0 -> 6.0 (delta=-0.01)",
+    "  Support gallia (democracy): 34.1 -> 33.8 (delta=-0.25)",
+    "  Sanctions on teutonia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs teutonia: imposer_cost=0.021, revenue=0.071, target_cost=0.030, net_cost=0.000",
+    "  Inflation teutonia: 1.5% -> 1.2%",
+    "  GDP teutonia: 46.65 -> 47.13 (growth +1.02%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt teutonia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue teutonia: 15.91 (base=17.91 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  Budget teutonia: rev=15.91 maint=4.05 social=4.87 mil=2.83 tech=2.16 treasury=12.48",
+    "  Production teutonia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability teutonia: 7.1 -> 7.2 (delta=+0.09)",
+    "  Support teutonia (democracy): 43.6 -> 44.3 (delta=+0.72)",
+    "  Sanctions on freeland: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs freeland: imposer_cost=0.034, revenue=0.095, target_cost=0.007, net_cost=0.000",
+    "  Inflation freeland: 2.1% -> 1.8%",
+    "  GDP freeland: 10.33 -> 10.69 (growth +3.49%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=1.000)",
+    "  Debt freeland: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue freeland: 1.21 (base=3.21 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: freeland reserves exhausted!",
+    "  Budget freeland: rev=1.21 maint=3.15 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production freeland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability freeland: 7.9 -> 8.2 (delta=+0.23)",
+    "  Support freeland (democracy): 69.3 -> 74.7 (delta=+5.39)",
+    "  Sanctions on ponte: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs ponte: imposer_cost=0.085, revenue=0.248, target_cost=0.008, net_cost=0.000",
+    "  Inflation ponte: 1.5% -> 1.2%",
+    "  GDP ponte: 23.46 -> 23.58 (growth +0.50%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=1.000)",
+    "  Debt ponte: 8.00 -> 8.00 (deficit=0.00)",
+    "  Revenue ponte: 1.90 (base=9.90 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=8.00)",
+    "  CRISIS: ponte reserves exhausted!",
+    "  Budget ponte: rev=1.90 maint=3.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production ponte: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability ponte: 5.8 -> 5.7 (delta=-0.06)",
+    "  Support ponte (democracy): 32.4 -> 30.8 (delta=-1.55)",
+    "  Sanctions on albion: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs albion: imposer_cost=0.132, revenue=0.382, target_cost=0.058, net_cost=0.000",
+    "  Inflation albion: 1.6% -> 1.3%",
+    "  GDP albion: 36.61 -> 37.08 (growth +1.27%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt albion: 4.00 -> 4.00 (deficit=0.00)",
+    "  Revenue albion: 8.24 (base=12.24 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=4.00)",
+    "  Budget albion: rev=8.24 maint=5.40 social=0.00 mil=0.00 tech=0.00 treasury=1.83",
+    "  Production albion: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability albion: 6.0 -> 6.0 (delta=+0.03)",
+    "  Support albion (democracy): 38.7 -> 38.6 (delta=-0.08)",
+    "  Sanctions on bharata: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs bharata: imposer_cost=0.259, revenue=0.862, target_cost=0.000, net_cost=0.000",
+    "  Inflation bharata: 2.6% -> 2.2%",
+    "  GDP bharata: 55.76 -> 60.38 (growth +8.28%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt bharata: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue bharata: 7.87 (base=10.87 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=3.00)",
+    "  Budget bharata: rev=7.87 maint=5.25 social=0.00 mil=0.00 tech=0.00 treasury=2.69",
+    "  Production bharata: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability bharata: 7.2 -> 7.6 (delta=+0.37)",
+    "  Support bharata (democracy): 96.0 -> 100.0 (delta=+10.69)",
+    "  Sanctions on levantia: damage=0.0002, coalition_coverage=0.006, effectiveness=weak",
+    "  Tariffs levantia: imposer_cost=0.014, revenue=0.039, target_cost=0.001, net_cost=0.000",
+    "  Inflation levantia: 1.8% -> 1.6%",
+    "  GDP levantia: 5.71 -> 5.93 (growth +3.82%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt levantia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue levantia: 0.00 (base=1.90 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: levantia reserves exhausted!",
+    "  Budget levantia: rev=0.00 maint=5.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production levantia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability levantia: 5.7 -> 5.9 (delta=+0.18)",
+    "  Support levantia (democracy): 62.1 -> 65.8 (delta=+3.63)",
+    "  Sanctions on formosa: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs formosa: imposer_cost=0.035, revenue=0.116, target_cost=0.015, net_cost=0.000",
+    "  Inflation formosa: 1.0% -> 0.9%",
+    "  GDP formosa: 8.87 -> 9.21 (growth +3.83%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt formosa: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue formosa: 0.84 (base=1.84 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=1.00)",
+    "  CRISIS: formosa reserves exhausted!",
+    "  Budget formosa: rev=0.84 maint=3.85 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production formosa: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability formosa: 8.3 -> 8.6 (delta=+0.32)",
+    "  Support formosa (democracy): 74.6 -> 80.7 (delta=+6.11)",
+    "  Sanctions on phrygia: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs phrygia: imposer_cost=0.003, revenue=0.011, target_cost=0.000, net_cost=0.000",
+    "  Inflation phrygia: 23.5% -> 20.0%",
+    "  GDP phrygia: 12.36 -> 12.73 (growth +2.94%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=0.997 block=1.000)",
+    "  Debt phrygia: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue phrygia: 0.00 (base=3.18 oil=0.00 sanc_cost=0.00 infl_erosion=5.55 war=0.00 debt=3.00)",
+    "  CRISIS: phrygia reserves exhausted!",
+    "  Budget phrygia: rev=0.00 maint=3.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production phrygia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability phrygia: 4.2 -> 4.1 (delta=-0.08)",
+    "  Support phrygia (hybrid): 53.4 -> 53.9 (delta=+0.49)",
+    "  Sanctions on yamato: damage=0.0004, coalition_coverage=0.046, effectiveness=weak",
+    "  Tariffs yamato: imposer_cost=0.203, revenue=0.678, target_cost=0.513, net_cost=0.039",
+    "  Inflation yamato: 1.3% -> 1.1%",
+    "  GDP yamato: 45.52 -> 46.43 (growth +2.00%, factors: tariff=0.999 sanc=1.000 war=1.000 tech=1.150 infl=1.000 block=1.000)",
+    "  Debt yamato: 6.00 -> 6.00 (deficit=0.00)",
+    "  Revenue yamato: 7.90 (base=13.93 oil=0.00 sanc_cost=0.03 infl_erosion=0.00 war=0.00 debt=6.00)",
+    "  CRISIS: yamato reserves exhausted!",
+    "  Budget yamato: rev=7.90 maint=5.40 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production yamato: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability yamato: 8.6 -> 8.8 (delta=+0.23)",
+    "  Support yamato (democracy): 57.7 -> 61.5 (delta=+3.80)",
+    "  Sanctions on solaria: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs solaria: imposer_cost=0.001, revenue=0.004, target_cost=0.008, net_cost=0.005",
+    "  Inflation solaria: 1.0% -> 0.9%",
+    "  GDP solaria: 12.62 -> 13.06 (growth +3.49%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=1.000)",
+    "  Debt solaria: 1.00 -> 1.00 (deficit=0.00)",
+    "  Revenue solaria: 0.31 (base=1.31 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=1.00)",
+    "  CRISIS: solaria reserves exhausted!",
+    "  Budget solaria: rev=0.31 maint=3.60 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production solaria: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability solaria: 8.1 -> 8.4 (delta=+0.28)",
+    "  Support solaria (autocracy): 80.7 -> 85.3 (delta=+4.53)",
+    "  Sanctions on choson: damage=0.0001, coalition_coverage=0.003, effectiveness=weak",
+    "  Tariffs choson: imposer_cost=0.002, revenue=0.007, target_cost=0.004, net_cost=0.000",
+    "  Inflation choson: 5.2% -> 4.4%",
+    "  GDP choson: 0.31 -> 0.31 (growth +0.50%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=0.999 block=1.000)",
+    "  Debt choson: 0.00 -> 0.00 (deficit=0.00)",
+    "  Revenue choson: 0.15 (base=0.15 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=0.00)",
+    "  CRISIS: choson reserves exhausted!",
+    "  Budget choson: rev=0.15 maint=1.95 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production choson: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability choson: 4.0 -> 4.0 (delta=-0.00)",
+    "  Support choson (autocracy): 64.0 -> 62.5 (delta=-1.50)",
+    "  Sanctions on hanguk: damage=0.0002, coalition_coverage=0.022, effectiveness=weak",
+    "  Tariffs hanguk: imposer_cost=0.017, revenue=0.056, target_cost=0.130, net_cost=0.090",
+    "  Inflation hanguk: 1.3% -> 1.1%",
+    "  GDP hanguk: 19.85 -> 20.39 (growth +2.77%, factors: tariff=0.995 sanc=1.000 war=1.000 tech=1.050 infl=1.000 block=1.000)",
+    "  Debt hanguk: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue hanguk: 3.30 (base=5.30 oil=0.00 sanc_cost=0.01 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: hanguk reserves exhausted!",
+    "  Budget hanguk: rev=3.30 maint=4.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production hanguk: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability hanguk: 6.9 -> 7.1 (delta=+0.22)",
+    "  Support hanguk (democracy): 44.0 -> 47.3 (delta=+3.26)",
+    "  Sanctions on caribe: damage=0.0002, coalition_coverage=0.011, effectiveness=weak",
+    "  Tariffs caribe: imposer_cost=0.006, revenue=0.021, target_cost=0.017, net_cost=0.002",
+    "  Inflation caribe: 31.3% -> 26.6%",
+    "  GDP caribe: 1.31 -> 1.30 (growth -0.95%, factors: tariff=0.998 sanc=1.000 war=1.000 tech=1.000 infl=0.996 block=1.000)",
+    "  Debt caribe: 5.00 -> 5.00 (deficit=0.00)",
+    "  Revenue caribe: 0.00 (base=0.39 oil=0.00 sanc_cost=0.00 infl_erosion=0.85 war=0.00 debt=5.00)",
+    "  CRISIS: caribe reserves exhausted!",
+    "  Budget caribe: rev=0.00 maint=1.00 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production caribe: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability caribe: 1.0 -> 1.0 (delta=-0.79)",
+    "  Support caribe (autocracy): 21.6 -> 16.1 (delta=-5.58)",
+    "  FINANCIAL CRISIS caribe: market_index=11.9, capital_flight=0.08",
+    "  Sanctions on mirage: damage=0.0000, coalition_coverage=0.000, effectiveness=weak",
+    "  Tariffs mirage: imposer_cost=0.000, revenue=0.000, target_cost=0.001, net_cost=0.001",
+    "  Inflation mirage: 1.0% -> 0.9%",
+    "  GDP mirage: 5.85 -> 6.08 (growth +3.99%, factors: tariff=1.000 sanc=1.000 war=1.000 tech=1.000 infl=1.000 block=1.000)",
+    "  Debt mirage: 0.00 -> 0.00 (deficit=0.00)",
+    "  Revenue mirage: 0.00 (base=0.00 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.00 debt=0.00)",
+    "  Budget mirage: rev=0.00 maint=2.45 social=0.00 mil=0.00 tech=0.00 treasury=2.75",
+    "  Production mirage: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability mirage: 9.2 -> 9.4 (delta=+0.20)",
+    "  Support mirage (autocracy): 91.5 -> 97.1 (delta=+5.60)",
+    "--- PASS 2: AI CONTEXTUAL ADJUSTMENT ---",
+    "  AI ADJ nordostan: war_fatigue_acceleration \u2014 Prolonged war (13 rounds) accelerates public fatigue.",
+    "  AI ADJ nordostan: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "  AI ADJ heartland: war_fatigue_acceleration \u2014 Prolonged war (13 rounds) accelerates public fatigue.",
+    "  AI ADJ heartland: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ persia: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ caribe: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "--- PASS 3: COHERENCE CHECK ---",
+    "=== ROUND 5 PROCESSING COMPLETE ==="
+  ]
+}

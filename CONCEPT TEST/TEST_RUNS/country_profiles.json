@@ -1,38 +1,48 @@
 {
   "meta": {
-    "version": "1.0",
+    "version": "2.0",
     "date": "2026-03-25",
-    "description": "AI decision profiles for all 20 countries. Defines strategic personality, not country data.",
+    "description": "AI decision profiles for all 20 countries. V2: enriched strategic context, ticking clocks, multi-parameter assessments.",
     "notes": "risk_tolerance, aggression, cooperation_bias are 0-1 scales. decision_weights must sum to ~1.0."
   },
   "profiles": [
     {
       "country_id": "columbia",
-      "primary_goal": "Maintain global hegemony and alliance network. Win re-election at Round 5.",
+      "primary_goal": "Maintain the rules-based international order with Columbia at its center. The President (age 82) sees himself as the architect of a new era -- reshaping alliances, confronting rivals, demonstrating American strength. Greenland, Cuba, Middle East peace, Ukraine resolution, China containment -- all part of the vision. But the world is slipping: Cathay's navy grows, allies hedge, the dollar faces alternatives, and re-election looms.",
       "secondary_goals": [
         "Contain Cathay tech rise through tariffs and export controls",
         "Manage Nordostan-Heartland war without direct involvement",
         "Prevent nuclear proliferation in Persia and Choson",
-        "Keep oil prices stable for domestic economy"
+        "Keep oil prices stable for domestic economy",
+        "Maintain AI tech lead -- reach L4 before Cathay reaches L3"
       ],
+      "ticking_clocks": [
+        "Cathay naval parity approaching 2028-2029",
+        "AI tech lead -- must reach L4 before Cathay reaches L3",
+        "Alliance erosion -- European strategic autonomy, Gulf hedging, India non-alignment",
+        "Dollar weaponization accelerating de-dollarization",
+        "Re-election Round 5 -- every decision measured against polls",
+        "Overstretch -- 4-5 theaters, not enough forces for all"
+      ],
+      "strategic_analysis": "The establishment sees a multi-parameter erosion of American primacy: (1) Military -- Cathay closes conventional gap within 3 years, already leads in shipbuilding 200:1; (2) Economic -- Cathay GDP approaching parity in PPP, dominates manufacturing, rare earths, batteries; (3) Technology -- Cathay close behind on AI, ahead on 5G and quantum; (4) Alliances -- allies diversifying relationships with Cathay, EU pursuing autonomy, Gulf states hedging; (5) Financial -- BRICS+ currency alternatives threaten dollar monopoly on which sanctions power rests. The window to act from strength is closing. But acting too aggressively accelerates the very fractures it aims to prevent.",
       "risk_tolerance": 0.4,
       "aggression": 0.3,
       "cooperation_bias": 0.6,
       "key_relationships": {
-        "cathay": "strategic competitor — contain through tariffs and tech restrictions, avoid direct conflict",
-        "nordostan": "adversary — sanction and isolate but avoid direct conflict",
-        "heartland": "ally — support with arms and money but not troops",
-        "gallia": "ally — coordinate within NATO but manage EU autonomy aspirations",
-        "teutonia": "ally — encourage defense spending, worry about China trade dependency",
-        "yamato": "key ally — Pacific anchor, support remilitarization",
-        "formosa": "protectorate — defend if attacked but prefer strategic ambiguity",
-        "bharata": "court aggressively — need on sanctions coalition, offer tech deals",
-        "levantia": "ally — restrain from unilateral Persia strikes, share intelligence",
-        "persia": "adversary — prevent nuclear weapons through sanctions and threat",
-        "albion": "closest ally — Five Eyes, intelligence sharing, coordinate everything",
-        "hanguk": "ally — maintain troop presence, tech cooperation",
-        "choson": "adversary — maximum sanctions, contain",
-        "solaria": "transactional partner — need oil stability, overlook human rights"
+        "cathay": "strategic competitor -- contain through tariffs and tech restrictions, avoid direct conflict",
+        "nordostan": "adversary -- sanction and isolate but avoid direct conflict",
+        "heartland": "ally -- support with arms and money but not troops",
+        "gallia": "ally -- coordinate within NATO but manage EU autonomy aspirations",
+        "teutonia": "ally -- encourage defense spending, worry about China trade dependency",
+        "yamato": "key ally -- Pacific anchor, support remilitarization",
+        "formosa": "protectorate -- defend if attacked but prefer strategic ambiguity",
+        "bharata": "court aggressively -- need on sanctions coalition, offer tech deals",
+        "levantia": "ally -- restrain from unilateral Persia strikes, share intelligence",
+        "persia": "adversary -- prevent nuclear weapons through sanctions and threat",
+        "albion": "closest ally -- Five Eyes, intelligence sharing, coordinate everything",
+        "hanguk": "ally -- maintain troop presence, tech cooperation",
+        "choson": "adversary -- maximum sanctions, contain",
+        "solaria": "transactional partner -- need oil stability, overlook human rights"
       },
       "decision_weights": {
         "economic_growth": 0.25,
@@ -53,27 +63,34 @@
     },
     {
       "country_id": "cathay",
-      "primary_goal": "Achieve Formosa reunification within leader's tenure. Surpass Columbia as dominant economic and technological power.",
+      "primary_goal": "Close the power gap with Columbia within the next 3-4 years. Chairman (age 72) sees this as his legacy -- particularly resolving the Formosa question. China's naval buildup is on track to overtake the US Pacific fleet by 2028-2029. The window is opening but will close as Columbia potentially reaches AI L4 breakthrough. Every year of patience is a year closer to military parity -- but also a year the Chairman ages without his legacy secured.",
       "secondary_goals": [
         "Build naval superiority in Western Pacific",
         "Achieve AI Level 3 before Columbia reaches Level 4",
         "Reduce dependency on Formosa semiconductors",
         "Expand influence through Belt and Road and BRICS+"
       ],
+      "ticking_clocks": [
+        "Naval parity with Columbia by 2028-2029",
+        "Chairman age 72, no successor, legacy = Formosa",
+        "AI tech race -- if Columbia reaches L4 first, window closes permanently",
+        "Economic slowdown reduces the growth advantage that funds the buildup"
+      ],
+      "strategic_analysis": "Multi-parameter assessment: Military gap closing (favorable). Nuclear approaching L3 (favorable). AI tech -- behind Columbia but closing (uncertain). Economic growth slowing from 6% to 4% (concerning). Alliance architecture -- BRICS+ growing but lacks NATO cohesion (mixed). Formosa semiconductor leverage declines as alternatives emerge (time-limited). Overall: the next 3 years are the optimal window. Delay risks permanent disadvantage if Columbia achieves AI L4.",
       "risk_tolerance": 0.5,
       "aggression": 0.4,
       "cooperation_bias": 0.5,
       "key_relationships": {
-        "columbia": "strategic rival — avoid open confrontation while building strength, exploit domestic divisions",
-        "nordostan": "junior partner — useful distraction for Columbia, supply with tech, buy energy",
-        "formosa": "renegade province — reunification is personal legacy, prefer peaceful coercion",
-        "yamato": "historical adversary — contain through economic leverage, watch remilitarization",
-        "bharata": "competitive partner — border tension but BRICS+ alignment",
-        "hanguk": "economic dependency target — use trade leverage to weaken Columbia alliance",
-        "solaria": "energy supplier — diversify away from Hormuz vulnerability",
-        "persia": "strategic partner — energy and anti-Columbia alignment",
-        "choson": "buffer state — restrain from provocations that invite Columbia presence",
-        "teutonia": "trade partner — exploit dependency to prevent sanctions alignment"
+        "columbia": "strategic rival -- avoid open confrontation while building strength, exploit domestic divisions",
+        "nordostan": "junior partner -- useful distraction for Columbia, supply with tech, buy energy",
+        "formosa": "renegade province -- reunification is personal legacy, prefer peaceful coercion",
+        "yamato": "historical adversary -- contain through economic leverage, watch remilitarization",
+        "bharata": "competitive partner -- border tension but BRICS+ alignment",
+        "hanguk": "economic dependency target -- use trade leverage to weaken Columbia alliance",
+        "solaria": "energy supplier -- diversify away from Hormuz vulnerability",
+        "persia": "strategic partner -- energy and anti-Columbia alignment",
+        "choson": "buffer state -- restrain from provocations that invite Columbia presence",
+        "teutonia": "trade partner -- exploit dependency to prevent sanctions alignment"
       },
       "decision_weights": {
         "economic_growth": 0.25,
@@ -94,28 +111,36 @@
     },
     {
       "country_id": "nordostan",
-      "primary_goal": "Achieve a 'victory' in Heartland war that can be sold domestically — frozen conflict on favorable terms or territorial consolidation.",
+      "primary_goal": "Produce something that can be called 'victory' in the Heartland war before resources run out. The President (age 73) has no safe exit -- personal survival depends on maintaining power, and power depends on the war producing results. The economy has proven surprisingly resilient under sanctions (4 years and counting) but is slowly eroding. The military is degraded but functional. Nuclear weapons remain the ultimate insurance. The question is not whether to fight, but what terms of settlement preserve the regime.",
       "secondary_goals": [
         "Prevent NATO expansion to Heartland",
         "Maintain nuclear deterrent as ultimate guarantee",
         "Keep oil revenue flowing despite sanctions",
         "Prevent regime collapse from war exhaustion"
       ],
+      "ticking_clocks": [
+        "Economic erosion -- sanctions slowly bite despite resilience",
+        "Military attrition -- losing experienced troops faster than replacing them",
+        "War fatigue -- society tolerates the war but enthusiasm is gone",
+        "China's junior partner -- the longer the war, the more dependent on Cathay",
+        "Leader age 73, no successor -- personal survival = regime survival"
+      ],
+      "strategic_analysis": "Resilience, not collapse: the economy adapted to sanctions through import substitution, China trade, and oil revenue. GDP contracted 2% initially, now growing again at 1-2%. But the military industrial base is strained, and the skilled workforce is depleting. Nuclear capability remains the regime's insurance -- no external power will risk forcing regime change on a nuclear-armed state. The goal is a settlement that preserves territorial gains and regime dignity. Escalation (nuclear threats, energy weaponization) is a tool for negotiation, not warfare.",
       "risk_tolerance": 0.7,
-      "aggression": 0.7,
+      "aggression": 0.6,
       "cooperation_bias": 0.2,
       "key_relationships": {
-        "columbia": "primary adversary — nuclear parity keeps them at bay",
-        "heartland": "existential enemy — must be neutralized or partitioned",
-        "cathay": "senior partner — need their economy and UN veto",
-        "persia": "partner — coordinate sanctions evasion, arms sales",
-        "choson": "useful chaos agent — provocations distract Columbia",
-        "freeland": "NATO frontline threat — intimidate but do not cross",
-        "teutonia": "potential wedge — exploit energy dependency and war fatigue",
-        "phrygia": "transactional — need Bosphorus access, play NATO fissures",
-        "solaria": "OPEC+ partner — coordinate production for revenue",
-        "bharata": "arms customer — maintain relationship for UN votes",
-        "caribe": "foothold — project power in Columbia's backyard"
+        "columbia": "primary adversary -- nuclear parity keeps them at bay",
+        "heartland": "existential enemy -- must be neutralized or partitioned",
+        "cathay": "senior partner -- need their economy and UN veto",
+        "persia": "partner -- coordinate sanctions evasion, arms sales",
+        "choson": "useful chaos agent -- provocations distract Columbia",
+        "freeland": "NATO frontline threat -- intimidate but do not cross",
+        "teutonia": "potential wedge -- exploit energy dependency and war fatigue",
+        "phrygia": "transactional -- need Bosphorus access, play NATO fissures",
+        "solaria": "OPEC+ partner -- coordinate production for revenue",
+        "bharata": "arms customer -- maintain relationship for UN votes",
+        "caribe": "foothold -- project power in Columbia's backyard"
       },
       "decision_weights": {
         "military_victory": 0.30,
@@ -147,15 +172,15 @@
       "aggression": 0.5,
       "cooperation_bias": 0.7,
       "key_relationships": {
-        "columbia": "essential patron — survival depends on continued aid, fear of aid fatigue",
-        "nordostan": "existential enemy — no compromise on sovereignty",
-        "gallia": "key supporter — military aid and diplomatic backing",
-        "albion": "intelligence partner — critical for targeting",
-        "teutonia": "major donor — but frustratingly cautious on heavy weapons",
-        "freeland": "closest ally — logistics corridor and political champion",
-        "phrygia": "complicated — controls Black Sea access, mediator role",
-        "bharata": "disappointment — sells fence-sitting as non-alignment",
-        "cathay": "indirect adversary — arms Nordostan, blocks UN action"
+        "columbia": "essential patron -- survival depends on continued aid, fear of aid fatigue",
+        "nordostan": "existential enemy -- no compromise on sovereignty",
+        "gallia": "key supporter -- military aid and diplomatic backing",
+        "albion": "intelligence partner -- critical for targeting",
+        "teutonia": "major donor -- but frustratingly cautious on heavy weapons",
+        "freeland": "closest ally -- logistics corridor and political champion",
+        "phrygia": "complicated -- controls Black Sea access, mediator role",
+        "bharata": "disappointment -- sells fence-sitting as non-alignment",
+        "cathay": "indirect adversary -- arms Nordostan, blocks UN action"
       },
       "decision_weights": {
         "military_defense": 0.35,
@@ -182,18 +207,25 @@
         "Control Strait of Hormuz as leverage",
         "Balance hardliner, reformist, and military factions internally"
       ],
+      "ticking_clocks": [
+        "Nuclear threshold approaching -- Levantia will strike if progress exceeds 80%",
+        "Proxy network degraded by Levantia operations -- rebuilding takes time",
+        "Internal reform pressure -- younger population demands economic opening",
+        "IRGC economic empire -- military-industrial faction has veto power over diplomacy"
+      ],
+      "strategic_analysis": "The regime operates on multiple tracks simultaneously. Track 1: Nuclear ambiguity -- stay close enough to a weapon to deter attack, far enough to avoid triggering one. Track 2: Proxy network as regional insurance -- even if bombed, proxies continue the fight. Track 3: Hormuz leverage -- the ability to shut down 20% of global oil gives disproportionate negotiating power relative to GDP. Track 4: Great power relationships -- Cathay buys oil regardless of Western sanctions, Nordostan sells weapons and provides UN cover. The internal debate: hardliners want to sprint to a weapon, IRGC pragmatists want threshold status for leverage, reformists want to trade nuclear ambiguity for sanctions relief. The Supreme Leader balances all three, tilting toward threshold status.",
       "risk_tolerance": 0.6,
       "aggression": 0.5,
       "cooperation_bias": 0.3,
       "key_relationships": {
-        "columbia": "primary adversary — sanctions source, military threat",
-        "levantia": "existential adversary — preemptive strike threat",
-        "nordostan": "arms supplier and UN protector — coordinate against West",
-        "cathay": "major oil customer and tech supplier — BRICS+ partner",
-        "solaria": "regional rival — compete for Gulf influence but OPEC+ partner",
-        "phrygia": "trade partner — sanctions evasion corridor",
-        "bharata": "oil customer — maintain energy exports",
-        "mirage": "neighbor and rival — competing Gulf visions"
+        "columbia": "primary adversary -- sanctions source, military threat",
+        "levantia": "existential adversary -- preemptive strike threat, proxy war ongoing",
+        "nordostan": "arms supplier and UN protector -- coordinate against West",
+        "cathay": "major oil customer and tech supplier -- BRICS+ partner",
+        "solaria": "regional rival -- compete for Gulf influence but OPEC+ partner",
+        "phrygia": "trade partner -- sanctions evasion corridor",
+        "bharata": "oil customer -- maintain energy exports",
+        "mirage": "neighbor and rival -- competing Gulf visions"
       },
       "decision_weights": {
         "nuclear_program": 0.30,
@@ -220,18 +252,19 @@
         "Protect French industry from Chinese competition",
         "Mediate conflicts to enhance diplomatic prestige"
       ],
+      "strategic_analysis": "Gallia occupies a unique position: nuclear-armed, UNSC permanent member, and the only EU state with genuine power projection capability. In the US-China competition, Gallia sees opportunity for Europe as a third pole -- not equidistant, but autonomous. The Nordostan-Heartland war validates European defense investment but also reveals painful dependence on Columbia for heavy logistics and intelligence. Gallia's calculation: support Heartland enough to maintain credibility, push EU defense integration to reduce Columbia dependency, maintain Cathay trade to avoid economic damage, and position Paris as the indispensable mediator. Risk: if Columbia demands loyalty tests (anti-Cathay sanctions, force commitments), Gallia must choose between alliance and autonomy.",
       "risk_tolerance": 0.4,
       "aggression": 0.2,
       "cooperation_bias": 0.6,
       "key_relationships": {
-        "columbia": "ally but rival — resist American dominance of alliance, maintain independence",
-        "teutonia": "essential partner — Franco-German axis drives EU, frustration with pacifism",
-        "albion": "post-Brexit competitor — cooperate on defense but compete on influence",
-        "nordostan": "adversary — support Heartland but keep diplomatic channel open",
-        "cathay": "economic partner — resist Columbia pressure for full decoupling",
-        "heartland": "supported nation — military aid within budget limits",
-        "bharata": "strategic partner — defense sales, Indo-Pacific presence",
-        "levantia": "complicated — historical ties, tension over settlements"
+        "columbia": "ally but rival -- resist American dominance of alliance, maintain independence",
+        "teutonia": "essential partner -- Franco-German axis drives EU, frustration with pacifism",
+        "albion": "post-Brexit competitor -- cooperate on defense but compete on influence",
+        "nordostan": "adversary -- support Heartland but keep diplomatic channel open",
+        "cathay": "economic partner -- resist Columbia pressure for full decoupling",
+        "heartland": "supported nation -- military aid within budget limits",
+        "bharata": "strategic partner -- defense sales, Indo-Pacific presence",
+        "levantia": "complicated -- historical ties, tension over settlements"
       },
       "decision_weights": {
         "eu_leadership": 0.25,
@@ -258,16 +291,17 @@
         "Support Heartland within politically sustainable limits",
         "Lead EU economic policy coordination"
       ],
+      "strategic_analysis": "Teutonia is the most exposed European power in the US-China competition. Its economic model depends on exporting to Cathay (largest trade partner), importing energy (now diversified away from Nordostan but still vulnerable), and sheltering under Columbia's security umbrella. The Zeitenwende defense buildup is real but slow -- military spending increased but the Bundeswehr remains years from credible deterrence. In the Nordostan-Heartland war, Teutonia is the largest European donor but politically terrified of escalation. The nightmare scenario: forced to choose between Cathay trade (economic survival) and Columbia alliance (security survival). Strategy: delay that choice as long as possible through diplomatic ambiguity and incremental concessions to both sides.",
       "risk_tolerance": 0.2,
       "aggression": 0.1,
       "cooperation_bias": 0.8,
       "key_relationships": {
-        "columbia": "essential protector — but resent pressure on China trade",
-        "cathay": "critical trade partner — largest export market, cannot afford full decoupling",
-        "gallia": "EU partner — sometimes clashing on defense spending and industrial policy",
-        "nordostan": "former partner turned adversary — energy dependency broken, still fear escalation",
-        "heartland": "supported nation — generous aid but terrified of escalation",
-        "freeland": "eastern ally — respect their security concerns, coordinate NATO eastern flank"
+        "columbia": "essential protector -- but resent pressure on China trade",
+        "cathay": "critical trade partner -- largest export market, cannot afford full decoupling",
+        "gallia": "EU partner -- sometimes clashing on defense spending and industrial policy",
+        "nordostan": "former partner turned adversary -- energy dependency broken, still fear escalation",
+        "heartland": "supported nation -- generous aid but terrified of escalation",
+        "freeland": "eastern ally -- respect their security concerns, coordinate NATO eastern flank"
       },
       "decision_weights": {
         "economic_stability": 0.30,
@@ -295,16 +329,17 @@
         "Support Heartland unconditionally",
         "Lead NATO eastern flank coordination"
       ],
+      "strategic_analysis": "Freeland sees the Nordostan-Heartland war as an existential preview: if Heartland falls, Freeland is next. This drives the most aggressive military buildup in Europe -- defense spending at 4% of GDP and rising. Freeland's position in the US-China competition is simple: whatever keeps Columbia engaged in European security. Unlike Gallia or Teutonia, Freeland has no interest in strategic autonomy -- it wants MORE American troops, not fewer. Freeland lobbies relentlessly within NATO for maximum defense posture, frustrating allies who prefer diplomacy. The risk: Freeland's hawkish stance could split NATO consensus, ironically weakening the alliance it depends on.",
       "risk_tolerance": 0.5,
       "aggression": 0.4,
       "cooperation_bias": 0.7,
       "key_relationships": {
-        "columbia": "essential protector — want permanent bases and more troops",
-        "nordostan": "existential threat — only language they understand is force",
-        "heartland": "brother nation — if Heartland falls, Freeland is next",
-        "teutonia": "frustrating ally — too slow on defense, too soft on Nordostan",
-        "gallia": "ally — appreciate nuclear umbrella but dislike EU autonomy talk",
-        "albion": "trusted partner — post-Brexit defense cooperation"
+        "columbia": "essential protector -- want permanent bases and more troops",
+        "nordostan": "existential threat -- only language they understand is force",
+        "heartland": "brother nation -- if Heartland falls, Freeland is next",
+        "teutonia": "frustrating ally -- too slow on defense, too soft on Nordostan",
+        "gallia": "ally -- appreciate nuclear umbrella but dislike EU autonomy talk",
+        "albion": "trusted partner -- post-Brexit defense cooperation"
       },
       "decision_weights": {
         "military_security": 0.35,
@@ -331,16 +366,17 @@
         "Maintain Mediterranean naval presence",
         "Balance domestic populism with alliance obligations"
       ],
+      "strategic_analysis": "Ponte is the weakest link in the Western alliance chain. Debt at 140% of GDP makes every policy choice a fiscal calculation. In the US-China competition, Ponte is tempted by Cathay infrastructure investment (Belt and Road) but constrained by alliance obligations. In the Nordostan-Heartland war, sanctions compliance hurts the Italian economy through higher energy costs. Ponte's strategy: use its swing-vote position in EU and NATO to extract concessions -- fiscal flexibility, infrastructure funds, migration support -- in exchange for loyalty. The risk: if domestic populists gain power, Ponte could veto EU sanctions or invite Cathay investment that compromises alliance security.",
       "risk_tolerance": 0.3,
       "aggression": 0.1,
       "cooperation_bias": 0.5,
       "key_relationships": {
-        "columbia": "distant ally — want attention but often overlooked",
-        "gallia": "EU partner and rival — compete for Mediterranean influence",
-        "teutonia": "fiscal overlord — resent austerity pressure",
-        "nordostan": "reluctant adversary — sanctions hurt, energy costs painful",
-        "cathay": "tempting investor — Belt and Road offers infrastructure money",
-        "phrygia": "Mediterranean neighbor — migration and Libya cooperation"
+        "columbia": "distant ally -- want attention but often overlooked",
+        "gallia": "EU partner and rival -- compete for Mediterranean influence",
+        "teutonia": "fiscal overlord -- resent austerity pressure",
+        "nordostan": "reluctant adversary -- sanctions hurt, energy costs painful",
+        "cathay": "tempting investor -- Belt and Road offers infrastructure money",
+        "phrygia": "Mediterranean neighbor -- migration and Libya cooperation"
       },
       "decision_weights": {
         "debt_management": 0.30,
@@ -367,16 +403,17 @@
         "Build Indo-Pacific tilt as strategic differentiator",
         "Support Heartland as demonstration of global relevance"
       ],
+      "strategic_analysis": "Post-Brexit Albion seeks relevance through two pillars: the Five Eyes intelligence advantage (unmatched in Europe) and nuclear deterrent credibility. In the US-China competition, Albion has chosen sides more clearly than any European ally -- AUKUS, Indo-Pacific tilt, Huawei ban. In the Nordostan-Heartland war, Albion leads on intelligence sharing and sanctions enforcement, punching above its weight. The strategy: be Columbia's indispensable partner in every theater, making the special relationship irreplaceable. Risk: overstretch. A small economy and shrinking military cannot credibly operate in Europe, the Indo-Pacific, and the Middle East simultaneously. Scotland independence pressure adds domestic fragility.",
       "risk_tolerance": 0.4,
       "aggression": 0.3,
       "cooperation_bias": 0.6,
       "key_relationships": {
-        "columbia": "special relationship — intelligence sharing, military coordination, follow lead",
-        "gallia": "rival and partner — post-Brexit tension but defense cooperation",
-        "nordostan": "adversary — lead on sanctions enforcement and intelligence",
-        "heartland": "strong supporter — training, intelligence, weapons",
-        "yamato": "growing partner — Indo-Pacific security cooperation",
-        "bharata": "historical connection — trade and defense deals"
+        "columbia": "special relationship -- intelligence sharing, military coordination, follow lead",
+        "gallia": "rival and partner -- post-Brexit tension but defense cooperation",
+        "nordostan": "adversary -- lead on sanctions enforcement and intelligence",
+        "heartland": "strong supporter -- training, intelligence, weapons",
+        "yamato": "growing partner -- Indo-Pacific security cooperation",
+        "bharata": "historical connection -- trade and defense deals"
       },
       "decision_weights": {
         "global_relevance": 0.25,
@@ -403,17 +440,24 @@
         "Secure energy imports at favorable prices (buy Russian oil at discount)",
         "Manage border tension with Cathay"
       ],
+      "ticking_clocks": [
+        "Demographic dividend window -- largest young workforce in history, but only for 15-20 years",
+        "Cathay border tension -- unresolved Ladakh standoff could escalate",
+        "Tech ambitions -- must build indigenous semiconductor and AI capacity before supply chains lock in",
+        "Energy transition -- massive oil import dependency creates vulnerability to price shocks"
+      ],
+      "strategic_analysis": "Bharata has perfected multi-alignment diplomacy: buying discounted Nordostan oil while deepening Columbia tech partnerships; joining BRICS+ while participating in the Quad; abstaining on UN votes while accepting defense technology from all sides. This works because BOTH blocs want Bharata more than Bharata needs either. Columbia needs Bharata for the democratic alliance narrative and China containment; Cathay needs Bharata for BRICS+ legitimacy and to prevent full encirclement. Bharata's leverage: 1.4 billion consumers, the world's fastest-growing major economy, and a swing vote in every international institution. The strategy: extract maximum concessions from the highest bidder on each issue, commit to neither, build indigenous capability so the leverage grows over time. Risk: a Formosa crisis or Cathay border escalation could force the choice Bharata desperately wants to avoid.",
       "risk_tolerance": 0.3,
       "aggression": 0.2,
       "cooperation_bias": 0.5,
       "key_relationships": {
-        "columbia": "important partner — tech deals and defense cooperation, but resist pressure to join anti-Cathay bloc",
-        "cathay": "rival and neighbor — border disputes, competition for regional influence, trade partner",
-        "nordostan": "traditional arms supplier — buy discounted oil, maintain BRICS+ ties",
-        "gallia": "defense supplier — Rafale jets, nuclear submarine deal",
-        "yamato": "quiet partner — shared Cathay concern, infrastructure cooperation",
-        "solaria": "energy supplier — OPEC+ relationship matters",
-        "persia": "energy supplier — resist sanctions pressure to cut ties"
+        "columbia": "important partner -- tech deals and defense cooperation, but resist pressure to join anti-Cathay bloc",
+        "cathay": "rival and neighbor -- border disputes, competition for regional influence, trade partner",
+        "nordostan": "traditional arms supplier -- buy discounted oil, maintain BRICS+ ties",
+        "gallia": "defense supplier -- Rafale jets, nuclear submarine deal",
+        "yamato": "quiet partner -- shared Cathay concern, infrastructure cooperation",
+        "solaria": "energy supplier -- OPEC+ relationship matters",
+        "persia": "energy supplier -- resist sanctions pressure to cut ties"
       },
       "decision_weights": {
         "economic_growth": 0.30,
@@ -440,16 +484,23 @@
         "Strengthen Columbia alliance and intelligence sharing",
         "Manage domestic coalition politics"
       ],
+      "ticking_clocks": [
+        "Persia nuclear progress -- once they cross the threshold, conventional deterrence fails",
+        "Proxy network reconstitution -- degraded networks rebuild within 2-3 years",
+        "Columbia attention span -- re-election politics may shift American focus away from Middle East",
+        "Regional normalization momentum -- Abraham Accords create incentives for restraint but also vulnerability"
+      ],
+      "strategic_analysis": "Levantia faces a classic security dilemma: preemptive action against Persia nuclear sites would set back the program 3-5 years but trigger massive retaliation through proxies and Hormuz disruption. Inaction risks a nuclear-armed Persia that is permanently undeterrable. The calculation: strike probability increases nonlinearly as Persia approaches the threshold. Below 60% progress: diplomacy and sabotage. Between 60-80%: intense covert operations. Above 80%: military strike becomes likely. Columbia's support is essential -- Levantia needs American bunker-buster munitions and diplomatic cover. The ongoing proxy degradation campaign buys time but is not a substitute for addressing the nuclear program directly.",
       "risk_tolerance": 0.7,
       "aggression": 0.7,
       "cooperation_bias": 0.3,
       "key_relationships": {
-        "columbia": "essential patron — military aid, intelligence sharing, UN veto protection",
-        "persia": "existential threat — nuclear program must be stopped by any means",
-        "solaria": "covert normalization partner — shared Persia concern",
-        "mirage": "covert partner — intelligence and economic ties",
-        "phrygia": "complicated — historical tensions but Erdogan pragmatism",
-        "gallia": "tense — disagree on Palestinian issues but defense cooperation"
+        "columbia": "essential patron -- military aid, intelligence sharing, UN veto protection",
+        "persia": "existential threat -- nuclear program must be stopped by any means",
+        "solaria": "covert normalization partner -- shared Persia concern",
+        "mirage": "covert partner -- intelligence and economic ties",
+        "phrygia": "complicated -- historical tensions but Erdogan pragmatism",
+        "gallia": "tense -- disagree on Palestinian issues but defense cooperation"
       },
       "decision_weights": {
         "persia_nuclear_prevention": 0.30,
@@ -465,7 +516,7 @@
         "Columbia abandoning security guarantee"
       ],
       "preferred_actions": ["preemptive_strikes", "intelligence_ops", "cyber_warfare", "targeted_assassination", "air_defense_investment", "diplomatic_normalization"],
-      "escalation_triggers": ["Persia nuclear R&D progress above 0.80", "Proxy mass rocket attack", "Columbia wavering on support", "Iranian missile deployment in Syria"]
+      "escalation_triggers": ["Persia nuclear R&D progress above 0.70", "Proxy mass rocket attack", "Columbia wavering on support", "Iranian missile deployment in Syria"]
     },
     {
       "country_id": "formosa",
@@ -480,11 +531,11 @@
       "aggression": 0.1,
       "cooperation_bias": 0.8,
       "key_relationships": {
-        "columbia": "existential protector — everything depends on American commitment",
-        "cathay": "existential threat — deterrence through economic interdependence",
-        "yamato": "security partner — shared Cathay concern, defense cooperation",
-        "hanguk": "tech partner — semiconductor supply chain cooperation",
-        "albion": "supporter — diplomatic recognition and defense sales"
+        "columbia": "existential protector -- everything depends on American commitment",
+        "cathay": "existential threat -- deterrence through economic interdependence",
+        "yamato": "security partner -- shared Cathay concern, defense cooperation",
+        "hanguk": "tech partner -- semiconductor supply chain cooperation",
+        "albion": "supporter -- diplomatic recognition and defense sales"
       },
       "decision_weights": {
         "survival": 0.35,
@@ -515,13 +566,13 @@
       "aggression": 0.4,
       "cooperation_bias": 0.4,
       "key_relationships": {
-        "columbia": "transactional ally — extract F-35s and concessions for NATO loyalty",
-        "nordostan": "energy and arms partner — buy S-400s, frustrate NATO",
-        "cathay": "economic partner — Belt and Road investment welcome",
-        "levantia": "complicated — normalize for economic benefit, compete for regional influence",
-        "gallia": "EU door-holder — leverage accession talks for concessions",
-        "heartland": "drone supplier — profitable and builds defense industry reputation",
-        "solaria": "Gulf rival — compete for Sunni leadership"
+        "columbia": "transactional ally -- extract F-35s and concessions for NATO loyalty",
+        "nordostan": "energy and arms partner -- buy S-400s, frustrate NATO",
+        "cathay": "economic partner -- Belt and Road investment welcome",
+        "levantia": "complicated -- normalize for economic benefit, compete for regional influence",
+        "gallia": "EU door-holder -- leverage accession talks for concessions",
+        "heartland": "drone supplier -- profitable and builds defense industry reputation",
+        "solaria": "Gulf rival -- compete for Sunni leadership"
       },
       "decision_weights": {
         "economic_survival": 0.30,
@@ -552,13 +603,13 @@
       "aggression": 0.2,
       "cooperation_bias": 0.7,
       "key_relationships": {
-        "columbia": "essential ally — host bases, coordinate Pacific defense, follow lead",
-        "cathay": "primary threat — watch naval buildup nervously, economic competition",
-        "hanguk": "partner — shared Cathay and Choson concerns despite historical tension",
-        "formosa": "critical partner — semiconductor supply chain, shared Cathay threat",
-        "bharata": "growing partner — Quad member, Indo-Pacific alignment",
-        "choson": "threat — missile overflights, nuclear provocations",
-        "albion": "new partner — Indo-Pacific tilt welcome"
+        "columbia": "essential ally -- host bases, coordinate Pacific defense, follow lead",
+        "cathay": "primary threat -- watch naval buildup nervously, economic competition",
+        "hanguk": "partner -- shared Cathay and Choson concerns despite historical tension",
+        "formosa": "critical partner -- semiconductor supply chain, shared Cathay threat",
+        "bharata": "growing partner -- Quad member, Indo-Pacific alignment",
+        "choson": "threat -- missile overflights, nuclear provocations",
+        "albion": "new partner -- Indo-Pacific tilt welcome"
       },
       "decision_weights": {
         "cathay_deterrence": 0.30,
@@ -589,13 +640,13 @@
       "aggression": 0.3,
       "cooperation_bias": 0.5,
       "key_relationships": {
-        "columbia": "security partner but increasingly independent — petrodollar tensions",
-        "cathay": "biggest customer — willing to accept yuan for oil",
-        "nordostan": "OPEC+ partner — cooperate on production but compete on market share",
-        "persia": "regional rival — existential competition for Gulf dominance",
-        "levantia": "covert partner — shared Persia concern, normalization track",
-        "mirage": "junior Gulf partner — coordinate but maintain dominance",
-        "bharata": "major customer — growing energy relationship"
+        "columbia": "security partner but increasingly independent -- petrodollar tensions",
+        "cathay": "biggest customer -- willing to accept yuan for oil",
+        "nordostan": "OPEC+ partner -- cooperate on production but compete on market share",
+        "persia": "regional rival -- existential competition for Gulf dominance",
+        "levantia": "covert normalization partner -- shared Persia concern",
+        "mirage": "junior Gulf partner -- coordinate but maintain dominance",
+        "bharata": "major customer -- growing energy relationship"
       },
       "decision_weights": {
         "oil_revenue": 0.30,
@@ -626,11 +677,11 @@
       "aggression": 0.6,
       "cooperation_bias": 0.1,
       "key_relationships": {
-        "columbia": "primary enemy — but nuclear deterrent keeps them at bay",
-        "cathay": "patron — provide food, energy, and UN protection in exchange for buffer state role",
-        "nordostan": "arms partner — coordinate provocations, sell ammunition",
-        "hanguk": "enemy state — existential rival, target for provocations",
-        "yamato": "historical enemy — missile overflights demonstrate capability"
+        "columbia": "primary enemy -- but nuclear deterrent keeps them at bay",
+        "cathay": "patron -- provide food, energy, and UN protection in exchange for buffer state role",
+        "nordostan": "arms partner -- coordinate provocations, sell ammunition",
+        "hanguk": "enemy state -- existential rival, target for provocations",
+        "yamato": "historical enemy -- missile overflights demonstrate capability"
       },
       "decision_weights": {
         "regime_survival": 0.35,
@@ -661,11 +712,11 @@
       "aggression": 0.2,
       "cooperation_bias": 0.6,
       "key_relationships": {
-        "columbia": "security guarantor — host bases, joint exercises, but economic cost of China tensions",
-        "cathay": "largest trade partner — cannot afford decoupling, semiconductor supply chain intertwined",
-        "choson": "existential threat — deterrence through Columbia alliance and own military",
-        "yamato": "complicated partner — shared threats but historical grievances",
-        "formosa": "tech partner — TSMC relationship critical for semiconductor ecosystem"
+        "columbia": "security guarantor -- host bases, joint exercises, but economic cost of China tensions",
+        "cathay": "largest trade partner -- cannot afford decoupling, semiconductor supply chain intertwined",
+        "choson": "existential threat -- deterrence through Columbia alliance and own military",
+        "yamato": "complicated partner -- shared threats but historical grievances",
+        "formosa": "tech partner -- TSMC relationship critical for semiconductor ecosystem"
       },
       "decision_weights": {
         "choson_deterrence": 0.25,
@@ -696,10 +747,10 @@
       "aggression": 0.2,
       "cooperation_bias": 0.4,
       "key_relationships": {
-        "columbia": "adversary — sanctions and regime change threat",
-        "cathay": "patron — infrastructure investment and arms purchases",
-        "nordostan": "military partner — hosted base, intelligence sharing",
-        "persia": "ideological ally — anti-Columbia solidarity"
+        "columbia": "adversary -- sanctions and regime change threat",
+        "cathay": "patron -- infrastructure investment and arms purchases",
+        "nordostan": "military partner -- hosted base, intelligence sharing",
+        "persia": "ideological ally -- anti-Columbia solidarity"
       },
       "decision_weights": {
         "regime_survival": 0.35,
@@ -729,12 +780,12 @@
       "aggression": 0.1,
       "cooperation_bias": 0.8,
       "key_relationships": {
-        "columbia": "security partner — host base, buy weapons, but diversify",
-        "cathay": "major investor and trade partner — welcome all money",
-        "solaria": "big brother — coordinate OPEC+ but maintain independence",
-        "persia": "neighbor — manage tensions, some trade despite sanctions",
-        "bharata": "labor source and trade partner — massive diaspora connection",
-        "levantia": "normalization partner — Abraham Accords economics"
+        "columbia": "security partner -- host base, buy weapons, but diversify",
+        "cathay": "major investor and trade partner -- welcome all money",
+        "solaria": "big brother -- coordinate OPEC+ but maintain independence",
+        "persia": "neighbor -- manage tensions, some trade despite sanctions",
+        "bharata": "labor source and trade partner -- massive diaspora connection",
+        "levantia": "normalization partner -- Abraham Accords economics"
       },
       "decision_weights": {
         "economic_growth": 0.30,

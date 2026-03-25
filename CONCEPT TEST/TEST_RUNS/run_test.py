@@ -701,11 +701,14 @@ class CountryAI:
 
     def _nordostan_military(self, country: dict, ws: WorldState, round_num: int,
                             actions: dict) -> dict:
-        """Nordostan: push in Eastern Europe but conserve if losing."""
+        """Nordostan V2: attritional long game, not desperate escalation.
+        Seek favorable local attacks, conserve forces, use energy leverage
+        and nuclear deterrence as shields while pursuing negotiated settlement."""
         mil = country["military"]
         pol = country["political"]
         ground = mil.get("ground", 0)
         tiredness = pol.get("war_tiredness", 0)
+        stability = pol.get("stability", 5)
 
         # Count forces on the front
         front_forces = 0
@@ -716,19 +719,20 @@ class CountryAI:
 
         # Heartland forces on adjacent zones
         heartland_front = 0
-        for zone_id in EE_HEARTLAND_ZONES[:4]:  # capital, central, south, dnipro
+        for zone_id in EE_HEARTLAND_ZONES[:4]:
             zone = ws.zones.get(zone_id, {}).get("forces", {})
             hl_in_zone = zone.get("heartland", {})
             heartland_front += hl_in_zone.get("ground", 0)
 
-        # Attack if we have favorable ratio (2:1 or better) and not exhausted
-        if front_forces >= heartland_front * 2 and tiredness < 6:
-            # Pick a target zone to attack
+        # ATTRITIONAL STRATEGY: only attack with favorable local ratio
+        # Higher tiredness -> more conservative (seeking settlement not victory)
+        required_ratio = 2.0 if tiredness < 4 else 2.5 if tiredness < 6 else 3.0
+        if front_forces >= heartland_front * required_ratio and tiredness < 8:
             targets = ["ee_east_front_north", "ee_dnipro_line", "ee_south_ukr"]
             for target in targets:
                 zone_forces = ws.zones.get(target, {}).get("forces", {})
                 defenders = zone_forces.get("heartland", {}).get("ground", 0)
-                if defenders > 0 and front_forces >= defenders * 2:
+                if defenders > 0 and front_forces >= defenders * required_ratio:
                     attack_units = min(front_forces, defenders * 3)
                     actions["combat"].append({
                         "attacker": "nordostan",
@@ -736,21 +740,26 @@ class CountryAI:
                         "zone": target,
                         "units": attack_units,
                     })
-                    break  # One attack per round
+                    break
 
-        # Mobilize if losing ground and desperate
-        if tiredness > 4 and ground < 12:
+        # MOBILIZATION: only partial, and only when truly needed (not desperate)
+        if ground < 10 and stability > 3:
             actions["mobilizations"] = "partial"
-        elif tiredness > 6 and ground < 8:
+        # General mobilization only if truly existential (Crimea threatened)
+        crimea_threat = ws.zones.get("ee_crimea_naval", {}).get("forces", {}).get("heartland", {}).get("ground", 0) > 0
+        if crimea_threat and ground < 8:
             actions["mobilizations"] = "general"
 
-        # Occasional missile strikes on Heartland infrastructure
-        if mil.get("strategic_missiles", 0) > 8 and random.random() < 0.4:
+        # Missile strikes: periodic infrastructure attrition (not desperate)
+        if mil.get("strategic_missiles", 0) > 8 and random.random() < 0.3:
             actions["missile_strikes"].append({
                 "country": "nordostan",
                 "target_zone": random.choice(["ee_capital", "ee_central_ukr", "ee_south_ukr"]),
                 "warhead": "conventional",
             })
+
+        # ENERGY LEVERAGE: use oil/gas as diplomatic tool (handled in OPEC decisions)
+        # NUCLEAR DETERRENCE: signal capability but do not escalate (no nuclear strikes)
 
         return actions
 
@@ -798,47 +807,59 @@ class CountryAI:
 
     def _cathay_military(self, country: dict, ws: WorldState, round_num: int,
                          actions: dict) -> dict:
-        """Cathay: gradual buildup near Formosa, act if window opens."""
+        """Cathay V2: Formosa window calculated from force ratios and ticking clocks.
+        Chairman's legacy clock + naval parity trajectory + Columbia distraction."""
         mil = country["military"]
         pol = country["political"]
         tech = country["technology"]
 
-        # Check Columbia naval presence in East China Sea
-        ecs_forces = ws.zones.get("g_sea_east_china", {}).get("forces", {})
-        columbia_naval = ecs_forces.get("columbia", {}).get("naval", 0)
-        cathay_naval = ecs_forces.get("cathay", {}).get("naval", 0)
-        yamato_naval = ecs_forces.get("yamato", {}).get("naval", 0)
-
-        # Build up naval presence gradually
-        # (production handles this, but we can signal intent)
-
-        # If Columbia is distracted (low support or multiple crises)
+        # Force ratio calculation
+        cathay_total_naval = mil.get("naval", 0)
         col_data = ws.countries.get("columbia", {})
+        col_naval = col_data.get("military", {}).get("naval", 0)
+        yamato_naval = ws.countries.get("yamato", {}).get("military", {}).get("naval", 0)
+        opponent_naval = col_naval + yamato_naval
+
+        # Naval parity ratio (Cathay vs Columbia+Yamato combined)
+        naval_ratio = cathay_total_naval / max(opponent_naval, 1)
+
+        # Columbia distraction score (0-1): higher = more distracted
         col_support = col_data.get("political", {}).get("political_support", 50)
         col_stability = col_data.get("political", {}).get("stability", 7)
-
-        formosa_window = (
-            col_support < 40
-            and columbia_naval <= 2
-            and mil.get("naval", 0) >= 10
-            and round_num >= 4
+        active_wars_involving_col = sum(1 for w in ws.wars
+            if w.get("attacker") == "columbia" or w.get("defender") == "columbia")
+        distraction_score = (
+            (max(50 - col_support, 0) / 50) * 0.3 +
+            (max(7 - col_stability, 0) / 7) * 0.3 +
+            min(active_wars_involving_col * 0.2, 0.4)
         )
 
-        if formosa_window and random.random() < self.aggression:
-            # Blockade Formosa
+        # Chairman legacy pressure increases with round number (age 72 + rounds)
+        legacy_pressure = min((round_num + 72 - 70) / 10.0, 1.0)  # 0.2 at R1, 1.0 by R8
+
+        # FORMOSA WINDOW: multi-parameter calculation
+        window_score = (
+            naval_ratio * 0.35 +            # Naval parity (most important)
+            distraction_score * 0.25 +       # Columbia distracted
+            legacy_pressure * 0.20 +         # Chairman's clock
+            (1.0 if round_num >= 5 else 0.5 if round_num >= 3 else 0.0) * 0.20  # Time pressure
+        )
+
+        # Blockade if window is strong enough and naval forces sufficient
+        if window_score > 0.65 and cathay_total_naval >= 10 and random.random() < self.aggression:
             actions["blockades"].append({
                 "country": "cathay",
                 "zone": "g_sea_east_china",
             })
-        elif round_num >= 3 and cathay_naval < columbia_naval + yamato_naval:
-            # Covert cyber against Formosa
+        elif round_num >= 3 and naval_ratio < 0.8:
+            # Not ready -- covert pressure to buy time
             actions["covert_ops"].append({
                 "country": "cathay",
                 "type": "cyber",
                 "target": "formosa",
             })
 
-        # Occasional cyber against Columbia
+        # Cyber against Columbia (ongoing)
         if tech.get("ai_level", 0) >= 2 and random.random() < 0.3:
             actions["covert_ops"].append({
                 "country": "cathay",
@@ -850,35 +871,66 @@ class CountryAI:
 
     def _levantia_military(self, country: dict, ws: WorldState, round_num: int,
                            actions: dict) -> dict:
-        """Levantia: strike Persia nuclear sites if threshold crossed."""
+        """Levantia V2: graduated response to Persia nuclear progress.
+        Below 60%: sabotage/cyber. 60-70%: intense covert. Above 70%: strike probability rises.
+        Above 80%: high-probability preemptive strike."""
         persia = ws.countries.get("persia", {})
         persia_nuc_prog = persia.get("technology", {}).get("nuclear_rd_progress", 0)
         persia_nuc_level = persia.get("technology", {}).get("nuclear_level", 0)
 
-        # Strike if Persia approaching nuclear weapon
-        if persia_nuc_prog >= 0.80 and persia_nuc_level == 0:
-            # High probability of preemptive strike
-            if random.random() < 0.7:
-                actions["combat"].append({
-                    "attacker": "levantia",
-                    "defender": "persia",
-                    "zone": "me_persia_nuclear",
-                    "units": 4,  # air strike package
-                })
-                actions["missile_strikes"].append({
-                    "country": "levantia",
-                    "target_zone": "me_persia_nuclear",
-                    "warhead": "conventional",
-                })
-        elif persia_nuc_level >= 1:
+        if persia_nuc_level >= 1:
             # Already has nukes -- too late for conventional strike, go covert
             actions["covert_ops"].append({
                 "country": "levantia",
                 "type": "sabotage",
                 "target": "persia",
             })
+        elif persia_nuc_prog >= 0.80:
+            # CRITICAL: high probability of preemptive strike
+            strike_prob = 0.75
+            if random.random() < strike_prob:
+                actions["combat"].append({
+                    "attacker": "levantia",
+                    "defender": "persia",
+                    "zone": "me_persia_nuclear",
+                    "units": 4,
+                })
+                actions["missile_strikes"].append({
+                    "country": "levantia",
+                    "target_zone": "me_persia_nuclear",
+                    "warhead": "conventional",
+                })
+        elif persia_nuc_prog >= 0.70:
+            # ELEVATED: strike probability increasing, intense covert + possible strike
+            strike_prob = 0.35
+            if random.random() < strike_prob:
+                actions["combat"].append({
+                    "attacker": "levantia",
+                    "defender": "persia",
+                    "zone": "me_persia_nuclear",
+                    "units": 4,
+                })
+                actions["missile_strikes"].append({
+                    "country": "levantia",
+                    "target_zone": "me_persia_nuclear",
+                    "warhead": "conventional",
+                })
+            else:
+                # Intense sabotage campaign
+                actions["covert_ops"].append({
+                    "country": "levantia",
+                    "type": "sabotage",
+                    "target": "persia",
+                })
+        elif persia_nuc_prog >= 0.60:
+            # MODERATE: intense covert operations
+            actions["covert_ops"].append({
+                "country": "levantia",
+                "type": "sabotage",
+                "target": "persia",
+            })
 
-        # Ongoing proxy management
+        # Ongoing cyber operations against Persia
         if random.random() < 0.4:
             actions["covert_ops"].append({
                 "country": "levantia",
@@ -890,18 +942,28 @@ class CountryAI:
 
     def _choson_military(self, country: dict, ws: WorldState, round_num: int,
                          actions: dict) -> dict:
-        """Choson: unpredictable provocations."""
+        """Choson V2: attention-seeking logic -- provoke when major powers are distracted."""
         mil = country["military"]
 
-        # Random provocations based on aggression and need for attention
-        provocation_chance = 0.3 + (0.2 if round_num % 2 == 0 else 0)
+        # Calculate how distracted major powers are
+        col_data = ws.countries.get("columbia", {})
+        col_stability = col_data.get("political", {}).get("stability", 7)
+        active_crises = len(ws.wars) + len([cp for cp, s in ws.chokepoint_status.items() if s == "blocked"])
+
+        # Higher provocation when Columbia is distracted or during major crises
+        distraction_bonus = min(active_crises * 0.10, 0.30)
+        col_weakness_bonus = max((7 - col_stability) * 0.05, 0)
+        provocation_chance = 0.25 + distraction_bonus + col_weakness_bonus
 
         if random.random() < provocation_chance:
-            provocation_type = random.choice(["missile_test", "border_incident", "cyber"])
+            provocation_type = random.choice(["missile_test", "cyber", "cyber"])  # cyber more likely
             if provocation_type == "missile_test" and mil.get("strategic_missiles", 0) > 0:
-                # Don't actually fire at anyone -- just demonstrate
-                # Represented as a missile strike on own zone (test)
-                pass  # Engine doesn't model tests, just demonstrate intent
+                # Demonstrate capability -- represented as cyber + diplomatic provocation
+                actions["covert_ops"].append({
+                    "country": "choson",
+                    "type": "cyber",
+                    "target": random.choice(["hanguk", "yamato"]),
+                })
             elif provocation_type == "cyber":
                 target = random.choice(["hanguk", "yamato", "columbia"])
                 actions["covert_ops"].append({
@@ -909,39 +971,61 @@ class CountryAI:
                     "type": "cyber",
                     "target": target,
                 })
-            elif provocation_type == "border_incident":
-                # Slight naval provocation
-                pass
 
         return actions
 
     def _columbia_military(self, country: dict, ws: WorldState, round_num: int,
                            actions: dict) -> dict:
-        """Columbia: maintain naval presence, support allies, respond to crises."""
+        """Columbia V2: overstretch logic -- when committed to multiple theaters
+        AND election approaches, make trade-offs."""
         mil = country["military"]
+        pol = country["political"]
 
-        # Arms transfers to Heartland (represented as increasing Heartland's
-        # ground units -- engine handles production, we just signal budget intent)
-        # Covert ops against adversaries
-        if mil.get("strategic_missiles", 0) > 10:
-            # Not using nukes -- but maintain deterrent posture
-            pass
+        # Count active theaters requiring attention
+        theaters = 0
+        if any(w.get("attacker") == "nordostan" for w in ws.wars):
+            theaters += 1  # Eastern Europe
+        if ws.chokepoint_status.get("hormuz") == "blocked":
+            theaters += 1  # Persian Gulf
+        if ws.chokepoint_status.get("taiwan_strait") == "blocked":
+            theaters += 2  # Pacific (highest priority)
+        cathay_naval = ws.countries.get("cathay", {}).get("military", {}).get("naval", 0)
+        if cathay_naval >= 10:
+            theaters += 1  # Pacific buildup threat
 
-        # Intelligence operations
-        if random.random() < 0.5:
-            target = random.choice(["nordostan", "cathay", "persia"])
+        # Election proximity pressure
+        election_pressure = 1.0
+        if round_num in (4, 5):
+            election_pressure = 0.7  # reduce foreign commitments near election
+
+        # OVERSTRETCH: if multiple theaters, reduce covert ops quality
+        # Focus intelligence on highest-priority threats
+        if theaters >= 3:
+            # Prioritize: focus on Cathay + one other
+            priority_targets = ["cathay"]
+            if ws.chokepoint_status.get("hormuz") == "blocked":
+                priority_targets.append("persia")
+            else:
+                priority_targets.append("nordostan")
+        else:
+            priority_targets = ["nordostan", "cathay", "persia"]
+
+        # Intelligence operations (adjusted by overstretch)
+        intel_chance = 0.5 * election_pressure
+        if random.random() < intel_chance:
+            target = random.choice(priority_targets)
             actions["covert_ops"].append({
                 "country": "columbia",
                 "type": "espionage",
                 "target": target,
             })
 
-        # Cyber operations against adversaries
-        if random.random() < 0.3:
+        # Cyber operations
+        if random.random() < 0.3 * election_pressure:
             actions["covert_ops"].append({
                 "country": "columbia",
                 "type": "cyber",
-                "target": random.choice(["nordostan", "cathay", "choson"]),
+                "target": random.choice(priority_targets + ["choson"]),
             })
 
         return actions
@@ -1367,5 +1451,5 @@ def run_simulation(num_rounds: int = 6, seed: Optional[int] = None,
 if __name__ == "__main__":
     run_name = sys.argv[1] if len(sys.argv) > 1 else "run_1"
     seed = int(sys.argv[2]) if len(sys.argv) > 2 else None
-    num_rounds = int(sys.argv[3]) if len(sys.argv) > 3 else 6
+    num_rounds = int(sys.argv[3]) if len(sys.argv) > 3 else 8
     run_simulation(num_rounds=num_rounds, seed=seed, run_name=run_name)

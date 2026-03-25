@@ -480,6 +480,19 @@ class TTTEngine:
             if prop_coins > 0:
                 self._apply_propaganda(cid, prop_coins)
 
+            # War tiredness: +0.3 per round for countries at war (separate from combat)
+            # Society adapts: natural decay of 5% per round (adaptation/normalization)
+            at_war = any(
+                w.get("attacker") == cid or w.get("defender") == cid
+                for w in self.ws.wars
+            )
+            current_wt = c["political"].get("war_tiredness", 0)
+            if at_war:
+                c["political"]["war_tiredness"] = current_wt * 0.95 + 0.3  # decay + increment
+            else:
+                # Not at war: war tiredness decays faster
+                c["political"]["war_tiredness"] = max(current_wt * 0.85, 0)
+
         return results
 
     # -----------------------------------------------------------------------
@@ -687,17 +700,10 @@ class TTTEngine:
     def calc_stability(self, country_id: str, events: dict) -> float:
         """Calculate new stability index.
 
-        Factors::
-
-            delta += (social_spending_ratio - baseline) * 5
-            delta -= casualties_this_round * 0.3
-            delta -= territory_lost * 0.5
-            delta += territory_gained * 0.3
-            delta -= (sanctions_pain / gdp) * 2
-            delta -= inflation_pct * 0.001
-            delta -= mobilization_level * 0.2
-            delta -= war_tiredness * 0.15
-            delta += propaganda_boost (diminishing returns)
+        V2: Destabilization comes from ACTOR BEHAVIOR, not formula decay.
+        Stable states have institutional inertia.  Peaceful non-sanctioned
+        countries are much less volatile.  Autocracies suppress instability
+        (at political support cost).
         """
         c = self.ws.countries[country_id]
         pol = c["political"]
@@ -705,46 +711,100 @@ class TTTEngine:
         old_stab = pol["stability"]
         delta = 0.0
 
-        # Social spending effect
-        baseline = eco.get("social_spending_baseline", 0.25)
-        actual = events.get("social_spending_ratio", baseline)
-        delta += (actual - baseline) * 5.0
+        at_war = any(
+            w.get("attacker") == country_id or w.get("defender") == country_id
+            for w in self.ws.wars
+        )
+        under_heavy_sanctions = self._sanctions_level(country_id) >= 2
 
-        # Casualties
-        casualties = events.get("casualties", 0)
-        delta -= casualties * 0.3
+        # POSITIVE INERTIA: Stable states tend to stay stable (but don't grow forever)
+        if old_stab >= 7 and old_stab < 9:
+            delta += 0.15  # well-functioning states have institutional resilience
+        elif old_stab >= 5 and old_stab < 7:
+            delta += 0.1  # moderate states have some inertia
 
-        # Territory
-        delta -= events.get("territory_lost", 0) * 0.5
-        delta += events.get("territory_gained", 0) * 0.3
+        # GDP GROWTH STABILIZES
+        gdp_growth = eco.get("gdp_growth_rate", 0)
+        # Store last_growth for reference
+        eco["last_growth"] = gdp_growth
+        if gdp_growth > 0:
+            delta += min(gdp_growth * 0.3, 0.5)  # growing economy helps, capped
+        elif gdp_growth < -2:
+            delta += gdp_growth * 0.2  # recession destabilizes
 
-        # Sanctions pain
-        gdp = eco["gdp"]
-        sanctions_pain = events.get("sanctions_pain", 0)
-        if gdp > 0:
-            delta -= (sanctions_pain / gdp) * 2.0
+        # SOCIAL SPENDING (maintains, doesn't just prevent decline)
+        social_ratio = events.get("social_spending_ratio", 0.3)
+        baseline = eco.get("social_spending_baseline", 0.30)
+        if social_ratio >= baseline:
+            delta += 0.2  # adequate spending maintains stability
+        else:
+            delta -= (baseline - social_ratio) * 3  # underspending hurts
 
-        # Inflation
-        inflation = eco["inflation"]
-        delta -= inflation * 0.001
+        # WAR EFFECTS (only for countries AT WAR)
+        if at_war:
+            casualties = events.get("casualties", 0)
+            delta -= casualties * 0.2  # each unit lost
+            territory_lost = events.get("territory_lost", 0)
+            delta -= territory_lost * 0.4
+            territory_gained = events.get("territory_gained", 0)
+            delta += territory_gained * 0.2
+            war_tiredness = pol.get("war_tiredness", 0)
+            delta -= war_tiredness * 0.05  # cumulative but gradual
+            # Note: war tiredness is incremented by combat resolution and mobilization,
+            # NOT here -- to avoid double-counting
 
-        # Mobilization
-        mob_level = events.get("mobilization_level", 0)
-        delta -= mob_level * 0.2
+        # SANCTIONS PAIN (proportional to actual economic damage)
+        if under_heavy_sanctions:
+            sanctions_gdp_hit = events.get("sanctions_gdp_impact",
+                                           events.get("sanctions_pain", 0))
+            gdp = eco["gdp"]
+            if gdp > 0:
+                sanctions_gdp_hit = sanctions_gdp_hit / gdp  # normalise
+            delta -= abs(sanctions_gdp_hit) * 0.8  # significant but survivable
 
-        # War tiredness
-        tiredness = pol.get("war_tiredness", 0)
-        delta -= tiredness * 0.15
+        # INFLATION (only severe inflation destabilizes)
+        inflation = eco.get("inflation", 0)
+        if inflation > 10:
+            delta -= (inflation - 10) * 0.05  # only high inflation matters
 
-        # Propaganda
-        prop = events.get("propaganda_boost", 0)
-        delta += prop
+        # MOBILIZATION
+        mobilization = events.get("mobilization_level", 0)
+        if mobilization > 0:
+            delta -= mobilization * 0.15
+
+        # PROPAGANDA BOOST (diminishing returns)
+        propaganda = events.get("propaganda_boost", 0)
+        delta += propaganda
+
+        # FOR PEACEFUL, NON-SANCTIONED COUNTRIES: much less volatile
+        if not at_war and not under_heavy_sanctions:
+            # Only extreme events move stability
+            if delta < 0:
+                delta *= 0.25  # peaceful countries resist destabilization
+
+        # AUTOCRACY RESILIENCE BONUS
+        regime = pol.get("regime_type", c.get("regime_type", "democracy"))
+        if regime == "autocracy":
+            if delta < 0:
+                delta *= 0.7  # autocracies are 30% more resilient to stability drops
 
         new_stab = _clamp(old_stab + delta, 1.0, 10.0)
         self._log.append(
             f"  Stability {country_id}: {old_stab:.1f} -> {new_stab:.1f} (delta={delta:+.2f})"
         )
         return round(new_stab, 2)
+
+    def _sanctions_level(self, country_id: str) -> int:
+        """Return the maximum sanctions level imposed on country_id by any actor."""
+        sanctions = self.ws.bilateral.get("sanctions", {})
+        max_level = 0
+        for sanctioner, targets in sanctions.items():
+            if sanctioner.startswith("_"):
+                continue
+            level = targets.get(country_id, 0)
+            if level > max_level:
+                max_level = level
+        return max_level
 
     # -----------------------------------------------------------------------
     # FORMULA 5: POLITICAL SUPPORT  (0-100 scale)
@@ -780,21 +840,27 @@ class TTTEngine:
         casualties = events.get("casualties", 0)
 
         if regime in ("democracy", "hybrid"):
-            delta += (gdp_growth - 2.0) * 3.0
+            delta += (gdp_growth - 2.0) * 1.5  # reduced from 3.0
             delta -= casualties * 2.0
-            delta += (stability - 5.0) * 2.0
+            delta += (stability - 5.0) * 1.0  # reduced from 2.0
             election_mod = events.get("election_proximity_modifier", 0)
             delta += election_mod
             rally = events.get("rally_effect", 0)
             delta += rally
         else:  # autocracy, theocracy
-            delta += (stability - 5.0) * 3.0
+            delta += (stability - 5.0) * 1.5  # reduced from 3.0
             weakness = events.get("perceived_weakness", 0)
             delta -= weakness * 5.0
             repression = events.get("repression_effect", 0)
             delta += repression
             nationalist = events.get("nationalist_rally", 0)
             delta += nationalist
+
+        # Mean-reversion: extreme values tend to drift back toward center
+        if old_sup > 70:
+            delta -= (old_sup - 70) * 0.05  # high support erodes slightly
+        elif old_sup < 30:
+            delta += (30 - old_sup) * 0.05  # very low support gets slight bounce
 
         new_sup = _clamp(old_sup + delta, 0.0, 100.0)
         self._log.append(
@@ -811,27 +877,32 @@ class TTTEngine:
                        disruptions: dict) -> float:
         """Calculate global oil price from OPEC+ production decisions and disruptions.
 
-        Formula::
-
-            total_production = sum(member_production * multiplier)
-            supply_ratio = total_production / baseline
-            demand_factor = weighted global GDP growth
-            disruption = 1.0 + hormuz_blocked * 0.35 + other * 0.1
-            oil_price = 80 * (demand_factor / supply_ratio) * disruption
+        V2: MORE responsive to crises.  High prices EXPLICITLY benefit producers.
         """
         base_price = 80.0
-        baseline_supply = 100.0  # normalized
 
-        total_prod = 0.0
-        for member, level in opec_decisions.items():
-            multiplier = OPEC_PRODUCTION_MULTIPLIER.get(level, 1.0)
-            # Each member contributes proportional to their share
-            share = {"solaria": 35, "nordostan": 30, "persia": 15, "mirage": 15,
-                     "caribe": 5}.get(member, 10)
-            total_prod += share * multiplier
-        if total_prod == 0:
-            total_prod = baseline_supply
-        supply_ratio = total_prod / baseline_supply
+        # Supply factor from OPEC+ decisions
+        supply_factor = 1.0
+        for member, decision in opec_decisions.items():
+            if decision == "low":
+                supply_factor -= 0.05
+            elif decision == "high":
+                supply_factor += 0.05
+        supply_factor = max(supply_factor, 0.5)
+
+        # Disruption factor -- MUCH more responsive
+        disruption = 1.0
+        for cp_name, status in self.ws.chokepoint_status.items():
+            if status != "blocked":
+                continue
+            if cp_name == "hormuz":
+                disruption += 0.60  # 60% spike
+            elif cp_name == "suez":
+                disruption += 0.15
+            elif cp_name == "malacca":
+                disruption += 0.20
+            else:
+                disruption += 0.05
 
         # Demand factor from global GDP growth
         total_gdp = sum(c["economic"]["gdp"] for c in self.ws.countries.values())
@@ -841,21 +912,22 @@ class TTTEngine:
                 c["economic"]["gdp"] * c["economic"]["gdp_growth_rate"] / 100.0
                 for c in self.ws.countries.values()
             ) / total_gdp
-        demand_factor = 1.0 + avg_growth * 0.5
+        demand = 1.0 + (avg_growth - 2.0) * 0.1
 
-        # Disruptions
-        hormuz = disruptions.get("hormuz_blocked", 0)
-        other = disruptions.get("other_disruptions", 0)
-        disruption_mult = 1.0 + (hormuz * 0.35) + (other * 0.1)
+        price = base_price * (demand / supply_factor) * disruption
+        price = _clamp(price, 20.0, 300.0)
 
-        oil_price = base_price * (demand_factor / max(supply_ratio, 0.5)) * disruption_mult
-        oil_price = _clamp(oil_price, 20.0, 300.0)
+        # BENEFIT TO PRODUCERS: oil revenue = price * 15% of GDP base capacity
+        for cid, country in self.ws.countries.items():
+            if country["economic"].get("oil_producer"):
+                oil_revenue = price * 0.15 * country["economic"]["gdp"] / 80.0
+                country["economic"]["oil_revenue"] = round(oil_revenue, 2)
 
         self._log.append(
-            f"  Oil price: ${oil_price:.1f} (supply_ratio={supply_ratio:.2f}, "
-            f"demand={demand_factor:.3f}, disruption={disruption_mult:.2f})"
+            f"  Oil price: ${price:.1f} (supply_factor={supply_factor:.2f}, "
+            f"demand={demand:.3f}, disruption={disruption:.2f})"
         )
-        return round(oil_price, 2)
+        return round(price, 2)
 
     # -----------------------------------------------------------------------
     # FORMULA 7: COMBAT RESOLUTION  (RISK dice model)
@@ -972,21 +1044,23 @@ class TTTEngine:
                        previous_inflation: float) -> float:
         """Calculate new inflation rate.
 
-        Formula::
-
-            new_inflation = old_inflation * 0.85  (15% natural decay)
-            new_inflation += (money_printed / gdp) * 50
-            revenue_erosion = inflation * 0.02 * gdp  (applied in revenue calc)
+        V2: Higher multiplier (60 vs 50), 3% GDP erosion per inflation point above 5%.
         """
         c = self.ws.countries[country_id]
         gdp = c["economic"]["gdp"]
 
+        # Natural decay (15% per round)
         new_inflation = previous_inflation * 0.85
         if gdp > 0 and money_printed > 0:
-            new_inflation += (money_printed / gdp) * 50.0
+            new_inflation += (money_printed / gdp) * 60.0  # was 50, now 60
 
         new_inflation = max(new_inflation, 0.0)
         new_inflation = min(new_inflation, 500.0)  # hard cap
+
+        # Revenue erosion: 3% of GDP per inflation point above 5% (was 2%)
+        excess_inflation = max(0, new_inflation - 5)
+        revenue_erosion = excess_inflation * 0.03 * gdp
+        c["economic"]["inflation_revenue_erosion"] = round(revenue_erosion, 2)
 
         self._log.append(
             f"  Inflation {country_id}: {previous_inflation:.1f}% -> {new_inflation:.1f}%"
@@ -1058,8 +1132,9 @@ class TTTEngine:
                 bw = self.trade_weights.get(sanctioner, {}).get(country_id, 0)
                 sanc_cost += level * bw * 0.015 * gdp
 
-        # Inflation erosion
-        inflation_erosion = (eco["inflation"] / 100.0) * 0.02 * gdp
+        # Inflation erosion (use V2 inflation_revenue_erosion if available)
+        inflation_erosion = eco.get("inflation_revenue_erosion",
+                                    (eco["inflation"] / 100.0) * 0.03 * gdp)
 
         # War damage
         war_damage = self._get_infra_damage(country_id) * 0.02 * gdp
@@ -1347,15 +1422,20 @@ class TTTEngine:
                     })
 
             # --- Sanctions coalition expansion ---
+            # V2: reduced impact for countries that have adapted (autocracies at war for >2 rounds)
             sanc_data = det_results.get("sanctions", {}).get(cid, {})
+            regime = pol.get("regime_type", c.get("regime_type", "democracy"))
+            sanctions_adapted = regime == "autocracy" and pol.get("war_tiredness", 0) > 2
             if sanc_data.get("damage", 0) > 0.10:
-                additional = gdp * 0.05
+                pct = 0.02 if sanctions_adapted else 0.05  # adapted countries feel less market panic
+                additional = gdp * pct
                 bounded = min(additional, gdp * 0.30)
                 eco["gdp"] = max(eco["gdp"] - bounded, 0.01)
                 adj_list.append({
                     "type": "sanctions_market_panic",
                     "gdp_adjustment": -bounded,
                     "justification": "Broad sanctions coalition triggers market panic and currency sell-off."
+                                     + (" (adapted economy, reduced impact)" if sanctions_adapted else "")
                 })
 
             # --- Tech breakthrough ---
@@ -1397,6 +1477,7 @@ class TTTEngine:
                     })
 
             # --- War fatigue acceleration ---
+            # V2: reduced acceleration, capped to prevent runaway
             if at_war:
                 for w in self.ws.wars:
                     if w.get("attacker") == cid or w.get("defender") == cid:
@@ -1404,25 +1485,31 @@ class TTTEngine:
                         if start < 0:
                             dur = round_num + abs(start)
                         else:
-                            dur = round_num - start
-                        if dur > 3:
-                            extra_fatigue = pol.get("war_tiredness", 0) * 0.50
-                            pol["war_tiredness"] = pol.get("war_tiredness", 0) + extra_fatigue * 0.1
+                            dur = max(round_num - start, 0)
+                        if dur > 6:
+                            # Only accelerate for very long wars, with diminishing effect
+                            current_wt = pol.get("war_tiredness", 0)
+                            extra_fatigue = min(current_wt * 0.03, 0.5)  # cap at 0.5
+                            pol["war_tiredness"] = current_wt + extra_fatigue
                             adj_list.append({
                                 "type": "war_fatigue_acceleration",
-                                "fatigue_increase": extra_fatigue * 0.1,
+                                "fatigue_increase": extra_fatigue,
                                 "justification": f"Prolonged war ({dur} rounds) accelerates public fatigue."
                             })
 
             # --- Capital flight if stability < 4 ---
+            # V2: autocracies with capital controls experience less capital flight
             if pol["stability"] < 4:
-                flight = gdp * 0.03
+                regime = pol.get("regime_type", c.get("regime_type", "democracy"))
+                flight_pct = 0.01 if regime == "autocracy" else 0.03
+                flight = gdp * flight_pct
                 bounded = min(flight, gdp * 0.30)
                 eco["gdp"] = max(eco["gdp"] - bounded, 0.01)
                 adj_list.append({
                     "type": "capital_flight",
                     "gdp_adjustment": -bounded,
-                    "justification": "Low stability triggers capital exodus and brain drain."
+                    "justification": "Low stability triggers capital exodus."
+                                     + (" (capital controls limit outflow)" if regime == "autocracy" else "")
                 })
 
             if adj_list:
