@@ -205,20 +205,26 @@ Track 2 follows its own architecture and build process (to be defined when we re
 
 ## 6. Current Stage
 
-> **TRACK 1, STAGE 1: CONCEPT DESIGN**
-> Checklist: `1. CONCEPT/CONCEPT_CHECKLIST_TTT.md` (v2.0)
-> Status: 11/52 complete, 4 in progress, 37 not started
-> Latest documents: `1. CONCEPT/CONCEPT V 2.0/` subfolder
+> **TRACK 1: CONCEPT → SEED TRANSITION**
+> **Concept gate: PASSED (conditional) — 2026-03-25**
+> Approved by Marat. 3 carry-forward items (B4 relationship matrix, C5 public speaking & press, C6 contracts consolidation).
+> Checklist: `1. CONCEPT/CONCEPT_CHECKLIST_TTT.md` (v3.2)
+> Top-level concept: `1. CONCEPT/TTT_CONCEPT_v1.0.md`
+> Status: 14/21 concept items complete, all 4 CRITICALs resolved, 3 mechanics added, domain validators passed.
+> First commit: `e77832a` pushed to https://github.com/Mar-Atn/THUCYDIDES
 
-**Priority deliverables (in order):**
-1. **D2** — Starting resource allocations *(most critical remaining concept deliverable)*
-2. **D1** — Public state of the world narrative
-3. **B6** — Relationship matrix between all actors
-4. **C5 + C6** — Public speaking protocol & press mechanic
-5. **E1.x** — Engine detail specifications (11 specs — bridges to Detailed Design stage)
+**Entering SEED stage. Priority deliverables:**
+1. **B4** — Relationship matrix *(carry-forward from Concept, needed for AI initialization)*
+2. **D2** — Starting resource allocations *(single most important Seed deliverable)*
+3. **D1** — Public state of the world narrative
+4. **C5** — Public speaking & press protocol *(carry-forward)*
+5. **E1.2** — Economic model specification *(first engine detail spec)*
+6. **E1.6** — Combat resolution specification
+7. **B3** — AI country detailed profiles
 
-**Active agents this phase:** SIMON, ATLAS (advisory), KEYNES, MACHIAVELLI, CLAUSEWITZ, VERA
-**On standby:** ARIA, FELIX, NOVA, DELPHI, CANVAS, CRAFT, TESTER
+**Active agents:** SIMON, ATLAS, KEYNES, MACHIAVELLI, CLAUSEWITZ, VERA, TESTER
+**Activating soon:** ARIA (AI profiles), CRAFT (artefacts — position papers)
+**On standby:** FELIX, NOVA, DELPHI, CANVAS
 
 **Update this section every time a stage gate is passed, priorities shift, or status materially changes.**
 
