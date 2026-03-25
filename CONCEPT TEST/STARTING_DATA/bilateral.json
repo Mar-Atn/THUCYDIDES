@@ -1,0 +1,150 @@
+{
+  "meta": {
+    "version": "1.0",
+    "date": "2026-03-25",
+    "tariff_scale": "0 = free trade, 1 = moderate, 2 = heavy, 3 = prohibitive",
+    "sanctions_scale": "-3 = actively helping evade, -2 = significant evasion, -1 = mild evasion, 0 = neutral, 1 = light sanctions, 2 = heavy sanctions, 3 = maximum sanctions",
+    "notes": "Only non-zero pairs listed. All unlisted pairs default to 0. Tariffs are directional (row imposes on column). Sanctions are directional (row sanctions column)."
+  },
+  "tariffs": {
+    "columbia": {
+      "cathay": 3,
+      "nordostan": 2,
+      "caribe": 2,
+      "persia": 2
+    },
+    "cathay": {
+      "columbia": 2,
+      "yamato": 1,
+      "hanguk": 1
+    },
+    "nordostan": {
+      "columbia": 2,
+      "albion": 2,
+      "gallia": 2,
+      "teutonia": 2,
+      "freeland": 2,
+      "ponte": 1
+    },
+    "gallia": {
+      "cathay": 1,
+      "nordostan": 1
+    },
+    "teutonia": {
+      "cathay": 1,
+      "nordostan": 1
+    },
+    "freeland": {
+      "cathay": 1,
+      "nordostan": 2
+    },
+    "ponte": {
+      "nordostan": 1
+    },
+    "albion": {
+      "cathay": 1,
+      "nordostan": 1
+    },
+    "bharata": {
+      "cathay": 1
+    },
+    "levantia": {
+      "persia": 3
+    },
+    "formosa": {},
+    "phrygia": {},
+    "yamato": {
+      "cathay": 1
+    },
+    "solaria": {},
+    "choson": {},
+    "hanguk": {},
+    "caribe": {
+      "columbia": 1
+    },
+    "mirage": {},
+    "heartland": {
+      "nordostan": 3
+    },
+    "persia": {
+      "columbia": 2,
+      "levantia": 3
+    }
+  },
+  "sanctions": {
+    "_description": "Sanctions imposed BY row ON column. Negative values = evasion/support for target.",
+    "columbia": {
+      "nordostan": 3,
+      "persia": 2,
+      "choson": 3,
+      "caribe": 2
+    },
+    "cathay": {
+      "nordostan": -1
+    },
+    "nordostan": {
+      "columbia": 1,
+      "heartland": 3
+    },
+    "gallia": {
+      "nordostan": 3,
+      "persia": 1,
+      "choson": 2
+    },
+    "teutonia": {
+      "nordostan": 3,
+      "persia": 1,
+      "choson": 2
+    },
+    "freeland": {
+      "nordostan": 3,
+      "persia": 1,
+      "choson": 2
+    },
+    "ponte": {
+      "nordostan": 2,
+      "choson": 1
+    },
+    "albion": {
+      "nordostan": 3,
+      "persia": 2,
+      "choson": 2
+    },
+    "bharata": {},
+    "levantia": {
+      "persia": 3,
+      "nordostan": 1
+    },
+    "formosa": {
+      "nordostan": 1
+    },
+    "phrygia": {
+      "nordostan": 0
+    },
+    "yamato": {
+      "nordostan": 2,
+      "choson": 3
+    },
+    "solaria": {},
+    "choson": {
+      "columbia": 1,
+      "hanguk": 1,
+      "yamato": 1
+    },
+    "hanguk": {
+      "nordostan": 2,
+      "choson": 3
+    },
+    "caribe": {
+      "columbia": 1
+    },
+    "mirage": {},
+    "heartland": {
+      "nordostan": 3
+    },
+    "persia": {
+      "columbia": 1,
+      "levantia": 3
+    }
+  }
+}

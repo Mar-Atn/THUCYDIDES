@@ -1,0 +1,726 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900">
+  <title>Thucydides Trap -- Global Map (Schematic)</title>
+  <desc>Indian-Ocean-centered schematic game board. 45 global zones with adjacency, chokepoints, and theater markers.</desc>
+
+  <defs>
+    <!-- Hatching for contested land zones -->
+    <pattern id="hatch-contested" patternUnits="userSpaceOnUse" width="8" height="8">
+      <rect width="8" height="8" fill="#FFF9C4"/>
+      <path d="M0,8 L8,0" stroke="#E0D97D" stroke-width="1"/>
+    </pattern>
+    <!-- Chokepoint diamond marker -->
+    <symbol id="chokepoint-diamond" viewBox="0 0 16 16" overflow="visible">
+      <polygon points="8,1 15,8 8,15 1,8" fill="#E53935" stroke="#B71C1C" stroke-width="1.2"/>
+      <text x="8" y="11" text-anchor="middle" font-size="7" fill="white" font-weight="bold" font-family="Arial">C</text>
+    </symbol>
+    <!-- Theater marker circle -->
+    <symbol id="theater-marker" viewBox="0 0 22 22" overflow="visible">
+      <circle cx="11" cy="11" r="10" fill="#7B1FA2" stroke="#4A148C" stroke-width="1.5"/>
+    </symbol>
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-2%" y="-2%" width="104%" height="104%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <style>
+    /* === Zone fills === */
+    .zone { stroke: #666; stroke-width: 1.2; cursor: pointer; filter: url(#shadow); }
+    .zone.land.western    { fill: #D4E6F1; }
+    .zone.land.brics      { fill: #FDE9D0; }
+    .zone.land.nonaligned { fill: #E8E8E8; }
+    .zone.land.contested  { fill: url(#hatch-contested); }
+    .zone.sea             { fill: #E3F2FD; stroke: #90CAF9; stroke-dasharray: 6 3; stroke-width: 1; }
+    .zone.sea.chokepoint  { fill: #BBDEFB; stroke: #64B5F6; stroke-dasharray: 6 3; stroke-width: 1.4; }
+
+    /* === Adjacency lines === */
+    .adj-land  { stroke: #888; stroke-width: 0.8; fill: none; }
+    .adj-sea   { stroke: #64B5F6; stroke-width: 0.7; fill: none; stroke-dasharray: 5 3; }
+    .adj-mixed { stroke: #999; stroke-width: 0.6; fill: none; stroke-dasharray: 2 3; }
+
+    /* === Labels === */
+    .zone-label { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 9px; fill: #222; text-anchor: middle; pointer-events: none; }
+    .zone-label.sea-label { font-size: 8px; fill: #1565C0; font-style: italic; }
+    .zone-label.small { font-size: 7.5px; }
+    .zone-label.title { font-size: 10px; font-weight: bold; }
+
+    /* === Theater markers === */
+    .theater-text { font-family: Arial, sans-serif; font-size: 9px; fill: white; font-weight: bold; text-anchor: middle; pointer-events: none; }
+
+    /* === Chokepoint icon === */
+    .chokepoint-icon { pointer-events: none; }
+
+    /* === Legend === */
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 9px; fill: #333; }
+    .legend-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; fill: #111; font-weight: bold; }
+
+    /* === Map title === */
+    .map-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .map-subtitle { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #555; text-anchor: middle; }
+
+    /* Hover */
+    .zone:hover { stroke: #333; stroke-width: 2; opacity: 0.9; }
+  </style>
+
+  <!-- ============================================================ -->
+  <!-- BACKGROUND                                                    -->
+  <!-- ============================================================ -->
+  <rect width="1600" height="900" fill="#F5F8FC"/>
+
+  <!-- Map title -->
+  <text x="800" y="30" class="map-title">THUCYDIDES TRAP -- GLOBAL STRATEGIC MAP</text>
+  <text x="800" y="48" class="map-subtitle">Indian Ocean Centred Projection | 45 Zones | Schematic v1.0</text>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: SEA ZONES                                              -->
+  <!-- ============================================================ -->
+  <g id="sea-zones">
+
+    <!-- Arctic Ocean (top strip) -->
+    <rect id="zone_g_sea_arctic" data-zone="g_sea_arctic" class="zone sea"
+          x="200" y="55" width="1200" height="55" rx="6"/>
+
+    <!-- GIUK Gap -->
+    <rect id="zone_g_sea_giuk" data-zone="g_sea_giuk" class="zone sea chokepoint"
+          x="340" y="115" width="100" height="65" rx="5"/>
+
+    <!-- Western Atlantic -->
+    <rect id="zone_g_sea_atlantic_west" data-zone="g_sea_atlantic_west" class="zone sea"
+          x="195" y="185" width="130" height="210" rx="6"/>
+
+    <!-- Eastern Atlantic -->
+    <rect id="zone_g_sea_atlantic_east" data-zone="g_sea_atlantic_east" class="zone sea"
+          x="400" y="185" width="90" height="200" rx="6"/>
+
+    <!-- South Atlantic (below E Atlantic) -->
+    <rect id="zone_g_sea_atlantic_south" data-zone="g_sea_atlantic_south" class="zone sea"
+          x="350" y="640" width="120" height="70" rx="6"/>
+
+    <!-- Gulf & Caribbean Sea -->
+    <rect id="zone_g_sea_gulf_caribbean" data-zone="g_sea_gulf_caribbean" class="zone sea chokepoint"
+          x="100" y="430" width="140" height="80" rx="6"/>
+
+    <!-- Baltic Sea -->
+    <rect id="zone_g_sea_baltic" data-zone="g_sea_baltic" class="zone sea"
+          x="585" y="130" width="65" height="50" rx="4"/>
+
+    <!-- Western Mediterranean -->
+    <rect id="zone_g_sea_med_west" data-zone="g_sea_med_west" class="zone sea"
+          x="500" y="340" width="100" height="55" rx="5"/>
+
+    <!-- Eastern Mediterranean -->
+    <rect id="zone_g_sea_med_east" data-zone="g_sea_med_east" class="zone sea chokepoint"
+          x="640" y="340" width="100" height="55" rx="5"/>
+
+    <!-- Black Sea -->
+    <rect id="zone_g_sea_black" data-zone="g_sea_black" class="zone sea"
+          x="700" y="240" width="100" height="55" rx="5"/>
+
+    <!-- Red Sea -->
+    <rect id="zone_g_sea_red" data-zone="g_sea_red" class="zone sea chokepoint"
+          x="740" y="440" width="60" height="90" rx="4"/>
+
+    <!-- Persian Gulf -->
+    <rect id="zone_g_sea_persian_gulf" data-zone="g_sea_persian_gulf" class="zone sea chokepoint"
+          x="850" y="395" width="80" height="55" rx="4"/>
+
+    <!-- Arabian Sea -->
+    <rect id="zone_g_sea_arabian" data-zone="g_sea_arabian" class="zone sea"
+          x="870" y="480" width="120" height="80" rx="6"/>
+
+    <!-- Indian Ocean (Central) -->
+    <rect id="zone_g_sea_indian_ocean" data-zone="g_sea_indian_ocean" class="zone sea"
+          x="960" y="590" width="160" height="90" rx="6"/>
+
+    <!-- Southeast Asia & Malacca -->
+    <rect id="zone_g_sea_southeast_asia" data-zone="g_sea_southeast_asia" class="zone sea chokepoint"
+          x="1120" y="530" width="100" height="70" rx="5"/>
+
+    <!-- South China Sea -->
+    <rect id="zone_g_sea_south_china" data-zone="g_sea_south_china" class="zone sea chokepoint"
+          x="1230" y="410" width="110" height="90" rx="5"/>
+
+    <!-- East China Sea -->
+    <rect id="zone_g_sea_east_china" data-zone="g_sea_east_china" class="zone sea chokepoint"
+          x="1300" y="290" width="100" height="75" rx="5"/>
+
+    <!-- North Pacific -->
+    <rect id="zone_g_sea_north_pacific" data-zone="g_sea_north_pacific" class="zone sea"
+          x="1420" y="140" width="160" height="120" rx="6"/>
+
+    <!-- Central Pacific -->
+    <rect id="zone_g_sea_central_pacific" data-zone="g_sea_central_pacific" class="zone sea"
+          x="1440" y="400" width="140" height="100" rx="6"/>
+
+    <!-- South Pacific (below Central Pacific) -->
+    <rect id="zone_g_sea_south_pacific" data-zone="g_sea_south_pacific" class="zone sea"
+          x="1400" y="600" width="160" height="80" rx="6"/>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: LAND ZONES                                             -->
+  <!-- ============================================================ -->
+  <g id="land-zones">
+
+    <!-- ======= COLUMBIA (far left) ======= -->
+    <rect id="zone_g_col_continental" data-zone="g_col_continental" class="zone land western"
+          x="30" y="185" width="155" height="190" rx="8"/>
+    <rect id="zone_g_col_alaska" data-zone="g_col_alaska" class="zone land western"
+          x="50" y="70" width="120" height="80" rx="8"/>
+    <rect id="zone_g_col_hawaii" data-zone="g_col_hawaii" class="zone land western"
+          x="1460" y="310" width="100" height="65" rx="8"/>
+
+    <!-- ======= CARIBE ======= -->
+    <rect id="zone_g_caribe" data-zone="g_caribe" class="zone land brics"
+          x="115" y="395" width="110" height="55" rx="6"/>
+
+    <!-- ======= GREENLAND (contested) ======= -->
+    <rect id="zone_g_contested_greenland" data-zone="g_contested_greenland" class="zone land contested"
+          x="260" y="80" width="100" height="80" rx="6"/>
+
+    <!-- ======= ALBION ======= -->
+    <rect id="zone_g_albion" data-zone="g_albion" class="zone land western"
+          x="460" y="130" width="80" height="50" rx="6"/>
+
+    <!-- ======= GALLIA ======= -->
+    <rect id="zone_g_gallia" data-zone="g_gallia" class="zone land western"
+          x="490" y="215" width="90" height="65" rx="6"/>
+
+    <!-- ======= TEUTONIA ======= -->
+    <rect id="zone_g_teutonia" data-zone="g_teutonia" class="zone land western"
+          x="580" y="190" width="80" height="60" rx="6"/>
+
+    <!-- ======= PONTE ======= -->
+    <rect id="zone_g_ponte" data-zone="g_ponte" class="zone land western"
+          x="530" y="290" width="75" height="55" rx="6"/>
+
+    <!-- ======= FREELAND ======= -->
+    <rect id="zone_g_freeland" data-zone="g_freeland" class="zone land western"
+          x="660" y="140" width="80" height="55" rx="6"/>
+
+    <!-- ======= HEARTLAND (between Freeland & Nordostan -- uses the contested hatch but labeled T1) ======= -->
+    <!-- Note: Heartland is not a separate global zone in the doc; it exists as the EE theater. -->
+    <!-- We represent it as a marker region between Freeland and Nordostan Western. -->
+
+    <!-- ======= NORDOSTAN ======= -->
+    <rect id="zone_g_nor_western" data-zone="g_nor_western" class="zone land brics"
+          x="750" y="100" width="120" height="80" rx="8"/>
+    <rect id="zone_g_nor_central" data-zone="g_nor_central" class="zone land brics"
+          x="900" y="80" width="180" height="80" rx="8"/>
+    <rect id="zone_g_nor_eastern" data-zone="g_nor_eastern" class="zone land brics"
+          x="1120" y="80" width="140" height="70" rx="8"/>
+
+    <!-- ======= PHRYGIA ======= -->
+    <rect id="zone_g_phrygia" data-zone="g_phrygia" class="zone land nonaligned"
+          x="670" y="280" width="80" height="55" rx="6"/>
+
+    <!-- ======= LEVANTIA ======= -->
+    <rect id="zone_g_levantia" data-zone="g_levantia" class="zone land western"
+          x="690" y="400" width="55" height="45" rx="5"/>
+
+    <!-- ======= SOLARIA ======= -->
+    <rect id="zone_g_solaria" data-zone="g_solaria" class="zone land nonaligned"
+          x="800" y="410" width="70" height="60" rx="6"/>
+
+    <!-- ======= MIRAGE ======= -->
+    <rect id="zone_g_mirage" data-zone="g_mirage" class="zone land nonaligned"
+          x="870" y="450" width="60" height="40" rx="5"/>
+
+    <!-- ======= PERSIA ======= -->
+    <rect id="zone_g_persia" data-zone="g_persia" class="zone land brics"
+          x="870" y="320" width="100" height="65" rx="6"/>
+
+    <!-- ======= CONTESTED CENTRAL ASIA ======= -->
+    <rect id="zone_g_contested_central_asia" data-zone="g_contested_central_asia" class="zone land contested"
+          x="940" y="195" width="120" height="70" rx="6"/>
+
+    <!-- ======= BHARATA ======= -->
+    <rect id="zone_g_bharata" data-zone="g_bharata" class="zone land nonaligned"
+          x="980" y="370" width="110" height="100" rx="8"/>
+
+    <!-- ======= HORN OF AFRICA (contested) ======= -->
+    <rect id="zone_g_contested_horn" data-zone="g_contested_horn" class="zone land contested"
+          x="745" y="540" width="80" height="60" rx="5"/>
+
+    <!-- ======= CENTRAL AFRICA (contested) ======= -->
+    <rect id="zone_g_contested_central_africa" data-zone="g_contested_central_africa" class="zone land contested"
+          x="500" y="530" width="110" height="70" rx="6"/>
+
+    <!-- ======= EAST ASIA ======= -->
+    <!-- Choson -->
+    <rect id="zone_g_choson" data-zone="g_choson" class="zone land brics"
+          x="1260" y="195" width="75" height="45" rx="5"/>
+
+    <!-- Hanguk -->
+    <rect id="zone_g_hanguk" data-zone="g_hanguk" class="zone land western"
+          x="1270" y="250" width="70" height="40" rx="5"/>
+
+    <!-- Yamato -->
+    <rect id="zone_g_yamato" data-zone="g_yamato" class="zone land western"
+          x="1360" y="220" width="75" height="55" rx="6"/>
+
+    <!-- Formosa -->
+    <rect id="zone_g_formosa" data-zone="g_formosa" class="zone land western"
+          x="1270" y="375" width="60" height="40" rx="5"/>
+
+    <!-- ======= CATHAY (far right area) ======= -->
+    <rect id="zone_g_cat_eastern" data-zone="g_cat_eastern" class="zone land brics"
+          x="1150" y="195" width="100" height="110" rx="8"/>
+    <rect id="zone_g_cat_western" data-zone="g_cat_western" class="zone land brics"
+          x="1060" y="225" width="85" height="90" rx="8"/>
+    <rect id="zone_g_cat_southern" data-zone="g_cat_southern" class="zone land brics"
+          x="1130" y="360" width="90" height="90" rx="8"/>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: ADJACENCY LINES                                        -->
+  <!-- ============================================================ -->
+  <g id="adjacency-lines">
+
+    <!-- === COLUMBIA internal === -->
+    <!-- Continental to Alaska -->
+    <line class="adj-land" x1="107" y1="185" x2="110" y2="150"/>
+    <!-- Continental to Caribbean (land-sea) -->
+    <line class="adj-mixed" x1="107" y1="375" x2="140" y2="430"/>
+    <!-- Continental to Caribe -->
+    <line class="adj-land" x1="145" y1="375" x2="160" y2="395"/>
+    <!-- Continental to W Atlantic -->
+    <line class="adj-mixed" x1="185" y1="280" x2="195" y2="280"/>
+    <!-- Alaska to Arctic -->
+    <line class="adj-mixed" x1="110" y1="70" x2="200" y2="82"/>
+    <!-- Alaska to N Pacific -->
+    <line class="adj-mixed" x1="170" y1="110" x2="1420" y2="180"/>
+    <!-- Hawaii to N Pacific -->
+    <line class="adj-mixed" x1="1510" y1="310" x2="1500" y2="260"/>
+    <!-- Hawaii to C Pacific -->
+    <line class="adj-mixed" x1="1510" y1="375" x2="1510" y2="400"/>
+
+    <!-- === Greenland adjacencies === -->
+    <!-- Greenland to GIUK -->
+    <line class="adj-mixed" x1="310" y1="160" x2="370" y2="130"/>
+    <!-- Greenland to Arctic -->
+    <line class="adj-mixed" x1="310" y1="80" x2="400" y2="82"/>
+    <!-- Greenland to W Atlantic -->
+    <line class="adj-mixed" x1="280" y1="160" x2="260" y2="185"/>
+
+    <!-- === GIUK adjacencies === -->
+    <!-- GIUK to Albion -->
+    <line class="adj-mixed" x1="420" y1="147" x2="460" y2="155"/>
+    <!-- GIUK to E Atlantic -->
+    <line class="adj-sea" x1="410" y1="180" x2="430" y2="185"/>
+    <!-- GIUK to Arctic -->
+    <line class="adj-sea" x1="390" y1="115" x2="400" y2="110"/>
+
+    <!-- === Albion adjacencies === -->
+    <!-- Albion to Gallia -->
+    <line class="adj-land" x1="500" y1="180" x2="515" y2="215"/>
+    <!-- Albion to E Atlantic -->
+    <line class="adj-mixed" x1="470" y1="180" x2="440" y2="185"/>
+
+    <!-- === Gallia adjacencies === -->
+    <!-- Gallia to Teutonia -->
+    <line class="adj-land" x1="580" y1="240" x2="590" y2="240"/>
+    <!-- Gallia to Ponte -->
+    <line class="adj-land" x1="540" y1="280" x2="550" y2="290"/>
+    <!-- Gallia to E Atlantic -->
+    <line class="adj-mixed" x1="490" y1="250" x2="485" y2="280"/>
+    <!-- Gallia to W Med -->
+    <line class="adj-mixed" x1="535" y1="280" x2="540" y2="340"/>
+
+    <!-- === Teutonia adjacencies === -->
+    <!-- Teutonia to Freeland -->
+    <line class="adj-land" x1="660" y1="210" x2="670" y2="185"/>
+    <!-- Teutonia to Ponte -->
+    <line class="adj-land" x1="610" y1="250" x2="575" y2="290"/>
+    <!-- Teutonia to Baltic -->
+    <line class="adj-mixed" x1="620" y1="190" x2="617" y2="180"/>
+
+    <!-- === Freeland adjacencies === -->
+    <!-- Freeland to Nordostan W -->
+    <line class="adj-land" x1="740" y1="160" x2="750" y2="150"/>
+    <!-- Freeland to Baltic -->
+    <line class="adj-mixed" x1="670" y1="180" x2="640" y2="180"/>
+
+    <!-- === Ponte adjacencies === -->
+    <!-- Ponte to W Med -->
+    <line class="adj-mixed" x1="555" y1="345" x2="550" y2="340"/>
+    <!-- Ponte to E Med -->
+    <line class="adj-mixed" x1="605" y1="330" x2="640" y2="350"/>
+
+    <!-- === Nordostan internal === -->
+    <!-- W to Central -->
+    <line class="adj-land" x1="870" y1="130" x2="900" y2="120"/>
+    <!-- Central to Eastern -->
+    <line class="adj-land" x1="1080" y1="110" x2="1120" y2="110"/>
+    <!-- W to Baltic -->
+    <line class="adj-mixed" x1="760" y1="180" x2="650" y2="170"/>
+    <!-- W to Black Sea -->
+    <line class="adj-mixed" x1="790" y1="180" x2="750" y2="240"/>
+    <!-- Central to Arctic -->
+    <line class="adj-mixed" x1="990" y1="80" x2="990" y2="110"/>
+    <!-- Central to Central Asia -->
+    <line class="adj-land" x1="990" y1="160" x2="990" y2="195"/>
+    <!-- Eastern to Arctic -->
+    <line class="adj-mixed" x1="1190" y1="80" x2="1190" y2="110"/>
+    <!-- Eastern to N Pacific -->
+    <line class="adj-mixed" x1="1260" y1="100" x2="1420" y2="170"/>
+    <!-- Eastern to Choson -->
+    <line class="adj-land" x1="1245" y1="130" x2="1275" y2="195"/>
+
+    <!-- === Phrygia adjacencies === -->
+    <!-- Phrygia to E Med -->
+    <line class="adj-mixed" x1="700" y1="335" x2="700" y2="340"/>
+    <!-- Phrygia to Black Sea -->
+    <line class="adj-mixed" x1="720" y1="280" x2="730" y2="275"/>
+    <!-- Phrygia to Levantia -->
+    <line class="adj-land" x1="710" y1="335" x2="715" y2="400"/>
+    <!-- Phrygia to Nordostan W (via Caucasus implied) -->
+    <line class="adj-land" x1="740" y1="290" x2="770" y2="180"/>
+
+    <!-- === Levantia adjacencies === -->
+    <!-- Levantia to E Med -->
+    <line class="adj-mixed" x1="695" y1="400" x2="690" y2="395"/>
+    <!-- Levantia to Solaria -->
+    <line class="adj-land" x1="745" y1="425" x2="800" y2="435"/>
+
+    <!-- === Solaria adjacencies === -->
+    <!-- Solaria to Persia -->
+    <line class="adj-land" x1="850" y1="420" x2="870" y2="370"/>
+    <!-- Solaria to Mirage -->
+    <line class="adj-land" x1="860" y1="450" x2="875" y2="460"/>
+    <!-- Solaria to Red Sea -->
+    <line class="adj-mixed" x1="800" y1="455" x2="780" y2="460"/>
+    <!-- Solaria to Persian Gulf -->
+    <line class="adj-mixed" x1="860" y1="445" x2="860" y2="415"/>
+    <!-- Solaria to Horn -->
+    <line class="adj-land" x1="820" y1="470" x2="790" y2="540"/>
+
+    <!-- === Mirage adjacencies === -->
+    <!-- Mirage to Persian Gulf -->
+    <line class="adj-mixed" x1="895" y1="450" x2="890" y2="450"/>
+    <!-- Mirage to Arabian Sea -->
+    <line class="adj-mixed" x1="910" y1="490" x2="920" y2="500"/>
+    <!-- Mirage to Persia -->
+    <line class="adj-land" x1="900" y1="450" x2="910" y2="385"/>
+
+    <!-- === Persia adjacencies === -->
+    <!-- Persia to Central Asia -->
+    <line class="adj-land" x1="940" y1="320" x2="960" y2="265"/>
+    <!-- Persia to Persian Gulf -->
+    <line class="adj-mixed" x1="890" y1="385" x2="890" y2="395"/>
+    <!-- Persia to Arabian Sea -->
+    <line class="adj-mixed" x1="940" y1="385" x2="940" y2="490"/>
+
+    <!-- === Central Asia adjacencies === -->
+    <!-- Central Asia to Cathay W -->
+    <line class="adj-land" x1="1060" y1="240" x2="1060" y2="240"/>
+    <!-- Central Asia to Bharata -->
+    <line class="adj-land" x1="1000" y1="265" x2="1010" y2="370"/>
+
+    <!-- === Bharata adjacencies === -->
+    <!-- Bharata to Cathay W -->
+    <line class="adj-land" x1="1060" y1="400" x2="1060" y2="315"/>
+    <!-- Bharata to Arabian Sea -->
+    <line class="adj-mixed" x1="980" y1="430" x2="960" y2="490"/>
+    <!-- Bharata to Indian Ocean -->
+    <line class="adj-mixed" x1="1035" y1="470" x2="1035" y2="590"/>
+
+    <!-- === Horn of Africa adjacencies === -->
+    <!-- Horn to Red Sea -->
+    <line class="adj-mixed" x1="770" y1="540" x2="770" y2="530"/>
+    <!-- Horn to Arabian Sea -->
+    <line class="adj-mixed" x1="825" y1="560" x2="870" y2="510"/>
+    <!-- Horn to Central Africa -->
+    <line class="adj-land" x1="745" y1="570" x2="610" y2="560"/>
+
+    <!-- === Central Africa adjacencies === -->
+    <!-- Central Africa to E Atlantic -->
+    <line class="adj-mixed" x1="500" y1="555" x2="480" y2="380"/>
+
+    <!-- === Cathay internal === -->
+    <!-- Eastern to Western -->
+    <line class="adj-land" x1="1150" y1="260" x2="1145" y2="265"/>
+    <!-- Eastern to Southern -->
+    <line class="adj-land" x1="1190" y1="305" x2="1180" y2="360"/>
+    <!-- Western to Southern -->
+    <line class="adj-land" x1="1105" y1="315" x2="1140" y2="360"/>
+
+    <!-- === Cathay external === -->
+    <!-- Eastern to E China Sea -->
+    <line class="adj-mixed" x1="1250" y1="270" x2="1300" y2="310"/>
+    <!-- Eastern to S China Sea -->
+    <line class="adj-mixed" x1="1240" y1="300" x2="1260" y2="410"/>
+    <!-- Eastern to Hanguk -->
+    <line class="adj-land" x1="1250" y1="230" x2="1270" y2="260"/>
+    <!-- Eastern to Choson -->
+    <line class="adj-land" x1="1240" y1="210" x2="1260" y2="210"/>
+    <!-- Southern to S China Sea -->
+    <line class="adj-mixed" x1="1220" y1="400" x2="1230" y2="430"/>
+    <!-- Southern to SE Asia/Malacca -->
+    <line class="adj-mixed" x1="1170" y1="450" x2="1165" y2="530"/>
+    <!-- Western to Central Asia -->
+    <line class="adj-land" x1="1060" y1="255" x2="1060" y2="250"/>
+    <!-- Western to Bharata -->
+    <line class="adj-land" x1="1060" y1="315" x2="1035" y2="370"/>
+
+    <!-- === East Asia === -->
+    <!-- Choson to Hanguk -->
+    <line class="adj-land" x1="1297" y1="240" x2="1300" y2="250"/>
+    <!-- Hanguk to Yamato -->
+    <line class="adj-land" x1="1340" y1="265" x2="1360" y2="245"/>
+    <!-- Hanguk to E China Sea -->
+    <line class="adj-mixed" x1="1320" y1="290" x2="1340" y2="300"/>
+    <!-- Yamato to E China Sea -->
+    <line class="adj-mixed" x1="1370" y1="275" x2="1360" y2="290"/>
+    <!-- Yamato to N Pacific -->
+    <line class="adj-mixed" x1="1435" y1="240" x2="1440" y2="210"/>
+    <!-- Formosa to E China Sea -->
+    <line class="adj-mixed" x1="1300" y1="375" x2="1320" y2="365"/>
+    <!-- Formosa to S China Sea -->
+    <line class="adj-mixed" x1="1280" y1="415" x2="1280" y2="420"/>
+
+    <!-- === Sea-sea adjacencies === -->
+    <!-- W Atlantic to E Atlantic -->
+    <line class="adj-sea" x1="325" y1="290" x2="400" y2="285"/>
+    <!-- W Atlantic to Gulf/Caribbean -->
+    <line class="adj-sea" x1="230" y1="395" x2="210" y2="430"/>
+    <!-- E Atlantic to W Med -->
+    <line class="adj-sea" x1="490" y1="335" x2="510" y2="340"/>
+    <!-- E Atlantic to GIUK -->
+    <line class="adj-sea" x1="430" y1="185" x2="420" y2="180"/>
+    <!-- W Med to E Med -->
+    <line class="adj-sea" x1="600" y1="365" x2="640" y2="365"/>
+    <!-- E Med to Red Sea -->
+    <line class="adj-sea" x1="730" y1="395" x2="750" y2="440"/>
+    <!-- Red Sea to Arabian -->
+    <line class="adj-sea" x1="800" y1="500" x2="870" y2="510"/>
+    <!-- Persian Gulf to Arabian -->
+    <line class="adj-sea" x1="910" y1="450" x2="920" y2="480"/>
+    <!-- Arabian to Indian Ocean -->
+    <line class="adj-sea" x1="950" y1="560" x2="980" y2="590"/>
+    <!-- Indian Ocean to SE Asia -->
+    <line class="adj-sea" x1="1120" y1="620" x2="1140" y2="600"/>
+    <!-- SE Asia to S China Sea -->
+    <line class="adj-sea" x1="1220" y1="540" x2="1240" y2="470"/>
+    <!-- S China Sea to E China Sea -->
+    <line class="adj-sea" x1="1310" y1="410" x2="1320" y2="365"/>
+    <!-- E China Sea to N Pacific -->
+    <line class="adj-sea" x1="1400" y1="310" x2="1430" y2="250"/>
+    <!-- N Pacific to C Pacific -->
+    <line class="adj-sea" x1="1500" y1="260" x2="1500" y2="400"/>
+    <!-- N Pacific to Arctic -->
+    <line class="adj-sea" x1="1400" y1="140" x2="1400" y2="110"/>
+    <!-- Gulf/Caribbean to C Pacific (Panama) -->
+    <line class="adj-sea" x1="240" y1="490" x2="1440" y2="450"/>
+    <!-- Black Sea to E Med (via Bosphorus through Phrygia) -->
+    <line class="adj-sea" x1="740" y1="295" x2="710" y2="340"/>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: CHOKEPOINT MARKERS                                     -->
+  <!-- ============================================================ -->
+  <g id="chokepoints" class="chokepoint-icon">
+
+    <!-- 1. Taiwan Strait (between Formosa and E China Sea) -->
+    <use href="#chokepoint-diamond" x="1290" y="360" width="16" height="16"/>
+
+    <!-- 2. Strait of Hormuz (between Persian Gulf and Arabian Sea) -->
+    <use href="#chokepoint-diamond" x="898" y="443" width="16" height="16"/>
+
+    <!-- 3. Bosphorus (at Phrygia between Black Sea and E Med) -->
+    <use href="#chokepoint-diamond" x="725" y="301" width="16" height="16"/>
+
+    <!-- 4. Suez Canal (between E Med and Red Sea) -->
+    <use href="#chokepoint-diamond" x="733" y="401" width="16" height="16"/>
+
+    <!-- 5. Malacca Strait (between Indian Ocean and S China Sea) -->
+    <use href="#chokepoint-diamond" x="1148" y="563" width="16" height="16"/>
+
+    <!-- 6. South China Sea (center of SCS zone) -->
+    <use href="#chokepoint-diamond" x="1277" y="447" width="16" height="16"/>
+
+    <!-- 7. GIUK Gap -->
+    <use href="#chokepoint-diamond" x="382" y="139" width="16" height="16"/>
+
+    <!-- 8. Caribbean Passages -->
+    <use href="#chokepoint-diamond" x="161" y="463" width="16" height="16"/>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: LABELS                                                 -->
+  <!-- ============================================================ -->
+  <g id="labels">
+
+    <!-- === Columbia === -->
+    <text x="107" y="275" class="zone-label title">Columbia</text>
+    <text x="107" y="288" class="zone-label small">(Continental)</text>
+    <text x="110" y="112" class="zone-label">Columbia</text>
+    <text x="110" y="123" class="zone-label small">(Alaska)</text>
+    <text x="1510" y="340" class="zone-label">Columbia</text>
+    <text x="1510" y="351" class="zone-label small">(Pacific Cmd)</text>
+
+    <!-- === Caribe === -->
+    <text x="170" y="420" class="zone-label">Caribe</text>
+
+    <!-- === Greenland === -->
+    <text x="310" y="122" class="zone-label">Greenland</text>
+
+    <!-- === Europe === -->
+    <text x="500" y="157" class="zone-label">Albion</text>
+    <text x="535" y="250" class="zone-label">Gallia</text>
+    <text x="620" y="223" class="zone-label">Teutonia</text>
+    <text x="567" y="320" class="zone-label">Ponte</text>
+    <text x="700" y="170" class="zone-label">Freeland</text>
+
+    <!-- === Nordostan === -->
+    <text x="810" y="137" class="zone-label title">Nordostan</text>
+    <text x="810" y="150" class="zone-label small">(Western)</text>
+    <text x="990" y="117" class="zone-label title">Nordostan</text>
+    <text x="990" y="130" class="zone-label small">(Central)</text>
+    <text x="1190" y="112" class="zone-label title">Nordostan</text>
+    <text x="1190" y="125" class="zone-label small">(Far East)</text>
+
+    <!-- === Middle East === -->
+    <text x="710" y="310" class="zone-label">Phrygia</text>
+    <text x="717" y="425" class="zone-label small">Levantia</text>
+    <text x="835" y="443" class="zone-label">Solaria</text>
+    <text x="900" y="473" class="zone-label small">Mirage</text>
+    <text x="920" y="355" class="zone-label">Persia</text>
+
+    <!-- === South Asia === -->
+    <text x="1035" y="418" class="zone-label title">Bharata</text>
+
+    <!-- === Contested === -->
+    <text x="1000" y="233" class="zone-label">Central Asia</text>
+    <text x="785" y="573" class="zone-label small">Horn of Africa</text>
+    <text x="555" y="568" class="zone-label small">Central Africa</text>
+
+    <!-- === East Asia === -->
+    <text x="1297" y="221" class="zone-label">Choson</text>
+    <text x="1305" y="273" class="zone-label">Hanguk</text>
+    <text x="1397" y="250" class="zone-label">Yamato</text>
+    <text x="1300" y="398" class="zone-label">Formosa</text>
+
+    <!-- === Cathay === -->
+    <text x="1200" y="248" class="zone-label title">Cathay</text>
+    <text x="1200" y="261" class="zone-label small">(Eastern)</text>
+    <text x="1102" y="268" class="zone-label">Cathay</text>
+    <text x="1102" y="280" class="zone-label small">(Interior)</text>
+    <text x="1175" y="403" class="zone-label">Cathay</text>
+    <text x="1175" y="415" class="zone-label small">(Southern)</text>
+
+    <!-- === Sea zone labels === -->
+    <text x="800" y="86" class="zone-label sea-label">Arctic Ocean</text>
+    <text x="390" y="152" class="zone-label sea-label">GIUK Gap</text>
+    <text x="260" y="293" class="zone-label sea-label">Western</text>
+    <text x="260" y="304" class="zone-label sea-label">Atlantic</text>
+    <text x="445" y="290" class="zone-label sea-label">Eastern</text>
+    <text x="445" y="301" class="zone-label sea-label">Atlantic</text>
+    <text x="410" y="678" class="zone-label sea-label">South Atlantic</text>
+    <text x="170" y="473" class="zone-label sea-label">Gulf &amp;</text>
+    <text x="170" y="484" class="zone-label sea-label">Caribbean</text>
+    <text x="617" y="158" class="zone-label sea-label">Baltic</text>
+    <text x="550" y="370" class="zone-label sea-label">W. Med</text>
+    <text x="690" y="370" class="zone-label sea-label">E. Med</text>
+    <text x="750" y="270" class="zone-label sea-label">Black Sea</text>
+    <text x="770" y="488" class="zone-label sea-label">Red Sea</text>
+    <text x="890" y="425" class="zone-label sea-label">Persian Gulf</text>
+    <text x="930" y="523" class="zone-label sea-label">Arabian Sea</text>
+    <text x="1040" y="638" class="zone-label sea-label">Indian Ocean</text>
+    <text x="1170" y="568" class="zone-label sea-label">SE Asia /</text>
+    <text x="1170" y="579" class="zone-label sea-label">Malacca</text>
+    <text x="1285" y="458" class="zone-label sea-label">South China</text>
+    <text x="1285" y="469" class="zone-label sea-label">Sea</text>
+    <text x="1350" y="330" class="zone-label sea-label">East China</text>
+    <text x="1350" y="341" class="zone-label sea-label">Sea</text>
+    <text x="1500" y="203" class="zone-label sea-label">North Pacific</text>
+    <text x="1510" y="453" class="zone-label sea-label">Central Pacific</text>
+    <text x="1480" y="643" class="zone-label sea-label">South Pacific</text>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LAYER: THEATER ACTIVATION MARKERS                             -->
+  <!-- ============================================================ -->
+  <g id="theater-markers">
+
+    <!-- T1: Eastern Europe Theater (on border between Freeland and Nordostan W) -->
+    <use href="#theater-marker" x="729" y="182" width="22" height="22"/>
+    <text x="740" y="197" class="theater-text">T1</text>
+
+    <!-- T2: Middle East Theater (on Persia region) -->
+    <use href="#theater-marker" x="953" y="343" width="22" height="22"/>
+    <text x="964" y="358" class="theater-text">T2</text>
+
+    <!-- T3: Taiwan Theater (on Formosa / Taiwan Strait) -->
+    <use href="#theater-marker" x="1256" y="380" width="22" height="22"/>
+    <text x="1267" y="395" class="theater-text">T3</text>
+
+    <!-- T4: Caribbean Theater (on Caribe) -->
+    <use href="#theater-marker" x="209" y="401" width="22" height="22"/>
+    <text x="220" y="416" class="theater-text">T4</text>
+
+    <!-- T5: Greenland Theater (on Greenland) -->
+    <use href="#theater-marker" x="342" y="95" width="22" height="22"/>
+    <text x="353" y="110" class="theater-text">T5</text>
+
+    <!-- T6: Korea Theater (on Choson/Hanguk border) -->
+    <use href="#theater-marker" x="1325" y="238" width="22" height="22"/>
+    <text x="1336" y="253" class="theater-text">T6</text>
+
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND                                                        -->
+  <!-- ============================================================ -->
+  <g id="legend" transform="translate(1310, 700)">
+    <rect x="0" y="0" width="270" height="185" rx="6" fill="white" stroke="#999" stroke-width="1" opacity="0.95"/>
+    <text x="135" y="18" class="legend-title" text-anchor="middle">LEGEND</text>
+
+    <!-- Zone colors -->
+    <rect x="10" y="28" width="18" height="12" rx="2" fill="#D4E6F1" stroke="#666" stroke-width="0.8"/>
+    <text x="34" y="38" class="legend-text">Western Alliance</text>
+
+    <rect x="10" y="46" width="18" height="12" rx="2" fill="#FDE9D0" stroke="#666" stroke-width="0.8"/>
+    <text x="34" y="56" class="legend-text">BRICS+ Aligned</text>
+
+    <rect x="10" y="64" width="18" height="12" rx="2" fill="#E8E8E8" stroke="#666" stroke-width="0.8"/>
+    <text x="34" y="74" class="legend-text">Non-Aligned</text>
+
+    <rect x="10" y="82" width="18" height="12" rx="2" fill="url(#hatch-contested)" stroke="#666" stroke-width="0.8"/>
+    <text x="34" y="92" class="legend-text">Contested</text>
+
+    <rect x="10" y="100" width="18" height="12" rx="2" fill="#E3F2FD" stroke="#90CAF9" stroke-width="0.8" stroke-dasharray="3 2"/>
+    <text x="34" y="110" class="legend-text">Sea Zone</text>
+
+    <rect x="10" y="118" width="18" height="12" rx="2" fill="#BBDEFB" stroke="#64B5F6" stroke-width="0.8" stroke-dasharray="3 2"/>
+    <text x="34" y="128" class="legend-text">Chokepoint Sea Zone</text>
+
+    <!-- Lines -->
+    <line x1="145" y1="34" x2="175" y2="34" class="adj-land"/>
+    <text x="181" y="38" class="legend-text">Land-Land</text>
+
+    <line x1="145" y1="52" x2="175" y2="52" class="adj-sea"/>
+    <text x="181" y="56" class="legend-text">Sea-Sea</text>
+
+    <line x1="145" y1="70" x2="175" y2="70" class="adj-mixed"/>
+    <text x="181" y="74" class="legend-text">Land-Sea</text>
+
+    <!-- Symbols -->
+    <use href="#chokepoint-diamond" x="152" y="84" width="16" height="16"/>
+    <text x="181" y="96" class="legend-text">Chokepoint</text>
+
+    <circle cx="160" cy="112" r="8" fill="#7B1FA2" stroke="#4A148C" stroke-width="1"/>
+    <text x="155" y="116" font-family="Arial" font-size="8" fill="white" font-weight="bold" text-anchor="middle">T#</text>
+    <text x="181" y="116" class="legend-text">Theater Marker</text>
+
+    <!-- Version info -->
+    <text x="135" y="175" class="legend-text" text-anchor="middle" font-size="7" fill="#999">TTT Global Map v1.0 | Schematic | 45 Zones</text>
+  </g>
+
+</svg>

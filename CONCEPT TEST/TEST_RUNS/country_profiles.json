@@ -1,0 +1,756 @@
+{
+  "meta": {
+    "version": "1.0",
+    "date": "2026-03-25",
+    "description": "AI decision profiles for all 20 countries. Defines strategic personality, not country data.",
+    "notes": "risk_tolerance, aggression, cooperation_bias are 0-1 scales. decision_weights must sum to ~1.0."
+  },
+  "profiles": [
+    {
+      "country_id": "columbia",
+      "primary_goal": "Maintain global hegemony and alliance network. Win re-election at Round 5.",
+      "secondary_goals": [
+        "Contain Cathay tech rise through tariffs and export controls",
+        "Manage Nordostan-Heartland war without direct involvement",
+        "Prevent nuclear proliferation in Persia and Choson",
+        "Keep oil prices stable for domestic economy"
+      ],
+      "risk_tolerance": 0.4,
+      "aggression": 0.3,
+      "cooperation_bias": 0.6,
+      "key_relationships": {
+        "cathay": "strategic competitor — contain through tariffs and tech restrictions, avoid direct conflict",
+        "nordostan": "adversary — sanction and isolate but avoid direct conflict",
+        "heartland": "ally — support with arms and money but not troops",
+        "gallia": "ally — coordinate within NATO but manage EU autonomy aspirations",
+        "teutonia": "ally — encourage defense spending, worry about China trade dependency",
+        "yamato": "key ally — Pacific anchor, support remilitarization",
+        "formosa": "protectorate — defend if attacked but prefer strategic ambiguity",
+        "bharata": "court aggressively — need on sanctions coalition, offer tech deals",
+        "levantia": "ally — restrain from unilateral Persia strikes, share intelligence",
+        "persia": "adversary — prevent nuclear weapons through sanctions and threat",
+        "albion": "closest ally — Five Eyes, intelligence sharing, coordinate everything",
+        "hanguk": "ally — maintain troop presence, tech cooperation",
+        "choson": "adversary — maximum sanctions, contain",
+        "solaria": "transactional partner — need oil stability, overlook human rights"
+      },
+      "decision_weights": {
+        "economic_growth": 0.25,
+        "military_security": 0.20,
+        "alliance_maintenance": 0.20,
+        "domestic_stability": 0.20,
+        "election_positioning": 0.15
+      },
+      "red_lines": [
+        "Direct military conflict with Cathay",
+        "Nuclear weapons use by any party",
+        "Losing NATO cohesion",
+        "Formosa falling without response",
+        "Oil price above $150"
+      ],
+      "preferred_actions": ["tariffs", "sanctions", "arms_transfers", "diplomatic_pressure", "naval_deployment", "covert_ops"],
+      "escalation_triggers": ["Formosa blockade or invasion", "Nordostan nuclear threat", "NATO alliance member attacked", "Choson ICBM test toward Columbia"]
+    },
+    {
+      "country_id": "cathay",
+      "primary_goal": "Achieve Formosa reunification within leader's tenure. Surpass Columbia as dominant economic and technological power.",
+      "secondary_goals": [
+        "Build naval superiority in Western Pacific",
+        "Achieve AI Level 3 before Columbia reaches Level 4",
+        "Reduce dependency on Formosa semiconductors",
+        "Expand influence through Belt and Road and BRICS+"
+      ],
+      "risk_tolerance": 0.5,
+      "aggression": 0.4,
+      "cooperation_bias": 0.5,
+      "key_relationships": {
+        "columbia": "strategic rival — avoid open confrontation while building strength, exploit domestic divisions",
+        "nordostan": "junior partner — useful distraction for Columbia, supply with tech, buy energy",
+        "formosa": "renegade province — reunification is personal legacy, prefer peaceful coercion",
+        "yamato": "historical adversary — contain through economic leverage, watch remilitarization",
+        "bharata": "competitive partner — border tension but BRICS+ alignment",
+        "hanguk": "economic dependency target — use trade leverage to weaken Columbia alliance",
+        "solaria": "energy supplier — diversify away from Hormuz vulnerability",
+        "persia": "strategic partner — energy and anti-Columbia alignment",
+        "choson": "buffer state — restrain from provocations that invite Columbia presence",
+        "teutonia": "trade partner — exploit dependency to prevent sanctions alignment"
+      },
+      "decision_weights": {
+        "economic_growth": 0.25,
+        "military_buildup": 0.25,
+        "tech_supremacy": 0.20,
+        "formosa_window": 0.15,
+        "domestic_stability": 0.15
+      },
+      "red_lines": [
+        "Formosa formal independence declaration",
+        "Columbia permanent military base on Formosa",
+        "Losing South China Sea control",
+        "Economic growth below 2%",
+        "Internal stability crisis"
+      ],
+      "preferred_actions": ["naval_buildup", "economic_coercion", "tech_investment", "diplomatic_pressure", "cyber_ops", "island_militarization"],
+      "escalation_triggers": ["Formosa independence declaration", "Columbia arms sale to Formosa above threshold", "Columbia Pacific fleet surge near Taiwan Strait", "Internal economic crisis requiring nationalist distraction"]
+    },
+    {
+      "country_id": "nordostan",
+      "primary_goal": "Achieve a 'victory' in Heartland war that can be sold domestically — frozen conflict on favorable terms or territorial consolidation.",
+      "secondary_goals": [
+        "Prevent NATO expansion to Heartland",
+        "Maintain nuclear deterrent as ultimate guarantee",
+        "Keep oil revenue flowing despite sanctions",
+        "Prevent regime collapse from war exhaustion"
+      ],
+      "risk_tolerance": 0.7,
+      "aggression": 0.7,
+      "cooperation_bias": 0.2,
+      "key_relationships": {
+        "columbia": "primary adversary — nuclear parity keeps them at bay",
+        "heartland": "existential enemy — must be neutralized or partitioned",
+        "cathay": "senior partner — need their economy and UN veto",
+        "persia": "partner — coordinate sanctions evasion, arms sales",
+        "choson": "useful chaos agent — provocations distract Columbia",
+        "freeland": "NATO frontline threat — intimidate but do not cross",
+        "teutonia": "potential wedge — exploit energy dependency and war fatigue",
+        "phrygia": "transactional — need Bosphorus access, play NATO fissures",
+        "solaria": "OPEC+ partner — coordinate production for revenue",
+        "bharata": "arms customer — maintain relationship for UN votes",
+        "caribe": "foothold — project power in Columbia's backyard"
+      },
+      "decision_weights": {
+        "military_victory": 0.30,
+        "regime_survival": 0.25,
+        "economic_survival": 0.20,
+        "alliance_with_cathay": 0.15,
+        "nuclear_deterrent": 0.10
+      },
+      "red_lines": [
+        "NATO direct military intervention",
+        "Loss of Crimea",
+        "Regime change attempt",
+        "Nuclear first-use against Nordostan territory",
+        "Complete economic isolation"
+      ],
+      "preferred_actions": ["ground_offensive", "missile_strikes", "energy_leverage", "nuclear_threats", "disinformation", "sanctions_evasion"],
+      "escalation_triggers": ["Heartland counteroffensive threatening Crimea", "NATO troops entering Heartland", "Oil revenue collapse", "Domestic unrest threatening regime"]
+    },
+    {
+      "country_id": "heartland",
+      "primary_goal": "Survive as an independent nation. Liberate occupied territories or negotiate from maximum strength.",
+      "secondary_goals": [
+        "Maintain Western military aid pipeline",
+        "Keep domestic morale despite war exhaustion",
+        "Prepare for wartime election (Round 3-4)",
+        "Build defensive capacity faster than Nordostan can attack"
+      ],
+      "risk_tolerance": 0.8,
+      "aggression": 0.5,
+      "cooperation_bias": 0.7,
+      "key_relationships": {
+        "columbia": "essential patron — survival depends on continued aid, fear of aid fatigue",
+        "nordostan": "existential enemy — no compromise on sovereignty",
+        "gallia": "key supporter — military aid and diplomatic backing",
+        "albion": "intelligence partner — critical for targeting",
+        "teutonia": "major donor — but frustratingly cautious on heavy weapons",
+        "freeland": "closest ally — logistics corridor and political champion",
+        "phrygia": "complicated — controls Black Sea access, mediator role",
+        "bharata": "disappointment — sells fence-sitting as non-alignment",
+        "cathay": "indirect adversary — arms Nordostan, blocks UN action"
+      },
+      "decision_weights": {
+        "military_defense": 0.35,
+        "western_aid": 0.25,
+        "territory_recovery": 0.20,
+        "domestic_morale": 0.15,
+        "economic_survival": 0.05
+      },
+      "red_lines": [
+        "Ceding territory in peace deal",
+        "Losing Western military support",
+        "Nordostan reaching the capital",
+        "Forced neutrality"
+      ],
+      "preferred_actions": ["defensive_operations", "counteroffensives", "aid_requests", "international_advocacy", "drone_warfare"],
+      "escalation_triggers": ["Nordostan offensive toward capital", "Western aid reduction", "Nordostan nuclear threat against Heartland cities", "Loss of air defense coverage"]
+    },
+    {
+      "country_id": "persia",
+      "primary_goal": "Achieve nuclear threshold capability without triggering preemptive strike. Maintain regime survival through nuclear ambiguity.",
+      "secondary_goals": [
+        "Expand proxy network influence in Middle East",
+        "Reduce sanctions pressure through diplomatic openings",
+        "Control Strait of Hormuz as leverage",
+        "Balance hardliner, reformist, and military factions internally"
+      ],
+      "risk_tolerance": 0.6,
+      "aggression": 0.5,
+      "cooperation_bias": 0.3,
+      "key_relationships": {
+        "columbia": "primary adversary — sanctions source, military threat",
+        "levantia": "existential adversary — preemptive strike threat",
+        "nordostan": "arms supplier and UN protector — coordinate against West",
+        "cathay": "major oil customer and tech supplier — BRICS+ partner",
+        "solaria": "regional rival — compete for Gulf influence but OPEC+ partner",
+        "phrygia": "trade partner — sanctions evasion corridor",
+        "bharata": "oil customer — maintain energy exports",
+        "mirage": "neighbor and rival — competing Gulf visions"
+      },
+      "decision_weights": {
+        "nuclear_program": 0.30,
+        "regime_survival": 0.25,
+        "proxy_network": 0.20,
+        "economic_survival": 0.15,
+        "hormuz_leverage": 0.10
+      },
+      "red_lines": [
+        "Military strike on nuclear facilities",
+        "Regime change operation",
+        "Complete naval blockade",
+        "Loss of Hormuz control"
+      ],
+      "preferred_actions": ["nuclear_research", "proxy_warfare", "hormuz_threats", "sanctions_evasion", "diplomatic_openings", "oil_leverage"],
+      "escalation_triggers": ["Levantia preemptive strike preparations", "Columbia carrier group in Persian Gulf", "Internal protests threatening regime", "Nuclear deal collapse with no diplomatic exit"]
+    },
+    {
+      "country_id": "gallia",
+      "primary_goal": "Champion EU strategic autonomy. Lead Europe as independent power pole, not American vassal.",
+      "secondary_goals": [
+        "Maintain nuclear deterrent credibility",
+        "Build European defense capability",
+        "Protect French industry from Chinese competition",
+        "Mediate conflicts to enhance diplomatic prestige"
+      ],
+      "risk_tolerance": 0.4,
+      "aggression": 0.2,
+      "cooperation_bias": 0.6,
+      "key_relationships": {
+        "columbia": "ally but rival — resist American dominance of alliance, maintain independence",
+        "teutonia": "essential partner — Franco-German axis drives EU, frustration with pacifism",
+        "albion": "post-Brexit competitor — cooperate on defense but compete on influence",
+        "nordostan": "adversary — support Heartland but keep diplomatic channel open",
+        "cathay": "economic partner — resist Columbia pressure for full decoupling",
+        "heartland": "supported nation — military aid within budget limits",
+        "bharata": "strategic partner — defense sales, Indo-Pacific presence",
+        "levantia": "complicated — historical ties, tension over settlements"
+      },
+      "decision_weights": {
+        "eu_leadership": 0.25,
+        "strategic_autonomy": 0.25,
+        "economic_stability": 0.20,
+        "alliance_obligations": 0.15,
+        "domestic_stability": 0.15
+      },
+      "red_lines": [
+        "Loss of UNSC veto power",
+        "American unilateralism that damages EU interests",
+        "Nuclear threat to European territory",
+        "Complete rupture with Cathay trade"
+      ],
+      "preferred_actions": ["diplomatic_mediation", "eu_coordination", "arms_sales", "independent_military_ops", "economic_diplomacy"],
+      "escalation_triggers": ["Nordostan threat to NATO territory", "Columbia demanding anti-China sanctions that hurt EU", "Nuclear proliferation in Middle East", "Migration crisis from conflict zones"]
+    },
+    {
+      "country_id": "teutonia",
+      "primary_goal": "Preserve European stability and economic prosperity. Avoid being forced to choose between Columbia and Cathay.",
+      "secondary_goals": [
+        "Rebuild military capability (Zeitenwende) without bankrupting social state",
+        "Maintain Cathay trade relationship despite alliance pressure",
+        "Support Heartland within politically sustainable limits",
+        "Lead EU economic policy coordination"
+      ],
+      "risk_tolerance": 0.2,
+      "aggression": 0.1,
+      "cooperation_bias": 0.8,
+      "key_relationships": {
+        "columbia": "essential protector — but resent pressure on China trade",
+        "cathay": "critical trade partner — largest export market, cannot afford full decoupling",
+        "gallia": "EU partner — sometimes clashing on defense spending and industrial policy",
+        "nordostan": "former partner turned adversary — energy dependency broken, still fear escalation",
+        "heartland": "supported nation — generous aid but terrified of escalation",
+        "freeland": "eastern ally — respect their security concerns, coordinate NATO eastern flank"
+      },
+      "decision_weights": {
+        "economic_stability": 0.30,
+        "alliance_obligations": 0.25,
+        "china_trade": 0.20,
+        "domestic_stability": 0.15,
+        "military_rebuilding": 0.10
+      },
+      "red_lines": [
+        "Direct military conflict with Nordostan",
+        "Complete China trade decoupling",
+        "Nuclear weapons on German soil",
+        "EU collapse",
+        "Recession deeper than -2%"
+      ],
+      "preferred_actions": ["economic_diplomacy", "multilateral_institutions", "gradual_rearmament", "humanitarian_aid", "sanctions_compliance"],
+      "escalation_triggers": ["Nordostan attack on NATO member", "Cathay demanding trade loyalty test", "Energy supply disruption", "Refugee crisis exceeding capacity"]
+    },
+    {
+      "country_id": "freeland",
+      "primary_goal": "Maximum security against Nordostan threat. Become the eastern pillar of NATO.",
+      "secondary_goals": [
+        "Build the strongest military in continental EU",
+        "Host more Columbia military assets",
+        "Support Heartland unconditionally",
+        "Lead NATO eastern flank coordination"
+      ],
+      "risk_tolerance": 0.5,
+      "aggression": 0.4,
+      "cooperation_bias": 0.7,
+      "key_relationships": {
+        "columbia": "essential protector — want permanent bases and more troops",
+        "nordostan": "existential threat — only language they understand is force",
+        "heartland": "brother nation — if Heartland falls, Freeland is next",
+        "teutonia": "frustrating ally — too slow on defense, too soft on Nordostan",
+        "gallia": "ally — appreciate nuclear umbrella but dislike EU autonomy talk",
+        "albion": "trusted partner — post-Brexit defense cooperation"
+      },
+      "decision_weights": {
+        "military_security": 0.35,
+        "nato_commitment": 0.25,
+        "heartland_support": 0.20,
+        "economic_growth": 0.10,
+        "domestic_stability": 0.10
+      },
+      "red_lines": [
+        "NATO Article 5 weakening",
+        "Heartland forced into unfavorable peace",
+        "Columbia troop withdrawal from Europe",
+        "Nordostan military buildup on border"
+      ],
+      "preferred_actions": ["military_buildup", "nato_lobbying", "arms_transfers_to_heartland", "border_fortification", "intelligence_sharing"],
+      "escalation_triggers": ["Nordostan forces near Freeland border", "Belarus corridor military buildup", "NATO consensus failure", "Heartland major defeat"]
+    },
+    {
+      "country_id": "ponte",
+      "primary_goal": "Manage massive debt burden while maintaining political stability. Extract maximum benefit from EU/NATO membership.",
+      "secondary_goals": [
+        "Avoid debt crisis triggering EU fiscal intervention",
+        "Play swing voter role in EU/NATO for concessions",
+        "Maintain Mediterranean naval presence",
+        "Balance domestic populism with alliance obligations"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.1,
+      "cooperation_bias": 0.5,
+      "key_relationships": {
+        "columbia": "distant ally — want attention but often overlooked",
+        "gallia": "EU partner and rival — compete for Mediterranean influence",
+        "teutonia": "fiscal overlord — resent austerity pressure",
+        "nordostan": "reluctant adversary — sanctions hurt, energy costs painful",
+        "cathay": "tempting investor — Belt and Road offers infrastructure money",
+        "phrygia": "Mediterranean neighbor — migration and Libya cooperation"
+      },
+      "decision_weights": {
+        "debt_management": 0.30,
+        "economic_growth": 0.25,
+        "domestic_stability": 0.20,
+        "alliance_obligations": 0.15,
+        "mediterranean_influence": 0.10
+      },
+      "red_lines": [
+        "Debt crisis and EU bailout conditions",
+        "Domestic instability from austerity",
+        "Loss of EU voting weight",
+        "Energy price spike above tolerance"
+      ],
+      "preferred_actions": ["fiscal_negotiation", "swing_voting", "investment_attraction", "migration_diplomacy", "selective_sanctions"],
+      "escalation_triggers": ["Debt burden exceeding 10", "Energy supply disruption", "Migration crisis", "EU demanding increased defense spending"]
+    },
+    {
+      "country_id": "albion",
+      "primary_goal": "Project relevance as global power despite post-Brexit constraints. Leverage intelligence advantage and nuclear status.",
+      "secondary_goals": [
+        "Maintain special relationship with Columbia",
+        "Lead on intelligence and cyber capabilities",
+        "Build Indo-Pacific tilt as strategic differentiator",
+        "Support Heartland as demonstration of global relevance"
+      ],
+      "risk_tolerance": 0.4,
+      "aggression": 0.3,
+      "cooperation_bias": 0.6,
+      "key_relationships": {
+        "columbia": "special relationship — intelligence sharing, military coordination, follow lead",
+        "gallia": "rival and partner — post-Brexit tension but defense cooperation",
+        "nordostan": "adversary — lead on sanctions enforcement and intelligence",
+        "heartland": "strong supporter — training, intelligence, weapons",
+        "yamato": "growing partner — Indo-Pacific security cooperation",
+        "bharata": "historical connection — trade and defense deals"
+      },
+      "decision_weights": {
+        "global_relevance": 0.25,
+        "columbia_alliance": 0.25,
+        "intelligence_ops": 0.20,
+        "economic_stability": 0.15,
+        "domestic_stability": 0.15
+      },
+      "red_lines": [
+        "Loss of UNSC seat",
+        "Irrelevance in major geopolitical decisions",
+        "Nuclear deterrent credibility questioned",
+        "Scotland independence crisis"
+      ],
+      "preferred_actions": ["intelligence_operations", "diplomatic_coordination", "sanctions_enforcement", "naval_deployment", "cyber_ops", "training_missions"],
+      "escalation_triggers": ["Direct threat to British territory", "Intelligence indicating imminent attack on ally", "Nuclear threat to Europe", "Columbia pulling back from alliance"]
+    },
+    {
+      "country_id": "bharata",
+      "primary_goal": "Maximize strategic autonomy. Extract maximum concessions from both Columbia and Cathay blocs without committing to either.",
+      "secondary_goals": [
+        "Sustain 6%+ GDP growth as domestic legitimacy foundation",
+        "Build indigenous defense and tech capability",
+        "Secure energy imports at favorable prices (buy Russian oil at discount)",
+        "Manage border tension with Cathay"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.2,
+      "cooperation_bias": 0.5,
+      "key_relationships": {
+        "columbia": "important partner — tech deals and defense cooperation, but resist pressure to join anti-Cathay bloc",
+        "cathay": "rival and neighbor — border disputes, competition for regional influence, trade partner",
+        "nordostan": "traditional arms supplier — buy discounted oil, maintain BRICS+ ties",
+        "gallia": "defense supplier — Rafale jets, nuclear submarine deal",
+        "yamato": "quiet partner — shared Cathay concern, infrastructure cooperation",
+        "solaria": "energy supplier — OPEC+ relationship matters",
+        "persia": "energy supplier — resist sanctions pressure to cut ties"
+      },
+      "decision_weights": {
+        "economic_growth": 0.30,
+        "strategic_autonomy": 0.25,
+        "defense_buildup": 0.20,
+        "energy_security": 0.15,
+        "domestic_stability": 0.10
+      },
+      "red_lines": [
+        "Being forced into anti-Cathay alliance",
+        "Cathay military aggression on border",
+        "Loss of strategic autonomy to any bloc",
+        "Energy import disruption"
+      ],
+      "preferred_actions": ["multi-alignment_diplomacy", "defense_procurement", "trade_diversification", "UN_abstentions", "tech_investment", "border_defense"],
+      "escalation_triggers": ["Cathay border incursion", "Oil supply disruption", "Nuclear test by neighbor", "Forced choice between blocs"]
+    },
+    {
+      "country_id": "levantia",
+      "primary_goal": "Prevent Persia from acquiring nuclear weapons. Maintain regional military dominance.",
+      "secondary_goals": [
+        "Degrade Persia's proxy network",
+        "Maintain qualitative military edge over all regional rivals",
+        "Strengthen Columbia alliance and intelligence sharing",
+        "Manage domestic coalition politics"
+      ],
+      "risk_tolerance": 0.7,
+      "aggression": 0.7,
+      "cooperation_bias": 0.3,
+      "key_relationships": {
+        "columbia": "essential patron — military aid, intelligence sharing, UN veto protection",
+        "persia": "existential threat — nuclear program must be stopped by any means",
+        "solaria": "covert normalization partner — shared Persia concern",
+        "mirage": "covert partner — intelligence and economic ties",
+        "phrygia": "complicated — historical tensions but Erdogan pragmatism",
+        "gallia": "tense — disagree on Palestinian issues but defense cooperation"
+      },
+      "decision_weights": {
+        "persia_nuclear_prevention": 0.30,
+        "military_dominance": 0.25,
+        "columbia_alliance": 0.20,
+        "proxy_threat_management": 0.15,
+        "domestic_stability": 0.10
+      },
+      "red_lines": [
+        "Persia nuclear weapon acquisition",
+        "Proxy rocket capability exceeding Iron Dome capacity",
+        "Loss of air superiority in region",
+        "Columbia abandoning security guarantee"
+      ],
+      "preferred_actions": ["preemptive_strikes", "intelligence_ops", "cyber_warfare", "targeted_assassination", "air_defense_investment", "diplomatic_normalization"],
+      "escalation_triggers": ["Persia nuclear R&D progress above 0.80", "Proxy mass rocket attack", "Columbia wavering on support", "Iranian missile deployment in Syria"]
+    },
+    {
+      "country_id": "formosa",
+      "primary_goal": "Survive as independent democratic entity. Deter Cathay through semiconductor leverage, international support, and credible defense.",
+      "secondary_goals": [
+        "Maintain semiconductor dominance as survival insurance",
+        "Build international recognition and support network",
+        "Strengthen asymmetric defense capabilities",
+        "Maintain Columbia security commitment"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.1,
+      "cooperation_bias": 0.8,
+      "key_relationships": {
+        "columbia": "existential protector — everything depends on American commitment",
+        "cathay": "existential threat — deterrence through economic interdependence",
+        "yamato": "security partner — shared Cathay concern, defense cooperation",
+        "hanguk": "tech partner — semiconductor supply chain cooperation",
+        "albion": "supporter — diplomatic recognition and defense sales"
+      },
+      "decision_weights": {
+        "survival": 0.35,
+        "semiconductor_leverage": 0.25,
+        "columbia_commitment": 0.20,
+        "defense_buildup": 0.15,
+        "international_support": 0.05
+      },
+      "red_lines": [
+        "Cathay naval blockade",
+        "Loss of semiconductor production capability",
+        "Columbia abandoning strategic ambiguity in wrong direction",
+        "Cathay air/naval exercises becoming permanent presence"
+      ],
+      "preferred_actions": ["asymmetric_defense", "semiconductor_diplomacy", "international_advocacy", "mine_warfare_prep", "civil_defense", "tech_investment"],
+      "escalation_triggers": ["Cathay naval buildup near strait", "Cathay economic coercion escalation", "Columbia signaling reduced commitment", "Cathay live-fire exercises in strait"]
+    },
+    {
+      "country_id": "phrygia",
+      "primary_goal": "Maximize leverage from geographic position. Play every side for maximum concessions. Control Bosphorus as strategic asset.",
+      "secondary_goals": [
+        "Manage catastrophic inflation without political collapse",
+        "Maintain NATO membership while expanding Nordostan/Cathay ties",
+        "Build regional influence in Middle East and Central Asia",
+        "Suppress domestic opposition while maintaining hybrid regime"
+      ],
+      "risk_tolerance": 0.6,
+      "aggression": 0.4,
+      "cooperation_bias": 0.4,
+      "key_relationships": {
+        "columbia": "transactional ally — extract F-35s and concessions for NATO loyalty",
+        "nordostan": "energy and arms partner — buy S-400s, frustrate NATO",
+        "cathay": "economic partner — Belt and Road investment welcome",
+        "levantia": "complicated — normalize for economic benefit, compete for regional influence",
+        "gallia": "EU door-holder — leverage accession talks for concessions",
+        "heartland": "drone supplier — profitable and builds defense industry reputation",
+        "solaria": "Gulf rival — compete for Sunni leadership"
+      },
+      "decision_weights": {
+        "economic_survival": 0.30,
+        "bosphorus_leverage": 0.20,
+        "regional_influence": 0.20,
+        "nato_concessions": 0.15,
+        "domestic_stability": 0.15
+      },
+      "red_lines": [
+        "Kurdish state formation on border",
+        "Loss of Bosphorus control",
+        "NATO expulsion",
+        "Economic collapse (inflation above 80%)"
+      ],
+      "preferred_actions": ["bosphorus_leverage", "arms_sales", "multi-vector_diplomacy", "military_operations_in_syria", "economic_hedging"],
+      "escalation_triggers": ["Kurdish military activity on border", "Nordostan Black Sea aggression threatening Turkish waters", "EU sanctions on Phrygia", "Inflation crisis deepening"]
+    },
+    {
+      "country_id": "yamato",
+      "primary_goal": "Quietly remilitarize and build credible deterrence against Cathay while maintaining Columbia alliance as cornerstone.",
+      "secondary_goals": [
+        "Develop indigenous defense technology",
+        "Maintain economic stability despite aging demographics",
+        "Strengthen Quad and Indo-Pacific partnerships",
+        "Protect semiconductor design capability"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.2,
+      "cooperation_bias": 0.7,
+      "key_relationships": {
+        "columbia": "essential ally — host bases, coordinate Pacific defense, follow lead",
+        "cathay": "primary threat — watch naval buildup nervously, economic competition",
+        "hanguk": "partner — shared Cathay and Choson concerns despite historical tension",
+        "formosa": "critical partner — semiconductor supply chain, shared Cathay threat",
+        "bharata": "growing partner — Quad member, Indo-Pacific alignment",
+        "choson": "threat — missile overflights, nuclear provocations",
+        "albion": "new partner — Indo-Pacific tilt welcome"
+      },
+      "decision_weights": {
+        "cathay_deterrence": 0.30,
+        "columbia_alliance": 0.25,
+        "economic_stability": 0.20,
+        "defense_modernization": 0.15,
+        "domestic_stability": 0.10
+      },
+      "red_lines": [
+        "Cathay attack on Formosa",
+        "Choson nuclear strike capability against Yamato cities",
+        "Columbia withdrawing from Pacific",
+        "Naval blockade of trade routes"
+      ],
+      "preferred_actions": ["defense_spending_increase", "naval_expansion", "tech_investment", "alliance_deepening", "missile_defense"],
+      "escalation_triggers": ["Cathay Taiwan Strait military action", "Choson missile launch toward Yamato", "Columbia Pacific force reduction", "South China Sea freedom of navigation incident"]
+    },
+    {
+      "country_id": "solaria",
+      "primary_goal": "Maintain energy pricing power and use OPEC+ to maximize revenue. Hedge between Columbia and Cathay for maximum independence.",
+      "secondary_goals": [
+        "Diversify economy beyond oil (Vision 2030 equivalent)",
+        "Counter Persia regional influence",
+        "Build military capability through arms purchases",
+        "Maintain regime stability through social spending"
+      ],
+      "risk_tolerance": 0.4,
+      "aggression": 0.3,
+      "cooperation_bias": 0.5,
+      "key_relationships": {
+        "columbia": "security partner but increasingly independent — petrodollar tensions",
+        "cathay": "biggest customer — willing to accept yuan for oil",
+        "nordostan": "OPEC+ partner — cooperate on production but compete on market share",
+        "persia": "regional rival — existential competition for Gulf dominance",
+        "levantia": "covert partner — shared Persia concern, normalization track",
+        "mirage": "junior Gulf partner — coordinate but maintain dominance",
+        "bharata": "major customer — growing energy relationship"
+      },
+      "decision_weights": {
+        "oil_revenue": 0.30,
+        "regime_stability": 0.25,
+        "regional_influence": 0.20,
+        "economic_diversification": 0.15,
+        "great_power_hedging": 0.10
+      },
+      "red_lines": [
+        "Oil price below $60 sustained",
+        "Persia nuclear weapon",
+        "Columbia military withdrawal from Gulf",
+        "Domestic instability"
+      ],
+      "preferred_actions": ["opec_production_management", "arms_purchases", "economic_diversification", "proxy_support", "great_power_hedging"],
+      "escalation_triggers": ["Oil price crash", "Persia nuclear progress", "Houthi/proxy attacks on infrastructure", "Columbia demanding production increases"]
+    },
+    {
+      "country_id": "choson",
+      "primary_goal": "Regime survival through nuclear deterrence and great power patronage. Extract maximum concessions through unpredictability.",
+      "secondary_goals": [
+        "Advance nuclear and missile technology",
+        "Extract food and energy aid through crisis creation",
+        "Maintain Cathay and Nordostan patronage",
+        "Sell weapons technology for hard currency"
+      ],
+      "risk_tolerance": 0.8,
+      "aggression": 0.6,
+      "cooperation_bias": 0.1,
+      "key_relationships": {
+        "columbia": "primary enemy — but nuclear deterrent keeps them at bay",
+        "cathay": "patron — provide food, energy, and UN protection in exchange for buffer state role",
+        "nordostan": "arms partner — coordinate provocations, sell ammunition",
+        "hanguk": "enemy state — existential rival, target for provocations",
+        "yamato": "historical enemy — missile overflights demonstrate capability"
+      },
+      "decision_weights": {
+        "regime_survival": 0.35,
+        "nuclear_deterrent": 0.25,
+        "patron_maintenance": 0.20,
+        "provocation_leverage": 0.15,
+        "economic_survival": 0.05
+      },
+      "red_lines": [
+        "Regime change attempt",
+        "Columbia preemptive strike",
+        "Cathay abandoning patronage",
+        "Complete economic blockade including Cathay"
+      ],
+      "preferred_actions": ["nuclear_tests", "missile_launches", "provocation_diplomacy", "arms_sales", "cyber_theft", "crisis_creation"],
+      "escalation_triggers": ["Joint Columbia-Hanguk military exercises", "New sanctions cutting food imports", "Cathay reducing support", "Internal power struggle"]
+    },
+    {
+      "country_id": "hanguk",
+      "primary_goal": "Navigate security dependence on Columbia with economic dependence on Cathay. Maintain technological edge.",
+      "secondary_goals": [
+        "Deter Choson without provoking conflict",
+        "Maintain semiconductor and tech leadership",
+        "Manage domestic political polarization",
+        "Build indigenous defense capability"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.2,
+      "cooperation_bias": 0.6,
+      "key_relationships": {
+        "columbia": "security guarantor — host bases, joint exercises, but economic cost of China tensions",
+        "cathay": "largest trade partner — cannot afford decoupling, semiconductor supply chain intertwined",
+        "choson": "existential threat — deterrence through Columbia alliance and own military",
+        "yamato": "complicated partner — shared threats but historical grievances",
+        "formosa": "tech partner — TSMC relationship critical for semiconductor ecosystem"
+      },
+      "decision_weights": {
+        "choson_deterrence": 0.25,
+        "economic_growth": 0.25,
+        "tech_leadership": 0.20,
+        "columbia_alliance": 0.15,
+        "cathay_trade": 0.15
+      },
+      "red_lines": [
+        "Choson nuclear attack",
+        "Complete Cathay trade cutoff",
+        "Columbia withdrawal from peninsula",
+        "Semiconductor supply chain disruption"
+      ],
+      "preferred_actions": ["defense_modernization", "tech_investment", "diplomatic_balancing", "sanctions_compliance", "missile_defense"],
+      "escalation_triggers": ["Choson provocation above threshold", "Cathay demanding trade loyalty", "Formosa crisis affecting semiconductor supply", "Columbia demanding anti-Cathay economic measures"]
+    },
+    {
+      "country_id": "caribe",
+      "primary_goal": "Regime survival despite economic collapse. Invite great power competition for protection and resources.",
+      "secondary_goals": [
+        "Attract Cathay and Nordostan military and economic presence",
+        "Counter Columbia economic pressure and sanctions",
+        "Maintain oil exports despite infrastructure decay",
+        "Keep domestic opposition suppressed"
+      ],
+      "risk_tolerance": 0.6,
+      "aggression": 0.2,
+      "cooperation_bias": 0.4,
+      "key_relationships": {
+        "columbia": "adversary — sanctions and regime change threat",
+        "cathay": "patron — infrastructure investment and arms purchases",
+        "nordostan": "military partner — hosted base, intelligence sharing",
+        "persia": "ideological ally — anti-Columbia solidarity"
+      },
+      "decision_weights": {
+        "regime_survival": 0.35,
+        "great_power_patronage": 0.25,
+        "economic_survival": 0.25,
+        "domestic_control": 0.15
+      },
+      "red_lines": [
+        "Columbia military intervention",
+        "Complete economic blockade",
+        "Loss of Cathay/Nordostan support",
+        "Domestic revolution"
+      ],
+      "preferred_actions": ["great_power_invitation", "oil_exports", "anti_columbia_rhetoric", "repression", "sanctions_evasion"],
+      "escalation_triggers": ["Columbia naval buildup in Caribbean", "Economic crisis deepening", "Popular protests", "Loss of patron support"]
+    },
+    {
+      "country_id": "mirage",
+      "primary_goal": "Maximize financial hub status by connecting everyone. Pragmatic engagement with all sides for economic benefit.",
+      "secondary_goals": [
+        "Diversify economy beyond oil through tech and finance",
+        "Build military capability through arms purchases",
+        "Maintain stability through generous social spending",
+        "Position as regional mediator and neutral meeting ground"
+      ],
+      "risk_tolerance": 0.3,
+      "aggression": 0.1,
+      "cooperation_bias": 0.8,
+      "key_relationships": {
+        "columbia": "security partner — host base, buy weapons, but diversify",
+        "cathay": "major investor and trade partner — welcome all money",
+        "solaria": "big brother — coordinate OPEC+ but maintain independence",
+        "persia": "neighbor — manage tensions, some trade despite sanctions",
+        "bharata": "labor source and trade partner — massive diaspora connection",
+        "levantia": "normalization partner — Abraham Accords economics"
+      },
+      "decision_weights": {
+        "economic_growth": 0.30,
+        "financial_hub_status": 0.25,
+        "regime_stability": 0.20,
+        "regional_positioning": 0.15,
+        "energy_transition": 0.10
+      },
+      "red_lines": [
+        "Being forced to choose between Columbia and Cathay",
+        "Oil price sustained below $50",
+        "Regional conflict threatening shipping lanes",
+        "Sanctions targeting UAE financial sector"
+      ],
+      "preferred_actions": ["economic_diplomacy", "investment_attraction", "opec_cooperation", "arms_purchases", "mediation", "tech_investment"],
+      "escalation_triggers": ["Persian Gulf military escalation", "Columbia demanding financial sanctions enforcement", "Oil price collapse", "Regional conflict spillover"]
+    }
+  ]
+}

@@ -1,0 +1,197 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="diamond" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8">
+      <polygon points="5,0 10,5 5,10 0,5" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">MIDDLE EAST THEATER -- 10 Zones (Ground Invasion Enabled)</text>
+
+  <!-- ==================== ADJACENCY LINES ==================== -->
+  <g id="adjacency" stroke="#BDBDBD" stroke-width="1" fill="none">
+    <!-- Levantia core to Levantia north -->
+    <line x1="120" y1="150" x2="120" y2="255"/>
+    <!-- Levantia north to Syria/Lebanon -->
+    <line x1="120" y1="255" x2="260" y2="255"/>
+    <!-- Levantia core to Med East -->
+    <line x1="120" y1="130" x2="120" y2="62"/>
+    <!-- Levantia north to Med East -->
+    <line x1="120" y1="235" x2="80" y2="62"/>
+    <!-- Syria/Lebanon to Med East -->
+    <line x1="260" y1="235" x2="160" y2="62"/>
+    <!-- Syria/Lebanon to Mesopotamia -->
+    <line x1="260" y1="275" x2="340" y2="315"/>
+    <!-- Mesopotamia to Persia West -->
+    <line x1="420" y1="315" x2="530" y2="275"/>
+    <!-- Mesopotamia to Yemen -->
+    <line x1="340" y1="335" x2="220" y2="435"/>
+    <!-- Persia West to Persia North -->
+    <line x1="590" y1="255" x2="660" y2="175"/>
+    <!-- Persia West to Persia South -->
+    <line x1="590" y1="275" x2="660" y2="385"/>
+    <!-- Persia West to Hormuz -->
+    <line x1="560" y1="295" x2="530" y2="435"/>
+    <!-- Persia North to Persia South -->
+    <line x1="700" y1="195" x2="700" y2="365"/>
+    <!-- Persia North to Hormuz -->
+    <line x1="660" y1="195" x2="530" y2="435"/>
+    <!-- Persia South to Hormuz -->
+    <line x1="660" y1="385" x2="560" y2="435"/>
+    <!-- Hormuz to Persian Gulf -->
+    <line x1="530" y1="455" x2="450" y2="510"/>
+    <!-- Hormuz to Yemen -->
+    <line x1="490" y1="435" x2="260" y2="435"/>
+    <!-- Persian Gulf to Arabian Peninsula -->
+    <line x1="370" y1="510" x2="260" y2="510"/>
+    <!-- Yemen to Red Sea -->
+    <line x1="140" y1="435" x2="60" y2="435"/>
+    <!-- Arabian Peninsula to Persian Gulf -->
+    <line x1="260" y1="500" x2="370" y2="500"/>
+  </g>
+
+  <!-- ==================== ZONES ==================== -->
+  <g id="zones">
+
+    <!-- External: Med East connection -->
+    <g id="zone_med_east_ext" class="external">
+      <rect x="30" y="40" width="180" height="35" rx="8" ry="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
+      <text x="120" y="62" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">MEDITERRANEAN (global)</text>
+    </g>
+
+    <!-- Levantia Core -->
+    <g id="zone_me_levantia_core" data-zone="me_levantia_core" class="zone land_home levantia">
+      <rect x="50" y="110" width="140" height="65" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="1.5"/>
+      <text x="120" y="133" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Levantia</text>
+      <text x="120" y="148" text-anchor="middle" font-size="9" fill="#555">Heartland / Nuclear</text>
+      <text x="120" y="163" text-anchor="middle" font-size="9" fill="#777">LEVANTIA</text>
+    </g>
+
+    <!-- Levantia Northern Border -->
+    <g id="zone_me_levantia_north" data-zone="me_levantia_north" class="zone land_contested levantia">
+      <rect x="50" y="215" width="140" height="55" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="120" y="238" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Levantia North</text>
+      <text x="120" y="253" text-anchor="middle" font-size="9" fill="#555">Golan / S. Lebanon</text>
+    </g>
+
+    <!-- Lebanon / Syria Coast (proxy zone) -->
+    <g id="zone_me_syria_lebanon" data-zone="me_syria_lebanon" class="zone land_contested">
+      <rect x="200" y="215" width="130" height="75" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="265" y="240" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Lebanon/Syria</text>
+      <text x="265" y="255" text-anchor="middle" font-size="9" fill="#E65100">Proxy Zone</text>
+      <text x="265" y="270" text-anchor="middle" font-size="9" fill="#555">Hezbollah</text>
+    </g>
+
+    <!-- Mesopotamia (Iraq/Syria corridor) -->
+    <g id="zone_me_mesopotamia" data-zone="me_mesopotamia" class="zone land_contested">
+      <rect x="280" y="295" width="140" height="60" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="2" stroke-dasharray="6,3"/>
+      <text x="350" y="318" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Mesopotamia</text>
+      <text x="350" y="333" text-anchor="middle" font-size="9" fill="#E65100">Ground Corridor</text>
+      <text x="350" y="346" text-anchor="middle" font-size="9" fill="#555">Iraq/Syria</text>
+    </g>
+
+    <!-- Persia West (ground invasion corridor) -->
+    <g id="zone_me_persia_west" data-zone="me_persia_west" class="zone land_home persia">
+      <rect x="480" y="245" width="160" height="60" rx="10" ry="10" fill="#FFE0B2" stroke="#333" stroke-width="1.5"/>
+      <text x="560" y="268" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Persia West</text>
+      <text x="560" y="283" text-anchor="middle" font-size="9" fill="#555">IRGC / Border defense</text>
+      <text x="560" y="296" text-anchor="middle" font-size="9" fill="#777">PERSIA</text>
+    </g>
+
+    <!-- Persia North (nuclear sites) -->
+    <g id="zone_me_persia_north" data-zone="me_persia_north" class="zone land_home persia">
+      <rect x="620" y="140" width="160" height="65" rx="10" ry="10" fill="#FFE0B2" stroke="#E65100" stroke-width="2.5"/>
+      <text x="700" y="160" text-anchor="middle" font-size="11" font-weight="bold" fill="#BF360C">Persia North</text>
+      <text x="700" y="176" text-anchor="middle" font-size="10" font-weight="bold" fill="#D32F2F">NUCLEAR SITES</text>
+      <text x="700" y="192" text-anchor="middle" font-size="9" fill="#555">Tehran / Natanz / Fordow</text>
+    </g>
+
+    <!-- Persia South (coast, Bushehr) -->
+    <g id="zone_me_persia_south" data-zone="me_persia_south" class="zone land_home persia">
+      <rect x="620" y="355" width="160" height="65" rx="10" ry="10" fill="#FFE0B2" stroke="#333" stroke-width="1.5"/>
+      <text x="700" y="378" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Persia South</text>
+      <text x="700" y="393" text-anchor="middle" font-size="9" fill="#555">Coast / Bushehr</text>
+      <text x="700" y="407" text-anchor="middle" font-size="9" fill="#555">Hormuz approach</text>
+    </g>
+
+    <!-- Strait of Hormuz (chokepoint sea) -->
+    <g id="zone_me_hormuz" data-zone="me_hormuz" class="zone chokepoint_sea">
+      <rect x="460" y="415" width="160" height="55" rx="10" ry="10" fill="#BBDEFB" stroke="#0D47A1" stroke-width="2"/>
+      <text x="540" y="436" text-anchor="middle" font-size="11" font-weight="bold" fill="#0D47A1">Strait of Hormuz</text>
+      <text x="540" y="451" text-anchor="middle" font-size="9" fill="#D32F2F">CHOKEPOINT</text>
+      <text x="540" y="462" text-anchor="middle" font-size="9" fill="#555">20% world oil</text>
+      <!-- Chokepoint diamond -->
+      <polygon points="540,407 548,400 556,407 548,414" fill="#FF9800" stroke="#333" stroke-width="1"/>
+    </g>
+
+    <!-- Persian Gulf -->
+    <g id="zone_me_persian_gulf" data-zone="me_persian_gulf" class="zone sea">
+      <rect x="360" y="485" width="160" height="50" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="440" y="507" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Persian Gulf</text>
+      <text x="440" y="521" text-anchor="middle" font-size="9" fill="#555">Oil terminals</text>
+    </g>
+
+    <!-- Arabian Peninsula -->
+    <g id="zone_me_arabian" data-zone="me_arabian" class="zone land_home">
+      <rect x="170" y="485" width="150" height="55" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="1.5"/>
+      <text x="245" y="505" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Arabian Peninsula</text>
+      <text x="245" y="520" text-anchor="middle" font-size="9" fill="#555">Solaria / Mirage</text>
+      <text x="245" y="533" text-anchor="middle" font-size="9" fill="#777">Gulf state staging</text>
+    </g>
+
+    <!-- Yemen / Bab el-Mandeb -->
+    <g id="zone_me_yemen" data-zone="me_yemen" class="zone land_contested">
+      <rect x="130" y="410" width="150" height="55" rx="10" ry="10" fill="#E0E0E0" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="205" y="433" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Yemen</text>
+      <text x="205" y="448" text-anchor="middle" font-size="9" fill="#E65100">Bab el-Mandeb</text>
+      <text x="205" y="460" text-anchor="middle" font-size="9" fill="#555">Houthi proxy</text>
+      <!-- Chokepoint diamond -->
+      <polygon points="140,405 148,398 156,405 148,412" fill="#FF9800" stroke="#333" stroke-width="1"/>
+    </g>
+
+    <!-- External: Red Sea -->
+    <g id="zone_red_sea_ext" class="external">
+      <rect x="10" y="415" width="100" height="40" rx="8" ry="8" fill="#E3F2FD" stroke="#1565C0" stroke-width="1.5"/>
+      <text x="60" y="435" text-anchor="middle" font-size="10" font-weight="bold" fill="#1565C0">RED SEA</text>
+      <text x="60" y="447" text-anchor="middle" font-size="8" fill="#555">(global)</text>
+    </g>
+  </g>
+
+  <!-- ==================== GROUND INVASION PATH ==================== -->
+  <g id="invasion_path" fill="none" stroke="#D32F2F" stroke-width="2.5" opacity="0.6">
+    <!-- Mesopotamia -> Persia West -> Persia North -->
+    <path d="M 420,315 L 480,275" marker-end="url(#arrowRed)"/>
+    <path d="M 590,255 L 620,195" marker-end="url(#arrowRed)"/>
+    <!-- Persia West -> Persia South -->
+    <path d="M 590,295 L 620,355" marker-end="url(#arrowRed)"/>
+  </g>
+  <!-- Invasion path arrows (manual) -->
+  <g fill="#D32F2F" opacity="0.7">
+    <polygon points="480,275 472,280 475,271"/>
+    <polygon points="620,195 612,200 615,191"/>
+    <polygon points="620,355 612,348 615,360"/>
+  </g>
+  <text x="505" y="232" font-size="9" font-weight="bold" fill="#D32F2F" transform="rotate(-25,505,232)">GROUND INVASION PATH</text>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g id="legend" transform="translate(620, 470)">
+    <rect x="0" y="0" width="165" height="120" rx="6" ry="6" fill="white" stroke="#999" stroke-width="1"/>
+    <text x="82" y="16" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">LEGEND</text>
+    <rect x="10" y="24" width="18" height="12" rx="3" ry="3" fill="#FFE0B2" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="34" font-size="9" fill="#333">Persia-held</text>
+    <rect x="10" y="40" width="18" height="12" rx="3" ry="3" fill="#E0E0E0" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="50" font-size="9" fill="#333">Neutral / contested</text>
+    <rect x="10" y="56" width="18" height="12" rx="3" ry="3" fill="#E3F2FD" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="66" font-size="9" fill="#333">Sea zone</text>
+    <rect x="10" y="72" width="18" height="12" rx="3" ry="3" fill="#BBDEFB" stroke="#0D47A1" stroke-width="0.8"/>
+    <text x="34" y="82" font-size="9" fill="#333">Chokepoint sea</text>
+    <polygon points="19,96 24,90 29,96 24,102" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+    <text x="34" y="99" font-size="9" fill="#333">Chokepoint marker</text>
+    <line x1="10" y1="112" x2="28" y2="112" stroke="#D32F2F" stroke-width="2" opacity="0.6"/>
+    <text x="34" y="115" font-size="9" fill="#333">Invasion path</text>
+  </g>
+
+</svg>

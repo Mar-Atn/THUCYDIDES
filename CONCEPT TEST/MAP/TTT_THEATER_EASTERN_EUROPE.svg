@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="diamond" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8">
+      <polygon points="5,0 10,5 5,10 0,5" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">EASTERN EUROPE THEATER -- 15 Zones</text>
+
+  <!-- ==================== ADJACENCY LINES ==================== -->
+  <g id="adjacency" stroke="#BDBDBD" stroke-width="1" fill="none">
+    <!-- ee_belarus connections -->
+    <line x1="165" y1="95" x2="315" y2="95"/>
+    <line x1="165" y1="95" x2="165" y2="195"/>
+    <line x1="165" y1="95" x2="315" y2="195"/>
+    <!-- ee_nord_border connections -->
+    <line x1="465" y1="95" x2="530" y2="195"/>
+    <line x1="465" y1="95" x2="530" y2="275"/>
+    <line x1="315" y1="95" x2="465" y2="95"/>
+    <!-- ee_west_ukr to ee_central_ukr -->
+    <line x1="165" y1="195" x2="315" y2="195"/>
+    <!-- ee_west_ukr to ee_southwest -->
+    <line x1="165" y1="195" x2="165" y2="285"/>
+    <!-- ee_west_ukr to ee_west_border -->
+    <line x1="165" y1="195" x2="60" y2="285"/>
+    <!-- ee_central_ukr to ee_east_front_north -->
+    <line x1="315" y1="195" x2="530" y2="195"/>
+    <!-- ee_central_ukr to ee_east_front_central -->
+    <line x1="315" y1="195" x2="530" y2="275"/>
+    <!-- ee_central_ukr to ee_capital -->
+    <line x1="315" y1="195" x2="315" y2="275"/>
+    <!-- ee_central_ukr to ee_south_ukr -->
+    <line x1="315" y1="195" x2="315" y2="355"/>
+    <!-- ee_capital to ee_south_ukr -->
+    <line x1="315" y1="275" x2="315" y2="355"/>
+    <!-- ee_capital to ee_east_front_central -->
+    <line x1="315" y1="275" x2="530" y2="275"/>
+    <!-- ee_southwest to ee_central_ukr -->
+    <line x1="165" y1="285" x2="315" y2="195"/>
+    <!-- ee_southwest to ee_west_border -->
+    <line x1="165" y1="285" x2="60" y2="285"/>
+    <!-- ee_east_front_north to ee_east_front_central -->
+    <line x1="530" y1="195" x2="530" y2="275"/>
+    <!-- ee_east_front_central to ee_east_front_south -->
+    <line x1="530" y1="275" x2="530" y2="355"/>
+    <!-- ee_east_front_south to ee_south_ukr -->
+    <line x1="530" y1="355" x2="315" y2="355"/>
+    <!-- ee_east_front_south to ee_occupied_south -->
+    <line x1="530" y1="355" x2="620" y2="420"/>
+    <!-- ee_south_ukr to ee_dnipro_line -->
+    <line x1="315" y1="355" x2="400" y2="420"/>
+    <!-- ee_dnipro_line to ee_occupied_south -->
+    <line x1="400" y1="420" x2="620" y2="420"/>
+    <!-- ee_dnipro_line to ee_kherson -->
+    <line x1="400" y1="420" x2="340" y2="490"/>
+    <!-- ee_occupied_south to ee_crimea_naval -->
+    <line x1="620" y1="420" x2="560" y2="490"/>
+    <!-- ee_kherson to ee_crimea_naval -->
+    <line x1="340" y1="490" x2="560" y2="490"/>
+    <!-- ee_crimea_naval to Black Sea -->
+    <line x1="560" y1="490" x2="560" y2="560"/>
+  </g>
+
+  <!-- ==================== ZONES ==================== -->
+  <g id="zones">
+
+    <!-- NORDOSTAN ZONES (light red) -->
+    <g id="zone_ee_belarus" data-zone="ee_belarus" class="zone land_home nordostan">
+      <rect x="90" y="60" width="150" height="65" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5"/>
+      <text x="165" y="88" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Belarus Corridor</text>
+      <text x="165" y="103" text-anchor="middle" font-size="9" fill="#777">NORDOSTAN</text>
+    </g>
+
+    <g id="zone_ee_nord_border" data-zone="ee_nord_border" class="zone land_home nordostan">
+      <rect x="380" y="60" width="170" height="65" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5"/>
+      <text x="465" y="83" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Nordostan Border</text>
+      <text x="465" y="97" text-anchor="middle" font-size="9" fill="#555">Belgorod/Kursk</text>
+      <text x="465" y="112" text-anchor="middle" font-size="9" fill="#777">NORDOSTAN</text>
+    </g>
+
+    <g id="zone_ee_east_front_central" data-zone="ee_east_front_central" class="zone land_contested nordostan">
+      <rect x="460" y="245" width="140" height="60" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="530" y="270" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">E. Front Central</text>
+      <text x="530" y="284" text-anchor="middle" font-size="9" fill="#555">Donbas</text>
+    </g>
+
+    <g id="zone_ee_east_front_south" data-zone="ee_east_front_south" class="zone land_contested nordostan">
+      <rect x="460" y="325" width="140" height="60" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="530" y="350" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">E. Front South</text>
+      <text x="530" y="364" text-anchor="middle" font-size="9" fill="#555">Zaporizhzhia</text>
+    </g>
+
+    <g id="zone_ee_occupied_south" data-zone="ee_occupied_south" class="zone land_contested nordostan">
+      <rect x="550" y="395" width="140" height="55" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="620" y="418" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Occupied South</text>
+      <text x="620" y="432" text-anchor="middle" font-size="9" fill="#555">Land bridge</text>
+    </g>
+
+    <g id="zone_ee_crimea_naval" data-zone="ee_crimea_naval" class="zone land_home nordostan">
+      <rect x="480" y="462" width="160" height="55" rx="10" ry="10" fill="#FFCDD2" stroke="#333" stroke-width="1.5"/>
+      <text x="560" y="485" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Crimea / Sevastopol</text>
+      <text x="560" y="500" text-anchor="middle" font-size="9" fill="#555">Black Sea Fleet</text>
+    </g>
+
+    <!-- HEARTLAND ZONES (light green) -->
+    <g id="zone_ee_west_ukr" data-zone="ee_west_ukr" class="zone land_home heartland">
+      <rect x="90" y="163" width="150" height="60" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="165" y="188" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Western Heartland</text>
+      <text x="165" y="203" text-anchor="middle" font-size="9" fill="#555">Lviv region</text>
+    </g>
+
+    <g id="zone_ee_central_ukr" data-zone="ee_central_ukr" class="zone land_home heartland">
+      <rect x="250" y="163" width="130" height="60" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="315" y="188" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Central Heartland</text>
+      <text x="315" y="203" text-anchor="middle" font-size="9" fill="#555">Crossroads</text>
+    </g>
+
+    <g id="zone_ee_capital" data-zone="ee_capital" class="zone land_home heartland">
+      <rect x="250" y="245" width="130" height="60" rx="10" ry="10" fill="#A5D6A7" stroke="#333" stroke-width="2"/>
+      <text x="315" y="268" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">CAPITAL (Kyiv)</text>
+      <text x="315" y="284" text-anchor="middle" font-size="9" fill="#555">Political center</text>
+    </g>
+
+    <g id="zone_ee_southwest" data-zone="ee_southwest" class="zone land_home heartland">
+      <rect x="90" y="255" width="140" height="60" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="160" y="280" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">SW Heartland</text>
+      <text x="160" y="295" text-anchor="middle" font-size="9" fill="#555">Odesa / Black Sea</text>
+    </g>
+
+    <g id="zone_ee_west_border" data-zone="ee_west_border" class="zone land_home heartland">
+      <rect x="10" y="255" width="70" height="60" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="45" y="275" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">NATO</text>
+      <text x="45" y="288" text-anchor="middle" font-size="9" fill="#555">Border</text>
+      <text x="45" y="300" text-anchor="middle" font-size="8" fill="#777">PL/RO</text>
+    </g>
+
+    <g id="zone_ee_south_ukr" data-zone="ee_south_ukr" class="zone land_home heartland">
+      <rect x="250" y="325" width="130" height="60" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="315" y="350" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Southern Heartland</text>
+      <text x="315" y="364" text-anchor="middle" font-size="9" fill="#555">Industrial</text>
+    </g>
+
+    <g id="zone_ee_dnipro_line" data-zone="ee_dnipro_line" class="zone land_home heartland">
+      <rect x="330" y="395" width="140" height="55" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="400" y="418" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Dnipro River Line</text>
+      <text x="400" y="432" text-anchor="middle" font-size="9" fill="#555">Defensive barrier</text>
+    </g>
+
+    <g id="zone_ee_kherson" data-zone="ee_kherson" class="zone land_contested heartland">
+      <rect x="270" y="462" width="140" height="55" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5" stroke-dasharray="6,3"/>
+      <text x="340" y="485" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Kherson Region</text>
+      <text x="340" y="500" text-anchor="middle" font-size="9" fill="#555">West bank recaptured</text>
+    </g>
+
+    <!-- CONTESTED / FRONT LINE (Heartland-held but contested) -->
+    <g id="zone_ee_east_front_north" data-zone="ee_east_front_north" class="zone land_contested heartland">
+      <rect x="460" y="163" width="140" height="60" rx="10" ry="10" fill="#FFF9C4" stroke="#E65100" stroke-width="2" stroke-dasharray="6,3"/>
+      <text x="530" y="183" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">E. Front North</text>
+      <text x="530" y="197" text-anchor="middle" font-size="9" fill="#E65100">CONTESTED</text>
+      <text x="530" y="211" text-anchor="middle" font-size="9" fill="#555">Kharkiv axis</text>
+    </g>
+
+    <!-- SEA ZONE -->
+    <g id="zone_black_sea" data-zone="g_sea_black" class="zone sea">
+      <rect x="440" y="530" width="240" height="50" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="560" y="555" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">BLACK SEA</text>
+      <text x="560" y="569" text-anchor="middle" font-size="9" fill="#555">to Bosphorus / Med</text>
+    </g>
+  </g>
+
+  <!-- ==================== FRONT LINE ==================== -->
+  <g id="frontline" fill="none" stroke="#D32F2F" stroke-width="2.5" stroke-dasharray="8,4" opacity="0.7">
+    <path d="M 455,150 L 455,230 L 455,310 L 455,390 L 545,460"/>
+  </g>
+  <text x="440" y="148" text-anchor="end" font-size="10" font-weight="bold" fill="#D32F2F">FRONT LINE</text>
+
+  <!-- ==================== EXTERNAL CONNECTIONS ==================== -->
+  <g id="external" font-size="9" fill="#666">
+    <!-- Nordostan border label -->
+    <rect x="250" y="30" width="300" height="20" rx="4" ry="4" fill="#EF9A9A" stroke="#C62828" stroke-width="1"/>
+    <text x="400" y="44" text-anchor="middle" font-size="10" font-weight="bold" fill="#B71C1C">NORDOSTAN TERRITORY (north)</text>
+
+    <!-- NATO border label -->
+    <rect x="5" y="230" width="75" height="18" rx="4" ry="4" fill="#90CAF9" stroke="#1565C0" stroke-width="1"/>
+    <text x="42" y="243" text-anchor="middle" font-size="9" font-weight="bold" fill="#0D47A1">NATO</text>
+
+    <!-- Bosphorus connection -->
+    <text x="700" y="570" text-anchor="start" font-size="9" fill="#1565C0">&#8594; Bosphorus</text>
+  </g>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g id="legend" transform="translate(620, 60)">
+    <rect x="0" y="0" width="165" height="130" rx="6" ry="6" fill="white" stroke="#999" stroke-width="1"/>
+    <text x="82" y="18" text-anchor="middle" font-size="10" font-weight="bold" fill="#333">LEGEND</text>
+    <rect x="10" y="26" width="18" height="12" rx="3" ry="3" fill="#FFCDD2" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="36" font-size="9" fill="#333">Nordostan-held</text>
+    <rect x="10" y="44" width="18" height="12" rx="3" ry="3" fill="#C8E6C9" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="54" font-size="9" fill="#333">Heartland-held</text>
+    <rect x="10" y="62" width="18" height="12" rx="3" ry="3" fill="#FFF9C4" stroke="#E65100" stroke-width="0.8" stroke-dasharray="3,2"/>
+    <text x="34" y="72" font-size="9" fill="#333">Actively contested</text>
+    <rect x="10" y="80" width="18" height="12" rx="3" ry="3" fill="#E3F2FD" stroke="#333" stroke-width="0.8"/>
+    <text x="34" y="90" font-size="9" fill="#333">Sea zone</text>
+    <line x1="10" y1="103" x2="28" y2="103" stroke="#D32F2F" stroke-width="2" stroke-dasharray="4,2"/>
+    <text x="34" y="107" font-size="9" fill="#333">Front line</text>
+    <line x1="10" y1="119" x2="28" y2="119" stroke="#BDBDBD" stroke-width="1"/>
+    <text x="34" y="123" font-size="9" fill="#333">Adjacency</text>
+  </g>
+
+  <!-- ==================== CHOKEPOINT MARKERS ==================== -->
+  <g id="markers">
+    <!-- Bosphorus chokepoint indicator at Black Sea exit -->
+    <polygon points="690,555 698,548 706,555 698,562" fill="#FF9800" stroke="#333" stroke-width="1"/>
+    <text x="710" y="559" font-size="8" fill="#E65100" font-weight="bold">CHOKE</text>
+  </g>
+
+</svg>

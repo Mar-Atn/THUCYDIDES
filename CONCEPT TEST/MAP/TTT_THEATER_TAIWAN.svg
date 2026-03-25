@@ -1,0 +1,211 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="diamond-tw" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="8" markerHeight="8">
+      <polygon points="5,0 10,5 5,10 0,5" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#FAFAFA"/>
+
+  <!-- Title -->
+  <text x="400" y="24" text-anchor="middle" font-size="16" font-weight="bold" fill="#333">TAIWAN STRAIT THEATER -- 7 Zones</text>
+
+  <!-- ==================== ADJACENCY LINES ==================== -->
+  <g id="adjacency" stroke="#BDBDBD" stroke-width="1" fill="none">
+    <!-- Cathay Staging to Strait -->
+    <line x1="155" y1="270" x2="310" y2="270"/>
+    <!-- Cathay Staging to Sea North -->
+    <line x1="155" y1="230" x2="310" y2="155"/>
+    <!-- Strait to North Formosa -->
+    <line x1="390" y1="250" x2="470" y2="210"/>
+    <!-- Strait to Sea North -->
+    <line x1="350" y1="230" x2="350" y2="155"/>
+    <!-- Strait to Sea South -->
+    <line x1="350" y1="310" x2="310" y2="420"/>
+    <!-- Strait to South Formosa -->
+    <line x1="390" y1="290" x2="470" y2="350"/>
+    <!-- North Formosa to Sea North -->
+    <line x1="530" y1="185" x2="430" y2="155"/>
+    <!-- North Formosa to South Formosa -->
+    <line x1="530" y1="235" x2="530" y2="325"/>
+    <!-- North Formosa to Sea East -->
+    <line x1="600" y1="200" x2="660" y2="240"/>
+    <!-- South Formosa to Sea East -->
+    <line x1="600" y1="360" x2="660" y2="300"/>
+    <!-- South Formosa to Sea South -->
+    <line x1="470" y1="370" x2="350" y2="420"/>
+    <!-- Sea North to Sea East -->
+    <line x1="430" y1="135" x2="660" y2="240"/>
+    <!-- Sea North to East China Sea global -->
+    <line x1="350" y1="115" x2="350" y2="60"/>
+    <!-- Sea East to North Pacific global -->
+    <line x1="720" y1="250" x2="770" y2="220"/>
+    <!-- Sea South to SCS global -->
+    <line x1="250" y1="450" x2="165" y2="490"/>
+    <!-- Sea South to Sea East -->
+    <line x1="350" y1="440" x2="660" y2="300"/>
+    <!-- Sea South to Bashi Channel -->
+    <line x1="310" y1="460" x2="400" y2="500"/>
+    <!-- Bashi Channel to SCS -->
+    <line x1="400" y1="520" x2="165" y2="510"/>
+    <!-- Bashi Channel to Sea East -->
+    <line x1="440" y1="500" x2="660" y2="310"/>
+  </g>
+
+  <!-- ==================== ZONES ==================== -->
+  <g id="zones">
+
+    <!-- External: Cathay Eastern (global) -->
+    <g id="zone_cathay_ext" class="external">
+      <rect x="20" y="130" width="60" height="280" rx="8" ry="8" fill="#FFF9C4" stroke="#F9A825" stroke-width="1.5"/>
+      <text x="50" y="250" text-anchor="middle" font-size="10" font-weight="bold" fill="#F57F17" transform="rotate(-90,50,250)">CATHAY MAINLAND</text>
+    </g>
+
+    <!-- Cathay Staging Coast -->
+    <g id="zone_ts_cathay_staging" data-zone="ts_cathay_staging" class="zone land_home cathay">
+      <rect x="95" y="195" width="120" height="150" rx="10" ry="10" fill="#FFF9C4" stroke="#333" stroke-width="1.5"/>
+      <text x="155" y="245" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Cathay</text>
+      <text x="155" y="260" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Staging Coast</text>
+      <text x="155" y="278" text-anchor="middle" font-size="9" fill="#555">Fujian Province</text>
+      <text x="155" y="293" text-anchor="middle" font-size="9" fill="#555">Missiles / Air bases</text>
+      <text x="155" y="310" text-anchor="middle" font-size="9" fill="#555">Amphibious assembly</text>
+      <text x="155" y="330" text-anchor="middle" font-size="9" fill="#777">CATHAY</text>
+    </g>
+
+    <!-- Taiwan Strait (chokepoint sea) -->
+    <g id="zone_ts_strait" data-zone="ts_strait" class="zone chokepoint_sea">
+      <rect x="280" y="215" width="140" height="115" rx="10" ry="10" fill="#BBDEFB" stroke="#0D47A1" stroke-width="2.5"/>
+      <text x="350" y="250" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">TAIWAN</text>
+      <text x="350" y="267" text-anchor="middle" font-size="12" font-weight="bold" fill="#0D47A1">STRAIT</text>
+      <text x="350" y="287" text-anchor="middle" font-size="10" font-weight="bold" fill="#D32F2F">CHOKEPOINT</text>
+      <text x="350" y="303" text-anchor="middle" font-size="9" fill="#555">130km crossing</text>
+      <!-- Chokepoint diamond -->
+      <polygon points="350,207 358,200 366,207 358,214" fill="#FF9800" stroke="#333" stroke-width="1"/>
+    </g>
+
+    <!-- Northern Sea Approach -->
+    <g id="zone_ts_sea_north" data-zone="ts_sea_north" class="zone sea">
+      <rect x="270" y="100" width="170" height="65" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="355" y="125" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Northern Sea</text>
+      <text x="355" y="140" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Approach</text>
+      <text x="355" y="155" text-anchor="middle" font-size="9" fill="#555">Yamato/Columbia route</text>
+    </g>
+
+    <!-- North Formosa -->
+    <g id="zone_ts_north_formosa" data-zone="ts_north_formosa" class="zone land_home formosa">
+      <rect x="465" y="170" width="140" height="75" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="2"/>
+      <text x="535" y="195" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">North Formosa</text>
+      <text x="535" y="211" text-anchor="middle" font-size="9" fill="#555">Taipei / TSMC fabs</text>
+      <text x="535" y="226" text-anchor="middle" font-size="9" fill="#555">Primary landing beaches</text>
+      <text x="535" y="238" text-anchor="middle" font-size="9" fill="#777">FORMOSA</text>
+    </g>
+
+    <!-- South Formosa -->
+    <g id="zone_ts_south_formosa" data-zone="ts_south_formosa" class="zone land_home formosa">
+      <rect x="465" y="315" width="140" height="75" rx="10" ry="10" fill="#C8E6C9" stroke="#333" stroke-width="1.5"/>
+      <text x="535" y="340" text-anchor="middle" font-size="12" font-weight="bold" fill="#1B5E20">South Formosa</text>
+      <text x="535" y="356" text-anchor="middle" font-size="9" fill="#555">Kaohsiung port</text>
+      <text x="535" y="371" text-anchor="middle" font-size="9" fill="#555">Secondary landing</text>
+      <text x="535" y="383" text-anchor="middle" font-size="9" fill="#777">FORMOSA</text>
+    </g>
+
+    <!-- East Formosa Sea (Pacific Approach) -->
+    <g id="zone_ts_sea_east" data-zone="ts_sea_east" class="zone sea">
+      <rect x="630" y="225" width="140" height="95" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="700" y="255" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">East Formosa</text>
+      <text x="700" y="270" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Sea</text>
+      <text x="700" y="288" text-anchor="middle" font-size="9" fill="#555">Pacific approach</text>
+      <text x="700" y="303" text-anchor="middle" font-size="9" fill="#555">US intervention route</text>
+    </g>
+
+    <!-- South China Sea North (below-left) -->
+    <g id="zone_ts_scs_north" data-zone="ts_scs_north" class="zone sea">
+      <rect x="95" y="460" width="160" height="65" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="175" y="485" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">South China Sea</text>
+      <text x="175" y="500" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">North</text>
+      <text x="175" y="515" text-anchor="middle" font-size="9" fill="#555">Cathay island bases</text>
+    </g>
+
+    <!-- Southern Sea Approach / Bashi Channel -->
+    <g id="zone_ts_sea_south" data-zone="ts_sea_south" class="zone sea">
+      <rect x="260" y="395" width="140" height="70" rx="10" ry="10" fill="#E3F2FD" stroke="#333" stroke-width="1.5"/>
+      <text x="330" y="420" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Southern Sea</text>
+      <text x="330" y="435" text-anchor="middle" font-size="11" font-weight="bold" fill="#1565C0">Approach</text>
+      <text x="330" y="455" text-anchor="middle" font-size="9" fill="#555">Second blockade axis</text>
+    </g>
+
+    <!-- Bashi Channel / Luzon Strait -->
+    <g id="zone_ts_bashi" data-zone="ts_bashi" class="zone chokepoint_sea">
+      <rect x="370" y="485" width="150" height="60" rx="10" ry="10" fill="#BBDEFB" stroke="#0D47A1" stroke-width="2"/>
+      <text x="445" y="505" text-anchor="middle" font-size="11" font-weight="bold" fill="#0D47A1">Bashi Channel</text>
+      <text x="445" y="520" text-anchor="middle" font-size="9" fill="#555">Luzon Strait</text>
+      <text x="445" y="535" text-anchor="middle" font-size="9" fill="#D32F2F">CHOKEPOINT</text>
+      <!-- Chokepoint diamond -->
+      <polygon points="445,479 453,472 461,479 453,486" fill="#FF9800" stroke="#333" stroke-width="1"/>
+    </g>
+
+    <!-- External: East China Sea (global) -->
+    <g id="zone_ecs_ext" class="external">
+      <rect x="280" y="40" width="160" height="30" rx="6" ry="6" fill="#E3F2FD" stroke="#1565C0" stroke-width="1"/>
+      <text x="360" y="60" text-anchor="middle" font-size="9" font-weight="bold" fill="#1565C0">EAST CHINA SEA (global)</text>
+    </g>
+
+    <!-- External: North Pacific (global) -->
+    <g id="zone_pacific_ext" class="external">
+      <rect x="740" y="195" width="50" height="50" rx="6" ry="6" fill="#E3F2FD" stroke="#1565C0" stroke-width="1"/>
+      <text x="765" y="218" text-anchor="middle" font-size="8" font-weight="bold" fill="#1565C0">N.</text>
+      <text x="765" y="230" text-anchor="middle" font-size="8" font-weight="bold" fill="#1565C0">PACIFIC</text>
+    </g>
+  </g>
+
+  <!-- ==================== INVASION PATH ==================== -->
+  <g id="invasion_path">
+    <!-- Cathay invasion: Staging -> Strait -> North/South Formosa -->
+    <path d="M 215,270 L 280,270" fill="none" stroke="#D32F2F" stroke-width="3" opacity="0.5" stroke-dasharray="8,4"/>
+    <polygon points="278,264 290,270 278,276" fill="#D32F2F" opacity="0.5"/>
+
+    <path d="M 420,250 L 465,210" fill="none" stroke="#D32F2F" stroke-width="3" opacity="0.5" stroke-dasharray="8,4"/>
+    <polygon points="459,206 471,208 461,218" fill="#D32F2F" opacity="0.5"/>
+
+    <path d="M 420,290 L 465,350" fill="none" stroke="#D32F2F" stroke-width="3" opacity="0.5" stroke-dasharray="8,4"/>
+    <polygon points="459,354 471,352 461,342" fill="#D32F2F" opacity="0.5"/>
+
+    <text x="230" y="255" font-size="9" font-weight="bold" fill="#D32F2F">INVASION</text>
+  </g>
+
+  <!-- ==================== US INTERVENTION PATH ==================== -->
+  <g id="intervention_path">
+    <!-- Pacific -> East Formosa Sea -> reinforce Formosa -->
+    <path d="M 740,270 L 770,270" fill="none" stroke="#1565C0" stroke-width="2.5" opacity="0.5" stroke-dasharray="6,4"/>
+    <path d="M 630,265 L 605,225" fill="none" stroke="#1565C0" stroke-width="2.5" opacity="0.5" stroke-dasharray="6,4"/>
+    <polygon points="609,221 603,233 613,227" fill="#1565C0" opacity="0.5"/>
+    <path d="M 630,290 L 605,340" fill="none" stroke="#1565C0" stroke-width="2.5" opacity="0.5" stroke-dasharray="6,4"/>
+    <polygon points="609,344 603,332 613,338" fill="#1565C0" opacity="0.5"/>
+
+    <text x="640" y="180" font-size="9" font-weight="bold" fill="#1565C0">US/YAMATO</text>
+    <text x="640" y="192" font-size="9" font-weight="bold" fill="#1565C0">INTERVENTION</text>
+  </g>
+
+  <!-- ==================== LEGEND ==================== -->
+  <g id="legend" transform="translate(15, 540)">
+    <rect x="0" y="0" width="770" height="45" rx="6" ry="6" fill="white" stroke="#999" stroke-width="1"/>
+    <text x="15" y="16" font-size="10" font-weight="bold" fill="#333">LEGEND:</text>
+    <rect x="75" y="6" width="16" height="12" rx="3" ry="3" fill="#FFF9C4" stroke="#333" stroke-width="0.8"/>
+    <text x="96" y="16" font-size="9" fill="#333">Cathay</text>
+    <rect x="135" y="6" width="16" height="12" rx="3" ry="3" fill="#C8E6C9" stroke="#333" stroke-width="0.8"/>
+    <text x="156" y="16" font-size="9" fill="#333">Formosa</text>
+    <rect x="205" y="6" width="16" height="12" rx="3" ry="3" fill="#E3F2FD" stroke="#333" stroke-width="0.8"/>
+    <text x="226" y="16" font-size="9" fill="#333">Sea zone</text>
+    <rect x="275" y="6" width="16" height="12" rx="3" ry="3" fill="#BBDEFB" stroke="#0D47A1" stroke-width="0.8"/>
+    <text x="296" y="16" font-size="9" fill="#333">Chokepoint</text>
+    <polygon points="363,12 369,6 375,12 369,18" fill="#FF9800" stroke="#333" stroke-width="0.5"/>
+    <text x="381" y="16" font-size="9" fill="#333">Choke marker</text>
+    <line x1="440" y1="12" x2="460" y2="12" stroke="#D32F2F" stroke-width="2.5" stroke-dasharray="4,2" opacity="0.6"/>
+    <text x="466" y="16" font-size="9" fill="#333">Cathay invasion</text>
+    <line x1="545" y1="12" x2="565" y2="12" stroke="#1565C0" stroke-width="2.5" stroke-dasharray="4,2" opacity="0.6"/>
+    <text x="571" y="16" font-size="9" fill="#333">US/Yamato intervention</text>
+    <text x="15" y="37" font-size="9" fill="#777">Invasion: Cathay Coast -> Strait (naval battle) -> North/South Formosa (landing). Requires 4:1 force ratio.</text>
+  </g>
+
+</svg>

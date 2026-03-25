@@ -1,0 +1,938 @@
+{
+  "meta": {
+    "version": "1.0",
+    "date": "2026-03-25",
+    "scale": "1 coin ≈ $100B real GDP",
+    "round": "Q1 2026 baseline"
+  },
+  "organizations": [
+    {
+      "id": "western_treaty",
+      "name": "Western Treaty (NATO)",
+      "type": "alliance",
+      "members": ["columbia", "albion", "teutonia", "gallia", "freeland", "ponte", "phrygia"],
+      "decision_rule": "consensus",
+      "partners": ["yamato", "hanguk"]
+    },
+    {
+      "id": "the_union",
+      "name": "The Union (EU)",
+      "type": "political_economic",
+      "members": ["gallia", "teutonia", "freeland", "ponte"],
+      "decision_rule": "consensus"
+    },
+    {
+      "id": "the_council",
+      "name": "The Council (UN Security Council)",
+      "type": "security",
+      "permanent_members": ["columbia", "cathay", "nordostan", "gallia", "albion"],
+      "rotating_members": ["bharata"],
+      "decision_rule": "p5_veto"
+    },
+    {
+      "id": "the_league",
+      "name": "The League (BRICS+)",
+      "type": "coordination",
+      "members": ["cathay", "nordostan", "bharata", "solaria", "persia", "mirage"],
+      "observers": ["phrygia"],
+      "decision_rule": "loose_consensus"
+    },
+    {
+      "id": "the_cartel",
+      "name": "The Cartel (OPEC+)",
+      "type": "economic",
+      "members": ["solaria", "nordostan", "persia", "mirage"],
+      "decision_rule": "independent_production"
+    },
+    {
+      "id": "the_seven",
+      "name": "The Seven (G7)",
+      "type": "coordination",
+      "members": ["columbia", "albion", "teutonia", "gallia", "yamato", "ponte"],
+      "decision_rule": "non_binding"
+    }
+  ],
+  "countries": [
+    {
+      "id": "columbia",
+      "sim_name": "Columbia",
+      "parallel": "United States",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_council", "the_seven"],
+      "economic": {
+        "gdp": 280,
+        "gdp_growth_rate": 2.3,
+        "sectors": {"resources": 5, "industry": 18, "services": 55, "technology": 22},
+        "tax_rate": 0.24,
+        "treasury": 50,
+        "inflation": 3.5,
+        "trade_balance": -12,
+        "oil_producer": true,
+        "formosa_dependency": 0.65,
+        "debt_burden": 5,
+        "social_spending_baseline": 0.30
+      },
+      "military": {
+        "ground": 22,
+        "naval": 14,
+        "tactical_air": 15,
+        "strategic_missiles": 12,
+        "air_defense": 4,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 15},
+        "maintenance_cost_per_unit": 0.5,
+        "production_capacity": {"ground": 4, "naval": 2, "tactical_air": 3}
+      },
+      "political": {
+        "stability": 7,
+        "political_support": 44,
+        "dem_rep_split": [47, 53],
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.0,
+        "ai_level": 3,
+        "ai_rd_progress": 0.60
+      }
+    },
+    {
+      "id": "cathay",
+      "sim_name": "Cathay",
+      "parallel": "China",
+      "regime_type": "autocracy",
+      "organizations": ["the_council", "the_league"],
+      "economic": {
+        "gdp": 190,
+        "gdp_growth_rate": 4.5,
+        "sectors": {"resources": 8, "industry": 40, "services": 35, "technology": 17},
+        "tax_rate": 0.20,
+        "treasury": 40,
+        "inflation": 1.5,
+        "trade_balance": 8,
+        "oil_producer": false,
+        "formosa_dependency": 0.55,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.22
+      },
+      "military": {
+        "ground": 25,
+        "naval": 8,
+        "tactical_air": 10,
+        "strategic_missiles": 4,
+        "air_defense": 3,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 12},
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {"ground": 5, "naval": 2, "tactical_air": 3},
+        "strategic_missile_growth": 1
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 55,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.80,
+        "ai_level": 2,
+        "ai_rd_progress": 0.70
+      }
+    },
+    {
+      "id": "nordostan",
+      "sim_name": "Nordostan",
+      "parallel": "Russia",
+      "regime_type": "autocracy",
+      "organizations": ["the_council", "the_league", "the_cartel"],
+      "economic": {
+        "gdp": 22,
+        "gdp_growth_rate": 1.0,
+        "sectors": {"resources": 40, "industry": 25, "services": 25, "technology": 10},
+        "tax_rate": 0.22,
+        "treasury": 12,
+        "inflation": 8.5,
+        "trade_balance": 3,
+        "oil_producer": true,
+        "formosa_dependency": 0.15,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.20
+      },
+      "military": {
+        "ground": 18,
+        "naval": 6,
+        "tactical_air": 8,
+        "strategic_missiles": 12,
+        "air_defense": 3,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 12},
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {"ground": 4, "naval": 1, "tactical_air": 2}
+      },
+      "political": {
+        "stability": 5,
+        "political_support": 62,
+        "dem_rep_split": null,
+        "war_tiredness": 3,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.20
+      }
+    },
+    {
+      "id": "heartland",
+      "sim_name": "Heartland",
+      "parallel": "Ukraine",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 2,
+        "gdp_growth_rate": -2.0,
+        "sectors": {"resources": 15, "industry": 30, "services": 40, "technology": 15},
+        "tax_rate": 0.22,
+        "treasury": 3,
+        "inflation": 12.0,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.10,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.25
+      },
+      "military": {
+        "ground": 15,
+        "naval": 0,
+        "tactical_air": 5,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 2, "naval": 0, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.3,
+        "production_capacity": {"ground": 3, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 5,
+        "political_support": 48,
+        "dem_rep_split": null,
+        "war_tiredness": 5,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.15
+      }
+    },
+    {
+      "id": "persia",
+      "sim_name": "Persia",
+      "parallel": "Iran",
+      "regime_type": "theocracy",
+      "organizations": ["the_league", "the_cartel"],
+      "economic": {
+        "gdp": 5,
+        "gdp_growth_rate": 1.5,
+        "sectors": {"resources": 35, "industry": 30, "services": 28, "technology": 7},
+        "tax_rate": 0.18,
+        "treasury": 5,
+        "inflation": 25.0,
+        "trade_balance": 1,
+        "oil_producer": true,
+        "formosa_dependency": 0.10,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.20
+      },
+      "military": {
+        "ground": 8,
+        "naval": 2,
+        "tactical_air": 6,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.25,
+        "production_capacity": {"ground": 2, "naval": 0, "tactical_air": 2}
+      },
+      "political": {
+        "stability": 4,
+        "political_support": 40,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "theocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.60,
+        "ai_level": 1,
+        "ai_rd_progress": 0.15
+      }
+    },
+    {
+      "id": "gallia",
+      "sim_name": "Gallia",
+      "parallel": "France",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_union", "the_council", "the_seven"],
+      "economic": {
+        "gdp": 31,
+        "gdp_growth_rate": 1.2,
+        "sectors": {"resources": 5, "industry": 20, "services": 58, "technology": 17},
+        "tax_rate": 0.45,
+        "treasury": 10,
+        "inflation": 2.5,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.40,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.38
+      },
+      "military": {
+        "ground": 4,
+        "naval": 3,
+        "tactical_air": 3,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 15},
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {"ground": 1, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 35,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.30,
+        "ai_level": 1,
+        "ai_rd_progress": 0.35
+      }
+    },
+    {
+      "id": "teutonia",
+      "sim_name": "Teutonia",
+      "parallel": "Germany",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_union", "the_seven"],
+      "economic": {
+        "gdp": 45,
+        "gdp_growth_rate": 0.8,
+        "sectors": {"resources": 3, "industry": 35, "services": 48, "technology": 14},
+        "tax_rate": 0.38,
+        "treasury": 15,
+        "inflation": 2.8,
+        "trade_balance": 5,
+        "oil_producer": false,
+        "formosa_dependency": 0.50,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.35
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {"ground": 2, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 7,
+        "political_support": 42,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 2,
+        "ai_rd_progress": 0.40
+      }
+    },
+    {
+      "id": "freeland",
+      "sim_name": "Freeland",
+      "parallel": "Poland",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_union"],
+      "economic": {
+        "gdp": 9,
+        "gdp_growth_rate": 3.5,
+        "sectors": {"resources": 10, "industry": 35, "services": 45, "technology": 10},
+        "tax_rate": 0.30,
+        "treasury": 5,
+        "inflation": 4.0,
+        "trade_balance": -1,
+        "oil_producer": false,
+        "formosa_dependency": 0.30,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.28
+      },
+      "military": {
+        "ground": 5,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {"ground": 2, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 7,
+        "political_support": 50,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.20
+      }
+    },
+    {
+      "id": "ponte",
+      "sim_name": "Ponte",
+      "parallel": "Italy",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_union", "the_seven"],
+      "economic": {
+        "gdp": 23,
+        "gdp_growth_rate": 0.5,
+        "sectors": {"resources": 4, "industry": 28, "services": 56, "technology": 12},
+        "tax_rate": 0.42,
+        "treasury": 6,
+        "inflation": 2.8,
+        "trade_balance": 1,
+        "oil_producer": false,
+        "formosa_dependency": 0.35,
+        "debt_burden": 8,
+        "social_spending_baseline": 0.32
+      },
+      "military": {
+        "ground": 3,
+        "naval": 2,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.40,
+        "production_capacity": {"ground": 1, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 38,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.25
+      }
+    },
+    {
+      "id": "albion",
+      "sim_name": "Albion",
+      "parallel": "United Kingdom",
+      "regime_type": "democracy",
+      "organizations": ["western_treaty", "the_council", "the_seven"],
+      "economic": {
+        "gdp": 35,
+        "gdp_growth_rate": 1.0,
+        "sectors": {"resources": 5, "industry": 18, "services": 60, "technology": 17},
+        "tax_rate": 0.33,
+        "treasury": 10,
+        "inflation": 3.0,
+        "trade_balance": -3,
+        "oil_producer": true,
+        "formosa_dependency": 0.40,
+        "debt_burden": 4,
+        "social_spending_baseline": 0.33
+      },
+      "military": {
+        "ground": 3,
+        "naval": 3,
+        "tactical_air": 3,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 15},
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {"ground": 1, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 40,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.30,
+        "ai_level": 2,
+        "ai_rd_progress": 0.45
+      }
+    },
+    {
+      "id": "bharata",
+      "sim_name": "Bharata",
+      "parallel": "India",
+      "regime_type": "democracy",
+      "organizations": ["the_league"],
+      "economic": {
+        "gdp": 42,
+        "gdp_growth_rate": 6.5,
+        "sectors": {"resources": 10, "industry": 25, "services": 48, "technology": 17},
+        "tax_rate": 0.18,
+        "treasury": 12,
+        "inflation": 5.0,
+        "trade_balance": -3,
+        "oil_producer": false,
+        "formosa_dependency": 0.35,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.20
+      },
+      "military": {
+        "ground": 12,
+        "naval": 3,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.25,
+        "production_capacity": {"ground": 3, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 58,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.40,
+        "ai_level": 2,
+        "ai_rd_progress": 0.45
+      }
+    },
+    {
+      "id": "levantia",
+      "sim_name": "Levantia",
+      "parallel": "Israel",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 5,
+        "gdp_growth_rate": 3.0,
+        "sectors": {"resources": 3, "industry": 15, "services": 50, "technology": 32},
+        "tax_rate": 0.32,
+        "treasury": 5,
+        "inflation": 3.5,
+        "trade_balance": -1,
+        "oil_producer": false,
+        "formosa_dependency": 0.30,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.28
+      },
+      "military": {
+        "ground": 6,
+        "naval": 1,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 3,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.40,
+        "production_capacity": {"ground": 2, "naval": 0, "tactical_air": 2}
+      },
+      "political": {
+        "stability": 5,
+        "political_support": 52,
+        "dem_rep_split": null,
+        "war_tiredness": 2,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.50,
+        "ai_level": 2,
+        "ai_rd_progress": 0.55
+      }
+    },
+    {
+      "id": "formosa",
+      "sim_name": "Formosa",
+      "parallel": "Taiwan",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 8,
+        "gdp_growth_rate": 3.0,
+        "sectors": {"resources": 2, "industry": 30, "services": 35, "technology": 33},
+        "tax_rate": 0.20,
+        "treasury": 8,
+        "inflation": 2.0,
+        "trade_balance": 4,
+        "oil_producer": false,
+        "formosa_dependency": 0.0,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.22
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {"ground": 1, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 7,
+        "political_support": 55,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 2,
+        "ai_rd_progress": 0.50
+      }
+    },
+    {
+      "id": "phrygia",
+      "sim_name": "Phrygia",
+      "parallel": "Turkey",
+      "regime_type": "hybrid",
+      "organizations": ["western_treaty"],
+      "economic": {
+        "gdp": 11,
+        "gdp_growth_rate": 3.0,
+        "sectors": {"resources": 8, "industry": 30, "services": 50, "technology": 12},
+        "tax_rate": 0.25,
+        "treasury": 4,
+        "inflation": 45.0,
+        "trade_balance": -3,
+        "oil_producer": false,
+        "formosa_dependency": 0.20,
+        "debt_burden": 3,
+        "social_spending_baseline": 0.22
+      },
+      "military": {
+        "ground": 6,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.30,
+        "production_capacity": {"ground": 2, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 5,
+        "political_support": 50,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "hybrid"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.25
+      }
+    },
+    {
+      "id": "yamato",
+      "sim_name": "Yamato",
+      "parallel": "Japan",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 43,
+        "gdp_growth_rate": 1.0,
+        "sectors": {"resources": 2, "industry": 28, "services": 50, "technology": 20},
+        "tax_rate": 0.30,
+        "treasury": 15,
+        "inflation": 2.5,
+        "trade_balance": -2,
+        "oil_producer": false,
+        "formosa_dependency": 0.55,
+        "debt_burden": 6,
+        "social_spending_baseline": 0.30
+      },
+      "military": {
+        "ground": 3,
+        "naval": 4,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.45,
+        "production_capacity": {"ground": 1, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 8,
+        "political_support": 48,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.10,
+        "ai_level": 3,
+        "ai_rd_progress": 0.30
+      }
+    },
+    {
+      "id": "solaria",
+      "sim_name": "Solaria",
+      "parallel": "Saudi Arabia",
+      "regime_type": "autocracy",
+      "organizations": ["the_league", "the_cartel"],
+      "economic": {
+        "gdp": 11,
+        "gdp_growth_rate": 3.5,
+        "sectors": {"resources": 45, "industry": 20, "services": 28, "technology": 7},
+        "tax_rate": 0.10,
+        "treasury": 20,
+        "inflation": 2.0,
+        "trade_balance": 8,
+        "oil_producer": true,
+        "formosa_dependency": 0.20,
+        "debt_burden": 1,
+        "social_spending_baseline": 0.25
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.40,
+        "production_capacity": {"ground": 1, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 7,
+        "political_support": 65,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.10,
+        "ai_level": 1,
+        "ai_rd_progress": 0.20
+      }
+    },
+    {
+      "id": "choson",
+      "sim_name": "Choson",
+      "parallel": "North Korea",
+      "regime_type": "autocracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 0.3,
+        "gdp_growth_rate": 0.5,
+        "sectors": {"resources": 20, "industry": 40, "services": 35, "technology": 5},
+        "tax_rate": 0.50,
+        "treasury": 1,
+        "inflation": 10.0,
+        "trade_balance": -0.5,
+        "oil_producer": false,
+        "formosa_dependency": 0.0,
+        "debt_burden": 0,
+        "social_spending_baseline": 0.10
+      },
+      "military": {
+        "ground": 8,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 1,
+        "air_defense": 1,
+        "production_costs": {"ground": 1, "naval": 3, "tactical_air": 2, "strategic_missile": 10},
+        "maintenance_cost_per_unit": 0.15,
+        "production_capacity": {"ground": 2, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 4,
+        "political_support": 70,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.50,
+        "ai_level": 0,
+        "ai_rd_progress": 0.0
+      }
+    },
+    {
+      "id": "hanguk",
+      "sim_name": "Hanguk",
+      "parallel": "South Korea",
+      "regime_type": "democracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 18,
+        "gdp_growth_rate": 2.2,
+        "sectors": {"resources": 3, "industry": 33, "services": 42, "technology": 22},
+        "tax_rate": 0.26,
+        "treasury": 8,
+        "inflation": 2.5,
+        "trade_balance": 3,
+        "oil_producer": false,
+        "formosa_dependency": 0.40,
+        "debt_burden": 2,
+        "social_spending_baseline": 0.25
+      },
+      "military": {
+        "ground": 5,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {"ground": 2, "naval": 1, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 6,
+        "political_support": 35,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "democracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.05,
+        "ai_level": 2,
+        "ai_rd_progress": 0.50
+      }
+    },
+    {
+      "id": "caribe",
+      "sim_name": "Caribe",
+      "parallel": "Cuba + Venezuela",
+      "regime_type": "autocracy",
+      "organizations": [],
+      "economic": {
+        "gdp": 2,
+        "gdp_growth_rate": -1.0,
+        "sectors": {"resources": 50, "industry": 20, "services": 25, "technology": 5},
+        "tax_rate": 0.30,
+        "treasury": 1,
+        "inflation": 60.0,
+        "trade_balance": 0,
+        "oil_producer": true,
+        "formosa_dependency": 0.0,
+        "debt_burden": 5,
+        "social_spending_baseline": 0.20
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 1,
+        "strategic_missiles": 0,
+        "air_defense": 0,
+        "production_costs": {"ground": 2, "naval": 4, "tactical_air": 3, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.20,
+        "production_capacity": {"ground": 1, "naval": 0, "tactical_air": 0}
+      },
+      "political": {
+        "stability": 3,
+        "political_support": 45,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 0,
+        "ai_rd_progress": 0.0
+      }
+    },
+    {
+      "id": "mirage",
+      "sim_name": "Mirage",
+      "parallel": "UAE",
+      "regime_type": "autocracy",
+      "organizations": ["the_league", "the_cartel"],
+      "economic": {
+        "gdp": 5,
+        "gdp_growth_rate": 4.0,
+        "sectors": {"resources": 30, "industry": 15, "services": 45, "technology": 10},
+        "tax_rate": 0.0,
+        "treasury": 15,
+        "inflation": 2.0,
+        "trade_balance": 5,
+        "oil_producer": true,
+        "formosa_dependency": 0.15,
+        "debt_burden": 0,
+        "social_spending_baseline": 0.20
+      },
+      "military": {
+        "ground": 2,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {"ground": 3, "naval": 5, "tactical_air": 4, "strategic_missile": 0},
+        "maintenance_cost_per_unit": 0.35,
+        "production_capacity": {"ground": 1, "naval": 0, "tactical_air": 1}
+      },
+      "political": {
+        "stability": 8,
+        "political_support": 70,
+        "dem_rep_split": null,
+        "war_tiredness": 0,
+        "regime_type": "autocracy"
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.30
+      }
+    }
+  ],
+  "starting_conditions": {
+    "wars": [
+      {
+        "attacker": "nordostan",
+        "defender": "heartland",
+        "theater": "eastern_europe",
+        "status": "active",
+        "start_round": -8,
+        "occupied_zones": ["ee_east_front_central", "ee_east_front_south", "ee_occupied_south", "ee_crimea_naval"]
+      }
+    ],
+    "opec_production": {
+      "solaria": "normal",
+      "nordostan": "normal",
+      "persia": "normal",
+      "mirage": "normal"
+    },
+    "active_theaters": ["eastern_europe", "middle_east"],
+    "oil_price_index": 100
+  }
+}
