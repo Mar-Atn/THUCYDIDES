@@ -125,7 +125,7 @@ In TTT: "Helmsman offered a 5-year oil purchase guarantee in exchange for BRICS+
 
 What the AI wants and how it plans to get it. Current objectives, multi-round strategic plans, tactical priorities for this round, contingency plans, resource allocation intentions.
 
-In TTT: "Priority 1: Keep oil price above 80 by coordinating OPEC+ restraint. Priority 2: Delay BRICS+ currency commitment until Round 4 — maintain leverage with both sides. Priority 3: Acquire air defense units from Columbia (2 units, willing to pay up to 15 coins). Contingency: If Hormuz is blockaded by Persia, pivot to maximum production to capture market share."
+In TTT: "Priority 1: Keep oil price above 80 by coordinating OPEC+ restraint. Priority 2: Delay BRICS+ currency commitment until Round 4 — maintain leverage with both sides. Priority 3: Acquire air defense units from Columbia (2 units, willing to pay up to 15 coins). Contingency: If Gulf Gate is blockaded by Persia, pivot to maximum production to capture market share."
 
 ### Block Updates and Versioning
 

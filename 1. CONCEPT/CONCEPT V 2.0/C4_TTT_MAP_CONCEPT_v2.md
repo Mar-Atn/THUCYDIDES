@@ -35,7 +35,7 @@ All 15+ Tier 1 countries must be clearly identifiable. Tier 2 countries included
 These are the world's strategic bottlenecks — locations where naval power, trade flows, and military access converge. Control or disruption of any chokepoint has global consequences.
 
 - **Taiwan Strait** — semiconductor supply, China-Pacific access
-- **Strait of Hormuz** — Gulf oil exports, Iran's leverage point
+- **Gulf Gate** — Gulf oil exports, Iran's leverage point
 - **Bosphorus / Black Sea** — Russia's warm-water access, Turkey's control lever
 - **Suez Canal** — Europe-Asia trade shortcut
 - **Malacca Strait** — China's energy import vulnerability
@@ -78,7 +78,7 @@ Activates if China initiates blockade, military exercises-as-pressure, or invasi
 Naval and air power dominate. Semiconductor facilities on Taiwan are a strategic target / asset to protect. Resolution is fast but consequences are enormous (global economic shock from trade disruption).
 
 #### Mashriq
-**7-8 zones** covering: Iran (nuclear sites marked), Israel, the Gulf (Hormuz), and proxy territories (Lebanon/Syria, Yemen). 
+**7-8 zones** covering: Iran (nuclear sites marked), Israel, the Gulf (Gulf Gate), and proxy territories (Lebanon/Syria, Yemen). 
 
 Air and missile power dominate. The nuclear dimension (Iran's program, Israel's undeclared arsenal) adds escalation risk. Oil infrastructure as strategic target.
 

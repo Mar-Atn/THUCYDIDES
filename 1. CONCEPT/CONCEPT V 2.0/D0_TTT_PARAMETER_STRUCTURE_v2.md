@@ -264,7 +264,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 2.4.2 | Oil price model | W | A | Price = f(total OPEC+ production decisions, supply disruptions, demand, blockades) |
 | 2.4.3 | OPEC+ production options | W | A | Low / normal / high — per member |
 | 2.4.4 | Starting OPEC+ production levels | K | A | Initial production setting per OPEC+ member |
-| 2.4.5 | Hormuz blockade impact | W | A | Effect on oil supply/price when Strait of Hormuz is blocked |
+| 2.4.5 | Gulf Gate blockade impact | W | A | Effect on oil supply/price when Strait of Gulf Gate is blocked |
 | 2.4.6 | Oil revenue formula | K | A | How oil price translates to revenue for each producer |
 
 ### 2.5 — Financial Markets & Indicators (source: C1, E1)

@@ -853,7 +853,7 @@
        These are ocean hexes with orange/yellow borders
        ============================================================ -->
 
-  <!-- Strait of Hormuz: between Persia and Arabian Sea area -->
+  <!-- Gulf Gate: between Persia and Arabian Sea area -->
   <!-- r7c12: (cx=689.5, cy=380) -->
   <polygon points="689.5,350 715.48,365 715.48,395 689.5,410 663.52,395 663.52,365" fill="#B8D4E8" stroke="#cc8800" stroke-width="2.5"/>
   <text x="689.5" y="376" class="hex-label-sea">Strait of</text>
@@ -1002,7 +1002,7 @@
 
   <!-- Chokepoints list -->
   <text x="270" y="638" class="legend-text" font-weight="700">8 CHOKEPOINTS:</text>
-  <text x="270" y="653" class="legend-text">1. Hormuz  2. Suez  3. Bab el-Mandeb</text>
+  <text x="270" y="653" class="legend-text">1. Gulf Gate  2. Suez  3. Bab el-Mandeb</text>
   <text x="270" y="668" class="legend-text">4. Bosphorus  5. GIUK Gap  6. Malacca</text>
   <text x="270" y="683" class="legend-text">7. Taiwan Strait  8. Caribbean Passages</text>
 

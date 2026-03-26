@@ -56,7 +56,7 @@ g_choson,g_sea_east_china,land_sea
 g_hanguk,g_sea_east_china,land_sea
 g_caribe,g_sea_gulf_caribbean,land_sea
 g_mirage,g_sea_persian_gulf,land_sea
-g_mirage,me_gulf_hormuz,land_sea
+g_mirage,me_gulf_gate,land_sea
 g_thule,g_sea_arctic,land_sea
 g_thule,g_sea_giuk,land_sea
 g_contested_horn,g_sea_red,land_sea
@@ -76,8 +76,8 @@ g_sea_southeast_asia,g_sea_indian_ocean,sea_sea
 g_sea_indian_ocean,g_sea_arabian,sea_sea
 g_sea_indian_ocean,g_sea_red,sea_sea
 g_sea_arabian,g_sea_persian_gulf,sea_sea
-g_sea_persian_gulf,me_gulf_hormuz,sea_sea
-me_gulf_hormuz,g_sea_arabian,sea_sea
+g_sea_persian_gulf,me_gulf_gate,sea_sea
+me_gulf_gate,g_sea_arabian,sea_sea
 g_sea_red,g_sea_med_east,sea_sea
 g_sea_med_west,g_sea_med_east,sea_sea
 g_sea_med_east,g_sea_black,sea_sea
@@ -109,7 +109,7 @@ ee_belarus,ee_nord_border,land_land
 ee_belarus,ee_capital,land_land
 me_persia_west,me_persia_nuclear,land_land
 me_persia_west,me_iraq_corridor,land_land
-me_persia_west,me_gulf_hormuz,land_sea
+me_persia_west,me_gulf_gate,land_sea
 me_persia_nuclear,me_persia_east,land_land
 me_persia_east,g_sea_persian_gulf,land_sea
 me_persia_east,g_contested_central_asia,land_land
@@ -119,5 +119,5 @@ me_levantia_north,me_syria_lebanon,land_land
 me_syria_lebanon,me_iraq_corridor,land_land
 me_iraq_corridor,me_persia_west,land_land
 me_yemen,g_sea_red,land_sea
-me_yemen,me_gulf_hormuz,land_sea
+me_yemen,me_gulf_gate,land_sea
 g_choson_border,g_choson,land_land

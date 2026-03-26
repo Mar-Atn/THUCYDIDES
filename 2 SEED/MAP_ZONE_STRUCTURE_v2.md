@@ -48,7 +48,7 @@
 ## Chokepoints
 
 - **Formosa Strait** (`cp_formosa_strait`): grid (6,17), adjacent land: cathay, formosa
-- **Strait of Hormuz** (`cp_hormuz`): grid (8,13), adjacent land: persia, solaria, mirage, bharata
+- **Gulf Gate** (`cp_gulf_gate`): grid (8,13), adjacent land: persia, solaria, mirage, bharata
 - **Caribe Passage** (`cp_caribe_passage`): grid (9,2), adjacent land: caribe, columbia
 
 ## Adjacency Rules
@@ -151,11 +151,11 @@ Countries that share at least one land border edge:
 | persia_2 | Persia | land | persia | 6 | 12 | sea_5_11, persia_1, sea_6_11, sea_6_13, levantia, persia_3 |
 | phrygia_2 | Phrygia | land | phrygia | 7 | 10 | phrygia_1, sea_6_11, sea_7_9, levantia, sea_8_10, solaria_1 |
 | levantia | Levantia | land | levantia | 7 | 11 | sea_6_11, persia_2, phrygia_2, persia_3, solaria_1, solaria_2 |
-| persia_3 | Persia | land | persia | 7 | 12 | persia_2, sea_6_13, levantia, bharata_3, solaria_2, cp_hormuz |
+| persia_3 | Persia | land | persia | 7 | 12 | persia_2, sea_6_13, levantia, bharata_3, solaria_2, cp_gulf_gate |
 | solaria_1 | Solaria | land | solaria | 8 | 11 | phrygia_2, levantia, sea_8_10, solaria_2, horn, sea_9_11 |
-| solaria_2 | Solaria | land | solaria | 8 | 12 | levantia, persia_3, solaria_1, cp_hormuz, sea_9_11, mirage |
+| solaria_2 | Solaria | land | solaria | 8 | 12 | levantia, persia_3, solaria_1, cp_gulf_gate, sea_9_11, mirage |
 | horn | Horn | land | horn | 9 | 10 | sea_8_10, solaria_1, sea_9_9, sea_9_11, sea_10_10, sea_10_11 |
-| mirage | Mirage | land | mirage | 9 | 12 | solaria_2, cp_hormuz, sea_9_11, sea_9_13, sea_10_12, sea_10_13 |
+| mirage | Mirage | land | mirage | 9 | 12 | solaria_2, cp_gulf_gate, sea_9_11, sea_9_13, sea_10_12, sea_10_13 |
 
 ### Sogdiana (Central Asia)
 
@@ -170,7 +170,7 @@ Countries that share at least one land border edge:
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | bharata_1 | Bharata | land | bharata | 6 | 14 | sogdiana_2, cathay_2, sea_6_13, sea_6_15, bharata_3, bharata_2 |
-| bharata_3 | Bharata | land | bharata | 7 | 13 | sea_6_13, bharata_1, persia_3, bharata_2, cp_hormuz, sea_8_14 |
+| bharata_3 | Bharata | land | bharata | 7 | 13 | sea_6_13, bharata_1, persia_3, bharata_2, cp_gulf_gate, sea_8_14 |
 | bharata_2 | Bharata | land | bharata | 7 | 14 | bharata_1, sea_6_15, bharata_3, sea_7_15, sea_8_14, sea_8_15 |
 
 ### Asu (East Asia)
@@ -193,5 +193,5 @@ Countries that share at least one land border edge:
 | hex_id | display_name | type | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|----------|----------|---------------|
 | cp_formosa_strait | Formosa Strait | chokepoint | 6 | 17 | cathay_5, sea_5_17, sea_6_16, sea_6_18, sea_7_16, formosa |
-| cp_hormuz | Strait of Hormuz | chokepoint | 8 | 13 | persia_3, bharata_3, solaria_2, sea_8_14, mirage, sea_9_13 |
+| cp_gulf_gate | Gulf Gate | chokepoint | 8 | 13 | persia_3, bharata_3, solaria_2, sea_8_14, mirage, sea_9_13 |
 | cp_caribe_passage | Caribe Passage | chokepoint | 9 | 2 | col_south, sea_8_3, sea_9_1, caribe, sea_10_2, sea_10_3 |

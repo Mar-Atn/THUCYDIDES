@@ -560,7 +560,7 @@
   <!-- ================================================ -->
   <rect x="420" y="520" width="220" height="260" fill="white" stroke="#bbb" stroke-width="1" rx="6" opacity="0.92"/>
   <text x="530" y="543" class="legend-title" text-anchor="middle">8 CHOKEPOINTS</text>
-  <text x="435" y="565" class="legend-text">1. Strait of Hormuz</text>
+  <text x="435" y="565" class="legend-text">1. Gulf Gate</text>
   <text x="435" y="582" class="legend-text">2. Suez Canal</text>
   <text x="435" y="599" class="legend-text">3. Bab el-Mandeb</text>
   <text x="435" y="616" class="legend-text">4. Bosphorus Strait</text>

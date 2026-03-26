@@ -81,11 +81,11 @@ persia,ground,3,me_persia_west
 persia,ground,2,me_persia_nuclear
 persia,ground,2,me_persia_east
 persia,ground,1,me_iraq_corridor
-persia,naval,2,me_gulf_hormuz
+persia,naval,2,me_gulf_gate
 persia,tactical_air,2,me_persia_west
 persia,tactical_air,2,me_persia_nuclear
 persia,tactical_air,1,me_persia_east
-persia,tactical_air,1,me_gulf_hormuz
+persia,tactical_air,1,me_gulf_gate
 persia,air_defense,1,me_persia_nuclear
 gallia,ground,3,g_gallia
 gallia,ground,1,me_syria_lebanon

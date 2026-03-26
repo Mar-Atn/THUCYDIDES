@@ -60,7 +60,7 @@ ee_nord_border,Nordostan Border,land_home,nordostan,eastern_ereb,false
 me_persia_west,Persia Western,land_home,persia,mashriq,false
 me_persia_nuclear,Persia Nuclear Zone,land_home,persia,mashriq,false
 me_persia_east,Persia Eastern,land_home,persia,mashriq,false
-me_gulf_hormuz,Strait of Hormuz,chokepoint_sea,none,mashriq,true
+me_gulf_gate,Gulf Gate,chokepoint_sea,none,mashriq,true
 me_levantia_core,Levantia Core,land_home,levantia,mashriq,false
 me_levantia_north,Levantia Northern,land_home,levantia,mashriq,false
 me_syria_lebanon,Syria-Lebanon,land_contested,none,mashriq,false

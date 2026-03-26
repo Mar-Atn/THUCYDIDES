@@ -93,7 +93,7 @@
 
   <!-- ============ CHOKEPOINT MARKERS — Military star ============ -->
 
-  <!-- Hormuz star -->
+  <!-- Gulf Gate star -->
   <polygon points="480,280 483,274 490,273 485,268 486,261 480,265 474,261 475,268 470,273 477,274"
            fill="#8B2222" stroke="#5B1111" stroke-width="0.5"/>
   <text x="480" y="258" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#8B2222" text-anchor="middle" font-weight="bold" letter-spacing="2">HORMUZ</text>

@@ -102,7 +102,7 @@
 
   <!-- ============ CHOKEPOINT MARKERS — Anchor icons ============ -->
 
-  <!-- Hormuz anchor -->
+  <!-- Gulf Gate anchor -->
   <g transform="translate(485,278)">
     <circle r="3" fill="none" stroke="#FF6644" stroke-width="1.5"/>
     <line x1="0" y1="3" x2="0" y2="12" stroke="#FF6644" stroke-width="1.5"/>

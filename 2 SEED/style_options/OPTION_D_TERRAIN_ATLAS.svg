@@ -143,7 +143,7 @@
 
   <!-- ============ CHOKEPOINT MARKERS ============ -->
 
-  <!-- Hormuz passage marker -->
+  <!-- Gulf Gate passage marker -->
   <text x="478" y="258" font-family="Georgia, serif" font-size="8" fill="#BB3333" text-anchor="middle" font-weight="bold">HORMUZ</text>
   <text x="478" y="310" font-family="Georgia, serif" font-size="7" fill="#BB3333" text-anchor="middle" font-style="italic">Blockaded</text>
 

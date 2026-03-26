@@ -58,7 +58,7 @@
   <path d="M310,150 L380,160 L400,200 L380,230 L340,210 L300,180 Z"
         fill="#D8C0A8" stroke="#333333" stroke-width="1.5"/>
 
-  <!-- Persia South (Coast / Hormuz Defense) -->
+  <!-- Persia South (Coast / Gulf Gate Defense) -->
   <path d="M380,160 L460,150 L500,180 L520,220 L500,260 L440,270 L400,260 L380,230 L400,200 Z"
         fill="#D0B898" stroke="#333333" stroke-width="1.5"/>
 
@@ -90,13 +90,13 @@
   <path d="M440,260 L500,260 L520,280 L500,300 L460,310 L440,290 Z"
         fill="#7BA7CC" stroke="#333333" stroke-width="1.5"/>
 
-  <!-- Hormuz BLOCKED indicator - hatching overlay -->
+  <!-- Gulf Gate BLOCKED indicator - hatching overlay -->
   <path d="M440,260 L500,260 L520,280 L500,300 L460,310 L440,290 Z"
         fill="url(#blockadeHatchA)" stroke="none"/>
 
   <!-- ============ CHOKEPOINT MARKERS ============ -->
 
-  <!-- Hormuz diamond marker -->
+  <!-- Gulf Gate diamond marker -->
   <polygon points="480,280 490,270 500,280 490,290" fill="#CC3333" stroke="#991111" stroke-width="1"/>
   <text x="480" y="265" font-family="Georgia, serif" font-size="8" fill="#CC3333" text-anchor="middle" font-weight="bold">HORMUZ</text>
   <text x="480" y="305" font-family="Georgia, serif" font-size="7" fill="#CC3333" text-anchor="middle" font-style="italic">BLOCKED</text>
@@ -128,7 +128,7 @@
 
   <!-- ============ UNIT DEPLOYMENTS ============ -->
 
-  <!-- Persia: 3 ground units in South (Hormuz defense) -->
+  <!-- Persia: 3 ground units in South (Gulf Gate defense) -->
   <circle cx="430" cy="235" r="10" fill="#D0B898" stroke="#333" stroke-width="1"/>
   <text x="430" y="239" font-family="Georgia, serif" font-size="9" fill="#333" text-anchor="middle" font-weight="bold">3</text>
   <text x="445" y="248" font-family="Georgia, serif" font-size="6" fill="#666">GND</text>

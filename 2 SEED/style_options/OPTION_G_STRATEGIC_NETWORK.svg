@@ -456,7 +456,7 @@
   <circle cx="640" cy="330" r="12" fill="#5a85a5" stroke="#3a6585" stroke-width="1.5"/>
   <text x="640" y="328" class="node-label-sea">PERS.</text>
   <text x="640" y="336" class="node-label-sea">GULF</text>
-  <!-- Chokepoint ring (Hormuz) -->
+  <!-- Chokepoint ring (Gulf Gate) -->
   <circle cx="640" cy="330" r="16" fill="none" stroke="#aa2222" stroke-width="2"/>
   <text x="640" y="350" class="chokepoint-label">HORMUZ</text>
 
@@ -580,7 +580,7 @@
   <!-- ================================================ -->
   <rect x="400" y="460" width="200" height="225" fill="white" stroke="#ddd" stroke-width="1" rx="5"/>
   <text x="500" y="480" class="legend-title" text-anchor="middle">8 CHOKEPOINTS</text>
-  <text x="415" y="498" class="legend-text">1. Strait of Hormuz</text>
+  <text x="415" y="498" class="legend-text">1. Gulf Gate</text>
   <text x="415" y="512" class="legend-text">2. Suez Canal</text>
   <text x="415" y="526" class="legend-text">3. Bab el-Mandeb</text>
   <text x="415" y="540" class="legend-text">4. Bosphorus Strait</text>

@@ -231,7 +231,7 @@
   <polygon points="648,322 675.7,306 675.7,338 648,354 620.3,338 620.3,306" fill="#6a97bc" stroke="#5a87ac" stroke-width="0.8"/>
   <text x="648" y="322" class="hex-label-sea">Persian</text>
   <text x="648" y="331" class="hex-label-sea">Gulf</text>
-  <!-- Chokepoint: Hormuz -->
+  <!-- Chokepoint: Gulf Gate -->
   <circle cx="663" cy="342" r="4" fill="none" stroke="#8b2222" stroke-width="1.5"/>
   <text x="663" y="352" class="chokepoint-label">HORMUZ</text>
 
@@ -520,7 +520,7 @@
   <!-- ============================================ -->
   <rect x="600" y="480" width="200" height="200" fill="white" stroke="#ccc" stroke-width="1" rx="4"/>
   <text x="615" y="498" class="legend-title">8 CHOKEPOINTS</text>
-  <text x="615" y="514" class="legend-text">1. Strait of Hormuz</text>
+  <text x="615" y="514" class="legend-text">1. Gulf Gate</text>
   <text x="615" y="528" class="legend-text">2. Suez Canal</text>
   <text x="615" y="542" class="legend-text">3. Bab el-Mandeb (Red Sea)</text>
   <text x="615" y="556" class="legend-text">4. Bosphorus Strait</text>

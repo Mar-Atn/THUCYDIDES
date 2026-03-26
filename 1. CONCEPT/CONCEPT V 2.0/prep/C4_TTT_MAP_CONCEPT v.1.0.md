@@ -35,7 +35,7 @@ All 15+ Tier 1 countries must be clearly identifiable. Tier 2 countries included
 These are the world's strategic bottlenecks — locations where naval power, trade flows, and military access converge. Control or disruption of any chokepoint has global consequences.
 
 - **Taiwan Strait** — semiconductor supply, China-Pacific access
-- **Strait of Hormuz** — Gulf oil exports, Iran's leverage point
+- **Gulf Gate** — Gulf oil exports, Iran's leverage point
 - **Bosphorus / Black Sea** — Russia's warm-water access, Turkey's control lever
 - **Suez Canal** — Europe-Asia trade shortcut
 - **Malacca Strait** — China's energy import vulnerability
@@ -78,7 +78,7 @@ Activates if China initiates blockade, military exercises-as-pressure, or invasi
 Naval and air power dominate. Semiconductor facilities on Taiwan are a strategic target / asset to protect. Resolution is fast but consequences are enormous (global economic shock from trade disruption).
 
 #### Middle East
-**7-8 zones** covering: Iran (nuclear sites marked), Israel, the Gulf (Hormuz), and proxy territories (Lebanon/Syria, Yemen). 
+**7-8 zones** covering: Iran (nuclear sites marked), Israel, the Gulf (Gulf Gate), and proxy territories (Lebanon/Syria, Yemen). 
 
 Air and missile power dominate. The nuclear dimension (Iran's program, Israel's undeclared arsenal) adds escalation risk. Oil infrastructure as strategic target.
 
@@ -127,7 +127,7 @@ The map is not a separate domain — it is the **visual integration layer** wher
 
 1. **Scale of Eastern Europe theater at start:** How detailed? The Conflict SIM's 22 sectors were rich but created moderator burden. What's the minimum that preserves meaningful tactical choice?
 2. **Theater activation trigger:** Who decides? The players themselves by choosing to initiate military action?
-3. **Naval mechanics:** Several theaters are primarily naval (Taiwan Strait, Hormuz, Caribbean). Do we need a distinct naval mechanic, or is force deployment to sea zones sufficient?
+3. **Naval mechanics:** Several theaters are primarily naval (Taiwan Strait, Gulf Gate, Caribbean). Do we need a distinct naval mechanic, or is force deployment to sea zones sufficient?
 
 ---
 
