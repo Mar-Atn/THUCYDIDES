@@ -1,0 +1,1571 @@
+{
+  "round": 5,
+  "narrative": "ROUND 5 WORLD BRIEFING\n========================================\n\nGlobal GDP: 930.0 coins. Oil: $68/bbl.\n\nACTIVE CONFLICTS:\n  columbia vs persia (mashriq)\n  nordostan vs heartland (eastern_ereb)\n\nTOP ECONOMIES:\n  Columbia: GDP 314.4, growth +2.8%, stab 5/10\n  Cathay: GDP 262.6, growth +7.3%, stab 9/10\n  Bharata: GDP 60.4, growth +8.3%, stab 7/10\n  Teutonia: GDP 48.2, growth +1.5%, stab 8/10\n  Yamato: GDP 46.4, growth +1.9%, stab 8/10\n\nKEY INDICATORS:\n  WARNING: Nordostan stability 1.0/10\n  WARNING: Heartland stability 1/10\n  WARNING: Persia stability 1/10\n  WARNING: Persia inflation 22%\n  WARNING: Levantia stability 1/10\n  WARNING: Phrygia stability 1.52/10\n  WARNING: Choson stability 2.44/10\n  WARNING: Caribe stability 1.0/10\n  WARNING: Caribe inflation 27%\n  GROUND BLOCKADE: gulf_gate by mirage (0G + 1N) -- AIR CANNOT BREAK",
+  "flags": [
+    "SUSPICIOUS: levantia stability=1 but support=70.4"
+  ],
+  "results_summary": {
+    "oil_price": 67.68,
+    "countries": {
+      "columbia": {
+        "gdp": 314.4,
+        "growth": 2.8,
+        "stability": 4.9,
+        "support": 35.8,
+        "treasury": 66.0,
+        "inflation": 1.6,
+        "ground": 14,
+        "naval": 14
+      },
+      "cathay": {
+        "gdp": 262.6,
+        "growth": 7.3,
+        "stability": 9.0,
+        "support": 66.0,
+        "treasury": 83.8,
+        "inflation": 0.2,
+        "ground": 23,
+        "naval": 9
+      },
+      "nordostan": {
+        "gdp": 19.9,
+        "growth": 0.9,
+        "stability": 1.0,
+        "support": 39.4,
+        "treasury": 0,
+        "inflation": 2.2,
+        "ground": 10,
+        "naval": 6
+      },
+      "heartland": {
+        "gdp": 2.3,
+        "growth": 2.7,
+        "stability": 1,
+        "support": 5.0,
+        "treasury": 0,
+        "inflation": 3.3,
+        "ground": 4,
+        "naval": 0
+      },
+      "persia": {
+        "gdp": 2.4,
+        "growth": -2.9,
+        "stability": 1,
+        "support": 5.0,
+        "treasury": 0,
+        "inflation": 22.2,
+        "ground": 5,
+        "naval": 2
+      },
+      "gallia": {
+        "gdp": 36.0,
+        "growth": 1.3,
+        "stability": 7.5,
+        "support": 42.2,
+        "treasury": 10.7,
+        "inflation": 1.1,
+        "ground": 6,
+        "naval": 3
+      },
+      "teutonia": {
+        "gdp": 48.2,
+        "growth": 1.5,
+        "stability": 7.5,
+        "support": 46.9,
+        "treasury": 25.5,
+        "inflation": 1.1,
+        "ground": 6,
+        "naval": 2
+      },
+      "freeland": {
+        "gdp": 11.5,
+        "growth": 4.5,
+        "stability": 9.0,
+        "support": 67.6,
+        "treasury": 0,
+        "inflation": 1.8,
+        "ground": 5,
+        "naval": 1
+      },
+      "ponte": {
+        "gdp": 24.0,
+        "growth": 0.8,
+        "stability": 6.2,
+        "support": 39.8,
+        "treasury": 0,
+        "inflation": 1.1,
+        "ground": 4,
+        "naval": 2
+      },
+      "albion": {
+        "gdp": 35.1,
+        "growth": 1.4,
+        "stability": 7.5,
+        "support": 41.1,
+        "treasury": 2.9,
+        "inflation": 1.3,
+        "ground": 4,
+        "naval": 4
+      },
+      "bharata": {
+        "gdp": 60.4,
+        "growth": 8.3,
+        "stability": 6.9,
+        "support": 77.5,
+        "treasury": 2.7,
+        "inflation": 2.2,
+        "ground": 12,
+        "naval": 3
+      },
+      "levantia": {
+        "gdp": 5.4,
+        "growth": 3.8,
+        "stability": 1,
+        "support": 70.4,
+        "treasury": 0,
+        "inflation": 1.6,
+        "ground": 13,
+        "naval": 1
+      },
+      "formosa": {
+        "gdp": 9.4,
+        "growth": 3.6,
+        "stability": 8.1,
+        "support": 62.6,
+        "treasury": 0,
+        "inflation": 0.9,
+        "ground": 4,
+        "naval": 2
+      },
+      "phrygia": {
+        "gdp": 10.9,
+        "growth": 2.9,
+        "stability": 1.5,
+        "support": 45.5,
+        "treasury": 0,
+        "inflation": 20.0,
+        "ground": 6,
+        "naval": 2
+      },
+      "yamato": {
+        "gdp": 46.4,
+        "growth": 1.9,
+        "stability": 8.0,
+        "support": 51.3,
+        "treasury": 0,
+        "inflation": 1.1,
+        "ground": 3,
+        "naval": 4
+      },
+      "solaria": {
+        "gdp": 13.1,
+        "growth": 3.5,
+        "stability": 8.1,
+        "support": 67.7,
+        "treasury": 0,
+        "inflation": 0.9,
+        "ground": 3,
+        "naval": 1
+      },
+      "choson": {
+        "gdp": 0.3,
+        "growth": 0.5,
+        "stability": 2.4,
+        "support": 54.5,
+        "treasury": 0,
+        "inflation": 4.4,
+        "ground": 8,
+        "naval": 1
+      },
+      "hanguk": {
+        "gdp": 20.4,
+        "growth": 2.7,
+        "stability": 6.0,
+        "support": 40.2,
+        "treasury": 0,
+        "inflation": 1.1,
+        "ground": 5,
+        "naval": 2
+      },
+      "caribe": {
+        "gdp": 1.2,
+        "growth": -0.9,
+        "stability": 1.0,
+        "support": 28.0,
+        "treasury": 0,
+        "inflation": 26.6,
+        "ground": 3,
+        "naval": 1
+      },
+      "mirage": {
+        "gdp": 6.1,
+        "growth": 4.0,
+        "stability": 9.0,
+        "support": 75.3,
+        "treasury": 2.8,
+        "inflation": 0.9,
+        "ground": 2,
+        "naval": 1
+      }
+    }
+  },
+  "actions_taken": {
+    "dealer": "{'budget': {'social_spending_ratio': 0.25, 'military_pct': 0.49, 'tech_pct': 0.1, 'reserve_pct': 0.16, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'persia', 'preferred_zone': 'persia_1', 'units': 2}, {'target_country': 'persia', 'preferred_zone': 'persia_2', 'units': 3}], 'mobilization': None, 'production': {'ground': {'coins': 13.2, 'tier': 'accelerated'}, 'naval': {'coins': 4.4, 'tier': 'normal'}, 'tactical_air': {'coins': 4.4,",
+    "volt": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "anchor": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "shield": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "shadow": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "tribune": "{'influence': {'advice': [{'to': 'public', 'content': 'investigate_persia_war_authorization'}], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "challenger": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "helmsman": "{'budget': {'social_spending_ratio': 0.22, 'military_pct': 0.49000000000000005, 'tech_pct': 0.2, 'reserve_pct': 0.08999999999999997, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 2.9, 'tier': 'normal'}, 'naval': {'coins': 2.2, 'tier': 'normal'}, 'tactical_air': {'coins': 2.2, 'tier': 'normal'}}, 'formosa_action': 'full_blockade'}, 'diplomatic': {'proposals': [{'target': 'pathfinder', 'type':",
+    "rampart": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "abacus": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "circuit": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': [{'type': 'asset_protection', 'target': 'foreign_holdings'}]}}",
+    "sage": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "pathfinder": "{'budget': {'social_spending_ratio': 0.2, 'military_pct': 0.5, 'tech_pct': 0.05, 'reserve_pct': 0.25000000000000006, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'heartland', 'preferred_zone': 'heartland_2', 'units': 2}], 'mobilization': None, 'production': {'ground': {'coins': 0.7, 'tier': 'accelerated'}, 'naval': {'coins': 0.2, 'tier': 'normal'}, 'tactical_air': {'coins': 0.2, 'tier': 'normal'}}, 'war_posture': 'continue_pressur",
+    "ironhand": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "compass": "{'influence': {'advice': [{'to': 'pathfinder', 'content': 'sanctions_relief_opportunity'}], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': [{'type': 'back_channel', 'target': 'western_contacts', 'purpose': 'sanctions_relief_personal'}]}}",
+    "beacon": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "bulwark": "{'budget': {'social_spending_ratio': 0.25, 'military_pct': 0.5, 'tech_pct': 0.05, 'reserve_pct': 0.2, 'money_printed': 0, 'deficit': 0}, 'tariffs': {'choson': 2}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'nordostan', 'preferred_zone': 'heartland_2', 'units': 2}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.1, 'tier': 'accelerated'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}, 'war_posture': 'limited_counter",
+    "broker": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "furnace": "{'budget': {'social_spending_ratio': 0.15000000000000002, 'military_pct': 0.49, 'tech_pct': 0.1, 'reserve_pct': 0.26, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'levantia', 'preferred_zone': 'levantia', 'units': 1}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.1, 'tier': 'accelerated'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}, 'war_posture': 'active_defense",
+    "anvil": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "dawn": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
+    "lumiere": "{'budget': {'social_spending_ratio': 0.37, 'military_pct': 0.24000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.24000000000000002, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 1.0, 'tier': 'normal'}, 'naval': {'coins': 0.7, 'tier': 'normal'}, 'tactical_air': {'coins': 0.7, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "forge": "{'budget': {'social_spending_ratio': 0.32, 'military_pct': 0.22000000000000003, 'tech_pct': 0.15, 'reserve_pct': 0.30999999999999994, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 1.1, 'tier': 'normal'}, 'naval': {'coins': 0.8, 'tier': 'normal'}, 'tactical_air': {'coins': 0.8, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "sentinel": "{'budget': {'social_spending_ratio': 0.27, 'military_pct': 0.25, 'tech_pct': 0.15, 'reserve_pct': 0.32999999999999996, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.2, 'tier': 'normal'}, 'naval': {'coins': 0.2, 'tier': 'normal'}, 'tactical_air': {'coins': 0.2, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "ponte_role": "{'budget': {'social_spending_ratio': 0.32, 'military_pct': 0.22000000000000003, 'tech_pct': 0.15, 'reserve_pct': 0.30999999999999994, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.5, 'tier': 'normal'}, 'naval': {'coins': 0.4, 'tier': 'normal'}, 'tactical_air': {'coins': 0.4, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "mariner": "{'budget': {'social_spending_ratio': 0.32, 'military_pct': 0.24000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.2899999999999999, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.7, 'tier': 'normal'}, 'naval': {'coins': 0.5, 'tier': 'normal'}, 'tactical_air': {'coins': 0.5, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "pillar": "{'budget': {'social_spending_ratio': 0.37, 'military_pct': 0.21000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.27, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 1.0, 'tier': 'normal'}, 'naval': {'coins': 0.7, 'tier': 'normal'}, 'tactical_air': {'coins': 0.7, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "scales": "{'budget': {'social_spending_ratio': 0.22, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.4, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.6, 'tier': 'normal'}, 'naval': {'coins': 0.5, 'tier': 'normal'}, 'tactical_air': {'coins': 0.5, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "citadel": "{'budget': {'social_spending_ratio': 0.23000000000000004, 'military_pct': 0.505, 'tech_pct': 0.1, 'reserve_pct': 0.165, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'persia', 'preferred_zone': 'persia_1', 'units': 3}, {'target_country': 'persia', 'preferred_zone': 'persia_3', 'units': 1}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.3, 'tier': 'accelerated'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical",
+    "chip": "{'budget': {'social_spending_ratio': 0.24, 'military_pct': 0.21000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.4, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.1, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "bazaar": "{'budget': {'social_spending_ratio': 0.24, 'military_pct': 0.24000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.37, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.2, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "sakura": "{'budget': {'social_spending_ratio': 0.32, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.29999999999999993, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.8, 'tier': 'normal'}, 'naval': {'coins': 0.6, 'tier': 'normal'}, 'tactical_air': {'coins': 0.6, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "wellspring": "{'budget': {'social_spending_ratio': 0.27, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.35, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.1, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': [], 'opec': 'normal'}",
+    "pyro": "{'budget': {'social_spending_ratio': 0.2, 'military_pct': 0.27, 'tech_pct': 0.15, 'reserve_pct': 0.38, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.0, 'tier': 'normal'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}, 'provocation': 'missile_test'}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "vanguard": "{'budget': {'social_spending_ratio': 0.27, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.35, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.3, 'tier': 'normal'}, 'naval': {'coins': 0.2, 'tier': 'normal'}, 'tactical_air': {'coins': 0.2, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "havana": "{'budget': {'social_spending_ratio': 0.22, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.4, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.0, 'tier': 'normal'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "spire": "{'budget': {'social_spending_ratio': 0.22, 'military_pct': 0.22000000000000003, 'tech_pct': 0.15, 'reserve_pct': 0.41000000000000003, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.0, 'tier': 'normal'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': [], 'opec': 'normal'}"
+  },
+  "transactions": [
+    {
+      "tx_id": 1,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "arms_transfer",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.202228,
+      "round": 1,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "unit_type": "ground",
+        "count": 2,
+        "reduced_effectiveness_until_round": 2
+      },
+      "executed_timestamp": 1774565419.202234
+    },
+    {
+      "tx_id": 2,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.202237,
+      "round": 1,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 48.0,
+        "receiver_new_treasury": 3.0
+      },
+      "executed_timestamp": 1774565419.202241
+    },
+    {
+      "tx_id": 3,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.202243,
+      "round": 1,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 46.0,
+        "receiver_new_treasury": 7.0
+      },
+      "executed_timestamp": 1774565419.202246
+    },
+    {
+      "tx_id": 4,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "arms_transfer",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120478,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "unit_type": "ground",
+        "count": 2,
+        "reduced_effectiveness_until_round": 3
+      },
+      "executed_timestamp": 1774565419.212053
+    },
+    {
+      "tx_id": 5,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "arms_transfer",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120562,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "unit_type": "ground",
+        "count": 2,
+        "reduced_effectiveness_until_round": 3
+      },
+      "executed_timestamp": 1774565419.2120588
+    },
+    {
+      "tx_id": 6,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.212062,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 50.093,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.212065
+    },
+    {
+      "tx_id": 7,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120671,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 48.093,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.21207
+    },
+    {
+      "tx_id": 8,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.212081,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_1"
+      },
+      "executed_timestamp": 1774565419.212084
+    },
+    {
+      "tx_id": 9,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120872,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_2"
+      },
+      "executed_timestamp": 1774565419.212089
+    },
+    {
+      "tx_id": 10,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120929,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_3"
+      },
+      "executed_timestamp": 1774565419.212095
+    },
+    {
+      "tx_id": 11,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2120981,
+      "round": 2,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_4"
+      },
+      "executed_timestamp": 1774565419.2121
+    },
+    {
+      "tx_id": 12,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.222202,
+      "round": 3,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 52.828,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.2222059
+    },
+    {
+      "tx_id": 13,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.222209,
+      "round": 3,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 50.828,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.222212
+    },
+    {
+      "tx_id": 14,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.232436,
+      "round": 4,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 56.016000000000005,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.2324412
+    },
+    {
+      "tx_id": 15,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2324429,
+      "round": 4,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 54.016000000000005,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.232446
+    },
+    {
+      "tx_id": 16,
+      "sender": "cathay",
+      "receiver": "nordostan",
+      "tx_type": "arms_transfer",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.23245,
+      "round": 4,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "unit_type": "ground",
+        "count": 2,
+        "reduced_effectiveness_until_round": 5
+      },
+      "executed_timestamp": 1774565419.232453
+    },
+    {
+      "tx_id": 17,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.243047,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 59.711000000000006,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.243051
+    },
+    {
+      "tx_id": 18,
+      "sender": "columbia",
+      "receiver": "levantia",
+      "tx_type": "coin_transfer",
+      "details": {
+        "amount": 2
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2430542,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "amount_transferred": 2,
+        "sender_new_treasury": 57.711000000000006,
+        "receiver_new_treasury": 2
+      },
+      "executed_timestamp": 1774565419.243057
+    },
+    {
+      "tx_id": 19,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.243068,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_5"
+      },
+      "executed_timestamp": 1774565419.243071
+    },
+    {
+      "tx_id": 20,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2430751,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_6"
+      },
+      "executed_timestamp": 1774565419.243077
+    },
+    {
+      "tx_id": 21,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.2430809,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_7"
+      },
+      "executed_timestamp": 1774565419.243083
+    },
+    {
+      "tx_id": 22,
+      "sender": "columbia",
+      "receiver": "heartland",
+      "tx_type": "treaty",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "status": "executed",
+      "timestamp": 1774565419.243086,
+      "round": 5,
+      "sender_confirmed": true,
+      "receiver_confirmed": true,
+      "execution_details": {
+        "treaty_id": "treaty_8"
+      },
+      "executed_timestamp": 1774565419.2430878
+    }
+  ],
+  "combat_results": [
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "attacker_remaining": 2,
+      "defender_remaining": 1,
+      "modifiers": {
+        "attacker_tech": 1,
+        "attacker_morale": 1.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.5,
+        "terrain": 1,
+        "attacker_total": 2.0,
+        "defender_total": 0.5
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 1,
+      "modifiers": {
+        "attacker_tech": 1,
+        "attacker_morale": 1.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.5,
+        "terrain": 1,
+        "attacker_total": 2.0,
+        "defender_total": 0.5
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 4,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 3,
+      "attacker_remaining": 3,
+      "defender_remaining": 4,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": 0.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": 0.0,
+        "terrain": 0,
+        "attacker_total": 0.0,
+        "defender_total": 0.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 8,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": 0.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": 0.0,
+        "terrain": 0,
+        "attacker_total": 0.0,
+        "defender_total": 0.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "attacker_remaining": 1,
+      "defender_remaining": 3,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -0.5,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": 0.0,
+        "terrain": 1,
+        "attacker_total": -0.5,
+        "defender_total": 1.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "attacker_remaining": 1,
+      "defender_remaining": 1,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": 0.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.5,
+        "terrain": 1,
+        "attacker_total": 0.0,
+        "defender_total": 0.5
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "attacker_remaining": 1,
+      "defender_remaining": 1,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": 0.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.5,
+        "terrain": 1,
+        "attacker_total": 0.0,
+        "defender_total": 0.5
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "attacker_remaining": 2,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 1,
+        "attacker_morale": 0.585,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 1,
+        "attacker_total": 1.585,
+        "defender_total": -1.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "attacker_remaining": 3,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 1,
+        "attacker_morale": 0.585,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 1,
+        "attacker_total": 1.585,
+        "defender_total": -1.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_east_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_east_china"
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_south_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_south_china"
+    },
+    {
+      "type": "attack",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 4,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 3,
+      "defender_losses": 1,
+      "attacker_remaining": 1,
+      "defender_remaining": 3,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -0.51,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.7150000000000001,
+        "terrain": 0,
+        "attacker_total": -0.51,
+        "defender_total": -0.7150000000000001
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 6,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -0.7150000000000001,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.51,
+        "terrain": 0,
+        "attacker_total": -0.7150000000000001,
+        "defender_total": -0.51
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "attacker_remaining": 0,
+      "defender_remaining": 3,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -0.79,
+        "terrain": 1,
+        "attacker_total": -2.0,
+        "defender_total": 0.20999999999999996
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 2,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "attacker_remaining": 1,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -0.79,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 1,
+        "attacker_total": -0.79,
+        "defender_total": -1.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 2,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_east_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_east_china"
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_south_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_south_china"
+    },
+    {
+      "type": "attack",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 1,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -1.18,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -1.585,
+        "terrain": 0,
+        "attacker_total": -1.18,
+        "defender_total": -1.585
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 4,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -1.585,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -1.18,
+        "terrain": 0,
+        "attacker_total": -1.585,
+        "defender_total": -1.18
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 1,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 2,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_east_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_east_china"
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_south_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_south_china"
+    },
+    {
+      "type": "attack",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "attacker_remaining": 2,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -1.635,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 0,
+        "attacker_total": -1.635,
+        "defender_total": -2.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -1.635,
+        "terrain": 0,
+        "attacker_total": -2.0,
+        "defender_total": -1.635
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "attacker_remaining": 0,
+      "defender_remaining": 3,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -1.725,
+        "terrain": 1,
+        "attacker_total": -2.0,
+        "defender_total": -0.7250000000000001
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 1,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 2,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_east_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_east_china"
+    },
+    {
+      "type": "blockade",
+      "country": "cathay",
+      "zone": "g_sea_south_china",
+      "success": false,
+      "error": "cathay has no naval units in g_sea_south_china"
+    },
+    {
+      "type": "attack",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "attacker_remaining": 2,
+      "defender_remaining": 0,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 0,
+        "attacker_total": -2.0,
+        "defender_total": -2.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "origin_zone": null,
+      "attacker_units_committed": 2,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "attacker_remaining": 0,
+      "defender_remaining": 2,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 0,
+        "attacker_total": -2.0,
+        "defender_total": -2.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "attacker_remaining": 0,
+      "defender_remaining": 3,
+      "modifiers": {
+        "attacker_tech": 0,
+        "attacker_morale": -2.0,
+        "amphibious_penalty": 0,
+        "defender_tech": 0,
+        "defender_morale": -2.0,
+        "terrain": 1,
+        "attacker_total": -2.0,
+        "defender_total": -1.0
+      },
+      "is_amphibious": false
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "origin_zone": null,
+      "attacker_units_committed": 3,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 3,
+      "defender_remaining": 0
+    },
+    {
+      "type": "attack",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "origin_zone": null,
+      "attacker_units_committed": 1,
+      "success": true,
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "attacker_remaining": 1,
+      "defender_remaining": 0
+    }
+  ],
+  "negotiations": [
+    {
+      "round": 5,
+      "phase": "negotiation",
+      "deals_made": 8,
+      "details": [
+        {
+          "round": 5,
+          "neg_round": 0,
+          "proposer": "dealer",
+          "target": "bulwark",
+          "terms": {
+            "military_cooperation": true,
+            "arms_transfer": true,
+            "intelligence_sharing": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 0,
+          "proposer": "forge",
+          "target": "pathfinder",
+          "terms": {
+            "tariff_reduction": true,
+            "trade_agreement": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 1,
+          "proposer": "forge",
+          "target": "pathfinder",
+          "terms": {
+            "tariff_reduction": true,
+            "trade_agreement": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 2,
+          "proposer": "dealer",
+          "target": "bulwark",
+          "terms": {
+            "military_cooperation": true,
+            "arms_transfer": true,
+            "intelligence_sharing": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 2,
+          "proposer": "forge",
+          "target": "pathfinder",
+          "terms": {
+            "tariff_reduction": true,
+            "trade_agreement": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 3,
+          "proposer": "dealer",
+          "target": "bulwark",
+          "terms": {
+            "military_cooperation": true,
+            "arms_transfer": true,
+            "intelligence_sharing": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 4,
+          "proposer": "dealer",
+          "target": "bulwark",
+          "terms": {
+            "military_cooperation": true,
+            "arms_transfer": true,
+            "intelligence_sharing": true
+          }
+        },
+        {
+          "round": 5,
+          "neg_round": 4,
+          "proposer": "forge",
+          "target": "pathfinder",
+          "terms": {
+            "tariff_reduction": true,
+            "trade_agreement": true
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,163 +1,172 @@
-country_id,unit_type,count,zone_id
-columbia,ground,8,g_col_continental
-columbia,ground,1,g_col_alaska
-columbia,ground,2,g_col_hawaii
-columbia,ground,4,g_teutonia
-columbia,ground,3,g_yamato
-columbia,ground,2,g_mirage
-columbia,ground,1,g_contested_horn
-columbia,ground,1,g_hanguk
-columbia,naval,3,g_sea_atlantic_west
-columbia,naval,4,g_sea_north_pacific
-columbia,naval,2,g_sea_persian_gulf
-columbia,naval,2,g_sea_med_east
-columbia,naval,1,g_sea_east_china
-columbia,naval,1,g_sea_indian_ocean
-columbia,naval,1,g_sea_gulf_caribbean
-columbia,tactical_air,5,g_col_continental
-columbia,tactical_air,3,g_teutonia
-columbia,tactical_air,3,g_yamato
-columbia,tactical_air,2,g_col_hawaii
-columbia,tactical_air,2,g_mirage
-columbia,strategic_missile,6,g_col_continental
-columbia,strategic_missile,3,g_col_alaska
-columbia,strategic_missile,3,g_col_hawaii
-columbia,air_defense,2,g_col_continental
-columbia,air_defense,1,g_teutonia
-columbia,air_defense,1,g_yamato
-cathay,ground,10,g_cat_eastern
-cathay,ground,8,g_cat_western
-cathay,ground,5,g_cat_southern
-cathay,ground,2,g_choson_border
-cathay,naval,4,g_sea_south_china
-cathay,naval,3,g_sea_east_china
-cathay,naval,2,g_sea_southeast_asia
-cathay,tactical_air,5,g_cat_eastern
-cathay,tactical_air,5,g_cat_southern
-cathay,tactical_air,2,g_cat_western
-cathay,strategic_missile,2,g_cat_western
-cathay,strategic_missile,2,g_cat_eastern
-cathay,air_defense,1,g_cat_eastern
-cathay,air_defense,1,g_cat_western
-cathay,air_defense,1,g_cat_southern
-nordostan,ground,2,g_nor_western
-nordostan,ground,2,g_nor_central
-nordostan,ground,1,g_nor_eastern
-nordostan,ground,2,ee_belarus
-nordostan,ground,2,ee_nord_border
-nordostan,ground,3,ee_east_front_central
-nordostan,ground,3,ee_east_front_south
-nordostan,ground,2,ee_occupied_south
-nordostan,ground,1,ee_crimea_naval
-nordostan,naval,2,g_sea_black
-nordostan,naval,1,g_sea_baltic
-nordostan,naval,2,g_sea_north_pacific
-nordostan,naval,1,g_sea_arctic
-nordostan,tactical_air,1,g_nor_western
-nordostan,tactical_air,1,g_nor_central
-nordostan,tactical_air,3,ee_east_front_central
-nordostan,tactical_air,2,ee_nord_border
-nordostan,tactical_air,1,ee_crimea_naval
-nordostan,strategic_missile,6,g_nor_central
-nordostan,strategic_missile,4,g_nor_western
-nordostan,strategic_missile,2,g_nor_eastern
-nordostan,air_defense,1,g_nor_western
-nordostan,air_defense,1,g_nor_central
-nordostan,air_defense,1,ee_east_front_central
-heartland,ground,2,ee_west_ukr
-heartland,ground,3,ee_east_front_north
-heartland,ground,2,ee_capital
-heartland,ground,2,ee_central_ukr
-heartland,ground,2,ee_south_ukr
-heartland,ground,2,ee_dnipro_line
-heartland,ground,1,ee_kherson
-heartland,ground,1,ee_southwest
-heartland,tactical_air,2,ee_east_front_north
-heartland,tactical_air,1,ee_capital
-heartland,tactical_air,1,ee_south_ukr
-heartland,tactical_air,1,ee_dnipro_line
-heartland,air_defense,1,ee_capital
-persia,ground,3,me_persia_west
-persia,ground,2,me_persia_nuclear
-persia,ground,2,me_persia_east
-persia,ground,1,me_iraq_corridor
-persia,naval,2,me_gulf_gate
-persia,tactical_air,2,me_persia_west
-persia,tactical_air,2,me_persia_nuclear
-persia,tactical_air,1,me_persia_east
-persia,tactical_air,1,me_gulf_gate
-persia,air_defense,1,me_persia_nuclear
-gallia,ground,3,g_gallia
-gallia,ground,1,me_syria_lebanon
-gallia,naval,2,g_sea_med_west
-gallia,naval,1,g_sea_atlantic_east
-gallia,tactical_air,3,g_gallia
-gallia,strategic_missile,2,g_gallia
-gallia,air_defense,1,g_gallia
-teutonia,ground,4,g_teutonia
-teutonia,naval,2,g_sea_baltic
-teutonia,tactical_air,2,g_teutonia
-teutonia,air_defense,1,g_teutonia
-freeland,ground,5,g_freeland
-freeland,naval,1,g_sea_baltic
-freeland,tactical_air,2,g_freeland
-freeland,air_defense,1,g_freeland
-ponte,ground,3,g_ponte
-ponte,naval,2,g_sea_med_west
-ponte,tactical_air,2,g_ponte
-ponte,air_defense,1,g_ponte
-albion,ground,3,g_albion
-albion,naval,2,g_sea_atlantic_east
-albion,naval,1,g_sea_giuk
-albion,tactical_air,3,g_albion
-albion,strategic_missile,2,g_albion
-albion,air_defense,1,g_albion
-bharata,ground,10,g_bharata
-bharata,ground,2,g_contested_central_asia
-bharata,naval,2,g_sea_indian_ocean
-bharata,naval,1,g_sea_arabian
-bharata,tactical_air,4,g_bharata
-bharata,air_defense,2,g_bharata
-levantia,ground,4,me_levantia_core
-levantia,ground,2,me_levantia_north
-levantia,naval,1,g_sea_med_east
-levantia,tactical_air,3,me_levantia_core
-levantia,tactical_air,1,me_levantia_north
-levantia,air_defense,2,me_levantia_core
-levantia,air_defense,1,me_levantia_north
-formosa,ground,4,g_formosa
-formosa,naval,2,g_sea_east_china
-formosa,tactical_air,3,g_formosa
-formosa,air_defense,2,g_formosa
-phrygia,ground,5,g_phrygia
-phrygia,ground,1,me_syria_lebanon
-phrygia,naval,1,g_sea_med_east
-phrygia,naval,1,g_sea_black
-phrygia,tactical_air,3,g_phrygia
-phrygia,air_defense,1,g_phrygia
-yamato,ground,3,g_yamato
-yamato,naval,3,g_sea_east_china
-yamato,naval,1,g_sea_north_pacific
-yamato,tactical_air,3,g_yamato
-yamato,air_defense,2,g_yamato
-solaria,ground,3,g_solaria
-solaria,naval,1,g_sea_red
-solaria,tactical_air,2,g_solaria
-solaria,tactical_air,1,me_yemen
-solaria,air_defense,2,g_solaria
-choson,ground,8,g_choson
-choson,naval,1,g_sea_east_china
-choson,tactical_air,2,g_choson
-choson,strategic_missile,1,g_choson
-choson,air_defense,1,g_choson
-hanguk,ground,5,g_hanguk
-hanguk,naval,2,g_sea_east_china
-hanguk,tactical_air,3,g_hanguk
-hanguk,air_defense,2,g_hanguk
-caribe,ground,3,g_caribe
-caribe,naval,1,g_sea_gulf_caribbean
-caribe,tactical_air,1,g_caribe
-mirage,ground,2,g_mirage
-mirage,naval,1,g_sea_persian_gulf
-mirage,tactical_air,2,g_mirage
-mirage,air_defense,2,g_mirage
+country_id,unit_type,count,zone_id,notes
+columbia,ground,4,col_main_1,Continental main - ICBM silos Pentagon
+columbia,ground,2,col_main_2,Continental east - Atlantic seaboard
+columbia,ground,2,col_nw,Alaska/Pacific northwest
+columbia,ground,2,col_main_3,Hawaii/Pacific command equivalent
+columbia,ground,2,teutonia_1,Main European base (Ramstein)
+columbia,ground,1,yamato_2,Main Pacific base (Okinawa)
+columbia,ground,1,hanguk,Korea deterrence
+columbia,ground,1,freeland,NATO forward deployment
+columbia,ground,1,solaria_1,Gulf logistics - Persia war support
+columbia,ground,1,horn,Djibouti - Red Sea security
+columbia,ground,4,persia_2,ME theater - active war zone (Operation Epic Fury)
+columbia,ground,1,mirage,Gulf logistics hub
+columbia,naval,3,col_main_2,Atlantic Fleet home port
+columbia,naval,3,col_main_3,Pacific Fleet home port
+columbia,naval,3,persia_2,Persian Gulf - 2 CSGs for Epic Fury
+columbia,naval,2,levantia,Eastern Mediterranean - Persia war support
+columbia,naval,1,cathay_6,East China Sea patrol - Formosa deterrence
+columbia,naval,1,bharata_1,Indian Ocean presence
+columbia,naval,1,albion,Eastern Atlantic - GIUK Gap
+columbia,tactical_air,5,col_main_1,Continental strike capability
+columbia,tactical_air,2,col_main_3,Pacific air command
+columbia,tactical_air,2,teutonia_1,European air power
+columbia,tactical_air,1,yamato_2,Pacific base air
+columbia,tactical_air,3,persia_2,ME theater air campaign
+columbia,tactical_air,1,hanguk,Korea air deterrence
+columbia,tactical_air,1,col_nw,Alaska air defense
+columbia,strategic_missile,8,col_main_1,ICBM silos + bomber fleet
+columbia,strategic_missile,1,col_nw,Alaska strategic
+columbia,strategic_missile,3,col_main_2,SSBNs at sea
+columbia,air_defense,2,col_main_1,Homeland THAAD/Patriot
+columbia,air_defense,1,col_main_3,Hawaii defense
+columbia,air_defense,1,yamato_2,Pacific base defense
+cathay,ground,5,cathay_3,Central mainland - Beijing region
+cathay,ground,5,cathay_2,Western interior
+cathay,ground,4,cathay_6,Southeast - Taiwan Strait staging
+cathay,ground,4,cathay_5,Southern coastal
+cathay,ground,2,cathay_4,Northeast - Choson border security
+cathay,ground,3,cathay_7,South China coastal
+cathay,ground,2,choson,Choson border quick reaction force
+cathay,naval,4,cathay_7,South Sea Fleet - Taiwan Strait
+cathay,naval,3,cathay_4,East Sea Fleet - Yellow Sea
+cathay,naval,2,cathay_6,South China Sea patrols
+cathay,tactical_air,5,cathay_3,Central aviation + strategic reserve
+cathay,tactical_air,5,cathay_6,Coastal DF-21/DF-26 carrier killers + tactical aviation
+cathay,tactical_air,2,cathay_2,Western interior air
+cathay,strategic_missile,2,cathay_3,Silo-based ICBMs
+cathay,strategic_missile,1,cathay_2,Mobile DF-41 launchers
+cathay,strategic_missile,1,cathay_7,SSBNs - South China Sea bastion
+cathay,air_defense,1,cathay_3,Central defense
+cathay,air_defense,1,cathay_6,Coastal defense
+cathay,air_defense,1,cathay_2,Western defense
+nordostan,ground,2,nord_c1,Moscow/central strategic reserve
+nordostan,ground,2,nord_e2,Far East/Cathay border defense
+nordostan,ground,1,nord_w2,Caucasus/southern flank
+nordostan,ground,10,heartland_2,Eastern Heartland theater - front line offensive
+nordostan,ground,3,heartland_1,Heartland occupation/rear security
+nordostan,naval,2,nord_n1,Northern Fleet - Arctic/SSBN bastion
+nordostan,naval,2,nord_w2,Black Sea remnant + Caspian
+nordostan,naval,1,levantia,Mediterranean - Tartus/Syria
+nordostan,naval,1,nord_e3,Pacific Fleet
+nordostan,tactical_air,2,nord_c1,Strategic aviation homeland defense
+nordostan,tactical_air,4,heartland_2,Front-line aviation glide bombs drones
+nordostan,tactical_air,1,nord_w2,Southern air defense/strike
+nordostan,tactical_air,1,nord_e2,Far East air defense
+nordostan,strategic_missile,7,nord_c1,ICBM silos mobile launchers strategic bombers
+nordostan,strategic_missile,2,nord_e2,Mobile launchers Pacific SSBN patrols
+nordostan,strategic_missile,3,nord_n1,SSBNs Northern Fleet bastion
+nordostan,air_defense,1,nord_c1,Moscow strategic defense
+nordostan,air_defense,1,heartland_2,Theater air defense
+nordostan,air_defense,1,nord_w2,Southern/Caucasus defense
+heartland,ground,1,heartland_1,Strategic reserve/Kyiv defense
+heartland,ground,2,heartland_1,Central staging logistics training
+heartland,ground,7,heartland_2,Front-line combat 1000km front
+heartland,tactical_air,1,heartland_1,Air defense/strike reserve
+heartland,tactical_air,2,heartland_2,Front-line air support drone operations HIMARS
+heartland,air_defense,1,heartland_1,Patriot/NASAMS protecting Kyiv and central infrastructure
+persia,ground,3,persia_2,IRGC ground forces + Gulf Gate coastal defense batteries
+persia,ground,2,persia_1,Nuclear facility defense
+persia,ground,2,persia_3,Strategic depth ballistic missile guards
+persia,ground,1,phrygia_2,Iraq corridor - militia support/border security
+persia,naval,2,cp_gulf_gate,IRGC Navy - swarm boats mines submarines island garrisons
+persia,tactical_air,2,persia_2,Coastal anti-ship missiles Shahed drones
+persia,tactical_air,2,persia_1,Medium-range ballistic missiles air defense support
+persia,tactical_air,1,persia_3,Long-range ballistic missiles strategic reserve
+persia,tactical_air,1,cp_gulf_gate,Anti-ship missile batteries on fortified islands
+persia,air_defense,1,persia_1,S-300/S-400 protecting nuclear sites - ONLY air defense unit
+gallia,ground,4,gallia_1,Metropolitan France
+gallia,ground,1,horn,Djibouti overseas
+gallia,ground,1,levantia,Near ME deployment
+gallia,naval,1,gallia_1,Atlantic/Med home fleet
+gallia,naval,1,persia_3,Independent Persian Gulf deployment
+gallia,naval,1,levantia,Eastern Mediterranean
+gallia,tactical_air,3,gallia_1,Metropolitan Rafale
+gallia,tactical_air,1,horn,Overseas air
+gallia,strategic_missile,2,gallia_1,SSBNs + air-launched cruise missiles
+gallia,air_defense,1,gallia_1,SAMP/T homeland
+teutonia,ground,6,teutonia_1,Bundeswehr all homeland
+teutonia,naval,1,teutonia_1,Baltic/North Sea
+teutonia,naval,1,albion,Eastern Atlantic
+teutonia,tactical_air,3,teutonia_1,Eurofighter Typhoons
+teutonia,air_defense,1,teutonia_1,Patriot systems
+freeland,ground,5,freeland,All homeland defense
+freeland,naval,1,freeland,Baltic coastal
+freeland,tactical_air,2,freeland,F-35 and FA-50
+freeland,air_defense,1,freeland,Patriot from Columbia
+ponte,ground,4,ponte,Homeland
+ponte,naval,1,ponte,Tyrrhenian
+ponte,naval,1,levantia,Mediterranean patrol
+ponte,tactical_air,2,ponte,Eurofighter/F-35
+albion,ground,3,albion,British Isles homeland
+albion,ground,1,levantia,Cyprus/Gibraltar overseas
+albion,naval,2,albion,Home Fleet + Atlantic
+albion,naval,1,albion,Eastern Atlantic
+albion,naval,1,levantia,Eastern Mediterranean
+albion,tactical_air,2,albion,RAF homeland
+albion,tactical_air,1,levantia,Overseas RAF
+albion,strategic_missile,2,albion,Trident SSBNs - continuous at-sea deterrent
+albion,air_defense,1,albion,Sky Sabre homeland
+bharata,ground,10,bharata_2,Bulk on Cathay border and internal
+bharata,ground,2,bharata_1,Indian Ocean / Andaman & Nicobar
+bharata,naval,1,bharata_1,Western Fleet
+bharata,naval,2,bharata_1,Indian Ocean dominance
+bharata,tactical_air,4,bharata_2,Mixed fleet Su-30MKI Rafale Tejas
+bharata,air_defense,2,bharata_2,S-400 from Nordostan + domestic
+levantia,ground,3,levantia,Homeland + West Bank
+levantia,ground,2,phrygia_2,Lebanon theater
+levantia,ground,1,levantia,Persia-facing reserves
+levantia,naval,1,levantia,Mediterranean submarine fleet
+levantia,tactical_air,2,levantia,F-35I homeland
+levantia,tactical_air,2,persia_2,Persia strike operations
+levantia,air_defense,3,levantia,Iron Dome David's Sling Arrow - densest in world
+formosa,ground,4,formosa,All homeland - porcupine strategy
+formosa,naval,1,formosa,Home fleet
+formosa,naval,1,cp_formosa_strait,Strait patrol
+formosa,tactical_air,3,formosa,F-16V fleet anti-ship missiles
+formosa,air_defense,2,formosa,Patriot PAC-3 Tien Kung
+phrygia,ground,4,phrygia_1,Homeland + Syrian border
+phrygia,ground,1,phrygia_2,Syria deployment
+phrygia,ground,1,phrygia_2,Strait defense
+phrygia,naval,1,phrygia_1,Aegean/Mediterranean
+phrygia,naval,1,levantia,Eastern Med patrol
+phrygia,tactical_air,3,phrygia_1,F-16 fleet Bayraktar drones
+phrygia,air_defense,1,phrygia_1,S-400 from Nordostan
+yamato,ground,3,yamato_2,Self-Defense Forces homeland
+yamato,naval,2,yamato_2,Home fleet
+yamato,naval,1,cathay_6,East China Sea patrol
+yamato,naval,1,yamato_1,North Pacific
+yamato,tactical_air,3,yamato_2,F-35 fleet Type-12 standoff missiles
+yamato,air_defense,2,yamato_2,Aegis BMD PAC-3
+solaria,ground,3,solaria_2,Homeland oil infrastructure defense
+solaria,naval,1,cp_gulf_gate,Gulf patrol
+solaria,tactical_air,3,solaria_2,F-15s Typhoons air defense of oil facilities
+solaria,air_defense,2,solaria_2,Patriot batteries - tested vs Persian missiles
+choson,ground,6,choson,Homeland DMZ fortifications
+choson,ground,2,heartland_2,Deployed to Nordostan/Heartland theater
+choson,naval,1,choson,Coastal defense submarines
+choson,tactical_air,2,choson,Ballistic missile force Hwasong series
+choson,strategic_missile,1,choson,Nuclear-tipped ICBMs
+choson,air_defense,1,choson,Antiquated layered defense
+hanguk,ground,5,hanguk,All DMZ defense
+hanguk,naval,2,hanguk,Modern destroyers submarines
+hanguk,tactical_air,3,hanguk,F-35 F-15K KF-21
+hanguk,air_defense,2,hanguk,Patriot + THAAD
+caribe,ground,2,caribe,Cuba homeland
+caribe,ground,1,caribe,Venezuela
+caribe,naval,1,caribe,Coastal patrol
+caribe,tactical_air,1,caribe,Antiquated Soviet-era aircraft
+mirage,ground,2,mirage,Homeland professional force
+mirage,naval,1,cp_gulf_gate,Gulf patrol Jebel Ali
+mirage,tactical_air,2,mirage,F-16s Mirage 2000s drones
+mirage,air_defense,2,mirage,THAAD Patriot IRIS-T

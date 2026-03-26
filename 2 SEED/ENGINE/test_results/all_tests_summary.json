@@ -1,0 +1,50 @@
+{
+  "test_1_generic": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_2_aggressive_nordostan": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_3_formosa_crisis": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_4_oil_cartel": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_5_columbia_politics": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_6_alliance_cohesion": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_7_gulf_gate_escalation": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  },
+  "test_8_peace_scenario": {
+    "status": "completed",
+    "rounds": 8,
+    "time": 0.09,
+    "nuclear": false
+  }
+}

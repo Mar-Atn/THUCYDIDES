@@ -1,5 +1,5 @@
 from_country,to_country,relationship,dynamic
-columbia,cathay,hostile,Strategic rival. Tariff war. Tech competition. Formosa tripwire. Largest bilateral trade under assault.
+columbia,cathay,strategic_rival,THE Trap itself. Largest bilateral trade under ~47.5% tariff assault. Economic interdependence + military competition in Pacific. Cathay closing AI gap. Semiconductor supply chain through Formosa.
 columbia,nordostan,hostile,Nuclear peer adversary. Sanctions regime. Proxy conflict via Heartland. Two-front nightmare with Cathay.
 columbia,heartland,close_ally,Ally at war. Weapons and aid provider. Pushing for negotiated settlement. Heartland fears abandonment.
 columbia,persia,at_war,Operation Epic Fury. Joint campaign with Levantia. Two carrier strike groups committed. Regime change objective.
@@ -18,7 +18,7 @@ columbia,choson,hostile,Nuclear wildcard. No diplomatic channel. Deterrence via 
 columbia,hanguk,alliance,US ally. Hosts bases. Semiconductor power. Domestic crisis. Cathay trade dependency Columbia is disrupting.
 columbia,caribe,hostile,Post-intervention. Operation Absolute Resolve. Energy blockade. Monroe Doctrine tested.
 columbia,mirage,friendly,Financial hub. Arms buyer. Gulf military facilities. Critical logistics for Persia war. Hedges everyone.
-cathay,columbia,hostile,Strategic rival. Declining hegemon. Trade war. Tech competition. Rare earth vs chip export controls.
+cathay,columbia,strategic_rival,THE Trap itself. Rising challenger vs declining hegemon. ~30% average tariffs post-Supreme Court chaos. Rare earth vs chip export controls = mutual technological chokehold.
 cathay,nordostan,close_ally,Partnership without limits evolving to asymmetric dependency. Energy buyer. Arms trade. Joint BRICS+. Nordostan as junior partner.
 cathay,heartland,neutral,Carefully neutral. Calls for peaceful resolution. Mild sanctions-evasion support to Nordostan. Studies conflict for Taiwan lessons.
 cathay,persia,friendly,BRICS+ member. Energy supplier. Sanctions-evasion partner. But no military support after Epic Fury.
@@ -89,11 +89,11 @@ persia,levantia,at_war,Joint target of Operation Epic Fury with Columbia. Proxy 
 persia,formosa,neutral,No significant relationship.
 persia,phrygia,friendly,Neighbor. Trade partner. Energy transit.
 persia,yamato,neutral,Limited relationship.
-persia,solaria,tense,OPEC+ partner but regional rival. Sectarian divide. Oil competition.
+persia,solaria,hostile,Being shelled. Attacked US bases on Solaria territory. Infrastructure threatened. Energy facilities desalination plants at risk.
 persia,choson,friendly,Arms trade. Missile technology sharing. Fellow pariah states.
 persia,hanguk,neutral,Limited relationship.
 persia,caribe,friendly,Shared resistance to Columbia. Limited practical cooperation.
-persia,mirage,tense,Regional rival. Gulf competition. Different sides of sectarian divide.
+persia,mirage,hostile,Under attack. 357 ballistic missiles 1815 drones 15 cruise missiles launched at UAE. Hosting Columbia war infrastructure.
 gallia,columbia,alliance,NATO ally with friction. Disagrees on Persia trade policy. Strategic autonomy champion.
 gallia,cathay,tense,Wary respect. UNSC peers. Less economically dependent than Teutonia.
 gallia,nordostan,hostile,Strong sanctions. UNSC adversary. Nuclear tension.
@@ -288,7 +288,7 @@ solaria,columbia,friendly,Oil pricing power. Arms buyer. Hedging. Increasingly i
 solaria,cathay,friendly,Largest oil customer. Petroyuan negotiations. BRICS+ partner.
 solaria,nordostan,friendly,OPEC+ partner. Oil coordination.
 solaria,heartland,neutral,Limited relationship.
-solaria,persia,tense,OPEC+ partner but regional rival. Sectarian divide.
+solaria,persia,hostile,Under active missile/drone attack since Feb 28. Ras Tanura refinery partial shutdown. First direct Iranian strikes on all GCC states in history.
 solaria,gallia,friendly,Arms buyer. Diplomatic partner.
 solaria,teutonia,friendly,Energy buyer. Investment.
 solaria,freeland,neutral,Limited relationship.
@@ -364,7 +364,7 @@ mirage,columbia,friendly,Financial hub. Gulf military facilities. Arms buyer. Lo
 mirage,cathay,friendly,BRI logistics. Financial hub bypassing Western finance.
 mirage,nordostan,neutral,OPEC+ coordination. Limited strategic engagement.
 mirage,heartland,neutral,No significant relationship.
-mirage,persia,tense,Gulf rival. Different side of sectarian divide. OPEC+ coordination.
+mirage,persia,hostile,Under active attack. 357 ballistic missiles 1815 drones 15 cruise missiles. 9 dead 166 injured. Missiles near Dubai skyline. No-enemies strategy destroyed.
 mirage,gallia,friendly,Arms buyer. Financial partnership.
 mirage,teutonia,friendly,Investment and financial partner.
 mirage,freeland,neutral,Limited relationship.

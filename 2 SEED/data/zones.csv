@@ -1,68 +1,58 @@
 id,display_name,type,owner,theater,is_chokepoint
-g_col_continental,Columbia Continental,land_home,columbia,global,false
-g_col_alaska,Columbia Alaska,land_home,columbia,global,false
-g_col_hawaii,Columbia Hawaii,land_home,columbia,global,false
-g_cat_eastern,Cathay Eastern,land_home,cathay,global,false
-g_cat_western,Cathay Western,land_home,cathay,global,false
-g_cat_southern,Cathay Southern,land_home,cathay,global,false
-g_nor_western,Nordostan Western,land_home,nordostan,global,false
-g_nor_central,Nordostan Central,land_home,nordostan,global,false
-g_nor_eastern,Nordostan Eastern,land_home,nordostan,global,false
-g_gallia,Gallia,land_home,gallia,global,false
-g_teutonia,Teutonia,land_home,teutonia,global,false
-g_freeland,Freeland,land_home,freeland,global,false
-g_ponte,Ponte,land_home,ponte,global,false
-g_albion,Albion,land_home,albion,global,false
-g_bharata,Bharata,land_home,bharata,global,false
-g_formosa,Formosa,land_home,formosa,global,false
-g_phrygia,Phrygia,land_home,phrygia,global,false
-g_yamato,Yamato,land_home,yamato,global,false
-g_solaria,Solaria,land_home,solaria,global,false
-g_choson,Choson,land_home,choson,global,false
-g_hanguk,Hanguk,land_home,hanguk,global,false
-g_caribe,Caribe,land_home,caribe,global,false
-g_mirage,Mirage,land_home,mirage,global,false
-g_thule,Thule,land_contested,teutonia,global,false
-g_contested_horn,Horn of Africa,land_contested,none,global,false
-g_contested_central_asia,Central Asia,land_contested,none,global,false
-g_sea_atlantic_west,Western Atlantic,sea,none,global,false
-g_sea_atlantic_east,Eastern Atlantic,sea,none,global,false
-g_sea_north_pacific,North Pacific,sea,none,global,false
-g_sea_south_china,South China Sea,sea,none,global,false
-g_sea_east_china,East China Sea,sea,none,global,false
-g_sea_southeast_asia,Southeast Asia Sea,sea,none,global,false
-g_sea_indian_ocean,Indian Ocean,sea,none,global,false
-g_sea_arabian,Arabian Sea,sea,none,global,false
-g_sea_persian_gulf,Persian Gulf,sea,none,global,true
-g_sea_red,Red Sea,sea,none,global,true
-g_sea_med_west,Western Mediterranean,sea,none,global,false
-g_sea_med_east,Eastern Mediterranean,sea,none,global,false
-g_sea_black,Black Sea,sea,none,global,false
-g_sea_baltic,Baltic Sea,sea,none,global,false
-g_sea_giuk,GIUK Gap,sea,none,global,false
-g_sea_arctic,Arctic Ocean,sea,none,global,false
-g_sea_gulf_caribbean,Gulf and Caribbean,sea,none,global,false
-g_choson_border,Choson Border,land_contested,none,global,false
-ee_west_ukr,Western Ukraine,land_home,heartland,eastern_ereb,false
-ee_capital,Kyiv Capital Region,land_home,heartland,eastern_ereb,false
-ee_central_ukr,Central Ukraine,land_home,heartland,eastern_ereb,false
-ee_southwest,Southwestern Ukraine,land_home,heartland,eastern_ereb,false
-ee_east_front_north,Eastern Front North,land_contested,heartland,eastern_ereb,false
-ee_south_ukr,Southern Ukraine,land_contested,heartland,eastern_ereb,false
-ee_dnipro_line,Dnipro Line,land_contested,heartland,eastern_ereb,false
-ee_kherson,Kherson,land_contested,heartland,eastern_ereb,false
-ee_east_front_central,Eastern Front Central,land_contested,nordostan,eastern_ereb,false
-ee_east_front_south,Eastern Front South,land_contested,nordostan,eastern_ereb,false
-ee_occupied_south,Occupied South,land_contested,nordostan,eastern_ereb,false
-ee_crimea_naval,Crimea Naval Base,land_contested,nordostan,eastern_ereb,false
-ee_belarus,Belarus Staging,land_home,nordostan,eastern_ereb,false
-ee_nord_border,Nordostan Border,land_home,nordostan,eastern_ereb,false
-me_persia_west,Persia Western,land_home,persia,mashriq,false
-me_persia_nuclear,Persia Nuclear Zone,land_home,persia,mashriq,false
-me_persia_east,Persia Eastern,land_home,persia,mashriq,false
-me_gulf_gate,Gulf Gate,chokepoint_sea,none,mashriq,true
-me_levantia_core,Levantia Core,land_home,levantia,mashriq,false
-me_levantia_north,Levantia Northern,land_home,levantia,mashriq,false
-me_syria_lebanon,Syria-Lebanon,land_contested,none,mashriq,false
-me_iraq_corridor,Iraq Corridor,land_contested,none,mashriq,false
-me_yemen,Yemen,land_contested,none,mashriq,false
+col_nw,Columbia Northwest,land_home,columbia,americas,false
+col_w,Columbia West,land_home,columbia,americas,false
+col_main_1,Columbia Central,land_home,columbia,americas,false
+col_main_2,Columbia East,land_home,columbia,americas,false
+col_main_3,Columbia South Central,land_home,columbia,americas,false
+col_main_4,Columbia Southeast,land_home,columbia,americas,false
+col_south,Columbia South,land_home,columbia,americas,false
+caribe,Caribe,land_home,caribe,americas,false
+cp_caribe_passage,Caribe Passage,chokepoint,none,americas,true
+thule,Thule,land_contested,teutonia,ereb,false
+albion,Albion,land_home,albion,ereb,false
+teutonia_1,Teutonia North,land_home,teutonia,ereb,false
+teutonia_2,Teutonia South,land_home,teutonia,ereb,false
+freeland,Freeland,land_home,freeland,ereb,false
+gallia_1,Gallia West,land_home,gallia,ereb,false
+gallia_2,Gallia East,land_home,gallia,ereb,false
+ponte,Ponte,land_home,ponte,ereb,false
+heartland_1,Heartland West,land_home,heartland,ereb,false
+heartland_2,Heartland East,land_contested,heartland,ereb,false
+nord_n1,Nordostan Arctic,land_home,nordostan,ereb,false
+nord_w1,Nordostan West,land_home,nordostan,ereb,false
+nord_w2,Nordostan Southwest,land_home,nordostan,ereb,false
+nord_c1,Nordostan Central,land_home,nordostan,ereb,false
+nord_c2,Nordostan South Central,land_home,nordostan,ereb,false
+nord_e1,Nordostan East,land_home,nordostan,ereb,false
+nord_e2,Nordostan Far East,land_home,nordostan,ereb,false
+nord_e3,Nordostan Pacific,land_home,nordostan,ereb,false
+sogdiana_1,Sogdiana North,land_contested,none,mashriq,false
+sogdiana_2,Sogdiana South,land_contested,none,mashriq,false
+sogdiana_3,Sogdiana East,land_contested,none,mashriq,false
+phrygia_1,Phrygia East,land_home,phrygia,mashriq,false
+phrygia_2,Phrygia South,land_home,phrygia,mashriq,false
+levantia,Levantia,land_home,levantia,mashriq,false
+persia_1,Persia North,land_home,persia,mashriq,false
+persia_2,Persia West,land_home,persia,mashriq,false
+persia_3,Persia East,land_home,persia,mashriq,false
+solaria_1,Solaria West,land_home,solaria,mashriq,false
+solaria_2,Solaria East,land_home,solaria,mashriq,false
+horn,Horn of Africa,land_contested,none,mashriq,false
+mirage,Mirage,land_home,mirage,mashriq,false
+cp_gulf_gate,Gulf Gate,chokepoint,none,mashriq,true
+bharata_1,Bharata South,land_home,bharata,asu,false
+bharata_2,Bharata North,land_home,bharata,asu,false
+bharata_3,Bharata East,land_home,bharata,asu,false
+choson,Choson,land_home,choson,asu,false
+hanguk,Hanguk,land_home,hanguk,asu,false
+cathay_1,Cathay Northwest,land_home,cathay,asu,false
+cathay_2,Cathay West,land_home,cathay,asu,false
+cathay_3,Cathay Central,land_home,cathay,asu,false
+cathay_4,Cathay Northeast,land_home,cathay,asu,false
+cathay_5,Cathay Southwest,land_home,cathay,asu,false
+cathay_6,Cathay Southeast,land_home,cathay,asu,false
+cathay_7,Cathay South,land_home,cathay,asu,false
+yamato_1,Yamato North,land_home,yamato,asu,false
+yamato_2,Yamato South,land_home,yamato,asu,false
+formosa,Formosa,land_home,formosa,asu,false
+cp_formosa_strait,Formosa Strait,chokepoint,none,asu,true

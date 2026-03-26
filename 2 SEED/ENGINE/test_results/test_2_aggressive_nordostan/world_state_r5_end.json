@@ -1,0 +1,5829 @@
+{
+  "round_num": 5,
+  "countries": {
+    "columbia": {
+      "id": "columbia",
+      "sim_name": "Columbia",
+      "parallel": "United States",
+      "regime_type": "democracy",
+      "team_type": "team",
+      "team_size_min": 7,
+      "team_size_max": 9,
+      "ai_default": false,
+      "home_zones": [
+        "col_nw",
+        "col_w",
+        "col_main_1",
+        "col_main_2",
+        "col_main_3",
+        "col_main_4",
+        "col_south"
+      ],
+      "economic": {
+        "gdp": 314.39,
+        "gdp_growth_rate": 2.75,
+        "sectors": {
+          "resources": 5.0,
+          "industry": 18.0,
+          "services": 55.0,
+          "technology": 22.0
+        },
+        "tax_rate": 0.24,
+        "treasury": 65.07300000000001,
+        "inflation": 1.56,
+        "trade_balance": -12.0,
+        "oil_producer": true,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.65,
+        "debt_burden": 5.0,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 1.94,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 14,
+        "naval": 14,
+        "tactical_air": 15,
+        "strategic_missiles": 12,
+        "air_defense": 4,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 4,
+          "naval": 2,
+          "tactical_air": 3
+        },
+        "maintenance_cost_per_unit": 0.5,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 5.73,
+        "political_support": 46.16,
+        "dem_rep_split": {
+          "dem": 52.0,
+          "rep": 48.0
+        },
+        "war_tiredness": 3.9999999999999996,
+        "regime_type": "democracy",
+        "regime_status": "unstable",
+        "protest_risk": false,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.017587817650385,
+        "ai_level": 3,
+        "ai_rd_progress": 0.6410382411842315
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "cathay": {
+      "id": "cathay",
+      "sim_name": "Cathay",
+      "parallel": "China",
+      "regime_type": "autocracy",
+      "team_type": "team",
+      "team_size_min": 5,
+      "team_size_max": 5,
+      "ai_default": false,
+      "home_zones": [
+        "cathay_1",
+        "cathay_2",
+        "cathay_3",
+        "cathay_4",
+        "cathay_5",
+        "cathay_6",
+        "cathay_7"
+      ],
+      "economic": {
+        "gdp": 262.65,
+        "gdp_growth_rate": 7.34,
+        "sectors": {
+          "resources": 5.0,
+          "industry": 52.0,
+          "services": 30.0,
+          "technology": 13.0
+        },
+        "tax_rate": 0.2,
+        "treasury": 83.98500000000001,
+        "inflation": 0.22,
+        "trade_balance": 12.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.25,
+        "debt_burden": 2.0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 21,
+        "naval": 9,
+        "tactical_air": 12,
+        "strategic_missiles": 9,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 5,
+          "naval": 3,
+          "tactical_air": 3
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "strategic_missile_growth": 1,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 9.0,
+        "political_support": 66.03,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.8283960710506895,
+        "ai_level": 3,
+        "ai_rd_progress": 0.05282179854245957
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "nordostan": {
+      "id": "nordostan",
+      "sim_name": "Nordostan",
+      "parallel": "Russia",
+      "regime_type": "autocracy",
+      "team_type": "team",
+      "team_size_min": 3,
+      "team_size_max": 4,
+      "ai_default": false,
+      "home_zones": [
+        "nord_n1",
+        "nord_w1",
+        "nord_c1",
+        "nord_e1",
+        "nord_e2",
+        "nord_e3",
+        "nord_w2",
+        "nord_c2"
+      ],
+      "economic": {
+        "gdp": 19.9089,
+        "gdp_growth_rate": 0.88,
+        "sectors": {
+          "resources": 40.0,
+          "industry": 25.0,
+          "services": 25.0,
+          "technology": 10.0
+        },
+        "tax_rate": 0.2,
+        "treasury": 0,
+        "inflation": 2.22,
+        "trade_balance": 2.0,
+        "oil_producer": true,
+        "opec_member": true,
+        "opec_production": "normal",
+        "formosa_dependency": 0.15,
+        "debt_burden": 0.5,
+        "social_spending_baseline": 0.25,
+        "oil_revenue": 1.01,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 11,
+        "naval": 6,
+        "tactical_air": 8,
+        "strategic_missiles": 12,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 1.5,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 2
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1,
+        "political_support": 38.38,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 10.5575,
+        "regime_type": "autocracy",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 3,
+        "nuclear_rd_progress": 1.0074317831854542,
+        "ai_level": 1,
+        "ai_rd_progress": 0.3173408274327268
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "heartland": {
+      "id": "heartland",
+      "sim_name": "Heartland",
+      "parallel": "Ukraine",
+      "regime_type": "democracy",
+      "team_type": "team",
+      "team_size_min": 3,
+      "team_size_max": 3,
+      "ai_default": false,
+      "home_zones": [
+        "heartland_1",
+        "heartland_2"
+      ],
+      "economic": {
+        "gdp": 2.2504,
+        "gdp_growth_rate": 2.7,
+        "sectors": {
+          "resources": 15.0,
+          "industry": 20.0,
+          "services": 40.0,
+          "technology": 10.0
+        },
+        "tax_rate": 0.25,
+        "treasury": 0,
+        "inflation": 3.33,
+        "trade_balance": -0.8,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.1,
+        "debt_burden": 0.3,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 7,
+        "naval": 0,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 1.5,
+          "naval": 0.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1,
+        "political_support": 5.0,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 10.5575,
+        "regime_type": "democracy",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.007317595588256518,
+        "ai_level": 2,
+        "ai_rd_progress": 0.012796611928154098
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "persia": {
+      "id": "persia",
+      "sim_name": "Persia",
+      "parallel": "Iran",
+      "regime_type": "hybrid",
+      "team_type": "team",
+      "team_size_min": 3,
+      "team_size_max": 3,
+      "ai_default": false,
+      "home_zones": [
+        "persia_1",
+        "persia_2",
+        "persia_3"
+      ],
+      "economic": {
+        "gdp": 2.3508079333333334,
+        "gdp_growth_rate": -2.91,
+        "sectors": {
+          "resources": 35.0,
+          "industry": 30.0,
+          "services": 28.0,
+          "technology": 7.0
+        },
+        "tax_rate": 0.18,
+        "treasury": 0,
+        "inflation": 22.18,
+        "trade_balance": -1.0,
+        "oil_producer": true,
+        "opec_member": true,
+        "opec_production": "normal",
+        "formosa_dependency": 0.15,
+        "debt_burden": 0.0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.12,
+        "inflation_revenue_erosion": 1.41
+      },
+      "military": {
+        "ground": 5,
+        "naval": 2,
+        "tactical_air": 6,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 1.0,
+          "naval": 2.0,
+          "tactical_air": 2.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.25,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1,
+        "political_support": 5.0,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 9.750000000000002,
+        "regime_type": "hybrid",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.011129149619915587,
+        "ai_level": 0,
+        "ai_rd_progress": 0.1324628611406278
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "gallia": {
+      "id": "gallia",
+      "sim_name": "Gallia",
+      "parallel": "France",
+      "regime_type": "democracy",
+      "team_type": "europe",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": false,
+      "home_zones": [
+        "gallia_1",
+        "gallia_2"
+      ],
+      "economic": {
+        "gdp": 36.01,
+        "gdp_growth_rate": 1.27,
+        "sectors": {
+          "resources": 5.0,
+          "industry": 20.0,
+          "services": 55.0,
+          "technology": 20.0
+        },
+        "tax_rate": 0.45,
+        "treasury": 10.730000000000002,
+        "inflation": 1.1,
+        "trade_balance": -1.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.35,
+        "debt_burden": 3.0,
+        "social_spending_baseline": 0.35,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 6,
+        "naval": 3,
+        "tactical_air": 4,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.5,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 7.5,
+        "political_support": 42.2,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.8500467988101041,
+        "ai_level": 2,
+        "ai_rd_progress": 0.416775863890243
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "teutonia": {
+      "id": "teutonia",
+      "sim_name": "Teutonia",
+      "parallel": "Germany",
+      "regime_type": "democracy",
+      "team_type": "europe",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": false,
+      "home_zones": [
+        "teutonia_1",
+        "teutonia_2"
+      ],
+      "economic": {
+        "gdp": 48.22,
+        "gdp_growth_rate": 1.53,
+        "sectors": {
+          "resources": 3.0,
+          "industry": 28.0,
+          "services": 50.0,
+          "technology": 19.0
+        },
+        "tax_rate": 0.38,
+        "treasury": 25.506,
+        "inflation": 1.1,
+        "trade_balance": 3.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.45,
+        "debt_burden": 2.0,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 6,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2.5,
+          "naval": 4.0,
+          "tactical_air": 3.5
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 7.5,
+        "political_support": 46.93,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.04216318166502201,
+        "ai_level": 2,
+        "ai_rd_progress": 0.29838075721838475
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "freeland": {
+      "id": "freeland",
+      "sim_name": "Freeland",
+      "parallel": "Poland",
+      "regime_type": "democracy",
+      "team_type": "europe",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": false,
+      "home_zones": [
+        "freeland"
+      ],
+      "economic": {
+        "gdp": 11.53,
+        "gdp_growth_rate": 4.48,
+        "sectors": {
+          "resources": 8.0,
+          "industry": 30.0,
+          "services": 50.0,
+          "technology": 12.0
+        },
+        "tax_rate": 0.35,
+        "treasury": 0,
+        "inflation": 1.78,
+        "trade_balance": 0.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.25,
+        "debt_burden": 1.0,
+        "social_spending_baseline": 0.25,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 5,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 3.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 9.0,
+        "political_support": 67.57,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.037839247806783834,
+        "ai_level": 2,
+        "ai_rd_progress": 0.07056649782997686
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "ponte": {
+      "id": "ponte",
+      "sim_name": "Ponte",
+      "parallel": "Italy",
+      "regime_type": "democracy",
+      "team_type": "europe",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": false,
+      "home_zones": [
+        "ponte"
+      ],
+      "economic": {
+        "gdp": 24.044999999999998,
+        "gdp_growth_rate": 0.8,
+        "sectors": {
+          "resources": 4.0,
+          "industry": 22.0,
+          "services": 60.0,
+          "technology": 14.0
+        },
+        "tax_rate": 0.4,
+        "treasury": 0,
+        "inflation": 1.1,
+        "trade_balance": 0.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.3,
+        "debt_burden": 8.0,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 0,
+        "production_costs": {
+          "ground": 2.5,
+          "naval": 4.5,
+          "tactical_air": 3.5
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 6.25,
+        "political_support": 39.83,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.04464059301918934,
+        "ai_level": 2,
+        "ai_rd_progress": 0.0
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "albion": {
+      "id": "albion",
+      "sim_name": "Albion",
+      "parallel": "United Kingdom",
+      "regime_type": "democracy",
+      "team_type": "europe",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": false,
+      "home_zones": [
+        "albion"
+      ],
+      "economic": {
+        "gdp": 35.15,
+        "gdp_growth_rate": 1.4,
+        "sectors": {
+          "resources": 5.0,
+          "industry": 17.0,
+          "services": 60.0,
+          "technology": 18.0
+        },
+        "tax_rate": 0.35,
+        "treasury": 2.900000000000002,
+        "inflation": 1.33,
+        "trade_balance": -2.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.4,
+        "debt_burden": 3.0,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 4,
+        "naval": 4,
+        "tactical_air": 3,
+        "strategic_missiles": 2,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.5,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 7.5,
+        "political_support": 41.06,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 2,
+        "nuclear_rd_progress": 0.7388810915863708,
+        "ai_level": 2,
+        "ai_rd_progress": 0.4907225470348657
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "bharata": {
+      "id": "bharata",
+      "sim_name": "Bharata",
+      "parallel": "India",
+      "regime_type": "democracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "bharata_1",
+        "bharata_2",
+        "bharata_3"
+      ],
+      "economic": {
+        "gdp": 60.36,
+        "gdp_growth_rate": 8.27,
+        "sectors": {
+          "resources": 10.0,
+          "industry": 25.0,
+          "services": 48.0,
+          "technology": 17.0
+        },
+        "tax_rate": 0.18,
+        "treasury": 2.670000000000001,
+        "inflation": 2.22,
+        "trade_balance": -3.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.35,
+        "debt_burden": 3.0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 12,
+        "naval": 3,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 3,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.25,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 6.91,
+        "political_support": 77.55,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.4188334556974546,
+        "ai_level": 2,
+        "ai_rd_progress": 0.4939447299607275
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "levantia": {
+      "id": "levantia",
+      "sim_name": "Levantia",
+      "parallel": "Israel",
+      "regime_type": "democracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "levantia"
+      ],
+      "economic": {
+        "gdp": 5.3652,
+        "gdp_growth_rate": 3.82,
+        "sectors": {
+          "resources": 3.0,
+          "industry": 15.0,
+          "services": 50.0,
+          "technology": 32.0
+        },
+        "tax_rate": 0.32,
+        "treasury": 0,
+        "inflation": 1.56,
+        "trade_balance": -1.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.3,
+        "debt_burden": 2.0,
+        "social_spending_baseline": 0.28,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 11,
+        "naval": 1,
+        "tactical_air": 4,
+        "strategic_missiles": 0,
+        "air_defense": 3,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 2
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1,
+        "political_support": 65.02000000000001,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 9.250000000000002,
+        "regime_type": "democracy",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.5231860493266618,
+        "ai_level": 3,
+        "ai_rd_progress": 0.0
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "formosa": {
+      "id": "formosa",
+      "sim_name": "Formosa",
+      "parallel": "Taiwan",
+      "regime_type": "democracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "formosa"
+      ],
+      "economic": {
+        "gdp": 9.45,
+        "gdp_growth_rate": 3.64,
+        "sectors": {
+          "resources": 2.0,
+          "industry": 30.0,
+          "services": 35.0,
+          "technology": 33.0
+        },
+        "tax_rate": 0.2,
+        "treasury": 0,
+        "inflation": 0.88,
+        "trade_balance": 4.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.0,
+        "debt_burden": 1.0,
+        "social_spending_baseline": 0.22,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 4,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 8.05,
+        "political_support": 62.61,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.02176280021811156,
+        "ai_level": 2,
+        "ai_rd_progress": 0.5507798671755937
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "phrygia": {
+      "id": "phrygia",
+      "sim_name": "Phrygia",
+      "parallel": "Turkey",
+      "regime_type": "hybrid",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "phrygia_1",
+        "phrygia_2"
+      ],
+      "economic": {
+        "gdp": 10.931899999999999,
+        "gdp_growth_rate": 2.94,
+        "sectors": {
+          "resources": 8.0,
+          "industry": 30.0,
+          "services": 50.0,
+          "technology": 12.0
+        },
+        "tax_rate": 0.25,
+        "treasury": 0,
+        "inflation": 19.97,
+        "trade_balance": -3.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.2,
+        "debt_burden": 3.0,
+        "social_spending_baseline": 0.22,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 4.92
+      },
+      "military": {
+        "ground": 6,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.3,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1.52,
+        "political_support": 45.53,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "hybrid",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.027315157747396384,
+        "ai_level": 1,
+        "ai_rd_progress": 0.31373536807725827
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "yamato": {
+      "id": "yamato",
+      "sim_name": "Yamato",
+      "parallel": "Japan",
+      "regime_type": "democracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "yamato_1",
+        "yamato_2"
+      ],
+      "economic": {
+        "gdp": 46.35,
+        "gdp_growth_rate": 1.94,
+        "sectors": {
+          "resources": 2.0,
+          "industry": 28.0,
+          "services": 50.0,
+          "technology": 20.0
+        },
+        "tax_rate": 0.3,
+        "treasury": 0,
+        "inflation": 1.1,
+        "trade_balance": -2.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.55,
+        "debt_burden": 6.0,
+        "social_spending_baseline": 0.3,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 3,
+        "naval": 4,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.45,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 8.0,
+        "political_support": 51.29,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.1332475145412305,
+        "ai_level": 3,
+        "ai_rd_progress": 0.3775775339295378
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "solaria": {
+      "id": "solaria",
+      "sim_name": "Solaria",
+      "parallel": "Saudi Arabia",
+      "regime_type": "autocracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "solaria_1",
+        "solaria_2"
+      ],
+      "economic": {
+        "gdp": 13.06,
+        "gdp_growth_rate": 3.5,
+        "sectors": {
+          "resources": 45.0,
+          "industry": 20.0,
+          "services": 28.0,
+          "technology": 7.0
+        },
+        "tax_rate": 0.1,
+        "treasury": 0,
+        "inflation": 0.88,
+        "trade_balance": 8.0,
+        "oil_producer": true,
+        "opec_member": true,
+        "opec_production": "normal",
+        "formosa_dependency": 0.2,
+        "debt_burden": 1.0,
+        "social_spending_baseline": 0.25,
+        "oil_revenue": 0.72,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.4,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 8.1,
+        "political_support": 67.71,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.32768000000000014,
+        "regime_type": "autocracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.11087032271946029,
+        "ai_level": 1,
+        "ai_rd_progress": 0.22536408634540736
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "choson": {
+      "id": "choson",
+      "sim_name": "Choson",
+      "parallel": "North Korea",
+      "regime_type": "autocracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "choson"
+      ],
+      "economic": {
+        "gdp": 0.297,
+        "gdp_growth_rate": 0.5,
+        "sectors": {
+          "resources": 20.0,
+          "industry": 40.0,
+          "services": 35.0,
+          "technology": 5.0
+        },
+        "tax_rate": 0.5,
+        "treasury": 0,
+        "inflation": 4.44,
+        "trade_balance": -0.5,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.0,
+        "debt_burden": 0.0,
+        "social_spending_baseline": 0.1,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 8,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 1,
+        "air_defense": 1,
+        "production_costs": {
+          "ground": 1.0,
+          "naval": 3.0,
+          "tactical_air": 2.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.15,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 2.44,
+        "political_support": 54.47,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 1,
+        "nuclear_rd_progress": 0.5558000000000001,
+        "ai_level": 0,
+        "ai_rd_progress": 0.1302
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "hanguk": {
+      "id": "hanguk",
+      "sim_name": "Hanguk",
+      "parallel": "South Korea",
+      "regime_type": "democracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "hanguk"
+      ],
+      "economic": {
+        "gdp": 20.36,
+        "gdp_growth_rate": 2.72,
+        "sectors": {
+          "resources": 3.0,
+          "industry": 33.0,
+          "services": 42.0,
+          "technology": 22.0
+        },
+        "tax_rate": 0.26,
+        "treasury": 0,
+        "inflation": 1.1,
+        "trade_balance": 3.0,
+        "oil_producer": false,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.4,
+        "debt_burden": 2.0,
+        "social_spending_baseline": 0.25,
+        "oil_revenue": 0.0,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 5,
+        "naval": 2,
+        "tactical_air": 3,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 5.99,
+        "political_support": 40.23,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "democracy",
+        "regime_status": "unstable",
+        "protest_risk": false,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.07853811678132051,
+        "ai_level": 2,
+        "ai_rd_progress": 0.5665889391564145
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "caribe": {
+      "id": "caribe",
+      "sim_name": "Caribe",
+      "parallel": "Cuba + Venezuela",
+      "regime_type": "autocracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "caribe"
+      ],
+      "economic": {
+        "gdp": 1.20085713,
+        "gdp_growth_rate": -0.92,
+        "sectors": {
+          "resources": 50.0,
+          "industry": 20.0,
+          "services": 25.0,
+          "technology": 5.0
+        },
+        "tax_rate": 0.3,
+        "treasury": 0,
+        "inflation": 26.62,
+        "trade_balance": 0.0,
+        "oil_producer": true,
+        "opec_member": false,
+        "opec_production": "na",
+        "formosa_dependency": 0.0,
+        "debt_burden": 5.0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.08,
+        "inflation_revenue_erosion": 0.84
+      },
+      "military": {
+        "ground": 3,
+        "naval": 1,
+        "tactical_air": 1,
+        "strategic_missiles": 0,
+        "air_defense": 0,
+        "production_costs": {
+          "ground": 2.0,
+          "naval": 4.0,
+          "tactical_air": 3.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 0
+        },
+        "maintenance_cost_per_unit": 0.2,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 1.0,
+        "political_support": 28.04,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.0,
+        "regime_type": "autocracy",
+        "regime_status": "crisis",
+        "protest_risk": true,
+        "coup_risk": true
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.034090848002112664,
+        "ai_level": 0,
+        "ai_rd_progress": 0.07954531200492955
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    },
+    "mirage": {
+      "id": "mirage",
+      "sim_name": "Mirage",
+      "parallel": "UAE",
+      "regime_type": "autocracy",
+      "team_type": "solo",
+      "team_size_min": 1,
+      "team_size_max": 1,
+      "ai_default": true,
+      "home_zones": [
+        "mirage"
+      ],
+      "economic": {
+        "gdp": 6.09,
+        "gdp_growth_rate": 4.0,
+        "sectors": {
+          "resources": 30.0,
+          "industry": 15.0,
+          "services": 45.0,
+          "technology": 10.0
+        },
+        "tax_rate": 0.0,
+        "treasury": 2.750000000000003,
+        "inflation": 0.88,
+        "trade_balance": 5.0,
+        "oil_producer": true,
+        "opec_member": true,
+        "opec_production": "normal",
+        "formosa_dependency": 0.15,
+        "debt_burden": 0.0,
+        "social_spending_baseline": 0.2,
+        "oil_revenue": 0.22,
+        "inflation_revenue_erosion": 0.0
+      },
+      "military": {
+        "ground": 2,
+        "naval": 1,
+        "tactical_air": 2,
+        "strategic_missiles": 0,
+        "air_defense": 2,
+        "production_costs": {
+          "ground": 3.0,
+          "naval": 5.0,
+          "tactical_air": 4.0
+        },
+        "production_capacity": {
+          "ground": 1,
+          "naval": 0,
+          "tactical_air": 1
+        },
+        "maintenance_cost_per_unit": 0.35,
+        "strategic_missile_growth": 0,
+        "mobilization_pool": 0
+      },
+      "political": {
+        "stability": 9.0,
+        "political_support": 75.32,
+        "dem_rep_split": {
+          "dem": 0.0,
+          "rep": 0.0
+        },
+        "war_tiredness": 0.32768000000000014,
+        "regime_type": "autocracy",
+        "regime_status": "stable",
+        "protest_risk": false,
+        "coup_risk": false
+      },
+      "technology": {
+        "nuclear_level": 0,
+        "nuclear_rd_progress": 0.0,
+        "ai_level": 1,
+        "ai_rd_progress": 0.3
+      },
+      "diplomatic": {
+        "wars": [],
+        "peace_treaties": [],
+        "organization_memberships": [],
+        "active_treaties": []
+      }
+    }
+  },
+  "zones": {
+    "col_nw": {
+      "id": "col_nw",
+      "display_name": "Columbia Northwest",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "tactical_air": 1,
+          "strategic_missile": 1
+        }
+      }
+    },
+    "col_w": {
+      "id": "col_w",
+      "display_name": "Columbia West",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "col_main_1": {
+      "id": "col_main_1",
+      "display_name": "Columbia Central",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 4,
+          "tactical_air": 5,
+          "strategic_missile": 8,
+          "air_defense": 2
+        }
+      }
+    },
+    "col_main_2": {
+      "id": "col_main_2",
+      "display_name": "Columbia East",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "naval": 3,
+          "strategic_missile": 3
+        }
+      }
+    },
+    "col_main_3": {
+      "id": "col_main_3",
+      "display_name": "Columbia South Central",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "naval": 3,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "col_main_4": {
+      "id": "col_main_4",
+      "display_name": "Columbia Southeast",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "col_south": {
+      "id": "col_south",
+      "display_name": "Columbia South",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "caribe": {
+      "id": "caribe",
+      "display_name": "Caribe",
+      "type": "land_home",
+      "owner": "caribe",
+      "theater": "americas",
+      "is_chokepoint": false,
+      "forces": {
+        "caribe": {
+          "ground": 3,
+          "naval": 1,
+          "tactical_air": 1
+        }
+      }
+    },
+    "cp_caribe_passage": {
+      "id": "cp_caribe_passage",
+      "display_name": "Caribe Passage",
+      "type": "chokepoint",
+      "owner": "none",
+      "theater": "americas",
+      "is_chokepoint": true,
+      "forces": {}
+    },
+    "thule": {
+      "id": "thule",
+      "display_name": "Thule",
+      "type": "land_contested",
+      "owner": "teutonia",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "albion": {
+      "id": "albion",
+      "display_name": "Albion",
+      "type": "land_home",
+      "owner": "albion",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "teutonia": {
+          "naval": 1
+        },
+        "albion": {
+          "ground": 3,
+          "naval": 3,
+          "tactical_air": 2,
+          "strategic_missile": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "teutonia_1": {
+      "id": "teutonia_1",
+      "display_name": "Teutonia North",
+      "type": "land_home",
+      "owner": "teutonia",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 2,
+          "tactical_air": 2
+        },
+        "teutonia": {
+          "ground": 6,
+          "naval": 1,
+          "tactical_air": 3,
+          "air_defense": 1
+        }
+      }
+    },
+    "teutonia_2": {
+      "id": "teutonia_2",
+      "display_name": "Teutonia South",
+      "type": "land_home",
+      "owner": "teutonia",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "freeland": {
+      "id": "freeland",
+      "display_name": "Freeland",
+      "type": "land_home",
+      "owner": "freeland",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1
+        },
+        "freeland": {
+          "ground": 5,
+          "naval": 1,
+          "tactical_air": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "gallia_1": {
+      "id": "gallia_1",
+      "display_name": "Gallia West",
+      "type": "land_home",
+      "owner": "gallia",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "gallia": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 3,
+          "strategic_missile": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "gallia_2": {
+      "id": "gallia_2",
+      "display_name": "Gallia East",
+      "type": "land_home",
+      "owner": "gallia",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "ponte": {
+      "id": "ponte",
+      "display_name": "Ponte",
+      "type": "land_home",
+      "owner": "ponte",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "ponte": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 2
+        }
+      }
+    },
+    "heartland_1": {
+      "id": "heartland_1",
+      "display_name": "Heartland West",
+      "type": "land_home",
+      "owner": "heartland",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "ground": 3
+        },
+        "heartland": {
+          "ground": 1,
+          "tactical_air": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "heartland_2": {
+      "id": "heartland_2",
+      "display_name": "Heartland East",
+      "type": "land_contested",
+      "owner": "heartland",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "ground": 4,
+          "tactical_air": 4,
+          "air_defense": 1
+        },
+        "heartland": {
+          "ground": 3,
+          "tactical_air": 2
+        },
+        "choson": {
+          "ground": 2
+        }
+      }
+    },
+    "nord_n1": {
+      "id": "nord_n1",
+      "display_name": "Nordostan Arctic",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "naval": 2,
+          "strategic_missile": 3
+        }
+      }
+    },
+    "nord_w1": {
+      "id": "nord_w1",
+      "display_name": "Nordostan West",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "nord_w2": {
+      "id": "nord_w2",
+      "display_name": "Nordostan Southwest",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "ground": 1,
+          "naval": 2,
+          "tactical_air": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "nord_c1": {
+      "id": "nord_c1",
+      "display_name": "Nordostan Central",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "ground": 2,
+          "tactical_air": 2,
+          "strategic_missile": 7,
+          "air_defense": 1
+        }
+      }
+    },
+    "nord_c2": {
+      "id": "nord_c2",
+      "display_name": "Nordostan South Central",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "nord_e1": {
+      "id": "nord_e1",
+      "display_name": "Nordostan East",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "nord_e2": {
+      "id": "nord_e2",
+      "display_name": "Nordostan Far East",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "ground": 2,
+          "tactical_air": 1,
+          "strategic_missile": 2
+        }
+      }
+    },
+    "nord_e3": {
+      "id": "nord_e3",
+      "display_name": "Nordostan Pacific",
+      "type": "land_home",
+      "owner": "nordostan",
+      "theater": "ereb",
+      "is_chokepoint": false,
+      "forces": {
+        "nordostan": {
+          "naval": 1
+        }
+      }
+    },
+    "sogdiana_1": {
+      "id": "sogdiana_1",
+      "display_name": "Sogdiana North",
+      "type": "land_contested",
+      "owner": "none",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "sogdiana_2": {
+      "id": "sogdiana_2",
+      "display_name": "Sogdiana South",
+      "type": "land_contested",
+      "owner": "none",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "sogdiana_3": {
+      "id": "sogdiana_3",
+      "display_name": "Sogdiana East",
+      "type": "land_contested",
+      "owner": "none",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "phrygia_1": {
+      "id": "phrygia_1",
+      "display_name": "Phrygia East",
+      "type": "land_home",
+      "owner": "phrygia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "phrygia": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 3,
+          "air_defense": 1
+        }
+      }
+    },
+    "phrygia_2": {
+      "id": "phrygia_2",
+      "display_name": "Phrygia South",
+      "type": "land_home",
+      "owner": "phrygia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "persia": {
+          "ground": 1
+        },
+        "levantia": {
+          "ground": 2
+        },
+        "phrygia": {
+          "ground": 2
+        }
+      }
+    },
+    "levantia": {
+      "id": "levantia",
+      "display_name": "Levantia",
+      "type": "land_home",
+      "owner": "levantia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "naval": 2
+        },
+        "nordostan": {
+          "naval": 1
+        },
+        "gallia": {
+          "ground": 1,
+          "naval": 1
+        },
+        "ponte": {
+          "naval": 1
+        },
+        "albion": {
+          "ground": 1,
+          "naval": 1,
+          "tactical_air": 1
+        },
+        "levantia": {
+          "ground": 2,
+          "naval": 1,
+          "tactical_air": 2,
+          "air_defense": 3
+        },
+        "phrygia": {
+          "naval": 1
+        }
+      }
+    },
+    "persia_1": {
+      "id": "persia_1",
+      "display_name": "Persia North",
+      "type": "land_home",
+      "owner": "levantia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "levantia": {
+          "ground": 3
+        }
+      }
+    },
+    "persia_2": {
+      "id": "persia_2",
+      "display_name": "Persia West",
+      "type": "land_home",
+      "owner": "columbia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 3
+        }
+      }
+    },
+    "persia_3": {
+      "id": "persia_3",
+      "display_name": "Persia East",
+      "type": "land_home",
+      "owner": "levantia",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "levantia": {
+          "ground": 1
+        }
+      }
+    },
+    "solaria_1": {
+      "id": "solaria_1",
+      "display_name": "Solaria West",
+      "type": "land_home",
+      "owner": "solaria",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1
+        }
+      }
+    },
+    "solaria_2": {
+      "id": "solaria_2",
+      "display_name": "Solaria East",
+      "type": "land_home",
+      "owner": "solaria",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "solaria": {
+          "ground": 3,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "horn": {
+      "id": "horn",
+      "display_name": "Horn of Africa",
+      "type": "land_contested",
+      "owner": "none",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1
+        },
+        "gallia": {
+          "ground": 1,
+          "tactical_air": 1
+        }
+      }
+    },
+    "mirage": {
+      "id": "mirage",
+      "display_name": "Mirage",
+      "type": "land_home",
+      "owner": "mirage",
+      "theater": "mashriq",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1
+        },
+        "mirage": {
+          "ground": 2,
+          "tactical_air": 2,
+          "air_defense": 2
+        }
+      }
+    },
+    "cp_gulf_gate": {
+      "id": "cp_gulf_gate",
+      "display_name": "Gulf Gate",
+      "type": "chokepoint",
+      "owner": "none",
+      "theater": "mashriq",
+      "is_chokepoint": true,
+      "forces": {
+        "persia": {
+          "naval": 2,
+          "tactical_air": 1
+        },
+        "solaria": {
+          "naval": 1
+        },
+        "mirage": {
+          "naval": 1
+        }
+      }
+    },
+    "bharata_1": {
+      "id": "bharata_1",
+      "display_name": "Bharata South",
+      "type": "land_home",
+      "owner": "bharata",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "bharata": {
+          "ground": 2,
+          "naval": 3
+        }
+      }
+    },
+    "bharata_2": {
+      "id": "bharata_2",
+      "display_name": "Bharata North",
+      "type": "land_home",
+      "owner": "bharata",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "bharata": {
+          "ground": 10,
+          "tactical_air": 4,
+          "air_defense": 2
+        }
+      }
+    },
+    "bharata_3": {
+      "id": "bharata_3",
+      "display_name": "Bharata East",
+      "type": "land_home",
+      "owner": "bharata",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "choson": {
+      "id": "choson",
+      "display_name": "Choson",
+      "type": "land_home",
+      "owner": "choson",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 2
+        },
+        "choson": {
+          "ground": 6,
+          "naval": 1,
+          "tactical_air": 2,
+          "strategic_missile": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "hanguk": {
+      "id": "hanguk",
+      "display_name": "Hanguk",
+      "type": "land_home",
+      "owner": "hanguk",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1,
+          "tactical_air": 1
+        },
+        "hanguk": {
+          "ground": 5,
+          "naval": 2,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "cathay_1": {
+      "id": "cathay_1",
+      "display_name": "Cathay Northwest",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {}
+    },
+    "cathay_2": {
+      "id": "cathay_2",
+      "display_name": "Cathay West",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 5,
+          "tactical_air": 2,
+          "strategic_missile": 1,
+          "air_defense": 1
+        }
+      }
+    },
+    "cathay_3": {
+      "id": "cathay_3",
+      "display_name": "Cathay Central",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 5,
+          "tactical_air": 5,
+          "strategic_missile": 2,
+          "air_defense": 1
+        }
+      }
+    },
+    "cathay_4": {
+      "id": "cathay_4",
+      "display_name": "Cathay Northeast",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 2,
+          "naval": 3
+        }
+      }
+    },
+    "cathay_5": {
+      "id": "cathay_5",
+      "display_name": "Cathay Southwest",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 4
+        }
+      }
+    },
+    "cathay_6": {
+      "id": "cathay_6",
+      "display_name": "Cathay Southeast",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "naval": 1
+        },
+        "cathay": {
+          "ground": 4,
+          "naval": 2,
+          "tactical_air": 5,
+          "air_defense": 1
+        },
+        "yamato": {
+          "naval": 1
+        }
+      }
+    },
+    "cathay_7": {
+      "id": "cathay_7",
+      "display_name": "Cathay South",
+      "type": "land_home",
+      "owner": "cathay",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "cathay": {
+          "ground": 3,
+          "naval": 4,
+          "strategic_missile": 1
+        }
+      }
+    },
+    "yamato_1": {
+      "id": "yamato_1",
+      "display_name": "Yamato North",
+      "type": "land_home",
+      "owner": "yamato",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "yamato": {
+          "naval": 1
+        }
+      }
+    },
+    "yamato_2": {
+      "id": "yamato_2",
+      "display_name": "Yamato South",
+      "type": "land_home",
+      "owner": "yamato",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "columbia": {
+          "ground": 1,
+          "tactical_air": 1,
+          "air_defense": 1
+        },
+        "yamato": {
+          "ground": 3,
+          "naval": 2,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "formosa": {
+      "id": "formosa",
+      "display_name": "Formosa",
+      "type": "land_home",
+      "owner": "formosa",
+      "theater": "asu",
+      "is_chokepoint": false,
+      "forces": {
+        "formosa": {
+          "ground": 4,
+          "naval": 1,
+          "tactical_air": 3,
+          "air_defense": 2
+        }
+      }
+    },
+    "cp_formosa_strait": {
+      "id": "cp_formosa_strait",
+      "display_name": "Formosa Strait",
+      "type": "chokepoint",
+      "owner": "none",
+      "theater": "asu",
+      "is_chokepoint": true,
+      "forces": {
+        "formosa": {
+          "naval": 1
+        }
+      }
+    }
+  },
+  "zone_adjacency": {
+    "col_nw": [
+      {
+        "zone": "col_w",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_1",
+        "type": "land_land"
+      }
+    ],
+    "col_w": [
+      {
+        "zone": "col_nw",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_3",
+        "type": "land_land"
+      }
+    ],
+    "col_main_1": [
+      {
+        "zone": "col_nw",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_w",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_4",
+        "type": "land_land"
+      }
+    ],
+    "col_main_3": [
+      {
+        "zone": "col_w",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_4",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_south",
+        "type": "land_land"
+      }
+    ],
+    "col_main_2": [
+      {
+        "zone": "col_main_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_4",
+        "type": "land_land"
+      }
+    ],
+    "col_main_4": [
+      {
+        "zone": "col_main_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_south",
+        "type": "land_land"
+      }
+    ],
+    "col_south": [
+      {
+        "zone": "col_main_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "col_main_4",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_caribe_passage",
+        "type": "land_sea"
+      }
+    ],
+    "cp_caribe_passage": [
+      {
+        "zone": "col_south",
+        "type": "land_sea"
+      },
+      {
+        "zone": "caribe",
+        "type": "land_sea"
+      }
+    ],
+    "caribe": [
+      {
+        "zone": "cp_caribe_passage",
+        "type": "land_sea"
+      }
+    ],
+    "teutonia_1": [
+      {
+        "zone": "teutonia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "freeland",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_1",
+        "type": "land_land"
+      }
+    ],
+    "teutonia_2": [
+      {
+        "zone": "teutonia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "freeland",
+        "type": "land_land"
+      },
+      {
+        "zone": "gallia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "gallia_2",
+        "type": "land_land"
+      }
+    ],
+    "freeland": [
+      {
+        "zone": "teutonia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "teutonia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "gallia_2",
+        "type": "land_land"
+      }
+    ],
+    "heartland_1": [
+      {
+        "zone": "teutonia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "freeland",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w2",
+        "type": "land_land"
+      }
+    ],
+    "gallia_1": [
+      {
+        "zone": "teutonia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "gallia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "ponte",
+        "type": "land_land"
+      }
+    ],
+    "gallia_2": [
+      {
+        "zone": "teutonia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "freeland",
+        "type": "land_land"
+      },
+      {
+        "zone": "gallia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "levantia",
+        "type": "land_land"
+      }
+    ],
+    "heartland_2": [
+      {
+        "zone": "freeland",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w2",
+        "type": "land_land"
+      },
+      {
+        "zone": "phrygia_1",
+        "type": "land_land"
+      }
+    ],
+    "ponte": [
+      {
+        "zone": "gallia_1",
+        "type": "land_land"
+      }
+    ],
+    "levantia": [
+      {
+        "zone": "gallia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "phrygia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_1",
+        "type": "land_land"
+      }
+    ],
+    "nord_w1": [
+      {
+        "zone": "heartland_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w2",
+        "type": "land_land"
+      }
+    ],
+    "nord_w2": [
+      {
+        "zone": "heartland_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "heartland_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c2",
+        "type": "land_land"
+      }
+    ],
+    "phrygia_1": [
+      {
+        "zone": "heartland_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "phrygia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_2",
+        "type": "land_land"
+      }
+    ],
+    "nord_n1": [
+      {
+        "zone": "nord_c1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e1",
+        "type": "land_land"
+      }
+    ],
+    "nord_c1": [
+      {
+        "zone": "nord_n1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c2",
+        "type": "land_land"
+      }
+    ],
+    "nord_e1": [
+      {
+        "zone": "nord_n1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c2",
+        "type": "land_land"
+      }
+    ],
+    "nord_c2": [
+      {
+        "zone": "nord_c1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_w2",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_1",
+        "type": "land_land"
+      }
+    ],
+    "nord_e2": [
+      {
+        "zone": "nord_e1",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e3",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      }
+    ],
+    "nord_e3": [
+      {
+        "zone": "nord_e2",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_1",
+        "type": "land_land"
+      }
+    ],
+    "sogdiana_1": [
+      {
+        "zone": "nord_e2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_c2",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      }
+    ],
+    "sogdiana_3": [
+      {
+        "zone": "nord_e2",
+        "type": "land_land"
+      },
+      {
+        "zone": "nord_e3",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_1",
+        "type": "land_land"
+      }
+    ],
+    "cathay_1": [
+      {
+        "zone": "nord_e3",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      }
+    ],
+    "sogdiana_2": [
+      {
+        "zone": "sogdiana_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "sogdiana_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_2",
+        "type": "land_land"
+      }
+    ],
+    "persia_1": [
+      {
+        "zone": "sogdiana_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_2",
+        "type": "land_land"
+      }
+    ],
+    "bharata_2": [
+      {
+        "zone": "sogdiana_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_1",
+        "type": "land_land"
+      }
+    ],
+    "phrygia_2": [
+      {
+        "zone": "phrygia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "levantia",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_2",
+        "type": "land_land"
+      }
+    ],
+    "persia_2": [
+      {
+        "zone": "phrygia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "phrygia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_gulf_gate",
+        "type": "land_sea"
+      }
+    ],
+    "solaria_1": [
+      {
+        "zone": "phrygia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "levantia",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "horn",
+        "type": "land_land"
+      },
+      {
+        "zone": "horn",
+        "type": "land_land"
+      }
+    ],
+    "solaria_2": [
+      {
+        "zone": "phrygia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_gulf_gate",
+        "type": "land_sea"
+      },
+      {
+        "zone": "mirage",
+        "type": "land_land"
+      }
+    ],
+    "persia_3": [
+      {
+        "zone": "persia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "persia_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_gulf_gate",
+        "type": "land_sea"
+      }
+    ],
+    "cp_gulf_gate": [
+      {
+        "zone": "persia_2",
+        "type": "land_sea"
+      },
+      {
+        "zone": "persia_3",
+        "type": "land_sea"
+      },
+      {
+        "zone": "solaria_2",
+        "type": "land_sea"
+      },
+      {
+        "zone": "mirage",
+        "type": "land_sea"
+      }
+    ],
+    "horn": [
+      {
+        "zone": "solaria_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "solaria_1",
+        "type": "land_land"
+      }
+    ],
+    "mirage": [
+      {
+        "zone": "solaria_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_gulf_gate",
+        "type": "land_sea"
+      }
+    ],
+    "bharata_1": [
+      {
+        "zone": "bharata_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_3",
+        "type": "land_land"
+      }
+    ],
+    "bharata_3": [
+      {
+        "zone": "bharata_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_5",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_2",
+        "type": "land_land"
+      }
+    ],
+    "cathay_2": [
+      {
+        "zone": "bharata_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_1",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "bharata_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_5",
+        "type": "land_land"
+      }
+    ],
+    "cathay_5": [
+      {
+        "zone": "bharata_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_6",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_7",
+        "type": "land_land"
+      }
+    ],
+    "choson": [
+      {
+        "zone": "hanguk",
+        "type": "land_land"
+      }
+    ],
+    "hanguk": [
+      {
+        "zone": "choson",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_4",
+        "type": "land_land"
+      }
+    ],
+    "cathay_3": [
+      {
+        "zone": "cathay_2",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_4",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_5",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_6",
+        "type": "land_land"
+      },
+      {
+        "zone": "hanguk",
+        "type": "land_land"
+      }
+    ],
+    "cathay_4": [
+      {
+        "zone": "cathay_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_6",
+        "type": "land_land"
+      },
+      {
+        "zone": "hanguk",
+        "type": "land_land"
+      }
+    ],
+    "cathay_6": [
+      {
+        "zone": "cathay_3",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_4",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_5",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_7",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_formosa_strait",
+        "type": "land_sea"
+      }
+    ],
+    "cathay_7": [
+      {
+        "zone": "cathay_5",
+        "type": "land_land"
+      },
+      {
+        "zone": "cathay_6",
+        "type": "land_land"
+      },
+      {
+        "zone": "cp_formosa_strait",
+        "type": "land_sea"
+      }
+    ],
+    "cp_formosa_strait": [
+      {
+        "zone": "cathay_6",
+        "type": "land_sea"
+      },
+      {
+        "zone": "cathay_7",
+        "type": "land_sea"
+      },
+      {
+        "zone": "formosa",
+        "type": "land_sea"
+      }
+    ],
+    "formosa": [
+      {
+        "zone": "cp_formosa_strait",
+        "type": "land_sea"
+      }
+    ]
+  },
+  "bilateral": {
+    "tariffs": {
+      "columbia": {
+        "cathay": 3,
+        "nordostan": 2,
+        "caribe": 3,
+        "persia": 3,
+        "choson": 2
+      },
+      "cathay": {
+        "columbia": 2,
+        "yamato": 2,
+        "hanguk": 1,
+        "formosa": 2
+      },
+      "nordostan": {
+        "columbia": 2,
+        "albion": 2,
+        "gallia": 2,
+        "teutonia": 2,
+        "freeland": 2,
+        "ponte": 1,
+        "heartland": 2
+      },
+      "gallia": {
+        "cathay": 1,
+        "nordostan": 1
+      },
+      "teutonia": {
+        "cathay": 1,
+        "nordostan": 0
+      },
+      "freeland": {
+        "cathay": 1,
+        "nordostan": 2,
+        "choson": 2
+      },
+      "ponte": {
+        "nordostan": 1
+      },
+      "albion": {
+        "cathay": 1,
+        "nordostan": 1
+      },
+      "bharata": {
+        "cathay": 1
+      },
+      "levantia": {
+        "persia": 3,
+        "choson": 2
+      },
+      "yamato": {
+        "cathay": 1
+      },
+      "caribe": {
+        "columbia": 1
+      },
+      "heartland": {
+        "nordostan": 3,
+        "choson": 2
+      },
+      "persia": {
+        "columbia": 2,
+        "levantia": 3,
+        "gallia": 2,
+        "albion": 2,
+        "solaria": 2,
+        "mirage": 2
+      },
+      "choson": {
+        "columbia": 2,
+        "heartland": 2,
+        "gallia": 2,
+        "teutonia": 2,
+        "freeland": 2,
+        "albion": 2,
+        "levantia": 2,
+        "yamato": 2,
+        "hanguk": 2
+      }
+    },
+    "sanctions": {
+      "columbia": {
+        "nordostan": 3,
+        "persia": 3,
+        "choson": 3,
+        "caribe": 3
+      },
+      "gallia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 2
+      },
+      "teutonia": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 2
+      },
+      "freeland": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 2
+      },
+      "albion": {
+        "nordostan": 3,
+        "persia": 2,
+        "choson": 2
+      },
+      "ponte": {
+        "nordostan": 2,
+        "persia": 1,
+        "choson": 1
+      },
+      "levantia": {
+        "persia": 3,
+        "nordostan": 1
+      },
+      "formosa": {
+        "nordostan": 1
+      },
+      "yamato": {
+        "nordostan": 2,
+        "choson": 3
+      },
+      "hanguk": {
+        "nordostan": 2,
+        "choson": 3
+      },
+      "cathay": {
+        "nordostan": -1
+      },
+      "nordostan": {
+        "columbia": 1,
+        "heartland": 3
+      },
+      "choson": {
+        "columbia": 1,
+        "hanguk": 1,
+        "yamato": 1
+      },
+      "caribe": {
+        "columbia": 1
+      },
+      "heartland": {
+        "nordostan": 3
+      },
+      "persia": {
+        "columbia": 3,
+        "levantia": 3
+      }
+    }
+  },
+  "organizations": [
+    {
+      "id": "western_treaty",
+      "sim_name": "Western Treaty",
+      "parallel": "NATO",
+      "decision_rule": "consensus",
+      "chair_role_id": "",
+      "voting_threshold": "unanimous",
+      "meeting_frequency": "scheduled_r1_r4",
+      "description": "Military alliance with Article 5 collective defense. ~70% of combined spending from Columbia."
+    },
+    {
+      "id": "the_union",
+      "sim_name": "The Union",
+      "parallel": "EU",
+      "decision_rule": "consensus",
+      "chair_role_id": "pillar",
+      "voting_threshold": "unanimous",
+      "meeting_frequency": "scheduled_r1_r3",
+      "description": "Political-economic union. Trade policy and sanctions coordination. Commissioner chairs."
+    },
+    {
+      "id": "the_council",
+      "sim_name": "The Council",
+      "parallel": "UN Security Council",
+      "decision_rule": "p5_veto",
+      "chair_role_id": "",
+      "voting_threshold": "p5_unanimous_plus_majority",
+      "meeting_frequency": "scheduled_r1_r4",
+      "description": "International security body. P5 veto power. Structurally paralyzed on major issues."
+    },
+    {
+      "id": "the_league",
+      "sim_name": "The League",
+      "parallel": "BRICS+",
+      "decision_rule": "loose_consensus",
+      "chair_role_id": "",
+      "voting_threshold": "non_binding",
+      "meeting_frequency": "scheduled_r2_r4",
+      "description": "Coordination forum for non-Western powers. Alternative payment systems and development bank."
+    },
+    {
+      "id": "the_cartel",
+      "sim_name": "The Cartel",
+      "parallel": "OPEC+",
+      "decision_rule": "independent_production",
+      "chair_role_id": "",
+      "voting_threshold": "voluntary_coordination",
+      "meeting_frequency": "every_round",
+      "description": "Oil production coordination. Each member independently sets production. Classic prisoners dilemma."
+    },
+    {
+      "id": "the_seven",
+      "sim_name": "The Seven",
+      "parallel": "G7",
+      "decision_rule": "non_binding",
+      "chair_role_id": "",
+      "voting_threshold": "non_binding",
+      "meeting_frequency": "scheduled_r1_r4",
+      "description": "Western coordination on tech restrictions and sanctions. Non-binding joint statements."
+    },
+    {
+      "id": "columbia_parliament",
+      "sim_name": "Columbia Parliament",
+      "parallel": "US Congress",
+      "decision_rule": "majority",
+      "chair_role_id": "",
+      "voting_threshold": "three_of_five",
+      "meeting_frequency": "every_round",
+      "description": "Internal legislative body. 5 seats. Budget and treaty ratification require parliamentary approval."
+    },
+    {
+      "id": "the_assembly",
+      "sim_name": "The Assembly",
+      "parallel": "UN General Assembly",
+      "decision_rule": "majority",
+      "chair_role_id": "",
+      "voting_threshold": "simple_majority",
+      "meeting_frequency": "scheduled_r2_r5",
+      "description": "Every country votes. No veto. No enforcement. Moral weight. Forces public position declarations."
+    }
+  ],
+  "org_memberships": {
+    "western_treaty": [
+      "columbia",
+      "gallia",
+      "teutonia",
+      "freeland",
+      "ponte",
+      "albion",
+      "phrygia"
+    ],
+    "the_council": [
+      "columbia",
+      "cathay",
+      "nordostan",
+      "gallia",
+      "albion",
+      "bharata"
+    ],
+    "the_seven": [
+      "columbia",
+      "gallia",
+      "teutonia",
+      "ponte",
+      "albion",
+      "yamato"
+    ],
+    "columbia_parliament": [
+      "columbia"
+    ],
+    "the_assembly": [
+      "columbia",
+      "cathay",
+      "nordostan",
+      "heartland",
+      "persia",
+      "gallia",
+      "teutonia",
+      "freeland",
+      "ponte",
+      "albion",
+      "bharata",
+      "levantia",
+      "formosa",
+      "phrygia",
+      "yamato",
+      "solaria",
+      "choson",
+      "hanguk",
+      "caribe",
+      "mirage"
+    ],
+    "the_league": [
+      "cathay",
+      "nordostan",
+      "persia",
+      "bharata",
+      "phrygia",
+      "solaria",
+      "mirage"
+    ],
+    "the_cartel": [
+      "nordostan",
+      "persia",
+      "solaria",
+      "mirage"
+    ],
+    "the_union": [
+      "gallia",
+      "teutonia",
+      "freeland",
+      "ponte"
+    ]
+  },
+  "wars": [
+    {
+      "attacker": "columbia",
+      "defender": "persia",
+      "theater": "mashriq",
+      "start_round": 0,
+      "allies": {
+        "attacker": [
+          "levantia"
+        ],
+        "defender": []
+      },
+      "occupied_zones": []
+    },
+    {
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "theater": "eastern_ereb",
+      "start_round": -4,
+      "occupied_zones": [
+        "heartland_2"
+      ]
+    }
+  ],
+  "oil_price": 67.68,
+  "oil_price_index": 84.60000000000001,
+  "opec_production": {
+    "nordostan": "low",
+    "persia": "normal",
+    "solaria": "normal",
+    "mirage": "normal"
+  },
+  "global_trade_volume_index": 100.0,
+  "chokepoint_status": {
+    "hormuz": "open",
+    "malacca": "open",
+    "taiwan_strait": "open",
+    "suez": "open",
+    "bosphorus": "open",
+    "giuk": "open",
+    "caribbean": "open",
+    "south_china_sea": "open",
+    "gulf_gate_ground": "open"
+  },
+  "treaties": [
+    {
+      "id": "treaty_1",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 2,
+      "active": true
+    },
+    {
+      "id": "treaty_2",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 2,
+      "active": true
+    },
+    {
+      "id": "treaty_3",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 2,
+      "active": true
+    },
+    {
+      "id": "treaty_4",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 2,
+      "active": true
+    },
+    {
+      "id": "treaty_5",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 2,
+      "active": true
+    },
+    {
+      "id": "treaty_6",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 5,
+      "active": true
+    },
+    {
+      "id": "treaty_7",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 5,
+      "active": true
+    },
+    {
+      "id": "treaty_8",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 5,
+      "active": true
+    },
+    {
+      "id": "treaty_9",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 5,
+      "active": true
+    },
+    {
+      "id": "treaty_10",
+      "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+      "signatories": [
+        "columbia",
+        "heartland"
+      ],
+      "signed_round": 5,
+      "active": true
+    }
+  ],
+  "basing_rights": [],
+  "roles": {
+    "dealer": {
+      "id": "dealer",
+      "character_name": "Dealer",
+      "parallel": "US President",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "President of Columbia",
+      "age": 80,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 1,
+      "personal_coins": 5.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "set_tariffs",
+        "authorize_attack",
+        "fire_team_member",
+        "approve_nuclear",
+        "sign_treaty",
+        "set_budget",
+        "endorse_successor"
+      ],
+      "objectives": [
+        "secure_legacy",
+        "manage_succession",
+        "contain_cathay"
+      ],
+      "ticking_clock": "Term-limited age 80. 10% per-round incapacitation risk. Legacy = reshaping world order.",
+      "status": "active"
+    },
+    "volt": {
+      "id": "volt",
+      "character_name": "Volt",
+      "parallel": "US Vice President",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Vice President of Columbia",
+      "age": 60,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 2,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "assume_presidency",
+        "break_tie_vote",
+        "chair_nsc"
+      ],
+      "objectives": [
+        "win_nomination",
+        "build_base",
+        "prove_loyalty"
+      ],
+      "ticking_clock": "Succession race. Must balance loyalty to Dealer with own presidential ambitions. America First isolationist wing.",
+      "status": "active"
+    },
+    "anchor": {
+      "id": "anchor",
+      "character_name": "Anchor",
+      "parallel": "US Secretary of State",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Secretary of State",
+      "age": 62,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "negotiate_treaty",
+        "represent_abroad",
+        "diplomatic_channel"
+      ],
+      "objectives": [
+        "win_nomination",
+        "cuba_legacy",
+        "alliance_management"
+      ],
+      "ticking_clock": "Succession race. Cuba is personal trophy. Hawkish diplomatic establishment.",
+      "status": "active"
+    },
+    "shield": {
+      "id": "shield",
+      "character_name": "Shield",
+      "parallel": "US Secretary of Defense",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Secretary of Defense",
+      "age": 58,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "deploy_forces",
+        "military_operations",
+        "advise_president"
+      ],
+      "objectives": [
+        "military_readiness",
+        "manage_overstretch",
+        "warrior_ethos"
+      ],
+      "ticking_clock": "Overstretched military. Persia war consuming resources. Pacific deterrence at risk. Warrior ethos philosophy.",
+      "status": "active"
+    },
+    "shadow": {
+      "id": "shadow",
+      "character_name": "Shadow",
+      "parallel": "CIA Director",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Director of Central Intelligence",
+      "age": 55,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "intelligence_briefing",
+        "covert_operations",
+        "information_control"
+      ],
+      "objectives": [
+        "intelligence_accuracy",
+        "covert_influence",
+        "protect_sources"
+      ],
+      "ticking_clock": "Controls what Dealer sees. Information is power. Can shape decisions through selective briefings.",
+      "status": "active"
+    },
+    "tribune": {
+      "id": "tribune",
+      "character_name": "Tribune",
+      "parallel": "Congressional Opposition Leader",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Opposition",
+      "title": "Speaker of the Opposition",
+      "age": 50,
+      "gender": "F",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 3,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "block_budget",
+        "launch_investigation",
+        "public_statement",
+        "midterm_campaign"
+      ],
+      "objectives": [
+        "flip_parliament",
+        "constrain_president",
+        "opposition_agenda"
+      ],
+      "ticking_clock": "Mid-terms Round 2. If opposition wins Seat 5 Parliament flips 3-2.",
+      "status": "active"
+    },
+    "challenger": {
+      "id": "challenger",
+      "character_name": "Challenger",
+      "parallel": "Opposition Presidential Candidate",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Opposition",
+      "title": "Presidential Candidate",
+      "age": 45,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 4,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "campaign",
+        "foreign_meetings",
+        "public_statement",
+        "alternative_policy"
+      ],
+      "objectives": [
+        "win_presidency",
+        "build_coalition",
+        "offer_alternative_future"
+      ],
+      "ticking_clock": "Presidential election Round 5. Every foreign leader hedges between Dealer and Challenger.",
+      "status": "active"
+    },
+    "fixer": {
+      "id": "fixer",
+      "character_name": "Fixer",
+      "parallel": "Presidential Envoy - Middle East",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Presidential Envoy for Peace",
+      "age": 55,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 5,
+      "personal_coins": 2.0,
+      "expansion_role": true,
+      "ai_candidate": true,
+      "powers": [
+        "parallel_diplomacy",
+        "back_channel",
+        "middle_east_negotiation"
+      ],
+      "objectives": [
+        "peace_deal",
+        "dealer_legacy",
+        "regional_stability"
+      ],
+      "ticking_clock": "Expansion role. Parallel diplomatic channel may contradict official policy.",
+      "status": "active"
+    },
+    "pioneer": {
+      "id": "pioneer",
+      "character_name": "Pioneer",
+      "parallel": "Presidential Envoy - Tech/Business",
+      "country_id": "columbia",
+      "team": "Columbia",
+      "faction": "Presidents",
+      "title": "Presidential Envoy for Technology",
+      "age": 52,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 4.0,
+      "expansion_role": true,
+      "ai_candidate": true,
+      "powers": [
+        "tech_diplomacy",
+        "business_channel",
+        "ai_policy"
+      ],
+      "objectives": [
+        "tech_supremacy",
+        "business_deals",
+        "ai_regulation"
+      ],
+      "ticking_clock": "Expansion role. Tech tycoon with unaccountable influence.",
+      "status": "active"
+    },
+    "helmsman": {
+      "id": "helmsman",
+      "character_name": "Helmsman",
+      "parallel": "Chinese President/Chairman",
+      "country_id": "cathay",
+      "team": "Cathay",
+      "faction": "Chairman",
+      "title": "Chairman of Cathay",
+      "age": 72,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 5.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "all_executive",
+        "purge",
+        "military_order",
+        "set_policy",
+        "approve_nuclear"
+      ],
+      "objectives": [
+        "formosa_resolution",
+        "national_rejuvenation",
+        "personal_legacy"
+      ],
+      "ticking_clock": "No successor. Age 72. 5-10% incapacitation risk per round. Legacy requires Formosa resolution.",
+      "status": "active"
+    },
+    "rampart": {
+      "id": "rampart",
+      "character_name": "Rampart",
+      "parallel": "CMC Vice-Chairman",
+      "country_id": "cathay",
+      "team": "Cathay",
+      "faction": "Military",
+      "title": "Marshal of Cathay",
+      "age": 65,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "military_intelligence",
+        "co_sign_military",
+        "slow_walk",
+        "readiness_assessment"
+      ],
+      "objectives": [
+        "military_readiness",
+        "survive_purges",
+        "professional_standards"
+      ],
+      "ticking_clock": "Purge survivor. Co-signature required for military orders. Can slow-walk with 1-round delay. Anti-corruption commissar background.",
+      "status": "active"
+    },
+    "abacus": {
+      "id": "abacus",
+      "character_name": "Abacus",
+      "parallel": "Chinese Premier",
+      "country_id": "cathay",
+      "team": "Cathay",
+      "faction": "Government",
+      "title": "Premier of Cathay",
+      "age": 63,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "economic_data",
+        "budget_co_sign",
+        "acting_leader",
+        "reform_proposal"
+      ],
+      "objectives": [
+        "economic_stability",
+        "reform",
+        "prevent_catastrophe"
+      ],
+      "ticking_clock": "Controls real economic data. Hidden local debt crisis ($9-13T LGFVs). Acting leader if Helmsman incapacitated.",
+      "status": "active"
+    },
+    "circuit": {
+      "id": "circuit",
+      "character_name": "Circuit",
+      "parallel": "Tech/Industry Chief",
+      "country_id": "cathay",
+      "team": "Cathay",
+      "faction": "Business",
+      "title": "Minister of Technology and Industry",
+      "age": 50,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "tech_policy",
+        "rare_earth_weapon",
+        "foreign_business",
+        "cyber_operations"
+      ],
+      "objectives": [
+        "tech_self_sufficiency",
+        "protect_assets",
+        "global_integration"
+      ],
+      "ticking_clock": "Global assets at risk. Rare earth weapon is depreciating. 2 personal coins represent assets abroad.",
+      "status": "active"
+    },
+    "sage": {
+      "id": "sage",
+      "character_name": "Sage",
+      "parallel": "Party Elder",
+      "country_id": "cathay",
+      "team": "Cathay",
+      "faction": "Elder",
+      "title": "Retired Senior Leader",
+      "age": 78,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "party_conference",
+        "informal_counsel",
+        "succession_mechanism",
+        "legitimacy_challenge"
+      ],
+      "objectives": [
+        "party_survival",
+        "collective_leadership",
+        "prevent_catastrophe"
+      ],
+      "ticking_clock": "Activates when stability < 5 or support < 40%. Party immune system. Can convene party conference.",
+      "status": "active"
+    },
+    "lumiere": {
+      "id": "lumiere",
+      "character_name": "Lumiere",
+      "parallel": "French President",
+      "country_id": "gallia",
+      "team": "Europe",
+      "faction": "Gallia",
+      "title": "President of Gallia",
+      "age": 48,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "eu_vote",
+        "nato_vote",
+        "unsc_veto",
+        "nuclear_authority",
+        "strategic_autonomy",
+        "deploy_independently"
+      ],
+      "objectives": [
+        "european_autonomy",
+        "nuclear_credibility",
+        "global_influence"
+      ],
+      "ticking_clock": "Strategic autonomy champion. UNSC veto. Nuclear power. Ile-Longue speech expanding deterrent. 11-16% domestic approval.",
+      "status": "active"
+    },
+    "forge": {
+      "id": "forge",
+      "character_name": "Forge",
+      "parallel": "German Chancellor",
+      "country_id": "teutonia",
+      "team": "Europe",
+      "faction": "Teutonia",
+      "title": "Chancellor of Teutonia",
+      "age": 55,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "eu_vote",
+        "nato_vote",
+        "trade_policy",
+        "rearmament_decision",
+        "host_columbia_base"
+      ],
+      "objectives": [
+        "economic_prosperity",
+        "cathay_trade",
+        "reluctant_rearmament"
+      ],
+      "ticking_clock": "Massive Cathay trade dependency. Pressured to spend 5% GDP on defense. Hosts Columbia main European base. EUR 100B defense fund.",
+      "status": "active"
+    },
+    "sentinel": {
+      "id": "sentinel",
+      "character_name": "Sentinel",
+      "parallel": "Polish President",
+      "country_id": "freeland",
+      "team": "Europe",
+      "faction": "Freeland",
+      "title": "President of Freeland",
+      "age": 52,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "eu_vote",
+        "nato_vote",
+        "defense_spending",
+        "eastern_flank",
+        "heartland_logistics"
+      ],
+      "objectives": [
+        "maximum_security",
+        "nordostan_containment",
+        "nato_commitment"
+      ],
+      "ticking_clock": "NATO frontline. 4.8% GDP defense spending. Hosts Columbia forward deployments. Cohabitation with opposition president.",
+      "status": "active"
+    },
+    "ponte_role": {
+      "id": "ponte_role",
+      "character_name": "Ponte",
+      "parallel": "Italian PM",
+      "country_id": "ponte",
+      "team": "Europe",
+      "faction": "Ponte",
+      "title": "Prime Minister of Ponte",
+      "age": 50,
+      "gender": "F",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "eu_vote",
+        "nato_vote",
+        "swing_vote",
+        "debt_management",
+        "veto_sanctions"
+      ],
+      "objectives": [
+        "debt_survival",
+        "eu_influence",
+        "hedge_all_sides"
+      ],
+      "ticking_clock": "EU swing vote. 137.9% debt-to-GDP. 8 coins/round debt service. Russia-sympathetic coalition partners. Referendum defeat.",
+      "status": "active"
+    },
+    "mariner": {
+      "id": "mariner",
+      "character_name": "Mariner",
+      "parallel": "British PM",
+      "country_id": "albion",
+      "team": "Europe",
+      "faction": "Albion",
+      "title": "Prime Minister of Albion",
+      "age": 56,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "nato_vote",
+        "unsc_veto",
+        "nuclear_authority",
+        "five_eyes",
+        "pacific_ambition",
+        "intelligence_sharing"
+      ],
+      "objectives": [
+        "special_relationship",
+        "post_brexit_relevance",
+        "nuclear_credibility"
+      ],
+      "ticking_clock": "NATO but not EU. Five Eyes intelligence broker. UNSC veto. Offering troops for Heartland ceasefire monitoring.",
+      "status": "active"
+    },
+    "pillar": {
+      "id": "pillar",
+      "character_name": "Pillar",
+      "parallel": "EU Commissioner",
+      "country_id": "gallia",
+      "team": "Europe",
+      "faction": "EU",
+      "title": "Commissioner of The Union",
+      "age": 60,
+      "gender": "F",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "eu_agenda",
+        "call_eu_session",
+        "external_trade_negotiation",
+        "frame_issues",
+        "propose_compromise"
+      ],
+      "objectives": [
+        "eu_unity",
+        "institutional_relevance",
+        "resist_bilateral_bypass"
+      ],
+      "ticking_clock": "Cannot vote but sets EU agenda. Nightmare: member states bypassing EU for bilateral deals.",
+      "status": "active"
+    },
+    "pathfinder": {
+      "id": "pathfinder",
+      "character_name": "Pathfinder",
+      "parallel": "Russian President",
+      "country_id": "nordostan",
+      "team": "Nordostan",
+      "faction": "President",
+      "title": "President of Nordostan",
+      "age": 73,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 4.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "all_executive",
+        "arrest",
+        "nuclear_co_authority",
+        "war_direction",
+        "purge"
+      ],
+      "objectives": [
+        "territorial_control",
+        "great_power_recognition",
+        "personal_survival"
+      ],
+      "ticking_clock": "Age 73. 5-10% incapacitation risk increasing 2%/round. No succession plan. War must produce callable victory.",
+      "status": "active"
+    },
+    "ironhand": {
+      "id": "ironhand",
+      "character_name": "Ironhand",
+      "parallel": "Russian General",
+      "country_id": "nordostan",
+      "team": "Nordostan",
+      "faction": "Military",
+      "title": "Chief of General Staff",
+      "age": 60,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "military_operations",
+        "nuclear_co_authority",
+        "honest_assessment",
+        "coup_potential",
+        "frontline_command"
+      ],
+      "objectives": [
+        "military_result",
+        "professional_honor",
+        "survive"
+      ],
+      "ticking_clock": "Nuclear co-authorization required. Can slow-walk orders. Coup potential if conditions align with Compass.",
+      "status": "active"
+    },
+    "compass": {
+      "id": "compass",
+      "character_name": "Compass",
+      "parallel": "Russian Oligarch",
+      "country_id": "nordostan",
+      "team": "Nordostan",
+      "faction": "Economic",
+      "title": "Oligarch / Back-Channel",
+      "age": 55,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "economic_management",
+        "back_channel",
+        "sanctions_evasion",
+        "deal_making"
+      ],
+      "objectives": [
+        "sanctions_relief",
+        "unfreeze_assets",
+        "economic_survival"
+      ],
+      "ticking_clock": "3 personal coins frozen abroad. Direct financial incentive for peace. Back-channels to West.",
+      "status": "active"
+    },
+    "ledger": {
+      "id": "ledger",
+      "character_name": "Ledger",
+      "parallel": "Russian PM/Technocrat",
+      "country_id": "nordostan",
+      "team": "Nordostan",
+      "faction": "Government",
+      "title": "Prime Minister of Nordostan",
+      "age": 50,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": true,
+      "ai_candidate": true,
+      "powers": [
+        "state_budget",
+        "bureaucracy",
+        "economic_data",
+        "institutional_continuity"
+      ],
+      "objectives": [
+        "state_survival",
+        "institutional_continuity",
+        "follow_pathfinder"
+      ],
+      "ticking_clock": "Expansion role. Keeps the machine running. Sees real economic data. Institutional loyalty.",
+      "status": "active"
+    },
+    "beacon": {
+      "id": "beacon",
+      "character_name": "Beacon",
+      "parallel": "Ukrainian President",
+      "country_id": "heartland",
+      "team": "Heartland",
+      "faction": "Resistance",
+      "title": "President of Heartland",
+      "age": 47,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "executive_authority",
+        "alliance_diplomacy",
+        "war_leadership",
+        "territory_decisions",
+        "martial_law"
+      ],
+      "objectives": [
+        "national_survival",
+        "territorial_integrity",
+        "western_support"
+      ],
+      "ticking_clock": "22.6% first-round vote share but controls executive under martial law. Corruption scandal damaged credibility.",
+      "status": "active"
+    },
+    "bulwark": {
+      "id": "bulwark",
+      "character_name": "Bulwark",
+      "parallel": "Ukrainian General",
+      "country_id": "heartland",
+      "team": "Heartland",
+      "faction": "Military",
+      "title": "Commander-in-Chief",
+      "age": 50,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 1.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "military_command",
+        "shadow_diplomacy",
+        "popular_appeal",
+        "wartime_election"
+      ],
+      "objectives": [
+        "military_victory",
+        "win_presidency",
+        "better_leadership"
+      ],
+      "ticking_clock": "Would beat Beacon 64-36 in runoff. More popular than president. Wartime election candidate.",
+      "status": "active"
+    },
+    "broker": {
+      "id": "broker",
+      "character_name": "Broker",
+      "parallel": "Ukrainian Politician",
+      "country_id": "heartland",
+      "team": "Heartland",
+      "faction": "Pragmatist",
+      "title": "Opposition Leader",
+      "age": 52,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 1.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "back_channel",
+        "peace_negotiation",
+        "eu_connections",
+        "wartime_election"
+      ],
+      "objectives": [
+        "negotiated_peace",
+        "eu_membership",
+        "pragmatic_deal"
+      ],
+      "ticking_clock": "EU connections and oligarchic resources. Peace deal candidate. Territory-for-security trade.",
+      "status": "active"
+    },
+    "furnace": {
+      "id": "furnace",
+      "character_name": "Furnace",
+      "parallel": "Iranian Supreme Leader",
+      "country_id": "persia",
+      "team": "Persia",
+      "faction": "Hardline",
+      "title": "Supreme Leader of Persia",
+      "age": 45,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "supreme_authority",
+        "nuclear_decision",
+        "override_2of3",
+        "ideological_direction"
+      ],
+      "objectives": [
+        "nuclear_weapon",
+        "independent_authority",
+        "regime_survival"
+      ],
+      "ticking_clock": "Mojtaba Khamenei parallel. Installed by IRGC. May be hiding/injured. Override costs -5 support -1 stability each use.",
+      "status": "active"
+    },
+    "anvil": {
+      "id": "anvil",
+      "character_name": "Anvil",
+      "parallel": "IRGC Commander",
+      "country_id": "persia",
+      "team": "Persia",
+      "faction": "Military",
+      "title": "Commander of Revolutionary Guard",
+      "age": 58,
+      "gender": "M",
+      "is_head_of_state": false,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "military_operations",
+        "business_empire",
+        "kingmaker",
+        "veto_military",
+        "pragmatic_deal"
+      ],
+      "objectives": [
+        "irgc_survival",
+        "business_protection",
+        "power_broker"
+      ],
+      "ticking_clock": "IRGC controls 1/3 of economy. 2 personal coins = IRGC institutional wealth. Sanctions relief = personal profit. Can veto military orders with 1-round delay.",
+      "status": "active"
+    },
+    "dawn": {
+      "id": "dawn",
+      "character_name": "Dawn",
+      "parallel": "Iranian Reformist",
+      "country_id": "persia",
+      "team": "Persia",
+      "faction": "Reform",
+      "title": "Reformist Leader",
+      "age": 45,
+      "gender": "F",
+      "is_head_of_state": false,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 1.0,
+      "expansion_role": false,
+      "ai_candidate": false,
+      "powers": [
+        "public_appeal",
+        "western_contact",
+        "reform_proposal",
+        "diplomatic_credibility"
+      ],
+      "objectives": [
+        "engagement",
+        "sanctions_relief",
+        "represent_youth"
+      ],
+      "ticking_clock": "Represents 60% under 30. Deals with Dawn as signatory get +20% credibility. Activates when stability < 4 or support < 30%.",
+      "status": "active"
+    },
+    "scales": {
+      "id": "scales",
+      "character_name": "Scales",
+      "parallel": "Indian PM",
+      "country_id": "bharata",
+      "team": "Bharata",
+      "faction": "National",
+      "title": "Prime Minister of Bharata",
+      "age": 75,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "non_alignment",
+        "play_all_sides",
+        "nuclear_authority",
+        "trade_policy",
+        "brics_host"
+      ],
+      "objectives": [
+        "strategic_autonomy",
+        "economic_growth",
+        "multi_alignment"
+      ],
+      "ticking_clock": "2026 BRICS+ host. Multi-alignment doctrine. Everyone needs something from Bharata. Refused to take position on Iran war.",
+      "status": "active"
+    },
+    "citadel": {
+      "id": "citadel",
+      "character_name": "Citadel",
+      "parallel": "Israeli PM",
+      "country_id": "levantia",
+      "team": "Levantia",
+      "faction": "National",
+      "title": "Prime Minister of Levantia",
+      "age": 76,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "military_authority",
+        "unilateral_action",
+        "nuclear_ambiguity",
+        "regional_operations",
+        "multi_front_war"
+      ],
+      "objectives": [
+        "regional_dominance",
+        "destroy_persia_threat",
+        "columbia_alliance"
+      ],
+      "ticking_clock": "Multi-front war: Persia + Lebanon + Gaza. Operation Rising Lion. Densest air defense in world. Undeclared nuclear L1.",
+      "status": "active"
+    },
+    "chip": {
+      "id": "chip",
+      "character_name": "Chip",
+      "parallel": "Taiwanese President",
+      "country_id": "formosa",
+      "team": "Formosa",
+      "faction": "National",
+      "title": "President of Formosa",
+      "age": 60,
+      "gender": "F",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "semiconductor_leverage",
+        "defense_policy",
+        "diplomatic_status",
+        "porcupine_strategy"
+      ],
+      "objectives": [
+        "survival",
+        "semiconductor_shield",
+        "columbia_protection"
+      ],
+      "ticking_clock": "KMT legislature blocking defense budget. $40B defense plan cut 70%. Silicon shield eroding as fabs built abroad.",
+      "status": "active"
+    },
+    "bazaar": {
+      "id": "bazaar",
+      "character_name": "Bazaar",
+      "parallel": "Turkish President",
+      "country_id": "phrygia",
+      "team": "Phrygia",
+      "faction": "National",
+      "title": "President of Phrygia",
+      "age": 70,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "bosphorus_control",
+        "nato_veto",
+        "play_all_sides",
+        "arms_deals",
+        "nato_summit_host"
+      ],
+      "objectives": [
+        "maximum_leverage",
+        "bosphorus_control",
+        "hedge_everyone"
+      ],
+      "ticking_clock": "2026 NATO summit host. Controls Bosphorus and Dardanelles. NATO member + BRICS+ observer. S-400 buyer.",
+      "status": "active"
+    },
+    "sakura": {
+      "id": "sakura",
+      "character_name": "Sakura",
+      "parallel": "Japanese PM",
+      "country_id": "yamato",
+      "team": "Yamato",
+      "faction": "National",
+      "title": "Prime Minister of Yamato",
+      "age": 55,
+      "gender": "F",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 3.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "remilitarization",
+        "pacific_alliance",
+        "nuclear_debate",
+        "trade_policy",
+        "latent_nuclear"
+      ],
+      "objectives": [
+        "pacific_security",
+        "remilitarization",
+        "columbia_alliance"
+      ],
+      "ticking_clock": "First female PM. Record defense budget $57.8B. 2% GDP achieved early. Latent nuclear capability. Rapidus 2nm chip project.",
+      "status": "active"
+    },
+    "wellspring": {
+      "id": "wellspring",
+      "character_name": "Wellspring",
+      "parallel": "Saudi Crown Prince",
+      "country_id": "solaria",
+      "team": "Solaria",
+      "faction": "National",
+      "title": "Crown Prince of Solaria",
+      "age": 40,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 5.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "oil_production",
+        "opec_leadership",
+        "arms_deals",
+        "hedging",
+        "nuclear_threat"
+      ],
+      "objectives": [
+        "oil_pricing_power",
+        "vision_2030",
+        "infrastructure_defense"
+      ],
+      "ticking_clock": "Under active Persia missile attack. Ras Tanura refinery damaged. $16.5B arms package from Columbia. Will go nuclear if Persia does.",
+      "status": "active"
+    },
+    "pyro": {
+      "id": "pyro",
+      "character_name": "Pyro",
+      "parallel": "North Korean Leader",
+      "country_id": "choson",
+      "team": "Choson",
+      "faction": "National",
+      "title": "Supreme Leader of Choson",
+      "age": 42,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": true,
+      "parliament_seat": 0,
+      "personal_coins": 1.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "nuclear_provocation",
+        "arms_sales",
+        "troop_deployment",
+        "unpredictable_action",
+        "patron_manipulation"
+      ],
+      "objectives": [
+        "regime_survival",
+        "nuclear_leverage",
+        "blood_for_technology"
+      ],
+      "ticking_clock": "15000+ troops in Heartland. 6000+ casualties. Blood-for-technology with Nordostan. Crisis on demand capability.",
+      "status": "active"
+    },
+    "vanguard": {
+      "id": "vanguard",
+      "character_name": "Vanguard",
+      "parallel": "South Korean President",
+      "country_id": "hanguk",
+      "team": "Hanguk",
+      "faction": "National",
+      "title": "President of Hanguk",
+      "age": 55,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 2.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "defense_policy",
+        "trade_policy",
+        "semiconductor_competition",
+        "maximum_flexibility"
+      ],
+      "objectives": [
+        "national_security",
+        "economic_stability",
+        "balance_columbia_cathay"
+      ],
+      "ticking_clock": "Post-martial-law recovery. Maximum flexibility doctrine. Security with Columbia economy with Cathay. Samsung/SK Hynix leverage.",
+      "status": "active"
+    },
+    "havana": {
+      "id": "havana",
+      "character_name": "Havana",
+      "parallel": "Cuban/Venezuelan Leader",
+      "country_id": "caribe",
+      "team": "Caribe",
+      "faction": "National",
+      "title": "Leader of Caribe",
+      "age": 65,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 1.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "resistance",
+        "foreign_patron",
+        "monroe_doctrine_trigger",
+        "survival_diplomacy"
+      ],
+      "objectives": [
+        "regime_survival",
+        "break_blockade",
+        "find_patrons"
+      ],
+      "ticking_clock": "Under Columbia energy blockade. Nationwide blackout March 2026. Can invite Nordostan/Cathay military assets to trigger Monroe Doctrine crisis.",
+      "status": "active"
+    },
+    "spire": {
+      "id": "spire",
+      "character_name": "Spire",
+      "parallel": "UAE Ruler",
+      "country_id": "mirage",
+      "team": "Mirage",
+      "faction": "National",
+      "title": "Ruler of Mirage",
+      "age": 52,
+      "gender": "M",
+      "is_head_of_state": true,
+      "is_military_chief": false,
+      "parliament_seat": 0,
+      "personal_coins": 4.0,
+      "expansion_role": false,
+      "ai_candidate": true,
+      "powers": [
+        "financial_hub",
+        "sanctions_routing",
+        "back_channel_venue",
+        "arms_deals",
+        "hedging"
+      ],
+      "objectives": [
+        "financial_power",
+        "connect_everyone",
+        "pragmatic_hedging"
+      ],
+      "ticking_clock": "357 ballistic missiles + 1815 drones launched at UAE. Financial intermediary: +20% sanctions effectiveness when cooperating or +20% evasion when enabling.",
+      "status": "active"
+    }
+  },
+  "events_log": [
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 1,
+      "round": 1
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 2,
+      "round": 1
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 3,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 3,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_1",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 1
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "round": 1
+    },
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 4,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 5,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 6,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 7,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 8,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 9,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 10,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 11,
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 12,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_1",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "round": 2
+    },
+    {
+      "type": "election",
+      "subtype": "columbia_midterms",
+      "country": "columbia",
+      "incumbent_wins": true,
+      "result": {
+        "election_type": "columbia_midterms",
+        "country": "columbia",
+        "ai_score": 74.35,
+        "player_score": 50.0,
+        "final_incumbent_pct": 62.18,
+        "incumbent_wins": true,
+        "parliament_change": "status_quo",
+        "note": "Midterms: President's camp retains majority."
+      },
+      "round": 2
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 13,
+      "round": 3
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 14,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_1",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 2,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 3
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "round": 3
+    },
+    {
+      "type": "election",
+      "subtype": "heartland_wartime",
+      "country": "heartland",
+      "incumbent_wins": false,
+      "result": {
+        "election_type": "heartland_wartime",
+        "country": "heartland",
+        "ai_score": 27.7,
+        "player_score": 50.0,
+        "final_incumbent_pct": 38.85,
+        "incumbent_wins": false,
+        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+      },
+      "round": 3
+    },
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 15,
+      "round": 4
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 16,
+      "round": 4
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 17,
+      "round": 4
+    },
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "cathay",
+      "receiver": "nordostan",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 18,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_1",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "zone_captured": false,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 4
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 1,
+      "round": 4
+    },
+    {
+      "type": "election",
+      "subtype": "heartland_wartime_runoff",
+      "country": "heartland",
+      "incumbent_wins": false,
+      "result": {
+        "election_type": "heartland_wartime_runoff",
+        "country": "heartland",
+        "ai_score": 27.8,
+        "player_score": 50.0,
+        "final_incumbent_pct": 38.9,
+        "incumbent_wins": false,
+        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+      },
+      "round": 4
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 19,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "coin_transfer",
+      "sender": "columbia",
+      "receiver": "levantia",
+      "details": {
+        "amount": 2
+      },
+      "tx_id": 20,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "arms_transfer",
+      "sender": "cathay",
+      "receiver": "nordostan",
+      "details": {
+        "unit_type": "ground",
+        "count": 2
+      },
+      "tx_id": 21,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 22,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 23,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 24,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 25,
+      "round": 5
+    },
+    {
+      "type": "transaction",
+      "tx_type": "treaty",
+      "sender": "columbia",
+      "receiver": "heartland",
+      "details": {
+        "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
+        "signatories": [
+          "columbia",
+          "heartland"
+        ]
+      },
+      "tx_id": 26,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "columbia",
+      "defender": "persia",
+      "zone": "persia_2",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 1,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "nordostan",
+      "defender": "heartland",
+      "zone": "heartland_1",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "heartland",
+      "defender": "nordostan",
+      "zone": "heartland_2",
+      "zone_captured": false,
+      "attacker_losses": 2,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "persia",
+      "defender": "levantia",
+      "zone": "levantia",
+      "zone_captured": false,
+      "attacker_losses": 1,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_1",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "combat",
+      "attacker": "levantia",
+      "defender": "persia",
+      "zone": "persia_3",
+      "zone_captured": true,
+      "attacker_losses": 0,
+      "defender_losses": 0,
+      "round": 5
+    },
+    {
+      "type": "election",
+      "subtype": "columbia_presidential",
+      "country": "columbia",
+      "incumbent_wins": true,
+      "result": {
+        "election_type": "columbia_presidential",
+        "country": "columbia",
+        "ai_score": 76.15,
+        "player_score": 50.0,
+        "final_incumbent_pct": 63.08,
+        "incumbent_wins": true,
+        "note": "Presidential election. Incumbent camp wins."
+      },
+      "round": 5
+    }
+  ],
+  "nuclear_used_this_sim": false,
+  "ground_blockades": {
+    "gulf_gate": {
+      "controller": "mirage",
+      "ground_units": 0,
+      "naval_units": 1,
+      "breakable_by_air": false,
+      "requires_ground_invasion": true
+    }
+  }
+}

@@ -1,0 +1,276 @@
+{
+  "test_name": "Full Generic Run",
+  "seed": 100,
+  "rounds_played": 8,
+  "total_time_seconds": 0.09,
+  "agents_count": 37,
+  "final_state": {
+    "columbia": {
+      "gdp": 335.9,
+      "stability": 3.9,
+      "support": 28.8,
+      "military_total": 42,
+      "treasury": 84.2,
+      "nuclear_level": 3,
+      "ai_level": 3
+    },
+    "cathay": {
+      "gdp": 347.4,
+      "stability": 9.0,
+      "support": 70.6,
+      "military_total": 44,
+      "treasury": 120.8,
+      "nuclear_level": 2,
+      "ai_level": 3
+    },
+    "nordostan": {
+      "gdp": 20.0,
+      "stability": 1,
+      "support": 30.9,
+      "military_total": 25,
+      "treasury": 0,
+      "nuclear_level": 3,
+      "ai_level": 1
+    },
+    "heartland": {
+      "gdp": 2.2,
+      "stability": 1,
+      "support": 5.0,
+      "military_total": 9,
+      "treasury": 0,
+      "nuclear_level": 0,
+      "ai_level": 2
+    },
+    "persia": {
+      "gdp": 1.6,
+      "stability": 1,
+      "support": 5.0,
+      "military_total": 13,
+      "treasury": 0,
+      "nuclear_level": 1,
+      "ai_level": 0
+    },
+    "gallia": {
+      "gdp": 37.5,
+      "stability": 7.8,
+      "support": 44.4,
+      "military_total": 13,
+      "treasury": 13.1,
+      "nuclear_level": 2,
+      "ai_level": 2
+    },
+    "teutonia": {
+      "gdp": 50.7,
+      "stability": 7.8,
+      "support": 49.1,
+      "military_total": 11,
+      "treasury": 34.6,
+      "nuclear_level": 0,
+      "ai_level": 2
+    },
+    "albion": {
+      "gdp": 36.8,
+      "stability": 7.8,
+      "support": 43.7,
+      "military_total": 11,
+      "treasury": 1.9,
+      "nuclear_level": 2,
+      "ai_level": 2
+    },
+    "bharata": {
+      "gdp": 78.4,
+      "stability": 7.6,
+      "support": 85.0,
+      "military_total": 19,
+      "treasury": 4.2,
+      "nuclear_level": 1,
+      "ai_level": 2
+    },
+    "levantia": {
+      "gdp": 5.7,
+      "stability": 1.0,
+      "support": 75.6,
+      "military_total": 20,
+      "treasury": 0,
+      "nuclear_level": 1,
+      "ai_level": 3
+    },
+    "formosa": {
+      "gdp": 10.6,
+      "stability": 8.8,
+      "support": 68.8,
+      "military_total": 9,
+      "treasury": 0,
+      "nuclear_level": 0,
+      "ai_level": 2
+    }
+  },
+  "round_summaries": {
+    "1": {
+      "round": 1,
+      "elapsed_seconds": 0.0,
+      "oil_price": 67.58,
+      "flags_count": 0,
+      "flags": [],
+      "narrative_length": 851,
+      "deals_made": 13,
+      "combats": 7,
+      "transactions": 3
+    },
+    "2": {
+      "round": 2,
+      "elapsed_seconds": 0.0,
+      "oil_price": 71.35,
+      "flags_count": 0,
+      "flags": [],
+      "narrative_length": 876,
+      "deals_made": 14,
+      "combats": 5,
+      "transactions": 8
+    },
+    "3": {
+      "round": 3,
+      "elapsed_seconds": 0.0,
+      "oil_price": 67.62,
+      "flags_count": 0,
+      "flags": [],
+      "narrative_length": 874,
+      "deals_made": 17,
+      "combats": 2,
+      "transactions": 2
+    },
+    "4": {
+      "round": 4,
+      "elapsed_seconds": 0.0,
+      "oil_price": 71.4,
+      "flags_count": 1,
+      "flags": [
+        "SUSPICIOUS: levantia stability=1 but support=71.68"
+      ],
+      "narrative_length": 870,
+      "deals_made": 9,
+      "combats": 2,
+      "transactions": 2
+    },
+    "5": {
+      "round": 5,
+      "elapsed_seconds": 0.0,
+      "oil_price": 67.68,
+      "flags_count": 1,
+      "flags": [
+        "SUSPICIOUS: levantia stability=1 but support=73.45"
+      ],
+      "narrative_length": 836,
+      "deals_made": 8,
+      "combats": 3,
+      "transactions": 7
+    },
+    "6": {
+      "round": 6,
+      "elapsed_seconds": 0.0,
+      "oil_price": 71.48,
+      "flags_count": 1,
+      "flags": [
+        "SUSPICIOUS: levantia stability=1 but support=74.44"
+      ],
+      "narrative_length": 804,
+      "deals_made": 8,
+      "combats": 2,
+      "transactions": 2
+    },
+    "7": {
+      "round": 7,
+      "elapsed_seconds": 0.0,
+      "oil_price": 67.76,
+      "flags_count": 1,
+      "flags": [
+        "SUSPICIOUS: levantia stability=1.0 but support=74.76"
+      ],
+      "narrative_length": 775,
+      "deals_made": 10,
+      "combats": 2,
+      "transactions": 2
+    },
+    "8": {
+      "round": 8,
+      "elapsed_seconds": 0.0,
+      "oil_price": 71.58,
+      "flags_count": 1,
+      "flags": [
+        "SUSPICIOUS: levantia stability=1.0 but support=75.57"
+      ],
+      "narrative_length": 811,
+      "deals_made": 9,
+      "combats": 2,
+      "transactions": 7
+    }
+  },
+  "key_events": [
+    {
+      "type": "election",
+      "subtype": "columbia_midterms",
+      "country": "columbia",
+      "incumbent_wins": true,
+      "result": {
+        "election_type": "columbia_midterms",
+        "country": "columbia",
+        "ai_score": 69.75,
+        "player_score": 50.0,
+        "final_incumbent_pct": 59.88,
+        "incumbent_wins": true,
+        "parliament_change": "status_quo",
+        "note": "Midterms: President's camp retains majority."
+      },
+      "round": 2
+    },
+    {
+      "type": "election",
+      "subtype": "heartland_wartime",
+      "country": "heartland",
+      "incumbent_wins": false,
+      "result": {
+        "election_type": "heartland_wartime",
+        "country": "heartland",
+        "ai_score": 30.7,
+        "player_score": 50.0,
+        "final_incumbent_pct": 40.35,
+        "incumbent_wins": false,
+        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+      },
+      "round": 3
+    },
+    {
+      "type": "election",
+      "subtype": "heartland_wartime_runoff",
+      "country": "heartland",
+      "incumbent_wins": false,
+      "result": {
+        "election_type": "heartland_wartime_runoff",
+        "country": "heartland",
+        "ai_score": 28.09,
+        "player_score": 50.0,
+        "final_incumbent_pct": 39.05,
+        "incumbent_wins": false,
+        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+      },
+      "round": 4
+    },
+    {
+      "type": "election",
+      "subtype": "columbia_presidential",
+      "country": "columbia",
+      "incumbent_wins": true,
+      "result": {
+        "election_type": "columbia_presidential",
+        "country": "columbia",
+        "ai_score": 71.25,
+        "player_score": 50.0,
+        "final_incumbent_pct": 60.62,
+        "incumbent_wins": true,
+        "note": "Presidential election. Incumbent camp wins."
+      },
+      "round": 5
+    }
+  ],
+  "nuclear_used": false
+}

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "{\n  \"permissions\": {\n    \"allow\": [\n      \"Bash(*)\",\n      \"Read(*)\",\n      \"Write(*)\",\n      \"Edit(*)\",\n      \"MultiEdit(*)\",\n      \"NotebookEdit(*)\",\n      \"WebFetch(*)\",\n      \"WebSearch(*)\",\n      \"TodoWrite(*)\"\n    ]\n  }\n}"
+    ]
+  }
+}

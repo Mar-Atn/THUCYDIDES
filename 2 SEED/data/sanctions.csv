@@ -1,36 +1,37 @@
-country,target,level
-columbia,nordostan,3
-columbia,persia,2
-columbia,choson,3
-columbia,caribe,2
-cathay,nordostan,-1
-nordostan,columbia,1
-nordostan,heartland,3
-gallia,nordostan,3
-gallia,persia,1
-gallia,choson,2
-teutonia,nordostan,3
-teutonia,persia,1
-teutonia,choson,2
-freeland,nordostan,3
-freeland,persia,1
-freeland,choson,2
-ponte,nordostan,2
-ponte,choson,1
-albion,nordostan,3
-albion,persia,2
-albion,choson,2
-levantia,persia,3
-levantia,nordostan,1
-formosa,nordostan,1
-yamato,nordostan,2
-yamato,choson,3
-choson,columbia,1
-choson,hanguk,1
-choson,yamato,1
-hanguk,nordostan,2
-hanguk,choson,3
-caribe,columbia,1
-heartland,nordostan,3
-persia,columbia,1
-persia,levantia,3
+country,target,level,notes
+columbia,nordostan,3,Comprehensive: financial SWIFT exclusion technology energy price cap asset freezes travel bans 1500+ individuals
+columbia,persia,3,Maximum: wartime escalation on top of 2018 reimposition. Financial disconnect technology block energy sanctions.
+columbia,choson,3,Maximum sanctions. Longest-running sanctions regime.
+columbia,caribe,3,Full energy blockade. Executive Order declaring national emergency. Naval interdiction of oil tankers.
+gallia,nordostan,3,EU comprehensive sanctions aligned with Columbia
+gallia,persia,2,EU snapback triggered Sep 2025 + wartime escalation
+gallia,choson,2,UN and EU sanctions
+teutonia,nordostan,3,EU comprehensive sanctions - reluctant but compliant
+teutonia,persia,2,EU snapback + wartime
+teutonia,choson,2,UN and EU sanctions
+freeland,nordostan,3,Maximum enforcement. Most aggressive EU implementer.
+freeland,persia,2,EU aligned
+freeland,choson,2,UN and EU sanctions
+albion,nordostan,3,Comprehensive. Most aggressive in sanctioning oligarchs and pursuing Russian assets.
+albion,persia,2,Strong sanctions enforcement
+albion,choson,2,UN sanctions enforcement
+ponte,nordostan,2,EU aligned but weakest enforcer. Coalition partners question sanctions.
+ponte,persia,1,Minimal EU compliance
+ponte,choson,1,Weak enforcement
+levantia,persia,3,Wartime. Total. Existential conflict.
+levantia,nordostan,1,Alignment with Western sanctions
+formosa,nordostan,1,Aligned with Columbia restrictions
+yamato,nordostan,2,G7 aligned sanctions
+yamato,choson,3,Maximum - direct nuclear threat
+hanguk,nordostan,2,Western aligned
+hanguk,choson,3,Maximum - existential threat
+cathay,nordostan,-1,Sanctions evasion support. Buys energy at discount. Mild tech transfers.
+nordostan,columbia,1,Counter-sanctions (asset seizures banning Western goods)
+nordostan,heartland,3,Wartime total economic warfare
+choson,columbia,1,Symbolic counter-sanctions
+choson,hanguk,1,Symbolic counter-sanctions
+choson,yamato,1,Symbolic counter-sanctions
+caribe,columbia,1,Symbolic counter-sanctions
+heartland,nordostan,3,Wartime total
+persia,columbia,1,Counter-sanctions (symbolic)
+persia,levantia,3,Wartime total
