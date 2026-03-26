@@ -1,0 +1,498 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" width="1200" height="700">
+  <defs>
+    <style>
+      .grid-coord { font-family: 'Consolas', 'Courier New', monospace; font-size: 5px; fill: #aaa; text-anchor: middle; }
+      .zone-label { font-family: 'Consolas', 'Courier New', monospace; font-size: 6.5px; fill: #2a2a2a; text-anchor: middle; font-weight: 700; letter-spacing: 0.3px; }
+      .zone-label-sea { font-family: 'Consolas', 'Courier New', monospace; font-size: 6px; fill: #1a3a5a; text-anchor: middle; font-style: italic; }
+      .country-label { font-family: 'Consolas', 'Courier New', monospace; font-size: 10px; text-anchor: middle; font-weight: 700; letter-spacing: 2px; }
+      .continent-label { font-family: 'Consolas', 'Courier New', monospace; font-size: 12px; fill: #777; text-anchor: middle; font-weight: 300; letter-spacing: 4px; }
+      .nato-counter { stroke-width: 1; }
+      .counter-text { font-family: 'Consolas', 'Courier New', monospace; font-size: 5px; fill: white; text-anchor: middle; dominant-baseline: central; font-weight: 700; }
+      .counter-text-dark { font-family: 'Consolas', 'Courier New', monospace; font-size: 5px; fill: #222; text-anchor: middle; dominant-baseline: central; font-weight: 700; }
+      .chokepoint-sym { font-family: 'Consolas', monospace; font-size: 7px; fill: #cc2222; text-anchor: middle; font-weight: 700; }
+      .legend-text { font-family: 'Consolas', 'Courier New', monospace; font-size: 7px; fill: #333; }
+      .legend-title { font-family: 'Consolas', 'Courier New', monospace; font-size: 9px; fill: #111; font-weight: 700; letter-spacing: 1px; }
+      .theater-mark { font-family: 'Consolas', monospace; font-size: 5.5px; fill: #cc2222; text-anchor: middle; font-weight: 700; }
+    </style>
+    <!-- Hex pattern for background - pointy top, small hexes -->
+    <!-- Pointy-top hex: r=20, w=34.6, h=40, col spacing=34.6, row spacing=30 (3/4 * h=40) -->
+    <pattern id="hexgrid" x="0" y="0" width="34.64" height="60" patternUnits="userSpaceOnUse">
+      <polygon points="17.32,0 34.64,10 34.64,30 17.32,40 0,30 0,10" fill="none" stroke="#c0c0b8" stroke-width="0.3"/>
+      <polygon points="17.32,30 34.64,40 34.64,60 17.32,70 0,60 0,40" fill="none" stroke="#c0c0b8" stroke-width="0.3" transform="translate(17.32,0)"/>
+    </pattern>
+  </defs>
+
+  <!-- Background: warm tan base -->
+  <rect width="1200" height="700" fill="#d8d0c0"/>
+
+  <!-- Hex grid overlay across entire map -->
+  <rect width="1200" height="700" fill="url(#hexgrid)" opacity="0.5"/>
+
+  <!-- Title bar -->
+  <rect x="0" y="0" width="1200" height="40" fill="#3a3a30" opacity="0.9"/>
+  <text x="600" y="16" font-family="'Consolas', monospace" font-size="14" fill="#c0c0b0" text-anchor="middle" font-weight="700" letter-spacing="3">THUCYDIDES TRAP — GLOBAL STRATEGIC ASSESSMENT</text>
+  <text x="600" y="30" font-family="'Consolas', monospace" font-size="8" fill="#888" text-anchor="middle" letter-spacing="2">WARGAME OPERATIONAL MAP • 45 ZONES • CLASSIFICATION: EXERCISE ONLY</text>
+
+  <!-- Grid coordinates (faint) along edges -->
+  <text x="30" y="55" class="grid-coord">A1</text>
+  <text x="100" y="55" class="grid-coord">B1</text>
+  <text x="200" y="55" class="grid-coord">C1</text>
+  <text x="300" y="55" class="grid-coord">D1</text>
+  <text x="400" y="55" class="grid-coord">E1</text>
+  <text x="500" y="55" class="grid-coord">F1</text>
+  <text x="600" y="55" class="grid-coord">G1</text>
+  <text x="700" y="55" class="grid-coord">H1</text>
+  <text x="800" y="55" class="grid-coord">I1</text>
+  <text x="900" y="55" class="grid-coord">J1</text>
+  <text x="1000" y="55" class="grid-coord">K1</text>
+  <text x="1100" y="55" class="grid-coord">L1</text>
+
+  <!-- Row coordinates -->
+  <text x="12" y="100" class="grid-coord">1</text>
+  <text x="12" y="160" class="grid-coord">2</text>
+  <text x="12" y="220" class="grid-coord">3</text>
+  <text x="12" y="280" class="grid-coord">4</text>
+  <text x="12" y="340" class="grid-coord">5</text>
+  <text x="12" y="400" class="grid-coord">6</text>
+  <text x="12" y="460" class="grid-coord">7</text>
+
+  <!-- ================================================ -->
+  <!-- SEA ZONES (blue terrain hexes as large regions)  -->
+  <!-- ================================================ -->
+
+  <!-- Arctic Ocean -->
+  <rect x="350" y="48" width="500" height="35" fill="#6a92b5" opacity="0.4" rx="3"/>
+  <text x="600" y="70" class="zone-label-sea">ARCTIC OCEAN</text>
+
+  <!-- North Pacific -->
+  <ellipse cx="80" cy="180" rx="70" ry="80" fill="#6a92b5" opacity="0.35"/>
+  <text x="80" y="145" class="zone-label-sea">NORTH</text>
+  <text x="80" y="155" class="zone-label-sea">PACIFIC</text>
+
+  <!-- Central Pacific -->
+  <ellipse cx="50" cy="340" rx="45" ry="50" fill="#5a82a5" opacity="0.35"/>
+  <text x="50" y="340" class="zone-label-sea">CENT.</text>
+  <text x="50" y="350" class="zone-label-sea">PACIFIC</text>
+
+  <!-- Western Atlantic -->
+  <ellipse cx="230" cy="220" rx="45" ry="60" fill="#6a92b5" opacity="0.35"/>
+  <text x="230" y="215" class="zone-label-sea">W.ATL</text>
+
+  <!-- Gulf & Caribbean -->
+  <ellipse cx="170" cy="310" rx="45" ry="35" fill="#6a92b5" opacity="0.35"/>
+  <text x="170" y="310" class="zone-label-sea">GULF/CARIB</text>
+  <!-- Chokepoint -->
+  <text x="170" y="335" class="chokepoint-sym">&#x2693;</text>
+  <text x="170" y="345" class="theater-mark">CARIBBEAN PASS.</text>
+
+  <!-- Eastern Atlantic -->
+  <ellipse cx="310" cy="250" rx="40" ry="70" fill="#6a92b5" opacity="0.35"/>
+  <text x="310" y="250" class="zone-label-sea">E.ATL</text>
+
+  <!-- GIUK Gap -->
+  <ellipse cx="330" cy="100" rx="35" ry="25" fill="#5a82a5" opacity="0.4"/>
+  <text x="330" y="98" class="zone-label-sea">GIUK GAP</text>
+  <text x="330" y="112" class="chokepoint-sym">&#x2693;</text>
+
+  <!-- Baltic Sea -->
+  <ellipse cx="470" cy="108" rx="25" ry="20" fill="#7aa2c5" opacity="0.4"/>
+  <text x="470" y="108" class="zone-label-sea">BALTIC</text>
+
+  <!-- Black Sea -->
+  <ellipse cx="535" cy="195" rx="30" ry="18" fill="#6a92b5" opacity="0.4"/>
+  <text x="535" y="195" class="zone-label-sea">BLACK SEA</text>
+  <text x="555" y="210" class="chokepoint-sym">&#x2693;</text>
+  <text x="555" y="220" class="theater-mark">BOSPHORUS</text>
+
+  <!-- W. Mediterranean -->
+  <ellipse cx="400" cy="268" rx="35" ry="20" fill="#7aa2c5" opacity="0.35"/>
+  <text x="400" y="268" class="zone-label-sea">W.MED</text>
+
+  <!-- E. Mediterranean -->
+  <ellipse cx="500" cy="275" rx="35" ry="22" fill="#7aa2c5" opacity="0.35"/>
+  <text x="500" y="275" class="zone-label-sea">E.MED</text>
+  <text x="520" y="292" class="chokepoint-sym">&#x2693;</text>
+  <text x="520" y="302" class="theater-mark">SUEZ</text>
+
+  <!-- Red Sea -->
+  <ellipse cx="560" cy="350" rx="20" ry="40" fill="#6a92b5" opacity="0.4"/>
+  <text x="560" y="345" class="zone-label-sea">RED</text>
+  <text x="560" y="355" class="zone-label-sea">SEA</text>
+  <text x="560" y="380" class="chokepoint-sym">&#x2693;</text>
+
+  <!-- Persian Gulf -->
+  <ellipse cx="660" cy="310" rx="28" ry="18" fill="#6a92b5" opacity="0.4"/>
+  <text x="660" y="308" class="zone-label-sea">PERSIAN</text>
+  <text x="660" y="318" class="zone-label-sea">GULF</text>
+  <text x="688" y="318" class="chokepoint-sym">&#x2693;</text>
+  <text x="700" y="328" class="theater-mark">HORMUZ</text>
+
+  <!-- Arabian Sea -->
+  <ellipse cx="720" cy="380" rx="40" ry="30" fill="#5a82a5" opacity="0.35"/>
+  <text x="720" y="378" class="zone-label-sea">ARABIAN</text>
+  <text x="720" y="388" class="zone-label-sea">SEA</text>
+
+  <!-- Indian Ocean -->
+  <ellipse cx="820" cy="420" rx="50" ry="30" fill="#4a72a0" opacity="0.35"/>
+  <text x="820" y="420" class="zone-label-sea">INDIAN OCEAN</text>
+
+  <!-- SE Asia / Malacca -->
+  <ellipse cx="900" cy="365" rx="30" ry="25" fill="#6a92b5" opacity="0.4"/>
+  <text x="900" y="362" class="zone-label-sea">SE ASIA</text>
+  <text x="900" y="372" class="zone-label-sea">MALACCA</text>
+  <text x="900" y="388" class="chokepoint-sym">&#x2693;</text>
+  <text x="900" y="398" class="theater-mark">MALACCA STR.</text>
+
+  <!-- South China Sea -->
+  <ellipse cx="960" cy="290" rx="35" ry="35" fill="#6a92b5" opacity="0.4"/>
+  <text x="960" y="288" class="zone-label-sea">SOUTH</text>
+  <text x="960" y="298" class="zone-label-sea">CHINA SEA</text>
+  <text x="985" y="312" class="chokepoint-sym">&#x2693;</text>
+
+  <!-- East China Sea -->
+  <ellipse cx="1020" cy="210" rx="30" ry="30" fill="#6a92b5" opacity="0.4"/>
+  <text x="1020" y="208" class="zone-label-sea">E.CHINA</text>
+  <text x="1020" y="218" class="zone-label-sea">SEA</text>
+  <text x="1045" y="232" class="chokepoint-sym">&#x2693;</text>
+  <text x="1045" y="242" class="theater-mark">TAIWAN STR.</text>
+
+  <!-- North Pacific (East) -->
+  <ellipse cx="1100" cy="140" rx="50" ry="40" fill="#5a82a5" opacity="0.3"/>
+  <text x="1100" y="140" class="zone-label-sea">N.PACIFIC</text>
+
+  <!-- ================================================ -->
+  <!-- LAND ZONES with terrain colors                   -->
+  <!-- Thick country borders overlaid                   -->
+  <!-- ================================================ -->
+
+  <!-- COLUMBIA -->
+  <!-- Continental (temperate) -->
+  <path d="M120,155 L195,140 L200,185 L190,230 L140,240 L105,220 L95,180 Z" fill="#a0b890" stroke="#3a6a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="150" y="185" class="zone-label">COLUMBIA</text>
+  <text x="150" y="195" class="zone-label">(CONTINENTAL)</text>
+
+  <!-- Alaska (arctic) -->
+  <path d="M90,85 L140,78 L155,105 L130,130 L95,125 L80,105 Z" fill="#e0ddd5" stroke="#3a6a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="118" y="108" class="zone-label">ALASKA</text>
+
+  <!-- Hawaii/PACOM -->
+  <path d="M40,240 L70,235 L80,255 L65,272 L38,265 Z" fill="#a0b890" stroke="#3a6a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="58" y="257" class="zone-label">PACOM</text>
+
+  <!-- NATO counter: Columbia Ground -->
+  <rect x="135" y="200" width="30" height="14" fill="#3a6a3a" stroke="#2a5a2a" stroke-width="1" class="nato-counter"/>
+  <line x1="140" y1="200" x2="160" y2="214" stroke="white" stroke-width="0.8"/>
+  <line x1="160" y1="200" x2="140" y2="214" stroke="white" stroke-width="0.8"/>
+  <text x="150" y="222" class="counter-text-dark">x8</text>
+
+  <!-- CARIBE -->
+  <path d="M160,265 L190,260 L198,280 L185,300 L158,295 Z" fill="#c8b898" stroke="#8a6a4a" stroke-width="2" opacity="0.85"/>
+  <text x="178" y="282" class="zone-label">CARIBE</text>
+
+  <!-- COUNTRY LABEL -->
+  <text x="150" y="145" class="country-label" fill="#3a6a3a">COLUMBIA</text>
+
+  <!-- ================================================ -->
+  <!-- EUROPE -->
+  <!-- ================================================ -->
+
+  <!-- Albion (temperate) -->
+  <path d="M340,130 L365,125 L370,150 L360,168 L338,165 L332,145 Z" fill="#a0b890" stroke="#2a4a6a" stroke-width="2.5" opacity="0.85"/>
+  <text x="352" y="150" class="zone-label">ALBION</text>
+
+  <!-- Gallia (temperate) -->
+  <path d="M370,178 L405,170 L415,200 L405,225 L370,228 L362,205 Z" fill="#a0b890" stroke="#5a3a6a" stroke-width="2.5" opacity="0.85"/>
+  <text x="390" y="202" class="zone-label">GALLIA</text>
+
+  <!-- Teutonia (temperate) -->
+  <path d="M415,125 L450,118 L458,145 L450,168 L418,170 L410,148 Z" fill="#a0b890" stroke="#4a6a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="435" y="148" class="zone-label">TEUTONIA</text>
+
+  <!-- Ponte (temperate/med) -->
+  <path d="M418,215 L445,208 L455,240 L448,260 L420,258 L412,238 Z" fill="#b8c898" stroke="#6a5a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="435" y="238" class="zone-label">PONTE</text>
+
+  <!-- Freeland (temperate) -->
+  <path d="M458,118 L492,112 L500,142 L495,165 L462,168 L455,145 Z" fill="#a0b890" stroke="#6a3a6a" stroke-width="2.5" opacity="0.85"/>
+  <text x="478" y="142" class="zone-label">FREELAND</text>
+
+  <!-- EE Theater marker on Freeland -->
+  <rect x="455" y="168" width="48" height="10" rx="2" fill="#cc2222" opacity="0.2" stroke="#cc2222" stroke-width="0.8"/>
+  <text x="479" y="176" class="theater-mark">EE THEATER ACTIVE</text>
+
+  <!-- ================================================ -->
+  <!-- NORDOSTAN -->
+  <!-- ================================================ -->
+
+  <!-- Nordostan Western -->
+  <path d="M505,85 L555,78 L565,115 L558,155 L510,160 L498,120 Z" fill="#c8c0a8" stroke="#6a5a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="532" y="118" class="zone-label">NORDOSTAN</text>
+  <text x="532" y="128" class="zone-label">(WEST)</text>
+  <!-- NATO counter -->
+  <rect x="518" y="135" width="28" height="13" fill="#6a5a3a" stroke="#5a4a2a" stroke-width="1" class="nato-counter"/>
+  <line x1="523" y1="135" x2="541" y2="148" stroke="white" stroke-width="0.8"/>
+  <line x1="541" y1="135" x2="523" y2="148" stroke="white" stroke-width="0.8"/>
+  <text x="532" y="156" class="counter-text-dark">x6</text>
+
+  <!-- Nordostan Central (tundra/taiga) -->
+  <path d="M570,68 L660,60 L670,95 L665,118 L575,125 L565,95 Z" fill="#c0b8a0" stroke="#6a5a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="618" y="95" class="zone-label">NORDOSTAN (CENTRAL)</text>
+
+  <!-- Nordostan Far East (tundra) -->
+  <path d="M720,65 L790,58 L798,90 L790,118 L725,122 L715,92 Z" fill="#d0c8b0" stroke="#6a5a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="755" y="92" class="zone-label">NORDOSTAN (FAR EAST)</text>
+
+  <!-- COUNTRY LABEL -->
+  <text x="660" y="55" class="country-label" fill="#6a5a3a">NORDOSTAN</text>
+
+  <!-- ================================================ -->
+  <!-- MIDDLE EAST -->
+  <!-- ================================================ -->
+
+  <!-- Phrygia (mixed terrain) -->
+  <path d="M510,220 L548,215 L555,240 L548,260 L512,262 L505,242 Z" fill="#c8b898" stroke="#8a6a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="530" y="242" class="zone-label">PHRYGIA</text>
+
+  <!-- Levantia -->
+  <path d="M555,250 L578,245 L585,270 L580,290 L558,292 L550,272 Z" fill="#b8c8a8" stroke="#3a6a3a" stroke-width="2" opacity="0.85"/>
+  <text x="568" y="272" class="zone-label">LEVANTIA</text>
+
+  <!-- Solaria (desert) -->
+  <path d="M585,300 L635,292 L645,330 L635,360 L590,365 L580,335 Z" fill="#d8c898" stroke="#8a7a3a" stroke-width="2.5" opacity="0.85"/>
+  <text x="612" y="330" class="zone-label">SOLARIA</text>
+
+  <!-- Persia (desert + mountain) -->
+  <path d="M640,250 L700,242 L710,280 L705,310 L648,315 L635,285 Z" fill="#c8b080" stroke="#7a4a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="672" y="278" class="zone-label">PERSIA</text>
+  <!-- Mountain symbols -->
+  <polygon points="655,258 660,250 665,258" fill="none" stroke="#7a5a3a" stroke-width="0.8"/>
+  <polygon points="675,255 680,247 685,255" fill="none" stroke="#7a5a3a" stroke-width="0.8"/>
+
+  <!-- Mirage -->
+  <path d="M700,320 L730,315 L738,340 L732,358 L705,360 L698,342 Z" fill="#e0d0b0" stroke="#8a7a4a" stroke-width="2" opacity="0.85"/>
+  <text x="718" y="340" class="zone-label">MIRAGE</text>
+
+  <!-- ME Theater marker -->
+  <rect x="555" y="295" width="160" height="70" rx="3" fill="none" stroke="#cc2222" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/>
+  <text x="635" y="373" class="theater-mark">MIDDLE EAST THEATER ACTIVE</text>
+
+  <!-- ================================================ -->
+  <!-- CONTESTED ZONES -->
+  <!-- ================================================ -->
+
+  <!-- Central Asia -->
+  <path d="M670,170 L730,162 L738,195 L730,220 L675,225 L665,198 Z" fill="#d0c8b8" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
+  <text x="702" y="195" class="zone-label">CENTRAL ASIA</text>
+  <text x="702" y="205" class="zone-label" fill="#888">(CONTESTED)</text>
+
+  <!-- Horn of Africa -->
+  <path d="M565,385 L595,380 L600,405 L592,420 L568,418 Z" fill="#d0c0a0" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
+  <text x="582" y="402" class="zone-label">HORN</text>
+
+  <!-- Central Africa -->
+  <path d="M420,375 L460,368 L468,400 L458,420 L425,418 Z" fill="#b8c0a0" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
+  <text x="442" y="395" class="zone-label">C.AFRICA</text>
+
+  <!-- Greenland (arctic) -->
+  <path d="M270,68 L310,62 L318,88 L312,108 L275,112 L265,92 Z" fill="#e8e5dd" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
+  <text x="292" y="90" class="zone-label">GREENLAND</text>
+
+  <!-- ================================================ -->
+  <!-- SOUTH & EAST ASIA -->
+  <!-- ================================================ -->
+
+  <!-- Bharata (mixed: tropical, mountain) -->
+  <path d="M770,300 L820,292 L830,340 L820,380 L775,385 L762,345 Z" fill="#a8b890" stroke="#4a6a4a" stroke-width="2.5" opacity="0.85"/>
+  <text x="798" y="340" class="zone-label">BHARATA</text>
+  <!-- Mountain symbols -->
+  <polygon points="785,310 790,302 795,310" fill="none" stroke="#5a6a4a" stroke-width="0.8"/>
+  <!-- NATO counter -->
+  <rect x="784" y="350" width="28" height="13" fill="#4a6a4a" stroke="#3a5a3a" stroke-width="1" class="nato-counter"/>
+  <line x1="789" y1="350" x2="807" y2="363" stroke="white" stroke-width="0.8"/>
+  <line x1="807" y1="350" x2="789" y2="363" stroke="white" stroke-width="0.8"/>
+  <text x="798" y="371" class="counter-text-dark">x4</text>
+
+  <!-- ================================================ -->
+  <!-- EAST ASIA -->
+  <!-- ================================================ -->
+
+  <!-- Cathay Eastern -->
+  <path d="M920,170 L970,162 L978,200 L970,230 L925,235 L912,205 Z" fill="#c8b898" stroke="#8a6a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="945" y="195" class="zone-label">CATHAY</text>
+  <text x="945" y="205" class="zone-label">(EAST)</text>
+  <!-- NATO counter: Cathay Ground -->
+  <rect x="931" y="212" width="28" height="13" fill="#8a6a2a" stroke="#7a5a1a" stroke-width="1" class="nato-counter"/>
+  <line x1="936" y1="212" x2="954" y2="225" stroke="white" stroke-width="0.8"/>
+  <line x1="954" y1="212" x2="936" y2="225" stroke="white" stroke-width="0.8"/>
+  <text x="945" y="233" class="counter-text-dark">x8</text>
+
+  <!-- Cathay Interior (mountain/desert) -->
+  <path d="M845,170 L918,162 L920,200 L912,230 L850,235 L838,205 Z" fill="#c0b090" stroke="#8a6a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="882" y="198" class="zone-label">CATHAY (INTERIOR)</text>
+  <!-- Mountain symbols -->
+  <polygon points="860,180 865,172 870,180" fill="none" stroke="#7a5a3a" stroke-width="0.8"/>
+  <polygon points="880,178 885,170 890,178" fill="none" stroke="#7a5a3a" stroke-width="0.8"/>
+
+  <!-- Cathay Southern -->
+  <path d="M895,240 L938,235 L945,268 L938,295 L900,298 L890,270 Z" fill="#b8c090" stroke="#8a6a2a" stroke-width="2.5" opacity="0.85"/>
+  <text x="918" y="268" class="zone-label">CATHAY</text>
+  <text x="918" y="278" class="zone-label">(SOUTH)</text>
+
+  <!-- COUNTRY LABEL -->
+  <text x="910" y="155" class="country-label" fill="#8a6a2a">CATHAY</text>
+
+  <!-- Yamato -->
+  <path d="M1038,165 L1065,160 L1072,190 L1065,215 L1040,218 L1032,195 Z" fill="#a0b890" stroke="#2a5a7a" stroke-width="2.5" opacity="0.85"/>
+  <text x="1052" y="192" class="zone-label">YAMATO</text>
+  <!-- NATO counter -->
+  <rect x="1038" y="198" width="28" height="13" fill="#2a5a7a" stroke="#1a4a6a" stroke-width="1" class="nato-counter"/>
+  <line x1="1043" y1="198" x2="1061" y2="211" stroke="white" stroke-width="0.8"/>
+  <line x1="1061" y1="198" x2="1043" y2="211" stroke="white" stroke-width="0.8"/>
+  <text x="1052" y="219" class="counter-text-dark">x2</text>
+
+  <!-- Hanguk -->
+  <path d="M990,148 L1015,142 L1022,168 L1015,190 L992,192 L985,172 Z" fill="#a8b8c0" stroke="#3a5a7a" stroke-width="2.5" opacity="0.85"/>
+  <text x="1005" y="170" class="zone-label">HANGUK</text>
+  <!-- NATO counter -->
+  <rect x="991" y="176" width="28" height="13" fill="#3a5a7a" stroke="#2a4a6a" stroke-width="1" class="nato-counter"/>
+  <line x1="996" y1="176" x2="1014" y2="189" stroke="white" stroke-width="0.8"/>
+  <line x1="1014" y1="176" x2="996" y2="189" stroke="white" stroke-width="0.8"/>
+  <text x="1005" y="197" class="counter-text-dark">x3</text>
+
+  <!-- Choson -->
+  <path d="M960,132 L988,125 L995,152 L988,172 L962,175 L955,155 Z" fill="#c8c0b0" stroke="#5a4a3a" stroke-width="2" opacity="0.85"/>
+  <text x="975" y="152" class="zone-label">CHOSON</text>
+  <!-- Missile counter -->
+  <rect x="961" y="158" width="28" height="13" fill="#aa3333" stroke="#882222" stroke-width="1" class="nato-counter"/>
+  <line x1="975" y1="158" x2="975" y2="168" stroke="white" stroke-width="1"/>
+  <polygon points="975,158 972,162 978,162" fill="white"/>
+  <text x="975" y="178" class="counter-text-dark">x2</text>
+
+  <!-- Formosa -->
+  <path d="M1048,245 L1070,240 L1075,265 L1068,285 L1050,288 L1042,268 Z" fill="#98b888" stroke="#2a7a3a" stroke-width="2" opacity="0.85"/>
+  <text x="1060" y="268" class="zone-label">FORMOSA</text>
+  <!-- NATO counter -->
+  <rect x="1046" y="272" width="28" height="13" fill="#2a7a3a" stroke="#1a6a2a" stroke-width="1" class="nato-counter"/>
+  <line x1="1051" y1="272" x2="1069" y2="285" stroke="white" stroke-width="0.8"/>
+  <line x1="1069" y1="272" x2="1051" y2="285" stroke="white" stroke-width="0.8"/>
+  <text x="1060" y="293" class="counter-text-dark">x3</text>
+
+  <!-- ================================================ -->
+  <!-- NAVAL UNIT COUNTERS (in sea zones) -->
+  <!-- ================================================ -->
+
+  <!-- Columbia NAV in N.Pacific -->
+  <rect x="60" y="170" width="30" height="14" fill="#3a6a3a" stroke="#2a5a2a" stroke-width="1" rx="7"/>
+  <text x="75" y="179" class="counter-text">NAV x2</text>
+
+  <!-- Columbia NAV in W.Atlantic -->
+  <rect x="215" y="228" width="30" height="14" fill="#3a6a3a" stroke="#2a5a2a" stroke-width="1" rx="7"/>
+  <text x="230" y="237" class="counter-text">NAV x3</text>
+
+  <!-- Columbia NAV in E.Atlantic -->
+  <rect x="295" y="262" width="30" height="14" fill="#3a6a3a" stroke="#2a5a2a" stroke-width="1" rx="7"/>
+  <text x="310" y="271" class="counter-text">NAV x2</text>
+
+  <!-- Columbia NAV in Arabian Sea -->
+  <rect x="705" y="388" width="30" height="14" fill="#3a6a3a" stroke="#2a5a2a" stroke-width="1" rx="7"/>
+  <text x="720" y="397" class="counter-text">NAV x2</text>
+
+  <!-- Cathay NAV in SCS -->
+  <rect x="945" y="298" width="30" height="14" fill="#8a6a2a" stroke="#7a5a1a" stroke-width="1" rx="7"/>
+  <text x="960" y="307" class="counter-text">NAV x3</text>
+
+  <!-- Cathay NAV in E.China Sea -->
+  <rect x="1005" y="218" width="30" height="14" fill="#8a6a2a" stroke="#7a5a1a" stroke-width="1" rx="7"/>
+  <text x="1020" y="227" class="counter-text">NAV x2</text>
+
+  <!-- Nordostan NAV in Black Sea -->
+  <rect x="520" y="198" width="30" height="14" fill="#6a5a3a" stroke="#5a4a2a" stroke-width="1" rx="7"/>
+  <text x="535" y="207" class="counter-text">NAV x1</text>
+
+  <!-- Nordostan GND in EE zones -->
+  <rect x="462" y="150" width="28" height="13" fill="#6a5a3a" stroke="#5a4a2a" stroke-width="1" class="nato-counter"/>
+  <line x1="467" y1="150" x2="485" y2="163" stroke="white" stroke-width="0.8"/>
+  <line x1="485" y1="150" x2="467" y2="163" stroke="white" stroke-width="0.8"/>
+  <text x="476" y="148" class="counter-text-dark">NOR x4</text>
+
+  <!-- Heartland GND in EE zones -->
+  <rect x="462" y="123" width="28" height="13" fill="#5a7a5a" stroke="#4a6a4a" stroke-width="1" class="nato-counter"/>
+  <line x1="467" y1="123" x2="485" y2="136" stroke="white" stroke-width="0.8"/>
+  <line x1="485" y1="123" x2="467" y2="136" stroke="white" stroke-width="0.8"/>
+  <text x="476" y="121" class="counter-text-dark">HRT x3</text>
+
+  <!-- ================================================ -->
+  <!-- LEGEND -->
+  <!-- ================================================ -->
+  <rect x="20" y="475" width="350" height="210" fill="#f0ece0" stroke="#8a8a7a" stroke-width="1.5" rx="3"/>
+  <text x="195" y="494" class="legend-title" text-anchor="middle">OPERATIONAL MAP LEGEND</text>
+
+  <!-- Terrain types -->
+  <text x="35" y="512" class="legend-text" font-weight="700">TERRAIN:</text>
+  <rect x="35" y="518" width="16" height="12" fill="#a0b890" stroke="#666" stroke-width="0.5"/>
+  <text x="56" y="528" class="legend-text">Temperate</text>
+  <rect x="110" y="518" width="16" height="12" fill="#d8c898" stroke="#666" stroke-width="0.5"/>
+  <text x="131" y="528" class="legend-text">Desert</text>
+  <rect x="175" y="518" width="16" height="12" fill="#e0ddd5" stroke="#666" stroke-width="0.5"/>
+  <text x="196" y="528" class="legend-text">Arctic</text>
+  <rect x="235" y="518" width="16" height="12" fill="#c8b080" stroke="#666" stroke-width="0.5"/>
+  <text x="256" y="528" class="legend-text">Mountain</text>
+  <rect x="310" y="518" width="16" height="12" fill="#6a92b5" stroke="#666" stroke-width="0.5"/>
+  <text x="331" y="528" class="legend-text">Sea</text>
+
+  <!-- Country borders -->
+  <text x="35" y="548" class="legend-text" font-weight="700">COUNTRY BORDERS (thick colored lines):</text>
+  <line x1="35" y1="556" x2="55" y2="556" stroke="#3a6a3a" stroke-width="2.5"/>
+  <text x="60" y="560" class="legend-text">COL</text>
+  <line x1="85" y1="556" x2="105" y2="556" stroke="#8a6a2a" stroke-width="2.5"/>
+  <text x="110" y="560" class="legend-text">CAT</text>
+  <line x1="135" y1="556" x2="155" y2="556" stroke="#6a5a3a" stroke-width="2.5"/>
+  <text x="160" y="560" class="legend-text">NOR</text>
+  <line x1="185" y1="556" x2="205" y2="556" stroke="#7a4a2a" stroke-width="2.5"/>
+  <text x="210" y="560" class="legend-text">PER</text>
+  <line x1="235" y1="556" x2="255" y2="556" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="260" y="560" class="legend-text">Contested</text>
+
+  <!-- NATO Counters -->
+  <text x="35" y="580" class="legend-text" font-weight="700">NATO STANDARD COUNTERS:</text>
+
+  <!-- Ground (X inside rectangle) -->
+  <rect x="35" y="586" width="22" height="13" fill="#555" stroke="#333" stroke-width="1"/>
+  <line x1="38" y1="586" x2="54" y2="599" stroke="white" stroke-width="0.8"/>
+  <line x1="54" y1="586" x2="38" y2="599" stroke="white" stroke-width="0.8"/>
+  <text x="62" y="596" class="legend-text">Ground (Infantry/Division)</text>
+
+  <!-- Naval (rounded/oval) -->
+  <rect x="35" y="604" width="22" height="13" fill="#555" stroke="#333" stroke-width="1" rx="7"/>
+  <text x="62" y="614" class="legend-text">Naval (Fleet)</text>
+
+  <!-- Air (inverted V) -->
+  <rect x="35" y="622" width="22" height="13" fill="#555" stroke="#333" stroke-width="1"/>
+  <polygon points="46,622 40,635 52,635" fill="none" stroke="white" stroke-width="0.8"/>
+  <text x="62" y="632" class="legend-text">Air (inverted V = tactical air)</text>
+
+  <!-- Missile (vertical arrow) -->
+  <rect x="35" y="640" width="22" height="13" fill="#aa3333" stroke="#882222" stroke-width="1"/>
+  <line x1="46" y1="640" x2="46" y2="650" stroke="white" stroke-width="1"/>
+  <polygon points="46,640 43,644 49,644" fill="white"/>
+  <text x="62" y="650" class="legend-text">Missile (strategic/ballistic)</text>
+
+  <!-- Air Defense (arc) -->
+  <rect x="35" y="658" width="22" height="13" fill="#555" stroke="#333" stroke-width="1"/>
+  <path d="M40,668 Q46,658 52,668" fill="none" stroke="white" stroke-width="0.8"/>
+  <text x="62" y="668" class="legend-text">Air Defense (arc symbol)</text>
+
+  <!-- Chokepoints & Theaters -->
+  <rect x="390" y="475" width="250" height="110" fill="#f0ece0" stroke="#8a8a7a" stroke-width="1.5" rx="3"/>
+  <text x="515" y="494" class="legend-title" text-anchor="middle">CHOKEPOINTS &amp; THEATERS</text>
+  <text x="405" y="512" class="chokepoint-sym" text-anchor="start">&#x2693;</text>
+  <text x="420" y="512" class="legend-text">Chokepoint (8 total):</text>
+  <text x="420" y="524" class="legend-text">Hormuz, Suez, Bab el-Mandeb,</text>
+  <text x="420" y="536" class="legend-text">Bosphorus, GIUK, Malacca,</text>
+  <text x="420" y="548" class="legend-text">Taiwan Str., Caribbean Pass.</text>
+  <rect x="405" y="558" width="30" height="10" rx="2" fill="none" stroke="#cc2222" stroke-width="1.2" stroke-dasharray="4,2"/>
+  <text x="440" y="567" class="legend-text">Active Theater Zone</text>
+
+  <!-- Watermark -->
+  <text x="1100" y="690" font-family="'Consolas', monospace" font-size="7" fill="#aaa" text-anchor="end">OPTION F: WARGAME BOARD v1.0 | THUCYDIDES TRAP SIM</text>
+</svg>

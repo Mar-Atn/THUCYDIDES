@@ -1,11 +1,13 @@
 # Thucydides Trap SIM — Visual Style Options
-**Date:** 2026-03-26 | **Author:** CANVAS (UX & Visual Design) | **Status:** 4 Options for Review
+**Date:** 2026-03-26 | **Author:** CANVAS (UX & Visual Design) | **Status:** 7 Options for Review
 
 ---
 
 ## How to Compare
 
-All four SVG samples show the **same geographic region** — the Middle East theater and its surroundings (Persia, Levantia, Solaria, Mirage, Bharata, Horn of Africa, Phrygia, with Arabian Sea, Persian Gulf, Red Sea, and chokepoints at Hormuz and Bab el-Mandeb). Each includes identical unit deployments and a blockaded Hormuz. Open them side-by-side in a browser for direct comparison.
+**Options A-D** show the **same regional slice** — the Middle East theater and its surroundings (Persia, Levantia, Solaria, Mirage, Bharata, Horn of Africa, Phrygia, with Arabian Sea, Persian Gulf, Red Sea, and chokepoints at Hormuz and Bab el-Mandeb). Each includes identical unit deployments and a blockaded Hormuz.
+
+**Options E-G** show the **full global map** — all 45 zones, 20 countries, 8 chokepoints, and 2 active theaters (Eastern Europe, Middle East). These three options explore fundamentally different visual paradigms: hex grid, wargame board, and abstract network graph. They are 1200x700 SVGs with Indian Ocean-centered projection.
 
 ---
 
@@ -246,12 +248,210 @@ A strong path forward: **Option A as foundation, with selective elements from C*
 
 ---
 
+## Option E: Hex World
+
+**Visual register:** konkr.io meets a simplified political atlas — the world as a clean hex tessellation, every zone a single large hexagon, no empty space. A modern, abstract board game that feels both strategic and approachable.
+
+### Color Palette
+
+| Element | Hex | Description |
+|---------|-----|-------------|
+| Background | `#E8E4DE` | Warm light gray |
+| Sea (coastal) | `#7BA7CC` | Medium blue |
+| Sea (deep) | `#4A77A0` | Dark blue |
+| Sea (mid) | `#6A97BC` | Blue-gray |
+| Hex borders | `#666666` | Medium gray, 1px |
+| Columbia | `#B8C4A8` | Pale sage |
+| Cathay | `#D8C0A8` | Warm sand |
+| Nordostan | `#C0B0A0` | Dusty taupe |
+| Gallia | `#D0C0C8` | Dusty rose |
+| Teutonia | `#C8D0C0` | Light sage |
+| Freeland | `#C8C0D0` | Lavender |
+| Persia | `#D0B898` | Warm sand |
+| Bharata | `#C8B8D0` | Soft lavender |
+| Contested | `#D0D0D0` | Light gray, dashed border |
+| Chokepoints | N/A (red ring) | `#8B2222` red circle on sea hexes |
+
+### Typography
+- **Zone labels:** Segoe UI / Helvetica Neue, sans-serif, 7px, centered in hex
+- **Country names:** Same family, 11px, bold, spans multi-hex areas
+- **Sea labels:** Italic, slightly smaller (6.5px)
+
+### Unit Representation
+Small rectangular counters inside hexes. Color-coded: green (`#5A8A5A`) for ground with "GND x#", blue (`#4A7FA5`) for naval, gray (`#888`) for air, red (`#CC4444`) for missiles. Count number inside the counter. Compact, readable, stackable.
+
+### Pros
+- Instantly readable — each hex = one decision space
+- The hex tessellation gives a satisfying board-game tangibility
+- Muted political-atlas palette avoids "gamey" saturation while still being pleasant
+- Easy to update (add/remove hexes, recolor)
+- Hexagonal adjacency is unambiguous — neighbors are visually obvious
+- Good for digital interaction (click a hex, get info)
+
+### Cons
+- Geographic distortion is significant — countries lose their shape entirely
+- Some zones (vast like Nordostan Central, tiny like Formosa) get the same hex size
+- Less immersive than terrain-based maps — no sense of landscape
+- Hex grid can feel "flat" without terrain variation
+- Multi-hex countries need additional visual grouping to read as one entity
+
+---
+
+## Option F: Wargame Board
+
+**Visual register:** CosimAmphibious / professional hex wargame — smaller hexes creating a dense operational grid, terrain indicated through hex color, country borders as thick colored overlays, NATO-standard military symbology for unit counters. A defense analyst's working map.
+
+### Color Palette
+
+| Element | Hex | Description |
+|---------|-----|-------------|
+| Background | `#D8D0C0` | Warm tan (paper) |
+| Hex grid | `#C0C0B8` | Faint gray overlay pattern |
+| Sea zones | `#6A92B5` | Medium blue (semi-transparent) |
+| Temperate land | `#A0B890` | Light green |
+| Desert land | `#D8C898` | Tan/sand |
+| Arctic land | `#E0DDD5` | Off-white |
+| Mountain land | `#C8B080` | Light brown |
+| Contested zones | Terrain color | Dashed border `#999` |
+| Columbia border | `#3A6A3A` | Dark green, 2.5px |
+| Cathay border | `#8A6A2A` | Dark gold, 2.5px |
+| Nordostan border | `#6A5A3A` | Dark brown, 2.5px |
+| Persia border | `#7A4A2A` | Dark terracotta, 2.5px |
+| Chokepoints | `#CC2222` | Anchor symbol (&#x2693;) |
+| Title bar | `#3A3A30` | Dark olive-charcoal |
+
+### Typography
+- **All text:** Consolas / Courier New, monospaced — military dispatch feel
+- **Zone labels:** 6.5px, bold, ALL CAPS
+- **Country names:** 10px, bold, letter-spacing 2px
+- **Grid coordinates:** 5px, faint gray (A1, B1, etc. along edges)
+- **Title:** 14px, light gray on dark bar, spaced caps
+
+### Unit Representation
+NATO-standard military symbology in colored rectangular counters:
+- **Ground:** Rectangle with X (infantry/division crosshatch), country color fill
+- **Naval:** Rounded rectangle (elliptical ends), country color fill
+- **Air:** Rectangle with inverted V/triangle inside
+- **Air Defense:** Rectangle with arc symbol
+- **Missiles:** Rectangle with vertical arrow, red fill (`#AA3333`)
+- Count shown as "x#" text adjacent to counter
+
+### Pros
+- Maximum professional credibility — looks like a real defense planning tool
+- Terrain indication through hex color gives geographic context without complexity
+- NATO symbols are universal in strategy/defense audiences
+- Dense hex grid supports precise positioning and movement planning
+- Monospaced typography reinforces the operational/intelligence aesthetic
+- Grid coordinates enable verbal communication ("Move to E3")
+- Dark title bar creates strong visual framing
+
+### Cons
+- Most "hardcore" aesthetic — may intimidate non-military audiences
+- Small hexes (40px) make labels harder to read at a distance
+- NATO symbols require a learning curve for civilian players
+- Dense grid can feel overwhelming on first viewing
+- Country borders overlaid on hex grid can create visual clutter
+- Print at A3 may lose fine detail (small hex labels, grid coords)
+
+---
+
+## Option G: Strategic Network
+
+**Visual register:** Risk-meets-metro-map — a pure adjacency graph where zones are colored circles and connections are lines. Maximum strategic clarity, minimum geographic immersion. Like a power grid schematic of global geopolitics.
+
+### Color Palette
+
+| Element | Hex | Description |
+|---------|-----|-------------|
+| Background | `#F8F8F5` | Near-white warm |
+| Land nodes | Country-specific | Saturated muted tones (darker than hex fills) |
+| Columbia | `#5A7A4A` to `#6A8A5A` | Forest green family |
+| Cathay | `#8A6A2A` | Dark gold |
+| Nordostan | `#7A6A4A` | Dark taupe |
+| Europe | `#5A6A7A` / `#7A5A7A` / etc. | Each country distinct |
+| Sea nodes | `#4A7FA5` to `#3A6F95` | Blue family, smaller |
+| Contested nodes | `#B0B0B0` | Gray, dashed border |
+| Chokepoints | N/A (red ring) | `#AA2222` bold ring around sea node |
+| Land links | `#888888` | Solid gray, 1.2px |
+| Sea links | `#7AA5CC` | Dashed blue, 1px |
+| Mixed links | `#8A9AAA` | Dotted gray-blue, 1px |
+| Cluster bg | Country-tinted | Very light ellipse behind country group |
+| Active theater | `#CC2222` | Dashed red ring around node |
+
+### Typography
+- **Node labels:** Inter / Helvetica Neue, sans-serif, 6.5px, white on dark nodes
+- **Country labels:** 12px, bold, letter-spacing 1.5px, positioned above clusters
+- **Unit badges:** 5px, white on small colored circle attached to node
+- **Continent labels:** 15px, ultra-light weight, very faint behind clusters
+
+### Unit Representation
+Small colored circles ("badges") attached to the edge of zone nodes. Each badge contains a letter + number: G4 = Ground x4, N2 = Naval x2, M2 = Missile x2. Badge color matches the owning country. Extremely compact — one badge per unit type per zone.
+
+### Pros
+- **Maximum strategic clarity** — adjacency relationships are immediately visible
+- Easiest to produce, modify, and maintain (SVG circles and lines)
+- No geographic distortion debates — it's an explicit abstraction
+- Ideal for digital interaction (nodes are natural click targets)
+- Unit badges are minimal and unambiguous
+- The graph layout reveals strategic structure that geography obscures (e.g., how many hops from Columbia to Cathay)
+- Scales well — adding a new zone is adding one circle and some lines
+- Cleanest for projector/screen viewing at any distance
+- Natural format for algorithmic analysis (pathfinding, connectivity)
+
+### Cons
+- **Least immersive** — no sense of "being in the world"
+- Players lose geographic intuition (where IS the Malacca Strait relative to India?)
+- May feel too abstract for a simulation that's meant to feel consequential
+- Cluster layout requires careful design to maintain geographic "feel"
+- Long-distance links (e.g., N.Pacific spanning the full width) can create visual clutter
+- Not visually impressive in screenshots or presentations — looks like a diagram
+- Some founders may perceive it as "not finished" or "too schematic"
+
+---
+
+## Extended Comparison Matrix
+
+| Criterion | A: Political Atlas | B: Strategic Board | C: Intelligence Map | D: Terrain Atlas | E: Hex World | F: Wargame Board | G: Strategic Network |
+|-----------|:-:|:-:|:-:|:-:|:-:|:-:|:-:|
+| **Legibility (screen)** | 5 | 4 | 4 | 4 | 5 | 4 | 5 |
+| **Legibility (projection)** | 5 | 3 | 5 | 3 | 4 | 3 | 5 |
+| **Legibility (print A3)** | 5 | 2 | 5 | 4 | 4 | 3 | 5 |
+| **Gamification feel** | 2 | 5 | 2 | 4 | 4 | 5 | 3 |
+| **Authority/seriousness** | 4 | 3 | 5 | 4 | 3 | 5 | 3 |
+| **Visual beauty** | 3 | 4 | 3 | 5 | 3 | 4 | 2 |
+| **Unit visibility** | 4 | 5 | 4 | 3 | 4 | 5 | 5 |
+| **Production simplicity** | 5 | 4 | 4 | 2 | 4 | 3 | 5 |
+| **CEO/founder appeal** | 4 | 4 | 4 | 5 | 4 | 4 | 3 |
+| **Uniqueness/memorability** | 2 | 4 | 5 | 5 | 4 | 4 | 4 |
+| **Global map suitability** | 4 | 4 | 4 | 3 | 5 | 5 | 5 |
+| **Adjacency clarity** | 3 | 3 | 3 | 3 | 4 | 4 | 5 |
+| **Scalability (add zones)** | 3 | 3 | 3 | 2 | 4 | 3 | 5 |
+
+*Scale: 1 (lowest) to 5 (highest)*
+
+---
+
+## Updated Recommendation
+
+For global map display (all 45 zones), the three new options each serve a distinct purpose:
+
+- **If you want a digital board game feel:** Option E (Hex World) — approachable, clear, tactile
+- **If you want maximum defense credibility:** Option F (Wargame Board) — professional, dense, authoritative
+- **If you want maximum strategic clarity:** Option G (Strategic Network) — abstract, functional, analytically pure
+
+**Recommended hybrid path:** Use **Option F (Wargame Board) as the primary game map** for its terrain context and NATO symbology, with **Option G (Strategic Network) as a secondary "adjacency view"** that players can toggle to when analyzing movement paths and strategic connectivity. This gives both immersion and analytical clarity. For print/briefing materials, **Option A or E** remains the cleanest choice.
+
+---
+
 ## Files
 
 | File | Description |
 |------|-------------|
-| `OPTION_A_POLITICAL_ATLAS.svg` | 800x500 SVG sample — pale pastel atlas style |
-| `OPTION_B_STRATEGIC_BOARD.svg` | 800x500 SVG sample — dark navy board game style |
-| `OPTION_C_INTELLIGENCE_MAP.svg` | 800x500 SVG sample — parchment military intelligence style |
-| `OPTION_D_TERRAIN_ATLAS.svg` | 800x500 SVG sample — terrain-rich atlas with pennant units |
+| `OPTION_A_POLITICAL_ATLAS.svg` | 800x500 SVG sample — pale pastel atlas style (ME region) |
+| `OPTION_B_STRATEGIC_BOARD.svg` | 800x500 SVG sample — dark navy board game style (ME region) |
+| `OPTION_C_INTELLIGENCE_MAP.svg` | 800x500 SVG sample — parchment military intelligence style (ME region) |
+| `OPTION_D_TERRAIN_ATLAS.svg` | 800x500 SVG sample — terrain-rich atlas with pennant units (ME region) |
+| `OPTION_E_HEX_WORLD.svg` | 1200x700 SVG — hex tessellation global map, konkr.io inspired |
+| `OPTION_F_WARGAME_BOARD.svg` | 1200x700 SVG — dense hex wargame global map, NATO symbology |
+| `OPTION_G_STRATEGIC_NETWORK.svg` | 1200x700 SVG — abstract graph/network global map |
 | `STYLE_OPTIONS_OVERVIEW.md` | This document |
