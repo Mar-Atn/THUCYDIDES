@@ -1,0 +1,205 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <title>TTT Style Option C: Intelligence Map — Middle East Theater Sample</title>
+  <defs>
+    <!-- Subtle grid pattern -->
+    <pattern id="gridC" patternUnits="userSpaceOnUse" width="40" height="40">
+      <line x1="0" y1="0" x2="0" y2="40" stroke="#C8B898" stroke-width="0.2" stroke-opacity="0.3"/>
+      <line x1="0" y1="0" x2="40" y2="0" stroke="#C8B898" stroke-width="0.2" stroke-opacity="0.3"/>
+    </pattern>
+    <!-- Blockade pattern -->
+    <pattern id="blockadeC" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#8B2222" stroke-width="1" stroke-opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Parchment background -->
+  <rect width="800" height="500" fill="#F5F0E8"/>
+  <!-- Grid overlay -->
+  <rect width="800" height="500" fill="url(#gridC)"/>
+
+  <!-- ============ SEA ZONES ============ -->
+
+  <!-- Arabian Sea -->
+  <path d="M350,300 L500,280 L650,310 L700,400 L650,480 L400,480 L300,450 L280,380 Z"
+        fill="#9AB5C7" stroke="none"/>
+
+  <!-- Persian Gulf -->
+  <path d="M250,230 L340,210 L380,230 L400,260 L380,280 L340,290 L280,280 L240,260 Z"
+        fill="#9AB5C7" stroke="none"/>
+
+  <!-- Red Sea -->
+  <path d="M50,200 L80,190 L100,220 L110,300 L100,380 L80,420 L50,400 L40,300 Z"
+        fill="#9AB5C7" stroke="none"/>
+
+  <!-- Mediterranean -->
+  <path d="M0,50 L180,30 L200,60 L180,90 L80,100 L0,90 Z"
+        fill="#9AB5C7" stroke="none"/>
+
+  <!-- ============ LAND ZONES — subtle transparent overlays ============ -->
+
+  <!-- Phrygia -->
+  <path d="M120,30 L200,15 L260,40 L270,80 L240,110 L180,120 L130,105 L100,80 Z"
+        fill="#E8DDD0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Levantia -->
+  <path d="M130,120 L170,110 L190,130 L195,180 L175,200 L140,195 L120,170 Z"
+        fill="#D8E0D0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Mesopotamia -->
+  <path d="M190,90 L270,80 L310,100 L320,150 L300,180 L240,190 L195,180 L190,130 Z"
+        fill="#E8E0D0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Persia North -->
+  <path d="M320,60 L420,40 L480,70 L490,120 L460,150 L380,160 L320,150 L310,100 Z"
+        fill="#E0D0C0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Persia West -->
+  <path d="M310,150 L380,160 L400,200 L380,230 L340,210 L300,180 Z"
+        fill="#D8C8B8" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Persia South -->
+  <path d="M380,160 L460,150 L500,180 L520,220 L500,260 L440,270 L400,260 L380,230 L400,200 Z"
+        fill="#D0C0B0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Solaria -->
+  <path d="M100,200 L175,200 L240,190 L300,180 L340,210 L340,290 L300,340 L220,380 L140,400 L100,380 L80,300 L80,220 Z"
+        fill="#EAE0D0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Mirage -->
+  <path d="M380,280 L440,270 L470,290 L460,320 L420,330 L380,310 Z"
+        fill="#D0D8D0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Yemen -->
+  <path d="M100,380 L140,400 L220,380 L240,410 L200,450 L140,460 L90,440 L80,420 Z"
+        fill="#E0D8C8" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Horn of Africa -->
+  <path d="M40,400 L80,420 L90,440 L140,460 L160,490 L80,500 L0,500 L0,400 Z"
+        fill="#D8D0C0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Bharata -->
+  <path d="M560,150 L650,100 L720,120 L780,180 L800,280 L780,380 L720,440 L650,480 L600,430 L570,350 L550,270 L540,200 Z"
+        fill="#D8D0E0" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- Central Asia -->
+  <path d="M350,0 L500,0 L560,30 L560,80 L480,70 L420,40 L350,30 Z"
+        fill="#E0D8C8" stroke="#8B7355" stroke-width="1"/>
+
+  <!-- ============ STRAIT OF HORMUZ ============ -->
+  <path d="M440,260 L500,260 L520,280 L500,300 L460,310 L440,290 Z"
+        fill="#9AB5C7" stroke="#8B7355" stroke-width="1"/>
+  <path d="M440,260 L500,260 L520,280 L500,300 L460,310 L440,290 Z"
+        fill="url(#blockadeC)" stroke="none"/>
+
+  <!-- ============ CHOKEPOINT MARKERS — Military star ============ -->
+
+  <!-- Hormuz star -->
+  <polygon points="480,280 483,274 490,273 485,268 486,261 480,265 474,261 475,268 470,273 477,274"
+           fill="#8B2222" stroke="#5B1111" stroke-width="0.5"/>
+  <text x="480" y="258" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#8B2222" text-anchor="middle" font-weight="bold" letter-spacing="2">HORMUZ</text>
+  <text x="480" y="306" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#8B2222" text-anchor="middle" letter-spacing="1">[ BLOCKED ]</text>
+
+  <!-- Bab el-Mandeb star -->
+  <polygon points="105,430 108,424 115,423 110,418 111,411 105,415 99,411 100,418 95,423 102,424"
+           fill="#8B2222" stroke="#5B1111" stroke-width="0.5"/>
+  <text x="105" y="408" font-family="Consolas, 'Courier New', monospace" font-size="6" fill="#8B2222" text-anchor="middle" font-weight="bold" letter-spacing="1">BAB EL-MANDEB</text>
+
+  <!-- ============ ZONE LABELS — Military dispatch style, CAPS, spaced ============ -->
+
+  <text x="190" y="72" font-family="Consolas, 'Courier New', monospace" font-size="9" fill="#5B4B35" text-anchor="middle" letter-spacing="3">PHRYGIA</text>
+  <text x="160" y="158" font-family="Consolas, 'Courier New', monospace" font-size="8" fill="#5B4B35" text-anchor="middle" letter-spacing="3">LEVANTIA</text>
+  <text x="255" y="138" font-family="Consolas, 'Courier New', monospace" font-size="8" fill="#5B4B35" text-anchor="middle" letter-spacing="2">MESOPOTAMIA</text>
+  <text x="400" y="92" font-family="Consolas, 'Courier New', monospace" font-size="8" fill="#5B4B35" text-anchor="middle" letter-spacing="2">PERSIA NORTH</text>
+  <text x="400" y="103" font-family="Consolas, 'Courier New', monospace" font-size="6" fill="#8B7355" text-anchor="middle">[NUCLEAR COMPLEX]</text>
+  <text x="345" y="195" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#5B4B35" text-anchor="middle" letter-spacing="2">PERSIA W</text>
+  <text x="450" y="212" font-family="Consolas, 'Courier New', monospace" font-size="8" fill="#5B4B35" text-anchor="middle" letter-spacing="2">PERSIA SOUTH</text>
+  <text x="200" y="295" font-family="Consolas, 'Courier New', monospace" font-size="10" fill="#5B4B35" text-anchor="middle" letter-spacing="4">SOLARIA</text>
+  <text x="430" y="302" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#5B4B35" text-anchor="middle" letter-spacing="2">MIRAGE</text>
+  <text x="170" y="432" font-family="Consolas, 'Courier New', monospace" font-size="8" fill="#5B4B35" text-anchor="middle" letter-spacing="2">YEMEN</text>
+  <text x="75" y="475" font-family="Consolas, 'Courier New', monospace" font-size="7" fill="#5B4B35" text-anchor="middle" letter-spacing="1">HORN OF AFRICA</text>
+  <text x="660" y="278" font-family="Consolas, 'Courier New', monospace" font-size="10" fill="#5B4B35" text-anchor="middle" letter-spacing="4">BHARATA</text>
+
+  <!-- Sea labels -->
+  <text x="300" y="258" font-family="Consolas, monospace" font-size="7" fill="#5A7A8A" text-anchor="middle" font-style="italic" letter-spacing="1">PERSIAN GULF</text>
+  <text x="520" y="398" font-family="Consolas, monospace" font-size="9" fill="#5A7A8A" text-anchor="middle" font-style="italic" letter-spacing="2">ARABIAN SEA</text>
+  <text x="65" y="310" font-family="Consolas, monospace" font-size="7" fill="#5A7A8A" text-anchor="middle" font-style="italic" letter-spacing="1">RED SEA</text>
+
+  <!-- ============ UNIT DEPLOYMENTS — NATO military symbols ============ -->
+
+  <!-- Persia: 3 ground in South (rectangle = ground forces) -->
+  <rect x="422" y="228" width="20" height="14" fill="none" stroke="#5B3B25" stroke-width="1.5"/>
+  <line x1="422" y1="228" x2="442" y2="242" stroke="#5B3B25" stroke-width="0.8"/>
+  <line x1="442" y1="228" x2="422" y2="242" stroke="#5B3B25" stroke-width="0.8"/>
+  <text x="448" y="240" font-family="Consolas, monospace" font-size="8" fill="#5B3B25" font-weight="bold">x3</text>
+
+  <!-- Persia: 2 tactical air in North (inverted V = air) -->
+  <path d="M410,118 L420,108 L430,118" fill="none" stroke="#5B3B25" stroke-width="1.5"/>
+  <text x="436" y="118" font-family="Consolas, monospace" font-size="8" fill="#5B3B25" font-weight="bold">x2</text>
+
+  <!-- Columbia: 2 naval in Arabian Sea (inverted V with flat bottom = naval) -->
+  <rect x="548" y="362" width="20" height="14" fill="none" stroke="#1A3A5A" stroke-width="1.5"/>
+  <ellipse cx="558" cy="369" rx="8" ry="4" fill="none" stroke="#1A3A5A" stroke-width="0.8"/>
+  <text x="574" y="374" font-family="Consolas, monospace" font-size="8" fill="#1A3A5A" font-weight="bold">x2</text>
+
+  <!-- Columbia: 1 ground in Solaria -->
+  <rect x="230" y="318" width="16" height="12" fill="none" stroke="#1A3A5A" stroke-width="1.5"/>
+  <line x1="230" y1="318" x2="246" y2="330" stroke="#1A3A5A" stroke-width="0.8"/>
+  <line x1="246" y1="318" x2="230" y2="330" stroke="#1A3A5A" stroke-width="0.8"/>
+  <text x="250" y="328" font-family="Consolas, monospace" font-size="7" fill="#1A3A5A" font-weight="bold">x1</text>
+
+  <!-- Levantia: 2 ground + 1 air -->
+  <rect x="140" y="170" width="16" height="12" fill="none" stroke="#3B5B3B" stroke-width="1.5"/>
+  <line x1="140" y1="170" x2="156" y2="182" stroke="#3B5B3B" stroke-width="0.8"/>
+  <line x1="156" y1="170" x2="140" y2="182" stroke="#3B5B3B" stroke-width="0.8"/>
+  <text x="160" y="180" font-family="Consolas, monospace" font-size="7" fill="#3B5B3B" font-weight="bold">x2</text>
+  <path d="M165,182 L172,172 L179,182" fill="none" stroke="#3B5B3B" stroke-width="1.5"/>
+  <text x="183" y="180" font-family="Consolas, monospace" font-size="7" fill="#3B5B3B" font-weight="bold">x1</text>
+
+  <!-- Solaria: 1 ground -->
+  <rect x="190" y="340" width="16" height="12" fill="none" stroke="#5B4B25" stroke-width="1.5"/>
+  <line x1="190" y1="340" x2="206" y2="352" stroke="#5B4B25" stroke-width="0.8"/>
+  <line x1="206" y1="340" x2="190" y2="352" stroke="#5B4B25" stroke-width="0.8"/>
+  <text x="210" y="350" font-family="Consolas, monospace" font-size="7" fill="#5B4B25" font-weight="bold">x1</text>
+
+  <!-- ============ CLASSIFICATION HEADER ============ -->
+  <rect x="0" y="0" width="800" height="16" fill="#F5F0E8"/>
+  <text x="400" y="12" font-family="Consolas, 'Courier New', monospace" font-size="9" fill="#8B2222" text-anchor="middle" font-weight="bold" letter-spacing="4">TOP SECRET // NOFORN // THUCYDIDES</text>
+
+  <!-- ============ LEGEND ============ -->
+  <rect x="620" y="25" width="170" height="145" fill="#F5F0E8" stroke="#8B7355" stroke-width="0.5" rx="0"/>
+  <text x="705" y="42" font-family="Consolas, monospace" font-size="9" fill="#5B4B35" text-anchor="middle" font-weight="bold" letter-spacing="2">LEGEND</text>
+
+  <polygon points="638,55 641,49 648,48 643,43 644,36 638,40 632,36 633,43 628,48 635,49"
+           fill="#8B2222" stroke="none"/>
+  <text x="658" y="52" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">CHOKEPOINT</text>
+
+  <rect x="630" y="60" width="16" height="10" fill="url(#blockadeC)" stroke="#8B7355" stroke-width="0.5"/>
+  <text x="658" y="68" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">BLOCKADE</text>
+
+  <rect x="630" y="78" width="14" height="10" fill="none" stroke="#5B3B25" stroke-width="1"/>
+  <line x1="630" y1="78" x2="644" y2="88" stroke="#5B3B25" stroke-width="0.5"/>
+  <text x="658" y="86" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">GROUND UNIT</text>
+
+  <path d="M630,100 L637,92 L644,100" fill="none" stroke="#5B3B25" stroke-width="1"/>
+  <text x="658" y="100" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">TACTICAL AIR</text>
+
+  <rect x="630" y="108" width="14" height="10" fill="none" stroke="#1A3A5A" stroke-width="1"/>
+  <ellipse cx="637" cy="113" rx="5" ry="3" fill="none" stroke="#1A3A5A" stroke-width="0.5"/>
+  <text x="658" y="116" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">NAVAL UNIT</text>
+
+  <!-- Color key for factions -->
+  <line x1="630" y1="128" x2="644" y2="128" stroke="#5B3B25" stroke-width="2"/>
+  <text x="658" y="132" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">PERSIA</text>
+
+  <line x1="630" y1="140" x2="644" y2="140" stroke="#1A3A5A" stroke-width="2"/>
+  <text x="658" y="144" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">COLUMBIA</text>
+
+  <line x1="630" y1="152" x2="644" y2="152" stroke="#3B5B3B" stroke-width="2"/>
+  <text x="658" y="156" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">LEVANTIA</text>
+
+  <line x1="630" y1="164" x2="644" y2="164" stroke="#5B4B25" stroke-width="2"/>
+  <text x="658" y="168" font-family="Consolas, monospace" font-size="7" fill="#5B4B35">SOLARIA</text>
+
+  <!-- Footer -->
+  <text x="400" y="495" font-family="Consolas, monospace" font-size="8" fill="#8B7355" text-anchor="middle" letter-spacing="1">THUCYDIDES TRAP — Style Option C: Intelligence Map</text>
+</svg>
