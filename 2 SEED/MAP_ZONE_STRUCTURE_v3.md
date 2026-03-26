@@ -70,14 +70,13 @@ Countries that share at least one land border edge:
 - CATHAY -- NORDOSTAN
 - CATHAY -- SOGDIANA
 - CHOSON -- HANGUK
+- FREELAND -- GALLIA
 - FREELAND -- HEARTLAND
-- FREELAND -- NORDOSTAN
 - FREELAND -- TEUTONIA
-- GALLIA -- HEARTLAND
 - GALLIA -- LEVANTIA
 - GALLIA -- PONTE
 - GALLIA -- TEUTONIA
-- HEARTLAND -- LEVANTIA
+- HEARTLAND -- NORDOSTAN
 - HEARTLAND -- PHRYGIA
 - HEARTLAND -- TEUTONIA
 - HORN -- SOLARIA
@@ -118,42 +117,42 @@ Countries that share at least one land border edge:
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | thule | Thule | land | teutonia | 2 | 4 | sea_1_3, sea_1_4, sea_2_3, sea_2_5, sea_3_3, sea_3_4 |
-| teutonia_1 | Teutonia | land | teutonia | 3 | 7 | sea_2_7, sea_2_8, sea_3_6, freeland, teutonia_2, heartland_1 |
-| freeland | Freeland | land | freeland | 3 | 8 | sea_2_8, nord_w1, teutonia_1, nord_w2, heartland_1, sea_4_9 |
+| teutonia_1 | Teutonia | land | teutonia | 3 | 7 | sea_2_7, sea_2_8, sea_3_6, heartland_1, teutonia_2, freeland |
+| freeland | Freeland | land | freeland | 4 | 8 | teutonia_1, heartland_1, teutonia_2, heartland_2, gallia_2, sea_5_8 |
 | albion | Albion | land | albion | 4 | 5 | sea_3_4, sea_3_5, sea_4_4, sea_4_6, sea_5_4, sea_5_5 |
-| teutonia_2 | Teutonia | land | teutonia | 4 | 7 | sea_3_6, teutonia_1, sea_4_6, heartland_1, gallia_1, gallia_2 |
+| teutonia_2 | Teutonia | land | teutonia | 4 | 7 | sea_3_6, teutonia_1, sea_4_6, freeland, gallia_1, gallia_2 |
 | gallia_1 | Gallia | land | gallia | 5 | 6 | sea_4_6, teutonia_2, sea_5_5, gallia_2, ponte, sea_6_7 |
-| gallia_2 | Gallia | land | gallia | 5 | 7 | teutonia_2, heartland_1, gallia_1, heartland_2, sea_6_7, levantia |
+| gallia_2 | Gallia | land | gallia | 5 | 7 | teutonia_2, freeland, gallia_1, sea_5_8, sea_6_7, levantia |
 | ponte | Ponte | land | ponte | 6 | 6 | sea_5_5, gallia_1, sea_6_5, sea_6_7, sea_7_5, sea_7_6 |
 
 ### Heartland
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| heartland_1 | Heartland | land | heartland | 4 | 8 | teutonia_1, freeland, teutonia_2, sea_4_9, gallia_2, heartland_2 |
-| heartland_2 | Heartland | land | heartland | 5 | 8 | heartland_1, sea_4_9, gallia_2, phrygia_1, levantia, phrygia_2 |
+| heartland_1 | Heartland | land | heartland | 3 | 8 | sea_2_8, nord_w1, teutonia_1, nord_w2, freeland, heartland_2 |
+| heartland_2 | Heartland | land | heartland | 4 | 9 | heartland_1, nord_w2, freeland, sea_4_10, sea_5_8, phrygia_1 |
 
 ### Nordostan
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | nord_n1 | Nordostan | land | nordostan | 1 | 10 | sea_0_10, sea_0_11, sea_1_9, sea_1_11, nord_c1, nord_e1 |
-| nord_w1 | Nordostan | land | nordostan | 2 | 9 | sea_1_8, sea_1_9, sea_2_8, nord_c1, freeland, nord_w2 |
+| nord_w1 | Nordostan | land | nordostan | 2 | 9 | sea_1_8, sea_1_9, sea_2_8, nord_c1, heartland_1, nord_w2 |
 | nord_c1 | Nordostan | land | nordostan | 2 | 10 | sea_1_9, nord_n1, nord_w1, nord_e1, nord_w2, nord_c2 |
 | nord_e1 | Nordostan | land | nordostan | 2 | 11 | nord_n1, sea_1_11, nord_c1, nord_e2, nord_c2, sogdiana_1 |
 | nord_e2 | Nordostan | land | nordostan | 2 | 12 | sea_1_11, sea_1_12, nord_e1, nord_e3, sogdiana_1, sogdiana_3 |
 | nord_e3 | Nordostan | land | nordostan | 2 | 13 | sea_1_12, sea_1_13, nord_e2, sea_2_14, sogdiana_3, cathay_1 |
-| nord_w2 | Nordostan | land | nordostan | 3 | 9 | nord_w1, nord_c1, freeland, nord_c2, sea_4_9, sea_4_10 |
+| nord_w2 | Nordostan | land | nordostan | 3 | 9 | nord_w1, nord_c1, heartland_1, nord_c2, heartland_2, sea_4_10 |
 | nord_c2 | Nordostan | land | nordostan | 3 | 10 | nord_c1, nord_e1, nord_w2, sogdiana_1, sea_4_10, sea_4_11 |
 
 ### Mashriq (Middle East / Africa)
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| phrygia_1 | Phrygia | land | phrygia | 5 | 9 | sea_4_9, sea_4_10, heartland_2, sea_5_10, phrygia_2, persia_2 |
+| phrygia_1 | Phrygia | land | phrygia | 5 | 9 | heartland_2, sea_4_10, sea_5_8, sea_5_10, phrygia_2, persia_2 |
 | persia_1 | Persia | land | persia | 5 | 11 | sea_4_11, sogdiana_2, sea_5_10, bharata_2, persia_3, sea_6_12 |
-| levantia | Levantia | land | levantia | 6 | 8 | gallia_2, heartland_2, sea_6_7, phrygia_2, sea_7_7, solaria_1 |
-| phrygia_2 | Phrygia | land | phrygia | 6 | 9 | heartland_2, phrygia_1, levantia, persia_2, solaria_1, solaria_2 |
+| levantia | Levantia | land | levantia | 6 | 8 | gallia_2, sea_5_8, sea_6_7, phrygia_2, sea_7_7, solaria_1 |
+| phrygia_2 | Phrygia | land | phrygia | 6 | 9 | sea_5_8, phrygia_1, levantia, persia_2, solaria_1, solaria_2 |
 | persia_2 | Persia | land | persia | 6 | 10 | phrygia_1, sea_5_10, phrygia_2, persia_3, solaria_2, cp_gulf_gate |
 | persia_3 | Persia | land | persia | 6 | 11 | sea_5_10, persia_1, persia_2, sea_6_12, cp_gulf_gate, sea_7_11 |
 | solaria_1 | Solaria | land | solaria | 7 | 8 | levantia, phrygia_2, sea_7_7, solaria_2, horn, sea_8_9 |
@@ -166,38 +165,38 @@ Countries that share at least one land border edge:
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | sogdiana_1 | Sogdiana | land | sogdiana | 3 | 11 | nord_e1, nord_e2, nord_c2, sogdiana_3, sea_4_11, sogdiana_2 |
-| sogdiana_3 | Sogdiana | land | sogdiana | 3 | 12 | nord_e2, nord_e3, sogdiana_1, cathay_1, sogdiana_2, bharata_1 |
-| sogdiana_2 | Sogdiana | land | sogdiana | 4 | 12 | sogdiana_1, sogdiana_3, sea_4_11, bharata_1, persia_1, bharata_2 |
+| sogdiana_3 | Sogdiana | land | sogdiana | 3 | 12 | nord_e2, nord_e3, sogdiana_1, cathay_1, sogdiana_2, sea_4_13 |
+| sogdiana_2 | Sogdiana | land | sogdiana | 4 | 12 | sogdiana_1, sogdiana_3, sea_4_11, sea_4_13, persia_1, bharata_2 |
 
 ### Bharata (South Asia)
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| bharata_1 | Bharata | land | bharata | 4 | 13 | sogdiana_3, cathay_1, sogdiana_2, cathay_2, bharata_2, bharata_3 |
-| bharata_2 | Bharata | land | bharata | 5 | 12 | sogdiana_2, bharata_1, persia_1, bharata_3, sea_6_12, sea_6_13 |
-| bharata_3 | Bharata | land | bharata | 5 | 13 | bharata_1, cathay_2, bharata_2, cathay_5, sea_6_13, sea_6_14 |
+| bharata_1 | Bharata | land | bharata | 6 | 13 | bharata_2, bharata_3, sea_6_12, sea_6_14, sea_7_12, sea_7_13 |
+| bharata_2 | Bharata | land | bharata | 5 | 12 | sogdiana_2, sea_4_13, persia_1, bharata_3, sea_6_12, bharata_1 |
+| bharata_3 | Bharata | land | bharata | 5 | 13 | sea_4_13, cathay_2, bharata_2, cathay_5, bharata_1, sea_6_14 |
 
 ### Asu (East Asia)
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | choson | Choson | land | choson | 2 | 15 | sea_1_14, sea_1_15, sea_2_14, sea_2_16, sea_3_14, hanguk |
-| cathay_1 | Cathay | land | cathay | 3 | 13 | nord_e3, sea_2_14, sogdiana_3, sea_3_14, bharata_1, cathay_2 |
+| cathay_1 | Cathay | land | cathay | 3 | 13 | nord_e3, sea_2_14, sogdiana_3, sea_3_14, sea_4_13, cathay_2 |
 | hanguk | Hanguk | land | hanguk | 3 | 15 | choson, sea_2_16, sea_3_14, sea_3_16, cathay_3, cathay_4 |
 | yamato_1 | Yamato | land | yamato | 3 | 18 | sea_2_18, sea_2_19, sea_3_17, sea_3_19, yamato_2, sea_4_19 |
-| cathay_2 | Cathay | land | cathay | 4 | 14 | cathay_1, sea_3_14, bharata_1, cathay_3, bharata_3, cathay_5 |
+| cathay_2 | Cathay | land | cathay | 4 | 14 | cathay_1, sea_3_14, sea_4_13, cathay_3, bharata_3, cathay_5 |
 | cathay_3 | Cathay | land | cathay | 4 | 15 | sea_3_14, hanguk, cathay_2, cathay_4, cathay_5, cathay_6 |
-| cathay_4 | Cathay | land | cathay | 4 | 16 | hanguk, sea_3_16, cathay_3, sea_4_17, cathay_6, cathay_7 |
+| cathay_4 | Cathay | land | cathay | 4 | 16 | hanguk, sea_3_16, cathay_3, sea_4_17, cathay_6, sea_5_16 |
 | yamato_2 | Yamato | land | yamato | 4 | 18 | sea_3_17, yamato_1, sea_4_17, sea_4_19, sea_5_17, sea_5_18 |
-| cathay_5 | Cathay | land | cathay | 5 | 14 | cathay_2, cathay_3, bharata_3, cathay_6, sea_6_14, sea_6_15 |
-| cathay_6 | Cathay | land | cathay | 5 | 15 | cathay_3, cathay_4, cathay_5, cathay_7, sea_6_15, cp_formosa_strait |
-| cathay_7 | Cathay | land | cathay | 5 | 16 | cathay_4, sea_4_17, cathay_6, sea_5_17, cp_formosa_strait, sea_6_17 |
+| cathay_5 | Cathay | land | cathay | 5 | 14 | cathay_2, cathay_3, bharata_3, cathay_6, sea_6_14, cathay_7 |
+| cathay_6 | Cathay | land | cathay | 5 | 15 | cathay_3, cathay_4, cathay_5, sea_5_16, cathay_7, cp_formosa_strait |
+| cathay_7 | Cathay | land | cathay | 6 | 15 | cathay_5, cathay_6, sea_6_14, cp_formosa_strait, sea_7_14, sea_7_15 |
 | formosa | Formosa | land | formosa | 7 | 16 | cp_formosa_strait, sea_6_17, sea_7_15, sea_7_17, sea_8_16, sea_8_17 |
 
 ### Chokepoints
 
 | hex_id | display_name | type | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|----------|----------|---------------|
-| cp_formosa_strait | Formosa Strait | chokepoint | 6 | 16 | cathay_6, cathay_7, sea_6_15, sea_6_17, sea_7_15, formosa |
+| cp_formosa_strait | Formosa Strait | chokepoint | 6 | 16 | cathay_6, sea_5_16, cathay_7, sea_6_17, sea_7_15, formosa |
 | cp_gulf_gate | Gulf Gate | chokepoint | 7 | 10 | persia_2, persia_3, solaria_2, sea_7_11, mirage, sea_8_11 |
 | cp_caribe_passage | Caribe Passage | chokepoint | 8 | 2 | col_south, sea_7_2, sea_8_1, sea_8_3, sea_9_1, caribe |
