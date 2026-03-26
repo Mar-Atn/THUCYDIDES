@@ -40,14 +40,14 @@
   <ellipse cx="570" cy="105" rx="110" ry="55" fill="#d8d0c0" opacity="0.25"/>
   <text x="570" y="58" class="country-label" fill="#6a5a3a">NORDOSTAN</text>
 
-  <!-- Middle East cluster bg -->
+  <!-- Mashriq cluster bg -->
   <ellipse cx="590" cy="310" rx="100" ry="80" fill="#e0d8c0" opacity="0.25"/>
   <text x="590" y="240" class="country-label" fill="#7a5a2a">MIDDLE EAST</text>
 
   <!-- South Asia cluster bg -->
   <ellipse cx="780" cy="340" rx="55" ry="50" fill="#d0c8d8" opacity="0.25"/>
 
-  <!-- East Asia cluster bg -->
+  <!-- Asu cluster bg -->
   <ellipse cx="960" cy="200" rx="120" ry="100" fill="#d8c8b0" opacity="0.25"/>
   <text x="960" y="105" class="country-label" fill="#7a5a2a">EAST ASIA</text>
 
@@ -78,13 +78,13 @@
 
   <!-- Atlantic links -->
   <line x1="195" y1="225" x2="280" y2="220" class="link-sea"/><!-- W.Atl to E.Atl -->
-  <line x1="195" y1="225" x2="240" y2="105" class="link-sea"/><!-- W.Atl to Greenland -->
+  <line x1="195" y1="225" x2="240" y2="105" class="link-sea"/><!-- W.Atl to Thule -->
 
   <!-- GIUK and Arctic -->
   <line x1="280" y1="220" x2="300" y2="140" class="link-sea"/><!-- E.Atl to GIUK -->
-  <line x1="300" y1="140" x2="240" y2="105" class="link-sea"/><!-- GIUK to Greenland -->
+  <line x1="300" y1="140" x2="240" y2="105" class="link-sea"/><!-- GIUK to Thule -->
   <line x1="300" y1="140" x2="430" y2="72" class="link-sea"/><!-- GIUK to Arctic -->
-  <line x1="240" y1="105" x2="430" y2="72" class="link-sea"/><!-- Greenland to Arctic -->
+  <line x1="240" y1="105" x2="430" y2="72" class="link-sea"/><!-- Thule to Arctic -->
   <line x1="80" y1="135" x2="430" y2="72" class="link-sea"/><!-- N.Pacific to Arctic -->
   <line x1="115" y1="175" x2="430" y2="72" class="link-mixed"/><!-- Alaska to Arctic -->
 
@@ -134,7 +134,7 @@
   <line x1="640" y1="195" x2="780" y2="310" class="link-land"/><!-- C.Asia to Bharata -->
   <line x1="640" y1="195" x2="870" y2="180" class="link-land"/><!-- C.Asia to Cathay W -->
 
-  <!-- Middle East links -->
+  <!-- Mashriq links -->
   <line x1="500" y1="260" x2="500" y2="100" class="link-mixed"/><!-- Phrygia to Nordostan W (already exists) -->
   <line x1="535" y1="290" x2="500" y2="260" class="link-land"/><!-- Levantia to Phrygia -->
   <line x1="535" y1="290" x2="570" y2="310" class="link-land"/><!-- Levantia to Solaria -->
@@ -505,10 +505,9 @@
   <!-- CONTESTED ZONE NODES (gray, dashed border)       -->
   <!-- ================================================ -->
 
-  <!-- Greenland -->
+  <!-- Thule -->
   <circle cx="240" cy="105" r="14" fill="#b0b0b0" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
-  <text x="240" y="103" class="node-label-dark" font-size="5.5">GREEN-</text>
-  <text x="240" y="111" class="node-label-dark" font-size="5.5">LAND</text>
+  <text x="240" y="108" class="node-label-dark" font-size="5.5">THULE</text>
 
   <!-- Central Asia -->
   <circle cx="640" cy="195" r="15" fill="#b0b0b0" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/>
@@ -592,8 +591,8 @@
   <line x1="415" y1="606" x2="585" y2="606" stroke="#eee"/>
   <text x="415" y="620" class="legend-text" font-style="italic">Active theaters marked with</text>
   <text x="415" y="634" class="legend-text" font-style="italic">dashed red ring around node</text>
-  <text x="415" y="654" class="legend-text" font-style="italic">2 active: Eastern Europe,</text>
-  <text x="415" y="668" class="legend-text" font-style="italic">Middle East</text>
+  <text x="415" y="654" class="legend-text" font-style="italic">2 active: Eastern Ereb,</text>
+  <text x="415" y="668" class="legend-text" font-style="italic">Mashriq</text>
 
   <!-- NOTE box -->
   <rect x="620" y="460" width="240" height="100" fill="white" stroke="#ddd" stroke-width="1" rx="5"/>

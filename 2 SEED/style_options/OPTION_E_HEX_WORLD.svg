@@ -186,10 +186,9 @@
   <text x="600" y="52" class="hex-label-sea">Arctic</text>
   <text x="600" y="61" class="hex-label-sea">Ocean</text>
 
-  <!-- Greenland (contested) -->
+  <!-- Thule (contested) -->
   <polygon points="264,66 291.7,50 291.7,82 264,98 236.3,82 236.3,50" fill="#d0d0d0" stroke="#999" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="264" y="71" class="hex-label">Green-</text>
-  <text x="264" y="80" class="hex-label">land</text>
+  <text x="264" y="76" class="hex-label">Thule</text>
 
   <!-- ============================================ -->
   <!-- MIDDLE EAST (center) -->
@@ -413,10 +412,10 @@
   <!-- ACTIVE THEATER MARKERS -->
   <!-- ============================================ -->
 
-  <!-- Eastern Europe theater glow -->
+  <!-- Eastern Ereb theater glow -->
   <rect x="430" y="107" width="52" height="60" rx="5" fill="none" stroke="#cc3333" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
 
-  <!-- Middle East theater glow -->
+  <!-- Mashriq theater glow -->
   <rect x="528" y="235" width="190" height="130" rx="5" fill="none" stroke="#cc3333" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
 
   <!-- ============================================ -->

@@ -14,7 +14,7 @@ The zone structure serves four systems simultaneously:
 - **Deployment** (where units can be placed, transit delays)
 - **Economic effects** (blockades, chokepoints, trade disruption)
 
-**Naming convention:** `{scope}_{region}_{descriptor}` where scope is `g` (global), `ee` (Eastern Europe), `me` (Middle East), `ts` (Taiwan Strait), `cb` (Caribbean), `gl` (Greenland), `kr` (Korea).
+**Naming convention:** `{scope}_{region}_{descriptor}` where scope is `g` (global), `ee` (Eastern Ereb), `me` (Mashriq), `ts` (Taiwan Strait), `cb` (Caribbean), `gl` (Thule), `kr` (Korea).
 
 ---
 
@@ -56,7 +56,7 @@ The zone structure serves four systems simultaneously:
 | `g_ponte` | Ponte | `land_home` | `ponte` | `g_gallia`, `g_teutonia`, `g_sea_med_west`, `g_sea_med_east` | Mediterranean straddler. EU swing vote. Debt-burdened. |
 | `g_albion` | Albion | `land_home` | `albion` | `g_gallia`, `g_sea_atlantic_east`, `g_sea_giuk` | Nuclear. Five Eyes. GIUK Gap southern anchor. NATO but not EU. |
 
-### Middle East & Central/South Asia (6 zones)
+### Mashriq & Central/South Asia (6 zones)
 
 | Zone ID | Display Name | Type | Owner | Adjacent Zones | Notes |
 |---------|-------------|------|-------|----------------|-------|
@@ -67,7 +67,7 @@ The zone structure serves four systems simultaneously:
 | `g_bharata` | Bharata | `land_home` | `bharata` | `g_cat_western`, `g_sea_arabian`, `g_sea_indian_ocean` | Third pole. Genuine non-alignment. 1.4B people. Tech level 2. |
 | `g_mirage` | Mirage | `land_home` | `mirage` | `g_solaria`, `g_persia`, `g_sea_persian_gulf`, `g_sea_arabian` | Financial hub. Arms buyer. OPEC+ member. Pragmatic hedger. |
 
-### East Asia & Pacific (4 zones)
+### Asu & Pacific (4 zones)
 
 | Zone ID | Display Name | Type | Owner | Adjacent Zones | Notes |
 |---------|-------------|------|-------|----------------|-------|
@@ -90,11 +90,11 @@ These zones have no sovereign owner. They are strategic objectives, buffer zones
 
 | Zone ID | Display Name | Type | Owner | Adjacent Zones | Notes |
 |---------|-------------|------|-------|----------------|-------|
-| `g_contested_greenland` | Greenland | `land_contested` | `none` | `g_sea_giuk`, `g_sea_arctic`, `g_sea_atlantic_west` | Danish territory in fiction = unclaimed. Pioneer (Columbia envoy) has portfolio. Rare earth deposits. Greenland theater parent. |
+| `g_contested_thule` | Thule | `land_contested` | `teutonia` | `g_sea_giuk`, `g_sea_arctic`, `g_sea_atlantic_west` | Territory belonging to Teutonia's alliance network. Pioneer (Columbia envoy) has portfolio. Rare earth deposits. Thule theater parent. |
 | `g_contested_central_asia` | Central Asia | `land_contested` | `none` | `g_nor_central`, `g_cat_western`, `g_persia`, `g_bharata` | Stans (Kazakhstan, Uzbekistan, etc.). Energy resources. Cathay Belt-and-Road. Nordostan sphere of influence. Buffer zone between three powers. |
 | `g_contested_horn` | Horn of Africa | `land_contested` | `none` | `g_solaria`, `g_sea_red`, `g_sea_arabian`, `g_contested_central_africa` | Djibouti bases (Columbia, Cathay). Piracy. Red Sea southern approach. Yemen proxy war spillover. |
 | `g_contested_central_africa` | Central Africa | `land_contested` | `none` | `g_contested_horn`, `g_sea_atlantic_east` | Wagner/Africa Corps. Resource extraction. Cathay infrastructure investment. France legacy. Instability. |
-| `g_sea_arctic` | Arctic | `sea` | `none` | `g_col_alaska`, `g_nor_central`, `g_nor_eastern`, `g_contested_greenland`, `g_sea_giuk`, `g_sea_north_pacific` | Opening sea routes. Resource claims. Nordostan icebreaker advantage. Climate-driven strategic competition. |
+| `g_sea_arctic` | Arctic | `sea` | `none` | `g_col_alaska`, `g_nor_central`, `g_nor_eastern`, `g_contested_thule`, `g_sea_giuk`, `g_sea_north_pacific` | Opening sea routes. Resource claims. Nordostan icebreaker advantage. Climate-driven strategic competition. |
 
 > **Note:** Arctic is typed as `sea` because it functions primarily as a maritime transit/control zone, though it borders land. It has no owner and behaves as contested space.
 
@@ -106,7 +106,7 @@ Sea zones enable naval deployment, blockade, transit, and combat. Each sea zone 
 
 | Zone ID | Display Name | Type | Owner | Adjacent Zones | Notes |
 |---------|-------------|------|-------|----------------|-------|
-| `g_sea_atlantic_west` | Western Atlantic | `sea` | `none` | `g_col_continental`, `g_caribe`, `g_sea_gulf_caribbean`, `g_sea_atlantic_east`, `g_contested_greenland` | Columbia's home waters. Atlantic Fleet patrol area. Transatlantic link. |
+| `g_sea_atlantic_west` | Western Atlantic | `sea` | `none` | `g_col_continental`, `g_caribe`, `g_sea_gulf_caribbean`, `g_sea_atlantic_east`, `g_contested_thule` | Columbia's home waters. Atlantic Fleet patrol area. Transatlantic link. |
 | `g_sea_atlantic_east` | Eastern Atlantic | `sea` | `none` | `g_sea_atlantic_west`, `g_gallia`, `g_albion`, `g_sea_giuk`, `g_sea_med_west`, `g_contested_central_africa` | European Atlantic. NATO sea lane. UK/France naval patrol. Africa west coast access. |
 | `g_sea_gulf_caribbean` | Gulf & Caribbean Sea | `sea` | `none` | `g_col_continental`, `g_caribe`, `g_sea_atlantic_west`, `g_sea_central_pacific` | **[CHOKEPOINT: Caribbean Passages]** on border with Atlantic. Panama Canal implied in link to Central Pacific. US near-abroad. Caribbean theater parent sea zone. |
 | `g_sea_med_west` | Western Mediterranean | `sea` | `none` | `g_gallia`, `g_ponte`, `g_sea_atlantic_east`, `g_sea_med_east` | French/Italian naval sphere. NATO southern flank. Gibraltar implied at Atlantic border. |
@@ -116,13 +116,13 @@ Sea zones enable naval deployment, blockade, transit, and combat. Each sea zone 
 | `g_sea_red` | Red Sea | `sea` | `none` | `g_solaria`, `g_sea_med_east`, `g_sea_arabian`, `g_contested_horn` | **[CHOKEPOINT: Suez Canal]** on border with Med East. Houthi/proxy disruption zone. Trade route to Asia. |
 | `g_sea_persian_gulf` | Persian Gulf | `sea` | `none` | `g_persia`, `g_solaria`, `g_mirage`, `g_sea_arabian` | **[CHOKEPOINT: Strait of Hormuz]** on border with Arabian Sea. Oil export chokepoint. Columbia 5th Fleet. Iran can threaten closure. |
 | `g_sea_arabian` | Arabian Sea | `sea` | `none` | `g_sea_persian_gulf`, `g_sea_red`, `g_bharata`, `g_mirage`, `g_sea_indian_ocean`, `g_contested_horn` | Western Indian Ocean. Connects Gulf, Red Sea, India. Piracy corridor. Columbia/Cathay base competition (Djibouti). |
-| `g_sea_indian_ocean` | Indian Ocean | `sea` | `none` | `g_bharata`, `g_sea_arabian`, `g_sea_southeast_asia` | Bharata's natural sphere. Cathay String of Pearls. Connects Middle East energy to East Asia consumers. Columbia Diego Garcia base. |
+| `g_sea_indian_ocean` | Indian Ocean | `sea` | `none` | `g_bharata`, `g_sea_arabian`, `g_sea_southeast_asia` | Bharata's natural sphere. Cathay String of Pearls. Connects Mashriq energy to Asu consumers. Columbia Diego Garcia base. |
 | `g_sea_southeast_asia` | Southeast Asia & Malacca | `sea` | `none` | `g_cat_southern`, `g_sea_indian_ocean`, `g_sea_south_china` | **[CHOKEPOINT: Malacca Strait]** on border with Indian Ocean. Cathay energy import vulnerability. 40% of global trade. |
 | `g_sea_south_china` | South China Sea | `sea` | `none` | `g_cat_eastern`, `g_cat_southern`, `g_formosa`, `g_sea_southeast_asia`, `g_sea_east_china` | **[CHOKEPOINT: South China Sea / Taiwan Strait south approach]**. Contested waters. Island militarization. Massive trade volume. Nine-dash line. |
 | `g_sea_east_china` | East China Sea | `sea` | `none` | `g_cat_eastern`, `g_formosa`, `g_yamato`, `g_hanguk`, `g_sea_south_china`, `g_sea_north_pacific` | **[CHOKEPOINT: Taiwan Strait]** on border with Formosa. Senkaku/Diaoyu. Yamato-Cathay friction. |
 | `g_sea_north_pacific` | North Pacific | `sea` | `none` | `g_col_alaska`, `g_col_hawaii`, `g_yamato`, `g_nor_eastern`, `g_sea_east_china`, `g_sea_central_pacific`, `g_sea_arctic` | Vast. Columbia-Yamato maritime corridor. Nordostan Pacific Fleet transit. ICBM flight path. |
 | `g_sea_central_pacific` | Central Pacific | `sea` | `none` | `g_col_hawaii`, `g_sea_north_pacific`, `g_sea_gulf_caribbean` | Deep Pacific. US power projection route. Panama Canal western terminus implied. Guam staging. |
-| `g_sea_giuk` | GIUK Gap | `sea` | `none` | `g_albion`, `g_contested_greenland`, `g_sea_atlantic_east`, `g_sea_arctic` | **[CHOKEPOINT: GIUK Gap]**. Submarine detection corridor. North Atlantic gateway. Greenland theater anchor. |
+| `g_sea_giuk` | GIUK Gap | `sea` | `none` | `g_albion`, `g_contested_thule`, `g_sea_atlantic_east`, `g_sea_arctic` | **[CHOKEPOINT: GIUK Gap]**. Submarine detection corridor. North Atlantic gateway. Thule theater anchor. |
 
 > **Total global sea zones: 15** (14 named sea zones + Arctic which functions as sea). This matches the requirement of 14-15 sea zones.
 
@@ -136,8 +136,8 @@ Sea zones enable naval deployment, blockade, transit, and combat. Each sea zone 
 | Land -- Home (Cathay) | 3 |
 | Land -- Home (Nordostan) | 3 |
 | Land -- Home (Europe) | 5 |
-| Land -- Home (Middle East / South Asia) | 6 |
-| Land -- Home (East Asia / Pacific) | 4 |
+| Land -- Home (Mashriq / South Asia) | 6 |
+| Land -- Home (Asu / Pacific) | 4 |
 | Land -- Home (Americas) | 1 |
 | Land -- Contested | 5 |
 | Sea zones (incl. Arctic) | 15 |
@@ -207,7 +207,7 @@ Theaters expand a global zone (or cluster of global zones) into tactical detail 
 
 ---
 
-## 2.2 Middle East Theater (9 zones)
+## 2.2 Mashriq Theater (9 zones)
 
 **Status:** Active at game start (Round 1).
 **Parent global zones:** Expands `g_persia`, `g_levantia`, `g_solaria`, `g_sea_persian_gulf`, `g_sea_red`.
@@ -318,11 +318,11 @@ Theaters expand a global zone (or cluster of global zones) into tactical detail 
 
 ---
 
-## 2.5 Greenland Theater (3 zones)
+## 2.5 Thule Theater (3 zones)
 
 **Status:** Inactive at game start.
-**Parent global zones:** Expands `g_contested_greenland`, `g_sea_giuk`.
-**Activation trigger:** Columbia attempts to purchase/annex Greenland, OR deploys military forces to Greenland, OR any power establishes a military base on Greenland.
+**Parent global zones:** Expands `g_contested_thule`, `g_sea_giuk`.
+**Activation trigger:** Columbia attempts to purchase/annex Thule, OR deploys military forces to Thule, OR any power establishes a military base on Thule.
 **Dominant unit type:** Naval (GIUK sub detection), minimal ground.
 **Combat pacing:** 3 zones. Target: 2-3 minutes per round. Crisis scenario, not sustained campaign.
 
@@ -330,9 +330,9 @@ Theaters expand a global zone (or cluster of global zones) into tactical detail 
 
 | Zone ID | Display Name | Type | Owner (start) | Adjacent Zones | Notes |
 |---------|-------------|------|---------------|----------------|-------|
-| `gl_greenland` | Greenland Territory | `land_contested` | `none` | `gl_giuk_gap`, `gl_davis_strait` | Rare earth deposits. Thule Air Base (Columbia). Pioneer's portfolio. Tiny population. Arctic access. |
-| `gl_giuk_gap` | GIUK Gap (Theater) | `chokepoint_sea` | `none` | `gl_greenland`, `gl_davis_strait`, `g_sea_giuk`, `g_sea_atlantic_east` | **[CHOKEPOINT: GIUK Gap]**. Submarine detection arrays. North Atlantic chokepoint. Nordostan submarine transit route to Atlantic. Albion/Columbia ASW patrol. |
-| `gl_davis_strait` | Davis Strait | `sea` | `none` | `gl_greenland`, `gl_giuk_gap`, `g_sea_arctic`, `g_sea_atlantic_west` | Western approach to Greenland. Arctic shipping route. Ice conditions limit operations seasonally. |
+| `gl_thule` | Thule Territory | `land_contested` | `teutonia` | `gl_giuk_gap`, `gl_davis_strait` | Rare earth deposits. Thule Air Base (Columbia). Pioneer's portfolio. Tiny population. Arctic access. |
+| `gl_giuk_gap` | GIUK Gap (Theater) | `chokepoint_sea` | `none` | `gl_thule`, `gl_davis_strait`, `g_sea_giuk`, `g_sea_atlantic_east` | **[CHOKEPOINT: GIUK Gap]**. Submarine detection arrays. North Atlantic chokepoint. Nordostan submarine transit route to Atlantic. Albion/Columbia ASW patrol. |
+| `gl_davis_strait` | Davis Strait | `sea` | `none` | `gl_thule`, `gl_giuk_gap`, `g_sea_arctic`, `g_sea_atlantic_west` | Western approach to Thule. Arctic shipping route. Ice conditions limit operations seasonally. |
 
 ---
 
@@ -359,11 +359,11 @@ Theaters expand a global zone (or cluster of global zones) into tactical detail 
 
 | Theater | Zones | Active at Start | Parent Global Zones |
 |---------|:-----:|:---------------:|---------------------|
-| Eastern Europe | 15 | Yes | `g_nor_western`, `g_freeland` border region |
-| Middle East | 9 | Yes | `g_persia`, `g_levantia`, `g_solaria`, sea zones |
+| Eastern Ereb | 15 | Yes | `g_nor_western`, `g_freeland` border region |
+| Mashriq | 9 | Yes | `g_persia`, `g_levantia`, `g_solaria`, sea zones |
 | Taiwan Strait | 7 | No | `g_formosa`, `g_sea_east_china`, `g_sea_south_china` |
 | Caribbean | 4 | No | `g_caribe`, `g_sea_gulf_caribbean` |
-| Greenland | 3 | No | `g_contested_greenland`, `g_sea_giuk` |
+| Thule | 3 | No | `g_contested_thule`, `g_sea_giuk` |
 | Korea (optional) | 4 | No | `g_choson`, `g_hanguk` |
 | **TOTAL THEATER** | **42** | **24** | -- |
 
@@ -374,11 +374,11 @@ Theaters expand a global zone (or cluster of global zones) into tactical detail 
 | Layer | Count | Active at Start |
 |-------|:-----:|:---------------:|
 | Global map | 45 | 45 |
-| Eastern Europe theater | 15 | 15 |
-| Middle East theater | 9 | 9 |
+| Eastern Ereb theater | 15 | 15 |
+| Mashriq theater | 9 | 9 |
 | Taiwan Strait theater | 7 | 0 |
 | Caribbean theater | 4 | 0 |
-| Greenland theater | 3 | 0 |
+| Thule theater | 3 | 0 |
 | Korea theater (optional) | 4 | 0 |
 | **GRAND TOTAL** | **87** | **69** |
 
@@ -397,7 +397,7 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 | Property | Value |
 |----------|-------|
 | **Global zones** | Border between `g_sea_persian_gulf` and `g_sea_arabian` |
-| **Theater zone** | `me_gulf_hormuz` (Middle East theater) |
+| **Theater zone** | `me_gulf_hormuz` (Mashriq theater) |
 | **Default control** | Contested -- Columbia naval patrol, Persia coastal threat |
 | **Blockade minimum** | 1 naval unit in `g_sea_persian_gulf` (global) or `me_gulf_hormuz` (theater). Persia can also blockade using coastal missile batteries (tactical air/missile units in `me_persia_west`) without naval units. |
 | **Blockade effects** | Oil price spike (+50-100% depending on duration). Gulf producers (Solaria, Mirage, Persia) lose export revenue. Global importers (Cathay, Teutonia, Bharata, Yamato) face energy crisis. Stability hit to energy-dependent economies. |
@@ -425,7 +425,7 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 | Property | Value |
 |----------|-------|
 | **Global zones** | Border between `g_sea_med_east` and `g_sea_red` |
-| **Theater zone** | None (implied in Middle East theater adjacency) |
+| **Theater zone** | None (implied in Mashriq theater adjacency) |
 | **Default control** | Neutral (Egyptian sovereignty implied -- not a playable country). Open by default. |
 | **Blockade minimum** | Any power with 1+ naval unit in `g_sea_med_east` or `g_sea_red` can attempt disruption. Full blockade requires controlling both sides. Yemen proxies (Houthi) can disrupt from `me_yemen` theater zone. |
 | **Blockade effects** | Europe-Asia trade adds 2 weeks transit (around Africa). Trade cost +15-20%. European importers hit hardest. Oil from Gulf to Europe rerouted. |
@@ -481,11 +481,11 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 | Property | Value |
 |----------|-------|
 | **Global zones** | `g_sea_giuk` |
-| **Theater zone** | `gl_giuk_gap` (Greenland theater) |
+| **Theater zone** | `gl_giuk_gap` (Thule theater) |
 | **Default control** | NATO (Columbia + Albion ASW patrol) |
 | **Blockade minimum** | Not a traditional blockade point -- a submarine detection and denial zone. 1+ naval unit enables ASW (anti-submarine warfare) operations. Without presence, Nordostan submarines transit freely to Atlantic. |
 | **Blockade effects** | If NATO loses GIUK: Nordostan submarines threaten Atlantic shipping lanes and Columbia's eastern seaboard. If NATO holds: Nordostan submarine force bottled up in Arctic/Norwegian Sea. |
-| **Strategic significance** | Cold War era chokepoint, newly relevant. Greenland's strategic value is partly about anchoring the western end of this gap. Nordostan submarine-launched ballistic missiles are the second-strike deterrent -- GIUK monitoring affects nuclear balance perception. |
+| **Strategic significance** | Cold War era chokepoint, newly relevant. Thule's strategic value is partly about anchoring the western end of this gap. Nordostan submarine-launched ballistic missiles are the second-strike deterrent -- GIUK monitoring affects nuclear balance perception. |
 | **Special rules** | Submarine detection: naval units in GIUK Gap can detect and engage Nordostan submarines transiting to the Atlantic. Without GIUK presence, Nordostan submarine deployments to `g_sea_atlantic_west` or `g_sea_atlantic_east` are undetected until they act. |
 
 ---
@@ -529,7 +529,7 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 | Columbia to Pacific/Taiwan | `g_col_hawaii` → `g_sea_north_pacific` → `g_sea_east_china` → theater | None (open Pacific, but vast) | 1 round |
 | Columbia to Persian Gulf | `g_col_continental` → `g_sea_atlantic_west` → `g_sea_atlantic_east` → `g_sea_med_west` → `g_sea_med_east` → `g_sea_red` → `g_sea_arabian` → `g_sea_persian_gulf` | Suez Canal | 1 round (or instant via Gulf base) |
 | Columbia to Caribbean | `g_col_continental` → `g_sea_gulf_caribbean` | None (home waters) | Instant (adjacent) |
-| Columbia to Greenland | `g_col_continental` → `g_sea_atlantic_west` → `g_contested_greenland` | None | 1 round |
+| Columbia to Thule | `g_col_continental` → `g_sea_atlantic_west` → `g_contested_thule` | None | 1 round |
 
 > **The overstretched hegemon problem visualized:** Columbia can reach any theater in 1 round (or instantly via bases). BUT deploying to one theater means those units are NOT available elsewhere for 1 round. With 3-4 active theaters, Columbia physically cannot be strong everywhere.
 
@@ -540,7 +540,7 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 | Cathay to Taiwan | `g_cat_eastern` → `g_sea_east_china` → theater | Taiwan Strait | Adjacent (instant to East China Sea) |
 | Cathay to Indian Ocean | `g_cat_southern` → `g_sea_southeast_asia` → `g_sea_indian_ocean` | Malacca Strait | 1 round |
 | Cathay to Central Asia | `g_cat_western` → `g_contested_central_asia` | None (land) | Adjacent |
-| Cathay to Middle East | `g_cat_western` → `g_contested_central_asia` → `g_persia` | None (overland) | 1 round |
+| Cathay to Mashriq | `g_cat_western` → `g_contested_central_asia` → `g_persia` | None (overland) | 1 round |
 | Cathay to Korea | `g_cat_eastern` → `g_choson` / `g_hanguk` | None (land border) | Adjacent |
 
 > **Cathay's vulnerability:** Energy imports flow through Malacca. If blockaded, overland route via Central Asia provides only ~20% capacity. Cathay must either secure Malacca or reduce energy dependency.
@@ -549,11 +549,11 @@ The 8 chokepoints are the simulation's economic pressure points. Each chokepoint
 
 | Route | Path | Chokepoints | Transit Delay |
 |-------|------|-------------|:-------------:|
-| Nordostan to Eastern Europe | `g_nor_western` → theater | None (direct border) | Adjacent (instant to theater) |
+| Nordostan to Eastern Ereb | `g_nor_western` → theater | None (direct border) | Adjacent (instant to theater) |
 | Nordostan to Mediterranean | `g_sea_black` → `g_sea_med_east` | Bosphorus (Phrygia controls) | 1 round, IF Phrygia allows |
 | Nordostan to Atlantic | `g_nor_central`/`g_nor_eastern` → `g_sea_arctic` → `g_sea_giuk` → `g_sea_atlantic_east` | GIUK Gap | 1 round, detected if GIUK monitored |
 | Nordostan to Pacific | `g_nor_eastern` → `g_sea_north_pacific` | None | 1 round |
-| Nordostan to Middle East | `g_nor_western` → `g_sea_black` → (Bosphorus) → `g_sea_med_east` OR overland via `g_contested_central_asia` → `g_persia` | Bosphorus OR none (overland) | 1 round either way |
+| Nordostan to Mashriq | `g_nor_western` → `g_sea_black` → (Bosphorus) → `g_sea_med_east` OR overland via `g_contested_central_asia` → `g_persia` | Bosphorus OR none (overland) | 1 round either way |
 
 > **Nordostan's constraint:** Two of three naval egress points (Bosphorus, GIUK) are controlled or monitored by adversaries. Only the Pacific Fleet exits freely, but faces Columbia/Yamato. Nordostan's navy is structurally trapped.
 
@@ -599,7 +599,7 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 - `g_ponte`: gallia, teutonia, sea_med_west, sea_med_east
 - `g_albion`: gallia, sea_atlantic_east, sea_giuk
 
-**Middle East / South Asia:**
+**Mashriq / South Asia:**
 - `g_persia`: solaria, mirage, sea_persian_gulf, contested_central_asia, sea_arabian
 - `g_levantia`: phrygia, sea_med_east, solaria
 - `g_solaria`: persia, mirage, levantia, sea_persian_gulf, sea_red, contested_horn
@@ -607,7 +607,7 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 - `g_bharata`: cat_western, sea_arabian, sea_indian_ocean
 - `g_mirage`: solaria, persia, sea_persian_gulf, sea_arabian
 
-**East Asia / Pacific:**
+**Asu / Pacific:**
 - `g_yamato`: sea_east_china, sea_north_pacific, hanguk
 - `g_hanguk`: choson, cat_eastern, yamato, sea_east_china
 - `g_choson`: hanguk, cat_eastern, nor_eastern
@@ -617,13 +617,13 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 - `g_caribe`: col_continental, sea_gulf_caribbean, sea_atlantic_west
 
 **Contested:**
-- `g_contested_greenland`: sea_giuk, sea_arctic, sea_atlantic_west
+- `g_contested_thule`: sea_giuk, sea_arctic, sea_atlantic_west
 - `g_contested_central_asia`: nor_central, cat_western, persia, bharata
 - `g_contested_horn`: solaria, sea_red, sea_arabian, contested_central_africa
 - `g_contested_central_africa`: contested_horn, sea_atlantic_east
 
 **Sea (prefix `g_sea_` omitted for brevity):**
-- `atlantic_west`: col_continental, caribe, gulf_caribbean, atlantic_east, contested_greenland
+- `atlantic_west`: col_continental, caribe, gulf_caribbean, atlantic_east, contested_thule
 - `atlantic_east`: atlantic_west, gallia, albion, giuk, med_west, contested_central_africa
 - `gulf_caribbean`: col_continental, caribe, atlantic_west, central_pacific
 - `med_west`: gallia, ponte, atlantic_east, med_east
@@ -639,8 +639,8 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 - `east_china`: cat_eastern, formosa, yamato, hanguk, south_china, north_pacific
 - `north_pacific`: col_alaska, col_hawaii, yamato, nor_eastern, east_china, central_pacific, sea_arctic
 - `central_pacific`: col_hawaii, north_pacific, gulf_caribbean
-- `giuk`: albion, contested_greenland, atlantic_east, sea_arctic
-- `arctic`: col_alaska, nor_central, nor_eastern, contested_greenland, giuk, north_pacific
+- `giuk`: albion, contested_thule, atlantic_east, sea_arctic
+- `arctic`: col_alaska, nor_central, nor_eastern, contested_thule, giuk, north_pacific
 
 ---
 
@@ -649,7 +649,7 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 | Zone | Adjacent Count | Notes |
 |------|:--------------:|-------|
 | Highest connectivity (global): `g_sea_north_pacific` | 7 | Vast ocean, many borders |
-| Highest connectivity (global): `g_sea_arabian` | 6 | Hub of Middle East sea routes |
+| Highest connectivity (global): `g_sea_arabian` | 6 | Hub of Mashriq sea routes |
 | Highest connectivity (global): `g_cat_eastern` | 6 | Cathay's strategic center |
 | Lowest connectivity (global): `g_col_hawaii` | 2 | Isolated Pacific outpost |
 | Lowest connectivity (global): `g_sea_black` | 2 | Bottled up by Bosphorus |
@@ -661,15 +661,15 @@ For rapid lookup during gameplay. Each zone's full adjacency list.
 
 ## Why These Zone Counts
 
-**Eastern Europe (15):** The active war demands granularity. Players need to make meaningful choices about where to attack, where to reinforce, where to accept losses. 15 zones create a real front line with flanks, breakthroughs, and strategic depth. The Conflict SIM4 used 22 sectors for a pure military sim; 15 is the right reduction for a multi-domain game where military is one of four domains.
+**Eastern Ereb (15):** The active war demands granularity. Players need to make meaningful choices about where to attack, where to reinforce, where to accept losses. 15 zones create a real front line with flanks, breakthroughs, and strategic depth. The Conflict SIM4 used 22 sectors for a pure military sim; 15 is the right reduction for a multi-domain game where military is one of four domains.
 
-**Middle East (9):** More than the concept's 7-8 because the Iran nuclear sites deserve their own zone (it's the most important target in the theater), and the proxy network (Syria-Lebanon, Iraq corridor, Yemen) needs enough zones to show the "arc of resistance" geography. But combat here is mostly air/missile, not ground maneuver, so fewer zones than Eastern Europe.
+**Mashriq (9):** More than the concept's 7-8 because the Iran nuclear sites deserve their own zone (it's the most important target in the theater), and the proxy network (Syria-Lebanon, Iraq corridor, Yemen) needs enough zones to show the "arc of resistance" geography. But combat here is mostly air/missile, not ground maneuver, so fewer zones than Eastern Ereb.
 
 **Taiwan Strait (7):** Exactly right. The question is binary (does China cross?) but the approach matters (from where? can the US intervene?). 3 sea zones capture the naval geometry. The staging zone creates the visible buildup that terrifies everyone. Formosa itself is one zone because the island-fighting question is about whether they land, not where.
 
 **Caribbean (4):** Minimal. This theater exists for narrative, not tactical depth. The decision is "does Columbia invade its own backyard?" not "where exactly do ground forces maneuver."
 
-**Greenland (3):** Even more minimal. A crisis scenario, not a war. Territory + two sea approaches. The GIUK Gap is the real strategic content.
+**Thule (3):** Even more minimal. A crisis scenario, not a war. Territory + two sea approaches. The GIUK Gap is the real strategic content.
 
 **Korea (4):** Optional because Korean escalation may never happen. But if it does, the DMZ zone creates the Seoul-proximity horror, and the basing zone makes clear that attacking US/Yamato rear areas is an act of war against those countries directly.
 
@@ -689,7 +689,7 @@ This variety ensures that "chokepoint control" is never a single mechanic -- it 
 
 ## Adjacency Design Principles
 
-1. **No islands**: Every land zone is reachable by land from at least one neighbor (except Formosa and Greenland, which are deliberately isolated -- their isolation IS their strategic character).
+1. **No islands**: Every land zone is reachable by land from at least one neighbor (except Formosa and Thule, which are deliberately isolated -- their isolation IS their strategic character).
 2. **Sea zones connect**: Any sea zone is reachable from any other within 3 hops maximum. The longest naval transit (Black Sea to Central Pacific) is 6-7 hops but traverses 3 chokepoints.
 3. **Chokepoints are real**: There is no way to move from the Indian Ocean to the Mediterranean without passing through either Suez (via Red Sea) or going around Africa (via Atlantic East). The geography creates the strategic constraints.
 4. **Great power home zones touch**: Nordostan borders NATO (Freeland). Cathay borders Bharata. These adjacencies mean border tensions are spatial realities, not abstractions.
@@ -712,7 +712,7 @@ g_yamato, g_hanguk, g_choson, g_formosa
 g_caribe
 
 ## Land Contested (4) + Sea Arctic (1)
-g_contested_greenland, g_contested_central_asia, g_contested_horn, g_contested_central_africa
+g_contested_thule, g_contested_central_asia, g_contested_horn, g_contested_central_africa
 g_sea_arctic
 
 ## Sea (14)
@@ -722,14 +722,14 @@ g_sea_red, g_sea_persian_gulf, g_sea_arabian, g_sea_indian_ocean
 g_sea_southeast_asia, g_sea_south_china, g_sea_east_china
 g_sea_north_pacific, g_sea_central_pacific, g_sea_giuk
 
-# EASTERN EUROPE THEATER (15)
+# EASTERN EREB THEATER (15)
 ee_belarus, ee_nord_border
 ee_west_ukr, ee_central_ukr, ee_capital, ee_southwest, ee_west_border
 ee_south_ukr, ee_dnipro_line, ee_kherson
 ee_east_front_north, ee_east_front_central, ee_east_front_south
 ee_occupied_south, ee_crimea_naval
 
-# MIDDLE EAST THEATER (9)
+# MASHRIQ THEATER (9)
 me_levantia_core, me_levantia_north, me_syria_lebanon
 me_iraq_corridor, me_persia_west, me_persia_nuclear, me_persia_east
 me_gulf_hormuz, me_yemen
@@ -742,8 +742,8 @@ ts_formosa
 # CARIBBEAN THEATER (4)
 cb_cuba, cb_venezuela, cb_caribbean_sea, cb_columbia_coast
 
-# GREENLAND THEATER (3)
-gl_greenland, gl_giuk_gap, gl_davis_strait
+# THULE THEATER (3)
+gl_thule, gl_giuk_gap, gl_davis_strait
 
 # KOREA THEATER (4)
 kr_choson, kr_dmz, kr_hanguk, kr_basing
@@ -755,13 +755,13 @@ kr_choson, kr_dmz, kr_hanguk, kr_basing
 
 > **Final precise count from the registry above:**
 > - Land home: g_col (3) + g_cat (3) + g_nor (3) + Europe (5) + MidEast/SA (6) + EastAsia (4) + Americas (1) = **25**
-> - Land contested: 4 (greenland, central_asia, horn, central_africa)
+> - Land contested: 4 (thule, central_asia, horn, central_africa)
 > - Sea (including Arctic): arctic + atlantic_west + atlantic_east + gulf_caribbean + med_west + med_east + black + baltic + red + persian_gulf + arabian + indian_ocean + southeast_asia + south_china + east_china + north_pacific + central_pacific + giuk = **18**
 > - **Global total: 25 + 4 + 18 = 47**
 > - Theater total: 15 + 9 + 7 + 4 + 3 + 4 = **42**
 > - **Grand total: 89**
 
-> This is 2 over the 87 target. The 2 extra sea zones (central_pacific, giuk becoming their own zones rather than borders) add meaningful strategic content. Acceptable variance. To hit exactly 87, merge `g_sea_central_pacific` into `g_sea_north_pacific` and remove it. The GIUK gap should remain as it anchors the Greenland theater.
+> This is 2 over the 87 target. The 2 extra sea zones (central_pacific, giuk becoming their own zones rather than borders) add meaningful strategic content. Acceptable variance. To hit exactly 87, merge `g_sea_central_pacific` into `g_sea_north_pacific` and remove it. The GIUK gap should remain as it anchors the Thule theater.
 
 ---
 

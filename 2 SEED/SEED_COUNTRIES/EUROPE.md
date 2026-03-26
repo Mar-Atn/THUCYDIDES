@@ -32,7 +32,7 @@ All five European nations are NATO members. NATO decisions require consensus —
 
 ## The Thule Question
 
-Columbia wants to acquire Thule — a territory that, in game terms, belongs to Teutonia's broader alliance network (the Greenland parallel, where Denmark is abstracted into the European framework). This is the crack in NATO: the alliance's leading member is pressuring a fellow ally to cede sovereign territory. It forces every European nation to choose between solidarity with a fellow European state and maintaining the relationship with Columbia that underwrites their security. The January 2026 joint statement defending sovereignty was a rare moment of unity — but it papered over the fact that no European nation can afford a real confrontation with Washington.
+Columbia wants to acquire Thule — a territory that, in game terms, belongs to Teutonia's broader alliance network (the real-world Greenland parallel, where Denmark is abstracted into the European framework). This is the crack in NATO: the alliance's leading member is pressuring a fellow ally to cede sovereign territory. It forces every European nation to choose between solidarity with a fellow European state and maintaining the relationship with Columbia that underwrites their security. The January 2026 joint statement defending sovereignty was a rare moment of unity — but it papered over the fact that no European nation can afford a real confrontation with Washington.
 
 ---
 
@@ -74,7 +74,7 @@ Columbia wants to acquire Thule — a territory that, in game terms, belongs to 
 | **Freeland** | Alliance (tense) | Both EU and NATO members. Deep friction — Gallia sees Freeland as Columbia's trojan horse in Europe. Freeland sees Gallia's strategic autonomy as weakening NATO. Disagree on everything except opposing Nordostan. |
 | **Ponte** | Alliance (transactional) | Need Ponte's EU vote. Ponte is persuadable — financial relief buys alignment. Mediterranean solidarity. But Ponte's Russia sympathy and fiscal fragility make it unreliable. |
 | **Albion** | Alliance (wary respect) | Two nuclear powers, two UNSC vetoes. Starmer and Macron cooperating on Ukraine peace framework. Post-Brexit Albion needs European partnerships; Gallia offers military-to-military cooperation. But centuries of rivalry and structural competition for European leadership persist. |
-| **Columbia** | Alliance/Treaty (strained) | NATO ally, but Gallia building hedge against Columbia's unreliability. Disagreement on Persia war (France deployed independently), Greenland, trade. Macron's nuclear expansion is implicit rebuke of Columbia. |
+| **Columbia** | Alliance/Treaty (strained) | NATO ally, but Gallia building hedge against Columbia's unreliability. Disagreement on Persia war (France deployed independently), Thule, trade. Macron's nuclear expansion is implicit rebuke of Columbia. |
 | **Nordostan** | Hostile | Sanctions supporter but Macron increasingly calling for European dialogue with Moscow. France's UNSC veto gives independent leverage. |
 | **Cathay** | Tense/cautious | Less exposed than Teutonia to China trade but concerned about fair competition. More willing to confront on trade imbalance. |
 
@@ -186,7 +186,7 @@ What makes Gallia essential: the player who runs Lumiere holds the only independ
 | **Freeland** | Alliance (divergent) | Both EU members. Radically different threat perceptions. Freeland sees Russian threat as existential and demands maximum military commitment. Teutonia sees economic collapse as equally dangerous and wants calibrated responses. |
 | **Ponte** | Alliance (sympathetic) | Both face fiscal pressure. Teutonia understands Ponte's debt constraints because it fears similar economic fragility. But Ponte's Russia sympathy and blocking potential frustrate Teutonia's consensus-seeking instincts. |
 | **Albion** | Alliance (practical) | Post-Brexit relationship rebuilt through defense cooperation. Albion's intelligence and military capability valued. But Albion's absence from EU means Teutonia cannot count on it for trade and sanctions coordination. |
-| **Columbia** | Alliance/Treaty (under pressure) | Hosts Columbia's main European base — leverage but also dependency. Columbia simultaneously demands Teutonia spend 5% on defense, restrict China trade, and accept Greenland pressure. These demands are contradictory and economically impossible simultaneously. |
+| **Columbia** | Alliance/Treaty (under pressure) | Hosts Columbia's main European base — leverage but also dependency. Columbia simultaneously demands Teutonia spend 5% on defense, restrict China trade, and accept Thule pressure. These demands are contradictory and economically impossible simultaneously. |
 | **Cathay** | Tense (economic dependency) | THE constraint on Teutonia's foreign policy. German trade deficit with China has quadrupled since 2020. Automotive, chemicals, machinery industries deeply intertwined with Chinese supply chains. "De-risking" is policy — decoupling is economic suicide. |
 | **Nordostan** | Hostile | Sanctions supporter. Energy dependency resolved post-2022 (LNG terminals, renewables). But energy costs remain higher. War fatigue is real — Teutonia wants a negotiated end to the Heartland conflict. |
 
@@ -198,7 +198,7 @@ Teutonia enters mid-2026 as Europe's indispensable and most conflicted power. Ch
 
 Merz's response has been the most ambitious rearmament program since 1945 — a EUR 100 billion infrastructure and defense fund approved via constitutional amendment — combined with a trip to Beijing in February 2026 where he signed trade deals while pressing Xi on trade imbalances. This is the essential Teutonia contradiction: arming against the threat that America demands while trading with the partner America wants to contain. The coalition agreement describes China as "a systemic rival" and commits to "de-risking" — but de-risking is not decoupling, and every German auto executive knows the difference.
 
-The Thule question hits Teutonia hardest. In game terms, Greenland is abstracted as territory within Teutonia's alliance sphere. Columbia's pressure to acquire it forces Teutonia to choose between the ally that provides its security guarantee and the principle of territorial sovereignty that underpins the European order. Merz signed the joint statement defending sovereignty but took the most measured tone: "We know from experience that Trump threatens tariffs but often talks lead to resolution." Teutonia hosts the main Columbia military base — it cannot afford to antagonize Washington.
+The Thule question hits Teutonia hardest. In game terms, Thule is territory within Teutonia's alliance sphere. Columbia's pressure to acquire it forces Teutonia to choose between the ally that provides its security guarantee and the principle of territorial sovereignty that underpins the European order. Merz signed the joint statement defending sovereignty but took the most measured tone: "We know from experience that Trump threatens tariffs but often talks lead to resolution." Teutonia hosts the main Columbia military base — it cannot afford to antagonize Washington.
 
 Defense spending has passed $100 billion but starts from a chronically low base. The Bundeswehr has been underfunded for decades. Procurement is slow, bureaucratic, and plagued by delays. Reaching NATO's 3.5% GDP target by 2029 is the stated goal — but it requires either massive borrowing or cuts to social programs in a country where the welfare state is a constitutional commitment.
 
@@ -658,7 +658,7 @@ The Commissioner's nightmare: Gallia and Teutonia cutting a bilateral deal on de
 | Heartland EU accession | Skeptical (dilutes French influence) | Supportive (Eastern stability) | Maximum support | Blocking risk (cost) | N/A (not in EU) |
 | Defense spending (5% GDP) | Aspirational (2.25% current) | Accelerating (toward 3.5%) | Already exceeding (4.8%) | Impossible (debt crisis) | Moving toward 3% |
 | Strategic autonomy | Champion | Cautious supporter | Opposed (weakens NATO) | Indifferent (follows money) | Opposed (prefers Atlanticism) |
-| Thule/Greenland solidarity | Strong (sovereignty principle) | Measured (needs Columbia) | Nervous (needs Columbia more) | Follows crowd | Supports sovereignty |
+| Thule solidarity | Strong (sovereignty principle) | Measured (needs Columbia) | Nervous (needs Columbia more) | Follows crowd | Supports sovereignty |
 | Columbia relationship | Hedge and compete | Maintain and placate | Embrace and depend | Court for advantage | Special relationship — closest |
 
 ---
@@ -668,7 +668,7 @@ The Commissioner's nightmare: Gallia and Teutonia cutting a bilateral deal on de
 - Europe is the only team in the SIM where the players represent sovereign nations rather than roles within a single government. The collective action problem IS the gameplay — reaching agreement is the challenge, not implementing orders.
 - The Commissioner (Pillar) is the 6th player who has no national territory, no military, no economy, and no vote — but holds the agenda. This makes it the most unusual role in the entire SIM: power without sovereignty.
 - Albion's exclusion from EU decisions creates a permanent information and influence asymmetry that the other four EU members can exploit or resent but cannot resolve without readmitting Britain to the EU (which is not on offer).
-- The Thule/Greenland question is deliberately designed to crack NATO unity: Columbia pressuring a European ally on territorial sovereignty while demanding that same ally spend more on defense within the alliance Columbia leads.
+- The Thule question is deliberately designed to crack NATO unity: Columbia pressuring a European ally on territorial sovereignty while demanding that same ally spend more on defense within the alliance Columbia leads.
 - Each European player should feel they are representing a REAL national perspective that legitimately conflicts with others. The dysfunction is not incompetence — it is the product of genuine differences in geography, economy, history, and threat perception. France fears irrelevance. Germany fears economic collapse. Poland fears invasion. Italy fears bankruptcy. Britain fears exclusion. These fears are all rational. They are also incompatible.
 - Economic data reflects real Q1 2026 conditions. Military data is abstracted from real force structures. Political data reflects actual leadership situations, approval ratings, and coalition dynamics.
 - Europe's total combined GDP (~143 coins) exceeds Columbia's (280 coins) only when summed — but no single European country can match Columbia's economic weight, and the summing requires agreement that rarely materializes.

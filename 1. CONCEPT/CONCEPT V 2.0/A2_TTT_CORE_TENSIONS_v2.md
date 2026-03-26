@@ -30,11 +30,11 @@ Each is a simmering situation that could explode. Each has different stakes for 
 
 **Ukraine:** The legacy war, year 4+. Tests whether borders can be changed by force. Drains Western resources and attention. A peace deal, a frozen conflict, or an escalation — each reshapes the global landscape. The wartime election (three candidates, AI-judged) makes it personally dramatic.
 
-**Middle East:** Iran's nuclear program approaching the weapons threshold. Israel's willingness to strike unilaterally. Oil as a geopolitical weapon. A regional escalation that drags Columbia deeper into a theater it's trying to leave — the classic overstretch trap.
+**Mashriq:** Iran's nuclear program approaching the weapons threshold. Israel's willingness to strike unilaterally. Oil as a geopolitical weapon. A regional escalation that drags Columbia deeper into a theater it's trying to leave — the classic overstretch trap.
 
 **Caribbean:** The hegemon's own backyard. Russian and Chinese military foothold near US soil. Proves Columbia can't secure its near-abroad while managing a global transition. A provocation here is cheap for adversaries and expensive for Columbia — the asymmetry that small actors exploit.
 
-**Greenland:** Not a war theater — a trust crisis. Columbia's president pursuing territorial ambitions against an ally's sovereign territory. Demonstrates the system is breaking from INSIDE: the hegemon that built the rules-based order is now violating it. Every ally watching the Greenland question asks: if America does this to friends, what are alliance guarantees worth?
+**Thule:** Not a war theater — a trust crisis. Columbia's president pursuing territorial ambitions against an ally's sovereign territory. Demonstrates the system is breaking from INSIDE: the hegemon that built the rules-based order is now violating it. Every ally watching the Thule question asks: if America does this to friends, what are alliance guarantees worth?
 
 
 ### 3. The Global Alliances Reshaping

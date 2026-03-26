@@ -43,7 +43,7 @@ All units (apart from air/missile forces) are deployed to **theaters** visible o
 
 **Own territory:** Free deployment, no permission needed.
 
-**Columbia's base network:** 4-5 global bases (Pacific/Yamato, Europe/Teutonia, Middle East/Gulf, Indian Ocean, possibly Mediterranean). Each requires host consent. Host can renegotiate or revoke. Bases enable instant theater access without transit delay — Columbia's unique structural advantage and diplomatic vulnerability.
+**Columbia's base network:** 4-5 global bases (Pacific/Yamato, Ereb/Teutonia, Mashriq/Gulf, Indian Ocean, possibly Mediterranean). Each requires host consent. Host can renegotiate or revoke. Bases enable instant theater access without transit delay — Columbia's unique structural advantage and diplomatic vulnerability.
 
 **Foreign soil:** Requires explicit host agreement. Negotiated deal — may involve coins, security guarantees, political commitments. Creating a new foreign base is a major diplomatic event.
 
@@ -75,7 +75,7 @@ Production capacity limits (factories cap output regardless of budget, growing c
 
 ### Theater Activation
 
-The global map starts with **two active theaters** (Eastern Europe and Middle East - Iran). Other theaters (Pacific/Taiwan, Korea, South Asia, Caribbean) activate **dynamically** when military action in that region escalates. Each activated theater gets a zoom-in map with simplified sectors. The number of active theaters at game end is itself a measure of outcome.
+The global map starts with **two active theaters** (Eastern Ereb and Mashriq - Persia). Other theaters (Pacific/Taiwan, Korea, South Asia, Caribbean) activate **dynamically** when military action in that region escalates. Each activated theater gets a zoom-in map with simplified sectors. The number of active theaters at game end is itself a measure of outcome.
 
 ### Connections to Other Domains
 

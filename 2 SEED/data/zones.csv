@@ -43,26 +43,26 @@ g_sea_giuk,GIUK Gap,sea,none,global,false
 g_sea_arctic,Arctic Ocean,sea,none,global,false
 g_sea_gulf_caribbean,Gulf and Caribbean,sea,none,global,false
 g_choson_border,Choson Border,land_contested,none,global,false
-ee_west_ukr,Western Ukraine,land_home,heartland,eastern_europe,false
-ee_capital,Kyiv Capital Region,land_home,heartland,eastern_europe,false
-ee_central_ukr,Central Ukraine,land_home,heartland,eastern_europe,false
-ee_southwest,Southwestern Ukraine,land_home,heartland,eastern_europe,false
-ee_east_front_north,Eastern Front North,land_contested,heartland,eastern_europe,false
-ee_south_ukr,Southern Ukraine,land_contested,heartland,eastern_europe,false
-ee_dnipro_line,Dnipro Line,land_contested,heartland,eastern_europe,false
-ee_kherson,Kherson,land_contested,heartland,eastern_europe,false
-ee_east_front_central,Eastern Front Central,land_contested,nordostan,eastern_europe,false
-ee_east_front_south,Eastern Front South,land_contested,nordostan,eastern_europe,false
-ee_occupied_south,Occupied South,land_contested,nordostan,eastern_europe,false
-ee_crimea_naval,Crimea Naval Base,land_contested,nordostan,eastern_europe,false
-ee_belarus,Belarus Staging,land_home,nordostan,eastern_europe,false
-ee_nord_border,Nordostan Border,land_home,nordostan,eastern_europe,false
-me_persia_west,Persia Western,land_home,persia,middle_east,false
-me_persia_nuclear,Persia Nuclear Zone,land_home,persia,middle_east,false
-me_persia_east,Persia Eastern,land_home,persia,middle_east,false
-me_gulf_hormuz,Strait of Hormuz,chokepoint_sea,none,middle_east,true
-me_levantia_core,Levantia Core,land_home,levantia,middle_east,false
-me_levantia_north,Levantia Northern,land_home,levantia,middle_east,false
-me_syria_lebanon,Syria-Lebanon,land_contested,none,middle_east,false
-me_iraq_corridor,Iraq Corridor,land_contested,none,middle_east,false
-me_yemen,Yemen,land_contested,none,middle_east,false
+ee_west_ukr,Western Ukraine,land_home,heartland,eastern_ereb,false
+ee_capital,Kyiv Capital Region,land_home,heartland,eastern_ereb,false
+ee_central_ukr,Central Ukraine,land_home,heartland,eastern_ereb,false
+ee_southwest,Southwestern Ukraine,land_home,heartland,eastern_ereb,false
+ee_east_front_north,Eastern Front North,land_contested,heartland,eastern_ereb,false
+ee_south_ukr,Southern Ukraine,land_contested,heartland,eastern_ereb,false
+ee_dnipro_line,Dnipro Line,land_contested,heartland,eastern_ereb,false
+ee_kherson,Kherson,land_contested,heartland,eastern_ereb,false
+ee_east_front_central,Eastern Front Central,land_contested,nordostan,eastern_ereb,false
+ee_east_front_south,Eastern Front South,land_contested,nordostan,eastern_ereb,false
+ee_occupied_south,Occupied South,land_contested,nordostan,eastern_ereb,false
+ee_crimea_naval,Crimea Naval Base,land_contested,nordostan,eastern_ereb,false
+ee_belarus,Belarus Staging,land_home,nordostan,eastern_ereb,false
+ee_nord_border,Nordostan Border,land_home,nordostan,eastern_ereb,false
+me_persia_west,Persia Western,land_home,persia,mashriq,false
+me_persia_nuclear,Persia Nuclear Zone,land_home,persia,mashriq,false
+me_persia_east,Persia Eastern,land_home,persia,mashriq,false
+me_gulf_hormuz,Strait of Hormuz,chokepoint_sea,none,mashriq,true
+me_levantia_core,Levantia Core,land_home,levantia,mashriq,false
+me_levantia_north,Levantia Northern,land_home,levantia,mashriq,false
+me_syria_lebanon,Syria-Lebanon,land_contested,none,mashriq,false
+me_iraq_corridor,Iraq Corridor,land_contested,none,mashriq,false
+me_yemen,Yemen,land_contested,none,mashriq,false

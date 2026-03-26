@@ -293,9 +293,9 @@
   <path d="M420,375 L460,368 L468,400 L458,420 L425,418 Z" fill="#b8c0a0" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
   <text x="442" y="395" class="zone-label">C.AFRICA</text>
 
-  <!-- Greenland (arctic) -->
+  <!-- Thule (arctic) -->
   <path d="M270,68 L310,62 L318,88 L312,108 L275,112 L265,92 Z" fill="#e8e5dd" stroke="#999" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.75"/>
-  <text x="292" y="90" class="zone-label">GREENLAND</text>
+  <text x="292" y="90" class="zone-label">THULE</text>
 
   <!-- ================================================ -->
   <!-- SOUTH & EAST ASIA -->

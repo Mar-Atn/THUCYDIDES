@@ -176,8 +176,8 @@
     <rect id="zone_g_caribe" data-zone="g_caribe" class="zone land brics"
           x="115" y="395" width="110" height="55" rx="6"/>
 
-    <!-- ======= GREENLAND (contested) ======= -->
-    <rect id="zone_g_contested_greenland" data-zone="g_contested_greenland" class="zone land contested"
+    <!-- ======= THULE (contested) ======= -->
+    <rect id="zone_g_contested_thule" data-zone="g_contested_thule" class="zone land contested"
           x="260" y="80" width="100" height="80" rx="6"/>
 
     <!-- ======= ALBION ======= -->
@@ -298,12 +298,12 @@
     <!-- Hawaii to C Pacific -->
     <line class="adj-mixed" x1="1510" y1="375" x2="1510" y2="400"/>
 
-    <!-- === Greenland adjacencies === -->
-    <!-- Greenland to GIUK -->
+    <!-- === Thule adjacencies === -->
+    <!-- Thule to GIUK -->
     <line class="adj-mixed" x1="310" y1="160" x2="370" y2="130"/>
-    <!-- Greenland to Arctic -->
+    <!-- Thule to Arctic -->
     <line class="adj-mixed" x1="310" y1="80" x2="400" y2="82"/>
-    <!-- Greenland to W Atlantic -->
+    <!-- Thule to W Atlantic -->
     <line class="adj-mixed" x1="280" y1="160" x2="260" y2="185"/>
 
     <!-- === GIUK adjacencies === -->
@@ -466,7 +466,7 @@
     <!-- Western to Bharata -->
     <line class="adj-land" x1="1060" y1="315" x2="1035" y2="370"/>
 
-    <!-- === East Asia === -->
+    <!-- === Asu === -->
     <!-- Choson to Hanguk -->
     <line class="adj-land" x1="1297" y1="240" x2="1300" y2="250"/>
     <!-- Hanguk to Yamato -->
@@ -567,8 +567,8 @@
     <!-- === Caribe === -->
     <text x="170" y="420" class="zone-label">Caribe</text>
 
-    <!-- === Greenland === -->
-    <text x="310" y="122" class="zone-label">Greenland</text>
+    <!-- === Thule === -->
+    <text x="310" y="122" class="zone-label">Thule</text>
 
     <!-- === Europe === -->
     <text x="500" y="157" class="zone-label">Albion</text>
@@ -585,7 +585,7 @@
     <text x="1190" y="112" class="zone-label title">Nordostan</text>
     <text x="1190" y="125" class="zone-label small">(Far East)</text>
 
-    <!-- === Middle East === -->
+    <!-- === Mashriq === -->
     <text x="710" y="310" class="zone-label">Phrygia</text>
     <text x="717" y="425" class="zone-label small">Levantia</text>
     <text x="835" y="443" class="zone-label">Solaria</text>
@@ -600,7 +600,7 @@
     <text x="785" y="573" class="zone-label small">Horn of Africa</text>
     <text x="555" y="568" class="zone-label small">Central Africa</text>
 
-    <!-- === East Asia === -->
+    <!-- === Asu === -->
     <text x="1297" y="221" class="zone-label">Choson</text>
     <text x="1305" y="273" class="zone-label">Hanguk</text>
     <text x="1397" y="250" class="zone-label">Yamato</text>
@@ -649,11 +649,11 @@
   <!-- ============================================================ -->
   <g id="theater-markers">
 
-    <!-- T1: Eastern Europe Theater (on border between Freeland and Nordostan W) -->
+    <!-- T1: Eastern Ereb Theater (on border between Freeland and Nordostan W) -->
     <use href="#theater-marker" x="729" y="182" width="22" height="22"/>
     <text x="740" y="197" class="theater-text">T1</text>
 
-    <!-- T2: Middle East Theater (on Persia region) -->
+    <!-- T2: Mashriq Theater (on Persia region) -->
     <use href="#theater-marker" x="953" y="343" width="22" height="22"/>
     <text x="964" y="358" class="theater-text">T2</text>
 
@@ -665,7 +665,7 @@
     <use href="#theater-marker" x="209" y="401" width="22" height="22"/>
     <text x="220" y="416" class="theater-text">T4</text>
 
-    <!-- T5: Greenland Theater (on Greenland) -->
+    <!-- T5: Thule Theater (on Thule) -->
     <use href="#theater-marker" x="342" y="95" width="22" height="22"/>
     <text x="353" y="110" class="theater-text">T5</text>
 

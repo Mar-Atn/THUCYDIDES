@@ -5,9 +5,9 @@
 
 ## How to Compare
 
-**Options A-D** show the **same regional slice** — the Middle East theater and its surroundings (Persia, Levantia, Solaria, Mirage, Bharata, Horn of Africa, Phrygia, with Arabian Sea, Persian Gulf, Red Sea, and chokepoints at Hormuz and Bab el-Mandeb). Each includes identical unit deployments and a blockaded Hormuz.
+**Options A-D** show the **same regional slice** — the Mashriq theater and its surroundings (Persia, Levantia, Solaria, Mirage, Bharata, Horn of Africa, Phrygia, with Arabian Sea, Persian Gulf, Red Sea, and chokepoints at Hormuz and Bab el-Mandeb). Each includes identical unit deployments and a blockaded Hormuz.
 
-**Options E-G** show the **full global map** — all 45 zones, 20 countries, 8 chokepoints, and 2 active theaters (Eastern Europe, Middle East). These three options explore fundamentally different visual paradigms: hex grid, wargame board, and abstract network graph. They are 1200x700 SVGs with Indian Ocean-centered projection.
+**Options E-G** show the **full global map** — all 45 zones, 20 countries, 8 chokepoints, and 2 active theaters (Eastern Ereb, Mashriq). These three options explore fundamentally different visual paradigms: hex grid, wargame board, and abstract network graph. They are 1200x700 SVGs with Indian Ocean-centered projection.
 
 ---
 

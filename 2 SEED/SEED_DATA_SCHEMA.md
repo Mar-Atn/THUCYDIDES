@@ -228,7 +228,7 @@ Every zone on the global and theater maps.
 | `display_name` | string | Name shown on map | `Columbia Continental` |
 | `type` | enum | `land_home`/`land_contested`/`sea`/`chokepoint_sea` | `land_home` |
 | `owner` | string | FK → countries.id (or `none`) | `columbia` |
-| `theater` | string | Theater if applicable (`global`/`eastern_europe`/`middle_east`/`taiwan`/`caribbean`/`greenland`/`korea`) | `global` |
+| `theater` | string | Theater if applicable (`global`/`eastern_ereb`/`mashriq`/`taiwan`/`caribbean`/`thule`/`korea`) | `global` |
 | `is_chokepoint` | bool | Maritime chokepoint? | `false` |
 
 ---

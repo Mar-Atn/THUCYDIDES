@@ -185,7 +185,7 @@ Scheduled speech moments: Assembly (UNGA) addresses, campaign speeches before el
 
 ### 6.2 Sign treaty / agreement — Anytime (agreement - Any text signed by two or more sides)
 **Initiator:** Any two+ heads of state or authorized representatives.
-Content freely negotiated: peace terms, alliances, trade arrangements, secret protocols any thing (including - scede terriotory - e.g. allow US to take control over Greenland?)
+Content freely negotiated: peace terms, alliances, trade arrangements, secret protocols any thing (including - scede terriotory - e.g. allow Columbia to take control over Thule?)
 
 In Columbia: major treaties require parliamentary ratification (3 of 5 seats).
 
@@ -212,7 +212,7 @@ Beyond the standard actions, certain roles have capabilities nobody else possess
 | Tribune (Columbia Congress) | Block budget (if majority). Launch investigation (damages target's political support). Initiate impeachment. Legislate sanctions (harder to reverse than executive). | Negative power — can't initiate but can block everything. Dominant after hostile mid-terms. |
 | Spark (Columbia Tycoon) | Media manipulation (affects any country's political support). Independent tech investment. Back-channel meetings without government knowledge. | Unaccountable. Nobody can stop them. No authorization needed for anything. |
 | Fixer (Columbia Envoy) | Independent Middle East diplomatic channel. Personal deal-making outside official State Dept channels. | Shadow diplomacy that may contradict Anchor's negotiations. |
-| Pioneer (Columbia Envoy) | Independent tech/business channel to Cathay. Greenland portfolio. | Maintains contacts official policy has severed. |
+| Pioneer (Columbia Envoy) | Independent tech/business channel to Cathay. Thule portfolio. | Maintains contacts official policy has severed. |
 | Circuit (Cathay Tech) | Rare earth export restrictions. Independent international tech contacts. Cyber operations execution. | Controls Cathay's tech counter-weapons. Has external channels Helmsman may not know about. |
 | Sage (Cathay Elder) | Legitimize leadership transition. No formal power — but can distinguish "course correction" from "coup." | The succession question personified. Grows powerful only as Helmsman weakens. |
 | Compass (Nordostan Oligarch) | Personal coin transactions. Independent back-channels. Bribe foreign actors. | Operates entirely through personal channels. Can explore deals government can't officially pursue. |

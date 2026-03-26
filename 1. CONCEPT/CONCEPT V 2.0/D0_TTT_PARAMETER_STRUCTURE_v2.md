@@ -103,11 +103,11 @@ These define the game's skeleton — what exists, how time works, what the rules
 | # | Parameter | Granularity | Block | Description |
 |---|-----------|:-----------:|:-----:|-------------|
 | 0.4.1 | Global map design | W | A | Map projection, centering, visual style |
-| 0.4.2 | Theater definitions | Z | A | Which potential theaters exist (Eastern Europe, Taiwan Strait, Middle East, Caribbean, Greenland, Korea) |
+| 0.4.2 | Theater definitions | Z | A | Which potential theaters exist (Eastern Ereb, Taiwan Strait, Mashriq, Caribbean, Thule, Korea) |
 | 0.4.3 | Zone count per theater | Z | A | Number of zones in each theater map (Eastern Europe: 12–20, Taiwan: 3–4, etc.) |
 | 0.4.4 | Zone adjacency rules | Z | A | Which zones are adjacent to which (determines attack/movement options) |
 | 0.4.5 | Chokepoint definitions | Z | A | Which sea zones are chokepoints, what they control |
-| 0.4.6 | Active theaters at start | W | A | Which theaters are active at game start (Eastern Europe + Middle East) |
+| 0.4.6 | Active theaters at start | W | A | Which theaters are active at game start (Eastern Ereb + Mashriq) |
 | 0.4.7 | Theater activation triggers | Z | A | What causes a dormant theater to activate (first military action in region) |
 | 0.4.8 | Map display format | W | B | Physical wall map, digital screen, hybrid — and which screens show what |
 
@@ -162,7 +162,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 1.2.4 | Starting strategic missiles | K | A | Fixed allocation per country (Columbia ~10, Nordostan ~10, Cathay ~3+, Gallia ~2, Albion ~2) |
 | 1.2.5 | Starting air defense units | K | A | Fixed allocation per country (non-producible, scarce) |
 | 1.2.6 | Starting unit deployment | K×Z | A | Which units deployed in which zones at game start |
-| 1.2.7 | Columbia base network | Z | A | Location of Columbia's 4–5 global bases (Pacific/Yamato, Europe/Teutonia, Middle East/Gulf, Indian Ocean, Mediterranean?) |
+| 1.2.7 | Columbia base network | Z | A | Location of Columbia's 4-5 global bases (Pacific/Yamato, Ereb/Teutonia, Mashriq/Gulf, Indian Ocean, Mediterranean?) |
 | 1.2.8 | Starting basing rights | K×K | A | Which countries host which countries' forces at start |
 | 1.2.9 | Starting war status | K×K | A | Which countries are at war at game start (Nordostan vs. Heartland, potentially Persia-related) |
 

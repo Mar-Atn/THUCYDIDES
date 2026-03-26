@@ -26,7 +26,7 @@ The SIM uses a **two-layer map system**: a permanent global strategic map showin
 
 ### Geography
 
-A full world map. Not centered on the Atlantic (which marginalizes Asia) or the Pacific (which marginalizes Europe/Middle East). Ideally centered on the **Indian Ocean / Central Asia region**, placing the two great powers (USA and China) on opposite edges and the contested middle ground — Europe, Middle East, Central Asia, Indian Ocean — prominently in the center. This centering itself tells a story: the world's conflicts cluster in the space between the two poles.
+A full world map. Not centered on the Atlantic (which marginalizes Asia) or the Pacific (which marginalizes Ereb/Mashriq). Ideally centered on the **Indian Ocean / Central Asia region**, placing the two great powers (USA and China) on opposite edges and the contested middle ground — Ereb, Mashriq, Central Asia, Indian Ocean — prominently in the center. This centering itself tells a story: the world's conflicts cluster in the space between the two poles.
 
 All 15+ Tier 1 countries must be clearly identifiable. Tier 2 countries included as space permits.
 
@@ -40,7 +40,7 @@ These are the world's strategic bottlenecks — locations where naval power, tra
 - **Suez Canal** — Europe-Asia trade shortcut
 - **Malacca Strait** — China's energy import vulnerability
 - **South China Sea** — contested waters, island claims, massive trade volume
-- **GIUK Gap** (Greenland-Iceland-UK) — North Atlantic submarine access, newly relevant with Greenland tensions
+- **GIUK Gap** (Thule-Iceland-UK) — North Atlantic submarine access, newly relevant with Thule tensions
 - **Caribbean passages** — US near-abroad, Venezuela/Cuba dimension
 
 ### What it does in gameplay
@@ -77,7 +77,7 @@ Activates if China initiates blockade, military exercises-as-pressure, or invasi
 
 Naval and air power dominate. Semiconductor facilities on Taiwan are a strategic target / asset to protect. Resolution is fast but consequences are enormous (global economic shock from trade disruption).
 
-#### Middle East
+#### Mashriq
 **7-8 zones** covering: Iran (nuclear sites marked), Israel, the Gulf (Hormuz), and proxy territories (Lebanon/Syria, Yemen). 
 
 Air and missile power dominate. The nuclear dimension (Iran's program, Israel's undeclared arsenal) adds escalation risk. Oil infrastructure as strategic target.
@@ -87,8 +87,8 @@ Activates if the US intervenes militarily in Venezuela/Cuba. **2-3 zones**: nava
 
 The smallest and simplest theater — but thematically important because it shows the hegemon's own use of force in its sphere.
 
-#### Greenland 
-Acyivates if US decides to capture Greenland.  **2-3 zones**
+#### Thule
+Activates if Columbia decides to capture Thule.  **2-3 zones**
 
 #### Korean Peninsula (optional)
 Activates if North Korea provokes beyond the threshold (nuclear test, artillery on Seoul, invasion). **3-4 zones**: North Korea, the DMZ / Seoul corridor, South Korea, and US/Japan basing. 
@@ -126,7 +126,7 @@ The map is not a separate domain — it is the **visual integration layer** wher
 ## Resolved Questions (from v1.0)
 
 1. **Scale of Eastern Europe theater at start:** 12-20 zones. Enough for meaningful maneuver, simple enough to resolve in minutes. Exact count deferred to scenario configuration.
-2. **Theater activation trigger:** First attack in a region activates the theater zoom-in. Five pre-set theaters ready: Eastern Europe, Middle East, Taiwan Strait, Caribbean, Greenland. Korean Peninsula as optional 6th.
+2. **Theater activation trigger:** First attack in a region activates the theater zoom-in. Five pre-set theaters ready: Eastern Ereb, Mashriq, Taiwan Strait, Caribbean, Thule. Korean Peninsula as optional 6th.
 3. **Naval mechanics:** RISK-model combat in sea zones (same as ground). Naval bombardment at 10% per unit per round. Naval blockade requires 1+ unit in zone. Strategic missiles can target any zone globally (no adjacency). Air defense units deployable to any zone to absorb incoming strikes. See E1 Engine Architecture for full combat resolution.
 
 ---

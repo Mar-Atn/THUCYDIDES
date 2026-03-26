@@ -173,7 +173,7 @@ Suggest time and venue. UNSC, EU, NATO, Parliament, BRICS+, OPEC+, player-create
 | Shadow (Columbia CIA) | Selective intelligence briefing. Higher covert op success. |
 | Tribune (Columbia Congress) | Block budget (if majority). Investigation. Impeachment. |
 | Fixer (Columbia Envoy) | Independent Middle East channel. Personal deal-making. |
-| Pioneer (Columbia Envoy) | Tech/business channel to Cathay. Greenland portfolio. Media manipulation. Independent tech investment. Semi-unaccountable — personal business empire creates conflicts of interest. |
+| Pioneer (Columbia Envoy) | Tech/business channel to Cathay. Thule portfolio. Media manipulation. Independent tech investment. Semi-unaccountable — personal business empire creates conflicts of interest. |
 | Circuit (Cathay Tech) | Rare earth restrictions. Cyber ops. Independent contacts. |
 | Sage (Cathay Elder) | Legitimize transitions. Grows powerful as Helmsman weakens. |
 | Compass (Nordostan Oligarch) | Personal transactions. Independent back-channels. |

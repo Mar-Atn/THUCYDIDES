@@ -40,7 +40,7 @@ These are the world's strategic bottlenecks — locations where naval power, tra
 - **Suez Canal** — Europe-Asia trade shortcut
 - **Malacca Strait** — China's energy import vulnerability
 - **South China Sea** — contested waters, island claims, massive trade volume
-- **GIUK Gap** (Greenland-Iceland-UK) — North Atlantic submarine access, newly relevant with Greenland tensions
+- **GIUK Gap** (Thule-Iceland-UK) — North Atlantic submarine access, newly relevant with Thule tensions
 - **Caribbean passages** — US near-abroad, Venezuela/Cuba dimension
 
 ### What it does in gameplay
@@ -87,8 +87,8 @@ Activates if the US intervenes militarily in Venezuela/Cuba. **2-3 zones**: nava
 
 The smallest and simplest theater — but thematically important because it shows the hegemon's own use of force in its sphere.
 
-#### Greenland 
-Acyivates if US decides to capture Greenland.  **2-3 zones**
+#### Thule
+Activates if Columbia decides to capture Thule.  **2-3 zones**
 
 #### Korean Peninsula (optional)
 Activates if North Korea provokes beyond the threshold (nuclear test, artillery on Seoul, invasion). **3-4 zones**: North Korea, the DMZ / Seoul corridor, South Korea, and US/Japan basing. 

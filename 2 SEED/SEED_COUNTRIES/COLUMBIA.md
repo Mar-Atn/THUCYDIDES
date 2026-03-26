@@ -137,7 +137,7 @@ Starting majority: President's camp 3-2. Seat 5 contested at mid-terms (Round 2)
 - **Round 2:** Mid-term elections. Seat 5 contested. AI popular vote (50% weight) based on economic conditions, approval, Dem/Rep split. If opposition wins, Parliament flips 3-2 opposition.
 - **Round 5:** Presidential election. SUCCESSION RACE — Dealer is NOT running. Volt vs. Anchor compete for the governing party nomination. Challenger represents the opposition. Dealer is the kingmaker — his endorsement shapes the race, but his low approval may be a liability.
 
-**Personal dimension:** Dealer's private victory condition is LEGACY — not re-election. He sees himself as the architect of a new world order: reshaping alliances, confronting rivals, demonstrating strength. Greenland acquisition, Cuba submission, Persia regime change, Heartland resolution, Cathay containment — all pieces of the vision. But term-limited, age 80, with a 10% per-round chance of temporary incapacitation. His VP and SecState are already calculating their post-Dealer futures, which means his grand design competes with their personal ambitions for control of the policy apparatus.
+**Personal dimension:** Dealer's private victory condition is LEGACY — not re-election. He sees himself as the architect of a new world order: reshaping alliances, confronting rivals, demonstrating strength. Thule acquisition, Cuba submission, Persia regime change, Heartland resolution, Cathay containment — all pieces of the vision. But term-limited, age 80, with a 10% per-round chance of temporary incapacitation. His VP and SecState are already calculating their post-Dealer futures, which means his grand design competes with their personal ambitions for control of the policy apparatus.
 
 ---
 
