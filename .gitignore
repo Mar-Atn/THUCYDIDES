@@ -1,4 +1,6 @@
 .DS_Store
-*.docx
-__pycache__/
 *.pyc
+__pycache__/
+CONTEXT/CONFLICT SIM4 /
+*.pptx
+*.xlsx
