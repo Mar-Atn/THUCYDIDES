@@ -37,6 +37,17 @@ body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: #1a1a2e; 
 .palette-name input:focus { border-bottom-color: #e94560; outline: none; }
 .palette-divider { height: 1px; background: #333; margin: 6px 0; }
 
+/* GRID SIZE SECTION */
+.grid-section { margin-top: 8px; padding-top: 8px; border-top: 1px solid #333; }
+.grid-section h3 { font-size: 11px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 6px; }
+.grid-dim { font-size: 13px; color: #e94560; font-weight: 700; margin-bottom: 8px; text-align: center; letter-spacing: 1px; }
+.grid-row-btns { display: flex; gap: 4px; margin-bottom: 4px; align-items: center; }
+.grid-row-btns .grid-label { font-size: 10px; color: #888; width: 48px; text-align: right; margin-right: 2px; flex-shrink: 0; }
+.grid-btn { background: #0f3460; color: #eee; border: 1px solid #1a5276; padding: 3px 8px; border-radius: 3px; font-family: inherit; font-size: 10px; font-weight: 600; cursor: pointer; transition: background 0.15s; flex: 1; }
+.grid-btn:hover { background: #1a5276; }
+.grid-btn.add { color: #7ecf7e; }
+.grid-btn.rem { color: #e07070; }
+
 /* CHOKEPOINT SECTION */
 .cp-section { margin-top: 8px; }
 .cp-item { display: flex; align-items: center; gap: 4px; padding: 3px 6px; margin-bottom: 3px; border-radius: 4px; border: 2px solid transparent; }
@@ -81,6 +92,14 @@ canvas { background: #C5D9E8; }
     <div class="palette-divider"></div>
     <h3>Chokepoints</h3>
     <div id="chokepoints-panel"></div>
+    <div class="grid-section">
+      <h3>Grid Size</h3>
+      <div class="grid-dim" id="grid-dim-label">24 × 16</div>
+      <div class="grid-row-btns"><span class="grid-label">Rows</span><button class="grid-btn add" id="add-row-top">+ Top</button><button class="grid-btn rem" id="rem-row-top">− Top</button></div>
+      <div class="grid-row-btns"><span class="grid-label"></span><button class="grid-btn add" id="add-row-bot">+ Bot</button><button class="grid-btn rem" id="rem-row-bot">− Bot</button></div>
+      <div class="grid-row-btns"><span class="grid-label">Cols</span><button class="grid-btn add" id="add-col-left">+ Left</button><button class="grid-btn rem" id="rem-col-left">− Left</button></div>
+      <div class="grid-row-btns"><span class="grid-label"></span><button class="grid-btn add" id="add-col-right">+ Right</button><button class="grid-btn rem" id="rem-col-right">− Right</button></div>
+    </div>
   </div>
   <div id="canvas-wrap">
     <canvas id="hexmap"></canvas>
@@ -95,7 +114,7 @@ canvas { background: #C5D9E8; }
 
 <script>
 // ======== CONFIGURATION ========
-const COLS = 24, ROWS = 16;
+let COLS = 24, ROWS = 16;
 const S = 30;
 const HW = Math.sqrt(3) * S;
 const HH = 2 * S;
@@ -190,8 +209,12 @@ function getChokepointName(key) {
 
 // ======== INITIAL MAP STATE ========
 function loadCurrentMap() {
-  for (let r = 0; r < ROWS; r++)
+  ROWS = 16; COLS = 24;
+  grid = [];
+  for (let r = 0; r < ROWS; r++) {
+    grid[r] = [];
     for (let c = 0; c < COLS; c++) grid[r][c] = { owner: 'sea' };
+  }
   chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
 
   grid[2][11] = { owner: 'nordostan' };
@@ -258,6 +281,8 @@ function loadCurrentMap() {
   chokepoints.caribe_passage = { row: 9, col: 2 };
 
   clearSelection();
+  resizeCanvas();
+  if (document.getElementById('grid-dim-label')) updateGridDimLabel();
   buildChokepointPanel();
   draw();
 }
@@ -265,10 +290,15 @@ function loadCurrentMap() {
 // ======== CANVAS SETUP ========
 const canvas = document.getElementById('hexmap');
 const ctx = canvas.getContext('2d');
-const canvasW = PAD_X + COLS * COL_SP + ODD_OFF + 30;
-const canvasH = PAD_Y + (ROWS - 1) * ROW_SP + HH + 10;
-canvas.width = canvasW;
-canvas.height = canvasH;
+let canvasW, canvasH;
+
+function resizeCanvas() {
+  canvasW = PAD_X + COLS * COL_SP + ODD_OFF + 60;
+  canvasH = PAD_Y + ROWS * ROW_SP + S + 20;
+  canvas.width = canvasW;
+  canvas.height = canvasH;
+}
+resizeCanvas();
 
 // ======== HEX GEOMETRY ========
 function hexCenter(col, row) {
@@ -987,9 +1017,130 @@ document.getElementById('btn-export-md').addEventListener('click', () => {
   URL.revokeObjectURL(url);
 });
 
+// ======== GRID RESIZE ========
+function updateGridDimLabel() {
+  document.getElementById('grid-dim-label').textContent = COLS + ' × ' + ROWS;
+}
+
+function rowHasLand(rowIdx) {
+  for (let c = 0; c < COLS; c++) if (grid[rowIdx][c].owner !== 'sea') return true;
+  return false;
+}
+
+function colHasLand(colIdx) {
+  for (let r = 0; r < ROWS; r++) if (grid[r][colIdx].owner !== 'sea') return true;
+  return false;
+}
+
+function afterGridResize() {
+  clearSelection();
+  resizeCanvas();
+  updateGridDimLabel();
+  buildChokepointPanel();
+  draw();
+}
+
+function addRowTop() {
+  ROWS++;
+  const newRow = [];
+  for (let c = 0; c < COLS; c++) newRow.push({ owner: 'sea' });
+  grid.unshift(newRow);
+  // Shift chokepoint row indices
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key]) chokepoints[key].row++;
+  }
+  afterGridResize();
+}
+
+function addRowBottom() {
+  ROWS++;
+  const newRow = [];
+  for (let c = 0; c < COLS; c++) newRow.push({ owner: 'sea' });
+  grid.push(newRow);
+  afterGridResize();
+}
+
+function removeRowTop() {
+  if (ROWS <= 1) return;
+  if (rowHasLand(0) && !confirm('Top row contains land hexes. Delete anyway?')) return;
+  ROWS--;
+  grid.shift();
+  // Shift chokepoint row indices
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key]) {
+      if (chokepoints[key].row === 0) { chokepoints[key] = null; }
+      else { chokepoints[key].row--; }
+    }
+  }
+  afterGridResize();
+}
+
+function removeRowBottom() {
+  if (ROWS <= 1) return;
+  if (rowHasLand(ROWS - 1) && !confirm('Bottom row contains land hexes. Delete anyway?')) return;
+  ROWS--;
+  // Remove chokepoints in deleted row
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key] && chokepoints[key].row === ROWS) chokepoints[key] = null;
+  }
+  grid.pop();
+  afterGridResize();
+}
+
+function addColLeft() {
+  COLS++;
+  for (let r = 0; r < ROWS; r++) grid[r].unshift({ owner: 'sea' });
+  // Shift chokepoint col indices
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key]) chokepoints[key].col++;
+  }
+  afterGridResize();
+}
+
+function addColRight() {
+  COLS++;
+  for (let r = 0; r < ROWS; r++) grid[r].push({ owner: 'sea' });
+  afterGridResize();
+}
+
+function removeColLeft() {
+  if (COLS <= 1) return;
+  if (colHasLand(0) && !confirm('Left column contains land hexes. Delete anyway?')) return;
+  COLS--;
+  for (let r = 0; r < ROWS; r++) grid[r].shift();
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key]) {
+      if (chokepoints[key].col === 0) { chokepoints[key] = null; }
+      else { chokepoints[key].col--; }
+    }
+  }
+  afterGridResize();
+}
+
+function removeColRight() {
+  if (COLS <= 1) return;
+  if (colHasLand(COLS - 1) && !confirm('Right column contains land hexes. Delete anyway?')) return;
+  COLS--;
+  for (const key of Object.keys(chokepoints)) {
+    if (chokepoints[key] && chokepoints[key].col === COLS) chokepoints[key] = null;
+  }
+  for (let r = 0; r < ROWS; r++) grid[r].pop();
+  afterGridResize();
+}
+
+document.getElementById('add-row-top').addEventListener('click', addRowTop);
+document.getElementById('add-row-bot').addEventListener('click', addRowBottom);
+document.getElementById('rem-row-top').addEventListener('click', removeRowTop);
+document.getElementById('rem-row-bot').addEventListener('click', removeRowBottom);
+document.getElementById('add-col-left').addEventListener('click', addColLeft);
+document.getElementById('add-col-right').addEventListener('click', addColRight);
+document.getElementById('rem-col-left').addEventListener('click', removeColLeft);
+document.getElementById('rem-col-right').addEventListener('click', removeColRight);
+
 // ======== INIT ========
 buildPalette();
 loadCurrentMap();
+updateGridDimLabel();
 document.getElementById('st-brush').textContent = 'SEA';
 </script>
 </body>
