@@ -1514,8 +1514,8 @@ fileInput.addEventListener('change', (e) => {
             landMaxCol = Math.max(landMaxCol, h.col);
           }
         });
-        ROWS = Math.max(landMaxRow + 3, 8);
-        COLS = Math.max(landMaxCol + 3, 8);
+        ROWS = Math.max(landMaxRow + 2, 8);
+        COLS = Math.max(landMaxCol + 2, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
@@ -1649,8 +1649,8 @@ fileInput.addEventListener('change', (e) => {
           }
         }
 
-        ROWS = Math.max(maxRow + 3, 8);
-        COLS = Math.max(maxCol + 3, 8);
+        ROWS = Math.max(maxRow + 2, 8);
+        COLS = Math.max(maxCol + 2, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
