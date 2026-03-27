@@ -77,6 +77,7 @@ For odd rows (r % 2 == 1), neighbors at:
 | nord_e3 | Nordostan E3 | nordostan | 3 | 14 |
 | nord_w2 | Nordostan W2 | nordostan | 4 | 10 |
 | nord_c2 | Nordostan C2 | nordostan | 4 | 11 |
+| nord_sw | Nordostan SW | nordostan | 5 | 11 |
 | phrygia_1 | Phrygia N | phrygia | 6 | 10 |
 | phrygia_2 | Phrygia S | phrygia | 7 | 10 |
 | persia_1 | Persia N | persia | 6 | 12 |
@@ -93,7 +94,11 @@ For odd rows (r % 2 == 1), neighbors at:
 | bharata_1 | Bharata S | bharata | 7 | 14 |
 | bharata_2 | Bharata N | bharata | 6 | 13 |
 | bharata_3 | Bharata E | bharata | 6 | 14 |
-| cathay_1 | Cathay NW | cathay | 4 | 14 |
+| bharata_4 | Bharata W | bharata | 7 | 13 |
+| bharata_5 | Bharata S | bharata | 8 | 13 |
+| nord_e4 | Nordostan E4 | nordostan | 4 | 14 |
+| nord_e5 | Nordostan E5 | nordostan | 4 | 15 |
+| cathay_1 | Cathay NW | cathay | 5 | 14 |
 | cathay_2 | Cathay W | cathay | 5 | 15 |
 | cathay_3 | Cathay C | cathay | 5 | 16 |
 | cathay_4 | Cathay NE | cathay | 5 | 17 |
