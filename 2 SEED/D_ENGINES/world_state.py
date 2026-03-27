@@ -91,6 +91,9 @@ class WorldState:
         self.round_logs: Dict[int, List[dict]] = {}
         self.nuclear_used_this_sim: bool = False
         self.ground_blockades: Dict[str, dict] = {}  # Gulf Gate ground blockade
+        self.active_blockades: Dict[str, dict] = {}  # Chokepoint blockades (keyed by chokepoint name)
+        self.rare_earth_restrictions: Dict[str, int] = {}  # country_id -> restriction level (1-3)
+        self.formosa_blockade: bool = False  # Whether Formosa is under naval blockade
 
     # --- CSV Loading ---
 
@@ -494,6 +497,9 @@ class WorldState:
             "events_log": copy.deepcopy(self.events_log),
             "nuclear_used_this_sim": self.nuclear_used_this_sim,
             "ground_blockades": copy.deepcopy(self.ground_blockades),
+            "active_blockades": copy.deepcopy(self.active_blockades),
+            "rare_earth_restrictions": dict(self.rare_earth_restrictions),
+            "formosa_blockade": self.formosa_blockade,
         }
 
     def save_to_json(self, path: str) -> None:
@@ -522,6 +528,9 @@ class WorldState:
         ws.events_log = d.get("events_log", [])
         ws.nuclear_used_this_sim = d.get("nuclear_used_this_sim", False)
         ws.ground_blockades = d.get("ground_blockades", {})
+        ws.active_blockades = d.get("active_blockades", {})
+        ws.rare_earth_restrictions = d.get("rare_earth_restrictions", {})
+        ws.formosa_blockade = d.get("formosa_blockade", False)
         return ws
 
     def to_json(self, indent: int = 2) -> str:

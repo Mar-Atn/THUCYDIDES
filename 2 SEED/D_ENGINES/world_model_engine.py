@@ -96,6 +96,8 @@ class WorldModelEngine:
         self._apply_tariff_changes(actions.get("tariff_changes", {}))
         self._apply_sanction_changes(actions.get("sanction_changes", {}))
         self._apply_opec_changes(actions.get("opec_production", {}))
+        self._apply_rare_earth_changes(actions.get("rare_earth_restrictions", {}))
+        self._apply_blockade_changes(actions.get("blockade_changes", {}))
 
         # Step 1: Oil price
         results["oil_price"] = self._calc_oil_price()
@@ -222,9 +224,13 @@ class WorldModelEngine:
         blockade_frac = self._get_blockade_fraction(country_id)
         blockade_factor = max(0.5, 1.0 - blockade_frac * 0.4)
 
+        # Semiconductor disruption factor (FIX 2)
+        semiconductor_factor = self._calc_semiconductor_disruption(country_id)
+
         # Combined multiplicative growth
         combined = (tariff_factor * sanctions_factor * war_factor
-                    * tech_factor * inflation_factor * blockade_factor)
+                    * tech_factor * inflation_factor * blockade_factor
+                    * semiconductor_factor)
         effective_growth = base_growth * combined
         new_gdp = old_gdp * (1.0 + effective_growth)
         new_gdp = max(new_gdp, 0.01)
@@ -236,7 +242,7 @@ class WorldModelEngine:
             f"(growth {growth_pct:+.2f}%, t={tariff_factor:.3f} "
             f"s={sanctions_factor:.3f} w={war_factor:.3f} "
             f"tech={tech_factor:.3f} i={inflation_factor:.3f} "
-            f"b={blockade_factor:.3f})"
+            f"b={blockade_factor:.3f} semi={semiconductor_factor:.3f})"
         )
 
         return {
@@ -245,6 +251,7 @@ class WorldModelEngine:
             "tariff_factor": tariff_factor, "sanctions_factor": sanctions_factor,
             "war_factor": war_factor, "tech_factor": tech_factor,
             "inflation_factor": inflation_factor, "blockade_factor": blockade_factor,
+            "semiconductor_factor": semiconductor_factor,
         }
 
     def _calc_sanctions_impact(self, target_id: str) -> Tuple[float, Dict[str, float]]:
@@ -319,58 +326,109 @@ class WorldModelEngine:
         }
 
     def _calc_oil_price(self) -> float:
-        """Oil price from OPEC decisions + disruptions. Gulf Gate ground blockade = +60%."""
+        """Oil price: responsive to crises, blockades, wars, sanctions.
+
+        V4 changes:
+        - Gulf Gate blockade = +80% (was +60%)
+        - Formosa Strait blockade = +15%
+        - War premium: +10% per major war (capped 30%)
+        - Sanctions on oil producers reduce supply
+        - Speculative spike from crisis count
+        - Oil producer revenue update
+        - Target: peacetime $75-85, Gulf Gate blocked $140-180, crisis $180-250
+        """
         base_price = 80.0
 
+        # OPEC decisions
         supply_factor = 1.0
         for member, decision in self.ws.opec_production.items():
             if decision == "low":
-                supply_factor -= 0.05
+                supply_factor -= 0.06  # was 0.05
             elif decision == "high":
-                supply_factor += 0.05
-        supply_factor = max(supply_factor, 0.5)
+                supply_factor += 0.06
 
+        # CHOKEPOINT DISRUPTIONS -- much stronger impact
         disruption = 1.0
+
+        # Gulf Gate blockade -- MASSIVE impact (20% of world oil transits)
+        gulf_gate_blocked = self._is_chokepoint_blocked('gulf_gate')
+        # Also check legacy chokepoint_status for hormuz / gulf_gate_ground
+        for cp_name in ('hormuz', 'gulf_gate_ground'):
+            if self.ws.chokepoint_status.get(cp_name) == 'blocked':
+                gulf_gate_blocked = True
+        if gulf_gate_blocked:
+            disruption += 0.80  # was 0.60 -- 80% price spike
+
+        # Formosa Strait blockade -- moderate (trade disruption, not oil directly)
+        formosa_blocked = self._is_chokepoint_blocked('formosa_strait')
+        if self.ws.chokepoint_status.get('taiwan_strait') == 'blocked':
+            formosa_blocked = True
+        if formosa_blocked:
+            disruption += 0.15
+
+        # Other chokepoints (suez, malacca, etc.)
         for cp_name, status in self.ws.chokepoint_status.items():
             if status != "blocked":
                 continue
-            if cp_name == "hormuz":
-                disruption += 0.60
-            elif cp_name == "gulf_gate_ground":
-                disruption += 0.60  # ground blockade same as Hormuz
-            elif cp_name == "suez":
+            if cp_name in ("hormuz", "gulf_gate_ground", "taiwan_strait"):
+                continue  # already handled above
+            if cp_name == "suez":
                 disruption += 0.15
             elif cp_name == "malacca":
                 disruption += 0.20
             else:
                 disruption += 0.05
 
-        # Demand from global GDP growth
-        total_gdp = sum(c["economic"]["gdp"] for c in self.ws.countries.values())
-        avg_growth = 0.0
-        if total_gdp > 0:
-            avg_growth = sum(
-                c["economic"]["gdp"] * c["economic"]["gdp_growth_rate"] / 100.0
+        # WAR PREMIUM -- any major war adds uncertainty premium
+        war_premium = 0.0
+        major_war_countries = {'columbia', 'cathay', 'persia', 'solaria', 'nordostan'}
+        for war in self.ws.wars:
+            participants = [war.get('attacker', ''), war.get('defender', '')]
+            if any(p in major_war_countries for p in participants):
+                war_premium += 0.10  # 10% per major war
+        war_premium = min(war_premium, 0.30)  # cap at 30%
+
+        # SANCTIONS on oil producers -- reduce supply
+        sanctions_supply_hit = 0.0
+        for producer in ['nordostan', 'persia']:
+            sanctions_level = self._get_sanctions_on(producer)
+            if sanctions_level >= 2:
+                sanctions_supply_hit += 0.08  # each heavily sanctioned producer = 8% supply reduction
+
+        # DEMAND from global GDP growth
+        n_countries = len(self.ws.countries)
+        gdp_growth_avg = 0.0
+        if n_countries > 0:
+            gdp_growth_avg = sum(
+                c["economic"].get("gdp_growth_rate", 0)
                 for c in self.ws.countries.values()
-            ) / total_gdp
-        demand = 1.0 + (avg_growth - 2.0) * 0.1
+            ) / n_countries
+        demand_factor = 1.0 + (gdp_growth_avg - 2.0) * 0.05  # demand elasticity
 
-        price = base_price * (demand / supply_factor) * disruption
-        price = clamp(price, 20.0, 300.0)
+        # SPECULATIVE SPIKE -- markets overreact to crises
+        crisis_count = len(self.ws.wars) + (1 if gulf_gate_blocked else 0) + (1 if formosa_blocked else 0)
+        speculation = 1.0 + crisis_count * 0.05  # 5% per active crisis
 
-        # Benefit to producers
+        final_supply = max(0.5, supply_factor - sanctions_supply_hit)
+        price = base_price * (demand_factor / final_supply) * disruption * (1 + war_premium) * speculation
+
+        # Oil producer revenue update
         for cid, country in self.ws.countries.items():
             if country["economic"].get("oil_producer"):
-                oil_share = country["economic"]["sectors"].get("resources", 0) / 100.0
-                oil_revenue = price * oil_share * country["economic"]["gdp"] / 80.0 * 0.15
+                resource_pct = country["economic"]["sectors"].get("resources", 0) / 100.0
+                oil_revenue = price * resource_pct * country["economic"]["gdp"] * 0.01
                 oil_revenue = max(oil_revenue, 0.0)
                 country["economic"]["oil_revenue"] = round(oil_revenue, 2)
 
+        price = round(max(30.0, min(250.0, price)), 1)  # floor $30, ceiling $250
+
         self._log.append(
-            f"  Oil price: ${price:.1f} (supply={supply_factor:.2f} "
-            f"demand={demand:.3f} disruption={disruption:.2f})"
+            f"  Oil price: ${price:.1f} (supply={final_supply:.2f} "
+            f"demand={demand_factor:.3f} disruption={disruption:.2f} "
+            f"war_premium={war_premium:.2f} speculation={speculation:.2f} "
+            f"sanctions_supply_hit={sanctions_supply_hit:.2f})"
         )
-        return round(price, 2)
+        return price
 
     def _calc_inflation(self, country_id: str, money_printed: float) -> float:
         """Inflation with 15% natural decay, 60x money-printing multiplier."""
@@ -436,17 +494,15 @@ class WorldModelEngine:
     # ===================================================================
 
     def _calc_stability(self, country_id: str, events: dict) -> float:
-        """V3 stability: friction model. War, sanctions, inflation all cost stability.
+        """V4 stability: refined friction model with wartime resilience.
 
-        Key changes from v2:
-        - War: -0.3 per round for ALL belligerents even without casualties
-        - Sanctions: -0.1 * sanctions_level per round for targets
-        - Inflation: -0.05 * (inflation - 3) per round above 3%
-        - GDP growth has REDUCED positive effect (was 0.3x, now 0.08x)
-        - Positive inertia halved and only above 7
-        - Social spending below baseline hurts MORE
-        - Hard cap at 9.0 (not 10.0)
-        - War tiredness increases 0.5/round for active combatants
+        Key changes from v3:
+        - War friction reduced: defenders -0.10 (was -0.25), attackers -0.08 (was -0.15)
+        - Wartime democratic resilience: democracies under invasion get +0.15/round
+        - Society adaptation: war 3+ rounds halves war tiredness growth
+        - Social spending 1.5x effectiveness during war
+        - War tiredness accumulation slowed (0.2 defender, 0.15 attacker)
+        - Target: Heartland declines ~4->2.5-3.0 over 8 rounds, not to 1.0
         """
         c = self.ws.countries[country_id]
         pol = c["political"]
@@ -457,6 +513,7 @@ class WorldModelEngine:
         at_war = self.ws.get_country_at_war(country_id)
         sanctions_level = self._sanctions_level(country_id)
         under_heavy_sanctions = sanctions_level >= 2
+        regime = pol.get("regime_type", c.get("regime_type", "democracy"))
 
         # Positive inertia -- weaker, only at high stability
         if 7 <= old_stab < 9:
@@ -470,17 +527,21 @@ class WorldModelEngine:
             delta += gdp_growth * 0.3  # negative growth hurts more
 
         # Social spending -- below baseline is costly
+        # During war, social spending is 1.5x more effective (wartime programs matter more)
         social_ratio = events.get("social_spending_ratio", 0.20)
         baseline = eco.get("social_spending_baseline", 0.30)
+        social_effectiveness = 1.5 if at_war else 1.0
         if social_ratio >= baseline:
-            delta += 0.05  # meeting baseline is just neutral, slight positive
+            delta += 0.05 * social_effectiveness  # meeting baseline: slight positive, amplified in war
         elif social_ratio >= baseline - 0.05:
             delta -= 0.05  # minor shortfall -- small penalty
         else:
             shortfall = baseline - social_ratio
             delta -= shortfall * 3  # meaningful penalty for serious underspending
 
-        # WAR FRICTION: depends on how directly involved
+        # WAR FRICTION: depends on how directly involved (REDUCED from v3)
+        is_frontline = False
+        is_primary = False
         if at_war:
             # Check if primary belligerent (attacker/defender) or allied
             is_primary = any(
@@ -492,11 +553,11 @@ class WorldModelEngine:
                 w.get("defender") == country_id for w in self.ws.wars
             )
             if is_frontline:
-                delta -= 0.25  # defender: heavy cost, war at home
+                delta -= 0.10  # defender: was -0.25, now -0.10
             elif is_primary:
-                delta -= 0.15  # attacker / power projector: moderate cost
+                delta -= 0.08  # attacker: was -0.15, now -0.08
             else:
-                delta -= 0.08  # allied/supporting role: lighter cost
+                delta -= 0.05  # allied/supporting role: lighter cost
             casualties = events.get("casualties", 0)
             delta -= casualties * 0.2
             territory_lost = events.get("territory_lost", 0)
@@ -505,6 +566,11 @@ class WorldModelEngine:
             delta += territory_gained * 0.15
             war_tiredness = pol.get("war_tiredness", 0)
             delta -= min(war_tiredness * 0.04, 0.4)  # capped contribution
+
+            # WARTIME DEMOCRATIC RESILIENCE: democracies under existential threat
+            # get sustained +0.15 per round ("rally around the flag" ongoing effect)
+            if is_frontline and regime in ("democracy", "hybrid"):
+                delta += 0.15  # sustained democratic resilience under invasion
 
         # SANCTIONS FRICTION: -0.1 * level per round for targets
         if sanctions_level > 0:
@@ -538,7 +604,6 @@ class WorldModelEngine:
                 delta *= 0.5  # was 0.25, now 0.5 -- still dampened but real
 
         # Autocracy resilience
-        regime = pol.get("regime_type", c.get("regime_type", "democracy"))
         if regime == "autocracy":
             if delta < 0:
                 delta *= 0.75
@@ -687,10 +752,14 @@ class WorldModelEngine:
         gdp = c["economic"]["gdp"]
         result = {"nuclear_levelup": False, "ai_levelup": False}
 
+        # Rare earth impact on R&D (FIX 3)
+        rare_earth_factor = self._calc_rare_earth_impact(country_id)
+
         # Nuclear R&D
         nuc_invest = rd_investment.get("nuclear", 0)
         if nuc_invest > 0 and gdp > 0:
-            tech["nuclear_rd_progress"] += (nuc_invest / max(gdp, 0.01)) * 0.5
+            nuc_progress = (nuc_invest / max(gdp, 0.01)) * 0.5 * rare_earth_factor
+            tech["nuclear_rd_progress"] += nuc_progress
         nuc_threshold = NUCLEAR_RD_THRESHOLDS.get(tech["nuclear_level"], 999.0)
         if tech["nuclear_rd_progress"] >= nuc_threshold and tech["nuclear_level"] < 3:
             tech["nuclear_level"] += 1
@@ -702,7 +771,8 @@ class WorldModelEngine:
         # AI R&D
         ai_invest = rd_investment.get("ai", 0)
         if ai_invest > 0 and gdp > 0:
-            tech["ai_rd_progress"] += (ai_invest / max(gdp, 0.01)) * 0.5
+            ai_progress = (ai_invest / max(gdp, 0.01)) * 0.5 * rare_earth_factor
+            tech["ai_rd_progress"] += ai_progress
         ai_threshold = AI_RD_THRESHOLDS.get(tech["ai_level"], 999.0)
         if tech["ai_rd_progress"] >= ai_threshold and tech["ai_level"] < 4:
             tech["ai_level"] += 1
@@ -710,6 +780,10 @@ class WorldModelEngine:
             result["ai_levelup"] = True
             self._log.append(
                 f"  TECH BREAKTHROUGH: {country_id} AI->L{tech['ai_level']}")
+
+        if rare_earth_factor < 1.0:
+            self._log.append(
+                f"  Rare earth restriction on {country_id}: R&D factor={rare_earth_factor:.2f}")
 
         return result
 
@@ -1014,6 +1088,54 @@ class WorldModelEngine:
             if level in ("low", "normal", "high"):
                 self.ws.opec_production[member] = level
 
+    def _apply_rare_earth_changes(self, changes: dict) -> None:
+        """Apply rare earth restriction actions. Cathay can restrict exports to target countries.
+
+        Format: {"target_country_id": level} where level is 0-3.
+        Level 0 = lift restrictions, 1-3 = mild to severe.
+        Cost to Cathay: loses trade revenue proportional to restriction level.
+        """
+        if not changes:
+            return
+        for target, level in changes.items():
+            level = int(clamp(level, 0, 3))
+            if level == 0:
+                self.ws.rare_earth_restrictions.pop(target, None)
+                self._log.append(f"  Rare earth: restrictions on {target} LIFTED")
+            else:
+                self.ws.rare_earth_restrictions[target] = level
+                # Cost to Cathay: lose some trade revenue (rare earths are exports)
+                cathay = self.ws.countries.get('cathay')
+                if cathay:
+                    trade_loss = level * 0.3  # coins per level per target
+                    cathay['economic']['treasury'] = max(
+                        cathay['economic']['treasury'] - trade_loss, 0)
+                self._log.append(
+                    f"  Rare earth: Cathay restricts {target} at level {level} "
+                    f"(trade cost: {level * 0.3:.1f} coins)")
+
+    def _apply_blockade_changes(self, changes: dict) -> None:
+        """Apply blockade declarations or removals.
+
+        Format: {"chokepoint_key": {"blocker": country_id}} to add,
+                {"chokepoint_key": None} to remove.
+        Also handles formosa_blockade flag.
+        """
+        if not changes:
+            return
+        for chokepoint, data in changes.items():
+            if data is None:
+                self.ws.active_blockades.pop(chokepoint, None)
+                if chokepoint == 'formosa_strait':
+                    self.ws.formosa_blockade = False
+                self._log.append(f"  Blockade: {chokepoint} LIFTED")
+            else:
+                self.ws.active_blockades[chokepoint] = data
+                if chokepoint == 'formosa_strait':
+                    self.ws.formosa_blockade = True
+                self._log.append(
+                    f"  Blockade: {chokepoint} declared by {data.get('blocker', '?')}")
+
     def _apply_mobilization(self, country_id: str, level: str) -> None:
         c = self.ws.countries[country_id]
         mil = c["military"]
@@ -1069,14 +1191,111 @@ class WorldModelEngine:
                 max_level = level
         return max_level
 
+    def _is_chokepoint_blocked(self, chokepoint_key: str) -> bool:
+        """Check if a chokepoint is actively blocked via active_blockades."""
+        blockades = getattr(self.ws, 'active_blockades', {})
+        return chokepoint_key in blockades
+
+    def _get_sanctions_on(self, target_country: str) -> int:
+        """Get the maximum sanctions level imposed on a country (from bilateral data)."""
+        sanctions = self.ws.bilateral.get("sanctions", {})
+        max_level = 0
+        for sanctioner, targets in sanctions.items():
+            level = targets.get(target_country, 0)
+            if level > max_level:
+                max_level = level
+        return max_level
+
+    def _calc_semiconductor_disruption(self, country_id: str) -> float:
+        """If Formosa is blockaded, invaded, or at war, dependent countries lose GDP.
+
+        Uses formosa_dependency from countries.csv (0-1 scale).
+        Returns multiplicative factor for GDP growth (1.0 = no impact, 0.5 = floor).
+        """
+        dep = self.ws.countries[country_id]['economic'].get('formosa_dependency', 0)
+        if dep <= 0:
+            return 1.0  # no dependency, no impact
+
+        # Check if Formosa is disrupted
+        formosa_disrupted = False
+        disruption_severity = 0.0
+
+        # Check if Formosa is at war
+        for war in self.ws.wars:
+            if 'formosa' in [war.get('attacker'), war.get('defender')]:
+                formosa_disrupted = True
+                disruption_severity = 0.8  # severe -- active combat on semiconductor island
+
+        # Check if Formosa is blockaded (naval blockade flag or active_blockades)
+        formosa_blockade = getattr(self.ws, 'formosa_blockade', False)
+        if not formosa_blockade:
+            # Also check active_blockades for formosa_strait
+            formosa_blockade = self._is_chokepoint_blocked('formosa_strait')
+        if not formosa_blockade:
+            # Also check chokepoint_status for taiwan_strait
+            formosa_blockade = self.ws.chokepoint_status.get('taiwan_strait') == 'blocked'
+
+        if formosa_blockade and not formosa_disrupted:
+            formosa_disrupted = True
+            disruption_severity = 0.5  # moderate -- blockade disrupts shipping but fabs still operate
+
+        if not formosa_disrupted:
+            return 1.0
+
+        # GDP impact: country loses (dependency * severity) of its tech sector GDP
+        # E.g., Columbia with 65% dependency and 80% severity loses 52% of tech sector output
+        tech_sector_pct = self.ws.countries[country_id]['economic']['sectors'].get('technology', 0) / 100.0
+        gdp_loss_fraction = dep * disruption_severity * tech_sector_pct
+
+        return max(0.5, 1.0 - gdp_loss_fraction)  # floor at 50% -- total collapse prevented
+
+    def _calc_rare_earth_impact(self, country_id: str) -> float:
+        """If Cathay has declared rare earth restrictions, affected countries' R&D slows.
+
+        Returns multiplicative factor for R&D progress (1.0 = no impact, 0.4 = floor).
+        """
+        restrictions = getattr(self.ws, 'rare_earth_restrictions', {})
+        if country_id in restrictions:
+            restriction_level = restrictions[country_id]  # 0-3 scale
+            # Each level reduces R&D progress by 15%
+            rd_penalty = 1.0 - (restriction_level * 0.15)
+            return max(0.4, rd_penalty)  # floor at 40% -- can't completely block R&D
+        return 1.0  # no restrictions
+
     def _update_war_tiredness(self, country_id: str) -> None:
+        """War tiredness: defenders +0.2/round, attackers +0.15/round.
+        Society adaptation: after 3+ rounds at war, growth rate halves.
+        """
         c = self.ws.countries[country_id]
         pol = c["political"]
         at_war = self.ws.get_country_at_war(country_id)
         current_wt = pol.get("war_tiredness", 0)
         if at_war:
-            # War tiredness increases 0.4/round, capped at 10
-            pol["war_tiredness"] = min(current_wt + 0.4, 10.0)
+            # Determine role: defender accumulates faster than attacker
+            is_defender = any(
+                w.get("defender") == country_id for w in self.ws.wars
+            )
+            is_attacker = any(
+                w.get("attacker") == country_id for w in self.ws.wars
+            )
+            if is_defender:
+                base_increase = 0.20  # was 0.4
+            elif is_attacker:
+                base_increase = 0.15
+            else:
+                base_increase = 0.10  # allied/supporting role
+
+            # Society adaptation: after 3+ rounds at war, tiredness growth halves
+            war_duration = 0
+            for w in self.ws.wars:
+                if w.get("attacker") == country_id or w.get("defender") == country_id:
+                    start = w.get("start_round", 0)
+                    dur = self.ws.round_num - start if start >= 0 else self.ws.round_num + abs(start)
+                    war_duration = max(war_duration, dur)
+            if war_duration >= 3:
+                base_increase *= 0.5  # society adapts to wartime
+
+            pol["war_tiredness"] = min(current_wt + base_increase, 10.0)
         else:
             pol["war_tiredness"] = max(current_wt * 0.80, 0)
 
