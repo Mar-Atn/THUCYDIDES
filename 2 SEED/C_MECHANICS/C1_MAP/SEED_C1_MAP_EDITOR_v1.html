@@ -1139,9 +1139,19 @@ fileInput.addEventListener('change', (e) => {
           }
         });
 
-        // Rebuild grid
-        ROWS = maxRow + 1;
-        COLS = maxCol + 1;
+        // Compute tight bounds from LAND hexes only (not sea)
+        let landMaxRow = 0, landMaxCol = 0, landMinRow = 9999, landMinCol = 9999;
+        hexData.forEach(h => {
+          if (h.owner !== 'sea') {
+            landMaxRow = Math.max(landMaxRow, h.row);
+            landMaxCol = Math.max(landMaxCol, h.col);
+            landMinRow = Math.min(landMinRow, h.row);
+            landMinCol = Math.min(landMinCol, h.col);
+          }
+        });
+        // Add 2 rows/cols of water padding around land
+        ROWS = Math.max(landMaxRow + 3, 8);
+        COLS = Math.max(landMaxCol + 3, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
@@ -1234,9 +1244,9 @@ fileInput.addEventListener('change', (e) => {
           }
         }
 
-        // Rebuild grid
-        ROWS = Math.max(maxRow + 2, 16);
-        COLS = Math.max(maxCol + 2, 24);
+        // Rebuild grid — tight fit around land with 2 hex padding
+        ROWS = Math.max(maxRow + 3, 8);
+        COLS = Math.max(maxCol + 3, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
