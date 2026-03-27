@@ -640,10 +640,12 @@ function draw() {
 }
 
 // ======== MODE SWITCHING ========
-function setMode(mode) {
+function setMode(mode, keepPlacement) {
   editorMode = mode;
-  placingChokepoint = null;
-  placingDieHard = null;
+  if (!keepPlacement) {
+    placingChokepoint = null;
+    placingDieHard = null;
+  }
   if (mode !== 'select') { clearSelection(); dragging = false; dragStarted = false; }
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
   const label = mode === 'paint' ? 'Paint' : mode === 'select' ? 'Select' : 'Markers';
@@ -792,7 +794,7 @@ function buildChokepointPanel() {
       } else {
         placingChokepoint = def.key;
         placingDieHard = null;
-        setMode('markers');
+        setMode('markers', true);
         document.getElementById('st-mode').textContent = 'Place ' + def.name;
       }
       buildChokepointPanel();
@@ -845,7 +847,7 @@ function buildDieHardPanel() {
       } else {
         placingDieHard = def.key;
         placingChokepoint = null;
-        setMode('markers');
+        setMode('markers', true);
         document.getElementById('st-mode').textContent = 'Place ' + def.name;
       }
       buildChokepointPanel();
