@@ -47,8 +47,8 @@ Concept status: **strong** (countries and roles architected). SEED is the **bigg
 |---|------|---------|-----------|-------------|
 | B1 | **Country roster & organizations** | ● Complete (21 countries, 8 orgs) | Minor refinements from concept test | B1 v3 (updated) |
 | B2 | **Roles architecture** | ● Complete (6 teams, 40+ roles) | Structural refinements from concept test | B2 v3 (updated) |
-| B3 | **Country Seeds (21)** | ◐ Skeleton only | Full seed per country in standard template: geography, regime, economy, military, alliances, internal dynamics, key challenges, relationship to the Trap. Research real-world data and protagonists. | `SEED_COUNTRIES/` (21 files or combined) |
-| B4 | **Role Seeds (40+)** | — (new at this depth) | Full seed per role: bio/character, position/resources/powers, interests/objectives/needs, views/beliefs/values, key relationships, ticking clock, core dilemma. Research real protagonists. **Work role-by-role with Marat.** | `SEED_ROLES/` (per-team files) |
+| B3 | **Country Seeds (21)** | ◐ Skeleton only | Full seed per country in standard template: geography, regime, economy, military, alliances, internal dynamics, key challenges, relationship to the Trap. Research real-world data and protagonists. | `SEED_COUNTRIES/SEED_B1_COUNTRY_[name]_v1.md` (16 files) |
+| B4 | **Role Seeds (40+)** | — (new at this depth) | Full seed per role: bio/character, position/resources/powers, interests/objectives/needs, views/beliefs/values, key relationships, ticking clock, core dilemma. Research real protagonists. **Work role-by-role with Marat.** | `role_briefs/SEED_B2_ROLES_[team]_v1.md` (7 files) |
 | B5 | **Relationship Matrix** | ○ Not started | Bilateral relationships for all country pairs. Based on protagonist research. Tensions AND alignments mapped for SIM playability. | `SEED_RELATIONSHIP_MATRIX.md` |
 | B6 | **AI Country Profiles** | ◐ Concept test profiles | Full 4-block cognitive initialization for all AI-operated countries. Identity, personality, memory, goals/strategy. | `SEED_AI_COUNTRY_PROFILES.md` |
 
@@ -63,7 +63,7 @@ Concept status: **strong** (4 domains, 30 actions, time structure, map). SEED fi
 | C1 | **Domains architecture** | ● Complete (military, economy, politics, tech) | Incorporate concept test fixes (stability formula, oil price, inflation, cost-to-sanctioner, debt service). Finalize all mechanic details. | C1 v3 (updated) |
 | C2 | **Action system** | ● Complete (30 actions, auth chains) | Minor refinements | C2 v4 (updated) |
 | C3 | **Time structure** | ● Complete (6-8 rounds, dramatic arc) | Finalize as 8 rounds based on concept test | C3 v2 (updated) |
-| C4 | **Map & zones** | ● Concept + concept test (89 zones, adjacency) | Finalize zone structure, refine adjacency from test learnings | `SEED_MAP_ZONES.md` (refined) |
+| C4 | **Map & zones** | ● Concept + concept test (89 zones, adjacency) | Finalize zone structure, refine adjacency from test learnings | `SEED_C2_MAP_ZONES_v3.md` (refined) |
 | C5 | **Public speaking & press** | ○ Not started | Speech protocol, Veritas mechanic | `C5_TTT_PUBLIC_SPEAKING_PRESS.md` |
 | C6 | **Contracts & collective decisions** | ◐ Distributed | Consolidate into single reference | `C6_TTT_CONTRACTS_DECISIONS.md` |
 | C7 | **Starting Data Pack** | — (concept test draft exists) | ALL numerical starting values for 21 countries: GDP, military, tech, stability, sanctions, tariffs, deployments. Refined from concept test. Validated by all domain experts. | `SEED_STARTING_DATA.json` + `.md` |
@@ -106,7 +106,7 @@ Concept status: **architecture complete** (F1 participant module, F2 Navigator).
 
 | # | Item | Concept | SEED adds | Deliverable |
 |---|------|---------|-----------|-------------|
-| F1 | **World State Schema** | — (implicit in engine) | Canonical data model for the complete world state: per-country state (economic, military, political, tech), bilateral relations, zone control, deployments, war status, chokepoints, org membership. Versioned per round. | `SEED_DATA_WORLD_STATE.md` |
+| F1 | **World State Schema** | — (implicit in engine) | Canonical data model for the complete world state: per-country state (economic, military, political, tech), bilateral relations, zone control, deployments, war status, chokepoints, org membership. Versioned per round. | `SEED_F1_DATA_SCHEMA_v1.md` |
 | F2 | **Event Log Schema** | — (new) | Every SIM action logged: who, what, when, where, authorization, outcome. This is the behavioral data pipeline that feeds post-SIM analytics. The product's long-term value. | `SEED_DATA_EVENT_LOG.md` |
 | F3 | **Real-Time Data Flows** | — (new) | How data moves between engines, participants, facilitator, public display. What's pushed vs. pulled. Latency requirements. Information asymmetry enforcement (who sees what). | `SEED_DATA_FLOWS.md` |
 | F4 | **API Contracts** | — (new) | Interface definitions between: front-end ↔ back-end, engine ↔ database, AI module ↔ engine, facilitator ↔ system. Typed, versioned. | `SEED_API_CONTRACTS.md` |

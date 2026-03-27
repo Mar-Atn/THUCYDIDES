@@ -84,19 +84,21 @@ THUCYDIDES/
 │
 ├── 2 SEED/                                ← Stage 2: CURRENT WORKING STAGE
 │   ├── SEED_CHECKLIST_v2.md              ← 51 items, tracking progress
-│   ├── SEED_DATA_SCHEMA_v1.md            ← CSV schema (single source of truth)
+│   ├── SEED_F1_DATA_SCHEMA_v1.md         ← CSV schema (single source of truth)
 │   ├── SEED_TEMPLATE_ROLE_v1.md          ← Standard role format
 │   ├── SEED_TEMPLATE_COUNTRY_v1.md       ← Standard country format
-│   ├── SEED_MAP_GLOBAL_v1.svg            ← Approved hex map (H3)
-│   ├── SEED_MAP_ZONES_v3.md              ← Zone registry + adjacency + theaters
-│   ├── SEED_MAP_THEATER_EASTERN_EREB_v1.svg ← 15-hex theater map
-│   ├── SEED_MAP_THEATER_FORMOSA_v1.svg   ← 10-hex theater map
-│   ├── SEED_MAP_THEATER_MASHRIQ_v1.svg   ← 12-hex theater map
+│   ├── SEED_C1_MAP_GLOBAL_v1.svg         ← Approved hex map (C1)
+│   ├── SEED_C2_MAP_ZONES_v3.md           ← Zone registry + adjacency (C2)
+│   ├── SEED_C3_THEATER_EASTERN_EREB_v1.svg ← 15-hex theater map (C3)
+│   ├── SEED_C3_THEATER_FORMOSA_v1.svg    ← 10-hex theater map (C3)
+│   ├── SEED_C3_THEATER_MASHRIQ_v1.svg    ← 12-hex theater map (C3)
 │   ├── STATUS.md                         ← Phase status tracker
-│   ├── SEED_COUNTRIES/                   ← 16 country seed documents
-│   ├── role_briefs/                      ← 37 role seeds (7 files)
+│   ├── SEED_COUNTRIES/                   ← 16 country seeds (B1)
+│   │   └── SEED_B1_COUNTRY_[name]_v1.md
+│   ├── role_briefs/                      ← 37 role seeds in 7 files (B2)
+│   │   └── SEED_B2_ROLES_[team]_v1.md
 │   ├── role_packs/                       ← Artefact content (to fill)
-│   ├── data/                             ← 9 CSV files (canonical data)
+│   ├── data/                             ← 9 CSV files (canonical data, C4)
 │   └── ENGINE/                           ← Canonical engine code (latest)
 │
 ├── 10. TESTS/                             ← ALL testing (separate from design)
@@ -375,8 +377,8 @@ All files in official phase folders follow this pattern:
 
 **Examples:**
 - `CON_A1_THUCYDIDES_TRAP_v2.frozen.md` — Concept doc, frozen
-- `SEED_COUNTRY_COLUMBIA_v1.md` — Seed country seed, active
-- `SEED_MAP_GLOBAL_v1.frozen.svg` — Approved map, frozen
+- `SEED_B1_COUNTRY_COLUMBIA_v1.md` — Seed country seed, active
+- `SEED_C1_MAP_GLOBAL_v1.frozen.svg` — Approved map, frozen
 - `SEED_DATA_countries_v1.csv` — CSV data file, active
 
 **Exception:** Engine Python files keep code-style naming (e.g., `world_model_engine.py`) — code follows code conventions. CSVs in data/ keep short names for engine compatibility but get the SEED_ prefix in documentation references.
@@ -385,7 +387,7 @@ All files in official phase folders follow this pattern:
 - Files with NO status suffix are current/active — may be updated
 - Files with `.frozen` suffix are locked — require Marat approval to change (see Section 7.2 Rule 4)
 
-### Design Documents (Legacy Section Codes)
+### Design Documents (Legacy Section Codes — Concept Phase)
 
 **Section codes** (used in Concept phase CON_ prefix):
 - **A** = Scenario Foundation
@@ -396,6 +398,31 @@ All files in official phase folders follow this pattern:
 - **F** = AI Modules
 - **G** = AI Assistant
 - **H** = Web App
+
+### SEED Stage Section Codes
+
+Each SEED file's section code maps directly to the SEED checklist:
+
+| Code | Checklist Section | Content | Examples |
+|------|------------------|---------|----------|
+| **A** | Scenario Foundation | World context narrative | `SEED_A1_WORLD_CONTEXT_v1.md` |
+| **B1** | Countries | Country seed documents (16) | `SEED_B1_COUNTRY_COLUMBIA_v1.md` |
+| **B2** | Roles | Role seed documents (37 roles in 7 files) | `SEED_B2_ROLES_COLUMBIA_v1.md` |
+| **B3** | Relationships | Bilateral relationship matrix | `SEED_B3_RELATIONSHIPS_v1.md` |
+| **B4** | AI Profiles | AI country cognitive profiles | `SEED_B4_AI_PROFILES_v1.md` |
+| **C1** | Map Global | Global hex map | `SEED_C1_MAP_GLOBAL_v1.svg` |
+| **C2** | Map Zones | Zone structure + adjacency | `SEED_C2_MAP_ZONES_v3.md` |
+| **C3** | Map Theaters | Theater zoom-in maps | `SEED_C3_THEATER_[name]_v1.svg` |
+| **C4** | Starting Data | Numerical starting values | CSVs in `data/` folder |
+| **D1-D7** | Engines | World model engine specs | `SEED_D1_ENGINE_ECONOMIC_v1.md` |
+| **E1-E4** | AI Systems | AI participant + navigator specs | `SEED_E1_AI_ARCHITECTURE_v1.md` |
+| **F1** | Data Schema | CSV schemas + validation rules | `SEED_F1_DATA_SCHEMA_v1.md` |
+| **G1-G5** | Web App | Screen-level specs | `SEED_G1_APP_PARTICIPANT_v1.md` |
+| **H1-H4** | Visual Design | UX style, artefact templates | `SEED_H1_UX_STYLE_v1.md` |
+| **I1-I5** | Testing | Test architecture + harness | `SEED_I1_TEST_ARCHITECTURE_v1.md` |
+| **J1** | Delivery | Operations spec | `SEED_J1_DELIVERY_v1.md` |
+
+**Traceability rule:** Every checklist item maps to one or more files via section code. If checklist says "B2 — Role Seeds", look for files named `SEED_B2_ROLES_*.md`.
 
 Major version increments (v1 → v2) at stage gates. Minor increments (v2.1) for within-stage revisions.
 
