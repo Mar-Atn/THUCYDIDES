@@ -12,14 +12,14 @@ columbia,ground,1,horn,Djibouti - Red Sea security
 columbia,ground,4,persia_2,ME theater - active war zone (Operation Epic Fury)
 columbia,ground,1,mirage,Gulf logistics hub
 columbia,naval,1,col_main_2,Atlantic Fleet home port (Norfolk)
-columbia,naval,3,sea_tethys_west,Atlantic Fleet deployed
+columbia,naval,3,"w(5,4)",Atlantic Fleet deployed
 columbia,naval,1,col_main_3,Pacific Fleet home port (San Diego)
-columbia,naval,3,sea_mirovia_north,Pacific Fleet deployed
-columbia,naval,3,sea_gulf,Persian Gulf - 2 CSGs for Epic Fury
-columbia,naval,2,sea_med,Eastern Mediterranean - Persia war support
-columbia,naval,1,sea_ecs,East China Sea patrol - Formosa deterrence
-columbia,naval,1,sea_rheic,Indian Ocean presence
-columbia,naval,1,sea_arctic,GIUK Gap patrol
+columbia,naval,3,"w(19,3)",Pacific Fleet deployed
+columbia,naval,3,"w(12,8)",Persian Gulf - 2 CSGs for Epic Fury
+columbia,naval,2,"w(9,6)",Eastern Mediterranean - Persia war support
+columbia,naval,1,"w(17,4)",East China Sea patrol - Formosa deterrence
+columbia,naval,1,"w(13,9)",Indian Ocean presence
+columbia,naval,1,"w(12,1)",GIUK Gap patrol
 columbia,tactical_air,5,col_main_1,Continental strike capability
 columbia,tactical_air,2,col_main_3,Pacific air command
 columbia,tactical_air,2,teutonia_1,European air power
@@ -41,10 +41,10 @@ cathay,ground,2,cathay_4,Northeast - Choson border security
 cathay,ground,3,cathay_7,South China coastal
 cathay,ground,2,choson,Choson border quick reaction force
 cathay,naval,1,cathay_7,South Sea Fleet home port (Yulin)
-cathay,naval,3,sea_scs,South Sea Fleet deployed - Taiwan Strait
+cathay,naval,3,"w(16,6)",South Sea Fleet deployed - Taiwan Strait
 cathay,naval,1,cathay_4,East Sea Fleet home port (Qingdao)
-cathay,naval,2,sea_ecs,East Sea Fleet deployed - Yellow Sea
-cathay,naval,2,sea_scs,South China Sea patrols
+cathay,naval,2,"w(17,4)",East Sea Fleet deployed - Yellow Sea
+cathay,naval,2,"w(16,6)",South China Sea patrols
 cathay,tactical_air,5,cathay_3,Central aviation + strategic reserve
 cathay,tactical_air,5,cathay_6,Coastal DF-21/DF-26 carrier killers + tactical aviation
 cathay,tactical_air,2,cathay_2,Western interior air

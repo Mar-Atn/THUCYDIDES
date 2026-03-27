@@ -214,7 +214,9 @@ Every military unit placement at game start.
 | `country_id` | string | FK → countries.id | `columbia` |
 | `unit_type` | enum | `ground`/`naval`/`tactical_air`/`strategic_missile`/`air_defense` | `ground` |
 | `count` | int | Number of units | `8` |
-| `zone_id` | string | FK → zones.id | `col_continental` |
+| `zone_id` | string | Land zone ID (FK → zones.id) OR water hex coordinate `w(col,row)` | `col_continental` or `w(12,5)` |
+
+**Naval deployment convention:** Ground/air units deploy to named land zones (FK → zones.id). Naval units can deploy to either land zones (home ports) or water hex coordinates using the format `w(col,row)` where col and row are the visual grid coordinates from the global hex map. Water hexes are not named — they're addressed by position. Multiple nations' fleets can share a water hex. Between rounds, naval units can move to any water hex. Attacks only target adjacent hexes.
 
 ---
 
