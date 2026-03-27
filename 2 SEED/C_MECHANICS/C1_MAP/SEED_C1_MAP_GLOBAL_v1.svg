@@ -92,12 +92,12 @@
   <polygon points="630.91,152.50 661.22,170.00 661.22,205.00 630.91,222.50 600.60,205.00 600.60,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="691.53,152.50 721.84,170.00 721.84,205.00 691.53,222.50 661.22,205.00 661.22,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="752.15,152.50 782.46,170.00 782.46,205.00 752.15,222.50 721.84,205.00 721.84,170.00" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="812.77,152.50 843.08,170.00 843.08,205.00 812.77,222.50 782.46,205.00 782.46,170.00" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="873.39,152.50 903.70,170.00 903.70,205.00 873.39,222.50 843.08,205.00 843.08,170.00" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="934.02,152.50 964.33,170.00 964.33,205.00 934.02,222.50 903.70,205.00 903.70,170.00" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="994.64,152.50 1024.95,170.00 1024.95,205.00 994.64,222.50 964.33,205.00 964.33,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="1055.26,152.50 1085.57,170.00 1085.57,205.00 1055.26,222.50 1024.95,205.00 1024.95,170.00" fill="#8A8A8A" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1115.88,152.50 1146.19,170.00 1146.19,205.00 1115.88,222.50 1085.57,205.00 1085.57,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="812.77,152.50 843.08,170.00 843.08,205.00 812.77,222.50 782.46,205.00 782.46,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="873.39,152.50 903.70,170.00 903.70,205.00 873.39,222.50 843.08,205.00 843.08,170.00" fill="#D4A5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="934.02,152.50 964.33,170.00 964.33,205.00 934.02,222.50 903.70,205.00 903.70,170.00" fill="#D4A5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="994.64,152.50 1024.95,170.00 1024.95,205.00 994.64,222.50 964.33,205.00 964.33,170.00" fill="#D4A5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1055.26,152.50 1085.57,170.00 1085.57,205.00 1055.26,222.50 1024.95,205.00 1024.95,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1115.88,152.50 1146.19,170.00 1146.19,205.00 1115.88,222.50 1085.57,205.00 1085.57,170.00" fill="#8A8A8A" stroke="#666" stroke-width="1.5"/>
   <polygon points="1176.50,152.50 1206.81,170.00 1206.81,205.00 1176.50,222.50 1146.19,205.00 1146.19,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1237.12,152.50 1267.44,170.00 1267.44,205.00 1237.12,222.50 1206.81,205.00 1206.81,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1297.75,152.50 1328.06,170.00 1328.06,205.00 1297.75,222.50 1267.44,205.00 1267.44,170.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -116,15 +116,15 @@
   <polygon points="600.60,205.00 630.91,222.50 630.91,257.50 600.60,275.00 570.29,257.50 570.29,222.50" fill="#8FB59A" stroke="#666" stroke-width="1.5"/>
   <polygon points="661.22,205.00 691.53,222.50 691.53,257.50 661.22,275.00 630.91,257.50 630.91,222.50" fill="#A5C8A5" stroke="#666" stroke-width="1.5"/>
   <polygon points="721.84,205.00 752.15,222.50 752.15,257.50 721.84,275.00 691.53,257.50 691.53,222.50" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="782.46,205.00 812.77,222.50 812.77,257.50 782.46,275.00 752.15,257.50 752.15,222.50" fill="#C8C8A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="843.08,205.00 873.39,222.50 873.39,257.50 843.08,275.00 812.77,257.50 812.77,222.50" fill="#C8C8A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="903.70,205.00 934.02,222.50 934.02,257.50 903.70,275.00 873.39,257.50 873.39,222.50" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="964.33,205.00 994.64,222.50 994.64,257.50 964.33,275.00 934.02,257.50 934.02,222.50" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1024.95,205.00 1055.26,222.50 1055.26,257.50 1024.95,275.00 994.64,257.50 994.64,222.50" fill="#A5C8D4" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1085.57,205.00 1115.88,222.50 1115.88,257.50 1085.57,275.00 1055.26,257.50 1055.26,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="782.46,205.00 812.77,222.50 812.77,257.50 782.46,275.00 752.15,257.50 752.15,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="843.08,205.00 873.39,222.50 873.39,257.50 843.08,275.00 812.77,257.50 812.77,222.50" fill="#C8C8A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="903.70,205.00 934.02,222.50 934.02,257.50 903.70,275.00 873.39,257.50 873.39,222.50" fill="#C8C8A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="964.33,205.00 994.64,222.50 994.64,257.50 964.33,275.00 934.02,257.50 934.02,222.50" fill="#D4A5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1024.95,205.00 1055.26,222.50 1055.26,257.50 1024.95,275.00 994.64,257.50 994.64,222.50" fill="#D4A5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1085.57,205.00 1115.88,222.50 1115.88,257.50 1085.57,275.00 1055.26,257.50 1055.26,222.50" fill="#A5C8D4" stroke="#666" stroke-width="1.5"/>
   <polygon points="1146.19,205.00 1176.50,222.50 1176.50,257.50 1146.19,275.00 1115.88,257.50 1115.88,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="1206.81,205.00 1237.12,222.50 1237.12,257.50 1206.81,275.00 1176.50,257.50 1176.50,222.50" fill="#A5B5C8" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1267.44,205.00 1297.75,222.50 1297.75,257.50 1267.44,275.00 1237.12,257.50 1237.12,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1206.81,205.00 1237.12,222.50 1237.12,257.50 1206.81,275.00 1176.50,257.50 1176.50,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1267.44,205.00 1297.75,222.50 1297.75,257.50 1267.44,275.00 1237.12,257.50 1237.12,222.50" fill="#A5B5C8" stroke="#666" stroke-width="1.5"/>
   <polygon points="1328.06,205.00 1358.37,222.50 1358.37,257.50 1328.06,275.00 1297.75,257.50 1297.75,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1388.68,205.00 1418.99,222.50 1418.99,257.50 1388.68,275.00 1358.37,257.50 1358.37,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1449.30,205.00 1479.61,222.50 1479.61,257.50 1449.30,275.00 1418.99,257.50 1418.99,222.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -141,14 +141,14 @@
   <polygon points="691.53,257.50 721.84,275.00 721.84,310.00 691.53,327.50 661.22,310.00 661.22,275.00" fill="#A5C8A5" stroke="#666666" stroke-width="1.5"/>
   <polygon points="752.15,257.50 782.46,275.00 782.46,310.00 752.15,327.50 721.84,310.00 721.84,275.00" fill="#D4A5A5" stroke="#666666" stroke-width="1.5"/>
   <polygon points="812.77,257.50 843.08,275.00 843.08,310.00 812.77,327.50 782.46,310.00 782.46,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="873.39,257.50 903.70,275.00 903.70,310.00 873.39,327.50 843.08,310.00 843.08,275.00" fill="#C8C8A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="934.02,257.50 964.33,275.00 964.33,310.00 934.02,327.50 903.70,310.00 903.70,275.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="994.64,257.50 1024.95,275.00 1024.95,310.00 994.64,327.50 964.33,310.00 964.33,275.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1055.26,257.50 1085.57,275.00 1085.57,310.00 1055.26,327.50 1024.95,310.00 1024.95,275.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1115.88,257.50 1146.19,275.00 1146.19,310.00 1115.88,327.50 1085.57,310.00 1085.57,275.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1176.50,257.50 1206.81,275.00 1206.81,310.00 1176.50,327.50 1146.19,310.00 1146.19,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="1237.12,257.50 1267.44,275.00 1267.44,310.00 1237.12,327.50 1206.81,310.00 1206.81,275.00" fill="#A5B5C8" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1297.75,257.50 1328.06,275.00 1328.06,310.00 1297.75,327.50 1267.44,310.00 1267.44,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="873.39,257.50 903.70,275.00 903.70,310.00 873.39,327.50 843.08,310.00 843.08,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="934.02,257.50 964.33,275.00 964.33,310.00 934.02,327.50 903.70,310.00 903.70,275.00" fill="#C8C8A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="994.64,257.50 1024.95,275.00 1024.95,310.00 994.64,327.50 964.33,310.00 964.33,275.00" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1055.26,257.50 1085.57,275.00 1085.57,310.00 1055.26,327.50 1024.95,310.00 1024.95,275.00" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1115.88,257.50 1146.19,275.00 1146.19,310.00 1115.88,327.50 1085.57,310.00 1085.57,275.00" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1176.50,257.50 1206.81,275.00 1206.81,310.00 1176.50,327.50 1146.19,310.00 1146.19,275.00" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1237.12,257.50 1267.44,275.00 1267.44,310.00 1237.12,327.50 1206.81,310.00 1206.81,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1297.75,257.50 1328.06,275.00 1328.06,310.00 1297.75,327.50 1267.44,310.00 1267.44,275.00" fill="#A5B5C8" stroke="#666" stroke-width="1.5"/>
   <polygon points="1358.37,257.50 1388.68,275.00 1388.68,310.00 1358.37,327.50 1328.06,310.00 1328.06,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1418.99,257.50 1449.30,275.00 1449.30,310.00 1418.99,327.50 1388.68,310.00 1388.68,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1479.61,257.50 1509.92,275.00 1509.92,310.00 1479.61,327.50 1449.30,310.00 1449.30,275.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -164,12 +164,12 @@
   <polygon points="600.60,310.00 630.91,327.50 630.91,362.50 600.60,380.00 570.29,362.50 570.29,327.50" fill="#B5A5C8" stroke="#666" stroke-width="1.5"/>
   <polygon points="661.22,310.00 691.53,327.50 691.53,362.50 661.22,380.00 630.91,362.50 630.91,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="721.84,310.00 752.15,327.50 752.15,362.50 721.84,380.00 691.53,362.50 691.53,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="782.46,310.00 812.77,327.50 812.77,362.50 782.46,380.00 752.15,362.50 752.15,327.50" fill="#C8A57A" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="843.08,310.00 873.39,327.50 873.39,362.50 843.08,380.00 812.77,362.50 812.77,327.50" fill="#D4B5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="903.70,310.00 934.02,327.50 934.02,362.50 903.70,380.00 873.39,362.50 873.39,327.50" fill="#D4B5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="964.33,310.00 994.64,327.50 994.64,362.50 964.33,380.00 934.02,362.50 934.02,327.50" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1024.95,310.00 1055.26,327.50 1055.26,362.50 1024.95,380.00 994.64,362.50 994.64,327.50" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1085.57,310.00 1115.88,327.50 1115.88,362.50 1085.57,380.00 1055.26,362.50 1055.26,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="782.46,310.00 812.77,327.50 812.77,362.50 782.46,380.00 752.15,362.50 752.15,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="843.08,310.00 873.39,327.50 873.39,362.50 843.08,380.00 812.77,362.50 812.77,327.50" fill="#C8A57A" stroke="#666" stroke-width="1.5"/>
+  <polygon points="903.70,310.00 934.02,327.50 934.02,362.50 903.70,380.00 873.39,362.50 873.39,327.50" fill="#D4B5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="964.33,310.00 994.64,327.50 994.64,362.50 964.33,380.00 934.02,362.50 934.02,327.50" fill="#D4B5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1024.95,310.00 1055.26,327.50 1055.26,362.50 1024.95,380.00 994.64,362.50 994.64,327.50" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1085.57,310.00 1115.88,327.50 1115.88,362.50 1085.57,380.00 1055.26,362.50 1055.26,327.50" fill="#E8D5A3" stroke="#666" stroke-width="1.5"/>
   <polygon points="1146.19,310.00 1176.50,327.50 1176.50,362.50 1146.19,380.00 1115.88,362.50 1115.88,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1206.81,310.00 1237.12,327.50 1237.12,362.50 1206.81,380.00 1176.50,362.50 1176.50,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1267.44,310.00 1297.75,327.50 1297.75,362.50 1267.44,380.00 1237.12,362.50 1237.12,327.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -188,13 +188,13 @@
   <polygon points="630.91,362.50 661.22,380.00 661.22,415.00 630.91,432.50 600.60,415.00 600.60,380.00" fill="#D4D4A5" stroke="#666666" stroke-width="1.5"/>
   <polygon points="691.53,362.50 721.84,380.00 721.84,415.00 691.53,432.50 661.22,415.00 661.22,380.00" fill="#B5A08A" stroke="#666666" stroke-width="1.5"/>
   <polygon points="752.15,362.50 782.46,380.00 782.46,415.00 752.15,432.50 721.84,415.00 721.84,380.00" fill="#C8A57A" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="812.77,362.50 843.08,380.00 843.08,415.00 812.77,432.50 782.46,415.00 782.46,380.00" fill="#C8A57A" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="873.39,362.50 903.70,380.00 903.70,415.00 873.39,432.50 843.08,415.00 843.08,380.00" fill="#D4B5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="934.02,362.50 964.33,380.00 964.33,415.00 934.02,432.50 903.70,415.00 903.70,380.00" fill="#D4B5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="994.64,362.50 1024.95,380.00 1024.95,415.00 994.64,432.50 964.33,415.00 964.33,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="1055.26,362.50 1085.57,380.00 1085.57,415.00 1055.26,432.50 1024.95,415.00 1024.95,380.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1115.88,362.50 1146.19,380.00 1146.19,415.00 1115.88,432.50 1085.57,415.00 1085.57,380.00" fill="#B5CCE0" stroke="#D4880F" stroke-width="3"/>
-  <polygon points="1176.50,362.50 1206.81,380.00 1206.81,415.00 1176.50,432.50 1146.19,415.00 1146.19,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="812.77,362.50 843.08,380.00 843.08,415.00 812.77,432.50 782.46,415.00 782.46,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="873.39,362.50 903.70,380.00 903.70,415.00 873.39,432.50 843.08,415.00 843.08,380.00" fill="#C8A57A" stroke="#666" stroke-width="1.5"/>
+  <polygon points="934.02,362.50 964.33,380.00 964.33,415.00 934.02,432.50 903.70,415.00 903.70,380.00" fill="#D4B5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="994.64,362.50 1024.95,380.00 1024.95,415.00 994.64,432.50 964.33,415.00 964.33,380.00" fill="#D4B5A5" stroke="#666" stroke-width="1.5"/>
+  <polygon points="1055.26,362.50 1085.57,380.00 1085.57,415.00 1055.26,432.50 1024.95,415.00 1024.95,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1115.88,362.50 1146.19,380.00 1146.19,415.00 1115.88,432.50 1085.57,415.00 1085.57,380.00" fill="#E8D5A3" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1176.50,362.50 1206.81,380.00 1206.81,415.00 1176.50,432.50 1146.19,415.00 1146.19,380.00" fill="#B5CCE0" stroke="#D4880F" stroke-width="3"/>
   <polygon points="1237.12,362.50 1267.44,380.00 1267.44,415.00 1237.12,432.50 1206.81,415.00 1206.81,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1297.75,362.50 1328.06,380.00 1328.06,415.00 1297.75,432.50 1267.44,415.00 1267.44,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1358.37,362.50 1388.68,380.00 1388.68,415.00 1358.37,432.50 1328.06,415.00 1328.06,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -213,12 +213,12 @@
   <polygon points="661.22,415.00 691.53,432.50 691.53,467.50 661.22,485.00 630.91,467.50 630.91,432.50" fill="#C8B896" stroke="#666666" stroke-width="1.5"/>
   <polygon points="721.84,415.00 752.15,432.50 752.15,467.50 721.84,485.00 691.53,467.50 691.53,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="782.46,415.00 812.77,432.50 812.77,467.50 782.46,485.00 752.15,467.50 752.15,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="843.08,415.00 873.39,432.50 873.39,467.50 843.08,485.00 812.77,467.50 812.77,432.50" fill="#D4B5A5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="903.70,415.00 934.02,432.50 934.02,467.50 903.70,485.00 873.39,467.50 873.39,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="843.08,415.00 873.39,432.50 873.39,467.50 843.08,485.00 812.77,467.50 812.77,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="903.70,415.00 934.02,432.50 934.02,467.50 903.70,485.00 873.39,467.50 873.39,432.50" fill="#D4B5A5" stroke="#666" stroke-width="1.5"/>
   <polygon points="964.33,415.00 994.64,432.50 994.64,467.50 964.33,485.00 934.02,467.50 934.02,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1024.95,415.00 1055.26,432.50 1055.26,467.50 1024.95,485.00 994.64,467.50 994.64,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
-  <polygon points="1085.57,415.00 1115.88,432.50 1115.88,467.50 1085.57,485.00 1055.26,467.50 1055.26,432.50" fill="#8AC8B5" stroke="#666666" stroke-width="1.5"/>
-  <polygon points="1146.19,415.00 1176.50,432.50 1176.50,467.50 1146.19,485.00 1115.88,467.50 1115.88,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1085.57,415.00 1115.88,432.50 1115.88,467.50 1085.57,485.00 1055.26,467.50 1055.26,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
+  <polygon points="1146.19,415.00 1176.50,432.50 1176.50,467.50 1146.19,485.00 1115.88,467.50 1115.88,432.50" fill="#8AC8B5" stroke="#666" stroke-width="1.5"/>
   <polygon points="1206.81,415.00 1237.12,432.50 1237.12,467.50 1206.81,485.00 1176.50,467.50 1176.50,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1267.44,415.00 1297.75,432.50 1297.75,467.50 1267.44,485.00 1237.12,467.50 1237.12,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1328.06,415.00 1358.37,432.50 1358.37,467.50 1328.06,485.00 1297.75,467.50 1297.75,432.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -411,26 +411,26 @@
   <text x="509.7" y="345.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">GALLIA</text>
   <text x="509.7" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">PONTE</text>
   <text x="676.4" y="266.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HEARTL.</text>
-  <text x="826.2" y="210.8" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">NORDOSTAN</text>
+  <text x="886.8" y="210.8" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">NORDOSTAN</text>
   <text x="646.1" y="371.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">PHRYG.</text>
   <text x="630.9" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">LEVANT.</text>
-  <text x="782.5" y="380.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">PERSIA</text>
+  <text x="843.1" y="380.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">PERSIA</text>
   <text x="630.9" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">SOLARIA</text>
   <text x="630.9" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HORN</text>
   <text x="752.2" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">MIRAGE</text>
-  <text x="833.0" y="257.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">SOGDIANA</text>
-  <text x="879.5" y="387.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">BHARATA</text>
-  <text x="1020.6" y="322.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">CATHAY</text>
-  <text x="1055.3" y="187.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">CHOSON</text>
-  <text x="1024.9" y="240.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HANGUK</text>
-  <text x="1085.6" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">FORMOSA</text>
-  <text x="1222.0" y="266.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">YAMATO</text>
+  <text x="893.6" y="257.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">SOGDIANA</text>
+  <text x="940.1" y="387.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">BHARATA</text>
+  <text x="1081.2" y="322.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">CATHAY</text>
+  <text x="1115.9" y="187.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">CHOSON</text>
+  <text x="1085.5" y="240.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HANGUK</text>
+  <text x="1146.2" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">FORMOSA</text>
+  <text x="1282.6" y="266.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">YAMATO</text>
   <!-- OCEAN NAMES -->
   <text x="327.8" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Tethys</text>
-  <text x="1297.7" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Mirovia</text>
+  <text x="1358.3" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Mirovia</text>
   <text x="570.3" y="712.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Rheic Ocean</text>
   <!-- CHOKEPOINTS -->
-  <text x="1115.9" y="399.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Formosa St.</text>
+  <text x="1176.5" y="399.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Formosa St.</text>
   <text x="691.5" y="504.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Gulf Gate</text>
   <text x="206.6" y="504.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Caribe Pass.</text>
   <!-- LEGEND -->
@@ -452,6 +452,8 @@
   <text x="60.0" y="861.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Teutonia</text>
   <rect x="40" y="870" width="12" height="10" rx="1" fill="#B5A5C8" stroke="#666" stroke-width="0.5"/>
   <text x="60.0" y="875.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Gallia</text>
+  <!-- GRID COLUMN NUMBERS -->
+  <!-- GRID ROW NUMBERS -->
   <!-- GRID COLUMN NUMBERS -->
   <text x="55.0" y="-12" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#888;text-anchor:middle;dominant-baseline:central;font-weight:600">1</text>
   <text x="115.6" y="-12" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#888;text-anchor:middle;dominant-baseline:central;font-weight:600">2</text>
