@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THUCYDIDES TRAP — Master Test Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy: #1a1f3a;
+  --navy-light: #252b4d;
+  --columbia: #d4a867;
+  --cathay: #c9a92e;
+  --nordostan: #c47a7a;
+  --heartland: #6b9e6b;
+  --persia: #a08060;
+  --gallia: #7a8ead;
+  --bg: #f4f3f0;
+  --card: #ffffff;
+  --text: #2c2c2c;
+  --muted: #6b6b6b;
+  --border: #e0ddd8;
+  --accent: #3a5ba0;
+  --danger: #b94a48;
+  --success: #4a8c5c;
+  --warning: #c08a30;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+.header { background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%); color: white; padding: 40px 0; text-align: center; border-bottom: 4px solid var(--columbia); }
+.header h1 { font-size: 2.2rem; font-weight: 300; letter-spacing: 6px; text-transform: uppercase; margin-bottom: 8px; }
+.header h1 span { font-weight: 700; color: var(--columbia); }
+.header .subtitle { font-size: 1rem; color: #a0a8c0; letter-spacing: 2px; margin-bottom: 4px; }
+.header .date { font-size: 0.85rem; color: #707890; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
+.section { margin-bottom: 40px; }
+.section-title { font-size: 1.3rem; font-weight: 600; color: var(--navy); border-bottom: 2px solid var(--border); padding-bottom: 8px; margin-bottom: 20px; letter-spacing: 1px; text-transform: uppercase; }
+.section-title span.num { color: var(--accent); margin-right: 8px; }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; justify-content: center; }
+.badge { padding: 10px 20px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+.badge-green { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.badge-blue { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+.badge-gold { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+.badge-red { background: #fce4ec; color: #c62828; border: 1px solid #ef9a9a; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+th { background: var(--navy); color: white; padding: 10px 12px; text-align: left; font-weight: 600; letter-spacing: 0.5px; white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+tr:nth-child(even) { background: #f9f8f6; }
+tr:hover { background: #eeecea; }
+tr.llm-row { background: #fffde7; font-weight: 600; }
+tr.llm-row:hover { background: #fff9c4; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.good { color: var(--success); font-weight: 600; }
+td.warn { color: var(--warning); font-weight: 600; }
+td.bad { color: var(--danger); font-weight: 600; }
+
+.chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+.chart-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+.chart-box.full { grid-column: 1 / -1; }
+.chart-box h3 { font-size: 0.95rem; color: var(--navy); margin-bottom: 12px; text-align: center; }
+.chart-container { position: relative; height: 300px; }
+
+.test-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px; overflow: hidden; }
+.card-header { padding: 14px 20px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; background: #fafaf8; border-bottom: 1px solid var(--border); user-select: none; }
+.card-header:hover { background: #f0efec; }
+.card-header h3 { font-size: 0.95rem; color: var(--navy); }
+.card-header .arrow { font-size: 1.2rem; color: var(--muted); transition: transform 0.2s; }
+.card-header.open .arrow { transform: rotate(90deg); }
+.card-body { display: none; padding: 20px; }
+.card-body.open { display: block; }
+.card-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.metric { background: #f9f8f6; border-radius: 6px; padding: 12px; text-align: center; }
+.metric .val { font-size: 1.3rem; font-weight: 700; color: var(--navy); }
+.metric .lbl { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.mini-badge { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-right: 6px; margin-bottom: 4px; }
+
+.finding { margin-bottom: 16px; padding: 14px 18px; background: #f9f8f6; border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; }
+.finding strong { color: var(--navy); }
+.finding-num { display: inline-block; width: 22px; height: 22px; background: var(--accent); color: white; border-radius: 50%; text-align: center; line-height: 22px; font-size: 0.75rem; font-weight: 700; margin-right: 8px; }
+
+.conclusion-block { margin-top: 16px; padding: 14px 18px; border-radius: 6px; }
+.conclusion-block h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.conclusion-block ul { padding-left: 20px; }
+.conclusion-block li { margin-bottom: 6px; font-size: 0.9rem; }
+.cb-conclusions { background: #e8eaf6; border-left: 3px solid var(--accent); }
+.cb-conclusions h4 { color: var(--accent); }
+.cb-recommendations { background: #fff3e0; border-left: 3px solid var(--warning); }
+.cb-recommendations h4 { color: var(--warning); }
+
+.next-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.next-box { padding: 20px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); }
+.next-box h3 { font-size: 1rem; color: var(--navy); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+.next-box ul { padding-left: 18px; }
+.next-box li { margin-bottom: 8px; font-size: 0.9rem; }
+.next-box.works { border-left: 4px solid var(--success); }
+.next-box.calibrate { border-left: 4px solid var(--warning); }
+.next-box.missing { border-left: 4px solid var(--danger); }
+.next-box.next { border-left: 4px solid var(--accent); }
+
+.readiness { text-align: center; margin-top: 30px; padding: 24px; background: var(--navy); color: white; border-radius: 8px; }
+.readiness .pct { font-size: 3rem; font-weight: 700; color: var(--columbia); }
+.readiness .label { font-size: 1rem; letter-spacing: 2px; text-transform: uppercase; color: #a0a8c0; }
+.readiness .desc { margin-top: 10px; font-size: 0.9rem; color: #c0c4d0; max-width: 700px; margin-left: auto; margin-right: auto; }
+
+.narrative { display: grid; grid-template-columns: 80px 1fr; gap: 0; margin: 20px 0; }
+.narr-round { padding: 14px 10px; text-align: center; font-weight: 700; font-size: 0.85rem; color: white; background: var(--navy); border-bottom: 1px solid var(--navy-light); }
+.narr-text { padding: 12px 18px; border-bottom: 1px solid var(--border); font-size: 0.88rem; background: var(--card); }
+.narr-text .highlight { font-weight: 600; color: var(--navy); }
+
+@media (max-width: 768px) {
+  .chart-grid, .next-grid { grid-template-columns: 1fr; }
+  .header h1 { font-size: 1.5rem; letter-spacing: 3px; }
+  .narrative { grid-template-columns: 60px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>THUCYDIDES <span>TRAP</span></h1>
+  <div class="subtitle">Master Test Dashboard</div>
+  <div class="subtitle">9 Tests &bull; 72 Rounds Simulated &bull; SEED Stage Validation</div>
+  <div class="date">2026-03-26</div>
+</div>
+
+<div class="container">
+
+<!-- SECTION 0: EXECUTIVE SUMMARY -->
+<div class="section">
+  <div class="section-title"><span class="num">0</span> Executive Summary</div>
+  <div class="badge-row">
+    <div class="badge badge-blue">9 Tests Completed</div>
+    <div class="badge badge-green">Zero Nuclear Use</div>
+    <div class="badge badge-gold">Power Transition Confirmed</div>
+    <div class="badge badge-red">Stability Calibration Needed</div>
+  </div>
+  <div class="finding"><span class="finding-num">1</span><strong>Thucydides Trap dynamics emerge consistently</strong> — Cathay closes the GDP gap in all 9 tests. In the LLM test, the gap ratio rises from 0.727 to 0.858 over 8 rounds; in heuristic tests, Cathay overtakes Columbia outright (gap ratios 1.003&ndash;1.099).</div>
+  <div class="finding"><span class="finding-num">2</span><strong>Nuclear deterrence holds across all scenarios</strong> — no nuclear weapons used in any of 72 simulated rounds. The 3-confirmation rule is effective at preventing escalation.</div>
+  <div class="finding"><span class="finding-num">3</span><strong>War countries collapse too fast</strong> — Nordostan, Heartland, and Persia all reach stability 1.0 in heuristic tests. The LLM test shows more gradual decline (Heartland hits 1.0 by Round 3, Nordostan by Round 5) but still bottoms out early.</div>
+  <div class="finding"><span class="finding-num">4</span><strong>Heuristic tests produce too-similar results</strong> — Tests 2&ndash;8 share nearly identical final states despite different scenario overrides. The override mechanism is not differentiating enough.</div>
+  <div class="finding"><span class="finding-num">5</span><strong>LLM test produces the most credible dynamics</strong> — 141 deals negotiated, varied combat intensity (2&ndash;4 per round), responsive oil prices, and genuine strategic behavior from role-brief-driven agents.</div>
+</div>
+
+<!-- SECTION 1: CROSS-TEST COMPARISON -->
+<div class="section">
+  <div class="section-title"><span class="num">1</span> Cross-Test Comparison</div>
+  <div class="table-wrap">
+    <table id="comparison-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Test Name</th>
+          <th>Seed</th>
+          <th>Columbia GDP</th>
+          <th>Cathay GDP</th>
+          <th>Gap Ratio</th>
+          <th>Nord. Stab</th>
+          <th>Heart. Stab</th>
+          <th>Gallia Stab</th>
+          <th>Nuclear</th>
+          <th>Deals</th>
+          <th>Combats</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 2: THUCYDIDES TRAP TRAJECTORY -->
+<div class="section">
+  <div class="section-title"><span class="num">2</span> Thucydides Trap Trajectory</div>
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>LLM Test: Columbia vs Cathay GDP (Power Transition)</h3>
+      <div class="chart-container"><canvas id="chart-gdp"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>LLM Test: Naval Ratio (Cathay / Columbia)</h3>
+      <div class="chart-container"><canvas id="chart-naval"></canvas></div>
+    </div>
+    <div class="chart-box full">
+      <h3>Gap Ratio Comparison Across All 9 Tests (Cathay GDP / Columbia GDP)</h3>
+      <div class="chart-container"><canvas id="chart-gap-bar"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 3: INDIVIDUAL TEST CARDS -->
+<div class="section">
+  <div class="section-title"><span class="num">3</span> Individual Test Results</div>
+  <div id="test-cards"></div>
+</div>
+
+<!-- SECTION 4: LLM TEST DEEP DIVE -->
+<div class="section">
+  <div class="section-title"><span class="num">4</span> LLM Test Deep Dive</div>
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>Oil Price, Deals &amp; Combats per Round</h3>
+      <div class="chart-container"><canvas id="chart-llm-activity"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <h3>Stability Trajectories (Nordostan &amp; Heartland)</h3>
+      <div class="chart-container"><canvas id="chart-llm-stab"></canvas></div>
+    </div>
+  </div>
+
+  <h3 style="font-size:1rem; color:var(--navy); margin-bottom:12px;">Round-by-Round Narrative</h3>
+  <div class="narrative">
+    <div class="narr-round">R1<br>H2 2026</div>
+    <div class="narr-text"><span class="highlight">Opening positions crystallize.</span> Columbia GDP at $285.5T leads Cathay at $207.5T (gap 0.727). 16 deals struck &mdash; early diplomacy is active. Naval ratio 0.88 means Columbia still dominates at sea. Nordostan stability at 4.14 suggests the Donbas front is grinding but manageable. 4 combat actions in the first round set the tempo.</div>
+    <div class="narr-round">R2<br>H1 2027</div>
+    <div class="narr-text"><span class="highlight">Cathay reaches naval parity.</span> Naval ratio hits 1.00 &mdash; a critical Thucydides moment. Cathay GDP grows to $216.8T while 19 deals (the peak) show intensive diplomacy. Heartland stability drops sharply to 2.17 as war fatigue accelerates. Nordostan at 3.28 &mdash; the paranoia profile is driving aggressive posturing.</div>
+    <div class="narr-round">R3<br>H2 2027</div>
+    <div class="narr-text"><span class="highlight">Heartland collapses to stability floor.</span> Heartland hits 1.0 &mdash; the autocratic regime cannot sustain the war effort. Cathay's naval ratio pushes past parity to 1.06. The gap narrows to 0.770. Oil dips to $95. Nordostan at 2.41 continues its decline. 18 deals + 4 combats indicate simultaneous negotiation and fighting.</div>
+    <div class="narr-round">R4<br>H1 2028</div>
+    <div class="narr-text"><span class="highlight">The grind continues.</span> Nordostan at 1.66 &mdash; approaching collapse. Cathay's naval superiority grows (1.12). Columbia GDP $303.1T vs Cathay $237.2T. The Helmsman's team calculates the Formosa window &mdash; window score approaches 0.92 but doesn't cross the threshold. 17 deals suggest continued engagement.</div>
+    <div class="narr-round">R5<br>H2 2028</div>
+    <div class="narr-text"><span class="highlight">Nordostan hits the floor.</span> Stability 1.0 &mdash; both war countries are now collapsed. Oil rebounds to $98. Gap at 0.798 &mdash; Cathay within striking distance. 20 deals (tied for peak) &mdash; intensive end-of-year diplomacy. Naval ratio 1.15 solidifies Cathay's maritime advantage.</div>
+    <div class="narr-round">R6<br>H1 2029</div>
+    <div class="narr-text"><span class="highlight">Cathay's economic surge accelerates.</span> Gap reaches 0.834. Columbia at $318.0T vs Cathay $265.2T. Naval ratio 1.21 &mdash; Cathay's blue-water fleet dominance is pronounced. Only 3 combats suggest the frontlines are stabilizing as exhaustion sets in. 18 deals keep diplomatic channels open.</div>
+    <div class="narr-round">R7<br>H2 2029</div>
+    <div class="narr-text"><span class="highlight">The transition nears completion.</span> Gap 0.856. Columbia's overstretch becomes visible &mdash; maintaining global commitments while Cathay focuses regionally. 16 deals + 3 combats. Naval ratio 1.24. Columbia's succession dynamics (mid-term election effects) create policy uncertainty.</div>
+    <div class="narr-round">R8<br>H1 2030</div>
+    <div class="narr-text"><span class="highlight">Final state: power transition underway but not complete.</span> Columbia $354.4T vs Cathay $304.1T &mdash; gap 0.858. Only 2 combats in the final round (the minimum) suggest exhaustion. 17 deals. Naval ratio 1.27. Cathay has not triggered Formosa. The trap is set but hasn't snapped &mdash; consistent with the theory that rising powers calculate carefully.</div>
+  </div>
+
+  <h3 style="font-size:1rem; color:var(--navy); margin:20px 0 12px;">Team Dynamics</h3>
+  <div class="chart-grid">
+    <div class="chart-box">
+      <h3>Columbia: Overstretch Trajectory</h3>
+      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">GDP grows from $285.5T to $354.4T (+24%), but global commitments strain capacity. Succession dynamics (elections) create policy oscillation. Support never recovered from early war fatigue. The "arsenal of democracy" identity conflicts with economic pragmatism.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Cathay: Calculated Restraint</h3>
+      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">GDP surges from $207.5T to $304.1T (+47%). Naval ratio crosses parity in Round 2 and reaches 1.27. Helmsman's Formosa window score hits 0.92 but the threshold is never crossed &mdash; consistent with strategic patience. The regime prioritizes economic overtaking over military adventurism.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Nordostan: Paranoid Grind</h3>
+      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">Stability decays from 4.14 to 1.0 over 5 rounds. The autocratic paranoia profile drives aggressive deal-seeking (contributes to high deal counts) while simultaneously maintaining combat operations. Collapses but doesn't surrender &mdash; consistent with authoritarian persistence.</p>
+    </div>
+    <div class="chart-box">
+      <h3>Heartland: Fastest Collapse</h3>
+      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">Hits stability 1.0 by Round 3 &mdash; the fastest collapse of any country. Initial stability of 3.58 was already low. The regime's war tiredness accumulates too aggressively. This is the clearest calibration signal: Heartland should sustain war effort longer given its autocratic resilience.</p>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: DESIGN CONCLUSIONS -->
+<div class="section">
+  <div class="section-title"><span class="num">5</span> Design Conclusions &amp; Next Steps</div>
+  <div class="next-grid">
+    <div class="next-box works">
+      <h3>What Works</h3>
+      <ul>
+        <li><strong>Power transition dynamics</strong> &mdash; GDP gap closes consistently across all 9 tests</li>
+        <li><strong>Nuclear deterrence</strong> &mdash; 3-confirmation rule effective; zero use in 72 rounds</li>
+        <li><strong>Gulf Gate ground-based blockade</strong> &mdash; holds across tests, creates genuine economic pressure</li>
+        <li><strong>Economic interdependencies</strong> &mdash; tariffs/sanctions produce visible GDP effects</li>
+        <li><strong>Role-brief-driven reasoning</strong> (LLM test) produces credible strategic behavior</li>
+      </ul>
+    </div>
+    <div class="next-box calibrate">
+      <h3>What Needs Calibration</h3>
+      <ul>
+        <li><strong>Stability decay too aggressive for war countries</strong> &mdash; Heartland hits 1.0 by Round 3 in LLM test. <em>Recommend: slower war tiredness accumulation (0.2/round vs 0.4), higher autocracy/democracy resilience for wartime leaders</em></li>
+        <li><strong>Heuristic test overrides don't differentiate</strong> &mdash; need fundamentally different decision logic per test scenario, not just parameter tweaks</li>
+        <li><strong>Cathay stability too high</strong> (9.0 in heuristic tests) &mdash; needs downward pressure from economic slowdown, tech competition stress</li>
+        <li><strong>Support mean-reversion too weak</strong> &mdash; Cathay at 70% and Bharata at 100% are unrealistic</li>
+      </ul>
+    </div>
+    <div class="next-box missing">
+      <h3>What's Missing</h3>
+      <ul>
+        <li><strong>Theater-level combat</strong> &mdash; tests use global hexes, not the new theater maps</li>
+        <li><strong>Covert operations</strong> &mdash; not firing in most tests</li>
+        <li><strong>Election mechanics impact</strong> &mdash; elections happen but don't visibly change country behavior</li>
+        <li><strong>Internal team dynamics in heuristic tests</strong> &mdash; only LLM test models faction conflict</li>
+      </ul>
+    </div>
+    <div class="next-box next">
+      <h3>Recommended Next Tests</h3>
+      <ul>
+        <li><strong>LLM test with recalibrated stability</strong> &mdash; slower decay, test if war countries survive to Round 6+</li>
+        <li><strong>Theater-level test</strong> &mdash; focus on Eastern Ereb using 15-hex map</li>
+        <li><strong>Gulf Gate breakout attempt</strong> &mdash; Columbia ground invasion scenario</li>
+        <li><strong>Claude subagent test</strong> &mdash; actual Claude instances for each team (the ultimate validation)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="readiness">
+    <div class="pct">~70%</div>
+    <div class="label">SEED Design Readiness for Paper Playtest</div>
+    <div class="desc">The power transition, economic model, and military mechanics are solid. Stability calibration and internal team dynamics need one more iteration. The theater maps are ready but untested in the engine.</div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const HEURISTIC_TESTS = {
+  test_1_generic: { name: "Full Generic Run", seed: 100, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
+  test_2_aggressive_nordostan: { name: "Aggressive Nordostan", seed: 200, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_3_formosa_crisis: { name: "Cathay Formosa Push", seed: 300, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
+  test_4_oil_cartel: { name: "Oil Cartel Stress", seed: 400, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_5_columbia_politics: { name: "Columbia Internal", seed: 500, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_6_alliance_cohesion: { name: "NATO Fracture Test", seed: 600, columbia: {gdp:316.1,stability:3.5,support:25.0,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.099, nuclear_used:false },
+  test_7_gulf_gate: { name: "Gulf Gate Escalation", seed: 700, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_8_peace: { name: "Maximum Deal-Seeking", seed: 800, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false }
+};
+
+const LLM_TEST = {
+  name: "LLM Architecture Test (Role-Brief Driven)",
+  rounds: [
+    {round:1,label:"H2 2026",columbia_gdp:285.5,cathay_gdp:207.5,nord_stab:4.14,heart_stab:3.58,oil:97.8,gap:0.727,naval_ratio:0.88,deals:16,combats:4},
+    {round:2,label:"H1 2027",columbia_gdp:288.7,cathay_gdp:216.8,nord_stab:3.28,heart_stab:2.17,oil:96.5,gap:0.751,naval_ratio:1.00,deals:19,combats:3},
+    {round:3,label:"H2 2027",columbia_gdp:295.5,cathay_gdp:227.4,nord_stab:2.41,heart_stab:1.0,oil:95.0,gap:0.770,naval_ratio:1.06,deals:18,combats:4},
+    {round:4,label:"H1 2028",columbia_gdp:303.1,cathay_gdp:237.2,nord_stab:1.66,heart_stab:1.0,oil:94.0,gap:0.783,naval_ratio:1.12,deals:17,combats:3},
+    {round:5,label:"H2 2028",columbia_gdp:311.7,cathay_gdp:248.8,nord_stab:1.0,heart_stab:1.0,oil:98.0,gap:0.798,naval_ratio:1.15,deals:20,combats:4},
+    {round:6,label:"H1 2029",columbia_gdp:318.0,cathay_gdp:265.2,nord_stab:1.0,heart_stab:1.0,oil:97.0,gap:0.834,naval_ratio:1.21,deals:18,combats:3},
+    {round:7,label:"H2 2029",columbia_gdp:328.8,cathay_gdp:281.5,nord_stab:1.0,heart_stab:1.0,oil:96.0,gap:0.856,naval_ratio:1.24,deals:16,combats:3},
+    {round:8,label:"H1 2030",columbia_gdp:354.4,cathay_gdp:304.1,nord_stab:1.0,heart_stab:1.0,oil:98.0,gap:0.858,naval_ratio:1.27,deals:17,combats:2}
+  ],
+  total_deals: 141, total_combats: 26, nuclear_used: false
+};
+
+// ============================================================
+// SECTION 1: Comparison Table
+// ============================================================
+(function buildComparisonTable() {
+  const tbody = document.querySelector('#comparison-table tbody');
+  const tests = Object.entries(HEURISTIC_TESTS);
+  tests.forEach(([key, t], i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML =
+      '<td>' + (i+1) + '</td><td>' + t.name + '</td><td class="num">' + t.seed + '</td>' +
+      '<td class="num">' + t.columbia.gdp.toFixed(1) + '</td><td class="num">' + t.cathay.gdp.toFixed(1) + '</td>' +
+      '<td class="num ' + (t.gap_ratio >= 1.05 ? 'warn' : '') + '">' + t.gap_ratio.toFixed(3) + '</td>' +
+      '<td class="num bad">' + t.nordostan.stability.toFixed(1) + '</td>' +
+      '<td class="num bad">' + t.heartland.stability.toFixed(1) + '</td>' +
+      '<td class="num good">' + t.gallia.stability.toFixed(1) + '</td>' +
+      '<td class="good">No</td><td class="num" style="color:var(--muted)">N/A</td><td class="num" style="color:var(--muted)">N/A</td>';
+    tbody.appendChild(tr);
+  });
+  var last = LLM_TEST.rounds[7];
+  var tr = document.createElement('tr');
+  tr.className = 'llm-row';
+  tr.innerHTML =
+    '<td>9</td><td>LLM Architecture Test</td><td class="num">&mdash;</td>' +
+    '<td class="num">' + last.columbia_gdp.toFixed(1) + '</td><td class="num">' + last.cathay_gdp.toFixed(1) + '</td>' +
+    '<td class="num">' + last.gap.toFixed(3) + '</td>' +
+    '<td class="num bad">' + last.nord_stab.toFixed(1) + '</td>' +
+    '<td class="num bad">' + last.heart_stab.toFixed(1) + '</td>' +
+    '<td class="num" style="color:var(--muted)">&mdash;</td>' +
+    '<td class="good">No</td><td class="num">' + LLM_TEST.total_deals + '</td><td class="num">' + LLM_TEST.total_combats + '</td>';
+  tbody.appendChild(tr);
+})();
+
+// ============================================================
+// SECTION 2: Charts
+// ============================================================
+var labels = LLM_TEST.rounds.map(function(r) { return r.label; });
+
+new Chart(document.getElementById('chart-gdp'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Columbia GDP ($T)', data: LLM_TEST.rounds.map(function(r){return r.columbia_gdp;}), borderColor: '#d4a867', backgroundColor: 'rgba(212,168,103,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Cathay GDP ($T)', data: LLM_TEST.rounds.map(function(r){return r.cathay_gdp;}), borderColor: '#c9a92e', backgroundColor: 'rgba(201,169,46,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { beginAtZero: false, title: { display: true, text: 'GDP ($T)' } } } }
+});
+
+new Chart(document.getElementById('chart-naval'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Naval Ratio (Cathay/Columbia)', data: LLM_TEST.rounds.map(function(r){return r.naval_ratio;}), borderColor: '#3a5ba0', backgroundColor: 'rgba(58,91,160,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Parity Line (1.0)', data: [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0], borderColor: '#c62828', borderWidth: 1, borderDash: [6,4], pointRadius: 0, fill: false }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0.8, max: 1.35, title: { display: true, text: 'Ratio' } } } }
+});
+
+(function() {
+  var allTests = Object.values(HEURISTIC_TESTS).map(function(t) { return { name: t.name, gap: t.gap_ratio }; });
+  allTests.push({ name: 'LLM Test', gap: LLM_TEST.rounds[7].gap });
+  var colors = allTests.map(function(t, i) { return i === allTests.length - 1 ? '#c9a92e' : '#3a5ba0'; });
+  new Chart(document.getElementById('chart-gap-bar'), {
+    type: 'bar',
+    data: {
+      labels: allTests.map(function(t){return t.name;}),
+      datasets: [{ label: 'Gap Ratio (Cathay/Columbia)', data: allTests.map(function(t){return t.gap;}), backgroundColor: colors, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { min: 0.7, max: 1.15, title: { display: true, text: 'Cathay GDP / Columbia GDP' } },
+        x: { ticks: { maxRotation: 45, minRotation: 30, font: { size: 11 } } }
+      }
+    }
+  });
+})();
+
+// ============================================================
+// SECTION 3: Test Cards
+// ============================================================
+(function buildCards() {
+  var container = document.getElementById('test-cards');
+  var testDescs = {
+    test_1_generic: { desc: "Baseline run with default settings. No scenario overrides.", conclusion: "Establishes the baseline power transition trajectory. Cathay overtakes Columbia (gap 1.034). All war countries collapse to stability 1.0. Gallia remains stable at 7.8 &mdash; the European pillar holds.", rec: "Use as the control case. The fact that Cathay overtakes at gap 1.034 validates the GDP growth differential. However, identical outcomes with Test 3 (same seed family) suggest insufficient randomness." },
+    test_2_aggressive_nordostan: { desc: "Nordostan aggression profile maximized. Tests whether aggressive posture changes outcomes.", conclusion: "Despite maximum aggression override, Nordostan's final state is nearly identical to Tests 4-5-7-8 (GDP 20.0, stability 1.0, military 23). The aggression parameter does not produce meaningfully different strategic behavior &mdash; the heuristic decision tree dominates over profile parameters.", rec: "The override mechanism needs redesign. Instead of parameter tweaks, aggressive Nordostan should trigger qualitatively different behaviors: earlier nuclear threats, rejection of deals, escalation ladders. Current implementation just adjusts thresholds on the same decision tree." },
+    test_3_formosa_crisis: { desc: "Cathay Formosa push scenario. Tests whether Cathay attempts reunification.", conclusion: "Identical to Test 1 despite the Formosa crisis override. Cathay's heuristic logic never triggers the Formosa invasion pathway &mdash; the threshold is set too high or the conditions aren't met in the heuristic framework. Gap ratio 1.034.", rec: "The Formosa crisis needs explicit trigger logic in heuristic mode &mdash; a forced event at a specific round with probability based on window score. The current approach of hoping the heuristic agent 'decides' to invade doesn't work." },
+    test_4_oil_cartel: { desc: "Oil cartel stress test. Persian Gulf disruption scenario.", conclusion: "Oil cartel override produces no visible differentiation. Final state matches Tests 2, 5, 7, 8 exactly. The oil price mechanism in heuristic tests is not responsive to cartel overrides &mdash; prices appear hardcoded or follow a fixed trajectory.", rec: "Oil price should be a dynamic variable that responds to: Gulf Gate status, Persia sanctions, cartel coordination actions. Currently it's decorative in heuristic tests. The LLM test shows oil responding (97.8 to 94.0 to 98.0) &mdash; this responsiveness needs to be built into the heuristic engine." },
+    test_5_columbia_politics: { desc: "Columbia internal politics stress. Election and succession effects.", conclusion: "Columbia internal override has no visible effect. Same outcome as Tests 2, 4, 7, 8. Elections occur in the heuristic engine but don't change decision-making &mdash; the same heuristic tree runs regardless of which administration is in power.", rec: "Election results should modify Columbia's risk tolerance, deal acceptance thresholds, and military commitment levels. A hawkish administration should produce visibly different behavior than a dovish one. Currently elections are cosmetic." },
+    test_6_alliance_cohesion: { desc: "NATO fracture scenario. Tests alliance resilience under stress.", conclusion: "The ONLY heuristic test that produces meaningfully different numbers. Columbia GDP drops to 316.1 (vs 335-346 in others), support falls to 25.0%, and the gap ratio hits 1.099 &mdash; the widest of any test. This suggests the alliance cohesion parameter actually affects Columbia's GDP calculation.", rec: "This is the one override that works. Investigate WHY it works and apply the same coupling pattern to other overrides. The alliance fracture likely feeds directly into a GDP multiplier, while other overrides only affect decision thresholds that don't matter." },
+    test_7_gulf_gate: { desc: "Gulf Gate escalation scenario. Tests the Strait of Hormuz blockade mechanics.", conclusion: "Gulf Gate override produces no differentiation &mdash; same outcome as Tests 2, 4, 5, 8. The blockade mechanics in heuristic mode follow the same pattern regardless of escalation overrides. Ground-based blockade holds but doesn't create unique dynamics.", rec: "Gulf Gate escalation should trigger: oil price spikes, Columbia naval response options, Persia brinkmanship. The current override doesn't connect to these mechanics. Need explicit event injection for Gulf Gate scenarios." },
+    test_8_peace: { desc: "Maximum deal-seeking scenario. All agents prioritize diplomacy.", conclusion: "Peace override produces no differentiation. Same military outcomes, same stability collapses, same GDP figures. The deal-seeking parameter doesn't reduce combat or improve stability outcomes because the heuristic engine doesn't model deal-vs-combat tradeoffs.", rec: "Peace scenario should produce: fewer combats, higher deal counts, better stability preservation, slower military buildup. None of these effects are visible. The heuristic engine needs a diplomacy-vs-force slider that actually affects round outcomes." }
+  };
+
+  var allKeys = Object.keys(HEURISTIC_TESTS);
+  allKeys.forEach(function(key, i) {
+    var t = HEURISTIC_TESTS[key];
+    var info = testDescs[key];
+    var isTest6 = key === 'test_6_alliance_cohesion';
+    var card = document.createElement('div');
+    card.className = 'test-card';
+    card.innerHTML =
+      '<div class="card-header" onclick="this.classList.toggle(\'open\'); this.nextElementSibling.classList.toggle(\'open\');">' +
+        '<h3>Test ' + (i+1) + ': ' + t.name + ' (Seed ' + t.seed + ')</h3>' +
+        '<span class="arrow">&#9654;</span>' +
+      '</div>' +
+      '<div class="card-body">' +
+        '<p style="color:var(--muted); margin-bottom:14px; font-size:0.9rem;">' + info.desc + '</p>' +
+        '<div class="card-metrics">' +
+          '<div class="metric"><div class="val">' + t.columbia.gdp + '</div><div class="lbl">Columbia GDP</div></div>' +
+          '<div class="metric"><div class="val">' + t.cathay.gdp + '</div><div class="lbl">Cathay GDP</div></div>' +
+          '<div class="metric"><div class="val">' + t.gap_ratio.toFixed(3) + '</div><div class="lbl">Gap Ratio</div></div>' +
+          '<div class="metric"><div class="val">' + t.nordostan.stability + '</div><div class="lbl">Nord. Stability</div></div>' +
+          '<div class="metric"><div class="val">' + t.heartland.stability + '</div><div class="lbl">Heart. Stability</div></div>' +
+          '<div class="metric"><div class="val">' + t.gallia.stability + '</div><div class="lbl">Gallia Stability</div></div>' +
+        '</div>' +
+        '<div>' +
+          '<span class="mini-badge" style="background:#e8f5e9; color:#2e7d32;">No Nuclear</span>' +
+          (isTest6 ? '<span class="mini-badge" style="background:#fff3e0; color:#e65100;">Widest Gap (1.099)</span>' : '') +
+          (t.gap_ratio > 1.0 ? '<span class="mini-badge" style="background:#fce4ec; color:#c62828;">Cathay Overtakes</span>' : '') +
+          '<span class="mini-badge" style="background:#e3f2fd; color:#1565c0;">Heuristic Engine</span>' +
+        '</div>' +
+        '<div class="conclusion-block cb-conclusions">' +
+          '<h4>Conclusions</h4>' +
+          '<p style="font-size:0.88rem;">' + info.conclusion + '</p>' +
+        '</div>' +
+        '<div class="conclusion-block cb-recommendations">' +
+          '<h4>Recommendations</h4>' +
+          '<p style="font-size:0.88rem;">' + info.rec + '</p>' +
+        '</div>' +
+      '</div>';
+    container.appendChild(card);
+  });
+
+  // LLM Card (open by default)
+  var last = LLM_TEST.rounds[7];
+  var llmCard = document.createElement('div');
+  llmCard.className = 'test-card';
+  llmCard.innerHTML =
+    '<div class="card-header open" onclick="this.classList.toggle(\'open\'); this.nextElementSibling.classList.toggle(\'open\');">' +
+      '<h3>Test 9: LLM Architecture Test (Role-Brief Driven)</h3>' +
+      '<span class="arrow" style="transform:rotate(90deg)">&#9654;</span>' +
+    '</div>' +
+    '<div class="card-body open">' +
+      '<p style="color:var(--muted); margin-bottom:14px; font-size:0.9rem;">Full 8-round test using Claude-generated role briefs for each team. Agents reason from character profiles, not heuristic decision trees. The gold standard for behavioral credibility.</p>' +
+      '<div class="card-metrics">' +
+        '<div class="metric"><div class="val">' + last.columbia_gdp + '</div><div class="lbl">Columbia GDP</div></div>' +
+        '<div class="metric"><div class="val">' + last.cathay_gdp + '</div><div class="lbl">Cathay GDP</div></div>' +
+        '<div class="metric"><div class="val">' + last.gap.toFixed(3) + '</div><div class="lbl">Gap Ratio</div></div>' +
+        '<div class="metric"><div class="val">' + LLM_TEST.total_deals + '</div><div class="lbl">Total Deals</div></div>' +
+        '<div class="metric"><div class="val">' + LLM_TEST.total_combats + '</div><div class="lbl">Total Combats</div></div>' +
+        '<div class="metric"><div class="val">' + last.naval_ratio + '</div><div class="lbl">Naval Ratio</div></div>' +
+      '</div>' +
+      '<div>' +
+        '<span class="mini-badge" style="background:#e8f5e9; color:#2e7d32;">No Nuclear</span>' +
+        '<span class="mini-badge" style="background:#fff9c4; color:#f57f17;">Most Credible</span>' +
+        '<span class="mini-badge" style="background:#e3f2fd; color:#1565c0;">LLM Engine</span>' +
+        '<span class="mini-badge" style="background:#f3e5f5; color:#7b1fa2;">141 Deals</span>' +
+      '</div>' +
+      '<div class="conclusion-block cb-conclusions">' +
+        '<h4>Conclusions</h4>' +
+        '<p style="font-size:0.88rem;">The role-brief-driven approach produces meaningfully different dynamics: Cathay calculates but doesn\'t trigger Formosa (Helmsman\'s window score reaches 0.92 but not threshold), Nordostan grinds but seeks deals, Columbia\'s overstretch is visible. However, stability still collapses too fast for war countries (Heartland hits 1.0 by Round 3). The gap ratio of 0.858 means Cathay hasn\'t overtaken in 8 rounds &mdash; more realistic than heuristic tests where overtaking occurs. 141 deals across 8 rounds shows active diplomacy. Combat declines from 4 to 2 over the simulation &mdash; war exhaustion is modeled.</p>' +
+      '</div>' +
+      '<div class="conclusion-block cb-recommendations">' +
+        '<h4>Recommendations</h4>' +
+        '<p style="font-size:0.88rem;">1. Slow stability decay: Heartland should survive to Round 5-6 minimum. Reduce war tiredness from 0.4/round to 0.2/round for autocratic regimes.<br>2. Add Formosa trigger threshold &mdash; if window score exceeds 0.95, force a decision point with probability proportional to naval ratio advantage.<br>3. Extend to 12 rounds (through 2032) to see if Cathay actually overtakes, and what happens when it does.<br>4. Run with actual Claude subagents (not pre-scripted briefs) to test emergent strategy.</p>' +
+      '</div>' +
+    '</div>';
+  container.appendChild(llmCard);
+})();
+
+// ============================================================
+// SECTION 4: LLM Deep Dive Charts
+// ============================================================
+new Chart(document.getElementById('chart-llm-activity'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Deals', data: LLM_TEST.rounds.map(function(r){return r.deals;}), backgroundColor: 'rgba(58,91,160,0.7)', borderRadius: 4, yAxisID: 'y' },
+      { label: 'Combats', data: LLM_TEST.rounds.map(function(r){return r.combats;}), backgroundColor: 'rgba(185,74,72,0.7)', borderRadius: 4, yAxisID: 'y' },
+      { label: 'Oil Price ($)', data: LLM_TEST.rounds.map(function(r){return r.oil;}), type: 'line', borderColor: '#a08060', borderWidth: 2, pointRadius: 4, fill: false, yAxisID: 'y1' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' } },
+    scales: {
+      y: { beginAtZero: true, title: { display: true, text: 'Count' }, position: 'left' },
+      y1: { min: 90, max: 102, title: { display: true, text: 'Oil ($)' }, position: 'right', grid: { drawOnChartArea: false } }
+    }
+  }
+});
+
+new Chart(document.getElementById('chart-llm-stab'), {
+  type: 'line',
+  data: {
+    labels: labels,
+    datasets: [
+      { label: 'Nordostan Stability', data: LLM_TEST.rounds.map(function(r){return r.nord_stab;}), borderColor: '#c47a7a', backgroundColor: 'rgba(196,122,122,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Heartland Stability', data: LLM_TEST.rounds.map(function(r){return r.heart_stab;}), borderColor: '#6b9e6b', backgroundColor: 'rgba(107,158,107,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Floor (1.0)', data: [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0], borderColor: '#c62828', borderWidth: 1, borderDash: [6,4], pointRadius: 0, fill: false }
+    ]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, scales: { y: { min: 0, max: 5, title: { display: true, text: 'Stability Index' } } } }
+});
+</script>
+</body>
+</html>
