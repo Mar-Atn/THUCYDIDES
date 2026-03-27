@@ -33,6 +33,18 @@ body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: #1a1a2e; 
 .palette-name input:focus { border-bottom-color: #e94560; outline: none; }
 .palette-divider { height: 1px; background: #333; margin: 6px 0; }
 
+/* CHOKEPOINT SECTION */
+.cp-section { margin-top: 8px; }
+.cp-item { display: flex; align-items: center; gap: 4px; padding: 3px 6px; margin-bottom: 3px; border-radius: 4px; border: 2px solid transparent; }
+.cp-item.placing { border-color: #D4880F; background: rgba(212,136,15,0.15); }
+.cp-item-name { font-size: 10px; color: #D4A040; font-weight: 600; flex: 1; min-width: 0; }
+.cp-item-pos { font-size: 9px; color: #888; margin-right: 2px; }
+.cp-btn { background: #0f3460; color: #eee; border: 1px solid #1a5276; padding: 2px 8px; border-radius: 3px; font-family: inherit; font-size: 10px; cursor: pointer; transition: background 0.15s; }
+.cp-btn:hover { background: #1a5276; }
+.cp-btn.active { background: #D4880F; border-color: #D4880F; }
+.cp-btn.remove { background: #5a2020; border-color: #7a3030; }
+.cp-btn.remove:hover { background: #7a3030; }
+
 /* CANVAS AREA */
 #canvas-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 canvas { background: #C5D9E8; cursor: crosshair; }
@@ -47,7 +59,6 @@ canvas { background: #C5D9E8; cursor: crosshair; }
 <div id="header">
   <h1>TTT MAP EDITOR</h1>
   <div class="header-spacer"></div>
-  <button id="btn-chokepoint">Chokepoint Mode</button>
   <button id="btn-clear">Clear Map</button>
   <button id="btn-load">Load Current Map</button>
   <button id="btn-export-svg">Export SVG</button>
@@ -58,6 +69,9 @@ canvas { background: #C5D9E8; cursor: crosshair; }
   <div id="sidebar">
     <h3>Palette</h3>
     <div id="palette"></div>
+    <div class="palette-divider"></div>
+    <h3>Chokepoints</h3>
+    <div id="chokepoints-panel"></div>
   </div>
   <div id="canvas-wrap">
     <canvas id="hexmap"></canvas>
@@ -116,91 +130,125 @@ let countries = [
   { id: 'horn',      name: 'Horn',       color: '#B5A896' },
 ];
 
+// ======== CHOKEPOINT DEFINITIONS ========
+const chokepointDefs = [
+  { key: 'formosa_strait', name: 'Formosa Strait' },
+  { key: 'gulf_gate',      name: 'Gulf Gate' },
+  { key: 'caribe_passage', name: 'Caribe Passage' },
+];
+
 // ======== STATE ========
 let grid = [];
 for (let r = 0; r < ROWS; r++) {
   grid[r] = [];
   for (let c = 0; c < COLS; c++) {
-    grid[r][c] = { owner: 'sea', chokepoint: false };
+    grid[r][c] = { owner: 'sea' };
   }
 }
 
+// Named chokepoints: key -> {row, col} or null
+let chokepoints = {
+  formosa_strait: null,
+  gulf_gate: null,
+  caribe_passage: null,
+};
+
 let activeBrush = 'sea';
-let chokepointMode = false;
+let placingChokepoint = null; // key of chokepoint being placed, or null
 let hoverHex = null; // {row, col}
+
+// ======== HELPER: check if a hex is a chokepoint ========
+function getChokepointAt(row, col) {
+  for (const [key, pos] of Object.entries(chokepoints)) {
+    if (pos && pos.row === row && pos.col === col) return key;
+  }
+  return null;
+}
+
+function getChokepointName(key) {
+  const def = chokepointDefs.find(d => d.key === key);
+  return def ? def.name : key;
+}
 
 // ======== INITIAL MAP STATE (from SVG) ========
 function loadCurrentMap() {
   // Clear everything first
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      grid[r][c] = { owner: 'sea', chokepoint: false };
+      grid[r][c] = { owner: 'sea' };
+
+  chokepoints = {
+    formosa_strait: null,
+    gulf_gate: null,
+    caribe_passage: null,
+  };
 
   // Land hexes extracted from SEED_C1_MAP_GLOBAL_v1.svg
-  grid[2][11] = { owner: 'nordostan', chokepoint: false };
-  grid[3][5]  = { owner: 'teutonia', chokepoint: false };
-  grid[3][11] = { owner: 'nordostan', chokepoint: false };
-  grid[3][13] = { owner: 'nordostan', chokepoint: false };
-  grid[3][14] = { owner: 'nordostan', chokepoint: false };
-  grid[3][15] = { owner: 'nordostan', chokepoint: false };
-  grid[3][17] = { owner: 'choson', chokepoint: false };
-  grid[4][9]  = { owner: 'freeland', chokepoint: false };
-  grid[4][10] = { owner: 'heartland', chokepoint: false };
-  grid[4][11] = { owner: 'nordostan', chokepoint: false };
-  grid[4][13] = { owner: 'sogdiana', chokepoint: false };
-  grid[4][14] = { owner: 'sogdiana', chokepoint: false };
-  grid[4][15] = { owner: 'nordostan', chokepoint: false };
-  grid[4][16] = { owner: 'nordostan', chokepoint: false };
-  grid[4][17] = { owner: 'hanguk', chokepoint: false };
-  grid[4][20] = { owner: 'yamato', chokepoint: false };
-  grid[5][1]  = { owner: 'columbia', chokepoint: false };
-  grid[5][6]  = { owner: 'albion', chokepoint: false };
-  grid[5][8]  = { owner: 'teutonia', chokepoint: false };
-  grid[5][9]  = { owner: 'teutonia', chokepoint: false };
-  grid[5][10] = { owner: 'heartland', chokepoint: false };
-  grid[5][11] = { owner: 'nordostan', chokepoint: false };
-  grid[5][14] = { owner: 'sogdiana', chokepoint: false };
-  grid[5][15] = { owner: 'cathay', chokepoint: false };
-  grid[5][16] = { owner: 'cathay', chokepoint: false };
-  grid[5][17] = { owner: 'cathay', chokepoint: false };
-  grid[5][18] = { owner: 'cathay', chokepoint: false };
-  grid[5][20] = { owner: 'yamato', chokepoint: false };
-  grid[6][1]  = { owner: 'columbia', chokepoint: false };
-  grid[6][2]  = { owner: 'columbia', chokepoint: false };
-  grid[6][3]  = { owner: 'columbia', chokepoint: false };
-  grid[6][8]  = { owner: 'gallia', chokepoint: false };
-  grid[6][9]  = { owner: 'gallia', chokepoint: false };
-  grid[6][10] = { owner: 'phrygia', chokepoint: false };
-  grid[6][11] = { owner: 'phrygia', chokepoint: false };
-  grid[6][13] = { owner: 'persia', chokepoint: false };
-  grid[6][14] = { owner: 'bharata', chokepoint: false };
-  grid[6][15] = { owner: 'bharata', chokepoint: false };
-  grid[6][16] = { owner: 'cathay', chokepoint: false };
-  grid[6][17] = { owner: 'cathay', chokepoint: false };
-  grid[7][1]  = { owner: 'columbia', chokepoint: false };
-  grid[7][2]  = { owner: 'columbia', chokepoint: false };
-  grid[7][7]  = { owner: 'ponte', chokepoint: false };
-  grid[7][9]  = { owner: 'levantia', chokepoint: false };
-  grid[7][10] = { owner: 'phrygia', chokepoint: false };
-  grid[7][11] = { owner: 'persia', chokepoint: false };
-  grid[7][13] = { owner: 'persia', chokepoint: false };
-  grid[7][14] = { owner: 'bharata', chokepoint: false };
-  grid[7][15] = { owner: 'bharata', chokepoint: false };
-  grid[7][17] = { owner: 'cathay', chokepoint: false };
-  grid[8][2]  = { owner: 'columbia', chokepoint: false };
-  grid[8][9]  = { owner: 'solaria', chokepoint: false };
-  grid[8][12] = { owner: 'solaria', chokepoint: false };
-  grid[8][14] = { owner: 'bharata', chokepoint: false };
-  grid[8][18] = { owner: 'formosa', chokepoint: false };
-  grid[9][9]  = { owner: 'horn', chokepoint: false };
-  grid[9][11] = { owner: 'mirage', chokepoint: false };
-  grid[10][3] = { owner: 'caribe', chokepoint: false };
+  grid[2][11] = { owner: 'nordostan' };
+  grid[3][5]  = { owner: 'teutonia' };
+  grid[3][11] = { owner: 'nordostan' };
+  grid[3][13] = { owner: 'nordostan' };
+  grid[3][14] = { owner: 'nordostan' };
+  grid[3][15] = { owner: 'nordostan' };
+  grid[3][17] = { owner: 'choson' };
+  grid[4][9]  = { owner: 'freeland' };
+  grid[4][10] = { owner: 'heartland' };
+  grid[4][11] = { owner: 'nordostan' };
+  grid[4][13] = { owner: 'sogdiana' };
+  grid[4][14] = { owner: 'sogdiana' };
+  grid[4][15] = { owner: 'nordostan' };
+  grid[4][16] = { owner: 'nordostan' };
+  grid[4][17] = { owner: 'hanguk' };
+  grid[4][20] = { owner: 'yamato' };
+  grid[5][1]  = { owner: 'columbia' };
+  grid[5][6]  = { owner: 'albion' };
+  grid[5][8]  = { owner: 'teutonia' };
+  grid[5][9]  = { owner: 'teutonia' };
+  grid[5][10] = { owner: 'heartland' };
+  grid[5][11] = { owner: 'nordostan' };
+  grid[5][14] = { owner: 'sogdiana' };
+  grid[5][15] = { owner: 'cathay' };
+  grid[5][16] = { owner: 'cathay' };
+  grid[5][17] = { owner: 'cathay' };
+  grid[5][18] = { owner: 'cathay' };
+  grid[5][20] = { owner: 'yamato' };
+  grid[6][1]  = { owner: 'columbia' };
+  grid[6][2]  = { owner: 'columbia' };
+  grid[6][3]  = { owner: 'columbia' };
+  grid[6][8]  = { owner: 'gallia' };
+  grid[6][9]  = { owner: 'gallia' };
+  grid[6][10] = { owner: 'phrygia' };
+  grid[6][11] = { owner: 'phrygia' };
+  grid[6][13] = { owner: 'persia' };
+  grid[6][14] = { owner: 'bharata' };
+  grid[6][15] = { owner: 'bharata' };
+  grid[6][16] = { owner: 'cathay' };
+  grid[6][17] = { owner: 'cathay' };
+  grid[7][1]  = { owner: 'columbia' };
+  grid[7][2]  = { owner: 'columbia' };
+  grid[7][7]  = { owner: 'ponte' };
+  grid[7][9]  = { owner: 'levantia' };
+  grid[7][10] = { owner: 'phrygia' };
+  grid[7][11] = { owner: 'persia' };
+  grid[7][13] = { owner: 'persia' };
+  grid[7][14] = { owner: 'bharata' };
+  grid[7][15] = { owner: 'bharata' };
+  grid[7][17] = { owner: 'cathay' };
+  grid[8][2]  = { owner: 'columbia' };
+  grid[8][9]  = { owner: 'solaria' };
+  grid[8][12] = { owner: 'solaria' };
+  grid[8][14] = { owner: 'bharata' };
+  grid[8][18] = { owner: 'formosa' };
+  grid[9][9]  = { owner: 'horn' };
+  grid[9][11] = { owner: 'mirage' };
+  grid[10][3] = { owner: 'caribe' };
 
-  // Chokepoint hexes (sea hexes with orange border)
-  grid[7][18]  = { owner: 'sea', chokepoint: true };  // Formosa Strait
-  grid[9][2]   = { owner: 'sea', chokepoint: true };  // Caribe Passage
-  grid[9][10]  = { owner: 'sea', chokepoint: true };  // Gulf Gate
+  // Named chokepoints at their initial positions
+  chokepoints.formosa_strait = { row: 7, col: 18 };
+  chokepoints.gulf_gate      = { row: 9, col: 10 };
+  chokepoints.caribe_passage = { row: 9, col: 2 };
 
+  buildChokepointPanel();
   draw();
 }
 
@@ -262,6 +310,29 @@ function getCountryName(id) {
   return c ? c.name : id;
 }
 
+// ======== COMPUTE COUNTRY CENTERS ========
+function computeCountryCenters() {
+  const countryHexes = {};
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const o = grid[r][c].owner;
+      if (o === 'sea') continue;
+      if (!countryHexes[o]) countryHexes[o] = [];
+      const pos = hexCenter(c, r);
+      countryHexes[o].push(pos);
+    }
+  }
+  const centers = {};
+  for (const [id, hexes] of Object.entries(countryHexes)) {
+    centers[id] = {
+      x: hexes.reduce((s, h) => s + h.x, 0) / hexes.length,
+      y: hexes.reduce((s, h) => s + h.y, 0) / hexes.length,
+      count: hexes.length,
+    };
+  }
+  return centers;
+}
+
 // ======== DRAW ========
 function draw() {
   ctx.clearRect(0, 0, canvasW, canvasH);
@@ -276,12 +347,13 @@ function draw() {
       const { x, y } = hexCenter(c, r);
       const cell = grid[r][c];
       const color = getCountryColor(cell.owner);
+      const cpKey = getChokepointAt(r, c);
 
       hexPath(x, y, S);
       ctx.fillStyle = color;
       ctx.fill();
 
-      if (cell.chokepoint) {
+      if (cpKey) {
         ctx.strokeStyle = '#D4880F';
         ctx.lineWidth = 3;
         ctx.stroke();
@@ -294,7 +366,28 @@ function draw() {
         ctx.lineWidth = 0.3;
         ctx.stroke();
       }
+
+      // Draw chokepoint name label inside hex
+      if (cpKey) {
+        const cpName = getChokepointName(cpKey);
+        ctx.fillStyle = '#B8720C';
+        ctx.font = 'bold 8px Inter, Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(cpName, x, y);
+      }
     }
+  }
+
+  // Draw country name labels at geometric centers
+  const centers = computeCountryCenters();
+  for (const [id, info] of Object.entries(centers)) {
+    const fontSize = info.count >= 3 ? 11 : 8;
+    ctx.fillStyle = '#333';
+    ctx.font = `bold ${fontSize}px Inter, Arial, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(getCountryName(id), info.x, info.y);
   }
 
   // Draw hover highlight
@@ -363,7 +456,7 @@ function buildPalette() {
     nameWrap.className = 'palette-name';
     const nameInput = document.createElement('input');
     nameInput.value = c.name;
-    nameInput.addEventListener('input', (e) => { c.name = e.target.value; });
+    nameInput.addEventListener('input', (e) => { c.name = e.target.value; draw(); });
     nameInput.addEventListener('click', (e) => e.stopPropagation());
     nameWrap.appendChild(nameInput);
 
@@ -372,12 +465,78 @@ function buildPalette() {
 
     item.addEventListener('click', () => {
       activeBrush = c.id;
+      placingChokepoint = null;
       document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
       item.classList.add('selected');
       document.getElementById('st-brush').textContent = c.name;
+      document.getElementById('st-mode').textContent = 'Paint';
+      buildChokepointPanel();
     });
 
     pal.appendChild(item);
+  });
+}
+
+// ======== CHOKEPOINT PANEL ========
+function buildChokepointPanel() {
+  const panel = document.getElementById('chokepoints-panel');
+  panel.innerHTML = '';
+
+  chokepointDefs.forEach(def => {
+    const item = document.createElement('div');
+    item.className = 'cp-item' + (placingChokepoint === def.key ? ' placing' : '');
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'cp-item-name';
+    nameEl.textContent = def.name;
+
+    const posEl = document.createElement('span');
+    posEl.className = 'cp-item-pos';
+    const pos = chokepoints[def.key];
+    posEl.textContent = pos ? `(${pos.col+1},${pos.row+1})` : '--';
+
+    const placeBtn = document.createElement('button');
+    placeBtn.className = 'cp-btn' + (placingChokepoint === def.key ? ' active' : '');
+    placeBtn.textContent = 'Place';
+    placeBtn.addEventListener('click', () => {
+      if (placingChokepoint === def.key) {
+        placingChokepoint = null;
+      } else {
+        placingChokepoint = def.key;
+      }
+      // Deselect palette items visually
+      if (placingChokepoint) {
+        document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+        document.getElementById('st-mode').textContent = 'Place ' + def.name;
+      } else {
+        document.getElementById('st-mode').textContent = 'Paint';
+        // Re-select current brush
+        document.querySelectorAll('.palette-item').forEach(el => {
+          if (el.dataset.id === activeBrush) el.classList.add('selected');
+        });
+      }
+      buildChokepointPanel();
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'cp-btn remove';
+    removeBtn.textContent = 'X';
+    removeBtn.title = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      chokepoints[def.key] = null;
+      if (placingChokepoint === def.key) {
+        placingChokepoint = null;
+        document.getElementById('st-mode').textContent = 'Paint';
+      }
+      buildChokepointPanel();
+      draw();
+    });
+
+    item.appendChild(nameEl);
+    item.appendChild(posEl);
+    item.appendChild(placeBtn);
+    item.appendChild(removeBtn);
+    panel.appendChild(item);
   });
 }
 
@@ -393,7 +552,8 @@ canvas.addEventListener('mousemove', (e) => {
   if (hex) {
     const cell = grid[hex.row][hex.col];
     const ownerName = cell.owner === 'sea' ? 'Sea' : getCountryName(cell.owner);
-    const cp = cell.chokepoint ? ' [CP]' : '';
+    const cpKey = getChokepointAt(hex.row, hex.col);
+    const cp = cpKey ? ` [${getChokepointName(cpKey)}]` : '';
     document.getElementById('st-hover').textContent =
       `(${hex.col + 1}, ${hex.row + 1}) ${ownerName}${cp}`;
   } else {
@@ -417,8 +577,16 @@ canvas.addEventListener('click', (e) => {
   const hex = pixelToHex(mx, my);
   if (!hex) return;
 
-  if (chokepointMode) {
-    grid[hex.row][hex.col].chokepoint = !grid[hex.row][hex.col].chokepoint;
+  if (placingChokepoint) {
+    // Place chokepoint on this hex (move it if already placed elsewhere)
+    chokepoints[placingChokepoint] = { row: hex.row, col: hex.col };
+    placingChokepoint = null;
+    document.getElementById('st-mode').textContent = 'Paint';
+    // Re-select current brush
+    document.querySelectorAll('.palette-item').forEach(el => {
+      if (el.dataset.id === activeBrush) el.classList.add('selected');
+    });
+    buildChokepointPanel();
   } else {
     grid[hex.row][hex.col].owner = activeBrush;
   }
@@ -432,7 +600,7 @@ canvas.addEventListener('mousedown', (e) => {
 });
 window.addEventListener('mouseup', () => { painting = false; });
 canvas.addEventListener('mousemove', (e) => {
-  if (!painting) return;
+  if (!painting || placingChokepoint) return;
   const rect = canvas.getBoundingClientRect();
   const scaleX = canvas.width / rect.width;
   const scaleY = canvas.height / rect.height;
@@ -440,26 +608,18 @@ canvas.addEventListener('mousemove', (e) => {
   const my = (e.clientY - rect.top) * scaleY;
   const hex = pixelToHex(mx, my);
   if (!hex) return;
-  if (chokepointMode) {
-    // Don't drag-toggle chokepoints, only click
-  } else {
-    grid[hex.row][hex.col].owner = activeBrush;
-    draw();
-  }
+  grid[hex.row][hex.col].owner = activeBrush;
+  draw();
 });
 
 // ======== HEADER BUTTONS ========
-document.getElementById('btn-chokepoint').addEventListener('click', function() {
-  chokepointMode = !chokepointMode;
-  this.classList.toggle('active', chokepointMode);
-  document.getElementById('st-mode').textContent = chokepointMode ? 'Chokepoint' : 'Paint';
-});
-
 document.getElementById('btn-clear').addEventListener('click', () => {
   if (!confirm('Clear entire map to sea?')) return;
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++)
-      grid[r][c] = { owner: 'sea', chokepoint: false };
+      grid[r][c] = { owner: 'sea' };
+  chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
+  buildChokepointPanel();
   draw();
 });
 
@@ -475,7 +635,8 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-25 -25 ${Math.round(vb_w + 50)} ${Math.round(vb_h + 50)}" width="${Math.round(vb_w + 20)}" height="${Math.round(vb_h + 20)}">\n`;
   svg += `  <defs><style>\n`;
   svg += `    .lbl { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 9px; fill: #333; text-anchor: middle; dominant-baseline: central; }\n`;
-  svg += `    .country-lbl { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 12px; font-weight: 700; fill: #333; text-anchor: middle; dominant-baseline: central; letter-spacing: 1.5px; }\n`;
+  svg += `    .country-lbl-lg { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 13px; font-weight: 700; fill: #333; text-anchor: middle; dominant-baseline: central; letter-spacing: 1.5px; }\n`;
+  svg += `    .country-lbl-sm { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 9px; font-weight: 700; fill: #333; text-anchor: middle; dominant-baseline: central; letter-spacing: 1px; }\n`;
   svg += `    .ocean-lbl { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 20px; font-style: italic; fill: #6688AA; opacity: 0.5; text-anchor: middle; dominant-baseline: central; letter-spacing: 3px; }\n`;
   svg += `    .grid-lbl { font-family: Inter,Arial,sans-serif; font-size: 10px; fill: #AAAAAA; text-anchor: middle; dominant-baseline: central; }\n`;
   svg += `    .cp-lbl { font-family: Inter,Arial,sans-serif; font-size: 8px; font-weight: 700; fill: #B8720C; text-anchor: middle; dominant-baseline: central; }\n`;
@@ -489,6 +650,7 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
       const cx = SVG_PAD_X + c * SVG_COL_SP + (r % 2) * SVG_ODD_OFF;
       const cy = SVG_PAD_Y + r * SVG_ROW_SP;
       const color = getCountryColor(cell.owner);
+      const cpKey = getChokepointAt(r, c);
 
       // Compute pointy-top vertices
       const pts = [];
@@ -500,7 +662,7 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
       }
 
       let stroke, sw;
-      if (cell.chokepoint) {
+      if (cpKey) {
         stroke = '#D4880F'; sw = '3';
       } else if (cell.owner !== 'sea') {
         stroke = '#666666'; sw = '1.5';
@@ -509,6 +671,12 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
       }
 
       svg += `  <polygon points="${pts.join(' ')}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>\n`;
+
+      // Chokepoint label inside hex
+      if (cpKey) {
+        const cpName = getChokepointName(cpKey);
+        svg += `  <text x="${cx.toFixed(1)}" y="${(cy + 2).toFixed(1)}" class="cp-lbl">${cpName}</text>\n`;
+      }
     }
   }
 
@@ -523,36 +691,25 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
     svg += `  <text x="-10" y="${cy.toFixed(1)}" class="grid-lbl">${r + 1}</text>\n`;
   }
 
-  // Country labels - place one label per country at centroid of its hexes
+  // Country labels at geometric centers
   svg += `  <!-- COUNTRY LABELS -->\n`;
-  const countryHexes = {};
+  const countryHexesSVG = {};
   for (let r = 0; r < ROWS; r++) {
     for (let c = 0; c < COLS; c++) {
       const o = grid[r][c].owner;
       if (o === 'sea') continue;
-      if (!countryHexes[o]) countryHexes[o] = [];
+      if (!countryHexesSVG[o]) countryHexesSVG[o] = [];
       const cx = SVG_PAD_X + c * SVG_COL_SP + (r % 2) * SVG_ODD_OFF;
       const cy = SVG_PAD_Y + r * SVG_ROW_SP;
-      countryHexes[o].push({ x: cx, y: cy });
+      countryHexesSVG[o].push({ x: cx, y: cy });
     }
   }
-  for (const [id, hexes] of Object.entries(countryHexes)) {
+  for (const [id, hexes] of Object.entries(countryHexesSVG)) {
     const avgX = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
     const avgY = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
-    const name = getCountryName(id).toUpperCase();
-    svg += `  <text x="${avgX.toFixed(1)}" y="${avgY.toFixed(1)}" class="country-lbl">${name}</text>\n`;
-  }
-
-  // Chokepoint labels
-  svg += `  <!-- CHOKEPOINTS -->\n`;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (grid[r][c].chokepoint) {
-        const cx = SVG_PAD_X + c * SVG_COL_SP + (r % 2) * SVG_ODD_OFF;
-        const cy = SVG_PAD_Y + r * SVG_ROW_SP;
-        svg += `  <text x="${cx.toFixed(1)}" y="${(cy + 2).toFixed(1)}" class="cp-lbl">CP (${c+1},${r+1})</text>\n`;
-      }
-    }
+    const name = getCountryName(id);
+    const cls = hexes.length >= 3 ? 'country-lbl-lg' : 'country-lbl-sm';
+    svg += `  <text x="${avgX.toFixed(1)}" y="${avgY.toFixed(1)}" class="${cls}">${name}</text>\n`;
   }
 
   svg += `</svg>\n`;
@@ -592,17 +749,16 @@ document.getElementById('btn-export-md').addEventListener('click', () => {
     }
   }
 
-  // Chokepoints
-  md += '\n## Chokepoint Hexes\n\n';
-  md += '| hex_id | row | col |\n';
-  md += '|--------|-----|-----|\n';
-  let cpIdx = 0;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      if (grid[r][c].chokepoint) {
-        cpIdx++;
-        md += `| cp_${cpIdx} | ${r} | ${c} |\n`;
-      }
+  // Named Chokepoints
+  md += '\n## Chokepoints\n\n';
+  md += '| name | key | row | col |\n';
+  md += '|------|-----|-----|-----|\n';
+  for (const def of chokepointDefs) {
+    const pos = chokepoints[def.key];
+    if (pos) {
+      md += `| ${def.name} | ${def.key} | ${pos.row} | ${pos.col} |\n`;
+    } else {
+      md += `| ${def.name} | ${def.key} | -- | -- |\n`;
     }
   }
 
