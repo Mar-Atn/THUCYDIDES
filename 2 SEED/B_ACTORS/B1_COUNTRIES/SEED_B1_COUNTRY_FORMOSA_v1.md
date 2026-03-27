@@ -76,7 +76,7 @@ What makes Formosa interesting to play: you hold the most valuable economic asse
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 4 | `g_formosa` (4) | All homeland defense. Conscript-professional mix. Beach defense, urban warfare preparation. Asymmetric warfare doctrine ("porcupine strategy"). |
-| Naval forces | 2 | `g_formosa` (1), `g_sea_east_china` (1) | Small surface fleet. Submarines on order. Navy's role: delay invasion fleet, not defeat it. Mine warfare capability. |
+| Naval forces | 2 | `g_formosa` (1), `w(17,4)` (1) | Small surface fleet. Submarines on order. Navy's role: delay invasion fleet, not defeat it. Mine warfare capability. |
 | Tactical air/missiles | 3 | `g_formosa` (3) | F-16V fleet. Anti-ship missiles (Harpoon, domestic Hsiung Feng). Long-range precision strike capability limited. Air force would face severe attrition in first hours of conflict. |
 | Strategic missiles | 0 | — | No nuclear capability. No ballistic missiles. |
 | Air defense | 2 | `g_formosa` (2) | Patriot PAC-3 systems. Domestic Tien Kung missiles. Critical for defending against Cathay missile barrages. Insufficient against saturating attack. |

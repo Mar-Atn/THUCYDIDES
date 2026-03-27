@@ -269,7 +269,7 @@ class TestOrchestrator:
                     "round": round_num, "phase": "blockade", "result": result})
 
             if mil.get("formosa_action") in ("blockade", "full_blockade"):
-                for sea_zone in ["g_sea_east_china", "g_sea_south_china"]:
+                for sea_zone in ["w(17,4)", "w(16,7)"]:
                     result = self.live_action_engine.resolve_blockade(
                         agent.country_id, sea_zone)
                     self.simulation_log.append({

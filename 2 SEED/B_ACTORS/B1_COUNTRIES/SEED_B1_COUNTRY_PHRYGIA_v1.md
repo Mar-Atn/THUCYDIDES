@@ -81,7 +81,7 @@ What makes Phrygia interesting to play: you are the bazaar at the crossroads of 
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 6 | `g_phrygia` (4 — homeland + Syrian border), Syria (1), `g_strait_bosphorus` (1 — strait defense) | Second-largest NATO military by personnel. Syria deployment ongoing. Kurdish operations in southeast. |
-| Naval forces | 2 | `g_phrygia` (1 — Aegean/Mediterranean), `g_sea_med_east` (1) | Growing blue-water ambitions. Domestic frigate program. Controls Bosphorus naval transit. |
+| Naval forces | 2 | `g_phrygia` (1 — Aegean/Mediterranean), `w(9,6)` (1) | Growing blue-water ambitions. Domestic frigate program. Controls Bosphorus naval transit. |
 | Tactical air/missiles | 3 | `g_phrygia` (3) | F-16 fleet (no F-35 — expelled from program over S-400). Domestic Bayraktar TB2/TB3 drones. Cruise missiles (domestic). |
 | Strategic missiles | 0 | — | No nuclear capability. No ballistic missiles. |
 | Air defense | 1 | `g_phrygia` (1) | S-400 from Nordostan (the purchase that broke the F-35 deal). Domestic air defense in development. |

@@ -218,7 +218,7 @@ class LiveActionEngine:
         Gulf Gate special mechanic:
         - Ground-based blockade: if a country holds ground units on me_gulf_gate,
           air strikes CANNOT break the blockade. Only ground invasion can.
-        - Naval blockade: requires at least 1 naval unit in the sea zone.
+        - Naval blockade: requires at least 1 naval unit on the water hex.
         """
         result = {
             "type": "blockade",
@@ -957,14 +957,14 @@ class LiveActionEngine:
         adj = self.ws.zone_adjacency.get(origin_zone, [])
         for a in adj:
             if a["zone"] == target_zone and a["type"] == "land_sea":
-                # If attacker is in a sea zone attacking a land zone
+                # If attacker is on a water hex attacking a land zone
                 if origin_data.get("type", "").startswith("sea"):
                     return True
         return False
 
     def _get_intervening_sea_zones(self, origin: Optional[str],
                                     target: str) -> List[str]:
-        """Get sea zones between origin and target for amphibious checks."""
+        """Get water hexes between origin and target for amphibious checks."""
         if not origin:
             return []
         sea_zones = []

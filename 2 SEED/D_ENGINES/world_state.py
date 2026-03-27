@@ -21,13 +21,13 @@ from typing import Dict, List, Optional, Any
 
 CHOKEPOINTS = {
     "hormuz": {"zone": "cp_gulf_gate", "oil_impact": 0.35, "trade_impact": 0.10},
-    "malacca": {"zone": "g_sea_southeast_asia", "trade_impact": 0.30, "oil_impact": 0.05},
-    "taiwan_strait": {"zone": "g_sea_east_china", "tech_impact": 0.50, "trade_impact": 0.15},
-    "suez": {"zone": "g_sea_red", "trade_impact": 0.15, "oil_impact": 0.05},
-    "bosphorus": {"zone": "g_sea_black", "trade_impact": 0.08, "oil_impact": 0.0},
-    "giuk": {"zone": "g_sea_giuk", "detection": True, "trade_impact": 0.02},
-    "caribbean": {"zone": "g_sea_gulf_caribbean", "trade_impact": 0.05, "oil_impact": 0.02},
-    "south_china_sea": {"zone": "g_sea_south_china", "trade_impact": 0.20, "oil_impact": 0.03},
+    "malacca": {"zone": "w(15,9)", "trade_impact": 0.30, "oil_impact": 0.05},
+    "taiwan_strait": {"zone": "w(17,4)", "tech_impact": 0.50, "trade_impact": 0.15},
+    "suez": {"zone": "w(10,7)", "trade_impact": 0.15, "oil_impact": 0.05},
+    "bosphorus": {"zone": "w(10,3)", "trade_impact": 0.08, "oil_impact": 0.0},
+    "giuk": {"zone": "w(6,1)", "detection": True, "trade_impact": 0.02},
+    "caribbean": {"zone": "w(4,8)", "trade_impact": 0.05, "oil_impact": 0.02},
+    "south_china_sea": {"zone": "w(16,7)", "trade_impact": 0.20, "oil_impact": 0.03},
     "gulf_gate_ground": {"zone": "cp_gulf_gate", "oil_impact": 0.60, "ground_blockade": True},
 }
 

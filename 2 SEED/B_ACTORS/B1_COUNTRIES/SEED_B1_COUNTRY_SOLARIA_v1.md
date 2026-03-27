@@ -78,7 +78,7 @@ What makes Solaria essential to the SIM: every country's economic health depends
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 3 | `me_solaria` (3) | Professional but combat-untested. Equipment modern (Columbia-supplied). Ground defense of oil infrastructure priority. |
-| Naval forces | 1 | `g_sea_persian_gulf` (1) | Small navy. Gulf patrol. Dependent on Columbia naval presence for Gulf security. |
+| Naval forces | 1 | `w(12,8)` (1) | Small navy. Gulf patrol. Dependent on Columbia naval presence for Gulf security. |
 | Tactical air/missiles | 3 | `me_solaria` (3) | F-15s, Eurofighter Typhoons. New F-16 package incoming. Air defense of oil facilities is existential priority. |
 | Strategic missiles | 0 | — | No nuclear or strategic capability. Considering nuclear program — Wellspring has stated Solaria will develop nuclear weapons if Persia does. |
 | Air defense | 2 | `me_solaria` (2) | Patriot batteries (Columbia-supplied). THAAD requested. Tested in combat against Persian missile barrage — some intercepts, some failures. Not enough coverage for all critical infrastructure. |
@@ -135,7 +135,7 @@ What makes Solaria essential to the SIM: every country's economic health depends
 
 | Zone ID | Forces | Status |
 |---------|--------|--------|
-| `g_sea_persian_gulf` | Naval 1 | Gulf patrol. Operating alongside Columbia naval forces conducting Persia war. |
+| `w(12,8)` | Naval 1 | Gulf patrol. Operating alongside Columbia naval forces conducting Persia war. |
 
 ---
 

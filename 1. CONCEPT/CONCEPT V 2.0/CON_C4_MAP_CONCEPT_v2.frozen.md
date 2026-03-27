@@ -133,7 +133,11 @@ The map is not a separate domain — it is the **visual integration layer** wher
 
 1. **Scale of Eastern Europe theater at start:** 12-20 zones. Enough for meaningful maneuver, simple enough to resolve in minutes. Exact count deferred to scenario configuration.
 2. **Theater activation trigger:** First attack in a region activates the theater zoom-in. Five pre-set theaters ready: Eastern Ereb, Mashriq, Taiwan Strait, Caribbean, Thule. Korean Peninsula as optional 6th.
-3. **Naval mechanics:** RISK-model combat in sea zones (same as ground). Naval bombardment at 10% per unit per round. Naval blockade requires 1+ unit in zone. Strategic missiles can target any zone globally (no adjacency). Air defense units deployable to any zone to absorb incoming strikes. See E1 Engine Architecture for full combat resolution.
+3. **Naval mechanics:** RISK-model combat on water hexes (same as ground). Naval bombardment at 10% per unit per round. Naval blockade requires 1+ unit on water hex. Strategic missiles can target any zone globally (no adjacency). Air defense units deployable to any zone to absorb incoming strikes. See E1 Engine Architecture for full combat resolution.
+
+> **SEED DECISION (2026-03-27):** No named sea zones. Naval units position on water hex
+> coordinates w(col,row). The hex grid provides all needed mechanics: addressability,
+> adjacency, travel time, chokepoints. Simpler than named zones with no loss of functionality.
 
 ---
 

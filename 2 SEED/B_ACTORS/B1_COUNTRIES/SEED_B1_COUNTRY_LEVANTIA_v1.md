@@ -78,7 +78,7 @@ What makes Levantia interesting to play: you are small, surrounded, and have alr
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 6 | `g_levantia` (3 — homeland + West Bank), Lebanon theater (2), Persia-facing reserves (1) | IDF ground forces. High quality. Reservist-supplemented. 2 units committed to Lebanon operations. |
-| Naval forces | 1 | `g_sea_med_east` (1) | Small but capable. Submarine fleet (dolphin-class — nuclear-capable). Mediterranean patrol. |
+| Naval forces | 1 | `w(9,6)` (1) | Small but capable. Submarine fleet (dolphin-class — nuclear-capable). Mediterranean patrol. |
 | Tactical air/missiles | 4 | `g_levantia` (2), Persia strike operations (2) | F-35I fleet. Precision strike capability. 2 units actively conducting Persia campaign. Air superiority in region. |
 | Strategic missiles | 0 | — | Officially zero. Nuclear delivery capability exists (Jericho III ballistic missiles) but abstracted into Nuclear L1 undeclared status. |
 | Air defense | 3 | `g_levantia` (3) | Iron Dome, David's Sling, Arrow system. Densest air defense per territory in the world. Currently intercepting Persia missile/drone barrages. Critical asset. |

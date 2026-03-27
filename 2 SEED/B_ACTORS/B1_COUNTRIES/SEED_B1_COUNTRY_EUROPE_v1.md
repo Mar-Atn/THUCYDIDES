@@ -114,8 +114,8 @@ What makes Gallia essential: the player who runs Lumiere holds the only independ
 
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
-| Ground forces | 6 | `g_gallia` (4), `g_gallia_overseas` (1 — Djibouti), `g_sea_med_east` vicinity (1) | Professional, deployable, expeditionary-capable. |
-| Naval forces | 3 | `g_gallia` (1 — Atlantic/Med), `g_sea_persian_gulf` (1 — independent deployment), `g_sea_med_east` (1) | Charles de Gaulle carrier strike group. Independent blue-water capability. Currently deployed to Persian Gulf independently of Columbia. |
+| Ground forces | 6 | `g_gallia` (4), `g_gallia_overseas` (1 — Djibouti), `w(9,6)` vicinity (1) | Professional, deployable, expeditionary-capable. |
+| Naval forces | 3 | `g_gallia` (1 — Atlantic/Med), `w(12,8)` (1 — independent deployment), `w(9,6)` (1) | Charles de Gaulle carrier strike group. Independent blue-water capability. Currently deployed to Persian Gulf independently of Columbia. |
 | Tactical air/missiles | 4 | `g_gallia` (3), `g_gallia_overseas` (1) | Rafale combat aircraft. Domestic production (Dassault). |
 | Strategic missiles | 2 | `g_gallia` (2 — SSBNs + air-launched cruise missiles) | Independent nuclear deterrent. ~290-300 warheads (increasing). Sea-based + air-launched. Sole French command authority. |
 | Air defense | 1 | `g_gallia` (1) | SAMP/T systems. Limited relative to territory. |
@@ -227,7 +227,7 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 6 | `g_teutonia` (6) | Bundeswehr. Growing but starting from low base. Equipment procurement plagued by delays. |
-| Naval forces | 2 | `g_teutonia` (1 — Baltic/North Sea), `g_sea_atlantic_east` (1) | Small navy. Frigates and corvettes. No carrier capability. |
+| Naval forces | 2 | `g_teutonia` (1 — Baltic/North Sea), `w(7,3)` (1) | Small navy. Frigates and corvettes. No carrier capability. |
 | Tactical air/missiles | 3 | `g_teutonia` (3) | Eurofighter Typhoons. F-35 procurement underway for nuclear sharing role. |
 | Strategic missiles | 0 | — | No nuclear weapons. NATO nuclear sharing arrangement (US B61 bombs stored on German soil, delivered by German aircraft). |
 | Air defense | 1 | `g_teutonia` (1) | Patriot systems. Critically insufficient. Air defense is Germany's most urgent procurement priority. |
@@ -450,7 +450,7 @@ What makes Ponte essential: the player who runs this role holds the EU's veto �
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 4 | `g_ponte` (4) | Moderate army. Not designed for major land war. |
-| Naval forces | 2 | `g_ponte` (1 — Tyrrhenian), `g_sea_med_east` (1) | Mediterranean focus. Carrier Cavour. Controls central Mediterranean access. Migration patrols. |
+| Naval forces | 2 | `g_ponte` (1 — Tyrrhenian), `w(9,6)` (1) | Mediterranean focus. Carrier Cavour. Controls central Mediterranean access. Migration patrols. |
 | Tactical air/missiles | 2 | `g_ponte` (2) | Eurofighter Typhoons. F-35 procurement. |
 | Strategic missiles | 0 | — | No nuclear weapons. |
 | Air defense | 0 | — | Limited air defense. Dependent on NATO integrated systems. |
@@ -567,7 +567,7 @@ What makes Albion essential: nuclear deterrent, UNSC veto, Five Eyes intelligenc
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 4 | `g_albion` (3), `g_albion_overseas` (1 — Cyprus/Gibraltar) | British Army. Professional but small. Two reserve divisions being reconstituted per SDR. |
-| Naval forces | 4 | `g_albion` (2 — Home Fleet + Atlantic), `g_sea_atlantic_east` (1), `g_sea_med_east` (1) | Royal Navy. 2 aircraft carriers (Queen Elizabeth class). 6 destroyers, 12+ frigates. Nuclear attack submarines. Strongest European navy. |
+| Naval forces | 4 | `g_albion` (2 — Home Fleet + Atlantic), `w(7,3)` (1), `w(9,6)` (1) | Royal Navy. 2 aircraft carriers (Queen Elizabeth class). 6 destroyers, 12+ frigates. Nuclear attack submarines. Strongest European navy. |
 | Tactical air/missiles | 3 | `g_albion` (2), `g_albion_overseas` (1) | RAF. Typhoons, F-35Bs (carrier-capable). |
 | Strategic missiles | 2 | At sea (2 — Trident SSBNs on continuous patrol) | Trident nuclear deterrent. 4 Vanguard-class SSBNs (Dreadnought replacements building). ~225 warheads. Continuous At-Sea Deterrent (CASD). |
 | Air defense | 1 | `g_albion` (1) | Limited. Sky Sabre. Homeland defense priority. |

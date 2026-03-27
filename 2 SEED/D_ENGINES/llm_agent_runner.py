@@ -733,13 +733,13 @@ def deliberate_cathay(ws: WorldState, round_num: int, rng: random.Random) -> Tup
     if formosa_decision == "gray_zone_escalation":
         actions["military_ops"].append({
             "type": "gray_zone",
-            "target_zone": "g_sea_east_china",
+            "target_zone": "w(17,4)",
             "description": "Increased PLA Navy exercises near Formosa",
         })
     elif formosa_decision == "blockade":
         actions["military_ops"].append({
             "type": "blockade_preparation",
-            "target_zone": "g_sea_east_china",
+            "target_zone": "w(17,4)",
             "naval_units": min(5, mil["naval"]),
         })
 
@@ -1531,7 +1531,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
         mil_pct = 0.25
         tech_pct = 0.15
         # If Cathay escalating
-        if any(op.get("target_zone") == "g_sea_east_china"
+        if any(op.get("target_zone") == "w(17,4)"
                for ops in [deliberate_cathay.__doc__] for op in []):
             reasoning["decisions"].append("ALERT: Cathay escalation detected. Activate semiconductor deadman switch.")
         else:
@@ -1592,7 +1592,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
         mil_pct = 0.50
         social_pct = max(0.08, baseline_social - 0.15)
         if round_num % 3 == 0 and rng.random() < 0.5:
-            actions["military_ops"] = [{"type": "missile_test", "target_zone": "g_sea_of_yamato"}]
+            actions["military_ops"] = [{"type": "missile_test", "target_zone": "w(17,3)"}]
             reasoning["decisions"].append(f"Round {round_num}: Provocative missile test for concessions.")
         else:
             reasoning["decisions"].append("Maintain tension. Nuclear leverage for survival.")

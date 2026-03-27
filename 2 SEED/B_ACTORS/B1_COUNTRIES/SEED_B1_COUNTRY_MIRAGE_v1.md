@@ -84,7 +84,7 @@ What makes Mirage essential to the SIM: the financial intermediary. Every sancti
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 2 | `me_mirage` (2) | Small but well-equipped professional force. ~63,000 active duty. Combat experience in Yemen. |
-| Naval forces | 1 | `g_sea_persian_gulf` (1) | Modern corvettes, patrol vessels. Gulf patrol. Jebel Ali naval base. |
+| Naval forces | 1 | `w(12,8)` (1) | Modern corvettes, patrol vessels. Gulf patrol. Jebel Ali naval base. |
 | Tactical air/missiles | 2 | `me_mirage` (2) | F-16s (more incoming), Mirage 2000s, Rafale ordered. Drone capability (Chinese Wing Loong, others). Growing tactical air force. |
 | Strategic missiles | 0 | — | No strategic weapons. |
 | Air defense | 2 | `me_mirage` (2) | THAAD (Columbia-supplied), Patriot batteries, IRIS-T. Tested in combat against Persian missile barrage. Some intercepts successful; system stretched by volume of attacks. Critical infrastructure coverage gaps. |
@@ -141,7 +141,7 @@ What makes Mirage essential to the SIM: the financial intermediary. Every sancti
 
 | Zone ID | Forces | Status |
 |---------|--------|--------|
-| `g_sea_persian_gulf` | Naval 1 | Gulf patrol. Operating in contested waters alongside Columbia and Solaria naval forces. |
+| `w(12,8)` | Naval 1 | Gulf patrol. Operating in contested waters alongside Columbia and Solaria naval forces. |
 
 ---
 

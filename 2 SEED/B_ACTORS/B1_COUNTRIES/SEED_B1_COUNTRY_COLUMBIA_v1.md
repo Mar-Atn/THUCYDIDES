@@ -94,7 +94,7 @@ What makes Columbia essential to the SIM: every other country's strategy depends
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 22 | `g_col_continental` (8), `g_col_hawaii` (2), `g_col_alaska` (1), `g_teutonia` (2), `g_yamato` (1), `g_hanguk` (1), `g_freeland` (1), ME theater (4), `g_contested_horn` (1), `g_solaria` (1) | Overstretched. 4 ground committed to active Persia war zone. |
-| Naval forces | 14 | `g_col_continental` (3 — Atlantic Fleet), `g_col_hawaii` (3 — Pacific Fleet), `g_sea_persian_gulf` (3 — 2 CSGs for Epic Fury), `g_sea_med_east` (2), `g_sea_east_china` (1), `g_sea_atlantic_east` (1), `g_sea_indian_ocean` (1) | 11 carrier strike groups abstracted into 14 units. 3 committed to Persia theater — cannot redeploy without abandoning war. |
+| Naval forces | 14 | `g_col_continental` (3 — Atlantic Fleet), `g_col_hawaii` (3 — Pacific Fleet), `w(12,8)` (3 — 2 CSGs for Epic Fury), `w(9,6)` (2), `w(17,4)` (1), `w(7,3)` (1), `w(13,9)` (1) | 11 carrier strike groups abstracted into 14 units. 3 committed to Persia theater — cannot redeploy without abandoning war. |
 | Tactical air/missiles | 15 | `g_col_continental` (5), `g_col_hawaii` (2), `g_teutonia` (2), `g_yamato` (1), ME theater (3), `g_hanguk` (1), `g_col_alaska` (1) | 3 committed to active Persia air campaign. Global strike capability from continental bases. |
 | Strategic missiles | 12 | `g_col_continental` (8 — ICBM silos + bomber fleet), `g_col_alaska` (1), at sea (3 — SSBNs) | Fixed allocation. Full nuclear triad. ~3,700 warheads (1,770 deployed). MAD peer with Nordostan. Non-producible. |
 | Air defense | 4 | `g_col_continental` (2 — homeland THAAD/Patriot), `g_col_hawaii` (1), `g_yamato` (1) | Fixed allocation. Scarce relative to territory and commitments. Homeland defense prioritized. |
@@ -177,10 +177,10 @@ Starting majority: President's camp 3-2. Seat 5 contested at mid-terms (Round 2)
 | `g_solaria` | Ground 1 | Gulf logistics. Persia war support. |
 | `g_contested_horn` | Ground 1 | Djibouti. Red Sea security. Horn of Africa. |
 | ME theater zones | Ground 4, Naval 3, Tac Air 3 | **ACTIVE WAR ZONE.** Operation Epic Fury. 2 carrier strike groups. Cannot redeploy without abandoning campaign. |
-| `g_sea_med_east` | Naval 2 | Eastern Mediterranean. Persia war support + Levantia coordination. |
-| `g_sea_east_china` | Naval 1 | Pacific presence. Formosa deterrence patrol. |
-| `g_sea_atlantic_east` | Naval 1 | Atlantic security. GIUK Gap. |
-| `g_sea_indian_ocean` | Naval 1 | Indian Ocean presence. Sea lane protection. |
+| `w(9,6)` | Naval 2 | Eastern Mediterranean water hex. Persia war support + Levantia coordination. |
+| `w(17,4)` | Naval 1 | East Cathay Sea water hex. Formosa deterrence patrol. |
+| `w(7,3)` | Naval 1 | Eastern Atlantic water hex. GIUK Gap. |
+| `w(13,9)` | Naval 1 | Indian Ocean water hex. Sea lane protection. |
 | At sea (SSBNs) | Strat Missiles 3 | Ballistic missile submarines. Nuclear deterrent. Global patrol. |
 
 ### Overstretch Assessment

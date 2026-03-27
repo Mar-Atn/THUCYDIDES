@@ -81,7 +81,7 @@ What makes Yamato interesting to play: you are Columbia's indispensable Pacific 
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 3 | `g_yamato` (3) | Self-Defense Forces ground component. Professional, well-equipped, small. Amphibious capability developing for island defense. |
-| Naval forces | 4 | `g_yamato` (2 — home fleet), `g_sea_east_china` (1), `g_sea_pacific_west` (1) | JMSDF — among the most capable navies in the Pacific. 2 helicopter carriers (effectively light aircraft carriers). Submarine fleet. Anti-submarine warfare excellence. |
+| Naval forces | 4 | `g_yamato` (2 — home fleet), `w(17,4)` (1), `w(19,4)` (1) | JMSDF — among the most capable navies in the Pacific. 2 helicopter carriers (effectively light aircraft carriers). Submarine fleet. Anti-submarine warfare excellence. |
 | Tactical air/missiles | 3 | `g_yamato` (3) | F-35 fleet growing. Domestic Type-12 standoff missiles (1,000km range). GCAP next-gen fighter in development. |
 | Strategic missiles | 0 | — | No nuclear weapons. No ballistic missiles. But latent capability (see Technology). |
 | Air defense | 2 | `g_yamato` (2) | Aegis destroyers with BMD capability. PAC-3 Patriot. Columbia-provided systems. Integrated with Columbia's Pacific missile defense network. |

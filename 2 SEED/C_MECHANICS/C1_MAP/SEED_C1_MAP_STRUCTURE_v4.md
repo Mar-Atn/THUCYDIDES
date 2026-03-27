@@ -98,3 +98,20 @@ Other theaters (Formosa, Mashriq, Caribbean, Thule, Korea) resolved at global he
 | Formosa Strait | 6 | 16 |
 | Gulf Gate | 7 | 11 |
 | Caribe Passage | 7 | 3 |
+
+---
+
+## Naval Positioning
+
+Naval units are positioned on water hexes using grid coordinates: `w(col,row)`.
+No named sea zones exist. Every water hex on the global map is a valid naval position.
+
+**Rules:**
+- Naval units can move to ANY water hex between rounds
+- Attacks only target adjacent hexes (6 neighbors in hex grid)
+- Multiple nations' fleets can coexist on the same water hex
+- Chokepoints (Formosa Strait, Gulf Gate, Caribe Passage) are specific water hexes with blockade mechanics
+- Blockade: fleet must occupy the chokepoint hex + surrounding water hexes
+
+**Coordinate format:** `w(col,row)` where col and row are visual grid numbers from the global map.
+Example: `w(12,8)` = water hex at column 12, row 8 (Gulf waters near Persia coast)

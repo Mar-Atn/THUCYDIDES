@@ -79,7 +79,7 @@ What makes Bharata interesting to play: you are the person everyone needs and no
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 12 | `g_bharata` (10 — bulk on Cathay border and internal), `g_bharata_islands` (2 — Indian Ocean) | Third-largest ground force in SIM. Heavily oriented toward Cathay border (Ladakh, Arunachal Pradesh). |
-| Naval forces | 3 | `g_bharata` (1 — Western Fleet), `g_sea_indian_ocean` (2) | Growing blue-water capability. Aircraft carrier INS Vikrant operational. Indian Ocean dominance aspiration. |
+| Naval forces | 3 | `g_bharata` (1 — Western Fleet), `w(13,9)` (2) | Growing blue-water capability. Aircraft carrier INS Vikrant operational. Indian Ocean dominance aspiration. |
 | Tactical air/missiles | 4 | `g_bharata` (4) | Mix of Nordostan (Su-30MKI, Rafale from Gallia) and domestically produced (Tejas). Modernizing. |
 | Strategic missiles | 0 | — | Nuclear delivery via Agni series ballistic missiles abstracted into Nuclear L1. No strategic missile game units. |
 | Air defense | 2 | `g_bharata` (2) | S-400 from Nordostan (purchased despite Columbia objections). Domestic systems in development. |

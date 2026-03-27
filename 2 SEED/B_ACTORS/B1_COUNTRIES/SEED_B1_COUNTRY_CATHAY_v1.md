@@ -91,7 +91,7 @@ What makes Cathay essential to the SIM: Cathay is the rising power whose every y
 | Unit Type | Count | Deployment (zone IDs) | Notes |
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 25 | `g_cathay_mainland` (10), `g_cathay_west` (5), `g_cathay_south` (8), `g_choson_border` (2) | World's largest standing army (~2M active). Heavily concentrated on mainland. 8 units in southern/coastal zones = Taiwan Strait staging. Modernizing from mass infantry to mechanized/precision forces. |
-| Naval forces | 9 | `g_cathay_south` (4 — South Sea Fleet, Taiwan Strait), `g_cathay_mainland` (3 — East Sea Fleet, Yellow Sea), `g_sea_south_china` (2 — South China Sea patrols) | 395 combat vessels abstracted to 9 units. Largest navy by hull count. 3 carriers (Liaoning, Shandong, Fujian). Growing fast — producing warships at rate exceeding all Western navies combined. Quality gap narrowing. BUT: no global blue-water projection. Fleet concentrated in near-seas. |
+| Naval forces | 9 | `g_cathay_south` (4 — South Sea Fleet, Taiwan Strait), `g_cathay_mainland` (3 — East Sea Fleet, Yellow Sea), `w(16,7)` (2 — South China Sea patrols) | 395 combat vessels abstracted to 9 units. Largest navy by hull count. 3 carriers (Liaoning, Shandong, Fujian). Growing fast — producing warships at rate exceeding all Western navies combined. Quality gap narrowing. BUT: no global blue-water projection. Fleet concentrated in near-seas. |
 | Tactical air/missiles | 12 | `g_cathay_mainland` (5), `g_cathay_south` (5 — DF-21/DF-26 "carrier killer" missiles, tactical aviation), `g_cathay_west` (2) | Massive conventional missile arsenal — DF-21D and DF-26 anti-ship ballistic missiles can target carriers 1,500+ km offshore. 5th-gen J-20 fighters operational. Concentrated near coast for Taiwan/Pacific contingency. |
 | Strategic missiles | 4 | `g_cathay_mainland` (2 — silo-based ICBMs), `g_cathay_west` (1 — mobile DF-41 launchers), at sea (1 — SSBNs) | 600 warheads (2025), doubling since 2019. On track for 1,500 by 2035. NOT yet peer with Columbia/Nordostan (~3,700/~4,500). Growing +1/round until reaching cap. 80% progress toward L3 nuclear. |
 | Air defense | 3 | `g_cathay_mainland` (1), `g_cathay_south` (1 — coastal defense), `g_cathay_west` (1) | S-400 (from Nordostan) + HQ-9 domestic systems. Increasingly dense coastal air defense network. Fixed allocation. |
@@ -201,7 +201,7 @@ The weapon is powerful but depreciating — use it too early and the target dive
 | Zone ID | Forces | Status |
 |---------|--------|--------|
 | `g_choson_border` | Ground 2 | Border security. Quick reaction force if Choson collapses. Can reinforce Choson or seal border. |
-| `g_sea_south_china` | Naval 2 | South China Sea patrol. Artificial island garrisons (Spratly/Paracel). Confrontation zone with Philippines. Sea lane control. |
+| `w(16,7)` | Naval 2 | South China Sea patrol. Artificial island garrisons (Spratly/Paracel). Confrontation zone with Philippines. Sea lane control. |
 | At sea (SSBNs) | Strat Missiles 1 | Ballistic missile submarines. South China Sea bastion strategy. Nuclear deterrent patrol. |
 
 ### Force Concentration Assessment
