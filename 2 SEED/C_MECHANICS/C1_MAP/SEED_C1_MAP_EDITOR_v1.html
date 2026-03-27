@@ -62,6 +62,18 @@ body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: #1a1a2e; 
 .cp-btn.remove { background: #5a2020; border-color: #7a3030; }
 .cp-btn.remove:hover { background: #7a3030; }
 
+/* DIE HARD SECTION */
+.dh-item { display: flex; align-items: center; gap: 4px; padding: 3px 6px; margin-bottom: 3px; border-radius: 4px; border: 2px solid transparent; }
+.dh-item.placing { border-color: #CC0000; background: rgba(204,0,0,0.15); }
+.dh-item-name { font-size: 10px; color: #CC4444; font-weight: 600; flex: 1; min-width: 0; }
+.dh-item-pos { font-size: 9px; color: #888; margin-right: 2px; }
+.dh-btn { background: #0f3460; color: #eee; border: 1px solid #1a5276; padding: 2px 8px; border-radius: 3px; font-family: inherit; font-size: 10px; cursor: pointer; transition: background 0.15s; }
+.dh-btn:hover { background: #1a5276; }
+.dh-btn.active { background: #CC0000; border-color: #CC0000; }
+.dh-btn.remove { background: #5a2020; border-color: #7a3030; }
+.dh-btn.remove:hover { background: #7a3030; }
+.dh-btn.add-new { color: #CC4444; margin-top: 4px; }
+
 /* CANVAS AREA */
 #canvas-wrap { flex: 1; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 canvas { background: #C5D9E8; }
@@ -78,7 +90,7 @@ canvas { background: #C5D9E8; }
   <div class="mode-group">
     <button class="mode-btn active" data-mode="paint">PAINT (P)</button>
     <button class="mode-btn" data-mode="select">SELECT (S)</button>
-    <button class="mode-btn" data-mode="chokepoint">CHOKE (K)</button>
+    <button class="mode-btn" data-mode="markers">MARKERS (K)</button>
   </div>
   <div class="header-spacer"></div>
   <div class="file-group">
@@ -101,6 +113,9 @@ canvas { background: #C5D9E8; }
     <div class="palette-divider"></div>
     <h3>Chokepoints</h3>
     <div id="chokepoints-panel"></div>
+    <div class="palette-divider"></div>
+    <h3>Die Hard</h3>
+    <div id="diehard-panel"></div>
     <div class="grid-section">
       <h3>Grid Size</h3>
       <div class="grid-dim" id="grid-dim-label">24 × 16</div>
@@ -174,6 +189,11 @@ const chokepointDefs = [
   { key: 'caribe_passage', name: 'Caribe Passage' },
 ];
 
+// ======== DIE HARD DEFINITIONS ========
+let dieHardDefs = [
+  { key: 'die_hard_1', name: 'Die Hard' },
+];
+
 // ======== STATE ========
 let grid = [];
 for (let r = 0; r < ROWS; r++) {
@@ -182,11 +202,13 @@ for (let r = 0; r < ROWS; r++) {
 }
 
 let chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
+let dieHards = { die_hard_1: null };
 let activeBrush = 'sea';
 let placingChokepoint = null;
+let placingDieHard = null;
 let hoverHex = null;
 
-// Mode: 'paint', 'select', 'chokepoint'
+// Mode: 'paint', 'select', 'markers'
 let editorMode = 'paint';
 
 // Selection state
@@ -217,6 +239,19 @@ function getChokepointName(key) {
   return def ? def.name : key;
 }
 
+// ======== HELPER: check if a hex is a die hard ========
+function getDieHardAt(row, col) {
+  for (const [key, pos] of Object.entries(dieHards)) {
+    if (pos && pos.row === row && pos.col === col) return key;
+  }
+  return null;
+}
+
+function getDieHardName(key) {
+  const def = dieHardDefs.find(d => d.key === key);
+  return def ? def.name : key;
+}
+
 // ======== INITIAL MAP STATE ========
 function loadCurrentMap() {
   ROWS = 16; COLS = 24;
@@ -226,6 +261,7 @@ function loadCurrentMap() {
     for (let c = 0; c < COLS; c++) grid[r][c] = { owner: 'sea' };
   }
   chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
+  dieHards = { die_hard_1: null };
 
   grid[2][11] = { owner: 'nordostan' };
   grid[3][5]  = { owner: 'thule' };
@@ -294,6 +330,7 @@ function loadCurrentMap() {
   resizeCanvas();
   if (document.getElementById('grid-dim-label')) updateGridDimLabel();
   buildChokepointPanel();
+  buildDieHardPanel();
   draw();
 }
 
@@ -388,6 +425,24 @@ function isValidTarget(r, c) {
   return r >= 0 && r < ROWS && c >= 0 && c < COLS;
 }
 
+// ======== DRAW OCCUPIED STRIPES ========
+function drawOccupiedStripes(cx, cy, occupierColor) {
+  ctx.save();
+  hexPath(cx, cy, S);
+  ctx.clip();
+  ctx.globalAlpha = 0.5;
+  const step = 8;
+  for (let i = -80; i < 80; i += step) {
+    ctx.beginPath();
+    ctx.moveTo(cx - 40 + i, cy - 40);
+    ctx.lineTo(cx + 40 + i, cy + 40);
+    ctx.strokeStyle = occupierColor;
+    ctx.lineWidth = 4;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 // ======== DRAW ========
 function draw() {
   ctx.clearRect(0, 0, canvasW, canvasH);
@@ -396,7 +451,8 @@ function draw() {
 
   // Compute which cells are "vacated" during drag (for ghost display)
   const dragSourceSet = new Set();
-  const dragTargetMap = new Map(); // "r,c" -> {owner, cpKey}
+  const dragTargetMap = new Map(); // "r,c" -> {owner, occupied_by, cpKey, dhKey}
+
   let showGhost = dragging && dragStarted && dragDelta;
 
   if (showGhost) {
@@ -407,7 +463,9 @@ function draw() {
       if (isValidTarget(tr, tc)) {
         dragTargetMap.set(hexKey(tr, tc), {
           owner: grid[row][col].owner,
-          cpKey: getChokepointAt(row, col)
+          occupied_by: grid[row][col].occupied_by || null,
+          cpKey: getChokepointAt(row, col),
+          dhKey: getDieHardAt(row, col)
         });
       }
     }
@@ -420,13 +478,18 @@ function draw() {
       const cell = grid[r][c];
       const k = hexKey(r, c);
       const cpKey = getChokepointAt(r, c);
+      const dhKey = getDieHardAt(r, c);
 
       // If this hex is a drag source, draw as sea underneath
       let drawOwner = cell.owner;
+      let drawOccupied = cell.occupied_by || null;
       let drawCp = cpKey;
+      let drawDh = dhKey;
       if (showGhost && dragSourceSet.has(k) && !dragTargetMap.has(k)) {
         drawOwner = 'sea';
+        drawOccupied = null;
         drawCp = null;
+        drawDh = null;
       }
 
       const color = getCountryColor(drawOwner);
@@ -434,26 +497,53 @@ function draw() {
       ctx.fillStyle = color;
       ctx.fill();
 
-      if (drawCp) {
+      // Draw occupation stripes
+      if (drawOccupied) {
+        const occupierColor = getCountryColor(drawOccupied);
+        drawOccupiedStripes(x, y, occupierColor);
+      }
+
+      // Border drawing
+      if (drawDh) {
+        ctx.setLineDash([6, 3]);
+        ctx.strokeStyle = '#CC0000';
+        ctx.lineWidth = 3;
+        hexPath(x, y, S);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else if (drawCp) {
         ctx.strokeStyle = '#D4880F';
         ctx.lineWidth = 3;
+        hexPath(x, y, S);
         ctx.stroke();
       } else if (drawOwner !== 'sea') {
         ctx.strokeStyle = '#666666';
         ctx.lineWidth = 1.2;
+        hexPath(x, y, S);
         ctx.stroke();
       } else {
         ctx.strokeStyle = '#99AABB';
         ctx.lineWidth = 0.3;
+        hexPath(x, y, S);
         ctx.stroke();
       }
 
+      // Chokepoint label
       if (drawCp) {
         ctx.fillStyle = '#B8720C';
         ctx.font = 'bold 8px Inter, Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(getChokepointName(drawCp), x, y);
+      }
+
+      // Die Hard label
+      if (drawDh) {
+        ctx.fillStyle = '#CC0000';
+        ctx.font = 'bold 7px Inter, Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.fillText(getDieHardName(drawDh), x, y + S * 0.45);
       }
 
       // Selection highlight (not during active drag for source hexes)
@@ -478,13 +568,27 @@ function draw() {
       hexPath(x, y, S);
       ctx.fillStyle = color;
       ctx.fill();
-      if (info.cpKey) {
+      // Occupied stripes on ghost
+      if (info.occupied_by) {
+        const occupierColor = getCountryColor(info.occupied_by);
+        drawOccupiedStripes(x, y, occupierColor);
+      }
+      if (info.dhKey) {
+        ctx.setLineDash([6, 3]);
+        ctx.strokeStyle = '#CC0000';
+        ctx.lineWidth = 3;
+        hexPath(x, y, S);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      } else if (info.cpKey) {
         ctx.strokeStyle = '#D4880F';
         ctx.lineWidth = 3;
+        hexPath(x, y, S);
         ctx.stroke();
       } else if (info.owner !== 'sea') {
         ctx.strokeStyle = '#666666';
         ctx.lineWidth = 1.2;
+        hexPath(x, y, S);
         ctx.stroke();
       }
       // Dashed selection border on ghost
@@ -539,12 +643,14 @@ function draw() {
 function setMode(mode) {
   editorMode = mode;
   placingChokepoint = null;
+  placingDieHard = null;
   if (mode !== 'select') { clearSelection(); dragging = false; dragStarted = false; }
   document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
-  const label = mode === 'paint' ? 'Paint' : mode === 'select' ? 'Select' : 'Chokepoint';
+  const label = mode === 'paint' ? 'Paint' : mode === 'select' ? 'Select' : 'Markers';
   document.getElementById('st-mode').textContent = label;
   canvas.style.cursor = mode === 'select' ? 'default' : 'crosshair';
   buildChokepointPanel();
+  buildDieHardPanel();
   draw();
 }
 
@@ -588,15 +694,75 @@ function buildPalette() {
     item.addEventListener('click', () => {
       activeBrush = c.id;
       placingChokepoint = null;
+      placingDieHard = null;
       if (editorMode !== 'select') setMode('paint');
       document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
       item.classList.add('selected');
       document.getElementById('st-brush').textContent = c.name;
       buildChokepointPanel();
+      buildDieHardPanel();
     });
 
     pal.appendChild(item);
   });
+
+  // ---- SPECIAL section: Occupied ----
+  const specDiv = document.createElement('div');
+  specDiv.className = 'palette-divider';
+  pal.appendChild(specDiv);
+
+  const specLabel = document.createElement('div');
+  specLabel.style.cssText = 'font-size:9px;color:#666;text-align:center;margin:2px 0;letter-spacing:1px;';
+  specLabel.textContent = 'SPECIAL';
+  pal.appendChild(specLabel);
+
+  const occItem = document.createElement('div');
+  occItem.className = 'palette-item' + (activeBrush === '__occupied__' ? ' selected' : '');
+  occItem.dataset.id = '__occupied__';
+
+  // Striped swatch via a small canvas
+  const occSwatch = document.createElement('div');
+  occSwatch.className = 'palette-swatch';
+  occSwatch.style.overflow = 'hidden';
+  const swatchCanvas = document.createElement('canvas');
+  swatchCanvas.width = 22; swatchCanvas.height = 22;
+  const sctx = swatchCanvas.getContext('2d');
+  sctx.fillStyle = '#A5C8A5'; // heartland green as example base
+  sctx.fillRect(0, 0, 22, 22);
+  sctx.globalAlpha = 0.5;
+  sctx.strokeStyle = '#D4A5A5'; // nordostan rose
+  sctx.lineWidth = 3;
+  for (let i = -22; i < 44; i += 6) {
+    sctx.beginPath();
+    sctx.moveTo(i, 0);
+    sctx.lineTo(i + 22, 22);
+    sctx.stroke();
+  }
+  sctx.globalAlpha = 1.0;
+  swatchCanvas.style.cssText = 'width:22px;height:22px;border-radius:3px;';
+  occSwatch.style.background = 'none';
+  occSwatch.appendChild(swatchCanvas);
+
+  const occName = document.createElement('div');
+  occName.className = 'palette-name';
+  occName.innerHTML = '<span style="font-size:11px;color:#ccc;">Occupied</span>';
+
+  occItem.appendChild(occSwatch);
+  occItem.appendChild(occName);
+
+  occItem.addEventListener('click', () => {
+    activeBrush = '__occupied__';
+    placingChokepoint = null;
+    placingDieHard = null;
+    if (editorMode !== 'select') setMode('paint');
+    document.querySelectorAll('.palette-item').forEach(el => el.classList.remove('selected'));
+    occItem.classList.add('selected');
+    document.getElementById('st-brush').textContent = 'Occupied';
+    buildChokepointPanel();
+    buildDieHardPanel();
+  });
+
+  pal.appendChild(occItem);
 }
 
 // ======== CHOKEPOINT PANEL ========
@@ -625,10 +791,12 @@ function buildChokepointPanel() {
         setMode('paint');
       } else {
         placingChokepoint = def.key;
-        setMode('chokepoint');
+        placingDieHard = null;
+        setMode('markers');
         document.getElementById('st-mode').textContent = 'Place ' + def.name;
       }
       buildChokepointPanel();
+      buildDieHardPanel();
     });
 
     const removeBtn = document.createElement('button');
@@ -648,6 +816,74 @@ function buildChokepointPanel() {
     item.appendChild(removeBtn);
     panel.appendChild(item);
   });
+}
+
+// ======== DIE HARD PANEL ========
+function buildDieHardPanel() {
+  const panel = document.getElementById('diehard-panel');
+  panel.innerHTML = '';
+  dieHardDefs.forEach(def => {
+    const item = document.createElement('div');
+    item.className = 'dh-item' + (placingDieHard === def.key ? ' placing' : '');
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'dh-item-name';
+    nameEl.textContent = def.name;
+
+    const posEl = document.createElement('span');
+    posEl.className = 'dh-item-pos';
+    const pos = dieHards[def.key];
+    posEl.textContent = pos ? `(${pos.col+1},${pos.row+1})` : '--';
+
+    const placeBtn = document.createElement('button');
+    placeBtn.className = 'dh-btn' + (placingDieHard === def.key ? ' active' : '');
+    placeBtn.textContent = 'Place';
+    placeBtn.addEventListener('click', () => {
+      if (placingDieHard === def.key) {
+        placingDieHard = null;
+        setMode('paint');
+      } else {
+        placingDieHard = def.key;
+        placingChokepoint = null;
+        setMode('markers');
+        document.getElementById('st-mode').textContent = 'Place ' + def.name;
+      }
+      buildChokepointPanel();
+      buildDieHardPanel();
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'dh-btn remove';
+    removeBtn.textContent = 'X';
+    removeBtn.title = 'Remove';
+    removeBtn.addEventListener('click', () => {
+      dieHards[def.key] = null;
+      if (placingDieHard === def.key) { placingDieHard = null; setMode('paint'); }
+      buildDieHardPanel();
+      draw();
+    });
+
+    item.appendChild(nameEl);
+    item.appendChild(posEl);
+    item.appendChild(placeBtn);
+    item.appendChild(removeBtn);
+    panel.appendChild(item);
+  });
+
+  // "Add Die Hard" button
+  const addBtn = document.createElement('button');
+  addBtn.className = 'dh-btn add-new';
+  addBtn.textContent = '+ Add Die Hard';
+  addBtn.style.width = '100%';
+  addBtn.addEventListener('click', () => {
+    const name = prompt('Enter Die Hard marker name:', 'Die Hard ' + (dieHardDefs.length + 1));
+    if (!name) return;
+    const key = 'die_hard_' + (dieHardDefs.length + 1) + '_' + Date.now();
+    dieHardDefs.push({ key, name });
+    dieHards[key] = null;
+    buildDieHardPanel();
+  });
+  panel.appendChild(addBtn);
 }
 
 // ======== MOUSE COORDINATE HELPER ========
@@ -670,7 +906,10 @@ canvas.addEventListener('mousemove', (e) => {
     const ownerName = cell.owner === 'sea' ? 'Sea' : getCountryName(cell.owner);
     const cpKey = getChokepointAt(hex.row, hex.col);
     const cp = cpKey ? ` [${getChokepointName(cpKey)}]` : '';
-    document.getElementById('st-hover').textContent = `(${hex.col + 1}, ${hex.row + 1}) ${ownerName}${cp}`;
+    const dhKey = getDieHardAt(hex.row, hex.col);
+    const dh = dhKey ? ` [${getDieHardName(dhKey)}]` : '';
+    const occ = cell.occupied_by ? ` (occupied by ${getCountryName(cell.occupied_by)})` : '';
+    document.getElementById('st-hover').textContent = `(${hex.col + 1}, ${hex.row + 1}) ${ownerName}${occ}${cp}${dh}`;
   } else {
     document.getElementById('st-hover').textContent = '-';
   }
@@ -686,9 +925,9 @@ canvas.addEventListener('mousemove', (e) => {
     }
   }
 
-  // Paint drag
-  if (editorMode === 'paint' && painting && !placingChokepoint) {
-    if (hex) { grid[hex.row][hex.col].owner = activeBrush; }
+  // Paint drag (not for occupied brush or marker placement)
+  if (editorMode === 'paint' && painting && !placingChokepoint && !placingDieHard && activeBrush !== '__occupied__') {
+    if (hex) { grid[hex.row][hex.col].owner = activeBrush; delete grid[hex.row][hex.col].occupied_by; }
   }
 
   draw();
@@ -707,8 +946,9 @@ canvas.addEventListener('mousedown', (e) => {
 
   if (editorMode === 'paint') {
     painting = true;
-    if (placingChokepoint) return; // handled by click
-    if (hex) { grid[hex.row][hex.col].owner = activeBrush; draw(); }
+    if (placingChokepoint || placingDieHard) return; // handled by click
+    if (activeBrush === '__occupied__') return; // handled by click
+    if (hex) { grid[hex.row][hex.col].owner = activeBrush; delete grid[hex.row][hex.col].occupied_by; draw(); }
   } else if (editorMode === 'select') {
     if (!hex) { clearSelection(); draw(); return; }
     const k = hexKey(hex.row, hex.col);
@@ -732,7 +972,7 @@ canvas.addEventListener('mousedown', (e) => {
       dragDelta = { dr: 0, dc: 0 };
     }
     draw();
-  } else if (editorMode === 'chokepoint') {
+  } else if (editorMode === 'markers') {
     // handled by click
   }
 });
@@ -742,11 +982,22 @@ canvas.addEventListener('click', (e) => {
   const hex = pixelToHex(mx, my);
   if (!hex) return;
 
-  if (editorMode === 'chokepoint' && placingChokepoint) {
+  // Chokepoint placement in markers mode
+  if (editorMode === 'markers' && placingChokepoint) {
     chokepoints[placingChokepoint] = { row: hex.row, col: hex.col };
     placingChokepoint = null;
-    setMode('chokepoint');
+    setMode('markers');
     buildChokepointPanel();
+    draw();
+    return;
+  }
+
+  // Die Hard placement in markers mode
+  if (editorMode === 'markers' && placingDieHard) {
+    dieHards[placingDieHard] = { row: hex.row, col: hex.col };
+    placingDieHard = null;
+    setMode('markers');
+    buildDieHardPanel();
     draw();
     return;
   }
@@ -754,23 +1005,34 @@ canvas.addEventListener('click', (e) => {
   if (editorMode === 'select') {
     // If we just finished a drag, don't toggle selection
     if (dragStarted) return;
-    // Toggle on simple click (non-drag)
-    // mousedown already handled adding; here handle deselect on re-click of already-selected
-    // Actually mousedown already selected it or started drag. We handle shift-deselect:
     const k = hexKey(hex.row, hex.col);
     if (e.shiftKey && selectedHexes.has(k) && !dragStarted) {
-      // shift-click on already selected = deselect
-      // But mousedown just added it... We need to check if it was already selected before mousedown
-      // This is handled indirectly: mousedown adds, but if shift was held and it was already in set, nothing changes
+      // shift-click deselect handled indirectly
     }
     draw();
     return;
   }
 
-  // Paint mode click (non-drag)
-  if (editorMode === 'paint' && !placingChokepoint) {
-    grid[hex.row][hex.col].owner = activeBrush;
-    draw();
+  // Paint mode click
+  if (editorMode === 'paint') {
+    if (activeBrush === '__occupied__') {
+      // Toggle occupation on land hexes
+      const cell = grid[hex.row][hex.col];
+      if (cell.owner !== 'sea') {
+        if (cell.occupied_by) {
+          delete cell.occupied_by;
+        } else {
+          cell.occupied_by = 'nordostan';
+        }
+        draw();
+      }
+      return;
+    }
+    if (!placingChokepoint && !placingDieHard) {
+      grid[hex.row][hex.col].owner = activeBrush;
+      delete grid[hex.row][hex.col].occupied_by;
+      draw();
+    }
   }
 });
 
@@ -780,8 +1042,8 @@ window.addEventListener('mouseup', (e) => {
   if (editorMode === 'select' && dragging) {
     if (dragStarted && dragDelta && (dragDelta.dr !== 0 || dragDelta.dc !== 0)) {
       // Execute the move
-      const hexData = []; // collect data from selected hexes
-      const cpMoves = []; // chokepoints to relocate
+      const hexData = [];
+      const cpMoves = [];
 
       // Validate all targets are in bounds
       let allValid = true;
@@ -795,13 +1057,20 @@ window.addEventListener('mouseup', (e) => {
         // Collect data
         for (const k of selectedHexes) {
           const { row, col } = parseKey(k);
-          hexData.push({ row, col, owner: grid[row][col].owner, cpKey: getChokepointAt(row, col) });
+          hexData.push({
+            row, col,
+            owner: grid[row][col].owner,
+            occupied_by: grid[row][col].occupied_by || null,
+            cpKey: getChokepointAt(row, col),
+            dhKey: getDieHardAt(row, col)
+          });
         }
 
         // Clear source hexes
         for (const hd of hexData) {
           grid[hd.row][hd.col] = { owner: 'sea' };
           if (hd.cpKey) chokepoints[hd.cpKey] = null;
+          if (hd.dhKey) dieHards[hd.dhKey] = null;
         }
 
         // Write to target positions
@@ -809,18 +1078,18 @@ window.addEventListener('mouseup', (e) => {
         for (const hd of hexData) {
           const tr = hd.row + dragDelta.dr, tc = hd.col + dragDelta.dc;
           grid[tr][tc] = { owner: hd.owner };
+          if (hd.occupied_by) grid[tr][tc].occupied_by = hd.occupied_by;
           if (hd.cpKey) chokepoints[hd.cpKey] = { row: tr, col: tc };
+          if (hd.dhKey) dieHards[hd.dhKey] = { row: tr, col: tc };
           newSelected.add(hexKey(tr, tc));
         }
         selectedHexes = newSelected;
         buildChokepointPanel();
+        buildDieHardPanel();
       }
-      // else: invalid, snap back (do nothing)
     } else if (!dragStarted) {
-      // It was a click, not a drag - handle toggle for shift-click deselect
       const { mx, my } = canvasCoords(e);
       const hex = pixelToHex(mx, my);
-      // Selection was already handled in mousedown
     }
 
     dragging = false;
@@ -841,12 +1110,13 @@ window.addEventListener('keydown', (e) => {
 
   if (key === 'p') { setMode('paint'); return; }
   if (key === 's') { setMode('select'); return; }
-  if (key === 'k') { setMode('chokepoint'); return; }
+  if (key === 'k') { setMode('markers'); return; }
 
   if (key === 'escape') {
     if (dragging) { dragging = false; dragStarted = false; dragAnchor = null; dragDelta = null; dragStartMouse = null; }
     clearSelection();
     placingChokepoint = null;
+    placingDieHard = null;
     draw();
     return;
   }
@@ -859,10 +1129,14 @@ window.addEventListener('keydown', (e) => {
         // Remove chokepoint if present
         const cpKey = getChokepointAt(row, col);
         if (cpKey) chokepoints[cpKey] = null;
+        // Remove die hard if present
+        const dhKey = getDieHardAt(row, col);
+        if (dhKey) dieHards[dhKey] = null;
         grid[row][col] = { owner: 'sea' };
       }
       clearSelection();
       buildChokepointPanel();
+      buildDieHardPanel();
       draw();
       return;
     }
@@ -872,7 +1146,6 @@ window.addEventListener('keydown', (e) => {
   if (key === 'a' && (e.ctrlKey || e.metaKey)) {
     if (editorMode === 'select') {
       e.preventDefault();
-      // Find the country of the last clicked/selected hex
       let targetOwner = null;
       if (hoverHex) {
         targetOwner = grid[hoverHex.row][hoverHex.col].owner;
@@ -899,8 +1172,10 @@ document.getElementById('btn-clear').addEventListener('click', () => {
   for (let r = 0; r < ROWS; r++)
     for (let c = 0; c < COLS; c++) grid[r][c] = { owner: 'sea' };
   chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
+  for (const key of Object.keys(dieHards)) dieHards[key] = null;
   clearSelection();
   buildChokepointPanel();
+  buildDieHardPanel();
   draw();
 });
 
@@ -913,7 +1188,29 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
 
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-25 -25 ${Math.round(vb_w + 50)} ${Math.round(vb_h + 50)}" width="${Math.round(vb_w + 20)}" height="${Math.round(vb_h + 20)}">\n`;
   const F = 'font-family:Inter,Helvetica,Arial,sans-serif;text-anchor:middle;dominant-baseline:central;';
-  svg += `  <defs><style>.lbl{${F}font-size:9px;fill:#333}.country-lbl-lg{${F}font-size:13px;font-weight:700;fill:#333;letter-spacing:1.5px}.country-lbl-sm{${F}font-size:9px;font-weight:700;fill:#333;letter-spacing:1px}.ocean-lbl{${F}font-size:20px;font-style:italic;fill:#6688AA;opacity:0.5;letter-spacing:3px}.grid-lbl{${F}font-size:10px;fill:#AAA}.cp-lbl{${F}font-size:8px;font-weight:700;fill:#B8720C}</style></defs>\n`;
+  svg += `  <defs><style>.lbl{${F}font-size:9px;fill:#333}.country-lbl-lg{${F}font-size:13px;font-weight:700;fill:#333;letter-spacing:1.5px}.country-lbl-sm{${F}font-size:9px;font-weight:700;fill:#333;letter-spacing:1px}.ocean-lbl{${F}font-size:20px;font-style:italic;fill:#6688AA;opacity:0.5;letter-spacing:3px}.grid-lbl{${F}font-size:10px;fill:#AAA}.cp-lbl{${F}font-size:8px;font-weight:700;fill:#B8720C}.dh-lbl{${F}font-size:7px;font-weight:700;fill:#CC0000}</style></defs>\n`;
+
+  // Add occupation stripe patterns to defs
+  // Collect unique occupation patterns needed
+  const occPatterns = new Set();
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = grid[r][c];
+      if (cell.occupied_by) {
+        const patId = `occ_${cell.owner}_${cell.occupied_by}`;
+        if (!occPatterns.has(patId)) {
+          occPatterns.add(patId);
+          const baseColor = getCountryColor(cell.owner);
+          const stripeColor = getCountryColor(cell.occupied_by);
+          svg += `  <pattern id="${patId}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">\n`;
+          svg += `    <rect width="8" height="8" fill="${baseColor}"/>\n`;
+          svg += `    <rect width="4" height="8" fill="${stripeColor}" opacity="0.5"/>\n`;
+          svg += `  </pattern>\n`;
+        }
+      }
+    }
+  }
+
   svg += `  <rect width="${Math.round(vb_w)}" height="${Math.round(vb_h)}" fill="#C5D9E8"/>\n`;
   svg += `  <!-- HEXES -->\n`;
 
@@ -924,6 +1221,7 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
       const cy = SVG_PAD_Y + r * SVG_ROW_SP;
       const color = getCountryColor(cell.owner);
       const cpKey = getChokepointAt(r, c);
+      const dhKey = getDieHardAt(r, c);
 
       const pts = [];
       for (let i = 0; i < 6; i++) {
@@ -931,13 +1229,21 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
         pts.push(`${(cx + SVG_S * Math.cos(angle)).toFixed(2)},${(cy - SVG_S * Math.sin(angle)).toFixed(2)}`);
       }
 
-      let stroke, sw;
-      if (cpKey) { stroke = '#D4880F'; sw = '3'; }
+      let stroke, sw, dashArray = '';
+      if (dhKey) { stroke = '#CC0000'; sw = '3'; dashArray = ' stroke-dasharray="6,3"'; }
+      else if (cpKey) { stroke = '#D4880F'; sw = '3'; }
       else if (cell.owner !== 'sea') { stroke = '#666666'; sw = '1.5'; }
       else { stroke = '#99AABB'; sw = '0.3'; }
 
-      svg += `  <polygon points="${pts.join(' ')}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"/>\n`;
+      if (cell.occupied_by) {
+        const patId = `occ_${cell.owner}_${cell.occupied_by}`;
+        svg += `  <polygon points="${pts.join(' ')}" fill="url(#${patId})" stroke="${stroke}" stroke-width="${sw}"${dashArray}/>\n`;
+      } else {
+        svg += `  <polygon points="${pts.join(' ')}" fill="${color}" stroke="${stroke}" stroke-width="${sw}"${dashArray}/>\n`;
+      }
+
       if (cpKey) svg += `  <text x="${cx.toFixed(1)}" y="${(cy + 2).toFixed(1)}" class="cp-lbl">${getChokepointName(cpKey)}</text>\n`;
+      if (dhKey) svg += `  <text x="${cx.toFixed(1)}" y="${(cy + SVG_S * 0.45 + 2).toFixed(1)}" class="dh-lbl">${getDieHardName(dhKey)}</text>\n`;
     }
   }
 
@@ -981,7 +1287,7 @@ document.getElementById('btn-export-svg').addEventListener('click', () => {
 document.getElementById('btn-export-md').addEventListener('click', () => {
   let md = '# TTT Map Structure Export\n\n';
   md += `> Exported ${new Date().toISOString().slice(0,10)}\n\n---\n\n`;
-  md += '## Land Hex Registry\n\n| hex_id | owner | row | col |\n|--------|-------|-----|-----|\n';
+  md += '## Land Hex Registry\n\n| hex_id | owner | occupied_by | row | col |\n|--------|-------|-------------|-----|-----|\n';
 
   const hexCounters = {}, landHexes = [];
   for (let r = 0; r < ROWS; r++) {
@@ -991,14 +1297,20 @@ document.getElementById('btn-export-md').addEventListener('click', () => {
       if (!hexCounters[cell.owner]) hexCounters[cell.owner] = 0;
       hexCounters[cell.owner]++;
       const hexId = `${cell.owner}_${hexCounters[cell.owner]}`;
-      landHexes.push({ id: hexId, owner: cell.owner, row: r, col: c });
-      md += `| ${hexId} | ${cell.owner} | ${r} | ${c} |\n`;
+      landHexes.push({ id: hexId, owner: cell.owner, occupied_by: cell.occupied_by || '', row: r, col: c });
+      md += `| ${hexId} | ${cell.owner} | ${cell.occupied_by || ''} | ${r} | ${c} |\n`;
     }
   }
 
   md += '\n## Chokepoints\n\n| name | key | row | col |\n|------|-----|-----|-----|\n';
   for (const def of chokepointDefs) {
     const pos = chokepoints[def.key];
+    md += pos ? `| ${def.name} | ${def.key} | ${pos.row} | ${pos.col} |\n` : `| ${def.name} | ${def.key} | -- | -- |\n`;
+  }
+
+  md += '\n## Die Hard\n\n| name | key | row | col |\n|------|-----|-----|-----|\n';
+  for (const def of dieHardDefs) {
+    const pos = dieHards[def.key];
     md += pos ? `| ${def.name} | ${def.key} | ${pos.row} | ${pos.col} |\n` : `| ${def.name} | ${def.key} | -- | -- |\n`;
   }
 
@@ -1038,7 +1350,9 @@ document.getElementById('btn-save').addEventListener('click', () => {
   for (let r = 0; r < ROWS; r++) {
     gridData[r] = [];
     for (let c = 0; c < COLS; c++) {
-      gridData[r][c] = { owner: grid[r][c].owner };
+      const cell = { owner: grid[r][c].owner };
+      if (grid[r][c].occupied_by) cell.occupied_by = grid[r][c].occupied_by;
+      gridData[r][c] = cell;
     }
   }
 
@@ -1050,13 +1364,23 @@ document.getElementById('btn-save').addEventListener('click', () => {
     }
   }
 
+  const dhData = {};
+  for (const def of dieHardDefs) {
+    const pos = dieHards[def.key];
+    if (pos) {
+      dhData[def.key] = { row: pos.row, col: pos.col, name: def.name };
+    }
+  }
+
   const state = {
-    version: 1,
+    version: 2,
     rows: ROWS,
     cols: COLS,
     countries: countriesObj,
     grid: gridData,
-    chokepoints: cpData
+    chokepoints: cpData,
+    dieHards: dhData,
+    dieHardDefs: dieHardDefs
   };
 
   const json = JSON.stringify(state, null, 2);
@@ -1100,15 +1424,15 @@ fileInput.addEventListener('change', (e) => {
           const pts = poly.getAttribute('points');
           const fill = poly.getAttribute('fill');
           const stroke = poly.getAttribute('stroke');
+          const dashArray = poly.getAttribute('stroke-dasharray');
 
           const coords = pts.trim().split(/[\s,]+/).map(Number);
           const x1 = coords[0], y1 = coords[1];
 
-          // For pointy-top, first vertex is (cx, cy - s)
           const cx = x1;
           const cy = y1 + S_SVG;
 
-          const ROW_SP_SVG = 1.5 * S_SVG; // 52.5
+          const ROW_SP_SVG = 1.5 * S_SVG;
           const row = Math.round((cy - 30) / ROW_SP_SVG);
           let col;
           if (row % 2 === 0) {
@@ -1122,34 +1446,42 @@ fileInput.addEventListener('change', (e) => {
             maxCol = Math.max(maxCol, col);
 
             const isChokepoint = stroke === '#D4880F' || stroke === '#d4880f';
+            const isDieHard = stroke === '#CC0000' || stroke === '#cc0000';
             const isSea = fill === '#B5CCE0' || fill === '#b5cce0';
+            const isOccupied = fill && fill.startsWith('url(#occ_');
 
-            if (!isSea) {
-              let owner = 'sea';
+            let owner = 'sea';
+            let occupied_by = null;
+
+            if (isOccupied) {
+              // Parse pattern id: occ_<owner>_<occupier>
+              const match = fill.match(/url\(#occ_([^_]+)_([^)]+)\)/);
+              if (match) {
+                owner = match[1];
+                occupied_by = match[2];
+              }
+            } else if (!isSea) {
               for (const c of countries) {
                 if (c.color.toLowerCase() === fill.toLowerCase()) {
                   owner = c.id;
                   break;
                 }
               }
-              hexData.push({row, col, owner, chokepoint: isChokepoint});
-            } else if (isChokepoint) {
-              hexData.push({row, col, owner: 'sea', chokepoint: true});
+            }
+
+            if (owner !== 'sea' || isChokepoint || isDieHard) {
+              hexData.push({row, col, owner, occupied_by, chokepoint: isChokepoint, diehard: isDieHard});
             }
           }
         });
 
-        // Compute tight bounds from LAND hexes only (not sea)
-        let landMaxRow = 0, landMaxCol = 0, landMinRow = 9999, landMinCol = 9999;
+        let landMaxRow = 0, landMaxCol = 0;
         hexData.forEach(h => {
           if (h.owner !== 'sea') {
             landMaxRow = Math.max(landMaxRow, h.row);
             landMaxCol = Math.max(landMaxCol, h.col);
-            landMinRow = Math.min(landMinRow, h.row);
-            landMinCol = Math.min(landMinCol, h.col);
           }
         });
-        // Add 2 rows/cols of water padding around land
         ROWS = Math.max(landMaxRow + 3, 8);
         COLS = Math.max(landMaxCol + 3, 8);
         grid = [];
@@ -1161,6 +1493,7 @@ fileInput.addEventListener('change', (e) => {
         hexData.forEach(h => {
           if (h.row < ROWS && h.col < COLS) {
             grid[h.row][h.col] = {owner: h.owner};
+            if (h.occupied_by) grid[h.row][h.col].occupied_by = h.occupied_by;
           }
         });
 
@@ -1172,10 +1505,19 @@ fileInput.addEventListener('change', (e) => {
           if (i < keys.length) chokepoints[keys[i]] = {row: cp.row, col: cp.col};
         });
 
+        // Handle die hards
+        for (const key of Object.keys(dieHards)) dieHards[key] = null;
+        const dhHexes = hexData.filter(h => h.diehard);
+        dhHexes.forEach((dh, i) => {
+          const keys = Object.keys(dieHards);
+          if (i < keys.length) dieHards[keys[i]] = {row: dh.row, col: dh.col};
+        });
+
         clearSelection();
         resizeCanvas();
         updateGridDimLabel();
         buildChokepointPanel();
+        buildDieHardPanel();
         draw();
         return;
       } catch (err) {
@@ -1191,7 +1533,6 @@ fileInput.addEventListener('change', (e) => {
         let maxRow = 0, maxCol = 0;
         const hexData = [];
 
-        // Find the land hex registry table
         let inTable = false;
         for (const line of lines) {
           if (line.includes('hex_id') && line.includes('owner') && line.includes('row') && line.includes('col')) {
@@ -1203,12 +1544,13 @@ fileInput.addEventListener('change', (e) => {
             const parts = line.split('|').map(s => s.trim()).filter(s => s);
             if (parts.length >= 4) {
               const owner = parts[1];
-              const row = parseInt(parts[2]);
-              const col = parseInt(parts[3]);
+              const occupied_by = parts.length >= 5 ? parts[2] : '';
+              const row = parseInt(parts.length >= 5 ? parts[3] : parts[2]);
+              const col = parseInt(parts.length >= 5 ? parts[4] : parts[3]);
               if (!isNaN(row) && !isNaN(col)) {
                 maxRow = Math.max(maxRow, row);
                 maxCol = Math.max(maxCol, col);
-                hexData.push({row, col, owner});
+                hexData.push({row, col, owner, occupied_by: occupied_by || null});
               }
             }
           } else if (inTable && !line.startsWith('|')) {
@@ -1216,7 +1558,7 @@ fileInput.addEventListener('change', (e) => {
           }
         }
 
-        // Also parse chokepoints section
+        // Parse chokepoints section
         let inCPTable = false;
         const cpData = [];
         for (const line of lines) {
@@ -1224,8 +1566,7 @@ fileInput.addEventListener('change', (e) => {
             inCPTable = true;
             continue;
           }
-          // Also match the actual header format: "| name | key | row | col |"
-          if (!inCPTable && line.includes('name') && line.includes('key') && line.includes('row') && line.includes('col') && !line.includes('hex_id')) {
+          if (!inCPTable && line.includes('name') && line.includes('key') && line.includes('row') && line.includes('col') && !line.includes('hex_id') && !line.includes('occupied')) {
             inCPTable = true;
             continue;
           }
@@ -1244,7 +1585,38 @@ fileInput.addEventListener('change', (e) => {
           }
         }
 
-        // Rebuild grid — tight fit around land with 2 hex padding
+        // Parse die hard section
+        let inDHTable = false;
+        const dhData = [];
+        for (const line of lines) {
+          if (line.includes('Die Hard') && !inDHTable) {
+            // Look for the table header after this
+            continue;
+          }
+          if (line.includes('name') && line.includes('key') && line.includes('row') && line.includes('col') && !line.includes('hex_id') && !line.includes('occupied')) {
+            // Could be chokepoint or die hard table — we handle both
+            continue;
+          }
+        }
+        // Simpler: find "## Die Hard" section
+        let dhSection = false;
+        for (const line of lines) {
+          if (line.trim() === '## Die Hard') { dhSection = true; continue; }
+          if (dhSection && line.startsWith('## ')) { dhSection = false; continue; }
+          if (dhSection && line.startsWith('|---')) continue;
+          if (dhSection && line.includes('name') && line.includes('key')) continue;
+          if (dhSection && line.startsWith('|')) {
+            const parts = line.split('|').map(s => s.trim()).filter(s => s);
+            if (parts.length >= 4) {
+              const dhRow = parseInt(parts[2]);
+              const dhCol = parseInt(parts[3]);
+              if (!isNaN(dhRow) && !isNaN(dhCol)) {
+                dhData.push({name: parts[0], key: parts[1], row: dhRow, col: dhCol});
+              }
+            }
+          }
+        }
+
         ROWS = Math.max(maxRow + 3, 8);
         COLS = Math.max(maxCol + 3, 8);
         grid = [];
@@ -1259,6 +1631,7 @@ fileInput.addEventListener('change', (e) => {
               countries.push({id: h.owner, name: h.owner, color: '#AAAAAA'});
             }
             grid[h.row][h.col] = {owner: h.owner};
+            if (h.occupied_by) grid[h.row][h.col].occupied_by = h.occupied_by;
           }
         });
 
@@ -1270,11 +1643,22 @@ fileInput.addEventListener('change', (e) => {
           }
         });
 
+        // Apply die hards
+        for (const key of Object.keys(dieHards)) dieHards[key] = null;
+        dhData.forEach(dh => {
+          if (!(dh.key in dieHards)) {
+            dieHardDefs.push({ key: dh.key, name: dh.name });
+            dieHards[dh.key] = null;
+          }
+          dieHards[dh.key] = {row: dh.row, col: dh.col};
+        });
+
         clearSelection();
         buildPalette();
         resizeCanvas();
         updateGridDimLabel();
         buildChokepointPanel();
+        buildDieHardPanel();
         draw();
         return;
       } catch (err) {
@@ -1287,7 +1671,6 @@ fileInput.addEventListener('change', (e) => {
     try {
       const data = JSON.parse(evt.target.result);
 
-      // Validate required fields
       if (typeof data.rows !== 'number' || typeof data.cols !== 'number' || !Array.isArray(data.grid)) {
         alert('Invalid map file: missing rows, cols, or grid.');
         return;
@@ -1303,15 +1686,11 @@ fileInput.addEventListener('change', (e) => {
         }
       }
 
-      // Apply dimensions
       ROWS = data.rows;
       COLS = data.cols;
 
-      // Apply countries if present
       if (data.countries && typeof data.countries === 'object') {
-        // Build a set of existing country IDs
         const existingIds = new Set(countries.map(c => c.id));
-        // Update existing countries and add new ones
         for (const [id, info] of Object.entries(data.countries)) {
           const existing = countries.find(c => c.id === id);
           if (existing) {
@@ -1323,24 +1702,22 @@ fileInput.addEventListener('change', (e) => {
         }
       }
 
-      // Apply grid
       grid = [];
       for (let r = 0; r < ROWS; r++) {
         grid[r] = [];
         for (let c = 0; c < COLS; c++) {
           const cell = data.grid[r][c];
           grid[r][c] = { owner: (cell && cell.owner) ? cell.owner : 'sea' };
+          if (cell && cell.occupied_by) grid[r][c].occupied_by = cell.occupied_by;
         }
       }
 
       // Apply chokepoints
-      // Reset all existing chokepoints
       for (const key of Object.keys(chokepoints)) {
         chokepoints[key] = null;
       }
       if (data.chokepoints && typeof data.chokepoints === 'object') {
         for (const [key, info] of Object.entries(data.chokepoints)) {
-          // Add chokepoint def if it doesn't exist
           if (!chokepointDefs.find(d => d.key === key)) {
             chokepointDefs.push({ key: key, name: (info && info.name) || key });
           }
@@ -1353,12 +1730,35 @@ fileInput.addEventListener('change', (e) => {
         }
       }
 
-      // Rebuild UI
+      // Apply die hards
+      if (data.dieHardDefs && Array.isArray(data.dieHardDefs)) {
+        dieHardDefs = data.dieHardDefs;
+      }
+      // Reset die hards
+      dieHards = {};
+      for (const def of dieHardDefs) {
+        dieHards[def.key] = null;
+      }
+      if (data.dieHards && typeof data.dieHards === 'object') {
+        for (const [key, info] of Object.entries(data.dieHards)) {
+          if (!dieHardDefs.find(d => d.key === key)) {
+            dieHardDefs.push({ key: key, name: (info && info.name) || key });
+          }
+          if (!(key in dieHards)) {
+            dieHards[key] = null;
+          }
+          if (info && typeof info.row === 'number' && typeof info.col === 'number') {
+            dieHards[key] = { row: info.row, col: info.col };
+          }
+        }
+      }
+
       clearSelection();
       buildPalette();
       resizeCanvas();
       updateGridDimLabel();
       buildChokepointPanel();
+      buildDieHardPanel();
       draw();
     } catch (err) {
       alert('Error loading map file: ' + err.message);
@@ -1371,7 +1771,7 @@ fileInput.addEventListener('change', (e) => {
 document.getElementById('btn-new').addEventListener('click', () => {
   const input = prompt('Enter dimensions as COLSxROWS (e.g. 24x16):', COLS + 'x' + ROWS);
   if (!input) return;
-  const match = input.match(/^(\d+)\s*[xX×]\s*(\d+)$/);
+  const match = input.match(/^(\d+)\s*[xX\u00d7]\s*(\d+)$/);
   if (!match) {
     alert('Invalid format. Use COLSxROWS, e.g. 24x16');
     return;
@@ -1382,7 +1782,7 @@ document.getElementById('btn-new').addEventListener('click', () => {
     alert('Dimensions must be between 1 and 100.');
     return;
   }
-  if (!confirm('Create a new ' + newCols + '×' + newRows + ' blank map? Current map will be lost.')) return;
+  if (!confirm('Create a new ' + newCols + '\u00d7' + newRows + ' blank map? Current map will be lost.')) return;
 
   COLS = newCols;
   ROWS = newRows;
@@ -1391,20 +1791,23 @@ document.getElementById('btn-new').addEventListener('click', () => {
     grid[r] = [];
     for (let c = 0; c < COLS; c++) grid[r][c] = { owner: 'sea' };
   }
-  // Reset chokepoints
   for (const key of Object.keys(chokepoints)) {
     chokepoints[key] = null;
+  }
+  for (const key of Object.keys(dieHards)) {
+    dieHards[key] = null;
   }
   clearSelection();
   resizeCanvas();
   updateGridDimLabel();
   buildChokepointPanel();
+  buildDieHardPanel();
   draw();
 });
 
 // ======== GRID RESIZE ========
 function updateGridDimLabel() {
-  document.getElementById('grid-dim-label').textContent = COLS + ' × ' + ROWS;
+  document.getElementById('grid-dim-label').textContent = COLS + ' \u00d7 ' + ROWS;
 }
 
 function rowHasLand(rowIdx) {
@@ -1422,6 +1825,7 @@ function afterGridResize() {
   resizeCanvas();
   updateGridDimLabel();
   buildChokepointPanel();
+  buildDieHardPanel();
   draw();
 }
 
@@ -1430,9 +1834,11 @@ function addRowTop() {
   const newRow = [];
   for (let c = 0; c < COLS; c++) newRow.push({ owner: 'sea' });
   grid.unshift(newRow);
-  // Shift chokepoint row indices
   for (const key of Object.keys(chokepoints)) {
     if (chokepoints[key]) chokepoints[key].row++;
+  }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key]) dieHards[key].row++;
   }
   afterGridResize();
 }
@@ -1450,11 +1856,16 @@ function removeRowTop() {
   if (rowHasLand(0) && !confirm('Top row contains land hexes. Delete anyway?')) return;
   ROWS--;
   grid.shift();
-  // Shift chokepoint row indices
   for (const key of Object.keys(chokepoints)) {
     if (chokepoints[key]) {
       if (chokepoints[key].row === 0) { chokepoints[key] = null; }
       else { chokepoints[key].row--; }
+    }
+  }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key]) {
+      if (dieHards[key].row === 0) { dieHards[key] = null; }
+      else { dieHards[key].row--; }
     }
   }
   afterGridResize();
@@ -1464,9 +1875,11 @@ function removeRowBottom() {
   if (ROWS <= 1) return;
   if (rowHasLand(ROWS - 1) && !confirm('Bottom row contains land hexes. Delete anyway?')) return;
   ROWS--;
-  // Remove chokepoints in deleted row
   for (const key of Object.keys(chokepoints)) {
     if (chokepoints[key] && chokepoints[key].row === ROWS) chokepoints[key] = null;
+  }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key] && dieHards[key].row === ROWS) dieHards[key] = null;
   }
   grid.pop();
   afterGridResize();
@@ -1475,9 +1888,11 @@ function removeRowBottom() {
 function addColLeft() {
   COLS++;
   for (let r = 0; r < ROWS; r++) grid[r].unshift({ owner: 'sea' });
-  // Shift chokepoint col indices
   for (const key of Object.keys(chokepoints)) {
     if (chokepoints[key]) chokepoints[key].col++;
+  }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key]) dieHards[key].col++;
   }
   afterGridResize();
 }
@@ -1499,6 +1914,12 @@ function removeColLeft() {
       else { chokepoints[key].col--; }
     }
   }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key]) {
+      if (dieHards[key].col === 0) { dieHards[key] = null; }
+      else { dieHards[key].col--; }
+    }
+  }
   afterGridResize();
 }
 
@@ -1508,6 +1929,9 @@ function removeColRight() {
   COLS--;
   for (const key of Object.keys(chokepoints)) {
     if (chokepoints[key] && chokepoints[key].col === COLS) chokepoints[key] = null;
+  }
+  for (const key of Object.keys(dieHards)) {
+    if (dieHards[key] && dieHards[key].col === COLS) dieHards[key] = null;
   }
   for (let r = 0; r < ROWS; r++) grid[r].pop();
   afterGridResize();
