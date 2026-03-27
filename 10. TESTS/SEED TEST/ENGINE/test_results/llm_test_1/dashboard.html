@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THUCYDIDES TRAP -- Simulation Test Report</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#fff;color:#333;line-height:1.6}
+.header{background:#1A2A3A;color:#fff;padding:32px 40px 28px;position:relative}
+.header h1{font-size:28px;font-weight:700;letter-spacing:1px;margin-bottom:4px}
+.header .subtitle{font-size:14px;opacity:0.7;margin-bottom:16px}
+.header-meta{display:flex;gap:24px;font-size:13px;opacity:0.8;margin-bottom:16px;flex-wrap:wrap}
+.badges{display:flex;gap:12px;flex-wrap:wrap}
+.badge{padding:6px 16px;border-radius:4px;font-size:12px;font-weight:700;letter-spacing:0.5px}
+.badge-red{background:#C0392B;color:#fff}
+.badge-green{background:#27AE60;color:#fff}
+.badge-amber{background:#E67E22;color:#fff}
+.badge-blue{background:#2980B9;color:#fff}
+.container{max-width:1280px;margin:0 auto;padding:24px 40px}
+.section{margin-bottom:40px}
+.section-title{font-size:20px;font-weight:700;color:#1A2A3A;padding-bottom:8px;border-bottom:3px solid #E0E0E0;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-title .num{background:#1A2A3A;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+.card{background:#F5F5F5;border-radius:8px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.card h3{font-size:14px;font-weight:700;color:#555;margin-bottom:12px;text-transform:uppercase;letter-spacing:0.5px}
+.card-full{grid-column:1/-1}
+.metric-row{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px}
+.metric{background:#F5F5F5;border-radius:8px;padding:16px 20px;flex:1;min-width:160px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.metric .label{font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:4px}
+.metric .value{font-size:24px;font-weight:700;color:#1A2A3A}
+.metric .sub{font-size:12px;color:#888;margin-top:2px}
+.arrow-up{color:#C0392B}
+.arrow-down{color:#27AE60}
+.callout{background:#FFF3CD;border-left:4px solid #E67E22;padding:12px 16px;border-radius:0 6px 6px 0;margin:12px 0;font-size:13px}
+.callout-red{background:#F8D7DA;border-left-color:#C0392B}
+.callout-blue{background:#D6EAF8;border-left-color:#2980B9}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#1A2A3A;color:#fff;padding:8px 12px;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.3px}
+td{padding:7px 12px;border-bottom:1px solid #E8E8E8}
+tr:nth-child(even){background:#FAFAFA}
+tr:hover{background:#F0F0F0}
+.status-active{color:#C0392B;font-weight:700}
+.status-held{color:#27AE60;font-weight:700}
+canvas{max-height:320px}
+.collapsible{cursor:pointer;user-select:none}
+.collapsible::after{content:' +';font-weight:700;color:#888}
+.collapsible.open::after{content:' -'}
+.collapse-content{display:none;padding-top:12px}
+.collapse-content.show{display:block}
+.round-card{background:#F5F5F5;border-radius:8px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.round-card h3{margin-bottom:8px}
+.round-card .date-label{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.round-stats{display:flex;gap:16px;margin:12px 0;flex-wrap:wrap}
+.round-stat{background:#E8E8E8;padding:6px 12px;border-radius:4px;font-size:12px;font-weight:600}
+.narrative-text{font-size:13px;color:#555;white-space:pre-line;margin-top:8px;line-height:1.7}
+.events-list{list-style:none;padding:0;margin:8px 0}
+.events-list li{padding:4px 0 4px 16px;font-size:13px;position:relative}
+.events-list li::before{content:'';position:absolute;left:0;top:10px;width:6px;height:6px;border-radius:50%;background:#1A2A3A}
+.team-card{background:#F5F5F5;border-radius:8px;padding:20px;margin-bottom:12px}
+.team-card h4{font-size:15px;font-weight:700;color:#1A2A3A;margin-bottom:10px}
+.role-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.role-box{background:#fff;border-radius:6px;padding:12px;border-left:3px solid #888}
+.role-box.urgent{border-left-color:#C0392B}
+.role-box.moderate{border-left-color:#E67E22}
+.role-box.calm{border-left-color:#27AE60}
+.role-box .role-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#555;margin-bottom:4px}
+.role-box .role-pos{font-size:12px;color:#444;line-height:1.5}
+.deal-matrix td,.deal-matrix th{text-align:center;padding:6px;font-size:11px}
+.deal-matrix .cell-hot{background:#E74C3C;color:#fff}
+.deal-matrix .cell-warm{background:#F39C12;color:#fff}
+.deal-matrix .cell-mild{background:#F1C40F;color:#333}
+.deal-matrix .cell-cool{background:#E8E8E8;color:#555}
+.footer{background:#1A2A3A;color:#fff;padding:24px 40px;text-align:center;font-size:13px;opacity:0.9;margin-top:40px}
+.footer a{color:#5DADE2;text-decoration:none}
+@media(max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr}.container{padding:16px 20px}.header{padding:20px}}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+<h1>THUCYDIDES TRAP &mdash; Simulation Test Report</h1>
+<div class="subtitle">Role-Brief-Driven Agent Architecture &bull; LLM Test 1</div>
+<div class="header-meta">
+<span>Test: <strong>llm_test_1</strong></span>
+<span>Date: <strong>2026-03-27</strong></span>
+<span>Seed: <strong>42</strong></span>
+<span>Rounds: <strong>8</strong> (H2 2026 &ndash; H1 2030)</span>
+<span>Architecture: <strong>LLM Agent</strong></span>
+</div>
+<div class="badges">
+<span class="badge badge-red">TRAP STATUS: ELEVATED</span>
+<span class="badge badge-amber">DETERRENCE: STRAINED</span>
+<span class="badge badge-blue">THEATERS: 2 ACTIVE</span>
+<span class="badge badge-green">NUCLEAR: NOT USED</span>
+</div>
+</div>
+
+<div class="container">
+
+<!-- SECTION 1: THUCYDIDES TRAP -->
+<div class="section">
+<div class="section-title"><span class="num">1</span> The Thucydides Trap &mdash; Power Transition</div>
+<div class="metric-row">
+<div class="metric">
+<div class="label">GDP Gap Ratio</div>
+<div class="value">0.727 <span class="arrow-up">&rarr;</span> 0.858</div>
+<div class="sub">Cathay closing (+18% shift)</div>
+</div>
+<div class="metric">
+<div class="label">Naval Ratio (Cathay:Columbia)</div>
+<div class="value">0.88 <span class="arrow-up">&rarr;</span> 1.27</div>
+<div class="sub">Cathay surpassed Columbia in Round 2</div>
+</div>
+<div class="metric">
+<div class="label">Cathay Naval Units (final)</div>
+<div class="value">56</div>
+<div class="sub">vs Columbia 44 (+27% advantage)</div>
+</div>
+<div class="metric">
+<div class="label">Helmsman Formosa Score</div>
+<div class="value">0.51 <span class="arrow-up">&rarr;</span> 0.92</div>
+<div class="sub">Decision escalated to "blockade"</div>
+</div>
+</div>
+<div class="callout-red callout">Round 2 (H1 2027): Cathay reached naval parity (20 vs 20). By Round 8, Cathay holds 56 naval units to Columbia's 44 &mdash; a 1.27x superiority. The Helmsman's Formosa window score climbed from 0.51 to 0.92, crossing the blockade threshold.</div>
+<div class="grid-2">
+<div class="card">
+<h3>GDP Trajectories: Columbia vs Cathay</h3>
+<canvas id="chartGdpTrap"></canvas>
+</div>
+<div class="card">
+<h3>Naval Balance Over Time</h3>
+<canvas id="chartNaval"></canvas>
+</div>
+</div>
+</div>
+
+<!-- SECTION 2: ECONOMIC DASHBOARD -->
+<div class="section">
+<div class="section-title"><span class="num">2</span> Economic Dashboard</div>
+<div class="metric-row">
+<div class="metric">
+<div class="label">Global GDP (Final)</div>
+<div class="value">1,040</div>
+<div class="sub">coins (up from 815)</div>
+</div>
+<div class="metric">
+<div class="label">Oil Price</div>
+<div class="value">$98</div>
+<div class="sub">Stable (Gulf Gate blockade)</div>
+</div>
+<div class="metric">
+<div class="label">Fastest Growth</div>
+<div class="value">Cathay 8.0%</div>
+<div class="sub">Round 8 (Bharata 7.6%)</div>
+</div>
+<div class="metric">
+<div class="label">Inflation Leaders</div>
+<div class="value">Caribe 16%</div>
+<div class="sub">Persia 14%, Phrygia 12%</div>
+</div>
+</div>
+<div class="grid-2">
+<div class="card">
+<h3>Top 6 GDP Trajectories</h3>
+<canvas id="chartGdpAll"></canvas>
+</div>
+<div class="card">
+<h3>Oil Price Over Rounds</h3>
+<canvas id="chartOil"></canvas>
+</div>
+</div>
+<div class="card" style="margin-top:20px">
+<h3>Final GDP Comparison (All Countries, Sorted)</h3>
+<canvas id="chartGdpBar" style="max-height:380px"></canvas>
+</div>
+</div>
+
+<!-- SECTION 3: MILITARY SITUATION -->
+<div class="section">
+<div class="section-title"><span class="num">3</span> Military Situation</div>
+<div class="metric-row">
+<div class="metric">
+<div class="label">Total Combats</div>
+<div class="value">72</div>
+<div class="sub">across 8 rounds</div>
+</div>
+<div class="metric">
+<div class="label">Ground Battles</div>
+<div class="value">8</div>
+<div class="sub">Nordostan vs Heartland each round</div>
+</div>
+<div class="metric">
+<div class="label">Territory Changes</div>
+<div class="value">3</div>
+<div class="sub">heartland_2 captured R6, R7, R8</div>
+</div>
+<div class="metric">
+<div class="label">Gulf Gate Blockade</div>
+<div class="value" style="color:#C0392B">ACTIVE</div>
+<div class="sub">All 8 rounds (Hormuz)</div>
+</div>
+</div>
+<div class="grid-2">
+<div class="card">
+<h3>Total Military Units by Major Power</h3>
+<canvas id="chartMilitary"></canvas>
+</div>
+<div class="card">
+<h3>Combat Results by Round</h3>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>Rd</th><th>Attacker</th><th>Defender</th><th>Zone</th><th>Atk Loss</th><th>Def Loss</th><th>Captured</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>2</td><td>2</td><td>No</td></tr>
+<tr><td>2</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>2</td><td>2</td><td>No</td></tr>
+<tr><td>3</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>2</td><td>1</td><td>No</td></tr>
+<tr><td>4</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>1</td><td>1</td><td>No</td></tr>
+<tr><td>5</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>1</td><td>0</td><td>No</td></tr>
+<tr><td>6</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>0</td><td>1</td><td class="status-active">Yes</td></tr>
+<tr><td>7</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>0</td><td>0</td><td class="status-active">Yes</td></tr>
+<tr><td>8</td><td>Nordostan</td><td>Heartland</td><td>heartland_2</td><td>0</td><td>0</td><td class="status-active">Yes</td></tr>
+</tbody>
+</table>
+</div>
+<div class="callout" style="margin-top:12px">Covert ops: Columbia cyber on Cathay (3 success/5 fail), Cathay cyber on Columbia (3 success/5 fail). Cathay disinfo on Formosa: 3 success/5 fail. Persia maintained Gulf Gate blockade all 8 rounds. Columbia missile strikes on Persia: 8/8 hit.</div>
+</div>
+</div>
+</div>
+
+<!-- SECTION 4: POLITICAL DYNAMICS -->
+<div class="section">
+<div class="section-title"><span class="num">4</span> Political Dynamics</div>
+<div class="grid-2">
+<div class="card">
+<h3>Stability Index: Key Countries</h3>
+<canvas id="chartStability"></canvas>
+</div>
+<div class="card">
+<h3>Political Support: Key Countries</h3>
+<canvas id="chartSupport"></canvas>
+</div>
+</div>
+<div class="card" style="margin-top:20px">
+<h3>Key Political Events Timeline</h3>
+<table>
+<thead><tr><th>Round</th><th>Period</th><th>Event</th><th>Country</th><th>Significance</th></tr></thead>
+<tbody>
+<tr><td>2</td><td>H1 2027</td><td>Midterm Elections</td><td>Columbia</td><td>Support rose to 49.5% (Dealer maintains control)</td></tr>
+<tr><td>3</td><td>H2 2027</td><td>Wartime Election</td><td>Heartland</td><td>Support collapsed to 20.2% (Broker desperate)</td></tr>
+<tr><td>4</td><td>H1 2028</td><td>Wartime Runoff</td><td>Heartland</td><td>Support at 10.9% (regime barely holding)</td></tr>
+<tr><td>5</td><td>H2 2028</td><td>Presidential Election</td><td>Columbia</td><td>Support at 48.6% (Anchor vs Volt succession)</td></tr>
+<tr><td>3</td><td>H2 2027</td><td>Cathay Disinfo on Formosa</td><td>Formosa</td><td>Stability impact -0.3, support impact -2</td></tr>
+<tr><td>5</td><td>H2 2028</td><td>Choson Missile Test</td><td>Choson</td><td>Stability at 2.1, provocative signal</td></tr>
+<tr><td>6</td><td>H1 2029</td><td>Nordostan Captures Territory</td><td>Heartland</td><td>heartland_2 falls, first territorial change</td></tr>
+<tr><td>7</td><td>H2 2029</td><td>Persia Retaliates on Levantia</td><td>Levantia</td><td>Sabotage success, Levantia stability 1.8</td></tr>
+</tbody>
+</table>
+</div>
+<div class="card" style="margin-top:20px">
+<h3>War Tiredness Progression (Belligerents)</h3>
+<canvas id="chartWarTired"></canvas>
+</div>
+</div>
+
+<!-- SECTION 5: DIPLOMATIC ACTIVITY -->
+<div class="section">
+<div class="section-title"><span class="num">5</span> Diplomatic Activity</div>
+<div class="metric-row">
+<div class="metric">
+<div class="label">Total Deals Executed</div>
+<div class="value">141</div>
+<div class="sub">across 8 rounds</div>
+</div>
+<div class="metric">
+<div class="label">Most Active Dealer</div>
+<div class="value">Columbia</div>
+<div class="sub">Arms to Heartland every round</div>
+</div>
+<div class="metric">
+<div class="label">Failed/Rejected</div>
+<div class="value">~35</div>
+<div class="sub">Nordostan peace bids all rejected</div>
+</div>
+<div class="metric">
+<div class="label">Most Frequent Type</div>
+<div class="value">Coin Transfer</div>
+<div class="sub">22 total executed</div>
+</div>
+</div>
+<div class="grid-2">
+<div class="card">
+<h3>Deals per Round (by Category)</h3>
+<canvas id="chartDeals"></canvas>
+</div>
+<div class="card">
+<h3>Key Diplomatic Deals</h3>
+<div style="overflow-x:auto">
+<table>
+<thead><tr><th>From</th><th>To</th><th>Type</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Columbia</td><td>Heartland</td><td>Arms Transfer</td><td>Every round: 2 ground units + coins</td></tr>
+<tr><td>Cathay</td><td>Bharata</td><td>Tech Transfer</td><td>AI cooperation (most rounds)</td></tr>
+<tr><td>Cathay</td><td>Columbia</td><td>Trade Restriction</td><td>Rare earth export reduction 30%</td></tr>
+<tr><td>Albion</td><td>Columbia</td><td>Intelligence Sharing</td><td>Signals intel, Persia targeting (every round)</td></tr>
+<tr><td>Phrygia</td><td>Nordostan</td><td>Leverage Play</td><td>Bosphorus access for sanctions relief</td></tr>
+<tr><td>Persia</td><td>Cathay</td><td>Oil Deal</td><td>Discounted oil, bypass sanctions</td></tr>
+<tr><td>Gallia</td><td>Heartland</td><td>Security Guarantee</td><td>Nuclear umbrella (from R4)</td></tr>
+<tr><td>Nordostan</td><td>Columbia</td><td>Peace Framework</td><td>Rejected every attempt (R2-R5)</td></tr>
+<tr><td>Heartland</td><td>Nordostan</td><td>Peace Exploration</td><td>Back-channel from R6 (rejected)</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="card" style="margin-top:20px">
+<h3>Diplomatic Interaction Matrix (Executed Deals)</h3>
+<div style="overflow-x:auto">
+<table class="deal-matrix">
+<thead><tr><th>From \ To</th><th>Col</th><th>Cat</th><th>Nor</th><th>Hrt</th><th>Per</th><th>Bha</th><th>Teu</th><th>Yam</th><th>Alb</th><th>Phr</th><th>For</th><th>Mir</th><th>Sol</th><th>Car</th><th>Gal</th><th>Lev</th></tr></thead>
+<tbody id="matrixBody"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- SECTION 6: ROUND-BY-ROUND NARRATIVE -->
+<div class="section">
+<div class="section-title"><span class="num">6</span> Round-by-Round Narrative</div>
+<div id="roundNarratives"></div>
+</div>
+
+<!-- SECTION 7: TEAM DYNAMICS -->
+<div class="section">
+<div class="section-title"><span class="num">7</span> Team Internal Dynamics</div>
+<p style="font-size:13px;color:#888;margin-bottom:16px">Click each team header to expand faction dynamics.</p>
+
+<div class="team-card">
+<h4 class="collapsible" onclick="toggleCollapse(this)">Columbia (United States) &mdash; 7 Roles</h4>
+<div class="collapse-content">
+<div class="role-grid">
+<div class="role-box urgent"><div class="role-name">Dealer (President)</div><div class="role-pos">Legacy urgency: 0.6 &rarr; 1.0. Pushed all heritage targets simultaneously. Persia war priority, Caribe opportunistic. By R8: "Legacy panic."</div></div>
+<div class="role-box moderate"><div class="role-name">Shield (Pentagon)</div><div class="role-pos">Consistently warned of overstretch. Kept to 1 active theater. "Cannot sustain more than 2 theaters." Budget: 40% military.</div></div>
+<div class="role-box urgent"><div class="role-name">Shadow (Intelligence)</div><div class="role-pos">Flagged Cathay naval buildup from R1. By R8: "Naval buildup at 50. Formosa window: dangerous." Recommended Pacific pivot.</div></div>
+<div class="role-box urgent"><div class="role-name">Anchor (Hawks)</div><div class="role-pos">"Caribe action NOW." Pushed regime change in Persia. Tension with Volt: "high." Urgency moderated by R8.</div></div>
+<div class="role-box moderate"><div class="role-name">Volt (Populists)</div><div class="role-pos">"America First. Cut European subsidies." Opposed foreign commitments. High tension with Anchor throughout.</div></div>
+<div class="role-box calm"><div class="role-name">Tribune (Opposition)</div><div class="role-pos">"Block military adventurism." Had leverage early but lost it. By R8: "Minority opposition. Monitor and critique."</div></div>
+</div>
+<div class="callout" style="margin-top:12px">Internal dynamics evolved from "Dealer consolidating" (R1) to "Late game: Legacy panic. Succession open warfare between Volt and Anchor" (R8). Stability declined from 6.7 to 4.4.</div>
+</div>
+</div>
+
+<div class="team-card">
+<h4 class="collapsible" onclick="toggleCollapse(this)">Cathay (China) &mdash; 5 Roles</h4>
+<div class="collapse-content">
+<div class="role-grid">
+<div class="role-box urgent"><div class="role-name">Helmsman (Leader)</div><div class="role-pos">Formosa window: 0.51 &rarr; 0.92. Age 73 &rarr; 76. Legacy pressure: high &rarr; extreme. Decision: accelerate_buildup &rarr; blockade.</div></div>
+<div class="role-box moderate"><div class="role-name">Rampart (Military)</div><div class="role-pos">Readiness: 0.85 &rarr; 0.95. "Purge damage fading." Urged caution early, "approaching readiness" by R8. Amphibious capability uncertain.</div></div>
+<div class="role-box moderate"><div class="role-name">Abacus (Economy)</div><div class="role-pos">Real growth ~2.8% (reported 4.0%) in R1, real ~6.4% (reported 7.2%) in R8. "War would be catastrophic for economy."</div></div>
+<div class="role-box calm"><div class="role-name">Circuit (Tech)</div><div class="role-pos">"Use tech competition, not military force." Rare earth leverage 0.7. Warned: Formosa confrontation triggers devastating tech sanctions.</div></div>
+<div class="role-box calm"><div class="role-name">Sage (Party)</div><div class="role-pos">Alarm level: "normal" throughout. "Defer to Helmsman." No independent challenge.</div></div>
+</div>
+<div class="callout" style="margin-top:12px">Cathay's budget: naval-heavy (45% military, 15% tech). Naval units grew from 14 to 56. The Helmsman's Formosa window climbed past the blockade threshold by R8 but never triggered full kinetic action.</div>
+</div>
+</div>
+
+<div class="team-card">
+<h4 class="collapsible" onclick="toggleCollapse(this)">Nordostan (Russia) &mdash; 3 Roles</h4>
+<div class="collapse-content">
+<div class="role-grid">
+<div class="role-box urgent"><div class="role-name">Pathfinder (Leader)</div><div class="role-pos">Deal window: "open" &rarr; "closing." Probed Columbia peace deal every round, rejected each time. Territorial hold: 1 zone throughout. "Consolidate and defend."</div></div>
+<div class="role-box urgent"><div class="role-name">Ironhand (Military)</div><div class="role-pos">Attrition: 0.6 &rarr; 1.3. Replacement capacity: 0.92 &rarr; 0.36. "Attrition unsustainable. Recommend defensive posture." Loyalty: "calculating."</div></div>
+<div class="role-box moderate"><div class="role-name">Compass (Oligarch)</div><div class="role-pos">Sanctions pain: 26 &rarr; 27 (consistently devastating). "Western assets frozen." Personal stake: high (wants asset unfreezing). Back-channel to Columbia for oil deal.</div></div>
+</div>
+<div class="callout-red callout" style="margin-top:12px">Nordostan stability collapsed to 1.0 by R5 and stayed. War tiredness peaked at 10.3. Despite military success (capturing heartland_2), the economy and political system are in crisis. Ironhand's loyalty is "calculating" &mdash; coup risk elevated.</div>
+</div>
+</div>
+</div>
+
+</div><!-- /container -->
+
+<!-- FOOTER -->
+<div class="footer">
+<p>Generated by <strong>MetaGames TTT Test System</strong> &bull; Co-created by human and AI team</p>
+<p style="margin-top:6px"><a href="LLM_TEST_ANALYSIS.md">Full Analysis Report</a> &bull; Architecture: Role-Brief-Driven Agent Deliberation &bull; Seed 42</p>
+</div>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const ROUNDS = ['R1\nH2 2026','R2\nH1 2027','R3\nH2 2027','R4\nH1 2028','R5\nH2 2028','R6\nH1 2029','R7\nH2 2029','R8\nH1 2030'];
+const ROUND_LABELS = ['H2 2026','H1 2027','H2 2027','H1 2028','H2 2028','H1 2029','H2 2029','H1 2030'];
+
+// Country colors
+const C = {
+    columbia: '#C4A35A', cathay: '#D4A017', nordostan: '#C07070',
+    heartland: '#6B8E23', persia: '#E67E22', bharata: '#2E86C1',
+    teutonia: '#5B7FA6', yamato: '#8E44AD', gallia: '#3498DB',
+    albion: '#1ABC9C', phrygia: '#95A5A6', levantia: '#E74C3C',
+    formosa: '#16A085', choson: '#7F8C8D', caribe: '#D35400',
+    solaria: '#F39C12', mirage: '#27AE60', hanguk: '#9B59B6'
+};
+
+const GDP = {
+    columbia: [285.5,288.7,295.5,303.1,311.6,318.0,328.8,354.4],
+    cathay: [207.5,216.8,227.4,237.2,248.8,265.1,281.5,304.1],
+    bharata: [44.8,47.7,50.9,54.3,57.9,61.9,69.4,74.7],
+    teutonia: [45.5,46.1,46.7,47.2,47.8,48.4,49.1,49.7],
+    yamato: [43.5,44.0,44.6,45.2,46.0,46.8,47.7,48.7],
+    nordostan: [20.2,20.2,20.1,20.1,20.1,20.0,20.0,19.9],
+    gallia: [34.3,34.7,35.0,35.4,35.8,36.2,36.5,36.9],
+    albion: [33.4,33.7,34.1,34.5,34.9,35.3,35.7,37.9],
+    hanguk: [18.4,18.8,20.2,20.7,21.2,21.9,22.6,23.3],
+    solaria: [11.4,11.8,12.2,12.6,13.0,13.4,13.8,14.3],
+    phrygia: [11.0,10.9,10.9,10.8,10.7,10.7,10.6,10.5],
+    formosa: [8.2,8.5,9.2,9.5,9.8,10.3,10.7,11.3],
+    mirage: [5.2,5.4,5.6,5.8,6.0,6.3,6.5,6.7],
+    levantia: [5.2,5.3,5.3,5.3,5.6,5.6,5.5,5.5],
+    persia: [4.5,3.7,3.1,2.7,2.3,2.0,1.7,1.5],
+    heartland: [2.3,2.3,2.3,2.2,2.2,2.2,2.2,2.1],
+    caribe: [1.8,1.6,1.4,1.3,1.2,1.1,1.1,1.0],
+    choson: [0.3,0.3,0.3,0.3,0.3,0.3,0.3,0.3]
+};
+
+const NAVAL = {
+    columbia: [16,20,24,28,32,36,40,44],
+    cathay: [14,20,26,32,38,44,50,56]
+};
+
+const OIL = [97.82,97.84,97.86,97.89,97.92,97.96,98.00,98.04];
+
+const STABILITY = {
+    columbia: [6.7,6.4,6.0,5.7,5.3,5.0,4.7,4.4],
+    cathay: [8.2,8.3,8.4,8.6,8.8,8.9,9.0,9.0],
+    nordostan: [4.1,3.3,2.4,1.7,1.0,1.0,1.0,1.0],
+    heartland: [3.6,2.2,1.0,1.0,1.0,1.0,1.0,1.0],
+    persia: [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0],
+    phrygia: [3.9,3.0,2.4,1.8,1.4,1.1,1.0,1.0]
+};
+
+const SUPPORT = {
+    columbia: [44.9,49.5,50.8,48.9,48.6,48.1,47.2,46.0],
+    cathay: [59.3,60.7,62.1,63.6,65.1,66.7,68.2,69.7],
+    nordostan: [53.3,50.9,48.0,44.6,40.9,37.4,34.0,30.8],
+    heartland: [42.5,30.3,20.2,10.9,5.0,5.0,5.0,5.0],
+    persia: [41.1,39.1,34.3,28.6,22.8,16.9,11.0,5.0],
+    levantia: [62.0,70.9,78.7,85.6,91.4,95.0,95.0,95.0]
+};
+
+const WAR_TIRED = {
+    columbia: [1.4,1.8,2.2,2.6,3.0,3.4,3.9,4.4],
+    nordostan: [4.9,5.8,6.9,8.0,9.2,10.3,10.3,10.3],
+    heartland: [4.9,5.8,6.9,8.0,9.2,10.3,10.3,10.3],
+    persia: [1.4,1.8,2.2,2.6,3.0,3.4,3.9,4.4]
+};
+
+const MILITARY_TOTAL = {
+    columbia: [58,67,76,85,94,103,112,121],
+    cathay: [59,73,87,101,115,129,143,157],
+    nordostan: [32,32,32,33,34,36,38,40],
+    heartland: [13,13,14,15,17,18,20,22],
+    persia: [17,18,18,18,18,18,18,18],
+    bharata: [21,23,25,27,29,31,34,38]
+};
+
+// Deals by category per round
+const DEAL_CATS = {
+    arms: [2,3,3,2,3,3,3,2],
+    coins: [3,3,4,4,5,3,5,3],
+    trade: [2,3,1,3,2,3,2,3],
+    intel: [1,2,2,1,1,2,1,2],
+    other: [8,7,7,7,7,9,6,8]
+};
+
+// Interaction matrix data
+const MATRIX_COUNTRIES = ['columbia','cathay','nordostan','heartland','persia','bharata','teutonia','yamato','albion','phrygia','formosa','mirage','solaria','caribe','gallia','levantia'];
+const MATRIX_SHORT = ['Col','Cat','Nor','Hrt','Per','Bha','Teu','Yam','Alb','Phr','For','Mir','Sol','Car','Gal','Lev'];
+const MATRIX_DATA = {};
+// from -> to -> count
+function addM(f,t,n){const k=f+'>'+t; MATRIX_DATA[k]=(MATRIX_DATA[k]||0)+n;}
+addM('columbia','heartland',16);addM('columbia','cathay',3);
+addM('cathay','nordostan',6);addM('cathay','bharata',5);addM('cathay','columbia',5);
+addM('nordostan','cathay',5);addM('nordostan','mirage',4);
+addM('heartland','columbia',14);addM('heartland','teutonia',6);addM('heartland','nordostan',1);
+addM('persia','cathay',3);addM('persia','nordostan',3);addM('persia','columbia',2);
+addM('teutonia','heartland',3);
+addM('gallia','heartland',4);
+addM('albion','columbia',8);
+addM('bharata','cathay',6);addM('bharata','columbia',4);
+addM('formosa','columbia',6);
+addM('phrygia','nordostan',6);addM('phrygia','cathay',7);
+addM('yamato','columbia',7);
+addM('solaria','columbia',5);
+addM('caribe','cathay',4);addM('caribe','nordostan',1);
+addM('mirage','nordostan',3);
+
+// Narratives
+const NARRATIVES = {
+1: {events:['Columbia missile strike on Persia (HIT)','Nordostan attacks Heartland at heartland_2: 4 units, losses 2/2','Levantia covert op (sabotage) on Persia: FAILED','Persia blockade on Gulf Gate: ACTIVE'],text:'Global GDP: 814.8 coins. Oil: $98/bbl. Active conflicts: Columbia vs Persia (mashriq), Nordostan vs Heartland (eastern_ereb). Heartland stability 3.6/10. Persia inflation 42%. Caribe inflation 51%. Hormuz blocked.'},
+2: {events:['Naval parity reached: Columbia 20, Cathay 20','Columbia midterm elections','Cathay cyber attack on Columbia: SUCCESS','Levantia sabotage on Persia: SUCCESS','Persia blockade continues'],text:'Global GDP: 833.0 coins. Cathay reached naval parity. Columbia midterms held with 49.5% support. Cathay-Columbia cyber war intensifying. Heartland stability plunges to 2.2. Nordostan stability falling (3.3).'},
+3: {events:['Heartland wartime election (support 20.2%)','Cathay disinformation on Formosa: SUCCESS','Choson missile test','Nordostan attacks heartland_2: losses 2/1','Cathay disinfo destabilizes Formosa'],text:'Global GDP: 857.8 coins. Heartland\'s wartime election sees support collapse to 20%. Cathay\'s disinformation campaign succeeds against Formosa. Nordostan pressing attack. 7 countries now below stability 4.0.'},
+4: {events:['Heartland runoff election (support 10.9%)','Gallia extends nuclear umbrella to Heartland','Columbia cyber SUCCESS on Cathay','Columbia disinformation on Caribe: SUCCESS','Nordostan cyber on Heartland: SUCCESS'],text:'Global GDP: 883.0 coins. Heartland runoff with barely 10.9% support. Gallia/Lumiere extends nuclear guarantee to Heartland. Columbia succeeds with cyber against Cathay. Multi-front covert war intensifying.'},
+5: {events:['Columbia presidential election (support 48.6%)','Persia sends engagement signal to Columbia: ACCEPTED','Cathay disinformation on Formosa: SUCCESS','Nordostan attacks heartland_2: losses 1/0','Choson missile test'],text:'Global GDP: 910.7 coins. Columbia presidential election held amid declining stability (5.3). Persia opens back-channel to Columbia. Nordostan barely losing troops now as Heartland defenders crumble.'},
+6: {events:['NORDOSTAN CAPTURES heartland_2','Heartland explores peace with Nordostan','Columbia-Cathay trade negotiation (first direct)','Cathay cyber SUCCESS on Columbia','Levantia sabotage on Persia: SUCCESS'],text:'Global GDP: 941.2 coins. Major turning point: Nordostan captures heartland_2, the first territorial change. Heartland, desperate, opens peace exploration with Nordostan. Columbia and Cathay engage in direct trade talks for first time.'},
+7: {events:['Nordostan captures territory again','Columbia cyber SUCCESS on Cathay','Columbia disinformation on Caribe: SUCCESS','Persia retaliates: sabotage on Levantia: SUCCESS','8 countries below stability 2.0'],text:'Global GDP: 980.1 coins. Nordostan consolidates territorial gains. Persia counter-attacks Levantia with sabotage. Columbia stability falls to 4.7. 8 countries now in crisis territory (<2.0 stability).'},
+8: {events:['Nordostan secures position (zero losses)','Cathay cyber SUCCESS on Columbia','Cathay Formosa window score reaches 0.92','Persia sabotage on Levantia: SUCCESS','Columbia stability at 4.4'],text:'Global GDP: 1039.9 coins. Final round: Nordostan fully controls heartland_2 at zero cost. Cathay\'s Helmsman reaches 92% Formosa window score (blockade decision). Columbia stability 4.4 and declining. The trap is sprung.'}
+};
+
+// ============================================================
+// CHARTS
+// ============================================================
+const FONT = {family:'-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif'};
+Chart.defaults.font.family = FONT.family;
+Chart.defaults.font.size = 12;
+
+function lineOpts(title,yLabel){
+    return {responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:14,padding:12}},title:{display:!!title,text:title}},scales:{x:{grid:{display:false}},y:{title:{display:!!yLabel,text:yLabel},grid:{color:'#E8E8E8'}}}};
+}
+
+// Chart 1: GDP Trap
+new Chart(document.getElementById('chartGdpTrap'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia GDP',data:GDP.columbia,borderColor:C.columbia,backgroundColor:C.columbia+'33',borderWidth:3,tension:0.3,fill:false,pointRadius:4},
+        {label:'Cathay GDP',data:GDP.cathay,borderColor:C.cathay,backgroundColor:C.cathay+'33',borderWidth:3,tension:0.3,fill:false,pointRadius:4}
+    ]},
+    options:lineOpts(null,'GDP (coins)')
+});
+
+// Chart 2: Naval
+new Chart(document.getElementById('chartNaval'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia Naval',data:NAVAL.columbia,borderColor:C.columbia,borderWidth:3,tension:0.3,pointRadius:4},
+        {label:'Cathay Naval',data:NAVAL.cathay,borderColor:C.cathay,borderWidth:3,tension:0.3,pointRadius:4}
+    ]},
+    options:{...lineOpts(null,'Naval Units'),plugins:{...lineOpts(null).plugins,annotation:{}}}
+});
+
+// Chart 3: Top 6 GDP
+new Chart(document.getElementById('chartGdpAll'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia',data:GDP.columbia,borderColor:C.columbia,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Cathay',data:GDP.cathay,borderColor:C.cathay,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Bharata',data:GDP.bharata,borderColor:C.bharata,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Teutonia',data:GDP.teutonia,borderColor:C.teutonia,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Yamato',data:GDP.yamato,borderColor:C.yamato,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Nordostan',data:GDP.nordostan,borderColor:C.nordostan,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[5,5]}
+    ]},
+    options:lineOpts(null,'GDP (coins)')
+});
+
+// Chart 4: Oil
+new Chart(document.getElementById('chartOil'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Oil Price ($/bbl)',data:OIL,borderColor:'#2C3E50',backgroundColor:'#2C3E5022',borderWidth:3,tension:0.3,fill:true,pointRadius:4}
+    ]},
+    options:{...lineOpts(null,'$/bbl'),scales:{x:{grid:{display:false}},y:{min:96,max:100,title:{display:true,text:'$/bbl'},grid:{color:'#E8E8E8'}}}}
+});
+
+// Chart 5: Final GDP Bar
+const gdpSorted = Object.entries(GDP).map(([k,v])=>({name:k.charAt(0).toUpperCase()+k.slice(1),gdp:v[7],color:C[k]})).sort((a,b)=>b.gdp-a.gdp);
+new Chart(document.getElementById('chartGdpBar'),{
+    type:'bar',
+    data:{labels:gdpSorted.map(d=>d.name),datasets:[{
+        data:gdpSorted.map(d=>d.gdp),
+        backgroundColor:gdpSorted.map(d=>d.color),
+        borderRadius:4
+    }]},
+    options:{responsive:true,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{title:{display:true,text:'GDP (coins)'},grid:{color:'#E8E8E8'}}},indexAxis:'y'}
+});
+
+// Chart 6: Military stacked area
+new Chart(document.getElementById('chartMilitary'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia',data:MILITARY_TOTAL.columbia,borderColor:C.columbia,backgroundColor:C.columbia+'22',borderWidth:2,tension:0.3,fill:true},
+        {label:'Cathay',data:MILITARY_TOTAL.cathay,borderColor:C.cathay,backgroundColor:C.cathay+'22',borderWidth:2,tension:0.3,fill:true},
+        {label:'Nordostan',data:MILITARY_TOTAL.nordostan,borderColor:C.nordostan,backgroundColor:C.nordostan+'22',borderWidth:2,tension:0.3,fill:true},
+        {label:'Bharata',data:MILITARY_TOTAL.bharata,borderColor:C.bharata,backgroundColor:C.bharata+'22',borderWidth:2,tension:0.3,fill:true}
+    ]},
+    options:lineOpts(null,'Total Units (ground+naval+air)')
+});
+
+// Chart 7: Stability
+new Chart(document.getElementById('chartStability'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia',data:STABILITY.columbia,borderColor:C.columbia,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Cathay',data:STABILITY.cathay,borderColor:C.cathay,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Nordostan',data:STABILITY.nordostan,borderColor:C.nordostan,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[5,5]},
+        {label:'Heartland',data:STABILITY.heartland,borderColor:C.heartland,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[5,5]},
+        {label:'Persia',data:STABILITY.persia,borderColor:C.persia,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[3,3]},
+        {label:'Phrygia',data:STABILITY.phrygia,borderColor:C.phrygia,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[3,3]}
+    ]},
+    options:{...lineOpts(null,'Stability (0-10)'),scales:{x:{grid:{display:false}},y:{min:0,max:10,title:{display:true,text:'Stability'},grid:{color:'#E8E8E8'}}}}
+});
+
+// Chart 8: Political Support
+new Chart(document.getElementById('chartSupport'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia',data:SUPPORT.columbia,borderColor:C.columbia,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Cathay',data:SUPPORT.cathay,borderColor:C.cathay,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Nordostan',data:SUPPORT.nordostan,borderColor:C.nordostan,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Heartland',data:SUPPORT.heartland,borderColor:C.heartland,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[5,5]},
+        {label:'Persia',data:SUPPORT.persia,borderColor:C.persia,borderWidth:2,tension:0.3,pointRadius:3,borderDash:[5,5]},
+        {label:'Levantia',data:SUPPORT.levantia,borderColor:C.levantia,borderWidth:2,tension:0.3,pointRadius:3}
+    ]},
+    options:{...lineOpts(null,'Support (%)'),scales:{x:{grid:{display:false}},y:{min:0,max:100,title:{display:true,text:'Support %'},grid:{color:'#E8E8E8'}}}}
+});
+
+// Chart 9: War Tiredness
+new Chart(document.getElementById('chartWarTired'),{
+    type:'line',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Columbia',data:WAR_TIRED.columbia,borderColor:C.columbia,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Nordostan',data:WAR_TIRED.nordostan,borderColor:C.nordostan,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Heartland',data:WAR_TIRED.heartland,borderColor:C.heartland,borderWidth:2,tension:0.3,pointRadius:3},
+        {label:'Persia',data:WAR_TIRED.persia,borderColor:C.persia,borderWidth:2,tension:0.3,pointRadius:3}
+    ]},
+    options:lineOpts(null,'War Tiredness')
+});
+
+// Chart 10: Deals stacked bar
+new Chart(document.getElementById('chartDeals'),{
+    type:'bar',
+    data:{labels:ROUND_LABELS,datasets:[
+        {label:'Arms/Military',data:DEAL_CATS.arms,backgroundColor:'#C0392B'},
+        {label:'Coins/Finance',data:DEAL_CATS.coins,backgroundColor:'#F39C12'},
+        {label:'Trade/Tech',data:DEAL_CATS.trade,backgroundColor:'#2980B9'},
+        {label:'Intelligence',data:DEAL_CATS.intel,backgroundColor:'#8E44AD'},
+        {label:'Other (Aid/Alliance/Leverage)',data:DEAL_CATS.other,backgroundColor:'#95A5A6'}
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:12,padding:10}}},scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true,title:{display:true,text:'Deals Executed'},grid:{color:'#E8E8E8'}}}}
+});
+
+// ============================================================
+// INTERACTION MATRIX
+// ============================================================
+(function(){
+    const body = document.getElementById('matrixBody');
+    MATRIX_COUNTRIES.forEach((from,i)=>{
+        let row = '<tr><th style="text-align:left;background:#F5F5F5;color:#333">'+MATRIX_SHORT[i]+'</th>';
+        MATRIX_COUNTRIES.forEach((to,j)=>{
+            const k = from+'>'+to;
+            const v = MATRIX_DATA[k]||0;
+            let cls = '';
+            if(v>=10) cls='cell-hot';
+            else if(v>=5) cls='cell-warm';
+            else if(v>=2) cls='cell-mild';
+            else if(v>=1) cls='cell-cool';
+            row += '<td class="'+cls+'">'+(v||'')+'</td>';
+        });
+        row += '</tr>';
+        body.innerHTML += row;
+    });
+})();
+
+// ============================================================
+// ROUND NARRATIVES
+// ============================================================
+(function(){
+    const container = document.getElementById('roundNarratives');
+    for(let r=1;r<=8;r++){
+        const n = NARRATIVES[r];
+        const gdpLeaders = ['Columbia '+GDP.columbia[r-1],'Cathay '+GDP.cathay[r-1],'Bharata '+GDP.bharata[r-1]];
+        const dealsCount = DEAL_CATS.arms[r-1]+DEAL_CATS.coins[r-1]+DEAL_CATS.trade[r-1]+DEAL_CATS.intel[r-1]+DEAL_CATS.other[r-1];
+        const combatCounts = [4,8,10,10,9,10,11,10];
+        const stabWatch = [];
+        Object.entries(STABILITY).forEach(([k,v])=>{if(v[r-1]<3) stabWatch.push(k.charAt(0).toUpperCase()+k.slice(1)+' '+v[r-1].toFixed(1));});
+
+        let html = '<div class="round-card">';
+        html += '<div class="date-label">Round '+r+'</div>';
+        html += '<h3 class="collapsible" onclick="toggleCollapse(this)">'+ROUND_LABELS[r-1]+' &mdash; Round '+r+'</h3>';
+        html += '<div class="collapse-content">';
+        html += '<div class="round-stats">';
+        html += '<span class="round-stat">GDP Leaders: '+gdpLeaders.join(', ')+'</span>';
+        html += '<span class="round-stat">Stability Watch: '+(stabWatch.length?stabWatch.join(', '):'All above 3.0')+'</span>';
+        html += '<span class="round-stat">Combat Actions: '+combatCounts[r-1]+'</span>';
+        html += '<span class="round-stat">Deals: '+dealsCount+'</span>';
+        html += '</div>';
+        html += '<ul class="events-list">';
+        n.events.forEach(e=>{html+='<li>'+e+'</li>';});
+        html += '</ul>';
+        html += '<div class="narrative-text">'+n.text+'</div>';
+        html += '</div></div>';
+        container.innerHTML += html;
+    }
+})();
+
+// ============================================================
+// COLLAPSIBLE
+// ============================================================
+function toggleCollapse(el){
+    el.classList.toggle('open');
+    const content = el.nextElementSibling;
+    content.classList.toggle('show');
+}
+</script>
+</body>
+</html>
