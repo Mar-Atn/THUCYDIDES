@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
+  <title>Mashriq Theater v2 -- Persian Gulf Conflict</title>
+  <desc>12-hex theater map. Pointy-top hexagons, s=25. Gulf blockade theater.</desc>
+
+  <defs>
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.2" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <style>
+    .hex { stroke: #555; stroke-width: 1.2; filter: url(#shadow); }
+    .hex-persia { fill: #C8A57A; }
+    .hex-mountain { fill: #C8A57A; stroke: #8B6914; stroke-width: 1.8; }
+    .hex-levantia { fill: #D4A5B5; }
+    .hex-solaria { fill: #C8B896; }
+    .hex-mirage { fill: #D4BFA5; }
+    .hex-neutral { fill: #E0DDD5; }
+    .hex-proxy { fill: #B89898; }
+    .hex-sea { fill: #B5CCE0; stroke: #7FAAC4; stroke-width: 1; }
+    .hex-choke { fill: #B5CCE0; stroke: #D4880F; stroke-width: 3; }
+    .lbl { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 8px; fill: #222; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .lbl-name { font-size: 9px; font-weight: bold; }
+    .lbl-id { font-size: 6.5px; fill: #666; }
+    .title-text { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .subtitle-text { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 10px; fill: #555; text-anchor: middle; }
+    .legend-title { font-family: 'Inter',Arial,sans-serif; font-size: 9px; fill: #111; font-weight: bold; }
+    .legend-text { font-family: 'Inter',Arial,sans-serif; font-size: 7.5px; fill: #333; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="500" fill="#F5F8FC"/>
+
+  <!-- Title Banner -->
+  <rect x="0" y="0" width="700" height="52" fill="#1A237E" fill-opacity="0.06"/>
+  <text x="350" y="24" class="title-text">MASHRIQ THEATER</text>
+  <text x="350" y="40" class="subtitle-text">Persian Gulf Conflict | 12 Hexes | Gulf Gate Blockade</text>
+
+  <!--
+    HEX MATH: pointy-top, s=25
+    col_spacing = 43.301, row_spacing = 37.5
+    odd-row offset = 21.651
+
+    Origin: ox=100, oy=80
+    cx = ox + col * 43.301 + (row%2) * 21.651
+    cy = oy + row * 37.5
+  -->
+
+  <!-- ============================================================ -->
+  <!-- ROW 1: ma_levantia(1,1), ma_interior(1,2) -->
+  <!-- ============================================================ -->
+
+  <!-- ma_levantia (1,1) cx=100+43.301+21.651=164.952, cy=80+37.5=117.5 -->
+  <polygon class="hex hex-levantia" points="164.95,92.50 186.60,105.00 186.60,130.00 164.95,142.50 143.30,130.00 143.30,105.00"/>
+  <text x="164.95" y="114.5" class="lbl lbl-name">Levantia</text>
+  <text x="164.95" y="124.5" class="lbl lbl-id">ma_levantia</text>
+
+  <!-- ma_interior (1,2) cx=100+2*43.301+21.651=208.253, cy=117.5 -->
+  <polygon class="hex hex-persia" points="208.25,92.50 229.90,105.00 229.90,130.00 208.25,142.50 186.60,130.00 186.60,105.00"/>
+  <text x="208.25" y="111.5" class="lbl lbl-name">The Interior</text>
+  <text x="208.25" y="121.5" class="lbl lbl-id">ma_interior</text>
+  <text x="208.25" y="132.5" class="lbl" style="font-size:6px; fill:#8B4513;">NUCLEAR</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 2: ma_corridor(2,1), ma_frontier(2,2), ma_highlands(2,3) -->
+  <!-- ============================================================ -->
+
+  <!-- ma_corridor (2,1) cx=100+43.301=143.301, cy=80+75=155 -->
+  <polygon class="hex hex-neutral" points="143.30,130.00 164.95,142.50 164.95,167.50 143.30,180.00 121.65,167.50 121.65,142.50"/>
+  <text x="143.30" y="152.0" class="lbl lbl-name">The Corridor</text>
+  <text x="143.30" y="162.0" class="lbl lbl-id">ma_corridor</text>
+
+  <!-- ma_frontier (2,2) cx=100+2*43.301=186.602, cy=155 -->
+  <polygon class="hex hex-neutral" points="186.60,130.00 208.25,142.50 208.25,167.50 186.60,180.00 164.95,167.50 164.95,142.50"/>
+  <text x="186.60" y="152.0" class="lbl lbl-name">The Frontier</text>
+  <text x="186.60" y="162.0" class="lbl lbl-id">ma_frontier</text>
+
+  <!-- ma_highlands (2,3) cx=100+3*43.301=229.903, cy=155 -->
+  <polygon class="hex hex-mountain" points="229.90,130.00 251.55,142.50 251.55,167.50 229.90,180.00 208.25,167.50 208.25,142.50"/>
+  <text x="229.90" y="149.0" class="lbl lbl-name">Highlands</text>
+  <text x="229.90" y="159.0" class="lbl lbl-id">ma_highlands</text>
+  <text x="229.90" y="170.0" class="lbl" style="font-size:6px; fill:#8B6914;">MTN -1 ATK</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 3: ma_coast(3,3), ma_gulf_gate(3,4) -->
+  <!-- ============================================================ -->
+
+  <!-- ma_coast (3,3) cx=100+3*43.301+21.651=251.554, cy=80+112.5=192.5 -->
+  <polygon class="hex hex-persia" points="251.55,167.50 273.20,180.00 273.20,205.00 251.55,217.50 229.90,205.00 229.90,180.00"/>
+  <text x="251.55" y="189.5" class="lbl lbl-name">The Coast</text>
+  <text x="251.55" y="199.5" class="lbl lbl-id">ma_coast</text>
+  <text x="251.55" y="210.0" class="lbl" style="font-size:6px; fill:#C62828;">ANTI-SHIP</text>
+
+  <!-- ma_gulf_gate (3,4) cx=100+4*43.301+21.651=294.855, cy=192.5 -->
+  <polygon class="hex hex-choke" points="294.86,167.50 316.51,180.00 316.51,205.00 294.86,217.50 273.21,205.00 273.21,180.00"/>
+  <text x="294.86" y="189.5" class="lbl lbl-name" style="fill:#8B5E00;">Gulf Gate</text>
+  <text x="294.86" y="199.5" class="lbl lbl-id" style="fill:#8B5E00;">ma_gulf_gate</text>
+  <text x="294.86" y="210.0" class="lbl" style="font-size:6px; fill:#D4880F;">CHOKEPOINT</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 4: ma_southern(4,2), ma_solaria(4,3), ma_gulf(4,4), ma_mirage(4,5) -->
+  <!-- ============================================================ -->
+
+  <!-- ma_southern (4,2) cx=100+2*43.301=186.602, cy=80+150=230 -->
+  <polygon class="hex hex-sea" points="186.60,205.00 208.25,217.50 208.25,242.50 186.60,255.00 164.95,242.50 164.95,217.50"/>
+  <text x="186.60" y="227.0" class="lbl lbl-name" style="fill:#4A708B;">S. Waters</text>
+  <text x="186.60" y="237.0" class="lbl lbl-id" style="fill:#4A708B;">ma_southern</text>
+
+  <!-- ma_solaria (4,3) cx=100+3*43.301=229.903, cy=230 -->
+  <polygon class="hex hex-solaria" points="229.90,205.00 251.55,217.50 251.55,242.50 229.90,255.00 208.25,242.50 208.25,217.50"/>
+  <text x="229.90" y="227.0" class="lbl lbl-name">Solaria</text>
+  <text x="229.90" y="237.0" class="lbl lbl-id">ma_solaria</text>
+
+  <!-- ma_gulf (4,4) cx=100+4*43.301=273.204, cy=230 -->
+  <polygon class="hex hex-sea" points="273.20,205.00 294.85,217.50 294.85,242.50 273.20,255.00 251.55,242.50 251.55,217.50"/>
+  <text x="273.20" y="227.0" class="lbl lbl-name" style="fill:#4A708B;">Gulf Waters</text>
+  <text x="273.20" y="237.0" class="lbl lbl-id" style="fill:#4A708B;">ma_gulf</text>
+
+  <!-- ma_mirage (4,5) cx=100+5*43.301=316.505, cy=230 -->
+  <polygon class="hex hex-mirage" points="316.51,205.00 338.16,217.50 338.16,242.50 316.51,255.00 294.86,242.50 294.86,217.50"/>
+  <text x="316.51" y="227.0" class="lbl lbl-name">Mirage</text>
+  <text x="316.51" y="237.0" class="lbl lbl-id">ma_mirage</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 5: ma_yemen(5,2) -->
+  <!-- ============================================================ -->
+
+  <!-- ma_yemen (5,2) cx=100+2*43.301+21.651=208.253, cy=80+187.5=267.5 -->
+  <polygon class="hex hex-proxy" points="208.25,242.50 229.90,255.00 229.90,280.00 208.25,292.50 186.60,280.00 186.60,255.00"/>
+  <text x="208.25" y="264.5" class="lbl lbl-name">Southern Gate</text>
+  <text x="208.25" y="274.5" class="lbl lbl-id">ma_yemen</text>
+  <text x="208.25" y="285.0" class="lbl" style="font-size:6px; fill:#8B5E5E;">PROXY</text>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND -->
+  <!-- ============================================================ -->
+  <rect x="420" y="75" width="260" height="280" rx="6" fill="white" fill-opacity="0.90" stroke="#aaa" stroke-width="0.5"/>
+  <text x="435" y="95" class="legend-title" style="font-size:11px;">LEGEND</text>
+
+  <rect x="435" y="108" width="16" height="11" rx="1" fill="#C8A57A" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="117" class="legend-text">Persia</text>
+
+  <rect x="435" y="125" width="16" height="11" rx="1" fill="#C8A57A" stroke="#8B6914" stroke-width="1.5"/>
+  <text x="457" y="134" class="legend-text">Mountain terrain (-1 attacker)</text>
+
+  <rect x="435" y="142" width="16" height="11" rx="1" fill="#D4A5B5" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="151" class="legend-text">Levantia (independent strikes)</text>
+
+  <rect x="435" y="159" width="16" height="11" rx="1" fill="#C8B896" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="168" class="legend-text">Solaria (Gulf state)</text>
+
+  <rect x="435" y="176" width="16" height="11" rx="1" fill="#D4BFA5" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="185" class="legend-text">Mirage (Gulf state)</text>
+
+  <rect x="435" y="193" width="16" height="11" rx="1" fill="#E0DDD5" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="202" class="legend-text">Neutral / invasion corridor</text>
+
+  <rect x="435" y="210" width="16" height="11" rx="1" fill="#B89898" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="219" class="legend-text">Proxy-controlled</text>
+
+  <rect x="435" y="227" width="16" height="11" rx="1" fill="#B5CCE0" stroke="#7FAAC4" stroke-width="0.5"/>
+  <text x="457" y="236" class="legend-text">Sea hex</text>
+
+  <rect x="435" y="244" width="16" height="11" rx="1" fill="#B5CCE0" stroke="#D4880F" stroke-width="2"/>
+  <text x="457" y="253" class="legend-text">Chokepoint (Gulf Gate)</text>
+
+  <text x="435" y="275" class="legend-title" style="font-size:8px;">BLOCKADE RULE</text>
+  <text x="435" y="287" class="legend-text">Gulf Gate blocked while Persia</text>
+  <text x="435" y="297" class="legend-text">holds ground units on The Coast.</text>
+  <text x="435" y="307" class="legend-text">Air alone cannot break it.</text>
+
+  <text x="435" y="325" class="legend-title" style="font-size:8px;">GLOBAL HEX SOURCES</text>
+  <text x="435" y="337" class="legend-text">persia_2, persia_3, cp_gulf_gate</text>
+  <text x="435" y="347" class="legend-text">solaria_2, mirage, phrygia_2, levantia</text>
+
+  <!-- Compass -->
+  <text x="640" y="400" font-family="Inter,Arial,sans-serif" font-size="10" fill="#888" text-anchor="middle" font-weight="bold">N</text>
+  <line x1="640" y1="405" x2="640" y2="425" stroke="#888" stroke-width="1"/>
+  <polygon points="640,402 636,410 644,410" fill="#888"/>
+
+  <!-- Map credit -->
+  <text x="350" y="490" font-family="Inter,Arial,sans-serif" font-size="8" fill="#999" text-anchor="middle">THE THUCYDIDES TRAP | Mashriq Theater v2 | s=25 pointy-top hex grid</text>
+
+</svg>

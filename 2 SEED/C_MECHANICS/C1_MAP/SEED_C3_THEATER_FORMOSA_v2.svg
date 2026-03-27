@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
+  <title>Formosa Strait Theater v2 -- Cathay-Formosa Conflict</title>
+  <desc>9-hex theater map. Pointy-top hexagons, s=25. Strait crossing theater.</desc>
+
+  <defs>
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.2" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <style>
+    .hex { stroke: #555; stroke-width: 1.2; filter: url(#shadow); }
+    .hex-cathay { fill: #E8D5A3; }
+    .hex-formosa { fill: #8AC8B5; }
+    .hex-sea { fill: #B5CCE0; stroke: #7FAAC4; stroke-width: 1; }
+    .hex-choke { fill: #B5CCE0; stroke: #D4880F; stroke-width: 3; }
+    .lbl { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 8px; fill: #222; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+    .lbl-name { font-size: 9px; font-weight: bold; }
+    .lbl-id { font-size: 6.5px; fill: #666; }
+    .title-text { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .subtitle-text { font-family: 'Inter','Segoe UI',Arial,sans-serif; font-size: 10px; fill: #555; text-anchor: middle; }
+    .legend-title { font-family: 'Inter',Arial,sans-serif; font-size: 9px; fill: #111; font-weight: bold; }
+    .legend-text { font-family: 'Inter',Arial,sans-serif; font-size: 7.5px; fill: #333; }
+  </style>
+
+  <!-- Background -->
+  <rect width="700" height="500" fill="#F5F8FC"/>
+
+  <!-- Title Banner -->
+  <rect x="0" y="0" width="700" height="52" fill="#1A237E" fill-opacity="0.06"/>
+  <text x="350" y="24" class="title-text">FORMOSA STRAIT THEATER</text>
+  <text x="350" y="40" class="subtitle-text">Cathay-Formosa Conflict | 9 Hexes | Amphibious Assault / Blockade</text>
+
+  <!--
+    HEX MATH: pointy-top, s=25
+    col_spacing = 43.301, row_spacing = 37.5
+    odd-row offset = 21.651
+
+    Origin: ox=130, oy=80
+    cx = ox + col * 43.301 + (row%2) * 21.651
+    cy = oy + row * 37.5
+  -->
+
+  <!-- ============================================================ -->
+  <!-- ROW 1: fs_staging_1(1,1), fs_strait_1(1,2), fs_formosa_n(1,3), fs_east_sea(1,4) -->
+  <!-- ============================================================ -->
+
+  <!-- fs_staging_1 (1,1) cx=130+43.301+21.651=194.952, cy=80+37.5=117.5 -->
+  <polygon class="hex hex-cathay" points="194.95,92.50 216.60,105.00 216.60,130.00 194.95,142.50 173.30,130.00 173.30,105.00"/>
+  <text x="194.95" y="114.5" class="lbl lbl-name">N. Staging</text>
+  <text x="194.95" y="124.5" class="lbl lbl-id">fs_staging_1</text>
+
+  <!-- fs_strait_1 (1,2) cx=130+2*43.301+21.651=238.253, cy=117.5 -->
+  <polygon class="hex hex-sea" points="238.25,92.50 259.90,105.00 259.90,130.00 238.25,142.50 216.60,130.00 216.60,105.00"/>
+  <text x="238.25" y="114.5" class="lbl lbl-name" style="fill:#4A708B;">N. Strait</text>
+  <text x="238.25" y="124.5" class="lbl lbl-id" style="fill:#4A708B;">fs_strait_1</text>
+
+  <!-- fs_formosa_n (1,3) cx=130+3*43.301+21.651=281.554, cy=117.5 -->
+  <polygon class="hex hex-formosa" points="281.55,92.50 303.20,105.00 303.20,130.00 281.55,142.50 259.90,130.00 259.90,105.00"/>
+  <text x="281.55" y="111.5" class="lbl lbl-name">Formosa N</text>
+  <text x="281.55" y="121.5" class="lbl lbl-id">fs_formosa_n</text>
+  <text x="281.55" y="132.5" class="lbl" style="font-size:6px; fill:#2E7D32;">FABS</text>
+
+  <!-- fs_east_sea (1,4) cx=130+4*43.301+21.651=324.855, cy=117.5 -->
+  <polygon class="hex hex-sea" points="324.86,92.50 346.51,105.00 346.51,130.00 324.86,142.50 303.21,130.00 303.21,105.00"/>
+  <text x="324.86" y="111.5" class="lbl lbl-name" style="fill:#4A708B;">Eastern</text>
+  <text x="324.86" y="121.5" class="lbl lbl-name" style="fill:#4A708B;">Waters</text>
+  <text x="324.86" y="132.5" class="lbl lbl-id" style="fill:#4A708B;">fs_east_sea</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 2: fs_staging_2(2,1), fs_strait_2(2,2), fs_formosa_s(2,3) -->
+  <!-- ============================================================ -->
+
+  <!-- fs_staging_2 (2,1) cx=130+43.301=173.301, cy=80+75=155 -->
+  <polygon class="hex hex-cathay" points="173.30,130.00 194.95,142.50 194.95,167.50 173.30,180.00 151.65,167.50 151.65,142.50"/>
+  <text x="173.30" y="152.0" class="lbl lbl-name">S. Staging</text>
+  <text x="173.30" y="162.0" class="lbl lbl-id">fs_staging_2</text>
+
+  <!-- fs_strait_2 (2,2) cx=130+2*43.301=216.602, cy=155 — CHOKEPOINT -->
+  <polygon class="hex hex-choke" points="216.60,130.00 238.25,142.50 238.25,167.50 216.60,180.00 194.95,167.50 194.95,142.50"/>
+  <text x="216.60" y="149.0" class="lbl lbl-name" style="fill:#8B5E00;">S. Strait</text>
+  <text x="216.60" y="159.0" class="lbl lbl-id" style="fill:#8B5E00;">fs_strait_2</text>
+  <text x="216.60" y="170.0" class="lbl" style="font-size:6px; fill:#D4880F;">CHOKEPOINT</text>
+
+  <!-- fs_formosa_s (2,3) cx=130+3*43.301=259.903, cy=155 -->
+  <polygon class="hex hex-formosa" points="259.90,130.00 281.55,142.50 281.55,167.50 259.90,180.00 238.25,167.50 238.25,142.50"/>
+  <text x="259.90" y="152.0" class="lbl lbl-name">Formosa S</text>
+  <text x="259.90" y="162.0" class="lbl lbl-id">fs_formosa_s</text>
+
+  <!-- ============================================================ -->
+  <!-- ROW 3: fs_south_sea(3,2), fs_channel(3,3) -->
+  <!-- ============================================================ -->
+
+  <!-- fs_south_sea (3,2) cx=130+2*43.301+21.651=238.253, cy=80+112.5=192.5 -->
+  <polygon class="hex hex-sea" points="238.25,167.50 259.90,180.00 259.90,205.00 238.25,217.50 216.60,205.00 216.60,180.00"/>
+  <text x="238.25" y="189.5" class="lbl lbl-name" style="fill:#4A708B;">Southern Sea</text>
+  <text x="238.25" y="199.5" class="lbl lbl-id" style="fill:#4A708B;">fs_south_sea</text>
+
+  <!-- fs_channel (3,3) cx=130+3*43.301+21.651=281.554, cy=192.5 -->
+  <polygon class="hex hex-sea" points="281.55,167.50 303.20,180.00 303.20,205.00 281.55,217.50 259.90,205.00 259.90,180.00"/>
+  <text x="281.55" y="189.5" class="lbl lbl-name" style="fill:#4A708B;">The Channel</text>
+  <text x="281.55" y="199.5" class="lbl lbl-id" style="fill:#4A708B;">fs_channel</text>
+
+  <!-- ============================================================ -->
+  <!-- STRAIT CROSSING ARROWS (illustrative) -->
+  <!-- ============================================================ -->
+  <defs>
+    <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+      <polygon points="0 0, 6 2, 0 4" fill="#C62828" fill-opacity="0.4"/>
+    </marker>
+  </defs>
+  <!-- Cathay -> Formosa crossing indicators -->
+  <line x1="210" y1="117.5" x2="222" y2="117.5" stroke="#C62828" stroke-width="1" stroke-opacity="0.3" marker-end="url(#arrowhead)"/>
+  <line x1="188" y1="155" x2="200" y2="155" stroke="#C62828" stroke-width="1" stroke-opacity="0.3" marker-end="url(#arrowhead)"/>
+  <text x="202" y="112" font-family="Inter,Arial,sans-serif" font-size="6" fill="#C62828" fill-opacity="0.5">4:1</text>
+
+  <!-- ============================================================ -->
+  <!-- INTERVENTION ROUTE LABEL -->
+  <!-- ============================================================ -->
+  <text x="350" y="120" font-family="Inter,Arial,sans-serif" font-size="7" fill="#1565C0" fill-opacity="0.6" text-anchor="start">Columbia/Yamato</text>
+  <text x="350" y="130" font-family="Inter,Arial,sans-serif" font-size="7" fill="#1565C0" fill-opacity="0.6" text-anchor="start">entry point ---></text>
+
+  <!-- ============================================================ -->
+  <!-- LEGEND -->
+  <!-- ============================================================ -->
+  <rect x="420" y="75" width="260" height="305" rx="6" fill="white" fill-opacity="0.90" stroke="#aaa" stroke-width="0.5"/>
+  <text x="435" y="95" class="legend-title" style="font-size:11px;">LEGEND</text>
+
+  <rect x="435" y="108" width="16" height="11" rx="1" fill="#E8D5A3" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="117" class="legend-text">Cathay (staging areas)</text>
+
+  <rect x="435" y="125" width="16" height="11" rx="1" fill="#8AC8B5" stroke="#666" stroke-width="0.5"/>
+  <text x="457" y="134" class="legend-text">Formosa (defender)</text>
+
+  <rect x="435" y="142" width="16" height="11" rx="1" fill="#B5CCE0" stroke="#7FAAC4" stroke-width="0.5"/>
+  <text x="457" y="151" class="legend-text">Sea hex</text>
+
+  <rect x="435" y="159" width="16" height="11" rx="1" fill="#B5CCE0" stroke="#D4880F" stroke-width="2"/>
+  <text x="457" y="168" class="legend-text">Chokepoint (Formosa Strait)</text>
+
+  <text x="435" y="192" class="legend-title" style="font-size:8px;">BLOCKADE RULE</text>
+  <text x="435" y="204" class="legend-text">Complete blockade requires Cathay</text>
+  <text x="435" y="214" class="legend-text">fleet in ALL 4 water hexes adjacent</text>
+  <text x="435" y="224" class="legend-text">to Formosa: fs_strait_1, fs_strait_2,</text>
+  <text x="435" y="234" class="legend-text">fs_east_sea, fs_channel.</text>
+  <text x="435" y="244" class="legend-text">Missing one = leaky (50% supply).</text>
+
+  <text x="435" y="264" class="legend-title" style="font-size:8px;">AMPHIBIOUS ASSAULT</text>
+  <text x="435" y="276" class="legend-text">Crossing strait requires 4:1 ratio.</text>
+  <text x="435" y="286" class="legend-text">Must control a strait hex first.</text>
+
+  <text x="435" y="306" class="legend-title" style="font-size:8px;">SEMICONDUCTOR FABS</text>
+  <text x="435" y="318" class="legend-text">Combat on Formosa N risks destroying</text>
+  <text x="435" y="328" class="legend-text">global chip supply (-2 all economies).</text>
+
+  <text x="435" y="348" class="legend-title" style="font-size:8px;">GLOBAL HEX SOURCES</text>
+  <text x="435" y="360" class="legend-text">cathay_6 (5,15), cathay_7 (6,15)</text>
+  <text x="435" y="370" class="legend-text">cp_formosa_strait (6,16), formosa (7,16)</text>
+
+  <!-- Compass -->
+  <text x="640" y="400" font-family="Inter,Arial,sans-serif" font-size="10" fill="#888" text-anchor="middle" font-weight="bold">N</text>
+  <line x1="640" y1="405" x2="640" y2="425" stroke="#888" stroke-width="1"/>
+  <polygon points="640,402 636,410 644,410" fill="#888"/>
+
+  <!-- Map credit -->
+  <text x="350" y="490" font-family="Inter,Arial,sans-serif" font-size="8" fill="#999" text-anchor="middle">THE THUCYDIDES TRAP | Formosa Strait Theater v2 | s=25 pointy-top hex grid</text>
+
+</svg>
