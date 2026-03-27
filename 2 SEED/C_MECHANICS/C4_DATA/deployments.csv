@@ -43,25 +43,15 @@ cathay,air_defense,1,cathay_2,Western defense
 nordostan,ground,2,nord_c1,Moscow/central strategic reserve
 nordostan,ground,2,nord_e2,Far East/Cathay border defense
 nordostan,ground,1,nord_w2,Caucasus/southern flank
-nordostan,ground,10,heartland_2,Eastern Heartland theater - front line offensive
-nordostan,ground,3,heartland_1,Heartland occupation/rear security
 nordostan,tactical_air,2,nord_c1,Strategic aviation homeland defense
-nordostan,tactical_air,4,heartland_2,Front-line aviation glide bombs drones
 nordostan,tactical_air,1,nord_w2,Southern air defense/strike
 nordostan,tactical_air,1,nord_e2,Far East air defense
 nordostan,strategic_missile,7,nord_c1,ICBM silos mobile launchers strategic bombers
 nordostan,strategic_missile,2,nord_e2,Mobile launchers Pacific SSBN patrols
 nordostan,strategic_missile,3,nord_n1,SSBNs Northern Fleet bastion
 nordostan,air_defense,1,nord_c1,Moscow strategic defense
-nordostan,air_defense,1,heartland_2,Theater air defense
 nordostan,air_defense,1,nord_w2,Southern/Caucasus defense
-heartland,ground,1,heartland_1,Strategic reserve/Kyiv defense
-heartland,ground,2,heartland_1,Central staging logistics training
-heartland,ground,7,heartland_2,Front-line combat 1000km front
-heartland,tactical_air,1,heartland_1,Air defense/strike reserve
-heartland,tactical_air,2,heartland_2,Front-line air support drone operations HIMARS
-heartland,air_defense,1,heartland_1,Patriot/NASAMS protecting Kyiv and central infrastructure
-persia,ground,3,persia_2,IRGC ground forces + Gulf Gate coastal defense batteries
+persia,ground,2,persia_2,IRGC ground forces + Gulf Gate coastal defense batteries
 persia,ground,2,persia_1,Nuclear facility defense
 persia,ground,2,persia_3,Strategic depth ballistic missile guards
 persia,ground,1,phrygia_2,Iraq corridor - militia support/border security
@@ -116,7 +106,6 @@ solaria,ground,3,solaria_2,Homeland oil infrastructure defense
 solaria,tactical_air,3,solaria_2,F-15s Typhoons air defense of oil facilities
 solaria,air_defense,2,solaria_2,Patriot batteries - tested vs Persian missiles
 choson,ground,6,choson,Homeland DMZ fortifications
-choson,ground,2,heartland_2,Deployed to Nordostan/Heartland theater
 choson,tactical_air,2,choson,Ballistic missile force Hwasong series
 choson,strategic_missile,1,choson,Nuclear-tipped ICBMs
 choson,air_defense,1,choson,Antiquated layered defense
@@ -129,18 +118,30 @@ caribe,tactical_air,1,caribe,Antiquated Soviet-era aircraft
 mirage,ground,2,mirage,Homeland professional force
 mirage,tactical_air,2,mirage,F-16s Mirage 2000s drones
 mirage,air_defense,2,mirage,THAAD Patriot IRIS-T
-columbia,naval,3,col_main_2,Atlantic home port
-columbia,naval,2,col_main_3,Pacific home port
-columbia,naval,2,"w(12,8)",Gulf - Persia war
-columbia,naval,1,"w(9,6)",Mediterranean
-columbia,naval,1,"w(17,4)",East Cathay Sea - Formosa deterrence
-columbia,naval,1,"w(13,9)",Indian Ocean
-cathay,naval,3,"w(16,7)",South Cathay Sea Fleet
-cathay,naval,2,"w(17,4)",East Cathay Sea Fleet
-cathay,naval,1,cathay_7,Home port
 albion,naval,2,"w(7,3)",Atlantic/home waters
 nordostan,naval,2,nord_w2,Northern Fleet (Arctic/submarine)
 gallia,naval,1,"w(9,6)",Mediterranean/carrier group
 bharata,naval,2,"w(13,9)",Indian Ocean fleet
 yamato,naval,2,"w(19,4)",Pacific home waters
 phrygia,naval,1,phrygia_1,Bosphorus/Med
+nordostan,ground,8,heartland_2,Front line offensive forces (theater rows 4-6)
+nordostan,ground,5,heartland_1,Occupation/rear security forces (theater rows 3-4)
+nordostan,tactical_air,4,heartland_2,"Front-line aviation, glide bombs, drones"
+nordostan,air_defense,1,heartland_2,Theater air defense covering front
+choson,ground,2,heartland_2,Deployed to support Nordostan offensive
+heartland,ground,7,heartland_2,"Front line defense (theater rows 5-7, Die Hard zone)"
+heartland,ground,3,heartland_1,"Strategic reserve, capital defense, western logistics"
+heartland,tactical_air,2,heartland_2,"Front-line air support, drones, HIMARS"
+heartland,tactical_air,1,heartland_1,Air defense/strike reserve
+heartland,air_defense,1,heartland_1,Patriot/NASAMS protecting capital and infrastructure
+columbia,naval,3,"w(12,8)",Gulf — 2 CSGs for Operation Epic Fury
+columbia,naval,2,"w(9,6)",Mediterranean — Persia war support + Suez
+columbia,naval,2,"w(17,4)",East Cathay Sea — Formosa deterrence patrol
+columbia,naval,1,col_main_2,Atlantic home port
+columbia,naval,1,col_main_3,Pacific home port
+columbia,naval,1,"w(13,9)",Indian Ocean presence
+cathay,naval,2,"w(16,7)",South Cathay Sea — Formosa southern approach
+cathay,naval,2,"w(17,4)",East Cathay Sea — Formosa northern approach
+cathay,naval,1,"w(18,6)",Near Formosa — eastern patrol
+cathay,naval,1,cathay_7,Home port — Hainan
+persia,ground,1,cp_gulf_gate,Ground forces maintaining Gulf Gate blockade — coastal missile batteries
