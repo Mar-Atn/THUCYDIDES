@@ -973,7 +973,23 @@ canvas.addEventListener('mousedown', (e) => {
     }
     draw();
   } else if (editorMode === 'markers') {
-    // handled by click
+    // Place chokepoint or die hard on click
+    if (hex && placingChokepoint) {
+      chokepoints[placingChokepoint] = { row: hex.row, col: hex.col };
+      placingChokepoint = null;
+      setMode('markers');
+      buildChokepointPanel();
+      draw();
+      return;
+    }
+    if (hex && placingDieHard) {
+      dieHards[placingDieHard] = { row: hex.row, col: hex.col };
+      placingDieHard = null;
+      setMode('markers');
+      buildDieHardPanel();
+      draw();
+      return;
+    }
   }
 });
 
