@@ -6,9 +6,11 @@
 
 ## Section 1: Global Map — Hex Registry
 
-**Grid**: 22 columns x 14 rows, pointy-top hexagons, side length s=35
-**Canvas**: 1600 x 900 px
+**Grid**: 23 columns x 15 rows, pointy-top hexagons, side length s=35
+**Canvas**: 1700 x 950 px
 **Total hexes**: 308 (54 land, 3 chokepoint, 251 ocean)
+
+> Grid coordinates displayed on map: column (horizontal) first, row (vertical) second. Format: (col, row).
 
 ### Hex Math (Pointy-Top, Odd-Row Offset)
 
@@ -23,6 +25,10 @@ Odd-row offset:     dx/2 = 30.3109
 Center formula:
   cx = 55 + col * 60.6218 + (row % 2) * 30.3109
   cy = 30 + row * 52.5
+
+Grid origin: Row 1, Column 1 (shifted +1 from zero-based indexing).
+The first row and column of hexes on the map are water hexes
+added for framing. All land hexes start at row 2+ and column 1+.
 ```
 
 ### Adjacency Rules
@@ -45,68 +51,68 @@ For odd rows (r % 2 == 1), neighbors at:
 
 | hex_id | display_name | owner | row | col |
 |--------|-------------|-------|-----|-----|
-| col_nw | Columbia NW | columbia | 4 | 1 |
-| col_w | Columbia W | columbia | 5 | 0 |
-| col_main_1 | Columbia | columbia | 5 | 1 |
-| col_main_2 | Columbia E | columbia | 5 | 2 |
-| col_main_3 | Columbia SW | columbia | 6 | 1 |
-| col_main_4 | Columbia SE | columbia | 6 | 2 |
-| col_south | Columbia S | columbia | 7 | 1 |
-| caribe | Caribe | caribe | 9 | 2 |
-| thule | Thule | teutonia | 2 | 4 |
-| teutonia_1 | Teutonia N | teutonia | 3 | 7 |
-| teutonia_2 | Teutonia S | teutonia | 4 | 7 |
-| freeland | Freeland | freeland | 4 | 8 |
-| albion | Albion | albion | 4 | 5 |
-| gallia_1 | Gallia W | gallia | 5 | 6 |
-| gallia_2 | Gallia E | gallia | 5 | 7 |
-| ponte | Ponte | ponte | 6 | 6 |
-| heartland_1 | Heartland N | heartland | 3 | 8 |
-| heartland_2 | Heartland S | heartland | 4 | 9 |
-| nord_n1 | Nordostan N | nordostan | 1 | 10 |
-| nord_w1 | Nordostan W1 | nordostan | 2 | 9 |
-| nord_c1 | Nordostan C1 | nordostan | 2 | 10 |
-| nord_e1 | Nordostan E1 | nordostan | 2 | 11 |
-| nord_e2 | Nordostan E2 | nordostan | 2 | 12 |
-| nord_e3 | Nordostan E3 | nordostan | 2 | 13 |
-| nord_w2 | Nordostan W2 | nordostan | 3 | 9 |
-| nord_c2 | Nordostan C2 | nordostan | 3 | 10 |
-| phrygia_1 | Phrygia N | phrygia | 5 | 9 |
-| phrygia_2 | Phrygia S | phrygia | 6 | 9 |
-| persia_1 | Persia N | persia | 5 | 11 |
-| persia_2 | Persia W | persia | 6 | 10 |
-| persia_3 | Persia E | persia | 6 | 11 |
-| levantia | Levantia | levantia | 6 | 8 |
-| solaria_1 | Solaria W | solaria | 7 | 8 |
-| solaria_2 | Solaria E | solaria | 7 | 9 |
-| horn | Horn | horn | 8 | 8 |
-| mirage | Mirage | mirage | 8 | 10 |
-| sogdiana_1 | Sogdiana N | sogdiana | 3 | 11 |
-| sogdiana_2 | Sogdiana S | sogdiana | 4 | 12 |
-| sogdiana_3 | Sogdiana E | sogdiana | 3 | 12 |
-| bharata_1 | Bharata S | bharata | 6 | 13 |
-| bharata_2 | Bharata N | bharata | 5 | 12 |
-| bharata_3 | Bharata E | bharata | 5 | 13 |
-| cathay_1 | Cathay NW | cathay | 3 | 13 |
-| cathay_2 | Cathay W | cathay | 4 | 14 |
-| cathay_3 | Cathay C | cathay | 4 | 15 |
-| cathay_4 | Cathay NE | cathay | 4 | 16 |
-| cathay_5 | Cathay SW | cathay | 5 | 14 |
-| cathay_6 | Cathay SE | cathay | 5 | 15 |
-| cathay_7 | Cathay S | cathay | 6 | 15 |
-| choson | Choson | choson | 2 | 15 |
-| hanguk | Hanguk | hanguk | 3 | 15 |
-| formosa | Formosa | formosa | 7 | 16 |
-| yamato_1 | Yamato N | yamato | 3 | 18 |
-| yamato_2 | Yamato S | yamato | 4 | 18 |
+| col_nw | Columbia NW | columbia | 5 | 2 |
+| col_w | Columbia W | columbia | 6 | 1 |
+| col_main_1 | Columbia | columbia | 6 | 2 |
+| col_main_2 | Columbia E | columbia | 6 | 3 |
+| col_main_3 | Columbia SW | columbia | 7 | 2 |
+| col_main_4 | Columbia SE | columbia | 7 | 3 |
+| col_south | Columbia S | columbia | 8 | 2 |
+| caribe | Caribe | caribe | 10 | 3 |
+| thule | Thule | teutonia | 3 | 5 |
+| teutonia_1 | Teutonia N | teutonia | 4 | 8 |
+| teutonia_2 | Teutonia S | teutonia | 5 | 8 |
+| freeland | Freeland | freeland | 5 | 9 |
+| albion | Albion | albion | 5 | 6 |
+| gallia_1 | Gallia W | gallia | 6 | 7 |
+| gallia_2 | Gallia E | gallia | 6 | 8 |
+| ponte | Ponte | ponte | 7 | 7 |
+| heartland_1 | Heartland N | heartland | 4 | 9 |
+| heartland_2 | Heartland S | heartland | 5 | 10 |
+| nord_n1 | Nordostan N | nordostan | 2 | 11 |
+| nord_w1 | Nordostan W1 | nordostan | 3 | 10 |
+| nord_c1 | Nordostan C1 | nordostan | 3 | 11 |
+| nord_e1 | Nordostan E1 | nordostan | 3 | 12 |
+| nord_e2 | Nordostan E2 | nordostan | 3 | 13 |
+| nord_e3 | Nordostan E3 | nordostan | 3 | 14 |
+| nord_w2 | Nordostan W2 | nordostan | 4 | 10 |
+| nord_c2 | Nordostan C2 | nordostan | 4 | 11 |
+| phrygia_1 | Phrygia N | phrygia | 6 | 10 |
+| phrygia_2 | Phrygia S | phrygia | 7 | 10 |
+| persia_1 | Persia N | persia | 6 | 12 |
+| persia_2 | Persia W | persia | 7 | 11 |
+| persia_3 | Persia E | persia | 7 | 12 |
+| levantia | Levantia | levantia | 7 | 9 |
+| solaria_1 | Solaria W | solaria | 8 | 9 |
+| solaria_2 | Solaria E | solaria | 8 | 10 |
+| horn | Horn | horn | 9 | 9 |
+| mirage | Mirage | mirage | 9 | 11 |
+| sogdiana_1 | Sogdiana N | sogdiana | 4 | 12 |
+| sogdiana_2 | Sogdiana S | sogdiana | 5 | 13 |
+| sogdiana_3 | Sogdiana E | sogdiana | 4 | 13 |
+| bharata_1 | Bharata S | bharata | 7 | 14 |
+| bharata_2 | Bharata N | bharata | 6 | 13 |
+| bharata_3 | Bharata E | bharata | 6 | 14 |
+| cathay_1 | Cathay NW | cathay | 4 | 14 |
+| cathay_2 | Cathay W | cathay | 5 | 15 |
+| cathay_3 | Cathay C | cathay | 5 | 16 |
+| cathay_4 | Cathay NE | cathay | 5 | 17 |
+| cathay_5 | Cathay SW | cathay | 6 | 15 |
+| cathay_6 | Cathay SE | cathay | 6 | 16 |
+| cathay_7 | Cathay S | cathay | 7 | 16 |
+| choson | Choson | choson | 3 | 16 |
+| hanguk | Hanguk | hanguk | 4 | 16 |
+| formosa | Formosa | formosa | 8 | 17 |
+| yamato_1 | Yamato N | yamato | 4 | 19 |
+| yamato_2 | Yamato S | yamato | 5 | 19 |
 
 ### Chokepoint Hexes
 
 | hex_id | display_name | row | col |
 |--------|-------------|-----|-----|
-| cp_formosa_strait | Formosa Strait | 6 | 16 |
-| cp_gulf_gate | Gulf Gate | 7 | 10 |
-| cp_caribe_passage | Caribe Passage | 8 | 2 |
+| cp_formosa_strait | Formosa Strait | 7 | 17 |
+| cp_gulf_gate | Gulf Gate | 8 | 11 |
+| cp_caribe_passage | Caribe Passage | 9 | 3 |
 
 ### Complete Land-to-Land Adjacency List
 
@@ -214,9 +220,9 @@ yamato_2:       yamato_1
 Every hex on the global grid has an address `(row, col)`. Water hexes are addressed solely by grid coordinate — there are NO named sea zones.
 
 Examples:
-- `(0,0)` = top-left ocean hex
-- `(5,8)` = water hex between Freeland and Levantia
-- `(7,11)` = water hex east of Gulf Gate
+- `(1,1)` = top-left ocean hex
+- `(6,9)` = water hex between Freeland and Levantia
+- `(8,12)` = water hex east of Gulf Gate
 
 ### Naval Placement
 
@@ -230,21 +236,21 @@ These are the ONLY water hexes with special mechanics:
 
 | Chokepoint | Grid | Mechanic |
 |-----------|------|----------|
-| Gulf Gate | (7,10) | Blocked while Persia holds ground units on adjacent coast. See Section 5. |
-| Formosa Strait | (6,16) | Blockade requires occupying ALL water hexes adjacent to Formosa. See Section 6. |
-| Caribe Passage | (8,2) | Controls Atlantic-Pacific transit for Columbia's southern approaches. |
+| Gulf Gate | (8,11) | Blocked while Persia holds ground units on adjacent coast. See Section 5. |
+| Formosa Strait | (7,17) | Blockade requires occupying ALL water hexes adjacent to Formosa. See Section 6. |
+| Caribe Passage | (9,3) | Controls Atlantic-Pacific transit for Columbia's southern approaches. |
 
 ### Formosa Blockade Rule
 
-To blockade Formosa, a fleet must occupy **ALL** water hexes adjacent to the Formosa hex `(7,16)`. The adjacent water hexes are:
+To blockade Formosa, a fleet must occupy **ALL** water hexes adjacent to the Formosa hex `(8,17)`. The adjacent water hexes are:
 
 ```
-cp_formosa_strait  (6,16)
-sea_6_17           (6,17)
-sea_7_15           (7,15)
-sea_7_17           (7,17)
+cp_formosa_strait  (7,17)
+sea_7_18           (7,18)
 sea_8_16           (8,16)
-sea_8_17           (8,17)
+sea_8_18           (8,18)
+sea_9_17           (9,17)
+sea_9_18           (9,18)
 ```
 
 If **even one** adjacent water hex is unoccupied or occupied by a friendly/neutral navy, the blockade is incomplete. An incomplete blockade allows partial supply and reinforcement (50% capacity).
@@ -272,10 +278,10 @@ Theater maps use the **same hex geometry** as the global map (pointy-top, regula
 
 | Global Hex | Global Grid | Theater Hexes |
 |-----------|-------------|---------------|
-| heartland_1 | (3,8) | ee_front_1, ee_front_2, ee_depth_1, ee_depth_2, ee_capital, ee_west_1, ee_west_2 |
-| heartland_2 | (3,9) → (4,9) | ee_front_3, ee_front_4, ee_depth_3, ee_south_1, ee_south_2 |
-| nord_w1 | (2,9) | ee_staging_1, ee_staging_2, ee_occupied_1, ee_occupied_2, ee_corridor |
-| nord_w2 | (3,9) | ee_staging_3, ee_occupied_3, ee_occupied_4, ee_bastion_approach, ee_peninsula |
+| heartland_1 | (4,9) | ee_front_1, ee_front_2, ee_depth_1, ee_depth_2, ee_capital, ee_west_1, ee_west_2 |
+| heartland_2 | (4,10) → (5,10) | ee_front_3, ee_front_4, ee_depth_3, ee_south_1, ee_south_2 |
+| nord_w1 | (3,10) | ee_staging_1, ee_staging_2, ee_occupied_1, ee_occupied_2, ee_corridor |
+| nord_w2 | (4,10) | ee_staging_3, ee_occupied_3, ee_occupied_4, ee_bastion_approach, ee_peninsula |
 
 **Also mapped:** ee_bastion (disputed, between zones), ee_alliance (NATO border), ee_sea_1, ee_sea_2 (adjacent water)
 
@@ -283,13 +289,13 @@ Theater maps use the **same hex geometry** as the global map (pointy-top, regula
 
 | Global Hex | Global Grid | Theater Hexes |
 |-----------|-------------|---------------|
-| persia_2 | (6,10) | ma_interior, ma_highlands |
-| persia_3 | (6,11) | ma_coast |
-| cp_gulf_gate | (7,10) | ma_gulf_gate |
-| solaria_2 | (7,9) | ma_solaria |
-| mirage | (8,10) | ma_mirage |
-| phrygia_2 | (6,9) | ma_corridor, ma_frontier |
-| levantia | (6,8) | ma_levantia |
+| persia_2 | (7,11) | ma_interior, ma_highlands |
+| persia_3 | (7,12) | ma_coast |
+| cp_gulf_gate | (8,11) | ma_gulf_gate |
+| solaria_2 | (8,10) | ma_solaria |
+| mirage | (9,11) | ma_mirage |
+| phrygia_2 | (7,10) | ma_corridor, ma_frontier |
+| levantia | (7,9) | ma_levantia |
 
 **Also mapped:** ma_gulf (Gulf waters), ma_southern (southern approach), ma_yemen (proxy zone)
 
@@ -297,10 +303,10 @@ Theater maps use the **same hex geometry** as the global map (pointy-top, regula
 
 | Global Hex | Global Grid | Theater Hexes |
 |-----------|-------------|---------------|
-| cathay_6 | (5,15) | fs_staging_1 |
-| cathay_7 | (6,15) | fs_staging_2 |
-| cp_formosa_strait | (6,16) | fs_strait_1, fs_strait_2 |
-| formosa | (7,16) | fs_formosa_n, fs_formosa_s |
+| cathay_6 | (6,16) | fs_staging_1 |
+| cathay_7 | (7,16) | fs_staging_2 |
+| cp_formosa_strait | (7,17) | fs_strait_1, fs_strait_2 |
+| formosa | (8,17) | fs_formosa_n, fs_formosa_s |
 
 **Also mapped:** fs_east_sea, fs_south_sea, fs_channel (adjacent waters for intervention routes)
 
