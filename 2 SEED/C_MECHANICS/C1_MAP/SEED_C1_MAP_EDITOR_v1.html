@@ -1362,10 +1362,24 @@ document.getElementById('btn-save').addEventListener('click', () => {
     countriesObj[c.id] = { name: c.name, color: c.color };
   });
 
-  const gridData = [];
+  // Compute tight bounds — trim trailing water rows/cols
+  let saveMaxR = 0, saveMaxC = 0;
   for (let r = 0; r < ROWS; r++) {
-    gridData[r] = [];
     for (let c = 0; c < COLS; c++) {
+      if (grid[r][c].owner !== 'sea') {
+        saveMaxR = Math.max(saveMaxR, r);
+        saveMaxC = Math.max(saveMaxC, c);
+      }
+    }
+  }
+  // Add 1 row/col of water padding
+  const saveRows = Math.min(saveMaxR + 2, ROWS);
+  const saveCols = Math.min(saveMaxC + 2, COLS);
+
+  const gridData = [];
+  for (let r = 0; r < saveRows; r++) {
+    gridData[r] = [];
+    for (let c = 0; c < saveCols; c++) {
       const cell = { owner: grid[r][c].owner };
       if (grid[r][c].occupied_by) cell.occupied_by = grid[r][c].occupied_by;
       gridData[r][c] = cell;
@@ -1390,8 +1404,8 @@ document.getElementById('btn-save').addEventListener('click', () => {
 
   const state = {
     version: 2,
-    rows: ROWS,
-    cols: COLS,
+    rows: saveRows,
+    cols: saveCols,
     countries: countriesObj,
     grid: gridData,
     chokepoints: cpData,
