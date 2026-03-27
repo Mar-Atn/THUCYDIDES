@@ -70,7 +70,7 @@ For odd rows (r % 2 == 1), neighbors at:
 | heartland_1 | Heartland N | heartland | 4 | 9 |
 | heartland_2 | Heartland S | heartland | 5 | 10 |
 | nord_n1 | Nordostan N | nordostan | 2 | 11 |
-| nord_w1 | Nordostan W1 | nordostan | 3 | 10 |
+| ~~nord_w1~~ | ~~Nordostan W1~~ | ~~nordostan~~ | ~~3~~ | ~~10~~ | *REMOVED — converted to sea*
 | nord_c1 | Nordostan C1 | nordostan | 3 | 11 |
 | nord_e1 | Nordostan E1 | nordostan | 3 | 12 |
 | nord_e2 | Nordostan E2 | nordostan | 3 | 13 |
