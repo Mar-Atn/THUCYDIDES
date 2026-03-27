@@ -1,21 +1,21 @@
 id,sim_name,parallel,regime_type,team_type,team_size_min,team_size_max,ai_default,gdp,gdp_growth_base,sector_resources,sector_industry,sector_services,sector_technology,tax_rate,treasury,inflation,trade_balance,oil_producer,opec_member,opec_production,formosa_dependency,debt_burden,social_baseline,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,prod_cost_ground,prod_cost_naval,prod_cost_tactical,prod_cap_ground,prod_cap_naval,prod_cap_tactical,maintenance_per_unit,strategic_missile_growth,stability,political_support,dem_rep_split_dem,dem_rep_split_rep,war_tiredness,nuclear_level,nuclear_rd_progress,ai_level,ai_rd_progress,at_war_with,home_zones
-columbia,Columbia,United States,democracy,team,7,9,false,280,1.8,5,18,55,22,0.24,50,3.5,-12,true,false,na,0.65,5,0.30,22,14,15,12,4,3,5,4,4,2,3,0.5,0,7,38,52,48,1,3,1.0,3,0.60,persia,"col_nw,col_w,col_main_1,col_main_2,col_main_3,col_main_4,col_south"
-cathay,Cathay,China,autocracy,team,5,5,false,190,4.0,5,52,30,13,0.20,45,0.5,12,false,false,na,0.25,2,0.20,25,9,12,4,3,2,4,3,5,3,3,0.3,1,8,58,0,0,0,2,0.80,2,0.70,,"cathay_1,cathay_2,cathay_3,cathay_4,cathay_5,cathay_6,cathay_7"
-nordostan,Nordostan,Russia,autocracy,team,3,4,false,20,1.0,40,25,25,10,0.20,6,5.0,2,true,true,normal,0.15,0.5,0.25,18,6,8,12,3,1.5,4,3,4,1,2,0.3,0,5,55,0,0,4,3,1.0,1,0.30,heartland,"nord_n1,nord_w1,nord_c1,nord_e1,nord_e2,nord_e3,nord_w2,nord_c2"
+columbia,Columbia,United States,democracy,team,7,9,false,280,1.8,5,18,55,22,0.24,50,3.5,-12,true,false,na,0.65,5,0.30,22,10,15,12,4,3,5,4,4,0.17,3,0.5,0,7,38,52,48,1,3,1.0,3,0.60,persia,"col_nw,col_w,col_main_1,col_main_2,col_main_3,col_main_4,col_south"
+cathay,Cathay,China,autocracy,team,5,5,false,190,4.0,5,52,30,13,0.20,45,0.5,12,false,false,na,0.25,2,0.20,25,6,12,4,3,2,4,3,5,1,3,0.3,1,8,58,0,0,0,2,0.80,2,0.70,,"cathay_1,cathay_2,cathay_3,cathay_4,cathay_5,cathay_6,cathay_7"
+nordostan,Nordostan,Russia,autocracy,team,3,4,false,20,1.0,40,25,25,10,0.20,6,5.0,2,true,true,normal,0.15,0.5,0.25,18,2,8,12,3,1.5,4,3,4,0,2,0.3,0,5,55,0,0,4,3,1.0,1,0.30,heartland,"nord_n1,nord_w1,nord_c1,nord_e1,nord_e2,nord_e3,nord_w2,nord_c2"
 heartland,Heartland,Ukraine,democracy,team,3,3,false,2.2,2.5,15,20,40,10,0.25,1,7.5,-0.8,false,false,na,0.10,0.3,0.20,10,0,3,0,1,1.5,0,3,2,0,1,0.3,0,5,52,0,0,4,0,0.0,1,0.40,nordostan,"heartland_1,heartland_2"
-persia,Persia,Iran,hybrid,team,3,3,false,5,-3.0,35,30,28,7,0.18,1,50.0,-1,true,true,normal,0.15,0,0.20,8,2,6,0,1,1,2,2,2,1,1,0.25,0,4,40,0,0,1,0,0.60,0,0.10,columbia;levantia,"persia_1,persia_2,persia_3"
-gallia,Gallia,France,democracy,europe,1,1,false,34,1.0,5,20,55,20,0.45,8,2.5,-1,false,false,na,0.35,3,0.35,6,3,4,2,1,3,5,4,2,1,1,0.5,0,7,40,0,0,0,2,0.80,2,0.30,,"gallia_1,gallia_2"
-teutonia,Teutonia,Germany,democracy,europe,1,1,false,45,1.2,3,28,50,19,0.38,12,2.5,3,false,false,na,0.45,2,0.30,6,2,3,0,1,2.5,4,3.5,2,1,1,0.4,0,7,45,0,0,0,0,0.0,2,0.20,,"teutonia_1,teutonia_2"
-freeland,Freeland,Poland,democracy,europe,1,1,false,9,3.7,8,30,50,12,0.35,4,4.0,0,false,false,na,0.25,1,0.25,5,1,2,0,1,2,3,3,2,0,1,0.3,0,8,55,0,0,0,0,0.0,1,0.40,,"freeland"
-ponte,Ponte,Italy,democracy,europe,1,1,false,22,0.8,4,22,60,14,0.40,4,2.5,0,false,false,na,0.30,8,0.30,4,2,2,0,0,2.5,4.5,3.5,1,1,1,0.4,0,6,42,0,0,0,0,0.0,1,0.30,,"ponte"
-albion,Albion,United Kingdom,democracy,europe,1,1,false,33,1.1,5,17,60,18,0.35,8,3.0,-2,false,false,na,0.40,3,0.30,4,4,3,2,1,3,5,4,1,1,1,0.5,0,7,38,0,0,0,2,0.70,2,0.40,,"albion"
-bharata,Bharata,India,democracy,solo,1,1,true,42,6.5,10,25,48,17,0.18,12,5.0,-3,false,false,na,0.35,3,0.20,12,3,4,0,2,2,4,3,3,1,1,0.25,0,6,58,0,0,0,1,0.40,2,0.45,,"bharata_1,bharata_2,bharata_3"
-levantia,Levantia,Israel,democracy,solo,1,1,true,5,3.0,3,15,50,32,0.32,5,3.5,-1,false,false,na,0.30,2,0.28,6,1,4,0,3,3,5,4,2,0,2,0.40,0,5,52,0,0,2,1,0.50,2,0.55,persia,"levantia"
-formosa,Formosa,Taiwan,democracy,solo,1,1,true,8,3.0,2,30,35,33,0.20,8,2.0,4,false,false,na,0.0,1,0.22,4,2,3,0,2,3,5,4,1,0,1,0.35,0,7,55,0,0,0,0,0.0,2,0.50,,"formosa"
-phrygia,Phrygia,Turkey,hybrid,solo,1,1,true,11,3.0,8,30,50,12,0.25,4,45.0,-3,false,false,na,0.20,3,0.22,6,2,3,0,1,2,4,3,2,1,1,0.30,0,5,50,0,0,0,0,0.0,1,0.25,,"phrygia_1,phrygia_2"
-yamato,Yamato,Japan,democracy,solo,1,1,true,43,1.0,2,28,50,20,0.30,15,2.5,-2,false,false,na,0.55,6,0.30,3,4,3,0,2,3,5,4,1,1,1,0.45,0,8,48,0,0,0,0,0.10,3,0.30,,"yamato_1,yamato_2"
-solaria,Solaria,Saudi Arabia,autocracy,solo,1,1,true,11,3.5,45,20,28,7,0.10,20,2.0,8,true,true,normal,0.20,1,0.25,3,1,3,0,2,3,5,4,1,0,1,0.40,0,7,65,0,0,1,0,0.10,1,0.20,,"solaria_1,solaria_2"
-choson,Choson,North Korea,autocracy,solo,1,1,true,0.3,0.5,20,40,35,5,0.50,1,10.0,-0.5,false,false,na,0.0,0,0.10,8,1,2,1,1,1,3,2,2,0,1,0.15,0,4,70,0,0,0,1,0.50,0,0.0,,"choson"
-hanguk,Hanguk,South Korea,democracy,solo,1,1,true,18,2.2,3,33,42,22,0.26,8,2.5,3,false,false,na,0.40,2,0.25,5,2,3,0,2,2,4,3,2,1,1,0.35,0,6,35,0,0,0,0,0.05,2,0.50,,"hanguk"
-caribe,Caribe,Cuba + Venezuela,autocracy,solo,1,1,true,2,-1.0,50,20,25,5,0.30,1,60.0,0,true,false,na,0.0,5,0.20,3,1,1,0,0,2,4,3,1,0,0,0.20,0,3,45,0,0,0,0,0.0,0,0.0,,"caribe"
-mirage,Mirage,UAE,autocracy,solo,1,1,true,5,4.0,30,15,45,10,0.0,15,2.0,5,true,true,normal,0.15,0,0.20,2,1,2,0,2,3,5,4,1,0,1,0.35,0,8,70,0,0,1,0,0.0,1,0.30,,"mirage"
+persia,Persia,Iran,hybrid,team,3,3,false,5,-3.0,35,30,28,7,0.18,1,50.0,-1,true,true,normal,0.15,0,0.20,8,0,6,0,1,1,2,2,2,0,1,0.25,0,4,40,0,0,1,0,0.60,0,0.10,columbia;levantia,"persia_1,persia_2,persia_3"
+gallia,Gallia,France,democracy,europe,1,1,false,34,1.0,5,20,55,20,0.45,8,2.5,-1,false,false,na,0.35,3,0.35,6,1,4,2,1,3,5,4,2,0,1,0.5,0,7,40,0,0,0,2,0.80,2,0.30,,"gallia_1,gallia_2"
+teutonia,Teutonia,Germany,democracy,europe,1,1,false,45,1.2,3,28,50,19,0.38,12,2.5,3,false,false,na,0.45,2,0.30,6,0,3,0,1,2.5,4,3.5,2,0,1,0.4,0,7,45,0,0,0,0,0.0,2,0.20,,"teutonia_1,teutonia_2"
+freeland,Freeland,Poland,democracy,europe,1,1,false,9,3.7,8,30,50,12,0.35,4,4.0,0,false,false,na,0.25,1,0.25,5,0,2,0,1,2,3,3,2,0,1,0.3,0,8,55,0,0,0,0,0.0,1,0.40,,freeland
+ponte,Ponte,Italy,democracy,europe,1,1,false,22,0.8,4,22,60,14,0.40,4,2.5,0,false,false,na,0.30,8,0.30,4,0,2,0,0,2.5,4.5,3.5,1,0,1,0.4,0,6,42,0,0,0,0,0.0,1,0.30,,ponte
+albion,Albion,United Kingdom,democracy,europe,1,1,false,33,1.1,5,17,60,18,0.35,8,3.0,-2,false,false,na,0.40,3,0.30,4,2,3,2,1,3,5,4,1,0,1,0.5,0,7,38,0,0,0,2,0.70,2,0.40,,albion
+bharata,Bharata,India,democracy,solo,1,1,true,42,6.5,10,25,48,17,0.18,12,5.0,-3,false,false,na,0.35,3,0.20,12,2,4,0,2,2,4,3,3,0.5,1,0.25,0,6,58,0,0,0,1,0.40,2,0.45,,"bharata_1,bharata_2,bharata_3"
+levantia,Levantia,Israel,democracy,solo,1,1,true,5,3.0,3,15,50,32,0.32,5,3.5,-1,false,false,na,0.30,2,0.28,6,0,4,0,3,3,5,4,2,0,2,0.40,0,5,52,0,0,2,1,0.50,2,0.55,persia,levantia
+formosa,Formosa,Taiwan,democracy,solo,1,1,true,8,3.0,2,30,35,33,0.20,8,2.0,4,false,false,na,0.0,1,0.22,4,0,3,0,2,3,5,4,1,0,1,0.35,0,7,55,0,0,0,0,0.0,2,0.50,,formosa
+phrygia,Phrygia,Turkey,hybrid,solo,1,1,true,11,3.0,8,30,50,12,0.25,4,45.0,-3,false,false,na,0.20,3,0.22,6,1,3,0,1,2,4,3,2,0,1,0.30,0,5,50,0,0,0,0,0.0,1,0.25,,"phrygia_1,phrygia_2"
+yamato,Yamato,Japan,democracy,solo,1,1,true,43,1.0,2,28,50,20,0.30,15,2.5,-2,false,false,na,0.55,6,0.30,3,2,3,0,2,3,5,4,1,0,1,0.45,0,8,48,0,0,0,0,0.10,3,0.30,,"yamato_1,yamato_2"
+solaria,Solaria,Saudi Arabia,autocracy,solo,1,1,true,11,3.5,45,20,28,7,0.10,20,2.0,8,true,true,normal,0.20,1,0.25,3,0,3,0,2,3,5,4,1,0,1,0.40,0,7,65,0,0,1,0,0.10,1,0.20,,"solaria_1,solaria_2"
+choson,Choson,North Korea,autocracy,solo,1,1,true,0.3,0.5,20,40,35,5,0.50,1,10.0,-0.5,false,false,na,0.0,0,0.10,8,0,2,1,1,1,3,2,2,0,1,0.15,0,4,70,0,0,0,1,0.50,0,0.0,,choson
+hanguk,Hanguk,South Korea,democracy,solo,1,1,true,18,2.2,3,33,42,22,0.26,8,2.5,3,false,false,na,0.40,2,0.25,5,0,3,0,2,2,4,3,2,0,1,0.35,0,6,35,0,0,0,0,0.05,2,0.50,,hanguk
+caribe,Caribe,Cuba + Venezuela,autocracy,solo,1,1,true,2,-1.0,50,20,25,5,0.30,1,60.0,0,true,false,na,0.0,5,0.20,3,0,1,0,0,2,4,3,1,0,0,0.20,0,3,45,0,0,0,0,0.0,0,0.0,,caribe
+mirage,Mirage,UAE,autocracy,solo,1,1,true,5,4.0,30,15,45,10,0.0,15,2.0,5,true,true,normal,0.15,0,0.20,2,0,2,0,2,3,5,4,1,0,1,0.35,0,8,70,0,0,1,0,0.0,1,0.30,,mirage

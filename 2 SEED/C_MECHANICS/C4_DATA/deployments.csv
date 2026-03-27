@@ -11,15 +11,6 @@ columbia,ground,1,solaria_1,Gulf logistics - Persia war support
 columbia,ground,1,horn,Djibouti - Red Sea security
 columbia,ground,4,persia_2,ME theater - active war zone (Operation Epic Fury)
 columbia,ground,1,mirage,Gulf logistics hub
-columbia,naval,1,col_main_2,Atlantic Fleet home port (Norfolk)
-columbia,naval,3,"w(5,4)",Atlantic Fleet deployed
-columbia,naval,1,col_main_3,Pacific Fleet home port (San Diego)
-columbia,naval,3,"w(19,3)",Pacific Fleet deployed
-columbia,naval,3,"w(12,8)",Persian Gulf - 2 CSGs for Epic Fury
-columbia,naval,2,"w(9,6)",Eastern Mediterranean - Persia war support
-columbia,naval,1,"w(17,4)",East China Sea patrol - Formosa deterrence
-columbia,naval,1,"w(13,9)",Indian Ocean presence
-columbia,naval,1,"w(12,1)",GIUK Gap patrol
 columbia,tactical_air,5,col_main_1,Continental strike capability
 columbia,tactical_air,2,col_main_3,Pacific air command
 columbia,tactical_air,2,teutonia_1,European air power
@@ -40,11 +31,6 @@ cathay,ground,4,cathay_5,Southern coastal
 cathay,ground,2,cathay_4,Northeast - Choson border security
 cathay,ground,3,cathay_7,South China coastal
 cathay,ground,2,choson,Choson border quick reaction force
-cathay,naval,1,cathay_7,South Sea Fleet home port (Yulin)
-cathay,naval,3,"w(16,6)",South Sea Fleet deployed - Taiwan Strait
-cathay,naval,1,cathay_4,East Sea Fleet home port (Qingdao)
-cathay,naval,2,"w(17,4)",East Sea Fleet deployed - Yellow Sea
-cathay,naval,2,"w(16,6)",South China Sea patrols
 cathay,tactical_air,5,cathay_3,Central aviation + strategic reserve
 cathay,tactical_air,5,cathay_6,Coastal DF-21/DF-26 carrier killers + tactical aviation
 cathay,tactical_air,2,cathay_2,Western interior air
@@ -59,10 +45,6 @@ nordostan,ground,2,nord_e2,Far East/Cathay border defense
 nordostan,ground,1,nord_w2,Caucasus/southern flank
 nordostan,ground,10,heartland_2,Eastern Heartland theater - front line offensive
 nordostan,ground,3,heartland_1,Heartland occupation/rear security
-nordostan,naval,2,nord_n1,Northern Fleet - Arctic/SSBN bastion
-nordostan,naval,2,nord_w2,Black Sea remnant + Caspian
-nordostan,naval,1,levantia,Mediterranean - Tartus/Syria
-nordostan,naval,1,nord_e3,Pacific Fleet
 nordostan,tactical_air,2,nord_c1,Strategic aviation homeland defense
 nordostan,tactical_air,4,heartland_2,Front-line aviation glide bombs drones
 nordostan,tactical_air,1,nord_w2,Southern air defense/strike
@@ -83,7 +65,6 @@ persia,ground,3,persia_2,IRGC ground forces + Gulf Gate coastal defense batterie
 persia,ground,2,persia_1,Nuclear facility defense
 persia,ground,2,persia_3,Strategic depth ballistic missile guards
 persia,ground,1,phrygia_2,Iraq corridor - militia support/border security
-persia,naval,2,cp_gulf_gate,IRGC Navy - swarm boats mines submarines island garrisons
 persia,tactical_air,2,persia_2,Coastal anti-ship missiles Shahed drones
 persia,tactical_air,2,persia_1,Medium-range ballistic missiles air defense support
 persia,tactical_air,1,persia_3,Long-range ballistic missiles strategic reserve
@@ -92,85 +73,74 @@ persia,air_defense,1,persia_1,S-300/S-400 protecting nuclear sites - ONLY air de
 gallia,ground,4,gallia_1,Metropolitan France
 gallia,ground,1,horn,Djibouti overseas
 gallia,ground,1,levantia,Near ME deployment
-gallia,naval,1,gallia_1,Atlantic/Med home fleet
-gallia,naval,1,persia_3,Independent Persian Gulf deployment
-gallia,naval,1,levantia,Eastern Mediterranean
 gallia,tactical_air,3,gallia_1,Metropolitan Rafale
 gallia,tactical_air,1,horn,Overseas air
 gallia,strategic_missile,2,gallia_1,SSBNs + air-launched cruise missiles
 gallia,air_defense,1,gallia_1,SAMP/T homeland
 teutonia,ground,6,teutonia_1,Bundeswehr all homeland
-teutonia,naval,1,teutonia_1,Baltic/North Sea
-teutonia,naval,1,albion,Eastern Atlantic
 teutonia,tactical_air,3,teutonia_1,Eurofighter Typhoons
 teutonia,air_defense,1,teutonia_1,Patriot systems
 freeland,ground,5,freeland,All homeland defense
-freeland,naval,1,freeland,Baltic coastal
 freeland,tactical_air,2,freeland,F-35 and FA-50
 freeland,air_defense,1,freeland,Patriot from Columbia
 ponte,ground,4,ponte,Homeland
-ponte,naval,1,ponte,Tyrrhenian
-ponte,naval,1,levantia,Mediterranean patrol
 ponte,tactical_air,2,ponte,Eurofighter/F-35
 albion,ground,3,albion,British Isles homeland
 albion,ground,1,levantia,Cyprus/Gibraltar overseas
-albion,naval,2,albion,Home Fleet + Atlantic
-albion,naval,1,albion,Eastern Atlantic
-albion,naval,1,levantia,Eastern Mediterranean
 albion,tactical_air,2,albion,RAF homeland
 albion,tactical_air,1,levantia,Overseas RAF
 albion,strategic_missile,2,albion,Trident SSBNs - continuous at-sea deterrent
 albion,air_defense,1,albion,Sky Sabre homeland
 bharata,ground,10,bharata_2,Bulk on Cathay border and internal
 bharata,ground,2,bharata_1,Indian Ocean / Andaman & Nicobar
-bharata,naval,1,bharata_1,Western Fleet
-bharata,naval,2,bharata_1,Indian Ocean dominance
 bharata,tactical_air,4,bharata_2,Mixed fleet Su-30MKI Rafale Tejas
 bharata,air_defense,2,bharata_2,S-400 from Nordostan + domestic
 levantia,ground,3,levantia,Homeland + West Bank
 levantia,ground,2,phrygia_2,Lebanon theater
 levantia,ground,1,levantia,Persia-facing reserves
-levantia,naval,1,levantia,Mediterranean submarine fleet
 levantia,tactical_air,2,levantia,F-35I homeland
 levantia,tactical_air,2,persia_2,Persia strike operations
 levantia,air_defense,3,levantia,Iron Dome David's Sling Arrow - densest in world
 formosa,ground,4,formosa,All homeland - porcupine strategy
-formosa,naval,1,formosa,Home fleet
-formosa,naval,1,cp_formosa_strait,Strait patrol
 formosa,tactical_air,3,formosa,F-16V fleet anti-ship missiles
 formosa,air_defense,2,formosa,Patriot PAC-3 Tien Kung
 phrygia,ground,4,phrygia_1,Homeland + Syrian border
 phrygia,ground,1,phrygia_2,Syria deployment
 phrygia,ground,1,phrygia_2,Strait defense
-phrygia,naval,1,phrygia_1,Aegean/Mediterranean
-phrygia,naval,1,levantia,Eastern Med patrol
 phrygia,tactical_air,3,phrygia_1,F-16 fleet Bayraktar drones
 phrygia,air_defense,1,phrygia_1,S-400 from Nordostan
 yamato,ground,3,yamato_2,Self-Defense Forces homeland
-yamato,naval,2,yamato_2,Home fleet
-yamato,naval,1,cathay_6,East China Sea patrol
-yamato,naval,1,yamato_1,North Pacific
 yamato,tactical_air,3,yamato_2,F-35 fleet Type-12 standoff missiles
 yamato,air_defense,2,yamato_2,Aegis BMD PAC-3
 solaria,ground,3,solaria_2,Homeland oil infrastructure defense
-solaria,naval,1,cp_gulf_gate,Gulf patrol
 solaria,tactical_air,3,solaria_2,F-15s Typhoons air defense of oil facilities
 solaria,air_defense,2,solaria_2,Patriot batteries - tested vs Persian missiles
 choson,ground,6,choson,Homeland DMZ fortifications
 choson,ground,2,heartland_2,Deployed to Nordostan/Heartland theater
-choson,naval,1,choson,Coastal defense submarines
 choson,tactical_air,2,choson,Ballistic missile force Hwasong series
 choson,strategic_missile,1,choson,Nuclear-tipped ICBMs
 choson,air_defense,1,choson,Antiquated layered defense
 hanguk,ground,5,hanguk,All DMZ defense
-hanguk,naval,2,hanguk,Modern destroyers submarines
 hanguk,tactical_air,3,hanguk,F-35 F-15K KF-21
 hanguk,air_defense,2,hanguk,Patriot + THAAD
 caribe,ground,2,caribe,Cuba homeland
 caribe,ground,1,caribe,Venezuela
-caribe,naval,1,caribe,Coastal patrol
 caribe,tactical_air,1,caribe,Antiquated Soviet-era aircraft
 mirage,ground,2,mirage,Homeland professional force
-mirage,naval,1,cp_gulf_gate,Gulf patrol Jebel Ali
 mirage,tactical_air,2,mirage,F-16s Mirage 2000s drones
 mirage,air_defense,2,mirage,THAAD Patriot IRIS-T
+columbia,naval,3,col_main_2,Atlantic home port
+columbia,naval,2,col_main_3,Pacific home port
+columbia,naval,2,"w(12,8)",Gulf - Persia war
+columbia,naval,1,"w(9,6)",Mediterranean
+columbia,naval,1,"w(17,4)",East Cathay Sea - Formosa deterrence
+columbia,naval,1,"w(13,9)",Indian Ocean
+cathay,naval,3,"w(16,7)",South Cathay Sea Fleet
+cathay,naval,2,"w(17,4)",East Cathay Sea Fleet
+cathay,naval,1,cathay_7,Home port
+albion,naval,2,"w(7,3)",Atlantic/home waters
+nordostan,naval,2,nord_w2,Northern Fleet (Arctic/submarine)
+gallia,naval,1,"w(9,6)",Mediterranean/carrier group
+bharata,naval,2,"w(13,9)",Indian Ocean fleet
+yamato,naval,2,"w(19,4)",Pacific home waters
+phrygia,naval,1,phrygia_1,Bosphorus/Med
