@@ -106,6 +106,19 @@ Bilateral. Both parties confirm. Immediate. Irreversible (except basing rights).
 | 3.1 | **Coin transfer** | Exclusive. Any actor → any actor. Balance check. |
 | 3.2 | **Technology transfer** | Replicable — receiver gains, sender keeps. Irreversible. |
 | 3.3 | **Treaty / agreement** | Plain text, any signatories. Stored, not enforced. |
+
+> **SEED DECISION (2026-03-27):** Ceasefire and peace agreements use the standard
+> transaction engine "agreement" type. Any participant can propose any deal as free text
+> (ceasefire, peace treaty, territorial settlement, alliance, trade deal). The other side
+> can amend, reject, accept, or counter-propose. No special mechanics — just the standard
+> agreement transaction with:
+> - Agreement name (e.g., "Heartland-Nordostan Ceasefire")
+> - Free text terms
+> - Required signatories (both HoS must confirm)
+> - When both HoS sign a ceasefire: engine updates war_status, combat pauses between
+>   those countries, territory frozen at current lines
+> - Breach (attacking after ceasefire): automatic re-declaration of war + diplomatic
+>   penalty (all other countries notified)
 | 3.4 | **Organization creation** | Heads of state. NAME + MEMBERS + PURPOSE. |
 | 3.5 | **Basing rights** | Replicable. Uniquely REVOCABLE by host. |
 

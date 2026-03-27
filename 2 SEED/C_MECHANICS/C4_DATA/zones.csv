@@ -56,3 +56,13 @@ yamato_1,Yamato North,land_home,yamato,asu,false
 yamato_2,Yamato South,land_home,yamato,asu,false
 formosa,Formosa,land_home,formosa,asu,false
 cp_formosa_strait,Formosa Strait,chokepoint,none,asu,true
+sea_tethys_west,Tethys West,sea,none,global,false
+sea_tethys_east,Tethys East,sea,none,global,false
+sea_mirovia_north,Mirovia North,sea,none,global,false
+sea_mirovia_south,Mirovia South,sea,none,global,false
+sea_rheic,Rheic Ocean,sea,none,global,false
+sea_arctic,Arctic Sea,sea,none,global,false
+sea_med,Mediterranean,sea,none,global,false
+sea_scs,South Cathay Sea,sea,none,global,false
+sea_ecs,East Cathay Sea,sea,none,global,false
+sea_gulf,Gulf Waters,sea,none,global,false

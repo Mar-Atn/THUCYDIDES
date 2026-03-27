@@ -55,6 +55,13 @@ TRANSACTION_TYPES = {
         "reversible": False,
         "stored_not_enforced": True,
     },
+    "agreement": {
+        "exclusive": False,
+        "requires_balance": False,
+        "authorization": ["head_of_state"],
+        "reversible": False,
+        "stored_not_enforced": False,  # ceasefire/peace has mechanical effect
+    },
     "org_creation": {
         "exclusive": False,
         "requires_balance": False,
@@ -328,6 +335,49 @@ class TransactionEngine:
             }
             self.ws.treaties.append(treaty)
             tx["execution_details"] = {"treaty_id": treaty["id"]}
+
+        elif tx_type == "agreement":
+            agreement_name = details.get("name", "Unnamed Agreement")
+            agreement_text = details.get("text", "")
+            agreement_subtype = details.get("subtype", "general")  # ceasefire, peace, trade, alliance
+            signatories = details.get("signatories", [sender_country, receiver_country])
+            agreement = {
+                "id": f"agreement_{len(self.ws.treaties) + 1}",
+                "name": agreement_name,
+                "subtype": agreement_subtype,
+                "text": agreement_text,
+                "signatories": signatories,
+                "signed_round": self.ws.round_num,
+                "active": True,
+            }
+            self.ws.treaties.append(agreement)
+            tx["execution_details"] = {"agreement_id": agreement["id"]}
+
+            # Ceasefire / peace mechanical effect: end active war between signatories
+            if agreement_subtype in ("ceasefire", "peace"):
+                wars_to_remove = []
+                for i, war in enumerate(self.ws.wars):
+                    attacker = war.get("attacker")
+                    defender = war.get("defender")
+                    attacker_allies = war.get("allies", {}).get("attacker", [])
+                    defender_allies = war.get("allies", {}).get("defender", [])
+                    all_attacker_side = [attacker] + attacker_allies
+                    all_defender_side = [defender] + defender_allies
+                    # Check if both signatories are on opposing sides of this war
+                    s_on_atk = [s for s in signatories if s in all_attacker_side]
+                    s_on_def = [s for s in signatories if s in all_defender_side]
+                    if s_on_atk and s_on_def:
+                        wars_to_remove.append(i)
+                # Remove wars in reverse order to preserve indices
+                for i in reversed(wars_to_remove):
+                    ended_war = self.ws.wars.pop(i)
+                    self.ws.log_event({
+                        "type": "ceasefire",
+                        "agreement_id": agreement["id"],
+                        "ended_war": ended_war,
+                        "signatories": signatories,
+                    })
+                tx["execution_details"]["wars_ended"] = len(wars_to_remove)
 
         elif tx_type == "org_creation":
             org_name = details.get("name", "New Organization")
