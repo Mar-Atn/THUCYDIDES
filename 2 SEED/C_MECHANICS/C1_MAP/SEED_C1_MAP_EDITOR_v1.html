@@ -20,6 +20,8 @@ body { font-family: 'Inter', Helvetica, Arial, sans-serif; background: #1a1a2e; 
 .mode-btn { background: #0f3460; color: #aaa; border: none; padding: 6px 12px; font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; letter-spacing: 0.5px; }
 .mode-btn:hover { background: #1a5276; color: #eee; }
 .mode-btn.active { background: #e94560; color: #fff; }
+.header-sep { width: 1px; height: 28px; background: #1a5276; margin: 0 4px; }
+.file-group { display: flex; gap: 4px; }
 
 /* MAIN LAYOUT */
 #main { display: flex; flex: 1; overflow: hidden; }
@@ -79,10 +81,16 @@ canvas { background: #C5D9E8; }
     <button class="mode-btn" data-mode="chokepoint">CHOKE (K)</button>
   </div>
   <div class="header-spacer"></div>
-  <button id="btn-clear">Clear Map</button>
+  <div class="file-group">
+    <button id="btn-new">New</button>
+    <button id="btn-load-file">Load</button>
+    <button id="btn-save">Save</button>
+  </div>
+  <div class="header-sep"></div>
   <button id="btn-load">Load Current Map</button>
   <button id="btn-export-svg">Export SVG</button>
   <button id="btn-export-md">Export Structure</button>
+  <input type="file" id="file-input" accept=".json" style="display:none">
 </div>
 
 <div id="main">
@@ -1015,6 +1023,177 @@ document.getElementById('btn-export-md').addEventListener('click', () => {
   a.href = url; a.download = 'TTT_MAP_STRUCTURE_EXPORT.md';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
+});
+
+// ======== SAVE MAP ========
+document.getElementById('btn-save').addEventListener('click', () => {
+  const countriesObj = {};
+  countries.forEach(c => {
+    countriesObj[c.id] = { name: c.name, color: c.color };
+  });
+
+  const gridData = [];
+  for (let r = 0; r < ROWS; r++) {
+    gridData[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      gridData[r][c] = { owner: grid[r][c].owner };
+    }
+  }
+
+  const cpData = {};
+  for (const def of chokepointDefs) {
+    const pos = chokepoints[def.key];
+    if (pos) {
+      cpData[def.key] = { row: pos.row, col: pos.col, name: def.name };
+    }
+  }
+
+  const state = {
+    version: 1,
+    rows: ROWS,
+    cols: COLS,
+    countries: countriesObj,
+    grid: gridData,
+    chokepoints: cpData
+  };
+
+  const json = JSON.stringify(state, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'TTT_MAP_STATE.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// ======== LOAD MAP FROM FILE ========
+const fileInput = document.getElementById('file-input');
+document.getElementById('btn-load-file').addEventListener('click', () => {
+  fileInput.value = '';
+  fileInput.click();
+});
+
+fileInput.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+
+      // Validate required fields
+      if (typeof data.rows !== 'number' || typeof data.cols !== 'number' || !Array.isArray(data.grid)) {
+        alert('Invalid map file: missing rows, cols, or grid.');
+        return;
+      }
+      if (data.grid.length !== data.rows) {
+        alert('Invalid map file: grid row count does not match rows field.');
+        return;
+      }
+      for (let r = 0; r < data.rows; r++) {
+        if (!Array.isArray(data.grid[r]) || data.grid[r].length !== data.cols) {
+          alert('Invalid map file: grid row ' + r + ' has wrong column count.');
+          return;
+        }
+      }
+
+      // Apply dimensions
+      ROWS = data.rows;
+      COLS = data.cols;
+
+      // Apply countries if present
+      if (data.countries && typeof data.countries === 'object') {
+        // Build a set of existing country IDs
+        const existingIds = new Set(countries.map(c => c.id));
+        // Update existing countries and add new ones
+        for (const [id, info] of Object.entries(data.countries)) {
+          const existing = countries.find(c => c.id === id);
+          if (existing) {
+            existing.name = info.name || existing.name;
+            existing.color = info.color || existing.color;
+          } else {
+            countries.push({ id: id, name: info.name || id, color: info.color || '#AAAAAA' });
+          }
+        }
+      }
+
+      // Apply grid
+      grid = [];
+      for (let r = 0; r < ROWS; r++) {
+        grid[r] = [];
+        for (let c = 0; c < COLS; c++) {
+          const cell = data.grid[r][c];
+          grid[r][c] = { owner: (cell && cell.owner) ? cell.owner : 'sea' };
+        }
+      }
+
+      // Apply chokepoints
+      // Reset all existing chokepoints
+      for (const key of Object.keys(chokepoints)) {
+        chokepoints[key] = null;
+      }
+      if (data.chokepoints && typeof data.chokepoints === 'object') {
+        for (const [key, info] of Object.entries(data.chokepoints)) {
+          // Add chokepoint def if it doesn't exist
+          if (!chokepointDefs.find(d => d.key === key)) {
+            chokepointDefs.push({ key: key, name: (info && info.name) || key });
+          }
+          if (!(key in chokepoints)) {
+            chokepoints[key] = null;
+          }
+          if (info && typeof info.row === 'number' && typeof info.col === 'number') {
+            chokepoints[key] = { row: info.row, col: info.col };
+          }
+        }
+      }
+
+      // Rebuild UI
+      clearSelection();
+      buildPalette();
+      resizeCanvas();
+      updateGridDimLabel();
+      buildChokepointPanel();
+      draw();
+    } catch (err) {
+      alert('Error loading map file: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+});
+
+// ======== NEW MAP ========
+document.getElementById('btn-new').addEventListener('click', () => {
+  const input = prompt('Enter dimensions as COLSxROWS (e.g. 24x16):', COLS + 'x' + ROWS);
+  if (!input) return;
+  const match = input.match(/^(\d+)\s*[xX×]\s*(\d+)$/);
+  if (!match) {
+    alert('Invalid format. Use COLSxROWS, e.g. 24x16');
+    return;
+  }
+  const newCols = parseInt(match[1], 10);
+  const newRows = parseInt(match[2], 10);
+  if (newCols < 1 || newRows < 1 || newCols > 100 || newRows > 100) {
+    alert('Dimensions must be between 1 and 100.');
+    return;
+  }
+  if (!confirm('Create a new ' + newCols + '×' + newRows + ' blank map? Current map will be lost.')) return;
+
+  COLS = newCols;
+  ROWS = newRows;
+  grid = [];
+  for (let r = 0; r < ROWS; r++) {
+    grid[r] = [];
+    for (let c = 0; c < COLS; c++) grid[r][c] = { owner: 'sea' };
+  }
+  // Reset chokepoints
+  for (const key of Object.keys(chokepoints)) {
+    chokepoints[key] = null;
+  }
+  clearSelection();
+  resizeCanvas();
+  updateGridDimLabel();
+  buildChokepointPanel();
+  draw();
 });
 
 // ======== GRID RESIZE ========
