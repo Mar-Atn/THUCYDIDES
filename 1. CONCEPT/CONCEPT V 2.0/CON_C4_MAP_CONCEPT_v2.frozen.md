@@ -67,6 +67,12 @@ It also serves as the display surface for non-military information: which countr
 
 ### Potential theaters
 
+> **SEED DECISION (2026-03-27):** Only the Eastern Ereb theater has a detailed zoom-in map.
+> Other potential theaters (Formosa Strait, Mashriq, Caribbean, Thule, Korea) are resolved
+> at global map hex level. The global map's 1-3 hexes per country provides sufficient
+> resolution for blockade, amphibious assault, and crisis mechanics. This reduces complexity
+> and keeps the SIM focused on strategic decisions rather than tactical hex management.
+
 #### Eastern Europe (active at game start)
 The Russia-Ukraine front. Simplified from the Conflict SIM's 22 sectors to approximately **12-20 zones**: western Ukraine, central Ukraine (including capital), eastern front (active combat), southern front / Crimea, Russian border regions, and Belarus corridor. Enough for meaningful maneuver and resource deployment, simple enough to resolve in minutes per round.
 

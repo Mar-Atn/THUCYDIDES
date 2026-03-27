@@ -100,6 +100,10 @@ These define the game's skeleton — what exists, how time works, what the rules
 
 ### 0.4 — Map & Geography (source: C4)
 
+> **SEED DECISION (2026-03-27):** Only the Eastern Ereb theater is active with a detailed zoom-in map.
+> Other potential theaters (Formosa Strait, Mashriq, Caribbean, Thule, Korea) are resolved at
+> global map hex level. Parameters 0.4.2, 0.4.3, 0.4.6, 0.4.7 apply only to Eastern Ereb.
+
 | # | Parameter | Granularity | Block | Description |
 |---|-----------|:-----------:|:-----:|-------------|
 | 0.4.1 | Global map design | W | A | Map projection, centering, visual style |

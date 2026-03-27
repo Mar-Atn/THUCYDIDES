@@ -87,11 +87,12 @@ THUCYDIDES/
 │   ├── SEED_F1_DATA_SCHEMA_v1.md         ← CSV schema (single source of truth)
 │   ├── SEED_TEMPLATE_ROLE_v1.md          ← Standard role format
 │   ├── SEED_TEMPLATE_COUNTRY_v1.md       ← Standard country format
-│   ├── SEED_C1_MAP_GLOBAL_v1.svg         ← Approved hex map (C1)
+│   ├── C_MECHANICS/C1_MAP/               ← Map files (global + Eastern Ereb theater)
+│   │   ├── SEED_C1_MAP_STRUCTURE_v4.md   ← Global map structure + architecture decision
+│   │   ├── SEED_C1_MAP_GLOBAL_STATE_v4.json ← Global hex map state
+│   │   ├── SEED_C3_THEATER_EASTERN_EREB_STRUCTURE_v3.md ← Theater structure
+│   │   └── SEED_C3_THEATER_EASTERN_EREB_STATE_v3.json   ← Theater state
 │   ├── SEED_C2_MAP_ZONES_v3.md           ← Zone registry + adjacency (C2)
-│   ├── SEED_C3_THEATER_EASTERN_EREB_v1.svg ← 15-hex theater map (C3)
-│   ├── SEED_C3_THEATER_FORMOSA_v1.svg    ← 10-hex theater map (C3)
-│   ├── SEED_C3_THEATER_MASHRIQ_v1.svg    ← 12-hex theater map (C3)
 │   ├── STATUS.md                         ← Phase status tracker
 │   ├── SEED_COUNTRIES/                   ← 16 country seeds (B1)
 │   │   └── SEED_B1_COUNTRY_[name]_v1.md
@@ -220,8 +221,8 @@ Track 2 follows its own architecture and build process (to be defined when we re
 - ● 16 country seeds (all countries, full template)
 - ● 37 role seeds (all team + solo roles, 9 sections each, artefacts defined)
 - ● 9 CSV data files (countries, roles, orgs, memberships, relationships, tariffs, sanctions, zones, deployments)
-- ● Global hex map (H3 polished, 22 countries, 3 chokepoints)
-- ● 3 theater maps (Eastern Ereb, Formosa, Mashriq)
+- ● Global hex map (10×20 grid, 22 countries, 3 chokepoints)
+- ● 1 theater map (Eastern Ereb only; Formosa/Mashriq archived — global hex resolution per 2026-03-27 decision)
 - ● Zone structure v3 (hex registry + adjacency + theater appendix)
 - ● Engine code (3 engines + orchestrator + AI agents — 10 Python files, ~5000 lines)
 - ● Templates (role, country, data schema)

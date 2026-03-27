@@ -545,7 +545,7 @@ All outputs organized by level. No visibility/interface logic — just data.
 |-----------|------|:----------:|
 | Global oil price | Number | 2 |
 | Global trade volume index | Number | 2 |
-| Active theaters count | Number | From Live Action Engine |
+| Active theaters count | Number | From Live Action Engine | **SEED DECISION (2026-03-27):** Only Eastern Ereb has a detailed theater map. Other theaters resolved at global hex level. |
 | Chokepoint status (per chokepoint: open/contested/blocked) | Enum | From Live Action Engine |
 | Power balance indicators (aggregate military, economic, tech comparisons) | Composite index | 2,4,5 |
 | Structural clock positions (Formosa capability, Columbia election, Nordostan reserves, Persia nuclear) | Progress bars | 2,3,4,5 |

@@ -86,6 +86,8 @@ Production capacity limits (each country has maximum units per type per round). 
 
 ### Theater Activation
 
+> **SEED DECISION (2026-03-27):** Theater activation limited to Eastern Ereb. Other theaters use global hexes.
+
 The global map starts with **two active theaters** (Eastern Ereb and Mashriq - Persia). Other theaters (Pacific/Taiwan, Korea, South Asia, Caribbean) activate **dynamically** when military action in that region escalates. Each activated theater gets a zoom-in map with simplified sectors. The number of active theaters at game end is itself a measure of outcome.
 
 ### Connections to Other Domains

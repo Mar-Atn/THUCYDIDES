@@ -53,7 +53,7 @@ Zero inconsistencies across all seed files. Every name, number, relationship, fo
 |---|------|------------|:------:|
 | C1 | **Global Hex Map** — 22 countries, 3 chokepoints, hex tessellation | `SEED_C1_MAP_GLOBAL_v1.svg` | ● |
 | C2 | **Zone Structure** — hex registry, adjacency, theater appendix | `SEED_C2_MAP_ZONES_v3.md` | ● |
-| C3 | **Theater Maps (3)** — Eastern Ereb, Formosa, Mashriq | `SEED_C3_THEATER_[name]_v1.svg` (3 files) | ● |
+| C3 | **Theater Map (1)** — Eastern Ereb only. Formosa/Mashriq archived (resolved at global hex level per 2026-03-27 decision) | `SEED_C3_THEATER_EASTERN_EREB_v1.svg` | ● |
 | C4 | **Starting Data** — all numerical values in CSV format | `data/` folder (9 CSVs) | ● |
 | C5 | **Public Speaking & Press** — speech protocol, Veritas mechanic | `SEED_C5_PUBLIC_SPEAKING_v1.md` | ○ |
 | C6 | **Contracts & Collective Decisions** — treaty format, org decisions | `SEED_C6_CONTRACTS_DECISIONS_v1.md` | ○ |
@@ -165,7 +165,7 @@ Zero inconsistencies across all seed files. Every name, number, relationship, fo
 
 ## What's Done (23 items):
 - All 16 country seeds, all 37 role seeds
-- Global hex map + 3 theater maps + zone structure
+- Global hex map + 1 theater map (Eastern Ereb; Formosa/Mashriq archived) + zone structure
 - All 9 CSV data files (starting data)
 - 7 of 8 engine models implemented (code)
 - Data schema

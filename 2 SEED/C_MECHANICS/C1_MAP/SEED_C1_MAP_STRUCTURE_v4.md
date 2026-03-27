@@ -4,6 +4,24 @@
 
 ---
 
+## Map Architecture Decision
+
+**Global Map:** 10×20 hex grid, 22 countries, 3 chokepoints (Formosa Strait, Gulf Gate, Caribe Passage)
+
+**Theater Maps:** Only Eastern Ereb has a detailed theater map (10×10 hexes).
+Other theaters (Formosa, Mashriq, Caribbean, Thule, Korea) resolved at global hex level:
+- Formosa blockade: fleet occupies all water hexes adjacent to Formosa global hex
+- Gulf Gate blockade: Persia coast hex ground forces maintain blockade
+- Amphibious assault: 4:1 ratio applies at global hex level
+- Caribbean/Thule/Korea: political events, 1 hex resolution sufficient
+
+**Global-Theater Link:** Eastern Ereb theater hexes link to global hexes:
+- All Heartland theater hexes → global (11,4)
+- Nordostan rows 1-3 → global (12,3)
+- Nordostan rows 4+ → global (12,4)
+
+---
+
 ## Land Hex Registry
 
 | hex_id | owner | row | col |
