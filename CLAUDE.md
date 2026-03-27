@@ -77,20 +77,22 @@ THUCYDIDES/
 ├── .claude/agents/                        ← Agent definitions (14 files)
 │
 ├── 1. CONCEPT/                            ← Stage 1: FROZEN after gate pass
-│   ├── TTT_CONCEPT_v1.0.md               ← TOP OF HIERARCHY
-│   ├── CONCEPT_CHECKLIST_TTT.md           ← v3.2 (final)
-│   └── CONCEPT V 2.0/                    ← 14 concept documents (A1-I1)
+│   ├── CON_TOP_TTT_CONCEPT_v1.frozen.md  ← TOP OF HIERARCHY
+│   ├── CON_CHECKLIST_v3.frozen.md        ← v3.2 (final)
+│   ├── STATUS.md                         ← Phase status tracker
+│   └── CONCEPT V 2.0/                    ← 14 concept documents (CON_A1–CON_I1)
 │
 ├── 2 SEED/                                ← Stage 2: CURRENT WORKING STAGE
-│   ├── SEED_CHECKLIST_TTT.md             ← 51 items, tracking progress
-│   ├── SEED_DATA_SCHEMA.md               ← CSV schema (single source of truth)
-│   ├── SEED_ROLE_TEMPLATE.md             ← Standard role format
-│   ├── SEED_COUNTRY_TEMPLATE.md          ← Standard country format
-│   ├── MAP_GLOBAL.svg                    ← Approved hex map (H3)
-│   ├── MAP_ZONE_STRUCTURE_v3.md          ← Zone registry + adjacency + theaters
-│   ├── THEATER_EASTERN_EREB.svg          ← 15-hex theater map
-│   ├── THEATER_FORMOSA.svg               ← 10-hex theater map
-│   ├── THEATER_MASHRIQ.svg               ← 12-hex theater map
+│   ├── SEED_CHECKLIST_v2.md              ← 51 items, tracking progress
+│   ├── SEED_DATA_SCHEMA_v1.md            ← CSV schema (single source of truth)
+│   ├── SEED_TEMPLATE_ROLE_v1.md          ← Standard role format
+│   ├── SEED_TEMPLATE_COUNTRY_v1.md       ← Standard country format
+│   ├── SEED_MAP_GLOBAL_v1.svg            ← Approved hex map (H3)
+│   ├── SEED_MAP_ZONES_v3.md              ← Zone registry + adjacency + theaters
+│   ├── SEED_MAP_THEATER_EASTERN_EREB_v1.svg ← 15-hex theater map
+│   ├── SEED_MAP_THEATER_FORMOSA_v1.svg   ← 10-hex theater map
+│   ├── SEED_MAP_THEATER_MASHRIQ_v1.svg   ← 12-hex theater map
+│   ├── STATUS.md                         ← Phase status tracker
 │   ├── SEED_COUNTRIES/                   ← 16 country seed documents
 │   ├── role_briefs/                      ← 37 role seeds (7 files)
 │   ├── role_packs/                       ← Artefact content (to fill)
@@ -354,15 +356,38 @@ This is NON-NEGOTIABLE. MARCO reminds the team proactively — does not wait to 
 
 ## 8. File Naming & Versioning
 
-### Design Documents
+### File Naming Convention
 
-Follow the established convention:
-```
-[Section][Number]_TTT_[TOPIC]_v[X].md
-```
-Examples: `A1_TTT_THUCYDIDES_TRAP_REFERENCE_v2.md`, `E1_TTT_ENGINE_ARCHITECTURE_v2.md`
+All files in official phase folders follow this pattern:
 
-**Section codes:**
+```
+[PHASE]_[CODE]_[TOPIC]_v[N].[status].ext
+```
+
+| Element | Values | Example |
+|---------|--------|---------|
+| PHASE | `CON` (Concept), `SEED`, `DET` (Detailed Design) | `CON`, `SEED` |
+| CODE | Section code or type abbreviation | `A1`, `COUNTRY`, `ROLES`, `MAP`, `DATA` |
+| TOPIC | Descriptive name (underscores) | `THUCYDIDES_TRAP`, `COLUMBIA`, `GLOBAL` |
+| v[N] | Version number | `v1`, `v2`, `v3` |
+| .status | `.frozen` if locked, omit if current/active | `.frozen` |
+| ext | File extension | `.md`, `.svg`, `.csv`, `.py` |
+
+**Examples:**
+- `CON_A1_THUCYDIDES_TRAP_v2.frozen.md` — Concept doc, frozen
+- `SEED_COUNTRY_COLUMBIA_v1.md` — Seed country seed, active
+- `SEED_MAP_GLOBAL_v1.frozen.svg` — Approved map, frozen
+- `SEED_DATA_countries_v1.csv` — CSV data file, active
+
+**Exception:** Engine Python files keep code-style naming (e.g., `world_model_engine.py`) — code follows code conventions. CSVs in data/ keep short names for engine compatibility but get the SEED_ prefix in documentation references.
+
+**Status:**
+- Files with NO status suffix are current/active — may be updated
+- Files with `.frozen` suffix are locked — require Marat approval to change (see Section 7.2 Rule 4)
+
+### Design Documents (Legacy Section Codes)
+
+**Section codes** (used in Concept phase CON_ prefix):
 - **A** = Scenario Foundation
 - **B** = Actors & Structure
 - **C** = Game Mechanics
