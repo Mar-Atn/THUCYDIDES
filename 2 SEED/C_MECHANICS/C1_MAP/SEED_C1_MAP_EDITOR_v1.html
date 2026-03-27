@@ -91,7 +91,7 @@ canvas { background: #C5D9E8; }
   <button id="btn-load">Load Current Map</button>
   <button id="btn-export-svg">Export SVG</button>
   <button id="btn-export-md">Export Structure</button>
-  <input type="file" id="file-input" accept=".json" style="display:none">
+  <input type="file" id="file-input" accept=".json,.svg,.md" style="display:none">
 </div>
 
 <div id="main">
@@ -1080,6 +1080,200 @@ fileInput.addEventListener('change', (e) => {
   if (!file) return;
   const reader = new FileReader();
   reader.onload = (evt) => {
+    const fileName = file.name.toLowerCase();
+
+    // ---- SVG IMPORT ----
+    if (fileName.endsWith('.svg')) {
+      try {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(evt.target.result, 'image/svg+xml');
+        const polygons = svgDoc.querySelectorAll('polygon');
+
+        const S_SVG = 35;
+        const W_SVG = Math.sqrt(3) * S_SVG;
+        const HALF_W_SVG = W_SVG / 2;
+
+        let maxRow = 0, maxCol = 0;
+        const hexData = [];
+
+        polygons.forEach(poly => {
+          const pts = poly.getAttribute('points');
+          const fill = poly.getAttribute('fill');
+          const stroke = poly.getAttribute('stroke');
+
+          const coords = pts.trim().split(/[\s,]+/).map(Number);
+          const x1 = coords[0], y1 = coords[1];
+
+          // For pointy-top, first vertex is (cx, cy - s)
+          const cx = x1;
+          const cy = y1 + S_SVG;
+
+          const ROW_SP_SVG = 1.5 * S_SVG; // 52.5
+          const row = Math.round((cy - 30) / ROW_SP_SVG);
+          let col;
+          if (row % 2 === 0) {
+            col = Math.round((cx - 55) / W_SVG);
+          } else {
+            col = Math.round((cx - 55 - HALF_W_SVG) / W_SVG);
+          }
+
+          if (row >= 0 && col >= 0) {
+            maxRow = Math.max(maxRow, row);
+            maxCol = Math.max(maxCol, col);
+
+            const isChokepoint = stroke === '#D4880F' || stroke === '#d4880f';
+            const isSea = fill === '#B5CCE0' || fill === '#b5cce0';
+
+            if (!isSea) {
+              let owner = 'sea';
+              for (const c of countries) {
+                if (c.color.toLowerCase() === fill.toLowerCase()) {
+                  owner = c.id;
+                  break;
+                }
+              }
+              hexData.push({row, col, owner, chokepoint: isChokepoint});
+            } else if (isChokepoint) {
+              hexData.push({row, col, owner: 'sea', chokepoint: true});
+            }
+          }
+        });
+
+        // Rebuild grid
+        ROWS = maxRow + 1;
+        COLS = maxCol + 1;
+        grid = [];
+        for (let r = 0; r < ROWS; r++) {
+          grid[r] = [];
+          for (let c = 0; c < COLS; c++) grid[r][c] = {owner: 'sea'};
+        }
+
+        hexData.forEach(h => {
+          if (h.row < ROWS && h.col < COLS) {
+            grid[h.row][h.col] = {owner: h.owner};
+          }
+        });
+
+        // Handle chokepoints
+        for (const key of Object.keys(chokepoints)) chokepoints[key] = null;
+        const cpHexes = hexData.filter(h => h.chokepoint);
+        cpHexes.forEach((cp, i) => {
+          const keys = Object.keys(chokepoints);
+          if (i < keys.length) chokepoints[keys[i]] = {row: cp.row, col: cp.col};
+        });
+
+        clearSelection();
+        resizeCanvas();
+        updateGridDimLabel();
+        buildChokepointPanel();
+        draw();
+        return;
+      } catch (err) {
+        alert('Error importing SVG: ' + err.message);
+        return;
+      }
+    }
+
+    // ---- MARKDOWN IMPORT ----
+    if (fileName.endsWith('.md')) {
+      try {
+        const lines = evt.target.result.split('\n');
+        let maxRow = 0, maxCol = 0;
+        const hexData = [];
+
+        // Find the land hex registry table
+        let inTable = false;
+        for (const line of lines) {
+          if (line.includes('hex_id') && line.includes('owner') && line.includes('row') && line.includes('col')) {
+            inTable = true;
+            continue;
+          }
+          if (inTable && line.startsWith('|---')) continue;
+          if (inTable && line.startsWith('|')) {
+            const parts = line.split('|').map(s => s.trim()).filter(s => s);
+            if (parts.length >= 4) {
+              const owner = parts[1];
+              const row = parseInt(parts[2]);
+              const col = parseInt(parts[3]);
+              if (!isNaN(row) && !isNaN(col)) {
+                maxRow = Math.max(maxRow, row);
+                maxCol = Math.max(maxCol, col);
+                hexData.push({row, col, owner});
+              }
+            }
+          } else if (inTable && !line.startsWith('|')) {
+            inTable = false;
+          }
+        }
+
+        // Also parse chokepoints section
+        let inCPTable = false;
+        const cpData = [];
+        for (const line of lines) {
+          if (line.includes('Chokepoint') && line.includes('row') && line.includes('col')) {
+            inCPTable = true;
+            continue;
+          }
+          // Also match the actual header format: "| name | key | row | col |"
+          if (!inCPTable && line.includes('name') && line.includes('key') && line.includes('row') && line.includes('col') && !line.includes('hex_id')) {
+            inCPTable = true;
+            continue;
+          }
+          if (inCPTable && line.startsWith('|---')) continue;
+          if (inCPTable && line.startsWith('|')) {
+            const parts = line.split('|').map(s => s.trim()).filter(s => s);
+            if (parts.length >= 4) {
+              const cpRow = parseInt(parts[2]);
+              const cpCol = parseInt(parts[3]);
+              if (!isNaN(cpRow) && !isNaN(cpCol)) {
+                cpData.push({name: parts[0], key: parts[1], row: cpRow, col: cpCol});
+              }
+            }
+          } else if (inCPTable && !line.startsWith('|')) {
+            inCPTable = false;
+          }
+        }
+
+        // Rebuild grid
+        ROWS = Math.max(maxRow + 2, 16);
+        COLS = Math.max(maxCol + 2, 24);
+        grid = [];
+        for (let r = 0; r < ROWS; r++) {
+          grid[r] = [];
+          for (let c = 0; c < COLS; c++) grid[r][c] = {owner: 'sea'};
+        }
+
+        hexData.forEach(h => {
+          if (h.row < ROWS && h.col < COLS) {
+            if (h.owner !== 'sea' && !countries.find(c => c.id === h.owner)) {
+              countries.push({id: h.owner, name: h.owner, color: '#AAAAAA'});
+            }
+            grid[h.row][h.col] = {owner: h.owner};
+          }
+        });
+
+        // Apply chokepoints
+        for (const key of Object.keys(chokepoints)) chokepoints[key] = null;
+        cpData.forEach(cp => {
+          if (cp.key in chokepoints) {
+            chokepoints[cp.key] = {row: cp.row, col: cp.col};
+          }
+        });
+
+        clearSelection();
+        buildPalette();
+        resizeCanvas();
+        updateGridDimLabel();
+        buildChokepointPanel();
+        draw();
+        return;
+      } catch (err) {
+        alert('Error importing Markdown: ' + err.message);
+        return;
+      }
+    }
+
+    // ---- JSON IMPORT (existing logic) ----
     try {
       const data = JSON.parse(evt.target.result);
 
