@@ -1375,8 +1375,8 @@ document.getElementById('btn-save').addEventListener('click', () => {
     }
   }
   // Add 1 row/col of water padding
-  const saveRows = Math.min(saveMaxR + 2, ROWS);
-  const saveCols = Math.min(saveMaxC + 2, COLS);
+  const saveRows = Math.min(saveMaxR + 1, ROWS);
+  const saveCols = Math.min(saveMaxC + 1, COLS);
 
   const gridData = [];
   for (let r = 0; r < saveRows; r++) {
@@ -1514,8 +1514,8 @@ fileInput.addEventListener('change', (e) => {
             landMaxCol = Math.max(landMaxCol, h.col);
           }
         });
-        ROWS = Math.max(landMaxRow + 2, 8);
-        COLS = Math.max(landMaxCol + 2, 8);
+        ROWS = Math.max(landMaxRow + 1, 8);
+        COLS = Math.max(landMaxCol + 1, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
@@ -1649,8 +1649,8 @@ fileInput.addEventListener('change', (e) => {
           }
         }
 
-        ROWS = Math.max(maxRow + 2, 8);
-        COLS = Math.max(maxCol + 2, 8);
+        ROWS = Math.max(maxRow + 1, 8);
+        COLS = Math.max(maxCol + 1, 8);
         grid = [];
         for (let r = 0; r < ROWS; r++) {
           grid[r] = [];
