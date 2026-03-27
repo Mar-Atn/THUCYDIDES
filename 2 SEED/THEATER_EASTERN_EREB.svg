@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700">
+  <title>Eastern Ereb Theater -- Heartland-Nordostan Conflict</title>
+  <desc>15-hex theater zoom-in. Pointy-top hexagons, s=30. Front-line map of the Heartland-Nordostan war.</desc>
+
+  <defs>
+    <!-- Occupied territory diagonal stripe overlay -->
+    <pattern id="occupied-stripe" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(45)">
+      <rect width="8" height="8" fill="#D4A5A5"/>
+      <line x1="0" y1="0" x2="0" y2="8" stroke="#8B5E5E" stroke-width="2.5" stroke-opacity="0.4"/>
+    </pattern>
+    <!-- Contested amber glow -->
+    <filter id="amber-glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#DDA000" flood-opacity="0.35" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.12"/>
+    </filter>
+    <!-- Unit badge symbols -->
+    <symbol id="unit-ground" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#555" stroke="#333" stroke-width="0.8"/>
+      <line x1="1" y1="1" x2="19" y2="13" stroke="#fff" stroke-width="1"/>
+      <line x1="19" y1="1" x2="1" y2="13" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-naval" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#1565C0" stroke="#0D47A1" stroke-width="0.8"/>
+      <ellipse cx="10" cy="7" rx="7" ry="4" fill="none" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-air" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#6A1B9A" stroke="#4A148C" stroke-width="0.8"/>
+      <line x1="10" y1="2" x2="10" y2="12" stroke="#fff" stroke-width="1"/>
+      <line x1="4" y1="7" x2="16" y2="7" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-airdef" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#2E7D32" stroke="#1B5E20" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">AD</text>
+    </symbol>
+    <symbol id="unit-missile" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#C62828" stroke="#B71C1C" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">M</text>
+    </symbol>
+  </defs>
+
+  <style>
+    .hex { stroke: #555; stroke-width: 1.2; filter: url(#shadow); }
+    .hex-nordostan { fill: #D4A5A5; }
+    .hex-occupied { fill: url(#occupied-stripe); }
+    .hex-heartland { fill: #A5C8A5; }
+    .hex-contested { fill: #A5C8A5; stroke: #DDA000; stroke-width: 3; filter: url(#amber-glow); }
+    .hex-nato { fill: #C8C8C8; }
+    .hex-sea { fill: #B5CCE0; stroke: #7FAAC4; stroke-width: 1; }
+    .hex-corridor { fill: #D4A5A5; stroke: #888; stroke-dasharray: 4 2; }
+    .label { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 9px; fill: #222; text-anchor: middle; pointer-events: none; }
+    .label-name { font-size: 10px; font-weight: bold; }
+    .label-sub { font-size: 7.5px; fill: #555; }
+    .label-owner { font-size: 7px; fill: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+    .front-line { stroke: #C62828; stroke-width: 2.5; stroke-dasharray: 8 4; fill: none; }
+    .internal-border { stroke: #999; stroke-width: 0.5; stroke-dasharray: 2 2; fill: none; }
+    .title-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .subtitle-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #555; text-anchor: middle; }
+    .legend-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; fill: #111; font-weight: bold; }
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 8.5px; fill: #333; }
+  </style>
+
+  <!-- Background -->
+  <rect width="900" height="700" fill="#F5F8FC"/>
+
+  <!-- Title -->
+  <text x="450" y="28" class="title-text">EASTERN EREB THEATER</text>
+  <text x="450" y="44" class="subtitle-text">Heartland-Nordostan Conflict | 15 Hexes | Active Front</text>
+
+  <!-- =================================================================== -->
+  <!-- HEX GRID — pointy-top, s=30                                         -->
+  <!-- hex width = sqrt(3)*30 = 51.96, hex height = 60                     -->
+  <!-- col spacing = 51.96, row spacing = 45                               -->
+  <!-- odd rows offset right by 25.98                                      -->
+  <!-- Pointy-top hex vertices (relative to center):                       -->
+  <!--   (0,-30), (25.98,-15), (25.98,15), (0,30), (-25.98,15), (-25.98,-15) -->
+  <!-- =================================================================== -->
+
+  <g id="hexes" transform="translate(0, 20)">
+
+    <!-- ===================== ROW 0-1: NORDOSTAN STAGING ===================== -->
+
+    <!-- ee_corridor — "The Corridor" — col 0, row 1 — Nordostan flank -->
+    <g id="hex_ee_corridor">
+      <polygon class="hex hex-corridor" points="130,75 155.98,90 155.98,120 130,135 104.02,120 104.02,90"/>
+      <text x="130" y="103" class="label label-name">The Corridor</text>
+      <text x="130" y="114" class="label label-sub">Northern flank</text>
+      <text x="130" y="124" class="label label-owner">Nordostan</text>
+    </g>
+
+    <!-- ee_nord_staging_n — "Northern Staging" — col 2, row 0 -->
+    <g id="hex_ee_nord_staging_n">
+      <polygon class="hex hex-nordostan" points="338,75 363.98,90 363.98,120 338,135 312.02,120 312.02,90"/>
+      <text x="338" y="100" class="label label-name">Northern Staging</text>
+      <text x="338" y="111" class="label label-sub">Force assembly</text>
+      <text x="338" y="122" class="label label-owner">Nordostan</text>
+      <!-- Units: 3 ground -->
+      <use href="#unit-ground" x="318" y="128" width="20" height="14"/>
+      <text x="345" y="139" class="label" style="font-size:7px;fill:#333">x3</text>
+    </g>
+
+    <!-- ee_nord_staging_s — "Southern Staging" — col 4, row 0 -->
+    <g id="hex_ee_nord_staging_s">
+      <polygon class="hex hex-nordostan" points="546,75 571.98,90 571.98,120 546,135 520.02,120 520.02,90"/>
+      <text x="546" y="100" class="label label-name">Southern Staging</text>
+      <text x="546" y="111" class="label label-sub">Force assembly</text>
+      <text x="546" y="122" class="label label-owner">Nordostan</text>
+      <!-- Units: 2 ground, 1 missile -->
+      <use href="#unit-ground" x="521" y="128" width="20" height="14"/>
+      <text x="547" y="139" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-missile" x="555" y="128" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== ROW 2: OCCUPIED TERRITORY ===================== -->
+
+    <!-- ee_occupied_north — "Occupied North" — col 1, row 2 -->
+    <g id="hex_ee_occupied_north">
+      <polygon class="hex hex-occupied" points="234,165 259.98,180 259.98,210 234,225 208.02,210 208.02,180"/>
+      <text x="234" y="190" class="label label-name">Occupied North</text>
+      <text x="234" y="201" class="label label-sub">~95% Nordostan ctrl</text>
+      <text x="234" y="212" class="label label-owner">Occupied</text>
+      <!-- Units: 2 ground -->
+      <use href="#unit-ground" x="214" y="218" width="20" height="14"/>
+      <text x="241" y="229" class="label" style="font-size:7px;fill:#333">x2</text>
+    </g>
+
+    <!-- ee_occupied_east — "Occupied East" — col 3, row 2 -->
+    <g id="hex_ee_occupied_east">
+      <polygon class="hex hex-occupied" points="442,165 467.98,180 467.98,210 442,225 416.02,210 416.02,180"/>
+      <text x="442" y="190" class="label label-name">Occupied East</text>
+      <text x="442" y="201" class="label label-sub">~65% Nordostan ctrl</text>
+      <text x="442" y="212" class="label label-owner">Occupied</text>
+      <!-- Units: 3 ground, 1 air -->
+      <use href="#unit-ground" x="417" y="218" width="20" height="14"/>
+      <text x="444" y="229" class="label" style="font-size:7px;fill:#333">x3</text>
+      <use href="#unit-air" x="449" y="218" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== FRONT LINE (dashed red between rows 2-3) ===================== -->
+    <path class="front-line" d="M 170,240 Q 260,255 340,245 Q 420,235 500,248 Q 560,258 620,245"/>
+
+    <!-- ===================== ROW 3: FRONT / CONTESTED ===================== -->
+
+    <!-- ee_front_north — "Northern Front" — col 1, row 3 -->
+    <g id="hex_ee_front_north">
+      <polygon class="hex hex-heartland" points="234,270 259.98,285 259.98,315 234,330 208.02,315 208.02,285"/>
+      <text x="234" y="295" class="label label-name">Northern Front</text>
+      <text x="234" y="306" class="label label-sub">Active defense</text>
+      <text x="234" y="317" class="label label-owner">Heartland</text>
+      <!-- Units: 2 ground, 1 air defense -->
+      <use href="#unit-ground" x="212" y="323" width="20" height="14"/>
+      <text x="239" y="334" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-airdef" x="244" y="323" width="20" height="14"/>
+    </g>
+
+    <!-- ee_contested — "The Contested Ground" — col 3, row 3 — AMBER -->
+    <g id="hex_ee_contested">
+      <polygon class="hex hex-contested" points="442,270 467.98,285 467.98,315 442,330 416.02,315 416.02,285"/>
+      <text x="442" y="290" class="label label-name" style="font-size:10px;">The Contested</text>
+      <text x="442" y="301" class="label label-name" style="font-size:10px;">Ground</text>
+      <text x="442" y="313" class="label label-sub">20% holding — 4yr war</text>
+      <text x="442" y="323" class="label label-owner">Heartland</text>
+      <!-- Units: 3 ground, 1 air, 1 air defense -->
+      <use href="#unit-ground" x="410" y="329" width="20" height="14"/>
+      <text x="437" y="340" class="label" style="font-size:7px;fill:#333">x3</text>
+      <use href="#unit-air" x="441" y="329" width="20" height="14"/>
+      <use href="#unit-airdef" x="463" y="329" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== ROW 4: HEARTLAND FRONT ===================== -->
+
+    <!-- ee_front_south — "Southern Front" — col 2, row 4 -->
+    <g id="hex_ee_front_south">
+      <polygon class="hex hex-heartland" points="338,360 363.98,375 363.98,405 338,420 312.02,405 312.02,375"/>
+      <text x="338" y="385" class="label label-name">Southern Front</text>
+      <text x="338" y="396" class="label label-sub">Steppe sector</text>
+      <text x="338" y="407" class="label label-owner">Heartland</text>
+      <!-- Units: 2 ground -->
+      <use href="#unit-ground" x="318" y="413" width="20" height="14"/>
+      <text x="345" y="424" class="label" style="font-size:7px;fill:#333">x2</text>
+    </g>
+
+    <!-- ee_river_line — "River Line" — col 0, row 4 -->
+    <g id="hex_ee_river_line">
+      <polygon class="hex hex-heartland" points="130,360 155.98,375 155.98,405 130,420 104.02,405 104.02,375"/>
+      <text x="130" y="385" class="label label-name">River Line</text>
+      <text x="130" y="396" class="label label-sub">Major river defense</text>
+      <text x="130" y="407" class="label label-owner">Heartland</text>
+      <!-- Units: 1 ground -->
+      <use href="#unit-ground" x="113" y="413" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== ROW 5: HEARTLAND DEPTH ===================== -->
+
+    <!-- ee_capital — "The Capital" — col 1, row 5 -->
+    <g id="hex_ee_capital">
+      <polygon class="hex hex-heartland" points="234,450 259.98,465 259.98,495 234,510 208.02,495 208.02,465"/>
+      <!-- Capital star marker -->
+      <circle cx="234" cy="460" r="5" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+      <text x="234" y="463" class="label" style="font-size:6px;fill:#333;font-weight:bold">&#9733;</text>
+      <text x="234" y="478" class="label label-name">The Capital</text>
+      <text x="234" y="489" class="label label-sub">Political center</text>
+      <text x="234" y="500" class="label label-owner">Heartland</text>
+      <!-- Units: 1 ground, 1 air defense -->
+      <use href="#unit-ground" x="212" y="503" width="20" height="14"/>
+      <use href="#unit-airdef" x="237" y="503" width="20" height="14"/>
+    </g>
+
+    <!-- ee_central — "Central Heartland" — col 3, row 5 -->
+    <g id="hex_ee_central">
+      <polygon class="hex hex-heartland" points="442,450 467.98,465 467.98,495 442,510 416.02,495 416.02,465"/>
+      <text x="442" y="478" class="label label-name">Central Heartland</text>
+      <text x="442" y="489" class="label label-sub">Logistics hub</text>
+      <text x="442" y="500" class="label label-owner">Heartland</text>
+      <!-- Units: 1 ground -->
+      <use href="#unit-ground" x="425" y="503" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== ROW 6: HEARTLAND REAR ===================== -->
+
+    <!-- ee_western — "Western Heartland" — col 0, row 6 -->
+    <g id="hex_ee_western">
+      <polygon class="hex hex-heartland" points="130,540 155.98,555 155.98,585 130,600 104.02,585 104.02,555"/>
+      <text x="130" y="568" class="label label-name">Western Heartland</text>
+      <text x="130" y="579" class="label label-sub">Supply corridor</text>
+      <text x="130" y="590" class="label label-owner">Heartland</text>
+    </g>
+
+    <!-- ee_nato_border — "Alliance Border" — col 0, row 7 (shifted down) -->
+    <g id="hex_ee_nato_border">
+      <polygon class="hex hex-nato" points="130,630 155.98,645 155.98,675 130,690 104.02,675 104.02,645"/>
+      <!-- Shield icon -->
+      <path d="M130,643 L138,648 L138,658 L130,663 L122,658 L122,648 Z" fill="#7986CB" stroke="#3949AB" stroke-width="0.8"/>
+      <text x="130" y="656" class="label" style="font-size:5px;fill:#fff;font-weight:bold">NATO</text>
+      <text x="130" y="672" class="label label-name">Alliance Border</text>
+      <text x="130" y="683" class="label label-sub">Art. 5 protected</text>
+    </g>
+
+    <!-- ===================== FLANKS ===================== -->
+
+    <!-- ee_peninsula — "The Peninsula" — col 5, row 4 — Occupied -->
+    <g id="hex_ee_peninsula">
+      <polygon class="hex hex-occupied" points="650,360 675.98,375 675.98,405 650,420 624.02,405 624.02,375"/>
+      <text x="650" y="385" class="label label-name">The Peninsula</text>
+      <text x="650" y="396" class="label label-sub">Naval base — occupied</text>
+      <text x="650" y="407" class="label label-owner">Nordostan Occ.</text>
+      <!-- Units: 1 naval, 1 ground -->
+      <use href="#unit-naval" x="628" y="413" width="20" height="14"/>
+      <use href="#unit-ground" x="653" y="413" width="20" height="14"/>
+    </g>
+
+    <!-- ee_sea — "Southern Waters" — col 5, row 5 — Sea -->
+    <g id="hex_ee_sea">
+      <polygon class="hex hex-sea" points="650,450 675.98,465 675.98,495 650,510 624.02,495 624.02,465"/>
+      <text x="650" y="478" class="label label-name" style="fill:#1565C0;font-style:italic">Southern Waters</text>
+      <text x="650" y="489" class="label label-sub" style="fill:#1976D2">Naval zone</text>
+      <!-- Units: 1 Nordostan naval -->
+      <use href="#unit-naval" x="633" y="498" width="20" height="14"/>
+      <text x="660" y="509" class="label" style="font-size:6px;fill:#0D47A1">NORD</text>
+    </g>
+
+  </g><!-- end hexes -->
+
+  <!-- ===================== FRONT LINE ANNOTATIONS ===================== -->
+  <g transform="translate(0,20)">
+    <!-- Front line label -->
+    <text x="620" y="250" class="label" style="font-size:9px;fill:#C62828;font-weight:bold;font-style:italic">ACTIVE FRONT LINE</text>
+  </g>
+
+  <!-- ===================== LEGEND ===================== -->
+  <g transform="translate(710, 70)">
+    <rect x="0" y="0" width="170" height="340" rx="6" fill="#fff" stroke="#ccc" stroke-width="1" fill-opacity="0.92"/>
+    <text x="85" y="18" class="legend-title" text-anchor="middle">LEGEND</text>
+
+    <!-- Country colors -->
+    <rect x="10" y="30" width="16" height="12" rx="2" fill="#D4A5A5" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="40" class="legend-text">Nordostan</text>
+
+    <rect x="10" y="48" width="16" height="12" rx="2" fill="url(#occupied-stripe)" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="58" class="legend-text">Occupied territory</text>
+
+    <rect x="10" y="66" width="16" height="12" rx="2" fill="#A5C8A5" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="76" class="legend-text">Heartland</text>
+
+    <rect x="10" y="84" width="16" height="12" rx="2" fill="#A5C8A5" stroke="#DDA000" stroke-width="2.5"/>
+    <text x="32" y="94" class="legend-text">Contested zone</text>
+
+    <rect x="10" y="102" width="16" height="12" rx="2" fill="#C8C8C8" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="112" class="legend-text">Alliance (NATO)</text>
+
+    <rect x="10" y="120" width="16" height="12" rx="2" fill="#B5CCE0" stroke="#7FAAC4" stroke-width="0.5"/>
+    <text x="32" y="130" class="legend-text">Sea zone</text>
+
+    <!-- Front line -->
+    <line x1="10" y1="146" x2="26" y2="146" stroke="#C62828" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="32" y="150" class="legend-text">Active front line</text>
+
+    <!-- Unit types -->
+    <text x="85" y="172" class="legend-title" text-anchor="middle">UNIT TYPES</text>
+
+    <use href="#unit-ground" x="10" y="180" width="20" height="14"/>
+    <text x="36" y="191" class="legend-text">Ground forces</text>
+
+    <use href="#unit-naval" x="10" y="200" width="20" height="14"/>
+    <text x="36" y="211" class="legend-text">Naval forces</text>
+
+    <use href="#unit-air" x="10" y="220" width="20" height="14"/>
+    <text x="36" y="231" class="legend-text">Tactical air/missiles</text>
+
+    <use href="#unit-airdef" x="10" y="240" width="20" height="14"/>
+    <text x="36" y="251" class="legend-text">Air defense</text>
+
+    <use href="#unit-missile" x="10" y="260" width="20" height="14"/>
+    <text x="36" y="271" class="legend-text">Strategic missiles</text>
+
+    <!-- Special markers -->
+    <text x="85" y="295" class="legend-title" text-anchor="middle">MARKERS</text>
+    <circle cx="18" cy="308" r="5" fill="#FFD700" stroke="#B8860B" stroke-width="1"/>
+    <text x="18" y="311" style="font-size:5px;fill:#333;font-weight:bold;text-anchor:middle">&#9733;</text>
+    <text x="36" y="312" class="legend-text">Capital city</text>
+
+    <path d="M18,325 L23,328 L23,333 L18,336 L13,333 L13,328 Z" fill="#7986CB" stroke="#3949AB" stroke-width="0.5"/>
+    <text x="36" y="332" class="legend-text">NATO shield</text>
+  </g>
+
+</svg>

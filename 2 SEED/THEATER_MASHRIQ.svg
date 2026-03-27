@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <title>Mashriq Theater -- Persian Gulf Conflict</title>
+  <desc>12-hex theater zoom-in. Pointy-top hexagons, s=30. Gulf Gate blockade and invasion corridors.</desc>
+
+  <defs>
+    <!-- Chokepoint border glow -->
+    <filter id="chokepoint-glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#D4880F" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Blockade pattern -->
+    <pattern id="blockade-stripe" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#B5CCE0"/>
+      <line x1="0" y1="0" x2="0" y2="6" stroke="#C62828" stroke-width="1.5" stroke-opacity="0.5"/>
+    </pattern>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.12"/>
+    </filter>
+    <!-- Arrow markers -->
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C62828"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2E7D32"/>
+    </marker>
+    <!-- Unit badge symbols -->
+    <symbol id="unit-ground" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#555" stroke="#333" stroke-width="0.8"/>
+      <line x1="1" y1="1" x2="19" y2="13" stroke="#fff" stroke-width="1"/>
+      <line x1="19" y1="1" x2="1" y2="13" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-naval" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#1565C0" stroke="#0D47A1" stroke-width="0.8"/>
+      <ellipse cx="10" cy="7" rx="7" ry="4" fill="none" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-air" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#6A1B9A" stroke="#4A148C" stroke-width="0.8"/>
+      <line x1="10" y1="2" x2="10" y2="12" stroke="#fff" stroke-width="1"/>
+      <line x1="4" y1="7" x2="16" y2="7" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-airdef" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#2E7D32" stroke="#1B5E20" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">AD</text>
+    </symbol>
+    <symbol id="unit-missile" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#C62828" stroke="#B71C1C" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">M</text>
+    </symbol>
+    <!-- Nuclear icon -->
+    <symbol id="nuke-icon" viewBox="0 0 16 16">
+      <circle cx="8" cy="8" r="7" fill="#FFD600" stroke="#F57F17" stroke-width="1"/>
+      <text x="8" y="12" text-anchor="middle" font-size="10" fill="#333" font-weight="bold">&#9762;</text>
+    </symbol>
+  </defs>
+
+  <style>
+    .hex { stroke: #555; stroke-width: 1.2; filter: url(#shadow); }
+    .hex-persia { fill: #C8B8D4; }
+    .hex-corridor { fill: #D4C8A5; }
+    .hex-gulf-state { fill: #F5E6C8; }
+    .hex-levantia { fill: #B8C8D4; }
+    .hex-sea { fill: #B5CCE0; stroke: #7FAAC4; stroke-width: 1; }
+    .hex-chokepoint { fill: url(#blockade-stripe); stroke: #D4880F; stroke-width: 3; filter: url(#chokepoint-glow); }
+    .hex-proxy { fill: #D4B8A5; stroke: #888; stroke-dasharray: 4 2; }
+    .label { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 9px; fill: #222; text-anchor: middle; pointer-events: none; }
+    .label-name { font-size: 10px; font-weight: bold; }
+    .label-sub { font-size: 7.5px; fill: #555; }
+    .label-owner { font-size: 7px; fill: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+    .label-sea { font-size: 9px; fill: #1565C0; font-style: italic; font-weight: bold; }
+    .label-sea-sub { font-size: 7.5px; fill: #1976D2; font-style: italic; }
+    .blockade-line { stroke: #C62828; stroke-width: 2.5; stroke-dasharray: 6 3; fill: none; }
+    .invasion-path { stroke: #C62828; stroke-width: 1.5; stroke-dasharray: 8 4; fill: none; marker-end: url(#arrow-red); }
+    .title-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .subtitle-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #555; text-anchor: middle; }
+    .legend-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; fill: #111; font-weight: bold; }
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 8.5px; fill: #333; }
+  </style>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#F5F8FC"/>
+
+  <!-- Title -->
+  <text x="400" y="28" class="title-text">MASHRIQ THEATER</text>
+  <text x="400" y="44" class="subtitle-text">Persian Gulf Conflict | 12 Hexes | Gulf Gate Blockade</text>
+
+  <!-- =================================================================== -->
+  <!-- HEX GRID — pointy-top, s=30                                         -->
+  <!-- =================================================================== -->
+
+  <g id="hexes" transform="translate(0, 10)">
+
+    <!-- ===================== LEFT: INVASION CORRIDOR + LEVANTIA ===================== -->
+
+    <!-- ma_levantia — "Levantia" — independent nuclear actor -->
+    <g id="hex_ma_levantia">
+      <polygon class="hex hex-levantia" points="80,135 105.98,150 105.98,180 80,195 54.02,180 54.02,150"/>
+      <text x="80" y="160" class="label label-name">Levantia</text>
+      <text x="80" y="171" class="label label-sub">Nuclear-armed</text>
+      <text x="80" y="182" class="label label-owner">Independent</text>
+      <!-- Nuclear icon -->
+      <use href="#nuke-icon" x="95" y="140" width="14" height="14"/>
+      <!-- Units: 1 air, 1 missile -->
+      <use href="#unit-air" x="55" y="188" width="20" height="14"/>
+      <use href="#unit-missile" x="80" y="188" width="20" height="14"/>
+    </g>
+
+    <!-- ma_corridor — "The Corridor" — ground invasion route -->
+    <g id="hex_ma_corridor">
+      <polygon class="hex hex-corridor" points="80,240 105.98,255 105.98,285 80,300 54.02,285 54.02,255"/>
+      <text x="80" y="265" class="label label-name">The Corridor</text>
+      <text x="80" y="276" class="label label-sub">Ground invasion route</text>
+      <text x="80" y="287" class="label label-owner">Neutral zone</text>
+    </g>
+
+    <!-- ma_frontier — "The Frontier" — border zone entering Persia -->
+    <g id="hex_ma_frontier">
+      <polygon class="hex hex-corridor" points="210,240 235.98,255 235.98,285 210,300 184.02,285 184.02,255"/>
+      <text x="210" y="260" class="label label-name">The Frontier</text>
+      <text x="210" y="271" class="label label-sub">Border zone</text>
+      <text x="210" y="282" class="label label-sub">Entry to Persia</text>
+      <text x="210" y="293" class="label label-owner">Contested</text>
+    </g>
+
+    <!-- ===================== CENTER: PERSIA ===================== -->
+
+    <!-- ma_interior — "The Interior" — nuclear sites, leadership -->
+    <g id="hex_ma_interior">
+      <polygon class="hex hex-persia" points="340,150 365.98,165 365.98,195 340,210 314.02,195 314.02,165"/>
+      <text x="340" y="172" class="label label-name">The Interior</text>
+      <text x="340" y="183" class="label label-sub">Nuclear sites</text>
+      <text x="340" y="194" class="label label-owner">Persia</text>
+      <!-- Nuclear icon -->
+      <use href="#nuke-icon" x="355" y="155" width="14" height="14"/>
+      <!-- Units: 1 ground, 1 air defense, 1 missile -->
+      <use href="#unit-ground" x="312" y="203" width="20" height="14"/>
+      <use href="#unit-airdef" x="337" y="203" width="20" height="14"/>
+      <use href="#unit-missile" x="362" y="203" width="20" height="14"/>
+    </g>
+
+    <!-- ma_highlands — "The Highlands" — mountain terrain -->
+    <g id="hex_ma_highlands">
+      <polygon class="hex hex-persia" points="340,255 365.98,270 365.98,300 340,315 314.02,300 314.02,270"/>
+      <!-- Mountain texture markers -->
+      <text x="325" y="262" class="label" style="font-size:10px;fill:#8D6E63">&#9650;</text>
+      <text x="355" y="262" class="label" style="font-size:10px;fill:#8D6E63">&#9650;</text>
+      <text x="340" y="280" class="label label-name">The Highlands</text>
+      <text x="340" y="291" class="label label-sub">Mountain terrain</text>
+      <text x="340" y="302" class="label label-owner">Persia</text>
+      <!-- Units: 2 ground -->
+      <use href="#unit-ground" x="318" y="308" width="20" height="14"/>
+      <text x="345" y="319" class="label" style="font-size:7px;fill:#333">x2</text>
+    </g>
+
+    <!-- ma_coast — "The Coast" — Gulf-facing, blockade forces -->
+    <g id="hex_ma_coast">
+      <polygon class="hex hex-persia" points="470,310 495.98,325 495.98,355 470,370 444.02,355 444.02,325"/>
+      <!-- Critical hex highlight -->
+      <polygon points="470,310 495.98,325 495.98,355 470,370 444.02,355 444.02,325" fill="none" stroke="#C62828" stroke-width="2" stroke-dasharray="4 2"/>
+      <text x="470" y="330" class="label label-name" style="fill:#C62828">The Coast</text>
+      <text x="470" y="341" class="label label-sub">BLOCKADE FORCES</text>
+      <text x="470" y="352" class="label label-sub">Must fall to break Gate</text>
+      <text x="470" y="363" class="label label-owner">Persia</text>
+      <!-- Units: 2 ground, 1 naval, 1 missile -->
+      <use href="#unit-ground" x="440" y="370" width="20" height="14"/>
+      <text x="467" y="381" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-naval" x="472" y="370" width="20" height="14"/>
+      <use href="#unit-missile" x="494" y="370" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== CENTER-RIGHT: THE GATE ===================== -->
+
+    <!-- ma_gulf_gate — "Gulf Gate" — THE CHOKEPOINT -->
+    <g id="hex_ma_gulf_gate">
+      <polygon class="hex hex-chokepoint" points="600,310 625.98,325 625.98,355 600,370 574.02,355 574.02,325"/>
+      <text x="600" y="328" class="label" style="font-size:11px;fill:#B8660B;font-weight:bold">GULF GATE</text>
+      <text x="600" y="340" class="label" style="font-size:8px;fill:#D4880F;font-weight:bold">CHOKEPOINT</text>
+      <text x="600" y="351" class="label label-sub">Blocked while Coast held</text>
+      <text x="600" y="362" class="label label-sea-sub">Oil transit chokepoint</text>
+    </g>
+
+    <!-- Blockade line: Coast -> Gulf Gate -->
+    <line class="blockade-line" x1="500" y1="340" x2="570" y2="340"/>
+    <text x="535" y="333" class="label" style="font-size:7px;fill:#C62828;font-weight:bold">BLOCKADE</text>
+
+    <!-- ma_gulf_waters — "Gulf Waters" — inner gulf -->
+    <g id="hex_ma_gulf_waters">
+      <polygon class="hex hex-sea" points="600,415 625.98,430 625.98,460 600,475 574.02,460 574.02,430"/>
+      <text x="600" y="440" class="label label-sea">Gulf Waters</text>
+      <text x="600" y="451" class="label label-sea-sub">Oil terminals</text>
+      <text x="600" y="462" class="label label-sea-sub">Gulf state coast</text>
+      <!-- Units: Columbia 1 naval -->
+      <use href="#unit-naval" x="583" y="468" width="20" height="14"/>
+      <text x="610" y="479" class="label" style="font-size:6px;fill:#0D47A1">COL</text>
+    </g>
+
+    <!-- ===================== RIGHT: GULF STATES ===================== -->
+
+    <!-- ma_solaria — "Solaria" — Saudi territory -->
+    <g id="hex_ma_solaria">
+      <polygon class="hex hex-gulf-state" points="720,255 745.98,270 745.98,300 720,315 694.02,300 694.02,270"/>
+      <text x="720" y="278" class="label label-name">Solaria</text>
+      <text x="720" y="289" class="label label-sub">Columbia base</text>
+      <text x="720" y="300" class="label label-sub">Under missile threat</text>
+      <text x="720" y="311" class="label label-owner">Gulf State</text>
+      <!-- Units: 1 Columbia ground, 1 air -->
+      <use href="#unit-ground" x="698" y="315" width="20" height="14"/>
+      <text x="725" y="326" class="label" style="font-size:6px;fill:#333">COL</text>
+      <use href="#unit-air" x="728" y="315" width="20" height="14"/>
+    </g>
+
+    <!-- ma_mirage — "Mirage" — UAE territory -->
+    <g id="hex_ma_mirage">
+      <polygon class="hex hex-gulf-state" points="720,360 745.98,375 745.98,405 720,420 694.02,405 694.02,375"/>
+      <text x="720" y="383" class="label label-name">Mirage</text>
+      <text x="720" y="394" class="label label-sub">Financial hub</text>
+      <text x="720" y="405" class="label label-sub">Under drone threat</text>
+      <text x="720" y="416" class="label label-owner">Gulf State</text>
+    </g>
+
+    <!-- ===================== BOTTOM: SOUTHERN APPROACHES ===================== -->
+
+    <!-- ma_southern_waters — "Southern Waters" — Columbia naval approach -->
+    <g id="hex_ma_southern_waters">
+      <polygon class="hex hex-sea" points="470,480 495.98,495 495.98,525 470,540 444.02,525 444.02,495"/>
+      <text x="470" y="505" class="label label-sea">Southern Waters</text>
+      <text x="470" y="516" class="label label-sea-sub">Columbia naval</text>
+      <text x="470" y="527" class="label label-sea-sub">approach</text>
+      <!-- Units: Columbia 1 naval -->
+      <use href="#unit-naval" x="453" y="533" width="20" height="14"/>
+      <text x="480" y="544" class="label" style="font-size:6px;fill:#0D47A1">COL</text>
+    </g>
+
+    <!-- ma_yemen — "Southern Gate" — Bab el-Mandeb equivalent -->
+    <g id="hex_ma_yemen">
+      <polygon class="hex hex-proxy" points="300,480 325.98,495 325.98,525 300,540 274.02,525 274.02,495"/>
+      <text x="300" y="503" class="label label-name">Southern Gate</text>
+      <text x="300" y="514" class="label label-sub">2nd chokepoint</text>
+      <text x="300" y="525" class="label label-sub">Proxy-controlled</text>
+      <text x="300" y="536" class="label label-owner">Persia proxy</text>
+      <!-- Chokepoint border -->
+      <polygon points="300,480 325.98,495 325.98,525 300,540 274.02,525 274.02,495" fill="none" stroke="#D4880F" stroke-width="2.5"/>
+    </g>
+
+    <!-- ===================== INVASION PATH ANNOTATIONS ===================== -->
+
+    <!-- Ground invasion path: Corridor -> Frontier -> Highlands -> Coast -->
+    <path class="invasion-path" d="M 110,270 L 180,270"/>
+    <path class="invasion-path" d="M 240,270 L 310,280"/>
+    <path class="invasion-path" d="M 370,300 L 440,330"/>
+
+    <!-- Labels for invasion paths -->
+    <text x="145" y="260" class="label" style="font-size:7px;fill:#C62828;font-weight:bold">GROUND</text>
+    <text x="275" y="260" class="label" style="font-size:7px;fill:#C62828;font-weight:bold">ADVANCE</text>
+
+    <!-- Amphibious path: Gulf Waters -> Coast -->
+    <path class="invasion-path" d="M 590,430 L 500,360"/>
+    <text x="555" y="388" class="label" style="font-size:7px;fill:#C62828;font-weight:bold">AMPHIB</text>
+
+    <!-- Blockade mechanic callout box -->
+    <rect x="495" y="57" width="230" height="50" rx="5" fill="#FFF3E0" stroke="#E65100" stroke-width="1.2"/>
+    <text x="610" y="72" class="label" style="font-size:9px;fill:#E65100;font-weight:bold">BLOCKADE MECHANIC</text>
+    <text x="610" y="84" class="label" style="font-size:7.5px;fill:#BF360C">Persia ground on Coast = Gate blocked</text>
+    <text x="610" y="95" class="label" style="font-size:7.5px;fill:#BF360C">Must take Coast to reopen oil transit</text>
+
+  </g><!-- end hexes -->
+
+  <!-- ===================== LEGEND ===================== -->
+  <g transform="translate(10, 405)">
+    <rect x="0" y="0" width="200" height="185" rx="6" fill="#fff" stroke="#ccc" stroke-width="1" fill-opacity="0.92"/>
+    <text x="100" y="18" class="legend-title" text-anchor="middle">LEGEND</text>
+
+    <rect x="10" y="28" width="14" height="10" rx="2" fill="#C8B8D4" stroke="#555" stroke-width="0.5"/>
+    <text x="30" y="37" class="legend-text">Persia</text>
+
+    <rect x="10" y="42" width="14" height="10" rx="2" fill="#D4C8A5" stroke="#555" stroke-width="0.5"/>
+    <text x="30" y="51" class="legend-text">Corridor / Frontier</text>
+
+    <rect x="10" y="56" width="14" height="10" rx="2" fill="#F5E6C8" stroke="#555" stroke-width="0.5"/>
+    <text x="30" y="65" class="legend-text">Gulf states</text>
+
+    <rect x="10" y="70" width="14" height="10" rx="2" fill="#B8C8D4" stroke="#555" stroke-width="0.5"/>
+    <text x="30" y="79" class="legend-text">Levantia</text>
+
+    <rect x="10" y="84" width="14" height="10" rx="2" fill="#B5CCE0" stroke="#7FAAC4" stroke-width="0.5"/>
+    <text x="30" y="93" class="legend-text">Sea zone</text>
+
+    <rect x="10" y="98" width="14" height="10" rx="2" fill="url(#blockade-stripe)" stroke="#D4880F" stroke-width="2"/>
+    <text x="30" y="107" class="legend-text">Chokepoint (blockaded)</text>
+
+    <rect x="10" y="112" width="14" height="10" rx="2" fill="#D4B8A5" stroke="#888" stroke-width="0.5" stroke-dasharray="2 1"/>
+    <text x="30" y="121" class="legend-text">Proxy territory</text>
+
+    <use href="#nuke-icon" x="10" y="128" width="14" height="14"/>
+    <text x="30" y="139" class="legend-text">Nuclear capability</text>
+
+    <line x1="10" y1="152" x2="24" y2="152" stroke="#C62828" stroke-width="2" stroke-dasharray="4 2"/>
+    <text x="30" y="156" class="legend-text">Invasion / attack path</text>
+
+    <line x1="10" y1="168" x2="24" y2="168" stroke="#C62828" stroke-width="2.5" stroke-dasharray="6 3"/>
+    <text x="30" y="172" class="legend-text">Blockade line</text>
+  </g>
+
+</svg>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <title>Formosa Strait Theater -- Cathay-Formosa Conflict</title>
+  <desc>10-hex theater zoom-in. Pointy-top hexagons, s=30. Amphibious invasion corridor.</desc>
+
+  <defs>
+    <!-- Chokepoint border pattern -->
+    <filter id="chokepoint-glow" x="-15%" y="-15%" width="130%" height="130%">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feFlood flood-color="#D4880F" flood-opacity="0.4" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-3%" y="-3%" width="106%" height="106%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1.5" flood-opacity="0.12"/>
+    </filter>
+    <!-- Invasion arrow marker -->
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#C62828"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1565C0"/>
+    </marker>
+    <!-- Unit badge symbols -->
+    <symbol id="unit-ground" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#555" stroke="#333" stroke-width="0.8"/>
+      <line x1="1" y1="1" x2="19" y2="13" stroke="#fff" stroke-width="1"/>
+      <line x1="19" y1="1" x2="1" y2="13" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-naval" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#1565C0" stroke="#0D47A1" stroke-width="0.8"/>
+      <ellipse cx="10" cy="7" rx="7" ry="4" fill="none" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-air" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#6A1B9A" stroke="#4A148C" stroke-width="0.8"/>
+      <line x1="10" y1="2" x2="10" y2="12" stroke="#fff" stroke-width="1"/>
+      <line x1="4" y1="7" x2="16" y2="7" stroke="#fff" stroke-width="1"/>
+    </symbol>
+    <symbol id="unit-airdef" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#2E7D32" stroke="#1B5E20" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">AD</text>
+    </symbol>
+    <symbol id="unit-missile" viewBox="0 0 20 14">
+      <rect x="1" y="1" width="18" height="12" rx="2" fill="#C62828" stroke="#B71C1C" stroke-width="0.8"/>
+      <text x="10" y="10" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold">M</text>
+    </symbol>
+  </defs>
+
+  <style>
+    .hex { stroke: #555; stroke-width: 1.2; filter: url(#shadow); }
+    .hex-cathay { fill: #F5D0A9; }
+    .hex-formosa { fill: #A8D5BA; }
+    .hex-sea { fill: #B5CCE0; stroke: #7FAAC4; stroke-width: 1; }
+    .hex-chokepoint { fill: #B5CCE0; stroke: #D4880F; stroke-width: 3; filter: url(#chokepoint-glow); }
+    .label { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; font-size: 9px; fill: #222; text-anchor: middle; pointer-events: none; }
+    .label-name { font-size: 10px; font-weight: bold; }
+    .label-sub { font-size: 7.5px; fill: #555; }
+    .label-owner { font-size: 7px; fill: #777; text-transform: uppercase; letter-spacing: 0.5px; }
+    .label-sea { font-size: 9px; fill: #1565C0; font-style: italic; font-weight: bold; }
+    .label-sea-sub { font-size: 7.5px; fill: #1976D2; font-style: italic; }
+    .invasion-path { stroke: #C62828; stroke-width: 2; stroke-dasharray: 10 5; fill: none; marker-end: url(#arrow-red); }
+    .reinforce-path { stroke: #1565C0; stroke-width: 2; stroke-dasharray: 10 5; fill: none; marker-end: url(#arrow-blue); }
+    .title-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 18px; fill: #1A237E; font-weight: bold; text-anchor: middle; }
+    .subtitle-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; fill: #555; text-anchor: middle; }
+    .legend-title { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; fill: #111; font-weight: bold; }
+    .legend-text { font-family: 'Segoe UI', Arial, sans-serif; font-size: 8.5px; fill: #333; }
+  </style>
+
+  <!-- Background -->
+  <rect width="800" height="600" fill="#F5F8FC"/>
+
+  <!-- Title -->
+  <text x="400" y="28" class="title-text">FORMOSA STRAIT THEATER</text>
+  <text x="400" y="44" class="subtitle-text">Cathay-Formosa Conflict | 10 Hexes | Amphibious Invasion Corridor</text>
+
+  <!-- =================================================================== -->
+  <!-- HEX GRID                                                             -->
+  <!-- Pointy-top, s=30. Width=51.96, Height=60                           -->
+  <!-- Layout: Cathay coast (left) -> Strait (center) -> Formosa (right)  -->
+  <!-- =================================================================== -->
+
+  <g id="hexes" transform="translate(0, 15)">
+
+    <!-- ===================== CATHAY COAST (left) ===================== -->
+
+    <!-- fs_staging_north — "Northern Staging" — missile/air bases -->
+    <g id="hex_fs_staging_north">
+      <polygon class="hex hex-cathay" points="115,130 140.98,145 140.98,175 115,190 89.02,175 89.02,145"/>
+      <text x="115" y="155" class="label label-name">Northern Staging</text>
+      <text x="115" y="166" class="label label-sub">Missile + air bases</text>
+      <text x="115" y="177" class="label label-owner">Cathay</text>
+      <!-- Units: 2 air, 1 missile -->
+      <use href="#unit-air" x="88" y="183" width="20" height="14"/>
+      <text x="115" y="194" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-missile" x="120" y="183" width="20" height="14"/>
+    </g>
+
+    <!-- fs_staging_center — "Central Staging" — main force concentration -->
+    <g id="hex_fs_staging_center">
+      <polygon class="hex hex-cathay" points="115,235 140.98,250 140.98,280 115,295 89.02,280 89.02,250"/>
+      <text x="115" y="258" class="label label-name">Central Staging</text>
+      <text x="115" y="269" class="label label-sub">Main concentration</text>
+      <text x="115" y="280" class="label label-owner">Cathay</text>
+      <!-- Units: 4 ground (amphibious), 2 naval -->
+      <use href="#unit-ground" x="85" y="286" width="20" height="14"/>
+      <text x="112" y="297" class="label" style="font-size:7px;fill:#333">x4</text>
+      <use href="#unit-naval" x="118" y="286" width="20" height="14"/>
+      <text x="145" y="297" class="label" style="font-size:7px;fill:#333">x2</text>
+    </g>
+
+    <!-- fs_staging_south — "Southern Staging" — naval assembly -->
+    <g id="hex_fs_staging_south">
+      <polygon class="hex hex-cathay" points="115,340 140.98,355 140.98,385 115,400 89.02,385 89.02,355"/>
+      <text x="115" y="363" class="label label-name">Southern Staging</text>
+      <text x="115" y="374" class="label label-sub">Naval assembly</text>
+      <text x="115" y="385" class="label label-owner">Cathay</text>
+      <!-- Units: 2 naval, 1 ground -->
+      <use href="#unit-naval" x="88" y="391" width="20" height="14"/>
+      <text x="115" y="402" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-ground" x="120" y="391" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== THE STRAIT (center sea hexes) ===================== -->
+
+    <!-- fs_strait_north — "Northern Passage" -->
+    <g id="hex_fs_strait_north">
+      <polygon class="hex hex-sea" points="297,190 322.98,205 322.98,235 297,250 271.02,235 271.02,205"/>
+      <text x="297" y="215" class="label label-sea">Northern Passage</text>
+      <text x="297" y="226" class="label label-sea-sub">Crossing route</text>
+    </g>
+
+    <!-- fs_strait_south — "Southern Passage" — CHOKEPOINT -->
+    <g id="hex_fs_strait_south">
+      <polygon class="hex hex-chokepoint" points="297,295 322.98,310 322.98,340 297,355 271.02,340 271.02,310"/>
+      <text x="297" y="316" class="label label-sea" style="fill:#B8660B">Southern Passage</text>
+      <text x="297" y="327" class="label" style="font-size:8px;fill:#D4880F;font-weight:bold">CHOKEPOINT</text>
+      <text x="297" y="338" class="label label-sea-sub">Formosa Strait</text>
+    </g>
+
+    <!-- ===================== FORMOSA (right) ===================== -->
+
+    <!-- fs_formosa_north — "Northern Shore" -->
+    <g id="hex_fs_formosa_north">
+      <polygon class="hex hex-formosa" points="479,190 504.98,205 504.98,235 479,250 453.02,235 453.02,205"/>
+      <text x="479" y="210" class="label label-name">Northern Shore</text>
+      <text x="479" y="221" class="label label-sub">Landing beaches, fabs</text>
+      <text x="479" y="232" class="label label-sub">Political capital</text>
+      <text x="479" y="243" class="label label-owner">Formosa</text>
+      <!-- Units: 2 ground, 1 air defense, 1 air -->
+      <use href="#unit-ground" x="452" y="248" width="20" height="14"/>
+      <text x="479" y="259" class="label" style="font-size:7px;fill:#333">x2</text>
+      <use href="#unit-airdef" x="483" y="248" width="20" height="14"/>
+      <use href="#unit-air" x="452" y="264" width="20" height="14"/>
+    </g>
+
+    <!-- fs_formosa_south — "Southern Shore" -->
+    <g id="hex_fs_formosa_south">
+      <polygon class="hex hex-formosa" points="479,295 504.98,310 504.98,340 479,355 453.02,340 453.02,310"/>
+      <text x="479" y="318" class="label label-name">Southern Shore</text>
+      <text x="479" y="329" class="label label-sub">Port, industrial base</text>
+      <text x="479" y="340" class="label label-owner">Formosa</text>
+      <!-- Units: 1 ground, 1 naval -->
+      <use href="#unit-ground" x="457" y="348" width="20" height="14"/>
+      <use href="#unit-naval" x="483" y="348" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== EASTERN WATERS (far right) ===================== -->
+
+    <!-- fs_eastern_sea — "Eastern Waters" — US/Yamato intervention corridor -->
+    <g id="hex_fs_eastern_sea">
+      <polygon class="hex hex-sea" points="635,240 660.98,255 660.98,285 635,300 609.02,285 609.02,255"/>
+      <text x="635" y="263" class="label label-sea">Eastern Waters</text>
+      <text x="635" y="274" class="label label-sea-sub">Columbia/Yamato</text>
+      <text x="635" y="285" class="label label-sea-sub">intervention corridor</text>
+      <!-- Units: Columbia 2 naval, 1 air (pre-positioned) -->
+      <use href="#unit-naval" x="610" y="293" width="20" height="14"/>
+      <text x="637" y="304" class="label" style="font-size:6px;fill:#0D47A1">COL x2</text>
+      <use href="#unit-air" x="643" y="293" width="20" height="14"/>
+    </g>
+
+    <!-- ===================== SOUTHERN APPROACHES ===================== -->
+
+    <!-- fs_scs_approach — "Southern Sea" — South China Sea connection -->
+    <g id="hex_fs_scs_approach">
+      <polygon class="hex hex-sea" points="210,440 235.98,455 235.98,485 210,500 184.02,485 184.02,455"/>
+      <text x="210" y="468" class="label label-sea">Southern Sea</text>
+      <text x="210" y="479" class="label label-sea-sub">Maritime depth</text>
+      <text x="210" y="490" class="label label-sea-sub">Cathay controlled</text>
+    </g>
+
+    <!-- fs_channel — "The Channel" — Bashi Channel equivalent -->
+    <g id="hex_fs_channel">
+      <polygon class="hex hex-sea" points="479,440 504.98,455 504.98,485 479,500 453.02,485 453.02,455"/>
+      <text x="479" y="463" class="label label-sea">The Channel</text>
+      <text x="479" y="474" class="label label-sea-sub">Narrow passage south</text>
+      <text x="479" y="485" class="label label-sea-sub">of Formosa</text>
+    </g>
+
+    <!-- ===================== INVASION PATH ARROWS ===================== -->
+    <!-- Cathay staging -> strait -> Formosa -->
+    <path class="invasion-path" d="M 145,265 L 265,220"/>
+    <path class="invasion-path" d="M 145,265 L 265,325"/>
+    <path class="invasion-path" d="M 325,220 L 445,215"/>
+    <path class="invasion-path" d="M 325,325 L 445,320"/>
+
+    <!-- US/Yamato reinforcement path -->
+    <path class="reinforce-path" d="M 610,270 L 510,225"/>
+    <path class="reinforce-path" d="M 610,270 L 510,330"/>
+
+    <!-- Invasion path labels -->
+    <text x="200" y="215" class="label" style="font-size:8px;fill:#C62828;font-weight:bold">INVASION</text>
+    <text x="200" y="224" class="label" style="font-size:8px;fill:#C62828;font-weight:bold">AXIS</text>
+    <text x="560" y="210" class="label" style="font-size:8px;fill:#1565C0;font-weight:bold">REINFORCE</text>
+
+    <!-- 4:1 requirement note -->
+    <rect x="245" y="252" width="104" height="28" rx="4" fill="#FFF3E0" stroke="#E65100" stroke-width="1"/>
+    <text x="297" y="265" class="label" style="font-size:8px;fill:#E65100;font-weight:bold">4:1 RATIO REQUIRED</text>
+    <text x="297" y="276" class="label" style="font-size:7px;fill:#BF360C">for amphibious assault</text>
+
+  </g><!-- end hexes -->
+
+  <!-- ===================== LEGEND ===================== -->
+  <g transform="translate(620, 70)">
+    <rect x="0" y="0" width="165" height="290" rx="6" fill="#fff" stroke="#ccc" stroke-width="1" fill-opacity="0.92"/>
+    <text x="82" y="18" class="legend-title" text-anchor="middle">LEGEND</text>
+
+    <rect x="10" y="30" width="16" height="12" rx="2" fill="#F5D0A9" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="40" class="legend-text">Cathay coast</text>
+
+    <rect x="10" y="48" width="16" height="12" rx="2" fill="#A8D5BA" stroke="#555" stroke-width="0.5"/>
+    <text x="32" y="58" class="legend-text">Formosa</text>
+
+    <rect x="10" y="66" width="16" height="12" rx="2" fill="#B5CCE0" stroke="#7FAAC4" stroke-width="0.5"/>
+    <text x="32" y="76" class="legend-text">Sea zone</text>
+
+    <rect x="10" y="84" width="16" height="12" rx="2" fill="#B5CCE0" stroke="#D4880F" stroke-width="2.5"/>
+    <text x="32" y="94" class="legend-text">Chokepoint</text>
+
+    <line x1="10" y1="112" x2="26" y2="112" stroke="#C62828" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="32" y="116" class="legend-text">Invasion path</text>
+
+    <line x1="10" y1="130" x2="26" y2="130" stroke="#1565C0" stroke-width="2" stroke-dasharray="5 3"/>
+    <text x="32" y="134" class="legend-text">Reinforcement path</text>
+
+    <text x="82" y="156" class="legend-title" text-anchor="middle">UNIT TYPES</text>
+
+    <use href="#unit-ground" x="10" y="164" width="20" height="14"/>
+    <text x="36" y="175" class="legend-text">Ground forces</text>
+
+    <use href="#unit-naval" x="10" y="184" width="20" height="14"/>
+    <text x="36" y="195" class="legend-text">Naval forces</text>
+
+    <use href="#unit-air" x="10" y="204" width="20" height="14"/>
+    <text x="36" y="215" class="legend-text">Tactical air/missiles</text>
+
+    <use href="#unit-airdef" x="10" y="224" width="20" height="14"/>
+    <text x="36" y="235" class="legend-text">Air defense</text>
+
+    <use href="#unit-missile" x="10" y="244" width="20" height="14"/>
+    <text x="36" y="255" class="legend-text">Strategic missiles</text>
+
+    <rect x="10" y="268" width="145" height="16" rx="3" fill="#FFF3E0" stroke="#E65100" stroke-width="0.5"/>
+    <text x="82" y="280" class="legend-text" text-anchor="middle" style="fill:#E65100;font-weight:bold">4:1 amphibious rule</text>
+  </g>
+
+</svg>

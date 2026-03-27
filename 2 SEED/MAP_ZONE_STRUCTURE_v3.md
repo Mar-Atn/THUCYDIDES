@@ -200,3 +200,139 @@ Countries that share at least one land border edge:
 | cp_formosa_strait | Formosa Strait | chokepoint | 6 | 16 | cathay_6, sea_5_16, cathay_7, sea_6_17, sea_7_15, formosa |
 | cp_gulf_gate | Gulf Gate | chokepoint | 7 | 10 | persia_2, persia_3, solaria_2, sea_7_11, mirage, sea_8_11 |
 | cp_caribe_passage | Caribe Passage | chokepoint | 8 | 2 | col_south, sea_7_2, sea_8_1, sea_8_3, sea_9_1, caribe |
+
+---
+
+## Theater Zoom-In Maps
+
+Theater maps expand global hex zones into higher-granularity tactical hexes. Pointy-top hexagons, side length s = 30. These activate when military escalation demands tactical resolution.
+
+---
+
+### Theater 1: Eastern Ereb (Heartland-Nordostan Conflict)
+
+**File:** `THEATER_EASTERN_EREB.svg`
+**Expands:** Global hexes `heartland_1`, `heartland_2`, `nord_w1`, `nord_w2`
+**Hex count:** 15 | **Canvas:** 900 x 700 | **Status:** Active at game start
+
+#### Hex Registry
+
+| hex_id | display_name | type | owner | adjacent_hexes | starting_units |
+|--------|-------------|------|-------|---------------|----------------|
+| ee_corridor | The Corridor | land | nordostan | ee_nord_staging_n, ee_occupied_north, ee_river_line | — |
+| ee_nord_staging_n | Northern Staging | land | nordostan | ee_corridor, ee_nord_staging_s, ee_occupied_north, ee_occupied_east | 3 ground |
+| ee_nord_staging_s | Southern Staging | land | nordostan | ee_nord_staging_n, ee_occupied_east | 2 ground, 1 missile |
+| ee_occupied_north | Occupied North | land_occupied | nordostan | ee_corridor, ee_nord_staging_n, ee_occupied_east, ee_front_north, ee_contested | 2 ground |
+| ee_occupied_east | Occupied East | land_occupied | nordostan | ee_nord_staging_n, ee_nord_staging_s, ee_occupied_north, ee_contested, ee_peninsula | 3 ground, 1 air |
+| ee_front_north | Northern Front | land | heartland | ee_occupied_north, ee_contested, ee_river_line, ee_capital | 2 ground, 1 air_defense |
+| ee_contested | The Contested Ground | land_contested | heartland | ee_occupied_north, ee_occupied_east, ee_front_north, ee_front_south, ee_central | 3 ground, 1 air, 1 air_defense |
+| ee_front_south | Southern Front | land | heartland | ee_contested, ee_central, ee_river_line, ee_peninsula | 2 ground |
+| ee_river_line | River Line | land | heartland | ee_corridor, ee_front_north, ee_front_south, ee_capital, ee_western | 1 ground |
+| ee_capital | The Capital | land | heartland | ee_front_north, ee_river_line, ee_central, ee_western | 1 ground, 1 air_defense |
+| ee_central | Central Heartland | land | heartland | ee_contested, ee_front_south, ee_capital | 1 ground |
+| ee_western | Western Heartland | land | heartland | ee_river_line, ee_capital, ee_nato_border | — |
+| ee_nato_border | Alliance Border | land | nato | ee_western | — |
+| ee_peninsula | The Peninsula | land_occupied | nordostan | ee_occupied_east, ee_front_south, ee_sea | 1 ground, 1 naval |
+| ee_sea | Southern Waters | sea | neutral | ee_peninsula, ee_front_south | 1 naval (Nordostan) |
+
+#### Starting Force Summary
+
+| Side | Ground | Naval | Air | Air Defense | Missiles | Total |
+|------|--------|-------|-----|------------|----------|-------|
+| Nordostan | 11 | 2 | 1 | 0 | 1 | 15 |
+| Heartland | 10 | 0 | 1 | 3 | 0 | 14 |
+
+#### Special Rules
+
+1. **Occupied Territory:** `ee_occupied_north` and `ee_occupied_east` are former Heartland territory under Nordostan military control. Shown with striped overlay. Heartland may attempt to recapture.
+2. **Contested Zone:** `ee_contested` (The Contested Ground) is the critical hex. Heartland holds ~20% of the territory after 4 years of fighting. Nordostan claims it for any settlement. Heartland defends it as existential. Amber highlight. If Nordostan captures it, Heartland stability drops sharply.
+3. **The Corridor:** `ee_corridor` allows Nordostan to threaten a northern flank attack toward the capital, bypassing the front line. Historically uncommitted but a constant threat.
+4. **The Peninsula:** `ee_peninsula` is Nordostan-occupied with a naval base. Connected to Southern Waters. Provides naval projection into the theater.
+5. **Alliance Border:** `ee_nato_border` is protected by Article 5. Any attack on this hex triggers Alliance (NATO) collective defense. Effectively untouchable. No units deployed — serves as supply entry point for Western aid to Heartland.
+6. **Front Line:** The active front line runs between rows 2-3 (occupied/contested and Heartland front hexes). Shown as red dashed line.
+7. **Supply Corridor:** Western military aid enters through `ee_nato_border` -> `ee_western` -> `ee_capital` -> front lines. Disrupting this corridor (e.g., long-range strikes) degrades Heartland resupply.
+
+---
+
+### Theater 2: Formosa Strait (Cathay-Formosa Conflict)
+
+**File:** `THEATER_FORMOSA.svg`
+**Expands:** Global hexes `cathay_6`, `cathay_7`, `cp_formosa_strait`, `formosa`
+**Hex count:** 10 | **Canvas:** 800 x 600 | **Status:** Activates on escalation
+
+#### Hex Registry
+
+| hex_id | display_name | type | owner | adjacent_hexes | starting_units |
+|--------|-------------|------|-------|---------------|----------------|
+| fs_staging_north | Northern Staging | land | cathay | fs_staging_center, fs_strait_north | 2 air, 1 missile |
+| fs_staging_center | Central Staging | land | cathay | fs_staging_north, fs_staging_south, fs_strait_north, fs_strait_south | 4 ground, 2 naval |
+| fs_staging_south | Southern Staging | land | cathay | fs_staging_center, fs_strait_south, fs_scs_approach | 2 naval, 1 ground |
+| fs_strait_north | Northern Passage | sea | neutral | fs_staging_north, fs_staging_center, fs_formosa_north | — |
+| fs_strait_south | Southern Passage | sea_chokepoint | neutral | fs_staging_center, fs_staging_south, fs_formosa_south, fs_scs_approach, fs_channel | — |
+| fs_formosa_north | Northern Shore | land | formosa | fs_strait_north, fs_formosa_south, fs_eastern_sea | 2 ground, 1 air_defense, 1 air |
+| fs_formosa_south | Southern Shore | land | formosa | fs_strait_south, fs_formosa_north, fs_channel, fs_eastern_sea | 1 ground, 1 naval |
+| fs_eastern_sea | Eastern Waters | sea | neutral | fs_formosa_north, fs_formosa_south, fs_channel | 2 naval (Columbia), 1 air (Columbia) |
+| fs_scs_approach | Southern Sea | sea | neutral | fs_staging_south, fs_strait_south, fs_channel | — |
+| fs_channel | The Channel | sea | neutral | fs_strait_south, fs_formosa_south, fs_eastern_sea, fs_scs_approach | — |
+
+#### Starting Force Summary
+
+| Side | Ground | Naval | Air | Air Defense | Missiles | Total |
+|------|--------|-------|-----|------------|----------|-------|
+| Cathay | 5 | 4 | 2 | 0 | 1 | 12 |
+| Formosa | 3 | 1 | 1 | 1 | 0 | 6 |
+| Columbia (pre-positioned) | 0 | 2 | 1 | 0 | 0 | 3 |
+
+#### Special Rules
+
+1. **Amphibious Assault (4:1):** Crossing the strait from any Cathay staging hex to any Formosa hex requires 4:1 force ratio (attacker:defender in the target hex). Naval superiority in the strait hex is a prerequisite — Cathay must control at least one strait hex before landing.
+2. **Strait Chokepoint:** `fs_strait_south` (Southern Passage) is the Formosa Strait chokepoint from the global map. Controlling it allows blockade of Formosa's southern maritime access.
+3. **Columbia/Yamato Intervention:** Columbia and Yamato forces enter via `fs_eastern_sea`. If Columbia declares intervention, additional naval and air units deploy here. Yamato may independently reinforce.
+4. **Semiconductor Fabs:** `fs_formosa_north` contains the world's critical semiconductor fabrication facilities. Combat in this hex risks destroying them (roll for collateral damage each combat round). Destruction triggers global economic shock (-2 to all nations' economic stability).
+5. **Pre-positioned Forces:** Columbia has 2 naval + 1 air pre-positioned in Eastern Waters (routine Pacific deployment). These can intervene immediately if Columbia declares support, without needing to deploy from the global map.
+6. **Southern Approach:** `fs_scs_approach` connects to the South China Sea on the global map. Cathay can reinforce through here, but it is also vulnerable to interdiction from The Channel.
+
+---
+
+### Theater 3: Mashriq / Persian Gulf
+
+**File:** `THEATER_MASHRIQ.svg`
+**Expands:** Global hexes `persia_2`, `persia_3`, `cp_gulf_gate`, `solaria_2`, `phrygia_2`, `levantia`
+**Hex count:** 12 | **Canvas:** 800 x 600 | **Status:** Active at game start
+
+#### Hex Registry
+
+| hex_id | display_name | type | owner | adjacent_hexes | starting_units |
+|--------|-------------|------|-------|---------------|----------------|
+| ma_levantia | Levantia | land | levantia | ma_corridor, ma_interior | 1 air, 1 missile |
+| ma_corridor | The Corridor | land | neutral | ma_levantia, ma_frontier | — |
+| ma_frontier | The Frontier | land | neutral | ma_corridor, ma_highlands, ma_interior | — |
+| ma_interior | The Interior | land | persia | ma_levantia, ma_frontier, ma_highlands | 1 ground, 1 air_defense, 1 missile |
+| ma_highlands | The Highlands | land | persia | ma_frontier, ma_interior, ma_coast | 2 ground |
+| ma_coast | The Coast | land | persia | ma_highlands, ma_gulf_gate, ma_gulf_waters, ma_southern_waters | 2 ground, 1 naval, 1 missile |
+| ma_gulf_gate | Gulf Gate | sea_chokepoint | neutral | ma_coast, ma_gulf_waters, ma_solaria, ma_mirage | — |
+| ma_gulf_waters | Gulf Waters | sea | neutral | ma_coast, ma_gulf_gate, ma_solaria, ma_mirage, ma_southern_waters | 1 naval (Columbia) |
+| ma_solaria | Solaria | land | solaria | ma_gulf_gate, ma_gulf_waters, ma_mirage | 1 ground (Columbia), 1 air |
+| ma_mirage | Mirage | land | mirage | ma_gulf_gate, ma_gulf_waters, ma_solaria | — |
+| ma_southern_waters | Southern Waters | sea | neutral | ma_coast, ma_gulf_waters, ma_yemen | 1 naval (Columbia) |
+| ma_yemen | Southern Gate | land | persia_proxy | ma_southern_waters, ma_corridor | — |
+
+#### Starting Force Summary
+
+| Side | Ground | Naval | Air | Air Defense | Missiles | Total |
+|------|--------|-------|-----|------------|----------|-------|
+| Persia | 5 | 1 | 0 | 1 | 2 | 9 |
+| Levantia | 0 | 0 | 1 | 0 | 1 | 2 |
+| Columbia (deployed) | 1 | 2 | 0 | 0 | 0 | 3 |
+| Gulf States (Solaria) | 0 | 0 | 1 | 0 | 0 | 1 |
+
+#### Special Rules
+
+1. **Gulf Gate Blockade Mechanic:** The Gulf Gate (`ma_gulf_gate`) is blocked AS LONG AS Persia has ground units on The Coast (`ma_coast`). Ground-based anti-ship missiles and coastal defenses make the chokepoint impervious to naval or air attacks alone. To reopen the gate, Columbia must capture The Coast hex — either by amphibious assault from Gulf Waters or by ground invasion through The Frontier -> Highlands -> Coast.
+2. **Ground Invasion Route:** The Corridor (`ma_corridor`) -> The Frontier (`ma_frontier`) -> The Highlands -> The Coast. This is the overland path to break the blockade. The Highlands impose a -1 combat modifier on attackers (mountain terrain).
+3. **Nuclear Dimension:** The Interior (`ma_interior`) contains Persia's nuclear program facilities. Levantia (`ma_levantia`) has an undeclared nuclear arsenal. Strikes on The Interior's nuclear sites risk escalation. If Persia achieves nuclear breakout (event card or timer), the entire theater dynamic shifts.
+4. **Levantia Independent Action:** Levantia strikes Persia targets independently (air and missile strikes on The Interior). Does not coordinate with Columbia. Nuclear-armed — serves as a separate escalation vector.
+5. **Proxy Control — Southern Gate:** `ma_yemen` is controlled by a Persia-aligned proxy force. It functions as a second chokepoint (equivalent to Bab el-Mandeb). The proxy can harass shipping in Southern Waters. Disrupting the proxy requires dedicated Columbia naval operations.
+6. **Oil Infrastructure:** Combat in Gulf Waters, Gulf Gate, Solaria, or Mirage hexes risks damage to oil infrastructure. Each combat round in these hexes: roll for oil disruption event (affects global oil prices, all nations' economies).
+7. **Missile Threat to Gulf States:** Persia missiles in The Coast and The Interior can strike Solaria and Mirage. Gulf states cannot intercept without air defense units deployed. Columbia's air defense from the global map must be physically moved here to protect them.
+8. **Amphibious Assault on Coast:** Landing from Gulf Waters onto The Coast follows the standard 4:1 amphibious ratio (same as Formosa Strait). Combined arms with ground advance through Highlands can relax this to 2:1 if attacking from both directions simultaneously.
