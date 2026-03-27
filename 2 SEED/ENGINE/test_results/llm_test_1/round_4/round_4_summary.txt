@@ -1,0 +1,61 @@
+
+ROUND 4 — H1 2028
+============================================================
+WORLD STATE:
+  Oil: $98 | Active wars: 2 | Theaters: mashriq, eastern_ereb
+
+MAJOR EVENTS:
+  - columbia missile strike on me_persia_1 (conventional): HIT
+  - nordostan attacks heartland at heartland_2: 4 units — losses 1/1
+  - levantia missile strike on me_persia_1 (conventional): INTERCEPTED
+  - columbia covert op (cyber) on cathay: SUCCESS
+  - columbia covert op (disinformation) on caribe: SUCCESS
+  - cathay covert op (cyber) on columbia: FAILED
+  - cathay covert op (disinformation) on formosa: FAILED
+  - nordostan covert op (cyber) on heartland: SUCCESS (detected)
+  - levantia covert op (sabotage) on persia: SUCCESS (detected)
+  - persia blockade on cp_gulf_gate: ACTIVE (naval)
+
+NEGOTIATIONS:
+  - columbia -> heartland: arms_transfer (EXECUTED)
+  - columbia -> heartland: coin_transfer (EXECUTED)
+  - cathay -> nordostan: coin_transfer (EXECUTED)
+  - cathay -> bharata: tech_transfer (EXECUTED)
+  - cathay -> columbia: trade_restriction (EXECUTED)
+  - nordostan -> cathay: coin_transfer (EXECUTED)
+  - heartland -> columbia: arms_request (EXECUTED)
+  - heartland -> columbia: coin_request (EXECUTED)
+  - persia -> cathay: oil_deal (EXECUTED)
+  - gallia -> heartland: security_guarantee (EXECUTED)
+  - albion -> columbia: intelligence_sharing (EXECUTED)
+  - bharata -> cathay: trade_deal (EXECUTED)
+  - phrygia -> nordostan: leverage_play (EXECUTED)
+  - phrygia -> cathay: trade_deal (EXECUTED)
+  - yamato -> columbia: alliance_strengthening (EXECUTED)
+  - caribe -> nordostan: patron_request (EXECUTED)
+  - mirage -> nordostan: financial_services (EXECUTED)
+  - columbia -> cathay: trade_negotiation (FAILED/REJECTED)
+  - nordostan -> columbia: peace_framework (FAILED/REJECTED)
+  - nordostan -> mirage: oil_deal (FAILED/REJECTED)
+  - heartland -> teutonia: aid_request (FAILED/REJECTED)
+  - heartland -> nordostan: peace_exploration (FAILED/REJECTED)
+
+SCHEDULED EVENTS:
+  - election: heartland_wartime_runoff (heartland)
+
+TOP ECONOMIES:
+  Columbia 303 | Cathay 237 | Bharata 54 | Teutonia 47 | Yamato 45
+
+STABILITY WATCH:
+  Heartland 1.0
+  Persia 1.0
+  Caribe 1.0
+  Nordostan 1.7
+  Phrygia 1.8
+  Choson 2.4
+  Levantia 3.2
+
+THE TRAP:
+  Gap ratio: 0.783 (Cathay closing)
+  Naval balance: Columbia 28, Cathay 32 (ratio: 1.14)
+============================================================

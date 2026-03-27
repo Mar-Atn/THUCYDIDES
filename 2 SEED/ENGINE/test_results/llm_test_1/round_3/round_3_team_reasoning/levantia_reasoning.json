@@ -1,0 +1,13 @@
+{
+  "team": "levantia",
+  "round": 3,
+  "strategy": "regional_dominance",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 4.13,
+    "at_war": false
+  },
+  "decisions": [
+    "Continue Persia operations. Maintain nuclear ambiguity."
+  ]
+}

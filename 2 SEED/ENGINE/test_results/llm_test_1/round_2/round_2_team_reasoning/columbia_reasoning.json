@@ -1,0 +1,60 @@
+{
+  "team": "columbia",
+  "round": 2,
+  "assessments": {
+    "military_balance": {
+      "my_total": 58,
+      "enemy_total": 17,
+      "ratio": 3.411764705882353,
+      "ground": 24,
+      "naval": 16,
+      "air": 18,
+      "missiles": 11,
+      "enemies": [
+        "persia"
+      ],
+      "at_war": true,
+      "overstretch": false
+    },
+    "economic_health": "strained",
+    "gap_ratio": 0.727,
+    "naval_balance": "Columbia 16 vs Cathay 14"
+  },
+  "role_positions": {
+    "dealer": {
+      "heritage_targets": {
+        "persia": "active_war",
+        "caribe": "target",
+        "heartland_deal": "premature",
+        "thule": "aspirational",
+        "cathay_containment": "ongoing"
+      },
+      "legacy_urgency": 0.7,
+      "position": "Push all heritage targets simultaneously. Persia first, Caribe opportunistic."
+    },
+    "shield": {
+      "overstretch": "stressed",
+      "theaters": 1,
+      "position": "Cannot sustain more than 2 theaters. Recommend against Caribe action if Persia active."
+    },
+    "shadow": {
+      "cathay_assessment": "Naval buildup at 14. Formosa window analysis: dangerous.",
+      "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
+      "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
+    },
+    "anchor": {
+      "position": "Caribe action NOW while we have the initiative. Persia must conclude with regime change.",
+      "urgency": "high"
+    },
+    "volt": {
+      "position": "Reduce foreign commitments. America First. Cut European subsidies. Focus on domestic economy.",
+      "tension_with_anchor": "high"
+    },
+    "tribune": {
+      "position": "Block military adventurism. Investigate executive overreach.",
+      "has_leverage": true
+    }
+  },
+  "internal_dynamics": "Early rounds: Dealer consolidating. Volt and Anchor competing for successor position. Shield reluctantly executing. Tribune building case.",
+  "final_decision": "Round 2: Dealer prioritizes military operations. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Heartland arms transfer approved."
+}

@@ -1,0 +1,21 @@
+{
+  "team": "heartland",
+  "round": 2,
+  "role_positions": {
+    "beacon": {
+      "position": "No territorial concessions. 1 zones occupied. Support at 42%.",
+      "will_negotiate": true,
+      "red_line": "no_formal_recognition_of_annexation"
+    },
+    "bulwark": {
+      "position": "Defensive hold only. Ground forces: 10.",
+      "election_ambition": "high"
+    },
+    "broker": {
+      "position": "EU membership path is the real prize. Temporary ceasefire preserving future claims is acceptable.",
+      "back_channel": "preparing"
+    }
+  },
+  "internal_dynamics": "Beacon weakening. Bulwark positioning for election. Broker pushing deal.",
+  "final_decision": "Round 2: Internal pressure mounting. Defense budget 55%.  Requesting Western arms. "
+}

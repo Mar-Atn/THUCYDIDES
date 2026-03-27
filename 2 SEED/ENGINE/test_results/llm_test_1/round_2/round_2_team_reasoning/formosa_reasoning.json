@@ -1,0 +1,13 @@
+{
+  "team": "formosa",
+  "round": 2,
+  "strategy": "survival",
+  "assessment": {
+    "eco": "strong",
+    "stab": 7.18,
+    "at_war": false
+  },
+  "decisions": [
+    "Maintain semiconductor production. Quiet defense buildup."
+  ]
+}

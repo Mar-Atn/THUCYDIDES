@@ -1,0 +1,54 @@
+[
+  {
+    "type": "missile_strike",
+    "launcher": "columbia",
+    "target_zone": "me_persia_1",
+    "warhead_type": "conventional",
+    "success": true,
+    "intercepted": false,
+    "ground_destroyed": 0
+  },
+  {
+    "type": "attack",
+    "attacker": "nordostan",
+    "defender": "heartland",
+    "zone": "heartland_2",
+    "origin_zone": "nordostan_1",
+    "attacker_units_committed": 4,
+    "success": true,
+    "zone_captured": false,
+    "attacker_losses": 2,
+    "defender_losses": 2,
+    "attacker_remaining": 2,
+    "defender_remaining": 5,
+    "modifiers": {
+      "attacker_tech": 0,
+      "attacker_morale": 0.0,
+      "amphibious_penalty": 0,
+      "defender_tech": 0,
+      "defender_morale": 0.0,
+      "terrain": 0,
+      "attacker_total": 0.0,
+      "defender_total": 0.0
+    },
+    "is_amphibious": false
+  },
+  {
+    "type": "blockade",
+    "country": "persia",
+    "zone": "cp_gulf_gate",
+    "success": true,
+    "blockade_type": "naval",
+    "chokepoint": "hormuz"
+  },
+  {
+    "type": "covert_op",
+    "op_type": "sabotage",
+    "country": "levantia",
+    "target": "persia",
+    "success": false,
+    "detected": false,
+    "success_probability": 0.6,
+    "detection_probability": 0.4
+  }
+]

@@ -1,0 +1,27 @@
+ROUND 7 WORLD BRIEFING
+========================================
+
+Global GDP: 980.1 coins. Oil: $98/bbl.
+
+ACTIVE CONFLICTS:
+  columbia vs persia (mashriq)
+  nordostan vs heartland (eastern_ereb)
+
+TOP ECONOMIES:
+  Columbia: GDP 328.8, growth +3.4%, stab 5/10
+  Cathay: GDP 281.5, growth +7.2%, stab 9/10
+  Bharata: GDP 69.4, growth +6.8%, stab 7/10
+  Teutonia: GDP 49.1, growth +1.3%, stab 8/10
+  Yamato: GDP 47.7, growth +1.9%, stab 8/10
+
+KEY INDICATORS:
+  WARNING: Nordostan stability 1.0/10
+  WARNING: Heartland stability 1.0/10
+  WARNING: Persia stability 1.0/10
+  WARNING: Levantia stability 1.77/10
+  WARNING: Phrygia stability 1.0/10
+  WARNING: Choson stability 1.5/10
+  WARNING: Caribe stability 1.0/10
+
+BLOCKED CHOKEPOINTS: hormuz
+  GROUND BLOCKADE: gulf_gate by mirage (0G + 1N) -- AIR CANNOT BREAK

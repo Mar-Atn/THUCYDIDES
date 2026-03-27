@@ -1,0 +1,13 @@
+{
+  "team": "caribe",
+  "round": 4,
+  "strategy": "survival",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 1.0,
+    "at_war": false
+  },
+  "decisions": [
+    "Seek external patrons. Resist Columbia pressure."
+  ]
+}

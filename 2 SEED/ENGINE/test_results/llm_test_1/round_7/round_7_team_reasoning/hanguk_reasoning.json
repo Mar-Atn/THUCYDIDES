@@ -1,0 +1,13 @@
+{
+  "team": "hanguk",
+  "round": 7,
+  "strategy": "tech_competition",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 5.95,
+    "at_war": false
+  },
+  "decisions": [
+    "Semiconductor competition with Formosa. Alliance management."
+  ]
+}

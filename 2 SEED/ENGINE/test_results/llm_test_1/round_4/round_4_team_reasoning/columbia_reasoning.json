@@ -1,0 +1,60 @@
+{
+  "team": "columbia",
+  "round": 4,
+  "assessments": {
+    "military_balance": {
+      "my_total": 76,
+      "enemy_total": 18,
+      "ratio": 4.222222222222222,
+      "ground": 28,
+      "naval": 24,
+      "air": 24,
+      "missiles": 9,
+      "enemies": [
+        "persia"
+      ],
+      "at_war": true,
+      "overstretch": false
+    },
+    "economic_health": "strained",
+    "gap_ratio": 0.769,
+    "naval_balance": "Columbia 24 vs Cathay 26"
+  },
+  "role_positions": {
+    "dealer": {
+      "heritage_targets": {
+        "persia": "active_war",
+        "caribe": "target",
+        "heartland_deal": "premature",
+        "thule": "aspirational",
+        "cathay_containment": "ongoing"
+      },
+      "legacy_urgency": 0.9,
+      "position": "Push all heritage targets simultaneously. Persia first, Caribe opportunistic."
+    },
+    "shield": {
+      "overstretch": "stressed",
+      "theaters": 1,
+      "position": "Cannot sustain more than 2 theaters. Recommend against Caribe action if Persia active."
+    },
+    "shadow": {
+      "cathay_assessment": "Naval buildup at 26. Formosa window analysis: dangerous.",
+      "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
+      "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
+    },
+    "anchor": {
+      "position": "Caribe action NOW while we have the initiative. Persia must conclude with regime change.",
+      "urgency": "moderate"
+    },
+    "volt": {
+      "position": "Reduce foreign commitments. America First. Cut European subsidies. Focus on domestic economy.",
+      "tension_with_anchor": "high"
+    },
+    "tribune": {
+      "position": "Minority opposition. Monitor and critique.",
+      "has_leverage": false
+    }
+  },
+  "internal_dynamics": "Mid-game: Succession tension rising. Anchor wants Caribe legacy. Volt wants isolationist turn. Tribune building momentum.",
+  "final_decision": "Round 4: Dealer prioritizes legacy deals. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Heartland arms transfer approved."
+}

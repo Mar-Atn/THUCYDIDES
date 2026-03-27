@@ -1,0 +1,60 @@
+{
+  "team": "columbia",
+  "round": 3,
+  "assessments": {
+    "military_balance": {
+      "my_total": 67,
+      "enemy_total": 18,
+      "ratio": 3.7222222222222223,
+      "ground": 26,
+      "naval": 20,
+      "air": 21,
+      "missiles": 10,
+      "enemies": [
+        "persia"
+      ],
+      "at_war": true,
+      "overstretch": false
+    },
+    "economic_health": "strained",
+    "gap_ratio": 0.751,
+    "naval_balance": "Columbia 20 vs Cathay 20"
+  },
+  "role_positions": {
+    "dealer": {
+      "heritage_targets": {
+        "persia": "active_war",
+        "caribe": "target",
+        "heartland_deal": "premature",
+        "thule": "aspirational",
+        "cathay_containment": "ongoing"
+      },
+      "legacy_urgency": 0.8,
+      "position": "Push all heritage targets simultaneously. Persia first, Caribe opportunistic."
+    },
+    "shield": {
+      "overstretch": "stressed",
+      "theaters": 1,
+      "position": "Cannot sustain more than 2 theaters. Recommend against Caribe action if Persia active."
+    },
+    "shadow": {
+      "cathay_assessment": "Naval buildup at 20. Formosa window analysis: dangerous.",
+      "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
+      "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
+    },
+    "anchor": {
+      "position": "Caribe action NOW while we have the initiative. Persia must conclude with regime change.",
+      "urgency": "high"
+    },
+    "volt": {
+      "position": "Reduce foreign commitments. America First. Cut European subsidies. Focus on domestic economy.",
+      "tension_with_anchor": "high"
+    },
+    "tribune": {
+      "position": "Minority opposition. Monitor and critique.",
+      "has_leverage": false
+    }
+  },
+  "internal_dynamics": "Mid-game: Succession tension rising. Anchor wants Caribe legacy. Volt wants isolationist turn. Tribune building momentum.",
+  "final_decision": "Round 3: Dealer prioritizes military operations. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Heartland arms transfer approved."
+}

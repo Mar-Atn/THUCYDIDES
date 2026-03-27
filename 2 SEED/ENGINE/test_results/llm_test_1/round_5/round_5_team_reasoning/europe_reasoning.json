@@ -1,0 +1,48 @@
+{
+  "team": "europe",
+  "round": 5,
+  "role_positions": {
+    "lumiere": {
+      "position": "European strategic autonomy. French nuclear umbrella. Independent Persia policy.",
+      "defense_spending_push": "increase to 3%",
+      "heartland_support": "strong"
+    },
+    "forge": {
+      "position": "Economic stability first. Cathay trade essential. Reluctant rearmament.",
+      "cathay_trade_protection": "high priority",
+      "heartland_support": "strong but budget-constrained"
+    },
+    "sentinel": {
+      "position": "Maximum Nordostan containment. NATO Article 5 sacred. Defense spending to 4%.",
+      "heartland_support": "maximum possible",
+      "threat_level": "existential"
+    },
+    "ponte": {
+      "position": "Debt crisis (debt 8.0). Block anything that costs money. Hedge between all sides.",
+      "eu_blocker": true,
+      "for_sale": "to highest bidder"
+    },
+    "mariner": {
+      "position": "Special relationship with Columbia. Intelligence cooperation. Post-Brexit relevance.",
+      "intelligence_sharing": "columbia_focused"
+    }
+  },
+  "eu_decisions": [
+    {
+      "issue": "nordostan_sanctions_tightening",
+      "result": "approved",
+      "level": 3
+    },
+    {
+      "issue": "heartland_aid_package",
+      "result": "approved_full",
+      "amount": 2
+    },
+    {
+      "issue": "defense_spending_target",
+      "result": "3%_target_aspirational",
+      "binding": false
+    }
+  ],
+  "final_decision": "Round 5: EU united on Nordostan sanctions. Heartland aid: full. Defense spending gradual increase."
+}

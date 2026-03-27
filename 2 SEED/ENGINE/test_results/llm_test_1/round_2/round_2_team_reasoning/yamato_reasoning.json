@@ -1,0 +1,13 @@
+{
+  "team": "yamato",
+  "round": 2,
+  "strategy": "remilitarization",
+  "assessment": {
+    "eco": "moderate",
+    "stab": 8.0,
+    "at_war": false
+  },
+  "decisions": [
+    "Gradual remilitarization. Strengthen Columbia alliance."
+  ]
+}

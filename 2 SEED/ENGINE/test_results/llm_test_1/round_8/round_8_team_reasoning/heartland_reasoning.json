@@ -1,0 +1,21 @@
+{
+  "team": "heartland",
+  "round": 8,
+  "role_positions": {
+    "beacon": {
+      "position": "No territorial concessions. 1 zones occupied. Support at 5%.",
+      "will_negotiate": true,
+      "red_line": "no_formal_recognition_of_annexation"
+    },
+    "bulwark": {
+      "position": "Defensive hold only. Ground forces: 17.",
+      "election_ambition": "high"
+    },
+    "broker": {
+      "position": "EU membership path is the real prize. Temporary ceasefire preserving future claims is acceptable.",
+      "back_channel": "active with Compass (Nordostan)"
+    }
+  },
+  "internal_dynamics": "Crisis mode. Bulwark openly challenging. Broker in EU capitals.",
+  "final_decision": "Round 8: Internal pressure mounting. Defense budget 55%.  Requesting Western arms. Broker exploring back-channels."
+}

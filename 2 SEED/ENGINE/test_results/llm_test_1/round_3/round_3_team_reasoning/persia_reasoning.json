@@ -1,0 +1,22 @@
+{
+  "team": "persia",
+  "round": 3,
+  "role_positions": {
+    "anvil": {
+      "gulf_gate_status": "maintained",
+      "position": "Gulf Gate blockade is our primary leverage. Do NOT release without massive concessions.",
+      "business_interests": "IRGC businesses suffering from sanctions. Wants deal that preserves economic network."
+    },
+    "furnace": {
+      "position": "Nuclear program is divine right. Resistance continues. But survival comes first.",
+      "consolidation": "building",
+      "independence_from_anvil": "growing"
+    },
+    "dawn": {
+      "position": "People are suffering. Sanctions and war destroy the economy. Engagement with West is only path to relief.",
+      "urgency": "desperate"
+    }
+  },
+  "internal_dynamics": "Furnace gaining authority. Anvil controls military but Furnace controls theology. Dawn exploits cracks.",
+  "final_decision": "Round 3: Furnace asserting. Gulf Gate maintained. Nuclear R&D accelerating. Economy: crisis. Dawn pushing for engagement."
+}

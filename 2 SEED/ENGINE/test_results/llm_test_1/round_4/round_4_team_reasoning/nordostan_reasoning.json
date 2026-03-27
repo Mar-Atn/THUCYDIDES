@@ -1,0 +1,25 @@
+{
+  "team": "nordostan",
+  "round": 4,
+  "role_positions": {
+    "pathfinder": {
+      "deal_window": "open",
+      "military_situation": "advantageous",
+      "territorial_hold": 1,
+      "position": "Probe for deal with Dealer while window open. Hold all territory as non-negotiable minimum."
+    },
+    "ironhand": {
+      "attrition_rate": 0.9,
+      "replacement_capacity": 0.68,
+      "position": "Attrition unsustainable. Recommend defensive posture.",
+      "loyalty": "calculating"
+    },
+    "compass": {
+      "sanctions_pain": 27,
+      "position": "Sanctions devastating. Western assets frozen. Back-channel to Columbia: offer oil deal for sanctions relief.",
+      "personal_stake": "high -- wants asset unfreezing"
+    }
+  },
+  "internal_dynamics": "",
+  "final_decision": "Round 4: Pathfinder probing for deal. Military: offensive. Economy: crisis. OPEC: high production for revenue."
+}

@@ -1,0 +1,13 @@
+{
+  "team": "choson",
+  "round": 4,
+  "strategy": "provocateur",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 2.73,
+    "at_war": false
+  },
+  "decisions": [
+    "Maintain tension. Nuclear leverage for survival."
+  ]
+}

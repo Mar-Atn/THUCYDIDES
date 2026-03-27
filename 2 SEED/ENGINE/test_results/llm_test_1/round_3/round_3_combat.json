@@ -1,0 +1,109 @@
+[
+  {
+    "type": "missile_strike",
+    "launcher": "columbia",
+    "target_zone": "me_persia_1",
+    "warhead_type": "conventional",
+    "success": true,
+    "intercepted": false,
+    "ground_destroyed": 0
+  },
+  {
+    "type": "covert_op",
+    "op_type": "cyber",
+    "country": "columbia",
+    "target": "cathay",
+    "success": false,
+    "detected": true,
+    "success_probability": 0.65,
+    "detection_probability": 0.45
+  },
+  {
+    "type": "covert_op",
+    "op_type": "cyber",
+    "country": "cathay",
+    "target": "columbia",
+    "success": false,
+    "detected": false,
+    "success_probability": 0.65,
+    "detection_probability": 0.45
+  },
+  {
+    "type": "covert_op",
+    "op_type": "disinformation",
+    "country": "cathay",
+    "target": "formosa",
+    "success": true,
+    "detected": true,
+    "success_probability": 0.75,
+    "detection_probability": 0.25,
+    "stability_impact": -0.3,
+    "support_impact": -2
+  },
+  {
+    "type": "attack",
+    "attacker": "nordostan",
+    "defender": "heartland",
+    "zone": "heartland_2",
+    "origin_zone": "nordostan_1",
+    "attacker_units_committed": 4,
+    "success": true,
+    "zone_captured": false,
+    "attacker_losses": 2,
+    "defender_losses": 1,
+    "attacker_remaining": 2,
+    "defender_remaining": 2,
+    "modifiers": {
+      "attacker_tech": 0,
+      "attacker_morale": -0.8600000000000001,
+      "amphibious_penalty": 0,
+      "defender_tech": 0,
+      "defender_morale": -1.415,
+      "terrain": 0,
+      "attacker_total": -0.8600000000000001,
+      "defender_total": -1.415
+    },
+    "is_amphibious": false
+  },
+  {
+    "type": "covert_op",
+    "op_type": "cyber",
+    "country": "nordostan",
+    "target": "heartland",
+    "success": false,
+    "detected": false,
+    "success_probability": 0.55,
+    "detection_probability": 0.45
+  },
+  {
+    "type": "blockade",
+    "country": "persia",
+    "zone": "cp_gulf_gate",
+    "success": true,
+    "blockade_type": "naval",
+    "chokepoint": "hormuz"
+  },
+  {
+    "type": "missile_strike",
+    "launcher": "levantia",
+    "target_zone": "me_persia_1",
+    "warhead_type": "conventional",
+    "success": false,
+    "error": "levantia has no strategic missiles"
+  },
+  {
+    "type": "covert_op",
+    "op_type": "sabotage",
+    "country": "levantia",
+    "target": "persia",
+    "success": false,
+    "detected": false,
+    "success_probability": 0.5,
+    "detection_probability": 0.6
+  },
+  {
+    "type": "missile_test",
+    "country": "choson",
+    "success": true
+  }
+]

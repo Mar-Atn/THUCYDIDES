@@ -1,0 +1,13 @@
+{
+  "team": "choson",
+  "round": 3,
+  "strategy": "provocateur",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 3.11,
+    "at_war": false
+  },
+  "decisions": [
+    "Round 3: Provocative missile test for concessions."
+  ]
+}

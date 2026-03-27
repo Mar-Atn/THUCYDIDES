@@ -1,0 +1,60 @@
+
+ROUND 2 — H1 2027
+============================================================
+WORLD STATE:
+  Oil: $98 | Active wars: 2 | Theaters: mashriq, eastern_ereb
+
+MAJOR EVENTS:
+  - columbia missile strike on me_persia_1 (conventional): HIT
+  - nordostan attacks heartland at heartland_2: 4 units — losses 2/2
+  - levantia missile strike on me_persia_1 (conventional): INTERCEPTED
+  - columbia covert op (cyber) on cathay: FAILED (detected)
+  - cathay covert op (cyber) on columbia: SUCCESS (detected)
+  - nordostan covert op (cyber) on heartland: FAILED
+  - levantia covert op (sabotage) on persia: SUCCESS
+  - persia blockade on cp_gulf_gate: ACTIVE (naval)
+
+NEGOTIATIONS:
+  - columbia -> heartland: arms_transfer (EXECUTED)
+  - columbia -> heartland: coin_transfer (EXECUTED)
+  - cathay -> bharata: tech_transfer (EXECUTED)
+  - cathay -> columbia: trade_restriction (EXECUTED)
+  - heartland -> columbia: arms_request (EXECUTED)
+  - heartland -> columbia: coin_request (EXECUTED)
+  - heartland -> teutonia: aid_request (EXECUTED)
+  - persia -> cathay: oil_deal (EXECUTED)
+  - persia -> nordostan: intelligence_sharing (EXECUTED)
+  - teutonia -> heartland: coin_transfer (EXECUTED)
+  - albion -> columbia: intelligence_sharing (EXECUTED)
+  - bharata -> cathay: trade_deal (EXECUTED)
+  - bharata -> columbia: tech_cooperation (EXECUTED)
+  - formosa -> columbia: arms_request (EXECUTED)
+  - phrygia -> nordostan: leverage_play (EXECUTED)
+  - phrygia -> cathay: trade_deal (EXECUTED)
+  - yamato -> columbia: alliance_strengthening (EXECUTED)
+  - solaria -> columbia: investment (EXECUTED)
+  - cathay -> nordostan: coin_transfer (FAILED/REJECTED)
+  - nordostan -> columbia: peace_framework (FAILED/REJECTED)
+  - nordostan -> cathay: coin_transfer (FAILED/REJECTED)
+  - nordostan -> mirage: oil_deal (FAILED/REJECTED)
+  - caribe -> cathay: patron_request (FAILED/REJECTED)
+
+SCHEDULED EVENTS:
+  - election: columbia_midterms (columbia)
+
+TOP ECONOMIES:
+  Columbia 289 | Cathay 217 | Bharata 48 | Teutonia 46 | Yamato 44
+
+STABILITY WATCH:
+  Persia 1.0
+  Caribe 1.0
+  Heartland 2.2
+  Phrygia 3.0
+  Choson 3.1
+  Nordostan 3.3
+  Levantia 4.1
+
+THE TRAP:
+  Gap ratio: 0.751 (Cathay closing)
+  Naval balance: Columbia 20, Cathay 20 (ratio: 1.00)
+============================================================

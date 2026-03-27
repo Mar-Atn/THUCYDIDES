@@ -1,0 +1,33 @@
+{
+  "team": "cathay",
+  "round": 8,
+  "role_positions": {
+    "helmsman": {
+      "formosa_window_score": 0.92,
+      "formosa_decision": "blockade",
+      "age": 76,
+      "legacy_pressure": "extreme",
+      "position": "Formosa window assessment: 92%. Decision: blockade."
+    },
+    "rampart": {
+      "readiness": 0.95,
+      "honest_assessment": "Fleet at 95% effective readiness. Purge damage fading.",
+      "position": "Approaching readiness but amphibious capability uncertain."
+    },
+    "abacus": {
+      "reported_growth": 7.25,
+      "estimated_real_growth": 6.4,
+      "position": "Real growth ~6.4%, not 7.2%. Military spending sustainable but war would be catastrophic for economy."
+    },
+    "circuit": {
+      "rare_earth_leverage": 0.7,
+      "position": "Use tech competition, not military force. Rare earth restrictions give leverage. Formosa confrontation would trigger devastating tech sanctions."
+    },
+    "sage": {
+      "alarm_level": "normal",
+      "position": "Defer to Helmsman."
+    }
+  },
+  "internal_dynamics": "",
+  "final_decision": "Round 8: Helmsman's Formosa assessment 92%. Decision: blockade. Naval buildup accelerated. Budget: naval-heavy (45% military, 15% tech). Rampart urges readiness."
+}

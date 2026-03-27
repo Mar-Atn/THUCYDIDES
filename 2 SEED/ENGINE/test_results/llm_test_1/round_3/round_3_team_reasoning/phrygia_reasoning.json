@@ -1,0 +1,13 @@
+{
+  "team": "phrygia",
+  "round": 3,
+  "strategy": "maximum_leverage",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 3.03,
+    "at_war": false
+  },
+  "decisions": [
+    "Maximize Bosphorus leverage. Play NATO vs Nordostan for concessions."
+  ]
+}

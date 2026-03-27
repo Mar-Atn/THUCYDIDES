@@ -1,0 +1,51 @@
+
+ROUND 1 — H2 2026
+============================================================
+WORLD STATE:
+  Oil: $98 | Active wars: 2 | Theaters: mashriq, eastern_ereb
+
+MAJOR EVENTS:
+  - columbia missile strike on me_persia_1 (conventional): HIT
+  - nordostan attacks heartland at heartland_2: 4 units — losses 2/2
+  - levantia covert op (sabotage) on persia: FAILED
+  - persia blockade on cp_gulf_gate: ACTIVE (naval)
+
+NEGOTIATIONS:
+  - columbia -> heartland: arms_transfer (EXECUTED)
+  - columbia -> heartland: coin_transfer (EXECUTED)
+  - cathay -> bharata: tech_transfer (EXECUTED)
+  - cathay -> columbia: trade_restriction (EXECUTED)
+  - nordostan -> cathay: coin_transfer (EXECUTED)
+  - nordostan -> mirage: oil_deal (EXECUTED)
+  - heartland -> columbia: arms_request (EXECUTED)
+  - heartland -> columbia: coin_request (EXECUTED)
+  - heartland -> teutonia: aid_request (EXECUTED)
+  - albion -> columbia: intelligence_sharing (EXECUTED)
+  - bharata -> cathay: trade_deal (EXECUTED)
+  - phrygia -> nordostan: leverage_play (EXECUTED)
+  - yamato -> columbia: alliance_strengthening (EXECUTED)
+  - solaria -> columbia: investment (EXECUTED)
+  - caribe -> cathay: patron_request (EXECUTED)
+  - mirage -> nordostan: financial_services (EXECUTED)
+  - cathay -> nordostan: coin_transfer (FAILED/REJECTED)
+  - persia -> cathay: oil_deal (FAILED/REJECTED)
+  - bharata -> columbia: tech_cooperation (FAILED/REJECTED)
+  - formosa -> columbia: arms_request (FAILED/REJECTED)
+  - phrygia -> cathay: trade_deal (FAILED/REJECTED)
+
+TOP ECONOMIES:
+  Columbia 286 | Cathay 208 | Teutonia 46 | Bharata 45 | Yamato 43
+
+STABILITY WATCH:
+  Persia 1.0
+  Caribe 1.0
+  Choson 3.5
+  Heartland 3.6
+  Phrygia 3.9
+  Nordostan 4.1
+  Levantia 4.6
+
+THE TRAP:
+  Gap ratio: 0.727 (Cathay closing)
+  Naval balance: Columbia 16, Cathay 14 (ratio: 0.88)
+============================================================

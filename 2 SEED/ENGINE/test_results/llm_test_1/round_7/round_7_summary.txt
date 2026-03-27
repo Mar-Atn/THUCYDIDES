@@ -1,0 +1,60 @@
+
+ROUND 7 — H2 2029
+============================================================
+WORLD STATE:
+  Oil: $98 | Active wars: 2 | Theaters: mashriq, eastern_ereb
+
+MAJOR EVENTS:
+  - columbia missile strike on me_persia_1 (conventional): HIT
+  - nordostan attacks heartland at heartland_2: 4 units — losses 0/0 — ZONE CAPTURED
+  - levantia missile strike on me_persia_1 (conventional): INTERCEPTED
+  - columbia covert op (cyber) on cathay: SUCCESS (detected)
+  - columbia covert op (disinformation) on caribe: SUCCESS
+  - cathay covert op (cyber) on columbia: FAILED (detected)
+  - cathay covert op (disinformation) on formosa: FAILED (detected)
+  - nordostan covert op (cyber) on heartland: FAILED (detected)
+  - persia covert op (sabotage) on levantia: SUCCESS (detected)
+  - levantia covert op (sabotage) on persia: FAILED (detected)
+  - persia blockade on cp_gulf_gate: ACTIVE (naval)
+
+NEGOTIATIONS:
+  - columbia -> heartland: arms_transfer (EXECUTED)
+  - columbia -> heartland: coin_transfer (EXECUTED)
+  - cathay -> nordostan: coin_transfer (EXECUTED)
+  - cathay -> bharata: tech_transfer (EXECUTED)
+  - nordostan -> cathay: coin_transfer (EXECUTED)
+  - heartland -> columbia: arms_request (EXECUTED)
+  - heartland -> columbia: coin_request (EXECUTED)
+  - teutonia -> heartland: coin_transfer (EXECUTED)
+  - gallia -> heartland: security_guarantee (EXECUTED)
+  - albion -> columbia: intelligence_sharing (EXECUTED)
+  - bharata -> cathay: trade_deal (EXECUTED)
+  - bharata -> columbia: tech_cooperation (EXECUTED)
+  - formosa -> columbia: arms_request (EXECUTED)
+  - phrygia -> cathay: trade_deal (EXECUTED)
+  - yamato -> columbia: alliance_strengthening (EXECUTED)
+  - solaria -> columbia: investment (EXECUTED)
+  - caribe -> cathay: patron_request (EXECUTED)
+  - columbia -> cathay: trade_negotiation (FAILED/REJECTED)
+  - cathay -> columbia: trade_restriction (FAILED/REJECTED)
+  - nordostan -> mirage: oil_deal (FAILED/REJECTED)
+  - heartland -> teutonia: aid_request (FAILED/REJECTED)
+  - heartland -> nordostan: peace_exploration (FAILED/REJECTED)
+
+TOP ECONOMIES:
+  Columbia 329 | Cathay 282 | Bharata 69 | Teutonia 49 | Yamato 48
+
+STABILITY WATCH:
+  Nordostan 1.0
+  Heartland 1.0
+  Persia 1.0
+  Phrygia 1.0
+  Caribe 1.0
+  Choson 1.5
+  Levantia 1.8
+  Columbia 4.7
+
+THE TRAP:
+  Gap ratio: 0.856 (Cathay closing)
+  Naval balance: Columbia 40, Cathay 50 (ratio: 1.25)
+============================================================

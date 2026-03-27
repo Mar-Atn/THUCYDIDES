@@ -1,0 +1,13 @@
+{
+  "team": "solaria",
+  "round": 7,
+  "strategy": "oil_power_broker",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 8.25,
+    "at_war": false
+  },
+  "decisions": [
+    "OPEC normal production. Vision 2030 investment. Hedge between Columbia and Cathay."
+  ]
+}

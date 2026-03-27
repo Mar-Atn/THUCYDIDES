@@ -1,0 +1,13 @@
+{
+  "team": "bharata",
+  "round": 5,
+  "strategy": "non_alignment_optimization",
+  "assessment": {
+    "eco": "crisis",
+    "stab": 6.71,
+    "at_war": false
+  },
+  "decisions": [
+    "Maintain equidistance between Columbia and Cathay. Invest in tech."
+  ]
+}

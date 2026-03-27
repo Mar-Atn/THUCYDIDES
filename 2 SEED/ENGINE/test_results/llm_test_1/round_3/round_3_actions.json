@@ -1,0 +1,694 @@
+{
+  "columbia": {
+    "budget": {
+      "social_spending": 77.95710000000001,
+      "social_pct": 0.27,
+      "social_spending_ratio": 0.27,
+      "military_total": 115.49200000000002,
+      "tech_total": 49.0841,
+      "military": {
+        "ground": {
+          "coins": 34.647600000000004,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 46.19680000000001,
+          "tier": "accelerated"
+        },
+        "tactical_air": {
+          "coins": 34.647600000000004,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "cathay": 2,
+      "nordostan": 2
+    },
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 3
+    },
+    "military_ops": [
+      {
+        "type": "air_strike",
+        "target": "persia",
+        "target_zone": "me_persia_1",
+        "units": 2
+      }
+    ],
+    "covert_ops": [
+      {
+        "type": "cyber",
+        "target": "cathay",
+        "objective": "intelligence_gathering"
+      }
+    ],
+    "tech_rd": {
+      "ai": 34.358869999999996,
+      "nuclear": 0
+    }
+  },
+  "cathay": {
+    "budget": {
+      "social_spending": 39.0204,
+      "social_pct": 0.18000000000000002,
+      "social_spending_ratio": 0.18000000000000002,
+      "military_total": 97.55099999999999,
+      "tech_total": 32.516999999999996,
+      "military": {
+        "ground": {
+          "coins": 19.510199999999998,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 53.65305,
+          "tier": "accelerated"
+        },
+        "tactical_air": {
+          "coins": 24.387749999999997,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {
+      "columbia": 1
+    },
+    "sanctions": {},
+    "military_ops": [],
+    "covert_ops": [
+      {
+        "type": "cyber",
+        "target": "columbia",
+        "objective": "military_intelligence"
+      },
+      {
+        "type": "disinformation",
+        "target": "formosa",
+        "objective": "undermine_resistance_will"
+      }
+    ],
+    "tech_rd": {
+      "ai": 26.013599999999997,
+      "nuclear": 6.503399999999999
+    }
+  },
+  "nordostan": {
+    "budget": {
+      "social_spending": 4.03524,
+      "social_pct": 0.2,
+      "social_spending_ratio": 0.2,
+      "military_total": 10.088099999999999,
+      "tech_total": 1.00881,
+      "military": {
+        "ground": {
+          "coins": 7.061669999999999,
+          "tier": "accelerated"
+        },
+        "naval": {
+          "coins": 1.00881,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.01762,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military_ops": [
+      {
+        "type": "attack",
+        "target": "heartland",
+        "target_zone": "heartland_2",
+        "units": 4,
+        "origin_zone": "nordostan_1"
+      }
+    ],
+    "opec_production": "high",
+    "nuclear_posture": "elevated",
+    "tech_rd": {
+      "ai": 0.504405,
+      "nuclear": 0
+    },
+    "covert_ops": [
+      {
+        "type": "cyber",
+        "target": "heartland",
+        "objective": "military_disruption"
+      }
+    ]
+  },
+  "heartland": {
+    "budget": {
+      "social_spending": 0.341925,
+      "social_pct": 0.15,
+      "social_spending_ratio": 0.15,
+      "military_total": 1.2537250000000002,
+      "tech_total": 0.045590000000000006,
+      "military": {
+        "ground": {
+          "coins": 1.0029800000000002,
+          "tier": "accelerated"
+        },
+        "naval": {
+          "coins": 0,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.25074500000000005,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 0,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "persia": {
+    "budget": {
+      "social_spending": 0.4441824000000001,
+      "social_pct": 0.12000000000000001,
+      "social_spending_ratio": 0.12000000000000001,
+      "military_total": 1.6656840000000002,
+      "tech_total": 0.37015200000000004,
+      "military": {
+        "ground": {
+          "coins": 0.8328420000000001,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.33313680000000007,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.4997052,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "military_ops": [
+      {
+        "type": "maintain_blockade",
+        "zone": "cp_gulf_gate",
+        "description": "Maintain ground-based Gulf Gate blockade"
+      }
+    ],
+    "tech_rd": {
+      "ai": 0.07403040000000001,
+      "nuclear": 0.22209120000000002
+    },
+    "opec_production": "normal",
+    "covert_ops": []
+  },
+  "gallia": {
+    "budget": {
+      "social_spending": 11.447699999999998,
+      "social_pct": 0.32999999999999996,
+      "social_spending_ratio": 0.32999999999999996,
+      "military_total": 6.938,
+      "tech_total": 2.7752,
+      "military": {
+        "ground": {
+          "coins": 3.469,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 1.3876,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.0814,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 2
+    },
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 1.9426399999999997,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "teutonia": {
+    "budget": {
+      "social_spending": 13.83,
+      "social_pct": 0.3,
+      "social_spending_ratio": 0.3,
+      "military_total": 7.779375000000001,
+      "tech_total": 3.688,
+      "military": {
+        "ground": {
+          "coins": 3.8896875000000004,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 1.5558750000000003,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.3338125,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 2
+    },
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 2.5816,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "freeland": {
+    "budget": {
+      "social_spending": 2.028,
+      "social_pct": 0.2,
+      "social_spending_ratio": 0.2,
+      "military_total": 3.0420000000000003,
+      "tech_total": 0.8112,
+      "military": {
+        "ground": {
+          "coins": 1.5210000000000001,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.6084,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.9126000000000001,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 2
+    },
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 0.56784,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "ponte": {
+    "budget": {
+      "social_spending": 6.698999999999999,
+      "social_pct": 0.3,
+      "social_spending_ratio": 0.3,
+      "military_total": 2.233,
+      "tech_total": 1.7864,
+      "military": {
+        "ground": {
+          "coins": 1.1165,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.44660000000000005,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.6699,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 2
+    },
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 1.2504799999999998,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "albion": {
+    "budget": {
+      "social_spending": 9.447199999999999,
+      "social_pct": 0.27999999999999997,
+      "social_spending_ratio": 0.27999999999999997,
+      "military_total": 6.748000000000001,
+      "tech_total": 2.6992000000000003,
+      "military": {
+        "ground": {
+          "coins": 3.3740000000000006,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 1.3496000000000004,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.0244000000000004,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {
+      "nordostan": 3,
+      "persia": 2
+    },
+    "military_ops": [],
+    "tech_rd": {
+      "ai": 1.88944,
+      "nuclear": 0
+    },
+    "covert_ops": []
+  },
+  "bharata": {
+    "budget": {
+      "social_spending": 9.540000000000001,
+      "social_pct": 0.2,
+      "social_spending_ratio": 0.2,
+      "military_total": 9.540000000000001,
+      "tech_total": 4.7700000000000005,
+      "military": {
+        "ground": {
+          "coins": 4.7700000000000005,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 2.862,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 1.9080000000000004,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 2.3850000000000002,
+      "nuclear": 0
+    }
+  },
+  "levantia": {
+    "covert_ops": [
+      {
+        "type": "sabotage",
+        "target": "persia",
+        "objective": "nuclear_program_disruption"
+      }
+    ],
+    "military_ops": [
+      {
+        "type": "air_strike",
+        "target": "persia",
+        "target_zone": "me_persia_1",
+        "units": 2
+      }
+    ],
+    "budget": {
+      "social_spending": 1.2213,
+      "social_pct": 0.23000000000000004,
+      "social_spending_ratio": 0.23000000000000004,
+      "military_total": 1.8584999999999998,
+      "tech_total": 0.2655,
+      "military": {
+        "ground": {
+          "coins": 0.9292499999999999,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.5575499999999999,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.3717,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.13275,
+      "nuclear": 0
+    }
+  },
+  "formosa": {
+    "budget": {
+      "social_spending": 1.8678000000000001,
+      "social_pct": 0.22,
+      "social_spending_ratio": 0.22,
+      "military_total": 2.1225,
+      "tech_total": 1.2735,
+      "military": {
+        "ground": {
+          "coins": 1.06125,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.63675,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.42450000000000004,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.63675,
+      "nuclear": 0
+    }
+  },
+  "phrygia": {
+    "budget": {
+      "social_spending": 2.4050179999999997,
+      "social_pct": 0.22,
+      "social_spending_ratio": 0.22,
+      "military_total": 1.6397849999999998,
+      "tech_total": 0.5465949999999999,
+      "military": {
+        "ground": {
+          "coins": 0.8198924999999999,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.4919354999999999,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.327957,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.27329749999999997,
+      "nuclear": 0
+    }
+  },
+  "yamato": {
+    "budget": {
+      "social_spending": 13.2,
+      "social_pct": 0.3,
+      "social_spending_ratio": 0.3,
+      "military_total": 13.64,
+      "tech_total": 4.4,
+      "military": {
+        "ground": {
+          "coins": 6.82,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 4.092,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 2.728,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 2.2,
+      "nuclear": 0
+    }
+  },
+  "solaria": {
+    "opec_production": "normal",
+    "budget": {
+      "social_spending": 2.9425,
+      "social_pct": 0.25,
+      "social_spending_ratio": 0.25,
+      "military_total": 1.7654999999999998,
+      "tech_total": 0.5885,
+      "military": {
+        "ground": {
+          "coins": 0.8827499999999999,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.52965,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.35309999999999997,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.29425,
+      "nuclear": 0
+    }
+  },
+  "choson": {
+    "military_ops": [
+      {
+        "type": "missile_test",
+        "target_zone": "g_sea_of_yamato"
+      }
+    ],
+    "budget": {
+      "social_spending": 0.02376,
+      "social_pct": 0.08,
+      "social_spending_ratio": 0.08,
+      "military_total": 0.1485,
+      "tech_total": 0.01485,
+      "military": {
+        "ground": {
+          "coins": 0.07425,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.04455,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.0297,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.007425,
+      "nuclear": 0
+    }
+  },
+  "hanguk": {
+    "budget": {
+      "social_spending": 4.7025,
+      "social_pct": 0.25,
+      "social_spending_ratio": 0.25,
+      "military_total": 2.8215,
+      "tech_total": 2.8215,
+      "military": {
+        "ground": {
+          "coins": 1.41075,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.8464499999999999,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.5643,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 1.41075,
+      "nuclear": 0
+    }
+  },
+  "caribe": {
+    "budget": {
+      "social_spending": 0.1580184375,
+      "social_pct": 0.1,
+      "social_spending_ratio": 0.1,
+      "military_total": 0.23702765625,
+      "tech_total": 0.07900921875,
+      "military": {
+        "ground": {
+          "coins": 0.118513828125,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.07110829687499999,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.04740553125,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.039504609375,
+      "nuclear": 0
+    }
+  },
+  "mirage": {
+    "budget": {
+      "social_spending": 1.08,
+      "social_pct": 0.2,
+      "social_spending_ratio": 0.2,
+      "military_total": 0.81,
+      "tech_total": 0.27,
+      "military": {
+        "ground": {
+          "coins": 0.405,
+          "tier": "normal"
+        },
+        "naval": {
+          "coins": 0.243,
+          "tier": "normal"
+        },
+        "tactical_air": {
+          "coins": 0.16200000000000003,
+          "tier": "normal"
+        }
+      }
+    },
+    "tariffs": {},
+    "sanctions": {},
+    "tech_rd": {
+      "ai": 0.135,
+      "nuclear": 0
+    }
+  }
+}

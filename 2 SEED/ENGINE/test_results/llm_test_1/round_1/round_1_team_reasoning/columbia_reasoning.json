@@ -1,0 +1,60 @@
+{
+  "team": "columbia",
+  "round": 1,
+  "assessments": {
+    "military_balance": {
+      "my_total": 51,
+      "enemy_total": 16,
+      "ratio": 3.1875,
+      "ground": 22,
+      "naval": 14,
+      "air": 15,
+      "missiles": 12,
+      "enemies": [
+        "persia"
+      ],
+      "at_war": true,
+      "overstretch": false
+    },
+    "economic_health": "strained",
+    "gap_ratio": 0.679,
+    "naval_balance": "Columbia 14 vs Cathay 9"
+  },
+  "role_positions": {
+    "dealer": {
+      "heritage_targets": {
+        "persia": "active_war",
+        "caribe": "target",
+        "heartland_deal": "premature",
+        "thule": "aspirational",
+        "cathay_containment": "stable"
+      },
+      "legacy_urgency": 0.6,
+      "position": "Push all heritage targets simultaneously. Persia first, Caribe opportunistic."
+    },
+    "shield": {
+      "overstretch": "stressed",
+      "theaters": 1,
+      "position": "Cannot sustain more than 2 theaters. Recommend against Caribe action if Persia active."
+    },
+    "shadow": {
+      "cathay_assessment": "Naval buildup at 9. Formosa window analysis: not imminent.",
+      "nordostan_assessment": "Holding together.",
+      "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
+    },
+    "anchor": {
+      "position": "Caribe action NOW while we have the initiative. Persia must conclude with regime change.",
+      "urgency": "high"
+    },
+    "volt": {
+      "position": "Reduce foreign commitments. America First. Cut European subsidies. Focus on domestic economy.",
+      "tension_with_anchor": "high"
+    },
+    "tribune": {
+      "position": "Block military adventurism. Investigate executive overreach.",
+      "has_leverage": true
+    }
+  },
+  "internal_dynamics": "Early rounds: Dealer consolidating. Volt and Anchor competing for successor position. Shield reluctantly executing. Tribune building case.",
+  "final_decision": "Round 1: Dealer prioritizes military operations. Budget: 27% social, 40% military, 12% tech.  Heartland arms transfer approved."
+}

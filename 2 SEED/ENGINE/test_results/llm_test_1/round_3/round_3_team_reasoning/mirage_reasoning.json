@@ -1,0 +1,13 @@
+{
+  "team": "mirage",
+  "round": 3,
+  "strategy": "financial_intermediary",
+  "assessment": {
+    "eco": "strong",
+    "stab": 8.5,
+    "at_war": false
+  },
+  "decisions": [
+    "Financial intermediary. Route sanctions for commission."
+  ]
+}

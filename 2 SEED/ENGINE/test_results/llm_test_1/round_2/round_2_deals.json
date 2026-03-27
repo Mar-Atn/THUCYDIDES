@@ -1,0 +1,280 @@
+[
+  {
+    "type": "arms_transfer",
+    "from": "columbia",
+    "to": "heartland",
+    "terms": {
+      "unit_type": "ground",
+      "count": 2
+    },
+    "probability": 0.9,
+    "executed": true,
+    "tx_result": "executed",
+    "round": 2
+  },
+  {
+    "type": "coin_transfer",
+    "from": "columbia",
+    "to": "heartland",
+    "terms": {
+      "amount": 2
+    },
+    "probability": 0.95,
+    "executed": true,
+    "tx_result": "executed",
+    "round": 2
+  },
+  {
+    "type": "coin_transfer",
+    "from": "cathay",
+    "to": "nordostan",
+    "terms": {
+      "amount": 2
+    },
+    "probability": 0.7,
+    "executed": false
+  },
+  {
+    "type": "tech_transfer",
+    "from": "cathay",
+    "to": "bharata",
+    "terms": {
+      "domain": "ai",
+      "level": "cooperation"
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "trade_restriction",
+    "from": "cathay",
+    "to": "columbia",
+    "terms": {
+      "rare_earth_export_reduction": 0.3
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "peace_framework",
+    "from": "nordostan",
+    "to": "columbia",
+    "terms": {
+      "proposal": "grand_bargain",
+      "offer": "ceasefire_current_lines_plus_sanctions_relief",
+      "demand": "recognition_annexed_territories"
+    },
+    "probability": 0.5,
+    "executed": false
+  },
+  {
+    "type": "coin_transfer",
+    "from": "nordostan",
+    "to": "cathay",
+    "terms": {
+      "request": true,
+      "amount": 2
+    },
+    "probability": 0.6,
+    "executed": false
+  },
+  {
+    "type": "oil_deal",
+    "from": "nordostan",
+    "to": "mirage",
+    "terms": {
+      "sanctions_routing": true,
+      "discount": 0.15
+    },
+    "probability": 0.5,
+    "executed": false
+  },
+  {
+    "type": "arms_request",
+    "from": "heartland",
+    "to": "columbia",
+    "terms": {
+      "request": "ground_units",
+      "amount": 3,
+      "urgency": "critical"
+    },
+    "probability": 0.9,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "coin_request",
+    "from": "heartland",
+    "to": "columbia",
+    "terms": {
+      "amount": 2
+    },
+    "probability": 0.8,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "aid_request",
+    "from": "heartland",
+    "to": "teutonia",
+    "terms": {
+      "economic_aid": 1,
+      "eu_membership_progress": true
+    },
+    "probability": 0.7,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "oil_deal",
+    "from": "persia",
+    "to": "cathay",
+    "terms": {
+      "discounted_oil": true,
+      "bypass_sanctions": true
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "intelligence_sharing",
+    "from": "persia",
+    "to": "nordostan",
+    "terms": {
+      "shared_interest": "counter_western_pressure"
+    },
+    "probability": 0.5,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "coin_transfer",
+    "from": "teutonia",
+    "to": "heartland",
+    "terms": {
+      "amount": 1,
+      "eu_package": true
+    },
+    "probability": 0.9,
+    "executed": true,
+    "tx_result": "executed",
+    "round": 2
+  },
+  {
+    "type": "intelligence_sharing",
+    "from": "albion",
+    "to": "columbia",
+    "terms": {
+      "signals_intelligence": true,
+      "persia_targeting": true
+    },
+    "probability": 0.9,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "trade_deal",
+    "from": "bharata",
+    "to": "cathay",
+    "terms": {
+      "balanced_trade": true
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "tech_cooperation",
+    "from": "bharata",
+    "to": "columbia",
+    "terms": {
+      "ai_cooperation": true
+    },
+    "probability": 0.5,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "arms_request",
+    "from": "formosa",
+    "to": "columbia",
+    "terms": {
+      "air_defense": true,
+      "urgency": "standard"
+    },
+    "probability": 0.7,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "leverage_play",
+    "from": "phrygia",
+    "to": "nordostan",
+    "terms": {
+      "bosphorus_access": true,
+      "price": "sanctions_relief_support"
+    },
+    "probability": 0.5,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "trade_deal",
+    "from": "phrygia",
+    "to": "cathay",
+    "terms": {
+      "infrastructure_investment": true
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "alliance_strengthening",
+    "from": "yamato",
+    "to": "columbia",
+    "terms": {
+      "pacific_cooperation": true,
+      "joint_exercises": true
+    },
+    "probability": 0.8,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "investment",
+    "from": "solaria",
+    "to": "columbia",
+    "terms": {
+      "sovereign_wealth_investment": true
+    },
+    "probability": 0.6,
+    "executed": true,
+    "round": 2
+  },
+  {
+    "type": "patron_request",
+    "from": "caribe",
+    "to": "cathay",
+    "terms": {
+      "economic_aid": true,
+      "military_presence": true
+    },
+    "probability": 0.5,
+    "executed": false
+  },
+  {
+    "type": "financial_services",
+    "from": "mirage",
+    "to": "nordostan",
+    "terms": {
+      "sanctions_routing": true,
+      "commission": 0.05
+    },
+    "probability": 0.6,
+    "executed": false
+  }
+]
