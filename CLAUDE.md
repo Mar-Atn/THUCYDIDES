@@ -1,6 +1,6 @@
 # CLAUDE.md — Thucydides Trap (TTT) Project
 
-**Version:** 0.3 | **Date:** 2026-03-25 | **Owner:** Marat Atn (marat@metagames.org)
+**Version:** 1.0 | **Date:** 2026-03-27 | **Owner:** Marat Atn (marat@metagames.org)
 **Any change to this file must be confirmed by Marat.**
 **This file must be up to date and correct at all times. Review at least once per working session.**
 
@@ -71,41 +71,42 @@ This is the most complex project MetaGames has undertaken. Treat it accordingly.
 ### 4.1 Project Directory
 
 ```
-THUCYDIDES/                                ← Project root
-├── CLAUDE.md                              ← THIS FILE: operating rules, references, current state
+THUCYDIDES/
+├── CLAUDE.md                              ← THIS FILE: operating rules
 ├── Thucydides_Agent_Team.md               ← Team narrative description
+├── .claude/agents/                        ← Agent definitions (14 files)
 │
-├── .claude/agents/                        ← Agent definitions (14 files + TEAM_ROSTER.md)
+├── 1. CONCEPT/                            ← Stage 1: FROZEN after gate pass
+│   ├── TTT_CONCEPT_v1.0.md               ← TOP OF HIERARCHY
+│   ├── CONCEPT_CHECKLIST_TTT.md           ← v3.2 (final)
+│   └── CONCEPT V 2.0/                    ← 14 concept documents (A1-I1)
 │
-├── 1. CONCEPT/                            ← Track 1, Stage 1: Concept Design
-│   ├── TTT_CONCEPT_v1.0.md               ← TOP OF HIERARCHY: what & why in one document
-│   ├── CONCEPT_CHECKLIST_TTT.md           ← Completion tracking for this stage
-│   ├── CONCEPT V 2.0/                     ← Detailed concept documents (12 files, A1-F2)
-│   │   ├── A1_TTT_THUCYDIDES_TRAP_REFERENCE_v2.md
-│   │   ├── A2_TTT_CORE_TENSIONS_v2.md
-│   │   ├── B1_TTT_COUNTRY_STRUCTURE_v2.md
-│   │   ├── B2_TTT_ROLES_ARCHITECTURE_v2.md
-│   │   ├── C1_TTT_DOMAINS_ARCHITECTURE_v2.md
-│   │   ├── C2_TTT_ACTION_SYSTEM_v2.md
-│   │   ├── C3_TTT_TIME_STRUCTURE_v2.md
-│   │   ├── C4_TTT_MAP_CONCEPT_v2.md
-│   │   ├── D0_TTT_PARAMETER_STRUCTURE_v2.md
-│   │   ├── E1_TTT_ENGINE_ARCHITECTURE_v2.md
-│   │   ├── F1_TTT_AI_PARTICIPANT_MODULE_v2.md
-│   │   └── F2_TTT_AI_ASSISTANT_MODULE_v2.md
-│   └── prep/                              ← Earlier versions (v1.x, superseded)
+├── 2 SEED/                                ← Stage 2: CURRENT WORKING STAGE
+│   ├── SEED_CHECKLIST_TTT.md             ← 51 items, tracking progress
+│   ├── SEED_DATA_SCHEMA.md               ← CSV schema (single source of truth)
+│   ├── SEED_ROLE_TEMPLATE.md             ← Standard role format
+│   ├── SEED_COUNTRY_TEMPLATE.md          ← Standard country format
+│   ├── MAP_GLOBAL.svg                    ← Approved hex map (H3)
+│   ├── MAP_ZONE_STRUCTURE_v3.md          ← Zone registry + adjacency + theaters
+│   ├── THEATER_EASTERN_EREB.svg          ← 15-hex theater map
+│   ├── THEATER_FORMOSA.svg               ← 10-hex theater map
+│   ├── THEATER_MASHRIQ.svg               ← 12-hex theater map
+│   ├── SEED_COUNTRIES/                   ← 16 country seed documents
+│   ├── role_briefs/                      ← 37 role seeds (7 files)
+│   ├── role_packs/                       ← Artefact content (to fill)
+│   ├── data/                             ← 9 CSV files (canonical data)
+│   └── ENGINE/                           ← Canonical engine code (latest)
 │
-├── 2 SEED/                                ← Track 1, Stage 2: Seed Design (not yet started)
+├── 10. TESTS/                             ← ALL testing (separate from design)
+│   ├── TESTER_CONCEPT.md                 ← Tester instructions
+│   ├── CONCEPT TEST/                     ← Concept stage tests (archived)
+│   ├── SEED TEST/                        ← Seed stage tests + results
+│   └── MASTER_DASHBOARD.html             ← Test results visualization
 │
 ├── CONTEXT/                               ← Reference materials (read-only)
-│   ├── conflict sim4/                     ← Predecessor SIM (paper-tested Dec 2024, 26 files)
-│   └── Manifesto and What.docx            ← MetaGames methodology & philosophy
+│   └── Research files, SIM4 reference
 │
-└── (future stages)
-    ├── 3 DETAILED DESIGN/                 ← Track 1, Stage 3: Detailed Design Specs
-    ├── APP/                               ← Track 2: Web application code
-    ├── PACKAGE/                           ← Track 1, Stage 4: Participant & moderator materials
-    └── PRODUCTION/                        ← Track 1, Stage 5: Print-ready materials
+└── MAP SAMPLES/                           ← Visual reference images
 ```
 
 ### 4.2 Knowledge Base (MetaGames Standards)
@@ -147,12 +148,12 @@ Three additional SIM designs (roles and context only, no engine, paper-playable)
 ### 4.4 GitHub
 
 **TTT Repository:** `https://github.com/Mar-Atn/THUCYDIDES`
-- Just created. Currently empty.
-- SIM design files will be version-controlled here
-- APP development will use an `APP/` subfolder when Track 2 begins
+- Active repository with full project history
+- All design files version-controlled
 - Tag at every stage gate: `concept-v1.0`, `seed-v1.0`, etc.
-- No force-pushes to main
+- No force-pushes to main (exception: removing accidentally committed large files)
 - Commit prefixes: `concept:`, `seed:`, `design:`, `engine:`, `app:`, `fix:`, `docs:`
+- Every phase-folder update committed immediately
 
 ---
 
@@ -205,28 +206,39 @@ Track 2 follows its own architecture and build process (to be defined when we re
 
 ## 6. Current Stage
 
-> **TRACK 1: CONCEPT → SEED TRANSITION**
+> **TRACK 1, STAGE 2: SEED DESIGN — IN PROGRESS**
 > **Concept gate: PASSED (conditional) — 2026-03-25**
-> Approved by Marat. 3 carry-forward items (B4 relationship matrix, C5 public speaking & press, C6 contracts consolidation).
-> Checklist: `1. CONCEPT/CONCEPT_CHECKLIST_TTT.md` (v3.2)
-> Top-level concept: `1. CONCEPT/TTT_CONCEPT_v1.0.md`
-> Status: 14/21 concept items complete, all 4 CRITICALs resolved, 3 mechanics added, domain validators passed.
-> First commit: `e77832a` pushed to https://github.com/Mar-Atn/THUCYDIDES
+> **SEED work started: 2026-03-26**
+>
+> CONCEPT stage is FROZEN. Changes require Change Management Procedure (Section 7.2).
 
-**Entering SEED stage. Priority deliverables:**
-1. **B4** — Relationship matrix *(carry-forward from Concept, needed for AI initialization)*
-2. **D2** — Starting resource allocations *(single most important Seed deliverable)*
-3. **D1** — Public state of the world narrative
-4. **C5** — Public speaking & press protocol *(carry-forward)*
-5. **E1.2** — Economic model specification *(first engine detail spec)*
-6. **E1.6** — Combat resolution specification
-7. **B3** — AI country detailed profiles
+### What's Complete in SEED:
+- ● 16 country seeds (all countries, full template)
+- ● 37 role seeds (all team + solo roles, 9 sections each, artefacts defined)
+- ● 9 CSV data files (countries, roles, orgs, memberships, relationships, tariffs, sanctions, zones, deployments)
+- ● Global hex map (H3 polished, 22 countries, 3 chokepoints)
+- ● 3 theater maps (Eastern Ereb, Formosa, Mashriq)
+- ● Zone structure v3 (hex registry + adjacency + theater appendix)
+- ● Engine code (3 engines + orchestrator + AI agents — 10 Python files, ~5000 lines)
+- ● Templates (role, country, data schema)
+- ● SEED checklist v2.0
 
-**Active agents:** SIMON, ATLAS, KEYNES, MACHIAVELLI, CLAUSEWITZ, VERA, TESTER
-**Activating soon:** ARIA (AI profiles), CRAFT (artefacts — position papers)
-**On standby:** FELIX, NOVA, DELPHI, CANVAS
+### What's In Progress:
+- ◐ Engine calibration (stability formula needs iteration based on test results)
+- ◐ Naming consistency sweep (Ereb/Mashriq/Asu/Sogdiana/Gulf Gate — mostly done, needs verification)
 
-**Update this section every time a stage gate is passed, priorities shift, or status materially changes.**
+### What Remains:
+- ○ Role packs (artefact content — intelligence memos, briefings)
+- ○ UX Style Guide
+- ○ Public speaking & press mechanic (carry-forward from Concept)
+- ○ World context narrative (opening briefing)
+- ○ Customization guide
+
+### Testing Status:
+- 8 concept-level tests completed (v1 + v2)
+- 8 heuristic SEED tests completed
+- 1 LLM-architecture test completed (most credible dynamics)
+- Master dashboard at `10. TESTS/SEED TEST/MASTER_DASHBOARD.html`
 
 ---
 
@@ -269,6 +281,74 @@ Affects: [which higher-level documents need review]
 Recommended action: [MARCO's suggestion]
 Awaiting: [Marat confirmation / team review / specific agent]
 ```
+
+### 7.2 Phase Management & Configuration Control
+
+#### Rule 1: Upper Phase Freeze + Change Management
+
+When working on a LOWER phase (e.g., SEED), all UPPER phases (e.g., CONCEPT) are FROZEN. If work at the lower phase reveals inconsistencies with the upper phase:
+
+1. **STOP** lower-phase work
+2. **Initiate Change Management**: document what changed and why
+3. **Update the upper-phase documents** to reflect the new reality
+4. **Check meticulously** for consistency within the upper phase after the change
+5. **Freeze** the upper phase again
+6. **Return** to lower-phase work
+
+This prevents drift between phases. The upper phase is ALWAYS the source of truth for the lower phase.
+
+#### Rule 2: Current Phase Folder Discipline
+
+The current phase folder (e.g., `2 SEED/`) contains ONLY:
+- **One latest version** of each element (file, folder, code)
+- **No duplicates**, no old versions, no experiments
+- **Constantly checked** for consistency between elements
+- **Two tracking tools**:
+  - The **checklist** (inception checklist with progress status)
+  - A **status dashboard** (simple visual: what we have / what we don't)
+
+ALL tests, experiments, and explorations happen OUTSIDE the phase folder (in `10. TESTS/`, `EXPERIMENTS/`, etc.).
+
+**Git discipline:** Every update to a phase-folder file is committed immediately. The entire phase state must be recoverable from git at any moment.
+
+**NEVER DELETE files from the phase folder. ARCHIVE them if superseded.**
+
+#### Rule 3: Independent Testing
+
+Tests are run by a SEPARATE Claude Code instance (the "Tester"). The Tester:
+- Uses `10. TESTS/TESTER_CONCEPT.md` for approach and instructions
+- References CLAUDE.md for project rules
+- Reads from `2 SEED/` (the canonical files) but NEVER writes to it
+- Writes results to `10. TESTS/`
+- Returns findings to the main development team for interpretation and decision
+
+This separation ensures testing is objective and doesn't contaminate the design files.
+
+#### Rule 4: File Freeze Mechanism
+
+Individual files in the current phase can be marked as **FROZEN** — meaning they are considered ready for the next phase and should NOT be changed without explicit consultation with Marat.
+
+Frozen files are marked in the checklist with a 🔒 symbol.
+
+To change a frozen file:
+1. Raise the issue with Marat
+2. Justify the change
+3. Get approval
+4. Make the change
+5. Re-verify consistency with all other frozen files
+6. Re-freeze
+
+#### Rule 5: 3-Hour Consistency Check (MANDATORY)
+
+Every 3 hours of active work, MARCO MUST:
+1. **STOP and insist** on a consistency check (not just ask "what next?")
+2. **Verify**: Do all current-phase files agree with each other?
+3. **Verify**: Does the current phase still agree with the frozen upper phase?
+4. **Verify**: Are all changes committed to git?
+5. **Report** any inconsistencies found
+6. **Resolve** before continuing
+
+This is NON-NEGOTIABLE. MARCO reminds the team proactively — does not wait to be asked.
 
 ---
 
@@ -411,6 +491,15 @@ Every working session begins with MARCO reviewing:
 3. **Open alerts** (sync alerts, unresolved escalations, validator verdicts)
 4. **Today's plan** — which agents will be invoked, in what order, for what purpose
 5. **Decisions needed from Marat** (if any are pending)
+
+### During Session: 3-Hour Consistency Check
+Every 3 hours of active work (tracked by MARCO), STOP and:
+1. Run consistency check (Section 7.2, Rule 5)
+2. Commit all changes to git
+3. Update CLAUDE.md Section 6 if status has materially changed
+4. Brief Marat on what was accomplished and what's next
+
+MARCO does not ask "what would you like to do next?" at this checkpoint. MARCO INSISTS: "It's time for our 3-hour consistency check. Here's what I found..."
 
 ### Session Closing (MARCO)
 Every session ends with:
