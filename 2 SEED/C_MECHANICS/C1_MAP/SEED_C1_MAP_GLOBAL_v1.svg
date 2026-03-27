@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="-10 -5 1524 912" width="1504" height="897">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -30 1560 950" width="1560" height="950">
   <defs><style>
     .lbl { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 9px; fill: #333; text-anchor: middle; dominant-baseline: central; }
     .country-lbl { font-family: Inter,Helvetica,Arial,sans-serif; font-size: 12px; font-weight: 700; fill: #333; text-anchor: middle; dominant-baseline: central; letter-spacing: 1.5px; }
@@ -8,44 +8,6 @@
   </style></defs>
   <rect width="1504" height="897" fill="#C5D9E8"/>
   <!-- GRID LABELS -->
-  <text x="115.6" y="15" class="grid-lbl">1</text>
-  <text x="176.2" y="15" class="grid-lbl">2</text>
-  <text x="236.9" y="15" class="grid-lbl">3</text>
-  <text x="297.5" y="15" class="grid-lbl">4</text>
-  <text x="358.1" y="15" class="grid-lbl">5</text>
-  <text x="418.7" y="15" class="grid-lbl">6</text>
-  <text x="479.4" y="15" class="grid-lbl">7</text>
-  <text x="540.0" y="15" class="grid-lbl">8</text>
-  <text x="600.6" y="15" class="grid-lbl">9</text>
-  <text x="661.2" y="15" class="grid-lbl">10</text>
-  <text x="721.8" y="15" class="grid-lbl">11</text>
-  <text x="782.5" y="15" class="grid-lbl">12</text>
-  <text x="843.1" y="15" class="grid-lbl">13</text>
-  <text x="903.7" y="15" class="grid-lbl">14</text>
-  <text x="964.3" y="15" class="grid-lbl">15</text>
-  <text x="1024.9" y="15" class="grid-lbl">16</text>
-  <text x="1085.6" y="15" class="grid-lbl">17</text>
-  <text x="1146.2" y="15" class="grid-lbl">18</text>
-  <text x="1206.8" y="15" class="grid-lbl">19</text>
-  <text x="1267.4" y="15" class="grid-lbl">20</text>
-  <text x="1328.1" y="15" class="grid-lbl">21</text>
-  <text x="1388.7" y="15" class="grid-lbl">22</text>
-  <text x="1449.3" y="15" class="grid-lbl">23</text>
-  <text x="15" y="82.5" class="grid-lbl">1</text>
-  <text x="15" y="135.0" class="grid-lbl">2</text>
-  <text x="15" y="187.5" class="grid-lbl">3</text>
-  <text x="15" y="240.0" class="grid-lbl">4</text>
-  <text x="15" y="292.5" class="grid-lbl">5</text>
-  <text x="15" y="345.0" class="grid-lbl">6</text>
-  <text x="15" y="397.5" class="grid-lbl">7</text>
-  <text x="15" y="450.0" class="grid-lbl">8</text>
-  <text x="15" y="502.5" class="grid-lbl">9</text>
-  <text x="15" y="555.0" class="grid-lbl">10</text>
-  <text x="15" y="607.5" class="grid-lbl">11</text>
-  <text x="15" y="660.0" class="grid-lbl">12</text>
-  <text x="15" y="712.5" class="grid-lbl">13</text>
-  <text x="15" y="765.0" class="grid-lbl">14</text>
-  <text x="15" y="817.5" class="grid-lbl">15</text>
   <!-- HEXES -->
   <polygon points="55.00,-5.00 85.31,12.50 85.31,47.50 55.00,65.00 24.69,47.50 24.69,12.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="115.62,-5.00 145.93,12.50 145.93,47.50 115.62,65.00 85.31,47.50 85.31,12.50" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -233,7 +195,6 @@
   <polygon points="994.64,362.50 1024.95,380.00 1024.95,415.00 994.64,432.50 964.33,415.00 964.33,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1055.26,362.50 1085.57,380.00 1085.57,415.00 1055.26,432.50 1024.95,415.00 1024.95,380.00" fill="#E8D5A3" stroke="#666666" stroke-width="1.5"/>
   <polygon points="1115.88,362.50 1146.19,380.00 1146.19,415.00 1115.88,432.50 1085.57,415.00 1085.57,380.00" fill="#B5CCE0" stroke="#D4880F" stroke-width="3"/>
-  <text x="1115.9" y="399.5" class="cp-lbl">Formosa St.</text>
   <polygon points="1176.50,362.50 1206.81,380.00 1206.81,415.00 1176.50,432.50 1146.19,415.00 1146.19,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1237.12,362.50 1267.44,380.00 1267.44,415.00 1237.12,432.50 1206.81,415.00 1206.81,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1297.75,362.50 1328.06,380.00 1328.06,415.00 1297.75,432.50 1267.44,415.00 1267.44,380.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -267,7 +228,6 @@
   <polygon points="85.31,467.50 115.62,485.00 115.62,520.00 85.31,537.50 55.00,520.00 55.00,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="145.93,467.50 176.24,485.00 176.24,520.00 145.93,537.50 115.62,520.00 115.62,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="206.55,467.50 236.87,485.00 236.87,520.00 206.55,537.50 176.24,520.00 176.24,485.00" fill="#B5CCE0" stroke="#D4880F" stroke-width="3"/>
-  <text x="206.6" y="504.5" class="cp-lbl">Caribe Pass.</text>
   <polygon points="267.18,467.50 297.49,485.00 297.49,520.00 267.18,537.50 236.87,520.00 236.87,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="327.80,467.50 358.11,485.00 358.11,520.00 327.80,537.50 297.49,520.00 297.49,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="388.42,467.50 418.73,485.00 418.73,520.00 388.42,537.50 358.11,520.00 358.11,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -276,7 +236,6 @@
   <polygon points="570.29,467.50 600.60,485.00 600.60,520.00 570.29,537.50 539.97,520.00 539.97,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="630.91,467.50 661.22,485.00 661.22,520.00 630.91,537.50 600.60,520.00 600.60,485.00" fill="#B5A896" stroke="#666666" stroke-width="1.5"/>
   <polygon points="691.53,467.50 721.84,485.00 721.84,520.00 691.53,537.50 661.22,520.00 661.22,485.00" fill="#B5CCE0" stroke="#D4880F" stroke-width="3"/>
-  <text x="691.5" y="504.5" class="cp-lbl">Gulf Gate</text>
   <polygon points="752.15,467.50 782.46,485.00 782.46,520.00 752.15,537.50 721.84,520.00 721.84,485.00" fill="#D4BFA5" stroke="#666666" stroke-width="1.5"/>
   <polygon points="812.77,467.50 843.08,485.00 843.08,520.00 812.77,537.50 782.46,520.00 782.46,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="873.39,467.50 903.70,485.00 903.70,520.00 873.39,537.50 843.08,520.00 843.08,485.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
@@ -435,25 +394,102 @@
   <polygon points="1418.99,782.50 1449.30,800.00 1449.30,835.00 1418.99,852.50 1388.68,835.00 1388.68,800.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <polygon points="1479.61,782.50 1509.92,800.00 1509.92,835.00 1479.61,852.50 1449.30,835.00 1449.30,800.00" fill="#B5CCE0" stroke="#99AABB" stroke-width="0.3"/>
   <!-- COUNTRY LABELS -->
-  <text x="197.9" y="365.5" class="country-lbl">COLUMBIA</text>
-  <text x="499.6" y="238.0" class="country-lbl">TEUTONIA</text>
-  <text x="826.2" y="208.8" class="country-lbl">NORDOSTAN</text>
-  <text x="782.5" y="378.0" class="country-lbl">PERSIA</text>
-  <text x="833.0" y="255.5" class="country-lbl">SOGDIANA</text>
-  <text x="879.5" y="385.0" class="country-lbl">BHARATA</text>
-  <text x="1020.6" y="320.5" class="country-lbl">CATHAY</text>
   <!-- OCEAN LABELS -->
-  <text x="200" y="400" class="ocean-lbl">Tethys</text>
-  <text x="500" y="650" class="ocean-lbl">Tethys</text>
-  <text x="1300" y="200" class="ocean-lbl">Mirovia</text>
-  <text x="800" y="700" class="ocean-lbl">Rheic Ocean</text>
   <!-- LEGEND -->
   <rect x="30" y="740" width="180" height="120" rx="5" fill="white" opacity="0.85" stroke="#999" stroke-width="0.5"/>
-  <text x="120" y="755" class="lbl" style="font-weight:700;font-size:11px">THE THUCYDIDES TRAP</text>
   <rect x="40" y="772" width="12" height="10" rx="1" fill="#D4B896" stroke="#666" stroke-width="0.5"/>
   <rect x="40" y="786" width="12" height="10" rx="1" fill="#E8D5A3" stroke="#666" stroke-width="0.5"/>
   <rect x="40" y="800" width="12" height="10" rx="1" fill="#D4A5A5" stroke="#666" stroke-width="0.5"/>
   <rect x="40" y="814" width="12" height="10" rx="1" fill="#A5C8A5" stroke="#666" stroke-width="0.5"/>
   <rect x="40" y="828" width="12" height="10" rx="1" fill="#C8A57A" stroke="#666" stroke-width="0.5"/>
   <rect x="40" y="842" width="12" height="10" rx="1" fill="#D4B5A5" stroke="#666" stroke-width="0.5"/>
+  <!-- GRID NUMBERS -->
+  <text x="115.6" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">1</text>
+  <text x="176.2" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">2</text>
+  <text x="236.9" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">3</text>
+  <text x="297.5" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">4</text>
+  <text x="358.1" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">5</text>
+  <text x="418.7" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">6</text>
+  <text x="479.4" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">7</text>
+  <text x="540.0" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">8</text>
+  <text x="600.6" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">9</text>
+  <text x="661.2" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">10</text>
+  <text x="721.8" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">11</text>
+  <text x="782.5" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">12</text>
+  <text x="843.1" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">13</text>
+  <text x="903.7" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">14</text>
+  <text x="964.3" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">15</text>
+  <text x="1024.9" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">16</text>
+  <text x="1085.6" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">17</text>
+  <text x="1146.2" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">18</text>
+  <text x="1206.8" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">19</text>
+  <text x="1267.4" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">20</text>
+  <text x="1328.1" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">21</text>
+  <text x="1388.7" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">22</text>
+  <text x="1449.3" y="0.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">23</text>
+  <text x="8.0" y="82.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">1</text>
+  <text x="8.0" y="135.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">2</text>
+  <text x="8.0" y="187.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">3</text>
+  <text x="8.0" y="240.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">4</text>
+  <text x="8.0" y="292.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">5</text>
+  <text x="8.0" y="345.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">6</text>
+  <text x="8.0" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">7</text>
+  <text x="8.0" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">8</text>
+  <text x="8.0" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">9</text>
+  <text x="8.0" y="555.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">10</text>
+  <text x="8.0" y="607.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">11</text>
+  <text x="8.0" y="660.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">12</text>
+  <text x="8.0" y="712.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">13</text>
+  <text x="8.0" y="765.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">14</text>
+  <text x="8.0" y="817.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;fill:#999;text-anchor:middle;dominant-baseline:central">15</text>
+  <!-- COUNTRY NAMES -->
+  <text x="197.9" y="367.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">COLUMBIA</text>
+  <text x="236.9" y="555.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">CARIBE</text>
+  <text x="524.8" y="240.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">TEUTONIA</text>
+  <text x="630.9" y="292.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">FREEL.</text>
+  <text x="449.0" y="292.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">ALBION</text>
+  <text x="509.7" y="345.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">GALLIA</text>
+  <text x="509.7" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">PONTE</text>
+  <text x="676.4" y="266.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HEARTL.</text>
+  <text x="826.2" y="210.8" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">NORDOSTAN</text>
+  <text x="646.1" y="371.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">PHRYG.</text>
+  <text x="630.9" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">LEVANT.</text>
+  <text x="782.5" y="380.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">PERSIA</text>
+  <text x="630.9" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">SOLARIA</text>
+  <text x="630.9" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HORN</text>
+  <text x="752.2" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">MIRAGE</text>
+  <text x="833.0" y="257.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">SOGDIANA</text>
+  <text x="879.5" y="387.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">BHARATA</text>
+  <text x="1020.6" y="322.5" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:1px">CATHAY</text>
+  <text x="1055.3" y="187.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">CHOSON</text>
+  <text x="1024.9" y="240.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">HANGUK</text>
+  <text x="1085.6" y="450.0" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">FORMOSA</text>
+  <text x="1222.0" y="266.2" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:600;fill:#333;text-anchor:middle;dominant-baseline:central;letter-spacing:0.5px">YAMATO</text>
+  <!-- OCEAN NAMES -->
+  <text x="327.8" y="502.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Tethys</text>
+  <text x="1297.7" y="397.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Mirovia</text>
+  <text x="570.3" y="712.5" style="font-family:Inter,Arial,sans-serif;font-size:18px;font-style:italic;fill:#6688AA;opacity:0.45;text-anchor:middle;letter-spacing:3px">Rheic Ocean</text>
+  <!-- CHOKEPOINTS -->
+  <text x="1115.9" y="399.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Formosa St.</text>
+  <text x="691.5" y="504.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Gulf Gate</text>
+  <text x="206.6" y="504.5" style="font-family:Inter,Arial,sans-serif;font-size:8px;font-weight:700;fill:#B8720C;text-anchor:middle;dominant-baseline:central">Caribe Pass.</text>
+  <!-- LEGEND -->
+  <rect x="30" y="740" width="180" height="130" rx="5" fill="white" opacity="0.85" stroke="#999" stroke-width="0.5"/>
+  <text x="120.0" y="756.0" style="font-family:Inter,Arial,sans-serif;font-size:11px;font-weight:700;fill:#333;text-anchor:middle">THE THUCYDIDES TRAP</text>
+  <rect x="40" y="772" width="12" height="10" rx="1" fill="#D4B896" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="777.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Columbia</text>
+  <rect x="40" y="786" width="12" height="10" rx="1" fill="#E8D5A3" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="791.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Cathay</text>
+  <rect x="40" y="800" width="12" height="10" rx="1" fill="#D4A5A5" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="805.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Nordostan</text>
+  <rect x="40" y="814" width="12" height="10" rx="1" fill="#A5C8A5" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="819.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Heartland</text>
+  <rect x="40" y="828" width="12" height="10" rx="1" fill="#C8A57A" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="833.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Persia</text>
+  <rect x="40" y="842" width="12" height="10" rx="1" fill="#D4B5A5" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="847.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Bharata</text>
+  <rect x="40" y="856" width="12" height="10" rx="1" fill="#8FB59A" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="861.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Teutonia</text>
+  <rect x="40" y="870" width="12" height="10" rx="1" fill="#B5A5C8" stroke="#666" stroke-width="0.5"/>
+  <text x="60.0" y="875.0" style="font-family:Inter,Arial,sans-serif;font-size:9px;fill:#333;text-anchor:start;dominant-baseline:central">Gallia</text>
 </svg>
