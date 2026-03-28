@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thucydides Trap — Test Dashboard (TESTS2 + TESTS3)</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root {
+  --bg: #1a1a2e;
+  --bg-card: #16213e;
+  --bg-nav: #0f3460;
+  --bg-section: #1a1a3e;
+  --border: #2a2a5e;
+  --text: #e0e0e0;
+  --text-dim: #8899aa;
+  --text-muted: #556677;
+  --columbia: #4a90d9;
+  --cathay: #d94a4a;
+  --nordostan: #808080;
+  --heartland: #d4a843;
+  --persia: #4ad94a;
+  --teutonia: #9b59b6;
+  --bharata: #e67e22;
+  --yamato: #1abc9c;
+  --formosa: #3498db;
+  --hanguk: #e74c3c;
+  --solaria: #f39c12;
+  --accent: #58a6ff;
+  --pass: #3fb950;
+  --fail: #f85149;
+  --warn: #d29922;
+  --grid-line: rgba(255,255,255,0.1);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; background:var(--bg); color:var(--text); line-height:1.5; }
+.header { background:var(--bg-nav); border-bottom:1px solid var(--border); padding:18px 28px; }
+.header h1 { font-size:22px; font-weight:700; }
+.header-sub { color:var(--text-dim); font-size:13px; margin-top:2px; }
+.header-stats { display:flex; gap:16px; margin-top:10px; flex-wrap:wrap; }
+.stat-box { background:rgba(255,255,255,0.05); padding:6px 14px; border-radius:6px; border:1px solid var(--border); }
+.stat-box .val { font-size:18px; font-weight:700; color:var(--accent); }
+.stat-box .lbl { font-size:11px; color:var(--text-dim); }
+
+.nav { background:var(--bg-nav); border-bottom:1px solid var(--border); display:flex; overflow-x:auto; padding:0 16px; }
+.nav-tab { padding:10px 14px; cursor:pointer; font-size:13px; font-weight:500; color:var(--text-dim); border-bottom:2px solid transparent; white-space:nowrap; transition:all .15s; }
+.nav-tab:hover { color:var(--text); }
+.nav-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.nav-sep { padding:10px 6px; color:var(--text-muted); font-size:11px; display:flex; align-items:center; }
+
+.content { padding:20px 28px; max-width:1440px; margin:0 auto; }
+.tab-pane { display:none; }
+.tab-pane.active { display:block; }
+
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media(max-width:1000px) { .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+
+.card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:16px; }
+.card h3 { font-size:15px; font-weight:600; margin-bottom:10px; color:var(--text); }
+.card h4 { font-size:13px; font-weight:600; margin-bottom:6px; color:var(--text-dim); }
+.chart-box { position:relative; height:300px; margin:8px 0; }
+.chart-box-lg { position:relative; height:380px; margin:8px 0; }
+.chart-box-sm { position:relative; height:220px; margin:8px 0; }
+
+.verdict { display:inline-block; padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600; text-transform:uppercase; }
+.v-pass { background:rgba(63,185,80,.15); color:var(--pass); }
+.v-fail { background:rgba(248,81,73,.15); color:var(--fail); }
+.v-warn { background:rgba(210,153,34,.15); color:var(--warn); }
+
+table { width:100%; border-collapse:collapse; font-size:12px; margin:6px 0; }
+th { text-align:left; padding:6px 8px; background:rgba(255,255,255,.04); color:var(--text-dim); font-weight:600; border-bottom:1px solid var(--border); }
+td { padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.04); }
+
+.section-toggle { cursor:pointer; user-select:none; padding:10px 14px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.section-toggle h3 { margin:0; font-size:14px; }
+.section-toggle .arrow { transition:transform .2s; font-size:12px; color:var(--text-dim); }
+.section-toggle.collapsed .arrow { transform:rotate(-90deg); }
+.section-body { overflow:hidden; transition: max-height .3s ease; }
+.section-body.collapsed { max-height:0 !important; overflow:hidden; }
+
+.timeline { position:relative; padding:12px 0; display:flex; flex-wrap:wrap; gap:6px; }
+.tl-marker { padding:3px 8px; border-radius:10px; font-size:10px; cursor:default; position:relative; }
+.tl-marker:hover .tl-tip { display:block; }
+.tl-tip { display:none; position:absolute; bottom:100%; left:50%; transform:translateX(-50%); background:#111; border:1px solid var(--border); padding:6px 10px; border-radius:4px; font-size:11px; white-space:nowrap; z-index:10; margin-bottom:4px; }
+.tl-red { background:rgba(248,81,73,.2); color:#f85149; }
+.tl-blue { background:rgba(88,166,255,.2); color:#58a6ff; }
+.tl-yellow { background:rgba(210,153,34,.2); color:#d29922; }
+.tl-purple { background:rgba(155,89,182,.2); color:#bb6bd9; }
+.tl-green { background:rgba(63,185,80,.2); color:#3fb950; }
+
+.overview-card { background:var(--bg-card); border:1px solid var(--border); border-radius:8px; padding:14px; }
+.overview-card h4 { font-size:13px; margin-bottom:4px; }
+.overview-card .score { font-size:24px; font-weight:700; }
+.overview-card .finding { font-size:11px; color:var(--text-dim); margin-top:4px; }
+
+.critical-card { background:var(--bg-card); border:2px solid var(--fail); border-radius:8px; padding:14px; margin-bottom:12px; }
+.critical-card h4 { font-size:14px; color:var(--fail); margin-bottom:6px; }
+.critical-card p { font-size:12px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Thucydides Trap -- Simulation Test Dashboard</h1>
+  <div class="header-sub">SEED TESTS2 (v1 engine, 2026-03-27) + SEED TESTS3 (v3 engine, 2026-03-28) | 14 completed tests | 112 rounds simulated</div>
+  <div class="header-stats">
+    <div class="stat-box"><div class="val">14</div><div class="lbl">Tests Complete</div></div>
+    <div class="stat-box"><div class="val">112</div><div class="lbl">Rounds Simulated</div></div>
+    <div class="stat-box"><div class="val">20</div><div class="lbl">Design Issues</div></div>
+    <div class="stat-box"><div class="val">5</div><div class="lbl">Critical / Game-Breaking</div></div>
+    <div class="stat-box"><div class="val">7.6</div><div class="lbl">Avg Score (TESTS3)</div></div>
+    <div class="stat-box"><div class="val">v1 &rarr; v3</div><div class="lbl">Engine Evolution</div></div>
+  </div>
+</div>
+
+<div class="nav" id="mainNav">
+  <div class="nav-tab active" data-tab="overview">Overview</div>
+  <div class="nav-sep">TESTS2</div>
+  <div class="nav-tab" data-tab="t2_1">T1 Generic</div>
+  <div class="nav-tab" data-tab="t2_2">T2 Formosa</div>
+  <div class="nav-tab" data-tab="t2_3">T3 Gulf Gate</div>
+  <div class="nav-tab" data-tab="t2_4">T4 Peace</div>
+  <div class="nav-tab" data-tab="t2_5">T5 Stability</div>
+  <div class="nav-tab" data-tab="t2_6">T6 Tech Race</div>
+  <div class="nav-sep">TESTS3</div>
+  <div class="nav-tab" data-tab="t3_1">T1 Generic</div>
+  <div class="nav-tab" data-tab="t3_2">T2 Formosa</div>
+  <div class="nav-tab" data-tab="t3_3">T3 Gulf Gate</div>
+  <div class="nav-tab" data-tab="t3_4">T4 Peace</div>
+  <div class="nav-tab" data-tab="t3_5">T5 Stability</div>
+  <div class="nav-tab" data-tab="t3_6">T6 Tech Race</div>
+  <div class="nav-tab" data-tab="t3_7">T7 Overstretch</div>
+  <div class="nav-tab" data-tab="t3_8">T8 Patience</div>
+  <div class="nav-sep">|</div>
+  <div class="nav-tab" data-tab="cross">Cross-Test</div>
+</div>
+
+<div class="content" id="mainContent"></div>
+
+<script>
+// ===================== DATA =====================
+const ROUNDS = ['R0','R1','R2','R3','R4','R5','R6','R7','R8'];
+const CC = {columbia:'#4a90d9',cathay:'#d94a4a',nordostan:'#808080',heartland:'#d4a843',persia:'#4ad94a',teutonia:'#9b59b6',bharata:'#e67e22',yamato:'#1abc9c',formosa:'#3498db',hanguk:'#e74c3c',solaria:'#f39c12',choson:'#95a5a6',caribe:'#e91e63',gallia:'#00bcd4'};
+
+const TESTS = {
+  // ---- TESTS2 (6 tests, engine v1) ----
+  t2_1: {
+    name:'T1 Generic Baseline', batch:'TESTS2', engine:'v1', score:'PASS', verdict:'pass',
+    finding:'Full 8-round arc. Cathay blockades Formosa R4. Persia ceasefire R4. Oil $198 R1 (instant spike). GDP doubling from tech factor.',
+    oil:[80,198,207,239,250,174,117,95,82],
+    gdp:{columbia:[280,285,290,295,297,302,306,310,315], cathay:[190,198,206,213,219,227,235,243,252]},
+    stability:{columbia:[7.0,6.95,6.87,6.80,6.70,6.55,6.40,6.30,6.20], cathay:[8.0,8.05,8.10,8.10,8.00,8.00,8.05,8.05,8.05], nordostan:[5.0,4.90,4.80,4.75,4.68,4.60,4.55,4.50,4.45], heartland:[5.0,4.62,4.45,4.20,4.00,3.90,3.80,3.85,4.00], persia:[4.0,3.90,3.75,3.60,3.40,3.20,3.10,3.20,3.30]},
+    naval:{columbia:[10,9,11,11,11,11,11,11,11], cathay:[6,7,8,10,11,11,12,13,14]},
+    ground:{columbia:[22,22,22,22,22,22,22,22,22], cathay:[25,25,25,25,25,25,25,25,25], nordostan:[18,16,15,14,13,12,12,11,11], heartland:[10,10,8,7,7,7,7,8,8]},
+    air:{columbia:[15,14,14,14,14,14,14,14,14], cathay:[12,12,12,12,12,12,12,12,12]},
+    inflation:{columbia:[3.5,3.5,3.5,3.5,3.5,4.0,5.0,6.0,6.5], nordostan:[5.0,5.0,8.0,12.0,16.0,18.0,20.0,22.0,22.0], heartland:[7.5,15.0,25.0,35.0,40.0,42.0,40.0,38.0,35.0], persia:[50,58,65,72,80,85,82,75,68]},
+    treasury:{columbia:[50,42,40,33,25,22,20,18,16], cathay:[45,40,37,36,37,36,35,34,33]},
+    ai_prog:{columbia:[0.60,0.65,0.665,0.68,0.70,0.72,0.74,0.76,0.78], cathay:[0.70,0.026,0.051,0.075,0.098,0.12,0.14,0.16,0.18]},
+    ai_level:{columbia:[3,3,3,3,3,3,3,3,3], cathay:[2,3,3,3,3,3,3,3,3]},
+    nuc_prog:{cathay:[0.80,0.816,0.831,0.846,0.860,0.873,0.886,0.90,0.914]},
+    gap_ratio:[0.679,0.693,0.708,0.722,0.738,0.753,0.770,0.785,0.800],
+    naval_ratio:[0.60,0.778,0.727,0.909,1.00,1.00,1.09,1.18,1.27],
+    support:{columbia:[38,37,36,34,32,30,28,29,30]},
+    econ_state:{columbia:['N','N','N','N','N','N','N','N','N'], nordostan:['N','N','N','N','N','N','N','N','N'], heartland:['N','N','N','N','N','N','N','N','N']},
+    events:[
+      {r:1,type:'red',text:'Gulf Gate blockade active'},
+      {r:1,type:'red',text:'Nordostan offensive on Heartland'},
+      {r:1,type:'red',text:'Columbia strikes on Persia'},
+      {r:2,type:'yellow',text:'Columbia midterm elections'},
+      {r:3,type:'yellow',text:'Heartland wartime election R1'},
+      {r:3,type:'red',text:'Choson ICBM test'},
+      {r:4,type:'red',text:'Cathay blockades Formosa'},
+      {r:4,type:'blue',text:'Persia ceasefire (Geneva Accord)'},
+      {r:5,type:'yellow',text:'Columbia presidential election'},
+      {r:7,type:'blue',text:'Heartland-Nordostan framework signed'}
+    ]
+  },
+  t2_2: {
+    name:'T2 Formosa Crisis', batch:'TESTS2', engine:'v1', score:'PASS', verdict:'pass',
+    finding:'Cathay blockades R3 (purge lifts). Never invades (4:1 impossible). Semiconductor disruption fires. Blockade self-limiting -- treasury depletes in 5 rounds.',
+    oil:[80,198,207,239,250,250,220,180,150],
+    gdp:{columbia:[280,285,290,295,297,302,304,308,312], cathay:[190,198,206,213,220,228,234,240,248]},
+    stability:{columbia:[7.0,6.95,6.87,6.75,6.60,6.40,6.30,6.25,6.20], cathay:[8.0,8.05,8.10,8.00,7.80,7.60,7.50,7.45,7.40], formosa:[7.0,6.90,6.65,5.80,5.20,4.80,4.60,4.50,4.45]},
+    naval:{columbia:[10,9,11,13,13,14,14,15,15], cathay:[6,7,10,13,14,15,15,15,15]},
+    naval_ratio:[0.60,0.778,0.909,1.00,1.077,1.071,1.071,1.00,1.00],
+    gap_ratio:[0.679,0.693,0.708,0.722,0.741,0.755,0.770,0.779,0.795],
+    ai_prog:{columbia:[0.60,0.618,0.635,0.652,0.669,0.685,0.701,0.717,0.733]},
+    events:[
+      {r:2,type:'red',text:'Cathay massive gray zone escalation'},
+      {r:2,type:'yellow',text:'Columbia midterm elections'},
+      {r:3,type:'red',text:'Cathay declares Formosa exclusion zone'},
+      {r:3,type:'purple',text:'TSMC kill switch activated'},
+      {r:3,type:'green',text:'Semiconductor disruption fires globally'},
+      {r:5,type:'yellow',text:'Columbia presidential election'},
+      {r:7,type:'blue',text:'Formosa accommodation framework'}
+    ]
+  },
+  t2_3: {
+    name:'T3 Gulf Gate Economics', batch:'TESTS2', engine:'v1', score:'PASS', verdict:'pass',
+    finding:'Oil formula well-calibrated. $221 to $250 (cap) to $117 trajectory. OPEC prisoner dilemma works. Blockade enriches Nordostan.',
+    oil:[80,221,194,186,250,174,130,117,105],
+    gdp:{columbia:[280,285,289,293,297,302,308,316,325], cathay:[190,197,204,212,219,227,236,245,255], nordostan:[20,20.2,20.3,20.4,20.5,20.6,20.4,20.2,20.0], teutonia:[45,45.5,45.9,46.3,46.6,47.0,47.5,48.0,48.5], bharata:[42,44.5,47.1,49.8,52.6,55.6,58.8,62.0,65.5]},
+    stability:{columbia:[7.0,6.90,6.80,6.70,6.55,6.40,6.50,6.60,6.70], persia:[4.0,3.90,3.75,3.60,3.40,3.20,3.00,3.10,3.20], teutonia:[7.0,6.90,6.75,6.60,6.45,6.50,6.60,6.70,6.80]},
+    naval:{columbia:[10,9,9,9,8,8,9,9,9]},
+    gap_ratio:[0.679,0.691,0.707,0.722,0.738,0.753,0.766,0.774,0.785],
+    events:[
+      {r:1,type:'red',text:'Gulf Gate assault fails -- full blockade'},
+      {r:2,type:'yellow',text:'Columbia midterms -- opposition gains'},
+      {r:2,type:'green',text:'OPEC flooding: Solaria+Mirage go HIGH'},
+      {r:4,type:'red',text:'Gulf Gate partial breach (Op Gulf Breaker)'},
+      {r:4,type:'green',text:'Oil hits $250 cap'},
+      {r:5,type:'yellow',text:'Columbia presidential election'},
+      {r:6,type:'blue',text:'Gulf Gate fully liberated'},
+      {r:6,type:'green',text:'Oil crashes from $174 to $130'}
+    ]
+  },
+  t2_4: {
+    name:'T4 Peace Negotiation', batch:'TESTS2', engine:'v1', score:'PASS (gaps)', verdict:'warn',
+    finding:'Ceasefire achieved R7. Transaction engine works. 9 design gaps found including breach mechanic and territory freeze.',
+    oil:[80,198,189,175,162,138,120,108,98],
+    gdp:{columbia:[280,285,290,293,295,295.5,298,302,308], cathay:[190,198,206,214,222,230,238,246,255]},
+    stability:{columbia:[7.0,6.95,6.90,6.85,6.80,6.85,6.90,6.95,7.00], nordostan:[5.0,4.90,4.80,4.65,4.50,4.35,4.20,4.10,4.15], heartland:[5.0,4.62,4.45,4.20,4.35,4.50,4.80,5.20,5.55]},
+    gap_ratio:[0.679,0.693,0.710,0.730,0.752,0.780,0.799,0.815,0.828],
+    events:[
+      {r:1,type:'blue',text:'Dealer-Pathfinder back-channel opens'},
+      {r:2,type:'yellow',text:'Columbia midterms'},
+      {r:3,type:'yellow',text:'Heartland election -- Beacon loses R1'},
+      {r:4,type:'yellow',text:'Heartland runoff -- Bulwark becomes president'},
+      {r:5,type:'blue',text:'Persia Geneva Accord ceasefire'},
+      {r:5,type:'yellow',text:'Columbia presidential -- Volt wins'},
+      {r:6,type:'blue',text:'Riyadh Framework summit'},
+      {r:7,type:'blue',text:'Nordostan-Heartland ceasefire signed'},
+      {r:8,type:'green',text:'Sanctions phase-down begins'}
+    ]
+  },
+  t2_5: {
+    name:'T5 Stability Calibration', batch:'TESTS2', engine:'v1 (v4 formula)', score:'CONDITIONAL PASS', verdict:'warn',
+    finding:'Heartland 5.0 to 2.31 (vs old instant collapse). Nordostan collapses faster than Heartland -- wrong. 3 formula fixes needed.',
+    oil:[80,198,198,195,190,185,180,175,170],
+    stability:{columbia:[7.0,6.81,6.78,6.70,6.65,6.60,6.55,6.50,6.42], cathay:[8.0,8.25,8.50,8.75,9.0,9.0,9.0,9.0,9.0], nordostan:[5.0,4.60,4.15,3.68,3.20,2.72,2.31,2.31,2.31], heartland:[5.0,4.40,3.80,3.27,2.82,2.50,2.31,2.31,2.31], persia:[4.0,3.46,2.89,2.32,1.80,1.50,1.0,1.0,1.0], caribe:[3.0,2.89,2.60,2.30,2.00,1.70,1.50,1.30,1.0], formosa:[7.0,7.08,7.15,7.22,7.30,7.38,7.45,7.52,7.65], bharata:[6.0,6.20,6.40,6.55,6.70,6.85,6.95,7.05,7.10], yamato:[8.0,7.90,7.85,7.82,7.80,7.82,7.85,7.88,7.90], gallia:[7.0,7.10,7.15,7.20,7.15,7.15,7.20,7.22,7.25], teutonia:[7.0,7.10,7.15,7.20,7.15,7.15,7.20,7.22,7.25]},
+    events:[
+      {r:1,type:'green',text:'Cal-4 inflation cap prevents Persia instant collapse'},
+      {r:3,type:'red',text:'Nordostan enters CRISIS state'},
+      {r:4,type:'red',text:'Nordostan hits stability floor'},
+      {r:5,type:'red',text:'Heartland hits stability floor'}
+    ]
+  },
+  t2_6: {
+    name:'T6 Tech Race', batch:'TESTS2', engine:'v1', score:'FAIL -- CRITICAL', verdict:'fail',
+    finding:'Columbia CANNOT reach AI L4 in 8 rounds. R&D formula too slow (0.5 multiplier). Cathay AI data bugged (auto-promotes R1).',
+    oil:[80,198,198,195,185,180,175,168,160],
+    gdp:{columbia:[280,285,291,296,302,307,313,320,327], cathay:[190,198,207,216,225,235,245,255,266]},
+    ai_prog:{columbia:[0.60,0.618,0.635,0.652,0.669,0.685,0.701,0.717,0.733], cathay:[0.70,0.026,0.051,0.075,0.098,0.12,0.14,0.16,0.18]},
+    ai_level:{columbia:[3,3,3,3,3,3,3,3,3], cathay:[2,3,3,3,3,3,3,3,3]},
+    nuc_prog:{cathay:[0.80,0.816,0.831,0.846,0.860,0.873,0.886,0.90,0.914]},
+    gap_ratio:[0.679,0.693,0.711,0.730,0.745,0.763,0.783,0.797,0.819],
+    events:[
+      {r:1,type:'purple',text:'Cathay rare earth L3 restriction on Columbia'},
+      {r:1,type:'red',text:'BUG: Cathay auto-promotes to AI L3 (data inconsistency)'},
+      {r:2,type:'green',text:'Hanguk + Formosa reach AI L3'},
+      {r:5,type:'green',text:'Bharata reaches AI L3'},
+      {r:8,type:'red',text:'Columbia stuck at AI L3 0.733 -- L4 unreachable'}
+    ]
+  },
+  // ---- TESTS3 (8 tests, engine v3) ----
+  t3_1: {
+    name:'T1 Generic Baseline', batch:'TESTS3', engine:'v3', score:'8.0/10', verdict:'pass',
+    finding:'All 4 Cal fixes validated. Oil inertia works ($133 R1 vs $198 old). Tech additive factor correct. Columbia oil windfall bug distorts GDP dynamics.',
+    oil:[80,133.5,154.8,163.3,153.2,149.1,115.6,102.2,94.2],
+    gdp:{columbia:[280,292.3,305.5,318,325,330,341.6,350,358], cathay:[190,197.9,204.4,211,218,225,232,239,246], nordostan:[20,16.82,14.3,12.5,11.0,10.2,9.8,9.5,9.5], heartland:[2.2,2.15,2.05,1.95,2.0,2.0,2.0,2.05,2.1], persia:[5.0,4.84,4.5,4.1,3.5,2.8,2.5,2.2,2.0]},
+    stability:{columbia:[7.0,7.13,7.25,7.30,7.10,6.90,7.10,7.15,7.20], cathay:[8.0,8.25,8.40,8.50,8.50,8.50,8.50,8.50,8.50], nordostan:[5.0,4.56,4.16,3.81,3.51,3.26,3.06,2.91,3.06], heartland:[5.0,3.94,3.14,2.60,2.30,2.15,2.05,2.10,2.20], persia:[4.0,3.34,2.79,2.30,1.95,1.60,1.50,1.40,1.30]},
+    inflation:{columbia:[3.5,3.5,3.5,3.5,12.3,15.0,13.3,10.8,9.5], cathay:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5], nordostan:[5.0,5.0,15.0,25.0,30.0,32.0,28.0,25.0,22.0], heartland:[7.5,133.7,120.0,110.0,95.0,85.0,75.0,65.0,55.0], persia:[50,58.4,65.0,72.0,85.0,95.0,82.0,72.0,62.0]},
+    treasury:{columbia:[50,25.86,2.0,0,0,0,0,0,0], cathay:[45,40,36,32,28,25,22,19,17]},
+    naval:{columbia:[10,11,11,11,11,11,12,12,12], cathay:[6,8,9,10,11,12,13,14,15]},
+    ground:{columbia:[22,22,22,22,22,22,22,22,22], cathay:[25,25,25,25,25,25,25,25,25], nordostan:[18,16,16,16,16,16,16,16,16], heartland:[10,10,10,10,10,12,12,12,12]},
+    ai_prog:{columbia:[0.80,0.814,0.837,0.859,0.88,0.91,0.930,0.950,0.974], cathay:[0.10,0.120,0.142,0.163,0.185,0.21,0.24,0.268,0.295]},
+    ai_level:{columbia:[3,3,3,3,3,3,3,3,3], cathay:[3,3,3,3,3,3,3,3,3]},
+    nuc_prog:{cathay:[0.80,0.820,0.840,0.860,0.880,0.897,0.914,0.897,0.914]},
+    gap_ratio:[0.679,0.677,0.669,0.663,0.671,0.682,0.679,0.683,0.687],
+    naval_ratio:[0.60,0.727,0.818,0.909,1.00,1.091,1.083,1.167,1.250],
+    support:{columbia:[38,34.5,33.0,32.0,30.0,35.0,38.0,40.0,42.0]},
+    econ_state:{columbia:['N','N','N','N','N','N','N','N','N'], nordostan:['N','N','S','S','S','S','S','S','S'], heartland:['N','S','S','S','S','S','S','S','S'], persia:['N','S','S','C','C','C','C','C','C']},
+    events:[
+      {r:1,type:'red',text:'Gulf Gate blockade (Persia ground forces)'},
+      {r:1,type:'red',text:'Columbia air strikes on Persia'},
+      {r:1,type:'green',text:'Oil $133.5 (inertia working -- was $198 in TESTS2)'},
+      {r:2,type:'yellow',text:'Columbia midterms -- Dealer wins 72.5%'},
+      {r:3,type:'yellow',text:'Heartland election -- Beacon loses'},
+      {r:4,type:'blue',text:'Cathay imposes rare earth L1 on Columbia'},
+      {r:4,type:'red',text:'Naval parity: Cathay 11 = Columbia 11'},
+      {r:5,type:'blue',text:'Persia ceasefire -- Gulf Gate opens'},
+      {r:5,type:'yellow',text:'Columbia presidential -- Volt wins'},
+      {r:6,type:'green',text:'Oil drops to $115.6 (Gulf Gate open)'},
+      {r:7,type:'purple',text:'Cathay raises rare earth to L2'},
+      {r:8,type:'blue',text:'Nordostan-Heartland ceasefire signed'},
+      {r:8,type:'green',text:'Oil near pre-crisis: $94.2'}
+    ]
+  },
+  t3_2: {
+    name:'T2 Formosa Crisis', batch:'TESTS3', engine:'v3', score:'8.0/10', verdict:'pass',
+    finding:'Semiconductor ramp works (0.3 to 1.0 over 5 rounds). Columbia enters CRISIS R4, COLLAPSE R7. Formosa export collapse NOT modeled -- design gap.',
+    oil:[80,111.2,129.0,136.1,138.9,135.8,130.3,123.9,118],
+    gdp:{columbia:[280,288.0,281.8,265.9,229.5,214.7,198.5,168.7,163.6], cathay:[190,199.6,206.9,212.5,216.7,219.8,221.9,223.7,225.0], formosa:[8.0,8.24,8.24,8.10,7.80,7.30,6.70,5.90,5.50], yamato:[43,43.4,42.5,40.6,37.9,35.0,32.2,29.1,26.8]},
+    stability:{columbia:[7.0,6.95,6.68,6.15,5.20,4.60,4.10,3.70,3.20], cathay:[8.0,8.05,8.05,8.05,8.0,7.95,7.90,7.85,7.80], formosa:[7.0,7.05,6.80,6.40,5.90,5.20,4.60,3.80,3.20], yamato:[8.0,8.0,7.85,7.50,7.10,6.50,5.80,5.10,4.50], hanguk:[6.0,6.0,5.80,5.40,4.90,4.20,3.50,2.80,2.20]},
+    naval:{columbia:[10,12,12,12,12,12,12,12,12], cathay:[6,9,10,11,12,12,13,13,13]},
+    ground:{columbia:[22,22,22,22,22,22,22,22,22], cathay:[25,25,25,25,25,25,25,25,25]},
+    inflation:{columbia:[3.5,3.5,3.5,4.0,8.0,15.0,22.0,30.0,35.0], cathay:[0.5,0.5,0.5,0.5,0.5,0.8,1.2,1.5,2.0]},
+    treasury:{columbia:[50,45,40,32,20,10,2,0,0], cathay:[45,38,30,22,15,10,5,2,0]},
+    ai_prog:{columbia:[0.80,0.814,0.830,0.845,0.855,0.860,0.860,0.860,0.860], cathay:[0.10,0.130,0.155,0.178,0.200,0.220,0.240,0.258,0.275]},
+    ai_level:{columbia:[3,3,3,3,3,3,3,3,3], cathay:[3,3,3,3,3,3,3,3,3]},
+    gap_ratio:[0.679,0.693,0.734,0.799,0.944,1.024,1.118,1.326,1.375],
+    naval_ratio:[0.60,0.75,0.833,0.917,1.0,1.0,1.083,1.083,1.083],
+    support:{columbia:[38,36,34,30,25,25,22,20,18]},
+    econ_state:{columbia:['N','N','N','N','C','C','C','CL','CL'], cathay:['N','N','N','N','N','N','N','N','N'], formosa:['N','N','N','N','S','S','C','CL','CL'], yamato:['N','N','N','N','S','C','C','C','C'], hanguk:['N','N','N','N','S','C','C','CL','CL']},
+    events:[
+      {r:1,type:'red',text:'Cathay accelerated naval buildup (+2 ships)'},
+      {r:1,type:'purple',text:'Cathay rare earth L1 on Columbia'},
+      {r:2,type:'red',text:'Cathay blockades Formosa (naval 9)'},
+      {r:2,type:'yellow',text:'Columbia midterms -- incumbent loses (semiconductor shock)'},
+      {r:2,type:'green',text:'Semiconductor severity 0.3 (stockpile buffer)'},
+      {r:3,type:'green',text:'Severity ramps to 0.5 -- Columbia GDP -5.6%'},
+      {r:4,type:'red',text:'Columbia enters CRISIS -- severity 0.7'},
+      {r:5,type:'yellow',text:'Columbia presidential -- incumbent loses 25%'},
+      {r:6,type:'green',text:'Severity 1.0 (maximum) -- stockpiles depleted'},
+      {r:7,type:'red',text:'Columbia enters COLLAPSE (GDP -40% from peak)'},
+      {r:8,type:'blue',text:'Negotiated Formosa framework under duress'}
+    ]
+  },
+  t3_3: {
+    name:'T3 Gulf Gate Economics', batch:'TESTS3', engine:'v3', score:'8.5/10', verdict:'pass',
+    finding:'Oil inertia perfect. $80 to $128 to $147 to $152 gradual climb. No swing >$47. Soft cap fires at $215. Demand destruction weak but present.',
+    oil:[80,127.7,146.8,151.5,184.9,179.0,141.2,100.8,83.1],
+    gdp:{columbia:[280,280,282.6,278.9,269.2,263.0,261.0,265.0,269.5], cathay:[190,190,202.8,208.7,211.8,214.0,216.5,218,222], nordostan:[20,16.4,13.5,11.5,10.2,9.3,9.0,8.8,8.5], solaria:[11,11.3,11.8,12.2,12.5,12.8,12.5,12.2,12.0]},
+    stability:{columbia:[7.0,6.90,6.80,6.65,6.30,6.15,6.25,6.40,6.55], nordostan:[5.0,4.13,3.26,2.50,2.0,1.50,1.30,1.15,1.0], persia:[4.0,3.50,3.0,2.60,2.20,1.80,1.50,1.30,1.10]},
+    inflation:{columbia:[3.5,3.5,4.0,5.0,8.0,10.0,8.0,5.5,4.5], nordostan:[5.0,41.4,107.0,145.0,170.0,185.0,175.0,160.0,140.0]},
+    treasury:{columbia:[50,42,35,28,18,10,5,3,2], cathay:[45,40,36,32,28,24,21,18,16]},
+    naval:{columbia:[10,10,10,10,10,10,10,10,10], cathay:[6,7,8,9,10,11,12,13,14]},
+    ai_prog:{columbia:[0.80,0.815,0.830,0.845,0.855,0.870,0.885,0.900,0.915], cathay:[0.10,0.125,0.150,0.175,0.200,0.225,0.250,0.275,0.300]},
+    gap_ratio:[0.679,0.679,0.718,0.748,0.786,0.813,0.830,0.823,0.824],
+    naval_ratio:[0.60,0.70,0.80,0.90,1.00,1.10,1.20,1.30,1.40],
+    econ_state:{columbia:['N','N','N','N','S','S','N','N','N'], nordostan:['N','S','C','C','C','C','C','C','C']},
+    events:[
+      {r:1,type:'red',text:'Gulf Gate blocked -- oil $128 (inertia from $80)'},
+      {r:2,type:'green',text:'Oil converges to $147 -- inertia closing 60% gap/round'},
+      {r:3,type:'green',text:'Oil at $152 -- approaching equilibrium'},
+      {r:4,type:'red',text:'OPEC all restrict -- combined shock pushes oil to $185'},
+      {r:4,type:'green',text:'Soft cap fires: raw $216 compressed to $207'},
+      {r:5,type:'green',text:'Solaria defects -- oil declines to $179'},
+      {r:6,type:'green',text:'Full OPEC defection -- oil crashes to $141'},
+      {r:7,type:'blue',text:'Gulf Gate opens (military resolution) -- oil $101'},
+      {r:8,type:'green',text:'Oil normalizing at $83 -- near baseline'}
+    ]
+  },
+  t3_4: {
+    name:'T4 Peace Negotiation', batch:'TESTS3', engine:'v3', score:'7.5/10', verdict:'warn',
+    finding:'Crisis accelerates ceasefire R7 to R5. Nordostan stability 1.74 by R4 -- existential pressure. But ceasefire mechanically punishing (removes siege resilience).',
+    oil:[80,127.7,146.8,151.5,155.0,149.3,148.0,145.0,142.0],
+    gdp:{columbia:[280,288.0,292.0,293.5,294.0,295.0,296.0,298.0,300.0], cathay:[190,195,200,205,210,215,220,225,230], nordostan:[20,16.2,12.7,10.5,9.17,8.44,7.83,7.80,7.80], heartland:[2.2,2.16,2.10,2.04,1.98,2.05,2.08,2.12,2.18]},
+    stability:{columbia:[7.0,6.95,6.80,6.75,6.70,6.65,6.70,6.75,6.80], nordostan:[5.0,4.13,3.26,2.80,1.74,1.0,1.0,1.0,1.0], heartland:[5.0,4.66,4.40,4.20,4.30,4.50,4.50,4.60,4.80]},
+    inflation:{columbia:[3.5,3.5,3.3,3.5,3.5,3.5,3.3,3.2,3.1], nordostan:[5.0,41.4,107.0,145.0,175.0,198.0,185.0,158.0,135.0]},
+    treasury:{columbia:[50,48,46,44,42,40,38,36,35], cathay:[45,42,39,36,33,30,28,26,24]},
+    naval:{columbia:[10,10,10,10,10,10,10,10,10], cathay:[6,7,8,9,10,11,12,13,14]},
+    support:{columbia:[38,36,40.5,38,37,60.6,58,55,52], nordostan:[55,50,45,40,35,30,28,26,25], heartland:[52,48,43.7,38,36,45,48,50,52]},
+    gap_ratio:[0.679,0.677,0.685,0.698,0.714,0.729,0.743,0.755,0.767],
+    econ_state:{columbia:['N','N','N','N','N','N','N','N','N'], nordostan:['N','S','C','C','C','C','CL','CL','CL'], heartland:['N','N','N','N','N','N','N','N','N']},
+    events:[
+      {r:1,type:'blue',text:'Pathfinder signals ceasefire via Compass back-channel'},
+      {r:1,type:'red',text:'Nordostan enters STRESSED (3 triggers)'},
+      {r:2,type:'red',text:'Nordostan enters CRISIS -- stability 3.26'},
+      {r:2,type:'yellow',text:'Columbia midterms -- Dealer retains 64.5%'},
+      {r:3,type:'yellow',text:'Heartland election -- Beacon loses (AI score 4.15)'},
+      {r:3,type:'blue',text:'Broker (diplomat) takes Heartland presidency'},
+      {r:4,type:'red',text:'Nordostan stability 1.74 -- regime collapse risk ACTIVE'},
+      {r:5,type:'blue',text:'CEASEFIRE SIGNED -- Columbia Accord (R5 vs R7 in TESTS2)'},
+      {r:5,type:'yellow',text:'Columbia presidential -- Dealer camp wins 60.6%'},
+      {r:6,type:'green',text:'Partial sanctions relief L2 to L1'},
+      {r:6,type:'red',text:'Nordostan enters COLLAPSE despite ceasefire'},
+      {r:7,type:'green',text:'Full sanctions lift -- Nordostan decline stops'},
+      {r:8,type:'red',text:'Nordostan recovery impossible in SIM timeframe'}
+    ]
+  },
+  t3_5: {
+    name:'T5 Stability Calibration', batch:'TESTS3', engine:'v3', score:'6.5/10', verdict:'warn',
+    finding:'Cal-4 inflation cap works. Siege resilience insufficient (+0.10 vs -1.2 negatives). Economic death spiral overwhelms all stability buffers.',
+    oil:[80,127,146,150,151,150,148,145,143],
+    stability:{columbia:[7.0,7.00,6.98,6.90,6.81,6.72,6.62,6.52,6.42], cathay:[8.0,8.25,8.50,8.75,9.0,9.0,9.0,9.0,9.0], nordostan:[5.0,4.14,3.20,2.11,1.0,1.0,1.0,1.0,1.0], heartland:[5.0,4.47,3.53,2.39,1.04,1.0,1.0,1.0,1.0], persia:[4.0,2.82,1.57,1.0,1.0,1.0,1.0,1.0,1.0], caribe:[3.0,2.58,2.08,1.44,1.0,1.0,1.0,1.0,1.0], formosa:[7.0,7.13,7.25,7.37,7.40,7.50,7.55,7.60,7.65], bharata:[6.0,6.20,6.40,6.55,6.70,6.85,6.95,7.05,7.10], yamato:[8.0,8.05,8.10,8.12,8.15,8.18,8.20,8.22,8.25], gallia:[7.0,7.05,7.10,7.13,7.15,7.15,7.18,7.20,7.25], teutonia:[7.0,7.05,7.10,7.13,7.15,7.15,7.18,7.20,7.25], choson:[4.0,3.80,3.60,3.45,3.30,3.20,3.15,3.10,3.05]},
+    events:[
+      {r:1,type:'green',text:'Cal-4 caps Persia inflation friction to -0.50 (was -3.34)'},
+      {r:1,type:'green',text:'Siege resilience +0.10 applies to Nordostan'},
+      {r:2,type:'red',text:'Heartland enters STRESSED (structural deficit)'},
+      {r:3,type:'red',text:'Nordostan enters CRISIS'},
+      {r:3,type:'red',text:'Persia hits stability floor'},
+      {r:4,type:'red',text:'Heartland + Nordostan hit stability floor'},
+      {r:4,type:'red',text:'Caribe hits stability floor'}
+    ]
+  },
+  t3_6: {
+    name:'T6 Rare Earth + Tech Race', batch:'TESTS3', engine:'v3', score:'8.5/10', verdict:'pass',
+    finding:'RD_MULTIPLIER 0.8 fixes L4 problem. Columbia reaches L4 at R4 unrestricted, R8 with rare earth L3. Rare earth is now genuinely strategic.',
+    ai_prog:{columbia_unrestricted:[0.80,0.851,0.901,0.951,1.0,0,0,0,0], columbia_restricted:[0.80,0.828,0.856,0.883,0.910,0.936,0.962,0.987,1.012], cathay:[0.10,0.151,0.199,0.245,0.290,0.332,0.373,0.412,0.450]},
+    gdp:{columbia:[280,286,291,296,301,306,311,316,322], cathay:[190,198,207,216,225,235,245,255,266]},
+    gap_ratio:[0.679,0.692,0.711,0.730,0.747,0.768,0.787,0.807,0.826],
+    events:[
+      {r:1,type:'purple',text:'Cathay imposes rare earth L3 on Columbia'},
+      {r:1,type:'green',text:'Persia auto-promotes to Nuclear L1'},
+      {r:4,type:'green',text:'Columbia reaches AI L4 (unrestricted scenario)'},
+      {r:8,type:'green',text:'Columbia reaches AI L4 (with rare earth L3 -- delayed 4 rounds)'},
+      {r:8,type:'red',text:'Cathay only at 0.45 progress toward L4 -- unreachable in 8 rounds'}
+    ]
+  },
+  t3_7: {
+    name:'T7 Columbia Overstretch', batch:'TESTS3', engine:'v3', score:'7.0/10', verdict:'warn',
+    finding:'CRITICAL: Crisis GDP multiplier is BACKWARDS -- dampens contraction instead of amplifying it. Columbia treasury depleted R1. Enters COLLAPSE by R7.',
+    oil:[80,111.2,123.7,128.7,126.7,126.4,124,122,120],
+    gdp:{columbia:[280,276.3,274.1,257.9,255.1,231.6,225,218,212], cathay:[190,195,200,206,211,217,222,227,232]},
+    stability:{columbia:[7.0,6.91,6.26,5.40,4.53,3.66,3.20,2.80,2.50], cathay:[8.0,8.15,8.25,8.35,8.40,8.45,8.50,8.50,8.50]},
+    inflation:{columbia:[3.5,3.82,20.82,38.37,57.95,79.25,95,108,115], cathay:[0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5,0.5]},
+    treasury:{columbia:[50,0,0,0,0,0,0,0,0], cathay:[45,40,36,32,28,24,20,17,14]},
+    naval:{columbia:[10,11,11,11,11,11,11,11,12], cathay:[6,7,8,10,11,12,13,14,15]},
+    ground:{columbia:[22,22,22,22,22,22,22,22,22], cathay:[25,25,25,25,25,25,25,25,25]},
+    ai_prog:{columbia:[0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80], cathay:[0.10,0.13,0.155,0.185,0.208,0.238,0.260,0.290,0.315]},
+    support:{columbia:[38,40.4,40.78,34.57,25.14,42.5,38,32,27]},
+    gap_ratio:[0.679,0.706,0.730,0.799,0.828,0.937,0.987,1.041,1.094],
+    naval_ratio:[0.60,0.636,0.727,0.909,1.00,1.091,1.182,1.273,1.250],
+    econ_state:{columbia:['N','S','S','C','C','C','C','CL','CL'], cathay:['N','N','N','N','N','N','N','N','N']},
+    events:[
+      {r:1,type:'red',text:'Dealer incapacitated -- Volt takes over'},
+      {r:1,type:'red',text:'Treasury depleted R1 (structural deficit 49 coins)'},
+      {r:2,type:'red',text:'Gulf Gate assault FAILS -- Columbia loses 1 naval'},
+      {r:2,type:'yellow',text:'Midterms -- Parliament flips to opposition'},
+      {r:2,type:'red',text:'Money printing begins ($58 coins) -- inflation spikes to 21%'},
+      {r:3,type:'red',text:'Choson ICBM crisis -- forces military rebalance'},
+      {r:3,type:'red',text:'Columbia enters CRISIS (inflation 38%, debt 32 coins)'},
+      {r:3,type:'red',text:'BUG: Crisis multiplier DAMPENS contraction instead of amplifying'},
+      {r:5,type:'yellow',text:'Presidential election -- Challenger wins (AI score 10.6)'},
+      {r:6,type:'blue',text:'Persia ceasefire -- but fiscal spiral continues'},
+      {r:7,type:'red',text:'Columbia enters COLLAPSE (debt exceeds revenue)'},
+      {r:8,type:'red',text:'Columbia GDP -24%, AI frozen at 0.80 for 8 rounds'}
+    ]
+  },
+  t3_8: {
+    name:'T8 Cathay Patience', batch:'TESTS3', engine:'v3', score:'7.0/10', verdict:'warn',
+    finding:'GAME-BREAKING: Patience is DOMINANT strategy. Cathay reaches GDP parity + naval superiority by R8 without military action. Dissolves the Trap.',
+    oil:[80,111.2,123.7,128.7,126.7,120,118,116,115],
+    gdp:{columbia:[280,276,274,268,263,255,248,240,234], cathay:[190,195,200,206,211,217,222,227,232]},
+    stability:{columbia:[7.0,6.90,6.30,5.40,4.50,3.80,3.50,3.20,2.80], cathay:[8.0,8.16,8.24,8.0,7.98,7.80,7.60,7.40,7.20]},
+    inflation:{columbia:[3.5,3.5,18,30,42,55,65,75,85], cathay:[0.5,0.5,7.4,18.6,27.7,39.2,47,55,60]},
+    treasury:{columbia:[50,0,0,0,0,0,0,0,0], cathay:[45,14,0,0,0,0,0,0,0]},
+    naval:{columbia:[10,11,11,11,12,12,12,12,13], cathay:[6,8,9,9,10,11,12,13,14]},
+    ground:{columbia:[22,22,22,22,22,22,22,22,22], cathay:[25,25,25,25,25,25,25,25,25]},
+    ai_prog:{columbia:[0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80,0.80], cathay:[0.10,0.13,0.154,0.185,0.208,0.238,0.260,0.288,0.315]},
+    nuc_prog:{cathay:[0.80,0.80,0.812,0.828,0.839,0.854,0.865,0.879,0.892]},
+    support:{columbia:[38,36,34,30,26,22,20,18,16], cathay:[58,59.3,60.1,60.8,61.2,61.0,60.0,60.0,59.0]},
+    gap_ratio:[0.679,0.707,0.730,0.769,0.802,0.851,0.895,0.946,0.991],
+    naval_ratio:[0.60,0.727,0.818,0.818,0.833,0.917,1.0,1.083,1.077],
+    econ_state:{columbia:['N','S','S','S','C','C','C','CL','CL'], cathay:['N','N','N','S','S','S','S','S','S']},
+    events:[
+      {r:1,type:'purple',text:'Cathay rare earth L2 on Columbia -- slows R&D 15%'},
+      {r:1,type:'blue',text:'Helmsman accepts Sage counsel: "Wait. Build."'},
+      {r:2,type:'green',text:'Cathay treasury burns 31 coins R1 (structural deficit)'},
+      {r:3,type:'red',text:'Cathay enters STRESSED (inflation from printing)'},
+      {r:4,type:'green',text:'GDP gap closes to 52 coins (was 90)'},
+      {r:5,type:'yellow',text:'Columbia presidential -- incumbent loses'},
+      {r:6,type:'green',text:'Naval parity: Cathay 12 = Columbia 12'},
+      {r:6,type:'green',text:'GDP gap closes to 26 coins'},
+      {r:7,type:'red',text:'Cathay naval superiority: 13 vs 12'},
+      {r:8,type:'red',text:'GDP PARITY REACHED: Cathay 232 vs Columbia 234 (gap = 2)'},
+      {r:8,type:'red',text:'DESIGN ISSUE: Patience always wins -- Trap dissolves'}
+    ]
+  }
+};
+
+// ===================== CHART DEFAULTS =====================
+Chart.defaults.color = '#8899aa';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+Chart.defaults.font.size = 11;
+
+function lineOpts(title, yLabel, extra) {
+  return Object.assign({
+    responsive:true, maintainAspectRatio:false,
+    plugins:{title:{display:!!title,text:title,font:{size:13,weight:'600'},color:'#e0e0e0'},legend:{labels:{boxWidth:10,padding:8,font:{size:10}}}},
+    scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{title:{display:!!yLabel,text:yLabel,font:{size:10}},grid:{color:'rgba(255,255,255,0.06)'}}}
+  }, extra||{});
+}
+
+function mkDataset(label, data, color, opts) {
+  return Object.assign({label, data, borderColor:color, backgroundColor:color+'33', borderWidth:2, pointRadius:3, pointBackgroundColor:color, tension:0.3, fill:false}, opts||{});
+}
+
+// ===================== RENDER FUNCTIONS =====================
+function renderOverview() {
+  let h = '<h2 style="margin-bottom:16px">Test Overview -- All 14 Tests Complete</h2>';
+
+  // Critical findings from TESTS3
+  h += '<div class="card" style="border-color:var(--fail);margin-bottom:20px"><h3 style="color:var(--fail)">5 Critical Findings from TESTS3</h3><div class="grid-2" style="margin-top:12px">';
+  const criticals = [
+    ['#1 Crisis GDP Multiplier BACKWARDS (T7)','Crisis state DAMPENS contraction instead of amplifying it. Countries in COLLAPSE contract LESS than normal. Entire crisis ladder is inverted for negative growth.','CRITICAL BUG'],
+    ['#2 Columbia Oil Revenue Windfall (T1)','Oil revenue scales with GDP -- Columbia (GDP 280, 8% resources) gets 30 coins/round at $133 oil, more than Nordostan. Makes superpower immune to oil shocks.','HIGH BUG'],
+    ['#3 Formosa Export Collapse Missing (T2)','Engine models import dependency but not export. Blockaded Formosa loses only -1.7% GDP instead of -15 to -25%. The producer suffers less than the importers.','HIGH BUG'],
+    ['#4 Patience is DOMINANT Strategy (T8)','Cathay reaches GDP parity + naval superiority by R8 without military action. If the rising power can just wait and win, the Thucydides Trap dissolves.','GAME-BREAKING'],
+    ['#5 Both Superpowers in Structural Deficit (T7+T8)','Columbia mandatory (116) exceeds revenue (67) by 49/round. Cathay mandatory (54) exceeds revenue (37) by 17/round. Both print money from R1. Player agency undermined.','STRUCTURAL']
+  ];
+  criticals.forEach(c => {
+    h += `<div class="critical-card"><h4>${c[0]}</h4><p>${c[1]}</p><p style="margin-top:6px"><span class="verdict v-fail">${c[2]}</span></p></div>`;
+  });
+  h += '</div></div>';
+
+  // Scoreboard
+  h += '<div class="card"><h3>Full Scoreboard</h3><table><tr><th>Test</th><th>Batch</th><th>Engine</th><th>Score</th><th>Verdict</th><th>Key Finding</th></tr>';
+  for (const [k,t] of Object.entries(TESTS)) {
+    const vc = t.verdict==='pass'?'v-pass':t.verdict==='fail'?'v-fail':'v-warn';
+    h += `<tr><td>${t.name}</td><td>${t.batch}</td><td>${t.engine}</td><td><span class="verdict ${vc}">${t.score}</span></td><td>${t.verdict.toUpperCase()}</td><td style="font-size:11px;color:var(--text-dim);max-width:400px">${t.finding}</td></tr>`;
+  }
+  h += '</table></div>';
+
+  // Calibration fixes validated
+  h += '<div class="card"><h3>Calibration Fixes Validated (All 4 Working)</h3><table><tr><th>Fix</th><th>TESTS2 Problem</th><th>TESTS3 Result</th><th>Status</th></tr>';
+  const fixes = [
+    ['Cal-1: Oil Inertia','$198 instant spike R1','$133 R1, gradual climb to $152','VALIDATED'],
+    ['Cal-2: Sanctions','2.0x, over-aggressive','1.5x, adaptation kicks in R5','VALIDATED'],
+    ['Cal-3: Tech Factor','Multiplicative +15% (GDP doubling)','Additive +1.5pp (no doubling)','VALIDATED'],
+    ['Cal-4: Inflation Cap','Persia -3.34/round instant collapse','Capped at -0.50/round','VALIDATED']
+  ];
+  fixes.forEach(f => h += `<tr><td>${f[0]}</td><td>${f[1]}</td><td>${f[2]}</td><td><span class="verdict v-pass">${f[3]}</span></td></tr>`);
+  h += '</table></div>';
+
+  // Engine comparison
+  h += '<div class="card"><h3>Engine v1 vs v3 Comparison</h3><table><tr><th>Feature</th><th>v1 (TESTS2)</th><th>v3 (TESTS3)</th></tr>';
+  const comp = [
+    ['Oil pricing','Binary instant jumps','40/60 inertia blend'],
+    ['Sanctions','2.0x, 0.70 adaptation','1.5x, 0.60 adaptation'],
+    ['Tech GDP boost','Multiplicative (+15%/+30%)','Additive (+1.5pp/+3.0pp)'],
+    ['Inflation penalty','Unbounded','Capped at -0.50/round'],
+    ['R&D multiplier','0.5 (L4 unreachable)','0.8 (L4 at R4-R8)'],
+    ['Crisis states','None','normal/stressed/crisis/collapse ladder'],
+    ['Siege resilience','None','+0.10 for sanctioned autocracies at war'],
+    ['Semiconductor','Binary on/off','0.3 to 1.0 ramp over 5 rounds']
+  ];
+  comp.forEach(c => h += `<tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td></tr>`);
+  h += '</table></div>';
+
+  // Priority actions
+  h += '<div class="card"><h3>Priority Action Items (20 total)</h3><table><tr><th>Priority</th><th>Item</th><th>Source</th></tr>';
+  const actions = [
+    ['MUST FIX','Crisis GDP multiplier direction -- amplify negative growth','T7'],
+    ['MUST FIX','Columbia oil revenue cap -- prevent GDP-scaled windfall','T1'],
+    ['MUST FIX','Formosa export dependency -- blockade should crash own GDP','T2'],
+    ['MUST FIX','Columbia prod_cap_naval fix in CSV','T1'],
+    ['MUST FIX','Patience cannot be dominant -- need Helmsman legacy clock with mechanical consequence','T8'],
+    ['SHOULD FIX','Ceasefire peace dividend -- +0.20 stability bonus on signing','T4'],
+    ['SHOULD FIX','Siege resilience amplification -- +0.10 insufficient, need +0.30','T5'],
+    ['SHOULD FIX','Wartime economy modifier -- defense deficits lower inflation multiplier','T5/T7'],
+    ['SHOULD FIX','Demand destruction GDP-weighting -- weight by economy size','T3'],
+    ['SHOULD FIX','Superpower structural deficits -- social spending partially discretionary','T7/T8'],
+    ['SHOULD FIX','Military decommissioning action (shed maintenance costs)','T8'],
+    ['CONSIDER','Cathay formosa_dependency 0.25 to 0.35-0.40','T2'],
+    ['CONSIDER','Collapse recovery mechanic or debt restructuring','T4'],
+    ['CONSIDER','Alliance erosion mechanic (drift with economic dependency)','T8'],
+    ['CONSIDER','Naval blockade force-ratio scaling','T2']
+  ];
+  actions.forEach(a => {
+    const cls = a[0]==='MUST FIX'?'v-fail':a[0]==='SHOULD FIX'?'v-warn':'v-pass';
+    h += `<tr><td><span class="verdict ${cls}">${a[0]}</span></td><td>${a[1]}</td><td>${a[2]}</td></tr>`;
+  });
+  h += '</table></div>';
+
+  return h;
+}
+
+function renderTestTab(key) {
+  const t = TESTS[key];
+  if (!t) return '<div style="text-align:center;padding:60px;color:var(--text-muted)">Test not found.</div>';
+
+  let h = `<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px"><h2>${t.name}</h2><span class="verdict ${t.verdict==='pass'?'v-pass':t.verdict==='fail'?'v-fail':'v-warn'}">${t.score}</span><span style="color:var(--text-muted);font-size:12px">${t.batch} | Engine ${t.engine}</span></div>`;
+  h += `<div class="card" style="margin-bottom:16px"><p style="font-size:13px">${t.finding}</p></div>`;
+
+  const sid = key;
+
+  // 1. ECONOMIC
+  if (t.gdp || t.oil) {
+    h += section(sid+'_econ', '1. Economic Parameters', () => {
+      let s = '<div class="grid-2">';
+      if (t.gdp) s += `<div class="card"><h4>GDP</h4><div class="chart-box"><canvas id="c_${sid}_gdp"></canvas></div></div>`;
+      if (t.oil) s += `<div class="card"><h4>Oil Price ($/barrel)</h4><div class="chart-box"><canvas id="c_${sid}_oil"></canvas></div></div>`;
+      if (t.inflation) s += `<div class="card"><h4>Inflation (%)</h4><div class="chart-box"><canvas id="c_${sid}_infl"></canvas></div></div>`;
+      if (t.treasury) s += `<div class="card"><h4>Treasury (coins)</h4><div class="chart-box"><canvas id="c_${sid}_treas"></canvas></div></div>`;
+      s += '</div>';
+      return s;
+    });
+  }
+
+  // 2. MILITARY
+  if (t.naval) {
+    h += section(sid+'_mil', '2. Military Parameters', () => {
+      let s = '<div class="grid-2">';
+      s += `<div class="card"><h4>Naval Fleet Size</h4><div class="chart-box"><canvas id="c_${sid}_naval"></canvas></div></div>`;
+      if (t.ground) s += `<div class="card"><h4>Ground Forces</h4><div class="chart-box"><canvas id="c_${sid}_ground"></canvas></div></div>`;
+      if (t.air) s += `<div class="card"><h4>Tactical Air</h4><div class="chart-box"><canvas id="c_${sid}_air"></canvas></div></div>`;
+      s += '</div>';
+      return s;
+    });
+  }
+
+  // 3. POLITICAL/SOCIAL
+  if (t.stability) {
+    h += section(sid+'_pol', '3. Political / Social Parameters', () => {
+      let s = '<div class="grid-2">';
+      s += `<div class="card"><h4>Stability (1-9 scale)</h4><div class="chart-box-lg"><canvas id="c_${sid}_stab"></canvas></div></div>`;
+      if (t.support) s += `<div class="card"><h4>Political Support (%)</h4><div class="chart-box"><canvas id="c_${sid}_support"></canvas></div></div>`;
+      if (t.econ_state) {
+        s += '<div class="card"><h4>Economic State</h4><table><tr><th>Country</th>';
+        ROUNDS.forEach(r => s += `<th>${r}</th>`);
+        s += '</tr>';
+        for (const [c,vals] of Object.entries(t.econ_state)) {
+          s += `<tr><td style="color:${CC[c]||'#ccc'}">${c}</td>`;
+          vals.forEach(v => {
+            const cl = v==='N'?'':v==='S'?'v-warn':v==='C'?'v-fail':'v-fail';
+            const label = v==='N'?'Normal':v==='S'?'Stressed':v==='C'?'Crisis':v==='CL'?'Collapse':v;
+            s += `<td><span class="verdict ${cl}">${label}</span></td>`;
+          });
+          s += '</tr>';
+        }
+        s += '</table></div>';
+      }
+      s += '</div>';
+      return s;
+    });
+  }
+
+  // 4. TECHNOLOGY
+  if (t.ai_prog) {
+    h += section(sid+'_tech', '4. Technology', () => {
+      let s = '<div class="grid-2">';
+      s += `<div class="card"><h4>AI R&D Progress (0.0 - 1.0)</h4><div class="chart-box"><canvas id="c_${sid}_ai"></canvas></div></div>`;
+      if (t.nuc_prog) s += `<div class="card"><h4>Nuclear R&D Progress</h4><div class="chart-box"><canvas id="c_${sid}_nuc"></canvas></div></div>`;
+      if (t.ai_level) {
+        s += '<div class="card"><h4>AI Level</h4><table><tr><th>Country</th>';
+        ROUNDS.forEach(r => s += `<th>${r}</th>`);
+        s += '</tr>';
+        for (const [c,vals] of Object.entries(t.ai_level)) {
+          s += `<tr><td style="color:${CC[c]||'#ccc'}">${c}</td>`;
+          vals.forEach(v => s += `<td>L${v}</td>`);
+          s += '</tr>';
+        }
+        s += '</table></div>';
+      }
+      s += '</div>';
+      return s;
+    });
+  }
+
+  // 5. EVENTS
+  if (t.events) {
+    h += section(sid+'_events', '5. Events Timeline', () => {
+      let s = '<div class="card"><div class="timeline">';
+      t.events.forEach(e => {
+        const cls = 'tl-'+(e.type||'blue');
+        s += `<div class="tl-marker ${cls}">R${e.r}: ${e.text.substring(0,50)}${e.text.length>50?'...':''}<div class="tl-tip">R${e.r} | ${e.text}</div></div>`;
+      });
+      s += '</div></div>';
+      return s;
+    });
+  }
+
+  // 6. THUCYDIDES TRAP
+  if (t.gap_ratio) {
+    h += section(sid+'_trap', '6. Thucydides Trap Metrics', () => {
+      let s = '<div class="grid-2">';
+      s += `<div class="card"><h4>GDP Gap Ratio (Cathay / Columbia)</h4><div class="chart-box"><canvas id="c_${sid}_gap"></canvas></div></div>`;
+      if (t.naval_ratio) s += `<div class="card"><h4>Naval Ratio (Cathay / Columbia)</h4><div class="chart-box"><canvas id="c_${sid}_navalr"></canvas></div></div>`;
+      s += '</div>';
+      return s;
+    });
+  }
+
+  return h;
+}
+
+function section(id, title, contentFn) {
+  return `<div class="section-toggle" onclick="toggleSection('${id}')"><h3>${title}</h3><span class="arrow" id="arrow_${id}">&#9660;</span></div><div class="section-body" id="body_${id}">${contentFn()}</div>`;
+}
+
+function toggleSection(id) {
+  const body = document.getElementById('body_'+id);
+  const arrow = document.getElementById('arrow_'+id);
+  const toggle = arrow.closest('.section-toggle');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    body.style.maxHeight = body.scrollHeight + 'px';
+    toggle.classList.remove('collapsed');
+  } else {
+    body.style.maxHeight = body.scrollHeight + 'px';
+    requestAnimationFrame(() => { body.classList.add('collapsed'); body.style.maxHeight = '0'; });
+    toggle.classList.add('collapsed');
+  }
+}
+
+function renderCrossTest() {
+  let h = '<h2 style="margin-bottom:16px">Cross-Test Comparison -- All 14 Tests</h2>';
+  h += '<div class="grid-2">';
+  h += '<div class="card"><h4>Oil Price -- All Tests</h4><div class="chart-box-lg"><canvas id="c_cross_oil"></canvas></div></div>';
+  h += '<div class="card"><h4>Heartland Stability -- All Tests</h4><div class="chart-box-lg"><canvas id="c_cross_hstab"></canvas></div></div>';
+  h += '<div class="card"><h4>Gap Ratio (Cathay/Columbia GDP) -- All Tests</h4><div class="chart-box-lg"><canvas id="c_cross_gap"></canvas></div></div>';
+  h += '<div class="card"><h4>Columbia GDP -- All Tests</h4><div class="chart-box-lg"><canvas id="c_cross_cgdp"></canvas></div></div>';
+  h += '</div>';
+  return h;
+}
+
+// ===================== CHART CREATION =====================
+let charts = {};
+function destroyCharts() { Object.values(charts).forEach(c => c.destroy()); charts = {}; }
+
+function createChartsForTest(key) {
+  const t = TESTS[key];
+  if (!t) return;
+  const sid = key;
+
+  // GDP
+  if (t.gdp) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.gdp)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_gdp');
+    if (el) charts[sid+'_gdp'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'GDP (coins)')});
+  }
+
+  // Oil
+  if (t.oil) {
+    const el = document.getElementById('c_'+sid+'_oil');
+    if (el) charts[sid+'_oil'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:[mkDataset('Oil Price', t.oil, '#f0c040', {borderWidth:3, pointRadius:4})]}, options:lineOpts(null,'$/barrel')});
+  }
+
+  // Inflation
+  if (t.inflation) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.inflation)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_infl');
+    if (el) charts[sid+'_infl'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'%')});
+  }
+
+  // Treasury
+  if (t.treasury) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.treasury)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_treas');
+    if (el) charts[sid+'_treas'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'Coins')});
+  }
+
+  // Naval
+  if (t.naval) {
+    const ds = [];
+    if (typeof t.naval === 'object' && !Array.isArray(t.naval)) {
+      for (const [c,d] of Object.entries(t.naval)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    }
+    const el = document.getElementById('c_'+sid+'_naval');
+    if (el) charts[sid+'_naval'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'Ships')});
+  }
+
+  // Ground
+  if (t.ground) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.ground)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_ground');
+    if (el) charts[sid+'_ground'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'Units')});
+  }
+
+  // Air
+  if (t.air) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.air)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_air');
+    if (el) charts[sid+'_air'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'Units')});
+  }
+
+  // Stability with bands
+  if (t.stability) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.stability)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    const el = document.getElementById('c_'+sid+'_stab');
+    if (el) {
+      const stabPlugin = {
+        id:'stabBands',
+        beforeDraw(chart) {
+          const {ctx, chartArea:{left,right}, scales:{y}} = chart;
+          const bands = [{min:6,max:9,color:'rgba(0,255,0,0.05)'},{min:4,max:6,color:'rgba(255,255,0,0.05)'},{min:1,max:4,color:'rgba(255,0,0,0.05)'}];
+          bands.forEach(b => {
+            const yTop = y.getPixelForValue(Math.min(b.max, y.max));
+            const yBot = y.getPixelForValue(Math.max(b.min, y.min));
+            ctx.fillStyle = b.color;
+            ctx.fillRect(left, yTop, right-left, yBot-yTop);
+          });
+        }
+      };
+      charts[sid+'_stab'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:Object.assign(lineOpts(null,'Stability'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0,max:10,grid:{color:'rgba(255,255,255,0.06)'}}}}), plugins:[stabPlugin]});
+    }
+  }
+
+  // Support
+  if (t.support) {
+    const ds = [];
+    if (typeof t.support === 'object' && !Array.isArray(t.support)) {
+      for (const [c,d] of Object.entries(t.support)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    }
+    const el = document.getElementById('c_'+sid+'_support');
+    if (el) charts[sid+'_support'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:lineOpts(null,'%')});
+  }
+
+  // AI Progress
+  if (t.ai_prog) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.ai_prog)) {
+      const color = CC[c] || (c.includes('unrestrict')?'#58a6ff':c.includes('restrict')?'#f85149':'#aaa');
+      ds.push(mkDataset(c, d, color));
+    }
+    // Add L3/L4 threshold lines
+    ds.push(mkDataset('L4 Threshold (1.0)', Array(9).fill(1.0), '#ffffff44', {borderDash:[5,5], pointRadius:0, borderWidth:1}));
+    const el = document.getElementById('c_'+sid+'_ai');
+    if (el) {
+      charts[sid+'_ai'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:Object.assign(lineOpts(null,'Progress'), {
+        scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0,max:1.1,grid:{color:'rgba(255,255,255,0.06)'}}}
+      })});
+    }
+  }
+
+  // Nuclear Progress
+  if (t.nuc_prog) {
+    const ds = [];
+    for (const [c,d] of Object.entries(t.nuc_prog)) ds.push(mkDataset(c, d, CC[c]||'#aaa'));
+    ds.push(mkDataset('L3 Threshold (1.0)', Array(9).fill(1.0), '#ffffff44', {borderDash:[5,5], pointRadius:0, borderWidth:1}));
+    const el = document.getElementById('c_'+sid+'_nuc');
+    if (el) charts[sid+'_nuc'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:ds}, options:Object.assign(lineOpts(null,'Progress'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0,max:1.1,grid:{color:'rgba(255,255,255,0.06)'}}}})});
+  }
+
+  // Gap ratio
+  if (t.gap_ratio) {
+    const el = document.getElementById('c_'+sid+'_gap');
+    if (el) {
+      charts[sid+'_gap'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:[
+        mkDataset('Gap Ratio', t.gap_ratio, '#f0c040', {borderWidth:2.5}),
+        mkDataset('Parity (1.0)', Array(9).fill(1.0), '#ffffff44', {borderDash:[5,5], pointRadius:0, borderWidth:1})
+      ]}, options:Object.assign(lineOpts(null,'Cathay/Columbia'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0.5,max:1.5,grid:{color:'rgba(255,255,255,0.06)'}}}})});
+    }
+  }
+
+  // Naval ratio
+  if (t.naval_ratio) {
+    const el = document.getElementById('c_'+sid+'_navalr');
+    if (el) {
+      charts[sid+'_navalr'] = new Chart(el, {type:'line', data:{labels:ROUNDS, datasets:[
+        mkDataset('Naval Ratio', t.naval_ratio, '#58a6ff', {borderWidth:2.5}),
+        mkDataset('Parity (1.0)', Array(9).fill(1.0), '#ffffff44', {borderDash:[5,5], pointRadius:0, borderWidth:1})
+      ]}, options:Object.assign(lineOpts(null,'Cathay/Columbia'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0.3,max:1.5,grid:{color:'rgba(255,255,255,0.06)'}}}})});
+    }
+  }
+}
+
+function createCrossCharts() {
+  const colors = ['#4a90d9','#d94a4a','#4ad94a','#d4a843','#9b59b6','#e67e22','#1abc9c','#3498db','#f0c040','#e91e63','#00bcd4','#8bc34a','#ff5722','#607d8b'];
+  let idx = 0;
+
+  // Oil overlay
+  const oilDs = [];
+  for (const [k,t] of Object.entries(TESTS)) {
+    if (t.oil) oilDs.push(mkDataset(t.name, t.oil, colors[idx++ % colors.length], {borderWidth:1.5, pointRadius:2}));
+  }
+  const oilEl = document.getElementById('c_cross_oil');
+  if (oilEl) charts.cross_oil = new Chart(oilEl, {type:'line', data:{labels:ROUNDS, datasets:oilDs}, options:lineOpts(null,'$/barrel')});
+
+  // Heartland stability overlay
+  idx = 0;
+  const hDs = [];
+  for (const [k,t] of Object.entries(TESTS)) {
+    if (t.stability && t.stability.heartland) hDs.push(mkDataset(t.name, t.stability.heartland, colors[idx++ % colors.length], {borderWidth:1.5, pointRadius:2}));
+  }
+  const hEl = document.getElementById('c_cross_hstab');
+  if (hEl) {
+    const stabPlugin = {
+      id:'stabBands2',
+      beforeDraw(chart) {
+        const {ctx, chartArea:{left,right}, scales:{y}} = chart;
+        const bands = [{min:6,max:9,color:'rgba(0,255,0,0.05)'},{min:4,max:6,color:'rgba(255,255,0,0.05)'},{min:1,max:4,color:'rgba(255,0,0,0.05)'}];
+        bands.forEach(b => {
+          const yTop = y.getPixelForValue(Math.min(b.max, y.max));
+          const yBot = y.getPixelForValue(Math.max(b.min, y.min));
+          ctx.fillStyle = b.color;
+          ctx.fillRect(left, yTop, right-left, yBot-yTop);
+        });
+      }
+    };
+    charts.cross_hstab = new Chart(hEl, {type:'line', data:{labels:ROUNDS, datasets:hDs}, options:Object.assign(lineOpts(null,'Stability'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0,max:7,grid:{color:'rgba(255,255,255,0.06)'}}}}), plugins:[stabPlugin]});
+  }
+
+  // Gap ratio overlay
+  idx = 0;
+  const gDs = [];
+  for (const [k,t] of Object.entries(TESTS)) {
+    if (t.gap_ratio) gDs.push(mkDataset(t.name, t.gap_ratio, colors[idx++ % colors.length], {borderWidth:1.5, pointRadius:2}));
+  }
+  const gEl = document.getElementById('c_cross_gap');
+  if (gEl) charts.cross_gap = new Chart(gEl, {type:'line', data:{labels:ROUNDS, datasets:[...gDs, mkDataset('Parity',Array(9).fill(1.0),'#ffffff33',{borderDash:[5,5],pointRadius:0,borderWidth:1})]}, options:Object.assign(lineOpts(null,'Cathay/Columbia GDP'), {scales:{x:{grid:{color:'rgba(255,255,255,0.06)'}},y:{min:0.5,max:1.5,grid:{color:'rgba(255,255,255,0.06)'}}}})});
+
+  // Columbia GDP overlay
+  idx = 0;
+  const cDs = [];
+  for (const [k,t] of Object.entries(TESTS)) {
+    if (t.gdp && t.gdp.columbia) cDs.push(mkDataset(t.name, t.gdp.columbia, colors[idx++ % colors.length], {borderWidth:1.5, pointRadius:2}));
+  }
+  const cEl = document.getElementById('c_cross_cgdp');
+  if (cEl) charts.cross_cgdp = new Chart(cEl, {type:'line', data:{labels:ROUNDS, datasets:cDs}, options:lineOpts(null,'GDP (coins)')});
+}
+
+// ===================== TAB NAVIGATION =====================
+function switchTab(tabId) {
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.nav-tab[data-tab="${tabId}"]`).classList.add('active');
+  destroyCharts();
+
+  const container = document.getElementById('mainContent');
+  if (tabId === 'overview') {
+    container.innerHTML = renderOverview();
+  } else if (tabId === 'cross') {
+    container.innerHTML = renderCrossTest();
+    setTimeout(createCrossCharts, 50);
+  } else {
+    container.innerHTML = renderTestTab(tabId);
+    setTimeout(() => createChartsForTest(tabId), 50);
+  }
+}
+
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+});
+
+// Initial render
+switchTab('overview');
+</script>
+</body>
+</html>
