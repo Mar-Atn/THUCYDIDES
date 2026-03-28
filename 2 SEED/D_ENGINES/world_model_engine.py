@@ -528,7 +528,7 @@ class WorldModelEngine:
         if formosa_disrupted and dep > 0:
             rounds_disrupted = eco.get("formosa_disruption_rounds", 0)
             # Severity ramps: 0.3, 0.5, 0.7, 0.9, 1.0
-            severity = min(1.0, 0.3 + 0.2 * rounds_disrupted)
+            severity = min(1.0, 0.3 + 0.2 * max(0, rounds_disrupted - 1))  # R1=0.3, R2=0.5, R3=0.7, R4=0.9, R5+=1.0
             tech_sector_pct = eco["sectors"].get("technology", 0) / 100.0
             semi_hit = -dep * severity * tech_sector_pct
 
@@ -567,7 +567,7 @@ class WorldModelEngine:
             crisis_amp = {
                 'normal': 1.0,
                 'stressed': 1.2,   # 20% worse in stressed
-                'crisis': 1.5,     # 50% worse in crisis
+                'crisis': 1.3,     # 30% worse in crisis
                 'collapse': 2.0,   # twice as bad in collapse
             }
             effective_growth = raw_growth * crisis_amp.get(eco_state, 1.0)
@@ -1810,16 +1810,10 @@ class WorldModelEngine:
                     f"  Auto-production {country_id}: +1 ground (war), "
                     f"cost={cost:.1f}, treasury={eco['treasury']:.1f}")
 
-        # Naval: countries with naval >= 5 auto-produce 1 per 2 rounds
-        naval = int(c.get('military', {}).get('naval', 0))
-        if naval >= 5 and self.ws.round_num % 2 == 0:
-            cost = float(c.get('military', {}).get('production_costs', {}).get('naval', 0))
-            if eco.get('treasury', 0) >= cost * 0.5:  # half cost for maintenance replacement
-                c['military']['naval'] = naval + 1
-                eco['treasury'] -= cost * 0.5
-                self._log.append(
-                    f"  Auto-production {country_id}: +1 naval (maintenance), "
-                    f"cost={cost * 0.5:.1f}, treasury={eco['treasury']:.1f}")
+        # Naval auto-production removed from here (FIX-A v2.4):
+        # Naval auto-production is handled ONLY in _calc_military_production()
+        # where it properly integrates with the budget system.
+        # Having it in both places caused double naval production on even rounds.
 
     # ===================================================================
     # FIX 6: CAPITULATION MECHANIC
@@ -1862,7 +1856,16 @@ class WorldModelEngine:
     # ===================================================================
 
     def _update_helmsman_legacy(self, round_num):
-        """Helmsman legacy pressure: if Formosa unresolved after R4, support erodes."""
+        """Helmsman legacy pressure: conditional on active Formosa pursuit (FIX-E v2.4).
+
+        Only triggers if Cathay is actually pursuing Formosa (blockade declared or
+        naval presence near Formosa Strait). Passive scenarios where Formosa isn't
+        the focus no longer incur the penalty.
+
+        - Actively pursuing AND failing: -2/round (after R4)
+        - NOT pursuing but window closing: -1/round (after R6)
+        - Formosa resolved: no penalty
+        """
         if round_num < 4:
             return
         formosa_resolved = getattr(self.ws, 'formosa_resolved', False)
@@ -1871,10 +1874,34 @@ class WorldModelEngine:
         cathay = self.ws.countries.get('cathay')
         if not cathay:
             return
-        cathay['political']['political_support'] -= 2.0  # -2%/round after R4
-        self._log.append(
-            f"  HELMSMAN LEGACY: Formosa unresolved at R{round_num}, "
-            f"Cathay support -{2.0} (now {cathay['political']['political_support']:.1f})")
+
+        # Check if Cathay is actively pursuing Formosa
+        active_blockades = getattr(self.ws, 'active_blockades', {})
+        cathay_pursuing = (
+            'formosa_strait' in active_blockades or
+            'taiwan_strait' in active_blockades or
+            getattr(self.ws, 'formosa_blockade', False) or
+            any(w for w in self.ws.wars
+                if 'formosa' in (w.get('attacker', ''), w.get('defender', ''))) or
+            any(d.get('zone', '').startswith('w(16') or d.get('zone', '').startswith('w(17')
+                for d in self.ws.deployments
+                if d.get('country') == 'cathay' and d.get('unit_type') == 'naval')
+        )
+
+        if not formosa_resolved and cathay_pursuing:
+            # Legacy pressure: actively pursuing Formosa and failing
+            cathay['political']['political_support'] -= 2.0
+            self._log.append(
+                f"  HELMSMAN LEGACY: Cathay actively pursuing Formosa at R{round_num}, "
+                f"unresolved -> support -{2.0} "
+                f"(now {cathay['political']['political_support']:.1f})")
+        elif not formosa_resolved and not cathay_pursuing and round_num >= 6:
+            # Mild pressure: missed the window, not even trying
+            cathay['political']['political_support'] -= 1.0
+            self._log.append(
+                f"  HELMSMAN LEGACY: Formosa unresolved at R{round_num}, "
+                f"Cathay NOT pursuing -> mild pressure -{1.0} "
+                f"(now {cathay['political']['political_support']:.1f})")
 
     # ===================================================================
     # SANCTIONS & TARIFFS IMPACT
