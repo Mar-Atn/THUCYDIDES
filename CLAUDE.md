@@ -591,6 +591,14 @@ When a significant portion of work is completed (e.g., CONCEPT stage finalized):
 - If a task reveals a gap, MARCO tracks it
 - MARCO may recommend creating specialized sub-agents for emerging needs
 
+### Evolving Methodology
+Validated methodologies are documented in `EVOLVING METHODOLOGY/` at the project root. These are reusable process templates that emerged from actual project work and proved effective.
+
+Current methodologies:
+- **Engine Validation** (`ENGINE_VALIDATION_METHODOLOGY.md`): 4-step iterative calibration process — expert dependency mapping → focused test scenarios → run & score → fix & iterate. Used to bring engine credibility from 6.5/10 to 8.6/10 in 2 iterations.
+
+When a new methodology proves successful, document it in `EVOLVING METHODOLOGY/` with: summary, the process steps, results log, when to apply, and key lessons learned.
+
 ---
 
 ## 14. The Mission
