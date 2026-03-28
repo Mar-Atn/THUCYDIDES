@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Style Comparison — Design Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  background: #111;
+  color: #ccc;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+/* ========== STICKY NAV ========== */
+.sticky-nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: #1a1a1a; border-bottom: 1px solid #333;
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 32px;
+  backdrop-filter: blur(12px);
+}
+.sticky-nav a {
+  color: #999; text-decoration: none; font-size: 14px; font-weight: 600;
+  padding: 6px 16px; border-radius: 6px; transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.sticky-nav a:hover { color: #fff; background: #2a2a2a; }
+.sticky-nav .nav-title {
+  color: #D4A843; font-weight: 700; font-size: 13px;
+  letter-spacing: 0.08em; text-transform: uppercase; margin-right: 24px;
+}
+
+/* ========== SECTIONS ========== */
+.page-section {
+  max-width: 1440px; margin: 0 auto; padding: 60px 32px;
+}
+.section-title {
+  font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700;
+  color: #E8ECF1; margin-bottom: 8px;
+}
+.section-subtitle {
+  color: #888; font-size: 15px; margin-bottom: 40px; max-width: 700px;
+}
+.section-divider {
+  border: none; border-top: 1px solid #2a2a2a; margin: 60px 0;
+}
+
+/* ========== THEME COMPARISON GRID ========== */
+.theme-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+@media (max-width: 1100px) { .theme-grid { grid-template-columns: 1fr; } }
+
+.theme-col {
+  border-radius: 12px; overflow: hidden;
+  border: 2px solid #333;
+}
+.theme-col.active { border-color: #D4A843; }
+.theme-label {
+  padding: 12px 20px; font-weight: 700; font-size: 13px;
+  letter-spacing: 0.1em; text-transform: uppercase; text-align: center;
+}
+.theme-label-a { background: #4A8EC2; color: #fff; }
+.theme-label-b { background: #1A5276; color: #fff; }
+.theme-label-c { background: #5B9BD5; color: #fff; }
+.theme-body { padding: 20px; }
+
+/* ========== COMPONENT SAMPLES ========== */
+.sample-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px; border-radius: 8px; margin-bottom: 16px;
+}
+.sample-header .title { font-family: 'Cinzel', serif; font-size: 14px; font-weight: 600; letter-spacing: 0.12em; }
+.sample-header .meta { font-size: 11px; opacity: 0.7; font-family: 'JetBrains Mono', monospace; }
+.sample-header .logo-text { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.5; }
+
+.data-card {
+  border-radius: 8px; padding: 16px; margin-bottom: 16px;
+}
+.data-card .card-title { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+.data-card .card-sub { font-size: 10px; opacity: 0.5; margin-bottom: 8px; }
+.data-card .card-value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 600; }
+.data-card .card-change { font-size: 12px; font-weight: 600; margin-top: 4px; }
+.data-card .sparkline { margin-top: 10px; }
+
+.badge-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.country-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600;
+}
+
+.alert-banner {
+  border-radius: 8px; padding: 10px 16px; margin-bottom: 16px;
+  font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px;
+}
+
+.status-table {
+  width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 11px;
+}
+.status-table th {
+  text-align: left; padding: 6px 8px; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 0.06em; font-weight: 600;
+}
+.status-table td { padding: 5px 8px; }
+.status-table tr + tr td { border-top-width: 1px; border-top-style: solid; }
+.state-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+}
+
+.map-placeholder {
+  border-radius: 8px; height: 100px; display: flex; align-items: center;
+  justify-content: center; margin-bottom: 16px; position: relative; overflow: hidden;
+}
+.map-placeholder .hex-grid { position: absolute; inset: 0; opacity: 0.15; }
+.map-placeholder .label {
+  font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.2em;
+  text-transform: uppercase; z-index: 1;
+}
+
+.chat-bubble {
+  padding: 8px 12px; border-radius: 10px; font-size: 11px;
+  max-width: 85%; margin-bottom: 8px; line-height: 1.4;
+}
+.chat-sent { margin-left: auto; border-bottom-right-radius: 2px; }
+.chat-received { margin-right: auto; border-bottom-left-radius: 2px; }
+.chat-sender { font-size: 9px; font-weight: 700; margin-bottom: 3px; display: flex; align-items: center; gap: 4px; }
+
+/* ========== TYPOGRAPHY SECTION ========== */
+.typo-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+}
+@media (max-width: 1100px) { .typo-grid { grid-template-columns: 1fr; } }
+.typo-col {
+  background: #1a1a1a; border-radius: 12px; padding: 28px;
+  border: 2px solid #333;
+}
+.typo-label {
+  display: inline-block; padding: 4px 12px; border-radius: 4px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+  text-transform: uppercase; margin-bottom: 20px;
+}
+.typo-h1 { font-size: 32px; font-weight: 700; color: #E8ECF1; margin-bottom: 12px; }
+.typo-h2 { font-size: 22px; font-weight: 600; color: #D4DEE8; margin-bottom: 10px; }
+.typo-h3 { font-size: 18px; font-weight: 600; color: #B0BEC5; margin-bottom: 16px; }
+.typo-body { font-family: 'DM Sans', sans-serif; font-size: 15px; color: #8899AA; margin-bottom: 16px; line-height: 1.65; }
+.typo-data { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 600; color: #D4A843; margin-bottom: 12px; }
+.typo-map { font-size: 13px; letter-spacing: 0.18em; color: #7A8FA3; text-transform: uppercase; font-variant: small-caps; }
+
+/* ========== EMBLEM SECTION ========== */
+.emblem-section { margin-bottom: 48px; }
+.emblem-style-title {
+  font-size: 16px; font-weight: 700; color: #E8ECF1; margin-bottom: 6px;
+}
+.emblem-style-desc { font-size: 13px; color: #666; margin-bottom: 20px; }
+.emblem-row {
+  display: flex; gap: 32px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px;
+}
+.emblem-item { text-align: center; }
+.emblem-item .name { font-size: 10px; color: #888; margin-top: 4px; letter-spacing: 0.05em; }
+.emblem-sizes { display: flex; align-items: flex-end; gap: 12px; }
+
+/* ========== DOCUMENT SAMPLES ========== */
+.sample-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;
+}
+@media (max-width: 900px) { .sample-grid { grid-template-columns: 1fr; } }
+.doc-sample {
+  border-radius: 12px; overflow: hidden; border: 2px solid #333;
+}
+.doc-label {
+  padding: 10px 20px; font-weight: 700; font-size: 12px;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  background: #D4A843; color: #111;
+}
+
+/* Dashboard sample */
+.dashboard-mock { background: #0F1923; min-height: 420px; display: flex; }
+.dash-nav {
+  width: 140px; background: #1B2838; padding: 16px 0; flex-shrink: 0;
+  border-right: 1px solid #243447;
+}
+.dash-nav-item {
+  padding: 8px 16px; font-size: 11px; color: #8899AA; cursor: default;
+}
+.dash-nav-item.active { color: #4A8EC2; background: rgba(74,142,194,0.1); border-left: 2px solid #4A8EC2; }
+.dash-main { flex: 1; padding: 16px; }
+.dash-topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px; background: #1B2838; border-radius: 8px; margin-bottom: 16px;
+}
+.dash-topbar .sim-name { font-family: 'Cinzel', serif; font-size: 12px; color: #D4A843; letter-spacing: 0.1em; }
+.dash-topbar .round { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8899AA; }
+.dash-topbar .role { font-size: 11px; color: #E8ECF1; font-weight: 600; }
+.dash-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 14px; }
+.dash-card {
+  background: #1B2838; border: 1px solid #243447; border-radius: 8px; padding: 12px;
+}
+.dash-card .dc-title { font-size: 10px; color: #8899AA; text-transform: uppercase; letter-spacing: 0.05em; }
+.dash-card .dc-val { font-family: 'JetBrains Mono', monospace; font-size: 20px; color: #E8ECF1; font-weight: 600; margin: 4px 0; }
+.dash-card .dc-change { font-size: 10px; font-weight: 600; }
+.dash-minimap {
+  background: #1B2838; border: 1px solid #243447; border-radius: 8px;
+  height: 80px; display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px; position: relative; overflow: hidden;
+}
+.dash-feed { background: #1B2838; border: 1px solid #243447; border-radius: 8px; padding: 12px; }
+.dash-feed-title { font-size: 10px; color: #8899AA; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.feed-item {
+  font-size: 11px; color: #E8ECF1; padding: 6px 0;
+  border-bottom: 1px solid #243447; display: flex; gap: 8px;
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-time { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: #5A6B7D; min-width: 36px; }
+.feed-icon { font-size: 10px; }
+
+/* Role brief */
+.role-brief-mock {
+  background: #F5F6F8; aspect-ratio: 210/297; max-height: 540px;
+  display: flex; flex-direction: column; position: relative;
+}
+.role-brief-stripe { height: 6px; background: #4A90D9; }
+.role-brief-classified {
+  text-align: center; padding: 16px 20px 8px;
+  font-size: 12px; font-weight: 700; color: #B03A3A; letter-spacing: 0.12em;
+  text-transform: uppercase; font-family: 'DM Sans', sans-serif;
+}
+.role-brief-body {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 20px; text-align: center;
+}
+.role-brief-emblem { margin-bottom: 20px; }
+.role-brief-role {
+  font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 700;
+  color: #1A2332; margin-bottom: 4px;
+}
+.role-brief-subtitle { font-size: 14px; color: #4A5568; margin-bottom: 16px; }
+.role-brief-teaser {
+  font-size: 12px; color: #4A5568; max-width: 280px; line-height: 1.6;
+}
+.role-brief-footer {
+  padding: 12px 20px; display: flex; justify-content: flex-end;
+  font-size: 9px; color: #8494A7; letter-spacing: 0.1em; text-transform: uppercase;
+}
+
+/* Presentation slide */
+.slide-mock {
+  background: #0D1B2A; aspect-ratio: 16/9; padding: 24px; display: flex;
+  flex-direction: column; position: relative;
+}
+.slide-title {
+  font-family: 'Playfair Display', serif; font-size: 18px; color: #D4DEE8;
+  margin-bottom: 16px;
+}
+.slide-metrics { display: flex; gap: 10px; margin-bottom: 16px; }
+.slide-metric {
+  background: #1B2A3E; border: 1px solid #253D54; border-radius: 6px;
+  padding: 8px 12px; flex: 1; text-align: center;
+}
+.slide-metric .sm-label { font-size: 9px; color: #7A8FA3; text-transform: uppercase; letter-spacing: 0.05em; }
+.slide-metric .sm-value { font-family: 'JetBrains Mono', monospace; font-size: 16px; color: #D4DEE8; font-weight: 600; }
+.slide-content { display: flex; gap: 16px; flex: 1; }
+.slide-map-area {
+  flex: 1; background: #1B2A3E; border: 1px solid #253D54;
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.slide-events {
+  width: 180px; background: #1B2A3E; border: 1px solid #253D54;
+  border-radius: 6px; padding: 10px; font-size: 10px; color: #D4DEE8;
+}
+.slide-events .se-title { font-size: 9px; color: #7A8FA3; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+.slide-event { padding: 4px 0; border-bottom: 1px solid #253D54; }
+.slide-event:last-child { border-bottom: none; }
+.slide-footer {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: 12px; font-size: 9px; color: #7A8FA3; letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* Name badge */
+.badge-mock {
+  background: #F5F6F8; width: 320px; height: 207px; /* 85x55mm ratio */
+  margin: 20px auto; border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column; box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.badge-color-band { height: 15%; }
+.badge-body {
+  flex: 1; padding: 10px 16px; display: flex; flex-direction: column;
+  justify-content: center;
+}
+.badge-country-line {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+}
+.badge-country-name { font-size: 10px; color: #4A5568; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+.badge-char-name { font-family: 'Playfair Display', serif; font-size: 26px; color: #1A2332; font-weight: 700; }
+.badge-char-title { font-size: 12px; color: #4A5568; margin-bottom: 4px; }
+.badge-participant { font-size: 11px; color: #8494A7; font-style: italic; }
+
+.badge-back {
+  background: #fff; width: 320px; height: 207px;
+  margin: 8px auto 20px; border-radius: 8px; overflow: hidden;
+  padding: 14px 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.badge-back-title { font-size: 9px; color: #1A2332; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.badge-back-row { display: flex; justify-content: space-between; font-size: 9px; color: #4A5568; padding: 3px 0; border-bottom: 1px solid #EBEDF2; }
+.badge-back-info { margin-top: 10px; font-size: 9px; color: #8494A7; }
+.badge-back-info div { margin-bottom: 3px; }
+
+/* Utility */
+.green { color: #4A8C6A; }
+.red { color: #C25454; }
+.gold { color: #D4A843; }
+.flex-col { display: flex; flex-direction: column; }
+</style>
+</head>
+<body>
+
+<!-- ==================== STICKY NAV ==================== -->
+<nav class="sticky-nav">
+  <span class="nav-title">TTT Style Review</span>
+  <a href="#themes">Themes</a>
+  <a href="#typography">Typography</a>
+  <a href="#emblems">Emblems</a>
+  <a href="#samples">Samples</a>
+</nav>
+
+<!-- ==================== SECTION 1: COLOR THEMES ==================== -->
+<section id="themes" class="page-section">
+  <h1 class="section-title">1. Color Theme Comparison</h1>
+  <p class="section-subtitle">Three themes rendered with identical sample components. Compare how each palette handles dashboards, data, alerts, and communication.</p>
+
+  <div class="theme-grid">
+
+    <!-- ===== THEME A: Situation Room ===== -->
+    <div class="theme-col">
+      <div class="theme-label theme-label-a">Option A: Situation Room (Dark)</div>
+      <div class="theme-body" style="background:#0F1923;">
+
+        <!-- Dashboard Header -->
+        <div class="sample-header" style="background:#1B2838; border: 1px solid #243447;">
+          <div>
+            <div class="title" style="color:#D4A843;">THE THUCYDIDES TRAP</div>
+          </div>
+          <div class="meta" style="color:#8899AA;">Round 3 | H1 2027 | 45:00</div>
+          <div class="logo-text" style="color:#5A6B7D;">METAGAMES</div>
+        </div>
+
+        <!-- Data Card -->
+        <div class="data-card" style="background:#1B2838; border: 1px solid #243447;">
+          <div class="card-title" style="color:#8899AA;">GDP</div>
+          <div class="card-sub" style="color:#5A6B7D;">Coins (billions)</div>
+          <div class="card-value" style="color:#E8ECF1;">280.4</div>
+          <div class="card-change" style="color:#4A8C6A;">+1.8% &#9650;</div>
+          <div class="sparkline">
+            <svg width="100%" height="30" viewBox="0 0 200 30">
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="none" stroke="#4A8C6A" stroke-width="2"/>
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="url(#sparkA)" stroke="none"/>
+              <defs><linearGradient id="sparkA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4A8C6A" stop-opacity="0.3"/><stop offset="100%" stop-color="#4A8C6A" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Country Badge Row -->
+        <div class="badge-row">
+          <span class="country-badge" style="background:rgba(74,144,217,0.2); color:#4A90D9;">&#9733; Columbia</span>
+          <span class="country-badge" style="background:rgba(217,74,74,0.2); color:#D94A4A;">&#11043; Cathay</span>
+          <span class="country-badge" style="background:rgba(128,128,128,0.2); color:#aaa;">&#9671; Nordostan</span>
+          <span class="country-badge" style="background:rgba(212,168,67,0.2); color:#D4A843;">&#9960; Heartland</span>
+          <span class="country-badge" style="background:rgba(74,217,122,0.2); color:#4AD97A;">&#9789; Persia</span>
+        </div>
+
+        <!-- Alert Banner -->
+        <div class="alert-banner" style="background:rgba(194,84,84,0.15); color:#C25454; border: 1px solid rgba(194,84,84,0.3);">
+          &#9876; MILITARY ALERT: Cathay naval exercises in Formosa approaches
+        </div>
+
+        <!-- Status Table -->
+        <table class="status-table">
+          <thead><tr style="border-bottom: 1px solid #243447;">
+            <th style="color:#5A6B7D;">Country</th><th style="color:#5A6B7D;">GDP</th><th style="color:#5A6B7D;">Stability</th><th style="color:#5A6B7D;">Support</th><th style="color:#5A6B7D;">State</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="color:#E8ECF1;">Columbia</td><td style="color:#8899AA; font-family:'JetBrains Mono',monospace;">280.4</td><td style="color:#8899AA;">78%</td><td style="color:#8899AA;">62%</td><td><span class="state-badge" style="background:rgba(74,140,106,0.2); color:#4A8C6A;">Normal</span></td></tr>
+            <tr style="border-color:#243447;"><td style="color:#E8ECF1; border-color:#243447;">Cathay</td><td style="color:#8899AA; font-family:'JetBrains Mono',monospace; border-color:#243447;">312.1</td><td style="color:#8899AA; border-color:#243447;">71%</td><td style="color:#8899AA; border-color:#243447;">85%</td><td style="border-color:#243447;"><span class="state-badge" style="background:rgba(196,135,58,0.2); color:#C4873A;">Stressed</span></td></tr>
+            <tr style="border-color:#243447;"><td style="color:#E8ECF1; border-color:#243447;">Nordostan</td><td style="color:#8899AA; font-family:'JetBrains Mono',monospace; border-color:#243447;">95.2</td><td style="color:#8899AA; border-color:#243447;">55%</td><td style="color:#8899AA; border-color:#243447;">73%</td><td style="border-color:#243447;"><span class="state-badge" style="background:rgba(74,140,106,0.2); color:#4A8C6A;">Normal</span></td></tr>
+            <tr style="border-color:#243447;"><td style="color:#E8ECF1; border-color:#243447;">Heartland</td><td style="color:#8899AA; font-family:'JetBrains Mono',monospace; border-color:#243447;">42.8</td><td style="color:#8899AA; border-color:#243447;">31%</td><td style="color:#8899AA; border-color:#243447;">48%</td><td style="border-color:#243447;"><span class="state-badge" style="background:rgba(194,84,84,0.2); color:#C25454;">Crisis</span></td></tr>
+            <tr style="border-color:#243447;"><td style="color:#E8ECF1; border-color:#243447;">Persia</td><td style="color:#8899AA; font-family:'JetBrains Mono',monospace; border-color:#243447;">88.6</td><td style="color:#8899AA; border-color:#243447;">64%</td><td style="color:#8899AA; border-color:#243447;">59%</td><td style="border-color:#243447;"><span class="state-badge" style="background:rgba(74,140,106,0.2); color:#4A8C6A;">Normal</span></td></tr>
+          </tbody>
+        </table>
+
+        <!-- Map Placeholder -->
+        <div class="map-placeholder" style="background:#1B2838; border: 1px solid #243447;">
+          <svg class="hex-grid" width="100%" height="100%">
+            <pattern id="hexA" width="30" height="26" patternUnits="userSpaceOnUse">
+              <polygon points="15,0 30,7 30,19 15,26 0,19 0,7" fill="none" stroke="#4A8EC2" stroke-width="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hexA)"/>
+          </svg>
+          <span class="label" style="color:#8899AA;">GLOBAL MAP</span>
+        </div>
+
+        <!-- Chat Bubbles -->
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="chat-bubble chat-sent" style="background:#4A8EC2; color:#fff;">
+            <div class="chat-sender"><span style="font-size:10px;">&#9733;</span> Columbia</div>
+            We propose emergency economic summit to discuss oil price stabilization.
+          </div>
+          <div class="chat-bubble chat-received" style="background:#243447; color:#E8ECF1;">
+            <div class="chat-sender" style="color:#D94A4A;"><span style="font-size:10px;">&#11043;</span> Cathay</div>
+            Cathay will attend, but any sanctions discussion is off the table.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== THEME B: Strategic Paper ===== -->
+    <div class="theme-col">
+      <div class="theme-label theme-label-b">Option B: Strategic Paper (Light)</div>
+      <div class="theme-body" style="background:#F5F6F8;">
+
+        <div class="sample-header" style="background:#EBEDF2; border: 1px solid #D8DCE5;">
+          <div><div class="title" style="color:#C4922A;">THE THUCYDIDES TRAP</div></div>
+          <div class="meta" style="color:#4A5568;">Round 3 | H1 2027 | 45:00</div>
+          <div class="logo-text" style="color:#8494A7;">METAGAMES</div>
+        </div>
+
+        <div class="data-card" style="background:#EBEDF2; border: 1px solid #D8DCE5;">
+          <div class="card-title" style="color:#4A5568;">GDP</div>
+          <div class="card-sub" style="color:#8494A7;">Coins (billions)</div>
+          <div class="card-value" style="color:#1A2332;">280.4</div>
+          <div class="card-change" style="color:#2E7D4F;">+1.8% &#9650;</div>
+          <div class="sparkline">
+            <svg width="100%" height="30" viewBox="0 0 200 30">
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="none" stroke="#2E7D4F" stroke-width="2"/>
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="url(#sparkB)" stroke="none"/>
+              <defs><linearGradient id="sparkB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#2E7D4F" stop-opacity="0.2"/><stop offset="100%" stop-color="#2E7D4F" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+
+        <div class="badge-row">
+          <span class="country-badge" style="background:rgba(74,144,217,0.12); color:#1A5276;">&#9733; Columbia</span>
+          <span class="country-badge" style="background:rgba(217,74,74,0.1); color:#B03A3A;">&#11043; Cathay</span>
+          <span class="country-badge" style="background:rgba(128,128,128,0.1); color:#555;">&#9671; Nordostan</span>
+          <span class="country-badge" style="background:rgba(196,146,42,0.12); color:#9A7420;">&#9960; Heartland</span>
+          <span class="country-badge" style="background:rgba(74,217,122,0.1); color:#2E7D4F;">&#9789; Persia</span>
+        </div>
+
+        <div class="alert-banner" style="background:rgba(176,58,58,0.08); color:#B03A3A; border: 1px solid rgba(176,58,58,0.2);">
+          &#9876; MILITARY ALERT: Cathay naval exercises in Formosa approaches
+        </div>
+
+        <table class="status-table">
+          <thead><tr style="border-bottom: 1px solid #D8DCE5;">
+            <th style="color:#8494A7;">Country</th><th style="color:#8494A7;">GDP</th><th style="color:#8494A7;">Stability</th><th style="color:#8494A7;">Support</th><th style="color:#8494A7;">State</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="color:#1A2332;">Columbia</td><td style="color:#4A5568; font-family:'JetBrains Mono',monospace;">280.4</td><td style="color:#4A5568;">78%</td><td style="color:#4A5568;">62%</td><td><span class="state-badge" style="background:rgba(46,125,79,0.1); color:#2E7D4F;">Normal</span></td></tr>
+            <tr><td style="color:#1A2332; border-color:#D8DCE5;">Cathay</td><td style="color:#4A5568; font-family:'JetBrains Mono',monospace; border-color:#D8DCE5;">312.1</td><td style="color:#4A5568; border-color:#D8DCE5;">71%</td><td style="color:#4A5568; border-color:#D8DCE5;">85%</td><td style="border-color:#D8DCE5;"><span class="state-badge" style="background:rgba(184,118,46,0.1); color:#B8762E;">Stressed</span></td></tr>
+            <tr><td style="color:#1A2332; border-color:#D8DCE5;">Nordostan</td><td style="color:#4A5568; font-family:'JetBrains Mono',monospace; border-color:#D8DCE5;">95.2</td><td style="color:#4A5568; border-color:#D8DCE5;">55%</td><td style="color:#4A5568; border-color:#D8DCE5;">73%</td><td style="border-color:#D8DCE5;"><span class="state-badge" style="background:rgba(46,125,79,0.1); color:#2E7D4F;">Normal</span></td></tr>
+            <tr><td style="color:#1A2332; border-color:#D8DCE5;">Heartland</td><td style="color:#4A5568; font-family:'JetBrains Mono',monospace; border-color:#D8DCE5;">42.8</td><td style="color:#4A5568; border-color:#D8DCE5;">31%</td><td style="color:#4A5568; border-color:#D8DCE5;">48%</td><td style="border-color:#D8DCE5;"><span class="state-badge" style="background:rgba(176,58,58,0.1); color:#B03A3A;">Crisis</span></td></tr>
+            <tr><td style="color:#1A2332; border-color:#D8DCE5;">Persia</td><td style="color:#4A5568; font-family:'JetBrains Mono',monospace; border-color:#D8DCE5;">88.6</td><td style="color:#4A5568; border-color:#D8DCE5;">64%</td><td style="color:#4A5568; border-color:#D8DCE5;">59%</td><td style="border-color:#D8DCE5;"><span class="state-badge" style="background:rgba(46,125,79,0.1); color:#2E7D4F;">Normal</span></td></tr>
+          </tbody>
+        </table>
+
+        <div class="map-placeholder" style="background:#EBEDF2; border: 1px solid #D8DCE5;">
+          <svg class="hex-grid" width="100%" height="100%">
+            <pattern id="hexB" width="30" height="26" patternUnits="userSpaceOnUse">
+              <polygon points="15,0 30,7 30,19 15,26 0,19 0,7" fill="none" stroke="#1A5276" stroke-width="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hexB)"/>
+          </svg>
+          <span class="label" style="color:#4A5568;">GLOBAL MAP</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="chat-bubble chat-sent" style="background:#1A5276; color:#fff;">
+            <div class="chat-sender"><span style="font-size:10px;">&#9733;</span> Columbia</div>
+            We propose emergency economic summit to discuss oil price stabilization.
+          </div>
+          <div class="chat-bubble chat-received" style="background:#D8DCE5; color:#1A2332;">
+            <div class="chat-sender" style="color:#B03A3A;"><span style="font-size:10px;">&#11043;</span> Cathay</div>
+            Cathay will attend, but any sanctions discussion is off the table.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== THEME C: Midnight Intelligence ===== -->
+    <div class="theme-col active">
+      <div class="theme-label theme-label-c">Option C: Midnight Intelligence (Rich Dark)</div>
+      <div class="theme-body" style="background:#0D1B2A;">
+
+        <div class="sample-header" style="background:#1B2A3E; border: 1px solid #253D54;">
+          <div><div class="title" style="color:#E8B84D;">THE THUCYDIDES TRAP</div></div>
+          <div class="meta" style="color:#7A8FA3;">Round 3 | H1 2027 | 45:00</div>
+          <div class="logo-text" style="color:#506070;">METAGAMES</div>
+        </div>
+
+        <div class="data-card" style="background:#1B2A3E; border: 1px solid #253D54;">
+          <div class="card-title" style="color:#7A8FA3;">GDP</div>
+          <div class="card-sub" style="color:#506070;">Coins (billions)</div>
+          <div class="card-value" style="color:#D4DEE8;">280.4</div>
+          <div class="card-change" style="color:#5BAD7A;">+1.8% &#9650;</div>
+          <div class="sparkline">
+            <svg width="100%" height="30" viewBox="0 0 200 30">
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="none" stroke="#5BAD7A" stroke-width="2"/>
+              <polyline points="0,25 30,22 60,20 90,18 120,19 150,15 180,12 200,8" fill="url(#sparkC)" stroke="none"/>
+              <defs><linearGradient id="sparkC" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#5BAD7A" stop-opacity="0.3"/><stop offset="100%" stop-color="#5BAD7A" stop-opacity="0"/></linearGradient></defs>
+            </svg>
+          </div>
+        </div>
+
+        <div class="badge-row">
+          <span class="country-badge" style="background:rgba(74,144,217,0.2); color:#5B9BD5;">&#9733; Columbia</span>
+          <span class="country-badge" style="background:rgba(212,91,91,0.2); color:#D45B5B;">&#11043; Cathay</span>
+          <span class="country-badge" style="background:rgba(128,128,128,0.2); color:#aaa;">&#9671; Nordostan</span>
+          <span class="country-badge" style="background:rgba(232,184,77,0.2); color:#E8B84D;">&#9960; Heartland</span>
+          <span class="country-badge" style="background:rgba(91,173,122,0.2); color:#5BAD7A;">&#9789; Persia</span>
+        </div>
+
+        <div class="alert-banner" style="background:rgba(212,91,91,0.12); color:#D45B5B; border: 1px solid rgba(212,91,91,0.25);">
+          &#9876; MILITARY ALERT: Cathay naval exercises in Formosa approaches
+        </div>
+
+        <table class="status-table">
+          <thead><tr style="border-bottom: 1px solid #253D54;">
+            <th style="color:#506070;">Country</th><th style="color:#506070;">GDP</th><th style="color:#506070;">Stability</th><th style="color:#506070;">Support</th><th style="color:#506070;">State</th>
+          </tr></thead>
+          <tbody>
+            <tr><td style="color:#D4DEE8;">Columbia</td><td style="color:#7A8FA3; font-family:'JetBrains Mono',monospace;">280.4</td><td style="color:#7A8FA3;">78%</td><td style="color:#7A8FA3;">62%</td><td><span class="state-badge" style="background:rgba(91,173,122,0.2); color:#5BAD7A;">Normal</span></td></tr>
+            <tr><td style="color:#D4DEE8; border-color:#253D54;">Cathay</td><td style="color:#7A8FA3; font-family:'JetBrains Mono',monospace; border-color:#253D54;">312.1</td><td style="color:#7A8FA3; border-color:#253D54;">71%</td><td style="color:#7A8FA3; border-color:#253D54;">85%</td><td style="border-color:#253D54;"><span class="state-badge" style="background:rgba(232,184,77,0.2); color:#E8B84D;">Stressed</span></td></tr>
+            <tr><td style="color:#D4DEE8; border-color:#253D54;">Nordostan</td><td style="color:#7A8FA3; font-family:'JetBrains Mono',monospace; border-color:#253D54;">95.2</td><td style="color:#7A8FA3; border-color:#253D54;">55%</td><td style="color:#7A8FA3; border-color:#253D54;">73%</td><td style="border-color:#253D54;"><span class="state-badge" style="background:rgba(91,173,122,0.2); color:#5BAD7A;">Normal</span></td></tr>
+            <tr><td style="color:#D4DEE8; border-color:#253D54;">Heartland</td><td style="color:#7A8FA3; font-family:'JetBrains Mono',monospace; border-color:#253D54;">42.8</td><td style="color:#7A8FA3; border-color:#253D54;">31%</td><td style="color:#7A8FA3; border-color:#253D54;">48%</td><td style="border-color:#253D54;"><span class="state-badge" style="background:rgba(212,91,91,0.2); color:#D45B5B;">Crisis</span></td></tr>
+            <tr><td style="color:#D4DEE8; border-color:#253D54;">Persia</td><td style="color:#7A8FA3; font-family:'JetBrains Mono',monospace; border-color:#253D54;">88.6</td><td style="color:#7A8FA3; border-color:#253D54;">64%</td><td style="color:#7A8FA3; border-color:#253D54;">59%</td><td style="border-color:#253D54;"><span class="state-badge" style="background:rgba(91,173,122,0.2); color:#5BAD7A;">Normal</span></td></tr>
+          </tbody>
+        </table>
+
+        <div class="map-placeholder" style="background:#1B2A3E; border: 1px solid #253D54;">
+          <svg class="hex-grid" width="100%" height="100%">
+            <pattern id="hexC" width="30" height="26" patternUnits="userSpaceOnUse">
+              <polygon points="15,0 30,7 30,19 15,26 0,19 0,7" fill="none" stroke="#5B9BD5" stroke-width="0.5"/>
+            </pattern>
+            <rect width="100%" height="100%" fill="url(#hexC)"/>
+          </svg>
+          <span class="label" style="color:#7A8FA3;">GLOBAL MAP</span>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px;">
+          <div class="chat-bubble chat-sent" style="background:#5B9BD5; color:#fff;">
+            <div class="chat-sender"><span style="font-size:10px;">&#9733;</span> Columbia</div>
+            We propose emergency economic summit to discuss oil price stabilization.
+          </div>
+          <div class="chat-bubble chat-received" style="background:#253D54; color:#D4DEE8;">
+            <div class="chat-sender" style="color:#D45B5B;"><span style="font-size:10px;">&#11043;</span> Cathay</div>
+            Cathay will attend, but any sanctions discussion is off the table.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /theme-grid -->
+</section>
+
+<hr class="section-divider">
+
+<!-- ==================== SECTION 2: TYPOGRAPHY ==================== -->
+<section id="typography" class="page-section">
+  <h1 class="section-title">2. Typography Comparison</h1>
+  <p class="section-subtitle">Three heading font options, each paired with DM Sans body text and JetBrains Mono data numbers. Body font is consistent; only headings change.</p>
+
+  <div class="typo-grid">
+
+    <!-- Font A: Playfair Display -->
+    <div class="typo-col">
+      <div class="typo-label" style="background:#4A8EC2; color:#fff;">Font A: Playfair Display</div>
+      <div class="typo-h1" style="font-family:'Playfair Display',serif;">The Thucydides Trap</div>
+      <div class="typo-h2" style="font-family:'Playfair Display',serif;">Round 3 — Eastern Ereb Theater</div>
+      <div class="typo-h3" style="font-family:'Playfair Display',serif;">Columbia Economic Dashboard</div>
+      <p class="typo-body">The Thucydides Trap is an immersive leadership simulation in which 25-39 participants govern 21 countries across four interconnected domains: economics, politics, military, and technology. Decisions cascade through a complex world model where every choice creates consequences — intended and unintended.</p>
+      <div class="typo-data">$198.40</div>
+      <div class="typo-map" style="font-family:'Cinzel',serif;">CATHAY</div>
+      <div style="margin-top:12px; font-size:11px; color:#555;">Editorial / The Economist / Financial Times feel. High contrast serif with dramatic thick-thin strokes. Signals intellectual authority and premium publishing.</div>
+    </div>
+
+    <!-- Font B: Source Serif 4 -->
+    <div class="typo-col">
+      <div class="typo-label" style="background:#1A5276; color:#fff;">Font B: Source Serif 4</div>
+      <div class="typo-h1" style="font-family:'Source Serif 4',serif;">The Thucydides Trap</div>
+      <div class="typo-h2" style="font-family:'Source Serif 4',serif;">Round 3 — Eastern Ereb Theater</div>
+      <div class="typo-h3" style="font-family:'Source Serif 4',serif;">Columbia Economic Dashboard</div>
+      <p class="typo-body">The Thucydides Trap is an immersive leadership simulation in which 25-39 participants govern 21 countries across four interconnected domains: economics, politics, military, and technology. Decisions cascade through a complex world model where every choice creates consequences — intended and unintended.</p>
+      <div class="typo-data">$198.40</div>
+      <div class="typo-map" style="font-family:'Cinzel',serif;">CATHAY</div>
+      <div style="margin-top:12px; font-size:11px; color:#555;">Corporate strategy / McKinsey / BCG feel. Neutral, professional serif with even weight distribution. Signals competence and institutional credibility.</div>
+    </div>
+
+    <!-- Font C: DM Sans Bold -->
+    <div class="typo-col">
+      <div class="typo-label" style="background:#5B9BD5; color:#fff;">Font C: DM Sans Bold</div>
+      <div class="typo-h1" style="font-family:'DM Sans',sans-serif; font-weight:700;">The Thucydides Trap</div>
+      <div class="typo-h2" style="font-family:'DM Sans',sans-serif; font-weight:700;">Round 3 — Eastern Ereb Theater</div>
+      <div class="typo-h3" style="font-family:'DM Sans',sans-serif; font-weight:700;">Columbia Economic Dashboard</div>
+      <p class="typo-body">The Thucydides Trap is an immersive leadership simulation in which 25-39 participants govern 21 countries across four interconnected domains: economics, politics, military, and technology. Decisions cascade through a complex world model where every choice creates consequences — intended and unintended.</p>
+      <div class="typo-data">$198.40</div>
+      <div class="typo-map" style="font-family:'Cinzel',serif;">CATHAY</div>
+      <div style="margin-top:12px; font-size:11px; color:#555;">Modern / Clean / MetaGames website consistency. Geometric sans-serif used at bold weight for headings. Signals contemporary tech-forward design. Same family as body text = ultra-consistent.</div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<!-- ==================== SECTION 3: COUNTRY EMBLEMS ==================== -->
+<section id="emblems" class="page-section">
+  <h1 class="section-title">3. Country Emblem Options</h1>
+  <p class="section-subtitle">Six countries shown in five distinct visual styles. Each emblem is rendered at 64px, 32px, and 16px to test scalability.</p>
+
+  <!-- ===== STYLE 1: Geometric Abstract ===== -->
+  <div class="emblem-section">
+    <div style="display:inline-block; padding:4px 12px; border-radius:4px; background:#4A8EC2; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Style 1</div>
+    <div class="emblem-style-title">Geometric Abstract (Bauhaus / Isotype)</div>
+    <div class="emblem-style-desc">Pure geometric shapes. Single stroke weight. Minimalist. Inspired by Otto Neurath's Isotype pictograms.</div>
+    <div class="emblem-row">
+      <!-- Columbia - Star -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><polygon points="32,6 38,24 57,24 42,36 47,54 32,43 17,54 22,36 7,24 26,24" fill="none" stroke="#4A90D9" stroke-width="2.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><polygon points="32,6 38,24 57,24 42,36 47,54 32,43 17,54 22,36 7,24 26,24" fill="none" stroke="#4A90D9" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,6 38,24 57,24 42,36 47,54 32,43 17,54 22,36 7,24 26,24" fill="#4A90D9" stroke="none"/></svg>
+        </div>
+        <div class="name">Columbia</div>
+      </div>
+      <!-- Cathay - Nested Hexagon -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><polygon points="32,6 54,17 54,39 32,50 10,39 10,17" fill="none" stroke="#D94A4A" stroke-width="2.5"/><polygon points="32,16 44,22 44,36 32,42 20,36 20,22" fill="none" stroke="#D94A4A" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><polygon points="32,6 54,17 54,39 32,50 10,39 10,17" fill="none" stroke="#D94A4A" stroke-width="4"/><polygon points="32,16 44,22 44,36 32,42 20,36 20,22" fill="none" stroke="#D94A4A" stroke-width="3"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,6 54,17 54,39 32,50 10,39 10,17" fill="#D94A4A" stroke="none"/></svg>
+        </div>
+        <div class="name">Cathay</div>
+      </div>
+      <!-- Nordostan - Diamond -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><polygon points="32,8 56,32 32,56 8,32" fill="none" stroke="#808080" stroke-width="2.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><polygon points="32,8 56,32 32,56 8,32" fill="none" stroke="#808080" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,8 56,32 32,56 8,32" fill="#808080" stroke="none"/></svg>
+        </div>
+        <div class="name">Nordostan</div>
+      </div>
+      <!-- Heartland - Shield -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="none" stroke="#D4A843" stroke-width="2.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="none" stroke="#D4A843" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="#D4A843" stroke="none"/></svg>
+        </div>
+        <div class="name">Heartland</div>
+      </div>
+      <!-- Persia - Crescent -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="none" stroke="#4AD97A" stroke-width="2.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="none" stroke="#4AD97A" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="#4AD97A" stroke="none"/></svg>
+        </div>
+        <div class="name">Persia</div>
+      </div>
+      <!-- Bharata - Wheel -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="#E67E22" stroke-width="2.5"/><circle cx="32" cy="32" r="6" fill="none" stroke="#E67E22" stroke-width="2"/><line x1="32" y1="10" x2="32" y2="54" stroke="#E67E22" stroke-width="1.5"/><line x1="10" y1="32" x2="54" y2="32" stroke="#E67E22" stroke-width="1.5"/><line x1="16" y1="16" x2="48" y2="48" stroke="#E67E22" stroke-width="1.5"/><line x1="48" y1="16" x2="16" y2="48" stroke="#E67E22" stroke-width="1.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="#E67E22" stroke-width="4"/><circle cx="32" cy="32" r="6" fill="none" stroke="#E67E22" stroke-width="3"/><line x1="32" y1="10" x2="32" y2="54" stroke="#E67E22" stroke-width="2.5"/><line x1="10" y1="32" x2="54" y2="32" stroke="#E67E22" stroke-width="2.5"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="#E67E22" stroke="none"/><circle cx="32" cy="32" r="8" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Bharata</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STYLE 2: Egyptian Hieroglyphic ===== -->
+  <div class="emblem-section">
+    <div style="display:inline-block; padding:4px 12px; border-radius:4px; background:#D4A843; color:#111; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Style 2</div>
+    <div class="emblem-style-title">Ancient Egyptian Hieroglyphic</div>
+    <div class="emblem-style-desc">Stylized bird, serpent, bear, shield, flame, lotus. Single-weight line art simplified to icon scale. Cartouche-inspired.</div>
+    <div class="emblem-row">
+      <!-- Columbia - Falcon -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,8 L22,20 L14,18 L18,28 L12,38 L22,36 L28,48 L32,56 L36,48 L42,36 L52,38 L46,28 L50,18 L42,20 Z" fill="none" stroke="#4A90D9" stroke-width="2" stroke-linejoin="round"/><circle cx="28" cy="22" r="2" fill="#4A90D9"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,8 L22,20 L14,18 L18,28 L12,38 L22,36 L28,48 L32,56 L36,48 L42,36 L52,38 L46,28 L50,18 L42,20 Z" fill="none" stroke="#4A90D9" stroke-width="3.5" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,8 L22,20 L14,18 L18,28 L12,38 L22,36 L28,48 L32,56 L36,48 L42,36 L52,38 L46,28 L50,18 L42,20 Z" fill="#4A90D9" stroke="none"/></svg>
+        </div>
+        <div class="name">Columbia</div>
+      </div>
+      <!-- Cathay - Serpent/Dragon -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M16,48 Q16,20 32,14 Q48,8 50,24 Q52,36 40,38 Q30,40 28,32 Q26,24 34,22" fill="none" stroke="#D94A4A" stroke-width="2.5" stroke-linecap="round"/><circle cx="36" cy="18" r="2" fill="#D94A4A"/><path d="M16,48 L10,52 M16,48 L12,44" stroke="#D94A4A" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M16,48 Q16,20 32,14 Q48,8 50,24 Q52,36 40,38 Q30,40 28,32 Q26,24 34,22" fill="none" stroke="#D94A4A" stroke-width="4" stroke-linecap="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M16,48 Q16,20 32,14 Q48,8 50,24 Q52,36 40,38 Q30,40 28,32" fill="none" stroke="#D94A4A" stroke-width="7" stroke-linecap="round"/></svg>
+        </div>
+        <div class="name">Cathay</div>
+      </div>
+      <!-- Nordostan - Bear -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="16" ry="18" fill="none" stroke="#808080" stroke-width="2.5"/><circle cx="20" cy="18" r="6" fill="none" stroke="#808080" stroke-width="2"/><circle cx="44" cy="18" r="6" fill="none" stroke="#808080" stroke-width="2"/><circle cx="27" cy="32" r="2" fill="#808080"/><circle cx="37" cy="32" r="2" fill="#808080"/><ellipse cx="32" cy="40" rx="4" ry="3" fill="none" stroke="#808080" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="16" ry="18" fill="none" stroke="#808080" stroke-width="4"/><circle cx="20" cy="18" r="6" fill="none" stroke="#808080" stroke-width="3.5"/><circle cx="44" cy="18" r="6" fill="none" stroke="#808080" stroke-width="3.5"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><ellipse cx="32" cy="36" rx="16" ry="18" fill="#808080"/><circle cx="20" cy="18" r="6" fill="#808080"/><circle cx="44" cy="18" r="6" fill="#808080"/></svg>
+        </div>
+        <div class="name">Nordostan</div>
+      </div>
+      <!-- Heartland - Shield with cross -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,6 L54,16 L54,34 Q54,54 32,60 Q10,54 10,34 L10,16 Z" fill="none" stroke="#D4A843" stroke-width="2.5"/><line x1="32" y1="16" x2="32" y2="50" stroke="#D4A843" stroke-width="2"/><line x1="18" y1="30" x2="46" y2="30" stroke="#D4A843" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,6 L54,16 L54,34 Q54,54 32,60 Q10,54 10,34 L10,16 Z" fill="none" stroke="#D4A843" stroke-width="4"/><line x1="32" y1="16" x2="32" y2="50" stroke="#D4A843" stroke-width="3"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,6 L54,16 L54,34 Q54,54 32,60 Q10,54 10,34 L10,16 Z" fill="#D4A843" stroke="none"/></svg>
+        </div>
+        <div class="name">Heartland</div>
+      </div>
+      <!-- Persia - Flame -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,6 Q38,20 44,28 Q52,40 42,52 Q36,58 32,58 Q28,58 22,52 Q12,40 20,28 Q26,20 32,6 Z" fill="none" stroke="#4AD97A" stroke-width="2.5"/><path d="M32,24 Q35,32 38,36 Q42,42 36,48 Q34,50 32,50 Q30,50 28,48 Q22,42 26,36 Q29,32 32,24 Z" fill="none" stroke="#4AD97A" stroke-width="1.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,6 Q38,20 44,28 Q52,40 42,52 Q36,58 32,58 Q28,58 22,52 Q12,40 20,28 Q26,20 32,6 Z" fill="none" stroke="#4AD97A" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,6 Q38,20 44,28 Q52,40 42,52 Q36,58 32,58 Q28,58 22,52 Q12,40 20,28 Q26,20 32,6 Z" fill="#4AD97A" stroke="none"/></svg>
+        </div>
+        <div class="name">Persia</div>
+      </div>
+      <!-- Bharata - Lotus -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,52 Q32,40 32,32 Q26,38 18,42 Q22,32 28,26 Q22,28 14,28 Q24,22 32,16 Q40,22 50,28 Q42,28 36,26 Q42,32 46,42 Q38,38 32,32" fill="none" stroke="#E67E22" stroke-width="2" stroke-linejoin="round"/><line x1="32" y1="52" x2="32" y2="58" stroke="#E67E22" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,52 Q32,40 32,32 Q26,38 18,42 Q22,32 28,26 Q22,28 14,28 Q24,22 32,16 Q40,22 50,28 Q42,28 36,26 Q42,32 46,42 Q38,38 32,32" fill="none" stroke="#E67E22" stroke-width="3.5" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,52 Q32,40 32,32 Q26,38 18,42 Q22,32 28,26 Q22,28 14,28 Q24,22 32,16 Q40,22 50,28 Q42,28 36,26 Q42,32 46,42 Q38,38 32,32" fill="#E67E22" stroke="none"/></svg>
+        </div>
+        <div class="name">Bharata</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STYLE 3: Seal/Stamp ===== -->
+  <div class="emblem-section">
+    <div style="display:inline-block; padding:4px 12px; border-radius:4px; background:#C25454; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Style 3</div>
+    <div class="emblem-style-title">Seal / Stamp (Classical)</div>
+    <div class="emblem-style-desc">Like ancient coin stamps or wax seals. Each emblem inside a circle border. Clean, authoritative. Roman coin / Greek drachma iconography.</div>
+    <div class="emblem-row">
+      <!-- Columbia -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#4A90D9" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#4A90D9" stroke-width="1"/><polygon points="32,12 35,24 48,24 38,32 41,44 32,37 23,44 26,32 16,24 29,24" fill="none" stroke="#4A90D9" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#4A90D9" stroke-width="4"/><polygon points="32,12 35,24 48,24 38,32 41,44 32,37 23,44 26,32 16,24 29,24" fill="#4A90D9" stroke="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#4A90D9" stroke="none"/><polygon points="32,14 35,24 46,24 37,31 40,42 32,36 24,42 27,31 18,24 29,24" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Columbia</div>
+      </div>
+      <!-- Cathay -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D94A4A" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#D94A4A" stroke-width="1"/><polygon points="32,14 46,21 46,39 32,46 18,39 18,21" fill="none" stroke="#D94A4A" stroke-width="2"/><polygon points="32,22 39,26 39,34 32,38 25,34 25,26" fill="none" stroke="#D94A4A" stroke-width="1.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D94A4A" stroke-width="4"/><polygon points="32,14 46,21 46,39 32,46 18,39 18,21" fill="#D94A4A" stroke="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#D94A4A" stroke="none"/><polygon points="32,16 44,22 44,38 32,44 20,38 20,22" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Cathay</div>
+      </div>
+      <!-- Nordostan -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#808080" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#808080" stroke-width="1"/><polygon points="32,12 50,32 32,52 14,32" fill="none" stroke="#808080" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#808080" stroke-width="4"/><polygon points="32,14 48,32 32,50 16,32" fill="#808080" stroke="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#808080" stroke="none"/><polygon points="32,14 48,32 32,50 16,32" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Nordostan</div>
+      </div>
+      <!-- Heartland -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D4A843" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#D4A843" stroke-width="1"/><path d="M32,12 L48,22 L48,38 Q48,50 32,54 Q16,50 16,38 L16,22 Z" fill="none" stroke="#D4A843" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#D4A843" stroke-width="4"/><path d="M32,14 L46,22 L46,36 Q46,48 32,52 Q18,48 18,36 L18,22 Z" fill="#D4A843" stroke="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#D4A843" stroke="none"/><path d="M32,14 L46,22 L46,36 Q46,48 32,52 Q18,48 18,36 L18,22 Z" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Heartland</div>
+      </div>
+      <!-- Persia -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#4AD97A" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#4AD97A" stroke-width="1"/><path d="M38,12 A20,20 0 1,0 38,52 A14,14 0 1,1 38,12" fill="none" stroke="#4AD97A" stroke-width="2"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#4AD97A" stroke-width="4"/><path d="M38,14 A18,18 0 1,0 38,50 A12,12 0 1,1 38,14" fill="#4AD97A" stroke="none"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#4AD97A" stroke="none"/><circle cx="38" cy="32" r="14" fill="#111" stroke="none"/></svg>
+        </div>
+        <div class="name">Persia</div>
+      </div>
+      <!-- Bharata -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#E67E22" stroke-width="2.5"/><circle cx="32" cy="32" r="24" fill="none" stroke="#E67E22" stroke-width="1"/><circle cx="32" cy="32" r="14" fill="none" stroke="#E67E22" stroke-width="2"/><circle cx="32" cy="32" r="4" fill="#E67E22"/><line x1="32" y1="18" x2="32" y2="46" stroke="#E67E22" stroke-width="1.5"/><line x1="18" y1="32" x2="46" y2="32" stroke="#E67E22" stroke-width="1.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#E67E22" stroke-width="4"/><circle cx="32" cy="32" r="14" fill="none" stroke="#E67E22" stroke-width="3"/><circle cx="32" cy="32" r="4" fill="#E67E22"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="#E67E22" stroke="none"/><circle cx="32" cy="32" r="12" fill="#111" stroke="none"/><circle cx="32" cy="32" r="4" fill="#E67E22"/></svg>
+        </div>
+        <div class="name">Bharata</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STYLE 4: Minimal Line Icons ===== -->
+  <div class="emblem-section">
+    <div style="display:inline-block; padding:4px 12px; border-radius:4px; background:#5BAD7A; color:#fff; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Style 4</div>
+    <div class="emblem-style-title">Minimal Line Icons (Tech / Modern)</div>
+    <div class="emblem-style-desc">Single continuous line or minimal strokes. Stripe / Linear app icon style. Very clean, very modern. Thin strokes, open shapes.</div>
+    <div class="emblem-row">
+      <!-- Columbia - Star outline, thin -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><polygon points="32,8 36,26 54,26 40,36 44,54 32,44 20,54 24,36 10,26 28,26" fill="none" stroke="#4A90D9" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><polygon points="32,8 36,26 54,26 40,36 44,54 32,44 20,54 24,36 10,26 28,26" fill="none" stroke="#4A90D9" stroke-width="3" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,8 36,26 54,26 40,36 44,54 32,44 20,54 24,36 10,26 28,26" fill="#4A90D9" stroke="none"/></svg>
+        </div>
+        <div class="name">Columbia</div>
+      </div>
+      <!-- Cathay - Single line hexagon spiral -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,42 L32,52 L12,42 L12,18 L32,8 M32,18 L42,24 L42,36 L32,42 L22,36 L22,24 L32,18" fill="none" stroke="#D94A4A" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,42 L32,52 L12,42 L12,18 L32,8 M32,18 L42,24 L42,36 L32,42 L22,36 L22,24 L32,18" fill="none" stroke="#D94A4A" stroke-width="3" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,8 52,18 52,42 32,52 12,42 12,18" fill="#D94A4A" stroke="none"/></svg>
+        </div>
+        <div class="name">Cathay</div>
+      </div>
+      <!-- Nordostan - Angular diamond, single stroke -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><polygon points="32,6 58,32 32,58 6,32" fill="none" stroke="#808080" stroke-width="1.5" stroke-linejoin="miter"/><line x1="32" y1="6" x2="32" y2="58" stroke="#808080" stroke-width="1"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><polygon points="32,6 58,32 32,58 6,32" fill="none" stroke="#808080" stroke-width="3" stroke-linejoin="miter"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><polygon points="32,6 58,32 32,58 6,32" fill="#808080" stroke="none"/></svg>
+        </div>
+        <div class="name">Nordostan</div>
+      </div>
+      <!-- Heartland - Shield, thin -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="none" stroke="#D4A843" stroke-width="1.5" stroke-linejoin="round"/><line x1="32" y1="18" x2="32" y2="50" stroke="#D4A843" stroke-width="1"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="none" stroke="#D4A843" stroke-width="3" stroke-linejoin="round"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M32,8 L52,18 L52,36 Q52,52 32,58 Q12,52 12,36 L12,18 Z" fill="#D4A843" stroke="none"/></svg>
+        </div>
+        <div class="name">Heartland</div>
+      </div>
+      <!-- Persia - Crescent, thin -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="none" stroke="#4AD97A" stroke-width="1.5"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="none" stroke="#4AD97A" stroke-width="3"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><path d="M40,10 A22,22 0 1,0 40,54 A16,16 0 1,1 40,10" fill="#4AD97A" stroke="none"/></svg>
+        </div>
+        <div class="name">Persia</div>
+      </div>
+      <!-- Bharata - Wheel, thin -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="none" stroke="#E67E22" stroke-width="1.5"/><circle cx="32" cy="32" r="4" fill="none" stroke="#E67E22" stroke-width="1.5"/><line x1="32" y1="8" x2="32" y2="56" stroke="#E67E22" stroke-width="1"/><line x1="8" y1="32" x2="56" y2="32" stroke="#E67E22" stroke-width="1"/><line x1="15" y1="15" x2="49" y2="49" stroke="#E67E22" stroke-width="1"/><line x1="49" y1="15" x2="15" y2="49" stroke="#E67E22" stroke-width="1"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="none" stroke="#E67E22" stroke-width="3"/><circle cx="32" cy="32" r="4" fill="#E67E22"/><line x1="32" y1="8" x2="32" y2="56" stroke="#E67E22" stroke-width="2"/><line x1="8" y1="32" x2="56" y2="32" stroke="#E67E22" stroke-width="2"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24" fill="#E67E22" stroke="none"/><circle cx="32" cy="32" r="8" fill="#111"/></svg>
+        </div>
+        <div class="name">Bharata</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== STYLE 5: Abstract Flags ===== -->
+  <div class="emblem-section">
+    <div style="display:inline-block; padding:4px 12px; border-radius:4px; background:#E8B84D; color:#111; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Style 5</div>
+    <div class="emblem-style-title">Abstract Flags (Geometric Color Blocks)</div>
+    <div class="emblem-style-desc">Geometric color arrangements -- stripes, chevrons, circles. Country color + white/black. Simple enough for 16px badge. Naval pennant / semaphore inspired.</div>
+    <div class="emblem-row">
+      <!-- Columbia - Blue with white star -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#4A90D9"/><polygon points="32,14 36,28 50,28 38,36 42,50 32,42 22,50 26,36 14,28 28,28" fill="#fff"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#4A90D9"/><polygon points="32,14 36,28 50,28 38,36 42,50 32,42 22,50 26,36 14,28 28,28" fill="#fff"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#4A90D9"/><polygon points="32,18 36,28 48,28 38,34 42,46 32,40 22,46 26,34 16,28 28,28" fill="#fff"/></svg>
+        </div>
+        <div class="name">Columbia</div>
+      </div>
+      <!-- Cathay - Red with gold chevron -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#D94A4A"/><polygon points="0,0 32,32 0,64" fill="#D4A843" opacity="0.8"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#D94A4A"/><polygon points="0,0 32,32 0,64" fill="#D4A843" opacity="0.8"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#D94A4A"/><polygon points="0,0 32,32 0,64" fill="#D4A843" opacity="0.8"/></svg>
+        </div>
+        <div class="name">Cathay</div>
+      </div>
+      <!-- Nordostan - Gray diagonal split -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#808080"/><polygon points="0,0 64,0 64,64" fill="#555"/><rect x="24" y="24" width="16" height="16" fill="#fff" opacity="0.5" transform="rotate(45,32,32)"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#808080"/><polygon points="0,0 64,0 64,64" fill="#555"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#808080"/><polygon points="0,0 64,0 64,64" fill="#555"/></svg>
+        </div>
+        <div class="name">Nordostan</div>
+      </div>
+      <!-- Heartland - Gold with black cross -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#D4A843"/><rect x="26" y="8" width="12" height="48" fill="#111" opacity="0.7"/><rect x="8" y="26" width="48" height="12" fill="#111" opacity="0.7"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#D4A843"/><rect x="26" y="8" width="12" height="48" fill="#111" opacity="0.7"/><rect x="8" y="26" width="48" height="12" fill="#111" opacity="0.7"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#D4A843"/><rect x="26" y="8" width="12" height="48" fill="#111" opacity="0.7"/><rect x="8" y="26" width="48" height="12" fill="#111" opacity="0.7"/></svg>
+        </div>
+        <div class="name">Heartland</div>
+      </div>
+      <!-- Persia - Green with white crescent -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#4AD97A"/><circle cx="30" cy="32" r="16" fill="#fff"/><circle cx="36" cy="32" r="14" fill="#4AD97A"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#4AD97A"/><circle cx="30" cy="32" r="16" fill="#fff"/><circle cx="36" cy="32" r="14" fill="#4AD97A"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#4AD97A"/><circle cx="28" cy="32" r="16" fill="#fff"/><circle cx="36" cy="32" r="14" fill="#4AD97A"/></svg>
+        </div>
+        <div class="name">Persia</div>
+      </div>
+      <!-- Bharata - Orange with white circle -->
+      <div class="emblem-item">
+        <div class="emblem-sizes">
+          <svg width="64" height="64" viewBox="0 0 64 64"><rect width="64" height="64" rx="4" fill="#E67E22"/><rect y="44" width="64" height="20" fill="#2E7D4F"/><circle cx="32" cy="32" r="12" fill="none" stroke="#fff" stroke-width="3"/><circle cx="32" cy="32" r="3" fill="#fff"/></svg>
+          <svg width="32" height="32" viewBox="0 0 64 64"><rect width="64" height="64" rx="8" fill="#E67E22"/><rect y="44" width="64" height="20" fill="#2E7D4F"/><circle cx="32" cy="32" r="12" fill="none" stroke="#fff" stroke-width="4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#E67E22"/><rect y="44" width="64" height="20" fill="#2E7D4F"/></svg>
+        </div>
+        <div class="name">Bharata</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<hr class="section-divider">
+
+<!-- ==================== SECTION 4: DOCUMENT SAMPLES ==================== -->
+<section id="samples" class="page-section">
+  <h1 class="section-title">4. Document Samples</h1>
+  <p class="section-subtitle">Full mockups using the recommended Hybrid theme: dark for app/projection, light for print. These demonstrate how the style system works across formats.</p>
+
+  <div class="sample-grid">
+
+    <!-- ===== Sample A: Participant Dashboard ===== -->
+    <div class="doc-sample">
+      <div class="doc-label">Sample A: Participant Dashboard (Dark Theme)</div>
+      <div class="dashboard-mock">
+        <div class="dash-nav">
+          <div style="padding:12px 16px; margin-bottom:8px;">
+            <div style="font-size:9px; color:#5A6B7D; letter-spacing:0.12em; text-transform:uppercase;">METAGAMES</div>
+          </div>
+          <div class="dash-nav-item active">Home</div>
+          <div class="dash-nav-item">Map</div>
+          <div class="dash-nav-item">Budget</div>
+          <div class="dash-nav-item">Military</div>
+          <div class="dash-nav-item">Diplomacy</div>
+          <div class="dash-nav-item">Intelligence</div>
+          <div class="dash-nav-item">Communications</div>
+        </div>
+        <div class="dash-main">
+          <div class="dash-topbar">
+            <div class="sim-name">THE THUCYDIDES TRAP</div>
+            <div class="round">R3 | H1 2027 | 45:00</div>
+            <div class="role">&#9733; DEALER &mdash; Columbia</div>
+          </div>
+          <div class="dash-cards">
+            <div class="dash-card">
+              <div class="dc-title">GDP</div>
+              <div class="dc-val">280.4</div>
+              <div class="dc-change" style="color:#4A8C6A;">+1.8% &#9650;</div>
+            </div>
+            <div class="dash-card">
+              <div class="dc-title">Stability</div>
+              <div class="dc-val">78%</div>
+              <div class="dc-change" style="color:#C4873A;">-2.1% &#9660;</div>
+            </div>
+            <div class="dash-card">
+              <div class="dc-title">Oil Price</div>
+              <div class="dc-val">$198</div>
+              <div class="dc-change" style="color:#C25454;">+12% &#9650;</div>
+            </div>
+            <div class="dash-card">
+              <div class="dc-title">Naval Strength</div>
+              <div class="dc-val">142</div>
+              <div class="dc-change" style="color:#4A8C6A;">Stable</div>
+            </div>
+          </div>
+          <div class="dash-minimap">
+            <svg width="100%" height="100%" style="position:absolute; opacity:0.12;">
+              <pattern id="hexD" width="20" height="17" patternUnits="userSpaceOnUse">
+                <polygon points="10,0 20,5 20,13 10,17 0,13 0,5" fill="none" stroke="#4A8EC2" stroke-width="0.5"/>
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#hexD)"/>
+            </svg>
+            <span style="font-family:'Cinzel',serif; font-size:10px; color:#5A6B7D; letter-spacing:0.15em; z-index:1;">GLOBAL THEATER</span>
+          </div>
+          <div class="dash-feed">
+            <div class="dash-feed-title">Activity Feed</div>
+            <div class="feed-item"><span class="feed-time">14:32</span><span class="feed-icon" style="color:#C25454;">&#9876;</span><span>Cathay deploys naval group to Formosa approaches</span></div>
+            <div class="feed-item"><span class="feed-time">14:28</span><span class="feed-icon" style="color:#D4A843;">&#9670;</span><span>Oil price rises to $198/barrel after Cartel announcement</span></div>
+            <div class="feed-item"><span class="feed-time">14:15</span><span class="feed-icon" style="color:#4A8EC2;">&#9993;</span><span>Gallia proposes Western Treaty emergency session</span></div>
+            <div class="feed-item"><span class="feed-time">14:02</span><span class="feed-icon" style="color:#4A8C6A;">&#9632;</span><span>Bharata signs trade agreement with Columbia (+2.4 coins)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sample B: Printed Role Brief Cover ===== -->
+    <div class="doc-sample">
+      <div class="doc-label">Sample B: Printed Role Brief Cover (Light Theme)</div>
+      <div class="role-brief-mock">
+        <div class="role-brief-stripe"></div>
+        <div class="role-brief-classified">CLASSIFIED &mdash; COLUMBIA EYES ONLY</div>
+        <div class="role-brief-body">
+          <div class="role-brief-emblem">
+            <svg width="96" height="96" viewBox="0 0 64 64">
+              <circle cx="32" cy="32" r="28" fill="none" stroke="#4A90D9" stroke-width="1.8"/>
+              <circle cx="32" cy="32" r="24" fill="none" stroke="#4A90D9" stroke-width="0.8"/>
+              <polygon points="32,10 36,24 50,24 39,33 43,47 32,39 21,47 25,33 14,24 28,24" fill="none" stroke="#4A90D9" stroke-width="1.5"/>
+            </svg>
+          </div>
+          <div class="role-brief-role">DEALER</div>
+          <div class="role-brief-subtitle">President of Columbia</div>
+          <div class="role-brief-teaser">You are the leader of the world's preeminent power. Your economy is the largest, your military is unmatched, and your alliances span the globe. But a rising challenger threatens the order you built. Every decision you make will shape the next decade of global politics.</div>
+        </div>
+        <div class="role-brief-footer">METAGAMES</div>
+      </div>
+    </div>
+
+    <!-- ===== Sample C: Presentation Slide ===== -->
+    <div class="doc-sample">
+      <div class="doc-label">Sample C: Presentation Slide &mdash; World Briefing (Dark)</div>
+      <div class="slide-mock">
+        <div class="slide-title">World State &mdash; Round 3</div>
+        <div class="slide-metrics">
+          <div class="slide-metric">
+            <div class="sm-label">Oil Price</div>
+            <div class="sm-value" style="color:#E8B84D;">$198</div>
+          </div>
+          <div class="slide-metric">
+            <div class="sm-label">Gap Ratio</div>
+            <div class="sm-value">0.87</div>
+          </div>
+          <div class="slide-metric">
+            <div class="sm-label">Active Wars</div>
+            <div class="sm-value" style="color:#D45B5B;">2</div>
+          </div>
+          <div class="slide-metric">
+            <div class="sm-label">Nuclear Status</div>
+            <div class="sm-value" style="color:#5BAD7A;">SAFE</div>
+          </div>
+        </div>
+        <div class="slide-content">
+          <div class="slide-map-area">
+            <svg width="100%" height="100%" style="position:absolute; opacity:0.1;">
+              <pattern id="hexE" width="24" height="21" patternUnits="userSpaceOnUse">
+                <polygon points="12,0 24,6 24,15 12,21 0,15 0,6" fill="none" stroke="#5B9BD5" stroke-width="0.5"/>
+              </pattern>
+              <rect width="100%" height="100%" fill="url(#hexE)"/>
+            </svg>
+            <span style="font-family:'Cinzel',serif; font-size:11px; color:#506070; letter-spacing:0.15em; z-index:1;">WORLD MAP</span>
+          </div>
+          <div class="slide-events">
+            <div class="se-title">Key Events</div>
+            <div class="slide-event">&#9876; Cathay-Formosa naval confrontation</div>
+            <div class="slide-event">&#9670; OPEC+ production cut announced</div>
+            <div class="slide-event">&#9993; Western Treaty Article 5 debate</div>
+            <div class="slide-event">&#9632; Heartland ceasefire proposal rejected</div>
+            <div class="slide-event">&#9888; Nordostan missile test detected</div>
+          </div>
+        </div>
+        <div class="slide-footer">
+          <span>METAGAMES</span>
+          <span>THE THUCYDIDES TRAP</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Sample D: Name Badge ===== -->
+    <div class="doc-sample">
+      <div class="doc-label">Sample D: Name Badge (Light Theme)</div>
+      <div style="background:#222; padding:24px;">
+        <!-- Front -->
+        <div style="text-align:center; font-size:10px; color:#888; margin-bottom:8px; letter-spacing:0.08em; text-transform:uppercase;">Front</div>
+        <div class="badge-mock">
+          <div class="badge-color-band" style="background:#4A90D9;"></div>
+          <div class="badge-body">
+            <div class="badge-country-line">
+              <svg width="20" height="20" viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="#4A90D9" stroke-width="3"/><polygon points="32,12 35,24 48,24 38,32 41,44 32,37 23,44 26,32 16,24 29,24" fill="#4A90D9" stroke="none"/></svg>
+              <span class="badge-country-name">Columbia</span>
+            </div>
+            <div class="badge-char-name">DEALER</div>
+            <div class="badge-char-title">President of Columbia</div>
+            <div class="badge-participant">John Smith</div>
+          </div>
+        </div>
+
+        <!-- Back -->
+        <div style="text-align:center; font-size:10px; color:#888; margin-bottom:8px; letter-spacing:0.08em; text-transform:uppercase;">Back</div>
+        <div class="badge-back">
+          <div class="badge-back-title">Schedule</div>
+          <div class="badge-back-row"><span>09:00</span><span>Registration &amp; Briefing</span></div>
+          <div class="badge-back-row"><span>10:00</span><span>Round 1 &mdash; H1 2025</span></div>
+          <div class="badge-back-row"><span>11:30</span><span>Round 2 &mdash; H2 2025</span></div>
+          <div class="badge-back-row"><span>13:00</span><span>Lunch Break</span></div>
+          <div class="badge-back-row"><span>14:00</span><span>Round 3 &mdash; H1 2026</span></div>
+          <div class="badge-back-row"><span>15:30</span><span>Round 4 &mdash; H2 2026</span></div>
+          <div class="badge-back-row"><span>17:00</span><span>Debrief &amp; Reflection</span></div>
+          <div class="badge-back-info">
+            <div><strong>WiFi:</strong> MetaGames-Event / Password: thucydides2027</div>
+            <div><strong>Emergency:</strong> Facilitator desk, Room A</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /sample-grid -->
+</section>
+
+<div style="text-align:center; padding:48px 32px; color:#444; font-size:12px; letter-spacing:0.05em;">
+  TTT STYLE COMPARISON v1.0 &mdash; Prepared for Design Review &mdash; METAGAMES 2026
+</div>
+
+</body>
+</html>
