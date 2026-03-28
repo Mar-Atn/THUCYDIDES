@@ -433,6 +433,86 @@ class TransactionEngine:
                 return {"success": True, "revoked": br}
         return {"success": False, "reason": "Basing rights not found"}
 
+    # --- G10: Personal Wallets ---
+
+    def execute_personal_transfer(self, from_entity: str, to_entity: str,
+                                   amount: float, from_type: str = 'role',
+                                   to_type: str = 'role') -> dict:
+        """Transfer coins between individuals, or between individual and country.
+
+        from_type/to_type: 'role' (personal wallet) or 'country' (state treasury)
+        """
+        # Get source balance
+        if from_type == 'role':
+            source = self.ws.get_role(from_entity)
+            if not source:
+                return {"success": False, "reason": f"Role {from_entity} not found"}
+            balance = source.get('personal_coins', 0)
+            if balance < amount:
+                return {"success": False, "reason": "Insufficient personal funds"}
+            source['personal_coins'] -= amount
+        else:
+            source_country = self.ws.countries.get(from_entity)
+            if not source_country:
+                return {"success": False, "reason": f"Country {from_entity} not found"}
+            if source_country['economic']['treasury'] < amount:
+                return {"success": False, "reason": "Insufficient treasury"}
+            source_country['economic']['treasury'] -= amount
+
+        # Credit destination
+        if to_type == 'role':
+            dest = self.ws.get_role(to_entity)
+            if not dest:
+                # Rollback source
+                if from_type == 'role':
+                    self.ws.get_role(from_entity)['personal_coins'] += amount
+                else:
+                    self.ws.countries[from_entity]['economic']['treasury'] += amount
+                return {"success": False, "reason": f"Role {to_entity} not found"}
+            dest['personal_coins'] = dest.get('personal_coins', 0) + amount
+        else:
+            dest_country = self.ws.countries.get(to_entity)
+            if not dest_country:
+                # Rollback source
+                if from_type == 'role':
+                    self.ws.get_role(from_entity)['personal_coins'] += amount
+                else:
+                    self.ws.countries[from_entity]['economic']['treasury'] += amount
+                return {"success": False, "reason": f"Country {to_entity} not found"}
+            dest_country['economic']['treasury'] += amount
+
+        result = {
+            "success": True,
+            "from": from_entity,
+            "to": to_entity,
+            "amount": amount,
+            "from_type": from_type,
+            "to_type": to_type,
+            "note": f"Personal transfer: {amount} coins from {from_entity} to {to_entity}"
+        }
+
+        self.ws.log_event({
+            "type": "personal_transfer",
+            "from": from_entity,
+            "to": to_entity,
+            "amount": amount,
+            "from_type": from_type,
+            "to_type": to_type,
+        })
+
+        self.transaction_log.append({
+            "tx_id": self._tx_counter + 1,
+            "tx_type": "personal_transfer",
+            "sender": from_entity,
+            "receiver": to_entity,
+            "details": {"amount": amount, "from_type": from_type, "to_type": to_type},
+            "status": "executed",
+            "round": self.ws.round_num,
+        })
+        self._tx_counter += 1
+
+        return result
+
     def get_pending_for(self, actor: str) -> List[dict]:
         """Get all pending transactions where actor is the receiver."""
         country_id = self._resolve_country(actor)

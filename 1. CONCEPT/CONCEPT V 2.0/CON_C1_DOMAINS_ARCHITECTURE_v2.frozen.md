@@ -81,7 +81,11 @@ Production capacity limits (each country has maximum units per type per round). 
 **Amphibious assault rules:**
 - Standard amphibious: 3:1 force ratio required (after all modifiers). Below 3:1, assault automatically fails.
 - Naval superiority prerequisite: no uncontested enemy naval units may remain in the sea zone before landing operations can begin.
-- Formosa-specific: 4:1 force ratio required (terrain, decades of defensive preparation, strait width).
+- Formosa-specific: 3:1 force ratio required (terrain, decades of defensive preparation, strait width).
+
+> **SEED DECISION (2026-03-28):** Formosa amphibious ratio reduced from 4:1 to 3:1.
+> At 3:1, attacker wins ~58% — a calculated risk, not a guarantee.
+> This allows invasion as a desperate gamble while still making it extremely costly.
 - Pre-landing bombardment: naval units (10% chance per unit of destroying one defender) and tactical air strikes can reduce defender count before the ratio check.
 
 ### Theater Activation

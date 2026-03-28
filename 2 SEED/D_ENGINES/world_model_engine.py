@@ -229,6 +229,9 @@ class WorldModelEngine:
             tech_result = self._calc_tech_advancement(cid, rd)
             results["tech"][cid] = tech_result
 
+            # --- G13: Personal tech investments ---
+            self._apply_personal_tech_investment(cid)
+
             # --- STEP 7: Inflation update (money printing from budget -> inflation) ---
             money_printed = bud_result.get("money_printed", 0)
             new_inflation = self._calc_inflation(cid, money_printed)
@@ -286,6 +289,20 @@ class WorldModelEngine:
             new_sup = self._calc_political_support(cid, ev, round_num)
             results["support"][cid] = new_sup
             c["political"]["political_support"] = new_sup
+
+        # --- G3: Check revolution/protest triggers ---
+        for cid in self.ws.countries:
+            rev_event = self._check_revolution(cid)
+            if rev_event:
+                results.setdefault("revolution_triggers", {})[cid] = rev_event
+                self._log.append(f"  REVOLUTION TRIGGER: {cid} — {rev_event['severity']} protests")
+
+        # --- G6: Health events for elderly leaders ---
+        for cid in self.ws.countries:
+            health_event = self._check_health_events(cid, round_num)
+            if health_event:
+                results.setdefault("health_events", {})[cid] = health_event
+                self._log.append(f"  HEALTH EVENT: {cid} — {health_event['event']}")
 
         # --- FIX 3: Update market index per country ---
         for cid in self.ws.countries:
@@ -1502,6 +1519,23 @@ class WorldModelEngine:
                                    f"in {combat.get('zone', '?')}")
                     })
 
+            # --- G1: Nuclear R&D pushback on strikes ---
+            # When a country's territory is struck (missile/air), push back nuclear R&D
+            for combat in det_results.get("combat_secondary", []):
+                if combat.get("defender") == cid and combat.get("type") in (
+                        "missile_strike", "attack"):
+                    nuc_prog = tech.get("nuclear_rd_progress", 0)
+                    if nuc_prog > 0:
+                        pushback = 0.15
+                        tech["nuclear_rd_progress"] = max(0, nuc_prog - pushback)
+                        adj_list.append({
+                            "type": "nuclear_rd_pushback",
+                            "variable": "nuclear_rd_progress",
+                            "adjustment": -pushback,
+                            "reason": (f"Strike on {cid} territory damages "
+                                       f"nuclear R&D infrastructure"),
+                        })
+
             # --- TECH BREAKTHROUGH OPTIMISM ---
             tech_res = det_results.get("tech", {}).get(cid, {})
             if tech_res.get("ai_levelup") or tech_res.get("nuclear_levelup"):
@@ -1938,42 +1972,88 @@ class WorldModelEngine:
         return total_damage, costs
 
     def _calc_tariff_impact(self, country_id: str) -> dict:
-        """Net tariff impact on country_id."""
+        """Net tariff impact on country_id — now supports per-sector tariffs (G15).
+
+        Tariff data format:
+        - Per-sector: tariffs[imposer][target] = {'resources': 0-3, 'industry': 0-3, ...}
+        - Aggregate (backward compatible): tariffs[imposer][target] = level (int)
+        """
         tariffs = self.ws.bilateral.get("tariffs", {})
         tw = self.trade_weights
         c = self.ws.countries[country_id]
         gdp = c["economic"]["gdp"]
 
+        # Sector weights for this country (used for per-sector calculations)
+        sectors = {
+            'resources': c['economic'].get('sector_resources', 0) / 100,
+            'industry': c['economic'].get('sector_industry', 0) / 100,
+            'services': c['economic'].get('sector_services', 0) / 100,
+            'technology': c['economic'].get('sector_technology', 0) / 100,
+        }
+
         cost_imposer = 0.0
         revenue_imposer = 0.0
         cost_target = 0.0
 
+        # --- Tariffs I impose on others ---
         my_tariffs = tariffs.get(country_id, {})
-        for target, level in my_tariffs.items():
-            if level <= 0:
-                continue
+        for target, tariff_data in my_tariffs.items():
             bw = tw.get(country_id, {}).get(target, 0.0)
-            tariff_cost = level * bw * 0.04 * gdp
-            revenue = tariff_cost * 0.70
-            net_cost = tariff_cost * 0.30
-            rerouting = level * 0.15
-            net_cost *= max(0.0, 1.0 - rerouting)
-            cost_imposer += net_cost
-            revenue_imposer += revenue
+            if isinstance(tariff_data, dict):
+                # Per-sector tariffs
+                for sector, level in tariff_data.items():
+                    if level <= 0 or sector not in sectors:
+                        continue
+                    sector_weight = sectors.get(sector, 0)
+                    tariff_cost = level * bw * 0.04 * gdp * sector_weight
+                    revenue = tariff_cost * 0.70
+                    net_cost = tariff_cost * 0.30
+                    rerouting = level * 0.15
+                    net_cost *= max(0.0, 1.0 - rerouting)
+                    cost_imposer += net_cost
+                    revenue_imposer += revenue
+            else:
+                # Aggregate tariff (backward compatible)
+                level = int(tariff_data)
+                if level <= 0:
+                    continue
+                tariff_cost = level * bw * 0.04 * gdp
+                revenue = tariff_cost * 0.70
+                net_cost = tariff_cost * 0.30
+                rerouting = level * 0.15
+                net_cost *= max(0.0, 1.0 - rerouting)
+                cost_imposer += net_cost
+                revenue_imposer += revenue
 
+        # --- Tariffs others impose on me ---
         for imposer_id, targets in tariffs.items():
             if imposer_id == country_id:
                 continue
-            level = targets.get(country_id, 0)
-            if level <= 0:
+            tariff_data = targets.get(country_id)
+            if tariff_data is None:
                 continue
             bw = tw.get(imposer_id, {}).get(country_id, 0.0)
             imposer_gdp = self.ws.countries.get(imposer_id, {}).get(
                 "economic", {}).get("gdp", 1)
-            c2us = level * bw * 0.04 * imposer_gdp * 0.5
-            rerouting = level * 0.15
-            c2us *= max(0.0, 1.0 - rerouting)
-            cost_target += c2us
+            if isinstance(tariff_data, dict):
+                # Per-sector tariffs against me
+                for sector, level in tariff_data.items():
+                    if level <= 0 or sector not in sectors:
+                        continue
+                    sector_weight = sectors.get(sector, 0)
+                    c2us = level * bw * 0.04 * imposer_gdp * 0.5 * sector_weight
+                    rerouting = level * 0.15
+                    c2us *= max(0.0, 1.0 - rerouting)
+                    cost_target += c2us
+            else:
+                # Aggregate tariff (backward compatible)
+                level = int(tariff_data)
+                if level <= 0:
+                    continue
+                c2us = level * bw * 0.04 * imposer_gdp * 0.5
+                rerouting = level * 0.15
+                c2us *= max(0.0, 1.0 - rerouting)
+                cost_target += c2us
 
         net_gdp_cost = max(cost_imposer + cost_target - revenue_imposer, 0.0)
         return {
@@ -2138,6 +2218,145 @@ class WorldModelEngine:
         else:
             pol["war_tiredness"] = max(current_wt * 0.80, 0)
 
+    # ===================================================================
+    # G3: REVOLUTION / PROTEST TRIGGER
+    # ===================================================================
+
+    def _check_revolution(self, country_id: str) -> dict:
+        """When stability 1-2 AND support <20%, mass protests erupt.
+
+        An ELITE participant (non-HoS role) can choose to 'lead the protest'.
+        This is a deliberate action (like a coup but from below).
+        Probabilistic outcome (dice) with risk for BOTH sides:
+        - If protest succeeds: HoS removed, protest leader takes power
+        - If protest fails: protest leader imprisoned/exiled
+        - Base probability: 30% + (20 - support)% + (3 - stability) * 10%
+        """
+        c = self.ws.countries[country_id]
+        stab = c['political']['stability']
+        support = c['political']['political_support']
+
+        if stab <= 2 and support < 20:
+            # Mass protests erupt automatically
+            protest_severity = 'severe' if stab <= 1 else 'major'
+
+            # Flag for elite participants — any non-HoS can lead
+            return {
+                "event": "mass_protests",
+                "country": country_id,
+                "severity": protest_severity,
+                "stability": stab,
+                "support": support,
+                "elite_can_lead": True,
+                "base_success_probability": 0.30 + (20 - support) / 100 + (3 - stab) * 0.10,
+                "note": ("An elite participant can choose to lead the protest. "
+                         "Success = regime change. Failure = imprisonment/exile for the leader. "
+                         "Risk for BOTH sides."),
+            }
+        return None
+
+    # ===================================================================
+    # G6: HEALTH EVENTS FOR ELDERLY LEADERS
+    # ===================================================================
+
+    def _check_health_events(self, country_id: str, round_num: int) -> dict:
+        """Leaders 70+ face health risks after Round 2.
+
+        Probability: ~3-5% per round (age-dependent, medical care matters).
+        Effects: reduced capacity OR death.
+        - Reduced capacity: fewer actions, can't attend meetings, lasts 1-2 rounds
+        - Death: permanent removal, succession crisis
+        """
+        if round_num <= 2:
+            return None  # allow players to establish themselves
+
+        ELDERLY_LEADERS = {
+            'columbia': {'role': 'dealer', 'age': 80, 'medical_quality': 0.9},  # best care
+            'cathay': {'role': 'helmsman', 'age': 73, 'medical_quality': 0.7},
+            'nordostan': {'role': 'pathfinder', 'age': 73, 'medical_quality': 0.6},
+        }
+
+        if country_id not in ELDERLY_LEADERS:
+            return None
+
+        leader = ELDERLY_LEADERS[country_id]
+
+        # Base probability: 3% at 70, +1% per year over 70, reduced by medical quality
+        base_prob = 0.03 + (leader['age'] - 70) * 0.01
+        prob = base_prob * (1 - leader['medical_quality'] * 0.5)
+        # Columbia (80, 0.9 medical): 0.13 * 0.55 = 7.15%
+        # Cathay (73, 0.7 medical): 0.06 * 0.65 = 3.9%
+        # Nordostan (73, 0.6 medical): 0.06 * 0.70 = 4.2%
+
+        roll = random.random()
+        if roll < prob:
+            # Health event triggered
+            severity_roll = random.random()
+            if severity_roll < 0.15:
+                # Death (15% of health events)
+                role = self.ws.get_role(leader['role'])
+                if role:
+                    role['status'] = 'dead'
+                return {
+                    "event": "leader_death",
+                    "country": country_id,
+                    "role": leader['role'],
+                    "note": f"Leader of {country_id} has died. Succession crisis.",
+                    "succession_required": True,
+                }
+            else:
+                # Incapacitation (85% of health events)
+                duration = random.choice([1, 1, 2])  # 1-2 rounds
+                role = self.ws.get_role(leader['role'])
+                if role:
+                    role['status'] = 'incapacitated'
+                return {
+                    "event": "leader_incapacitated",
+                    "country": country_id,
+                    "role": leader['role'],
+                    "duration": duration,
+                    "note": f"Leader of {country_id} incapacitated for {duration} round(s). Reduced capacity.",
+                    "effects": "Cannot attend meetings. Fewer actions. Deputy acts.",
+                }
+
+        return None
+
+    # ===================================================================
+    # G13: PERSONAL TECH INVESTMENTS
+    # ===================================================================
+
+    def _apply_personal_tech_investment(self, country_id: str):
+        """Roles like Pioneer (Columbia) and Circuit (Cathay) can invest
+        personal coins in their country's R&D.
+
+        Personal investment adds directly to R&D progress.
+        """
+        TECH_INVESTORS = {
+            'columbia': ['pioneer', 'dealer'],  # Pioneer is the tech mogul
+            'cathay': ['circuit'],
+        }
+
+        if country_id not in TECH_INVESTORS:
+            return
+
+        for role_id in TECH_INVESTORS[country_id]:
+            role = self.ws.get_role(role_id)
+            if not role:
+                continue
+            investment = role.get('tech_investment_this_round', 0)
+            if investment > 0 and role.get('personal_coins', 0) >= investment:
+                role['personal_coins'] -= investment
+                # Personal investment is 50% as efficient as government R&D
+                # (individual can't match state capacity, but contributes)
+                c = self.ws.countries[country_id]
+                gdp = c['economic']['gdp']
+                if gdp > 0:
+                    progress_boost = (investment / gdp) * 0.4  # 50% of normal R&D efficiency
+                    c['technology']['ai_rd_progress'] += progress_boost
+                    self._log.append(
+                        f"  G13: {role_id} invested {investment} personal coins in {country_id} AI R&D "
+                        f"(+{progress_boost:.4f} progress)")
+
     def _update_threshold_flags(self, country_id: str) -> None:
         c = self.ws.countries[country_id]
         pol = c["political"]
@@ -2156,12 +2375,25 @@ class WorldModelEngine:
     # ===================================================================
 
     def _apply_tariff_changes(self, changes: dict) -> None:
+        """Apply tariff changes. Supports both aggregate and per-sector (G15).
+
+        Format: changes[imposer][target] = level (int) OR
+                changes[imposer][target] = {'resources': 0-3, 'industry': 0-3, ...}
+        """
         tariffs = self.ws.bilateral.setdefault("tariffs", {})
         for imposer, targets in changes.items():
             if imposer not in tariffs:
                 tariffs[imposer] = {}
-            for target, level in targets.items():
-                tariffs[imposer][target] = clamp(level, 0, 3)
+            for target, tariff_data in targets.items():
+                if isinstance(tariff_data, dict):
+                    # Per-sector tariffs
+                    clamped = {}
+                    for sector, level in tariff_data.items():
+                        clamped[sector] = int(clamp(level, 0, 3))
+                    tariffs[imposer][target] = clamped
+                else:
+                    # Aggregate tariff (backward compatible)
+                    tariffs[imposer][target] = int(clamp(tariff_data, 0, 3))
 
     def _apply_sanction_changes(self, changes: dict) -> None:
         sanctions = self.ws.bilateral.setdefault("sanctions", {})

@@ -181,6 +181,11 @@ class WorldState:
                         "sanctions_rounds": 0,            # consecutive rounds under L2+ sanctions
                         "formosa_disruption_rounds": 0,   # consecutive rounds of semiconductor disruption
                         "market_index": 50,               # financial market confidence (0-100)
+                        # --- Flat sector aliases for per-sector tariff calculations ---
+                        "sector_resources": self._override_sector(cid, "resources", float(row["sector_resources"])),
+                        "sector_industry": float(row["sector_industry"]),
+                        "sector_services": float(row["sector_services"]),
+                        "sector_technology": float(row["sector_technology"]),
                     },
                     "military": {
                         "ground": int(row.get("mil_ground", 0)),
@@ -218,6 +223,7 @@ class WorldState:
                     "technology": {
                         "nuclear_level": int(row.get("nuclear_level", 0)),
                         "nuclear_rd_progress": float(row.get("nuclear_rd_progress", 0)),
+                        "nuclear_tested": int(row.get("nuclear_level", 0)) >= 1,  # L1+ start tested
                         "ai_level": self._override_ai_level(cid, int(row.get("ai_level", 0))),
                         "ai_rd_progress": self._override_ai_progress(cid, float(row.get("ai_rd_progress", 0))),
                     },
@@ -488,6 +494,10 @@ class WorldState:
             or country_id in w.get("allies", {}).get("defender", [])
             for w in self.wars
         )
+
+    def get_role(self, role_id: str) -> Optional[dict]:
+        """Get a role by its ID."""
+        return self.roles.get(role_id)
 
     def get_roles_for_country(self, country_id: str) -> List[dict]:
         return [r for r in self.roles.values() if r["country_id"] == country_id]

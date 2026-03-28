@@ -901,6 +901,194 @@ class LiveActionEngine:
         return result
 
     # -----------------------------------------------------------------------
+    # G1: NUCLEAR TEST — Signal Action + Tech Path
+    # -----------------------------------------------------------------------
+
+    def resolve_nuclear_test(self, country_id: str, test_type: str = "underground") -> dict:
+        """Nuclear test — a SIGNAL to the world + tech development milestone.
+
+        - underground: less provocative, smaller diplomatic cost
+        - overground: maximum signal, major diplomatic event, global stability shock
+
+        NOT required to advance nuclear tech — R&D investment is the path.
+        But test CONFIRMS capability (makes deterrent credible).
+        A strike on nuclear sites can push R&D progress BACK.
+        Countries can also BUY L1 tech from others via tech_transfer transaction
+        and deploy it next turn.
+        """
+        c = self.ws.countries[country_id]
+        nuc_level = c['technology']['nuclear_level']
+
+        if nuc_level < 1:
+            return {"success": False, "reason": "Must have at least L1 nuclear to test"}
+
+        result = {
+            "action": "nuclear_test",
+            "country": country_id,
+            "test_type": test_type,
+            "success": True,
+        }
+
+        # Diplomatic consequences
+        if test_type == "overground":
+            # Global stability shock
+            for cid, country in self.ws.countries.items():
+                country['political']['stability'] = max(1.0, country['political']['stability'] - 0.3)
+            result["global_event"] = f"{country_id} conducts overground nuclear test — global shock"
+            result["stability_cost_to_tester"] = -0.5  # self-cost too
+            c['political']['stability'] = max(1.0, c['political']['stability'] - 0.5)
+        else:
+            # Underground — less dramatic
+            result["global_event"] = f"{country_id} conducts underground nuclear test — detected by intelligence"
+            result["stability_cost_to_tester"] = -0.2
+            c['political']['stability'] = max(1.0, c['political']['stability'] - 0.2)
+
+        # Confirms capability — makes deterrent credible
+        c['technology']['nuclear_tested'] = True
+
+        # Political support boost domestically (nationalist rally)
+        c['political']['political_support'] = min(100, c['political']['political_support'] + 5)
+
+        self.ws.log_event({
+            "type": "nuclear_test",
+            "country": country_id,
+            "test_type": test_type,
+            "global_event": result.get("global_event", ""),
+        })
+        self._log_action(result)
+        return result
+
+    # -----------------------------------------------------------------------
+    # G2: FIRE / REASSIGN ACTION
+    # -----------------------------------------------------------------------
+
+    def resolve_fire(self, country_id: str, target_role_id: str, replacement_role_id: str = None) -> dict:
+        """Head of state fires/reassigns a subordinate.
+
+        - Instant power removal
+        - Columbia: Parliament must confirm replacement (Acting if not confirmed)
+        - Other countries: instant
+        - Fired role loses ALL powers, stays in game as opposition/disgraced
+        - Political cost: -3 support, -0.3 stability (institutional disruption)
+        """
+        c = self.ws.countries[country_id]
+
+        # Verify initiator is HoS
+        # (authorization check handled by orchestrator)
+
+        result = {
+            "action": "fire",
+            "country": country_id,
+            "target_role": target_role_id,
+            "success": True,
+        }
+
+        # Remove target's powers
+        target_role = self.ws.get_role(target_role_id)
+        if target_role:
+            target_role['status'] = 'fired'
+            target_role['powers'] = []  # all powers removed
+            result["fired_role"] = target_role_id
+        else:
+            result["success"] = False
+            result["error"] = f"Role {target_role_id} not found"
+            self._log_action(result)
+            return result
+
+        # Political cost
+        c['political']['political_support'] = max(0, c['political']['political_support'] - 3)
+        c['political']['stability'] = max(1.0, c['political']['stability'] - 0.3)
+
+        # Columbia special: Parliament confirmation
+        if country_id == 'columbia' and replacement_role_id:
+            # Check if parliament majority supports (3 of 5 seats)
+            parliament_approves = True  # simplified — orchestrator handles vote
+            if not parliament_approves:
+                result["acting"] = True
+                result["note"] = "Parliament did not confirm. Replacement serves as Acting official."
+
+        self.ws.log_event({
+            "type": "fire",
+            "country": country_id,
+            "target_role": target_role_id,
+            "replacement": replacement_role_id,
+        })
+        self._log_action(result)
+        return result
+
+    # -----------------------------------------------------------------------
+    # G3: PROTEST ACTION (elite leads mass protest)
+    # -----------------------------------------------------------------------
+
+    def resolve_protest_action(self, country_id: str, leader_role_id: str) -> dict:
+        """Elite participant leads the mass protest. Dice roll determines outcome."""
+        c = self.ws.countries[country_id]
+        stab = c['political']['stability']
+        support = c['political']['political_support']
+
+        base_prob = 0.30 + (20 - support) / 100 + max(0, (3 - stab)) * 0.10
+        prob = min(0.80, max(0.15, base_prob))  # floor 15%, cap 80%
+
+        roll = random.random()
+        success = roll < prob
+
+        if success:
+            # Regime change — protest leader takes power
+            # Remove old HoS
+            old_hos = self.ws.get_head_of_state(country_id)
+            if old_hos:
+                old_hos["status"] = "deposed"
+                old_hos["is_head_of_state"] = False
+
+            # Install protest leader
+            new_leader = self.ws.get_role(leader_role_id)
+            if new_leader:
+                new_leader["is_head_of_state"] = True
+
+            c['political']['stability'] = min(10.0, stab + 1.0)  # new hope
+            c['political']['political_support'] = min(100, support + 20)  # fresh mandate
+
+            result = {
+                "action": "protest_action",
+                "success": True,
+                "outcome": "regime_change",
+                "new_leader": leader_role_id,
+                "probability": round(prob, 3),
+                "note": f"Mass protests succeed. {leader_role_id} takes power. Previous HoS removed.",
+                "stability_change": +1.0,
+                "support_change": +20,
+            }
+        else:
+            # Protest crushed — leader imprisoned
+            leader_role = self.ws.get_role(leader_role_id)
+            if leader_role:
+                leader_role["status"] = "imprisoned"
+
+            c['political']['stability'] = max(1.0, stab - 0.5)  # more repression
+            c['political']['political_support'] = max(0, support - 5)  # fear, not loyalty
+
+            result = {
+                "action": "protest_action",
+                "success": False,
+                "outcome": "protest_crushed",
+                "imprisoned": leader_role_id,
+                "probability": round(prob, 3),
+                "note": f"Protest crushed. {leader_role_id} imprisoned. Regime consolidates.",
+                "stability_change": -0.5,
+                "support_change": -5,
+            }
+
+        self.ws.log_event({
+            "type": "protest_action",
+            "country": country_id,
+            "leader": leader_role_id,
+            "success": success,
+            "probability": round(prob, 3),
+        })
+        self._log_action(result)
+        return result
+
+    # -----------------------------------------------------------------------
     # HELPERS
     # -----------------------------------------------------------------------
 
