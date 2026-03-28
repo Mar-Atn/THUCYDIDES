@@ -33,7 +33,10 @@ CHOKEPOINTS = {
 
 UNIT_TYPES = ["ground", "naval", "tactical_air", "strategic_missiles", "air_defense"]
 
-AI_LEVEL_TECH_FACTOR = {0: 0.0, 1: 0.0, 2: 0.05, 3: 0.15, 4: 0.30}
+# Cal-3 v3: Tech boost applied to GROWTH RATE, not GDP multiplier.
+# L3 adds +1.5 percentage points to growth rate (not x1.15 to GDP).
+# L4 adds +3.0pp. This prevents unrealistic GDP doubling over 8 rounds.
+AI_LEVEL_TECH_FACTOR = {0: 0.0, 1: 0.0, 2: 0.005, 3: 0.015, 4: 0.030}
 AI_LEVEL_COMBAT_BONUS = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2}
 
 NUCLEAR_RD_THRESHOLDS = {0: 0.60, 1: 0.80, 2: 1.00}

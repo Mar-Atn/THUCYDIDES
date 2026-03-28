@@ -18,6 +18,12 @@ v2 CHANGES from v1:
 - Semiconductor disruption scales with duration
 - Sanctions diminishing returns after 4 rounds
 
+v3 CALIBRATION FIXES (from v2 test results):
+- Cal-1: Oil price inertia -- 60/40 blend toward equilibrium each round (no instant jumps)
+- Cal-2: Sanctions GDP multiplier reduced 2.0 -> 1.5; diminishing returns 0.70 -> 0.60 after 4 rounds
+- Cal-3: Tech boost applied to GROWTH RATE not GDP multiplier (L3: +1.5pp, L4: +3.0pp)
+- Cal-4: Inflation stability friction capped at -0.50/round (prevents single-round stability collapse)
+
 Processing sequence (CHAINED, not parallel):
 1. Oil price (global)
 2. GDP growth per country
@@ -372,12 +378,19 @@ class WorldModelEngine:
 
         # Soft cap: asymptotic above $200
         if raw_price <= 200:
-            price = raw_price
+            formula_price = raw_price
         else:
-            price = 200 + 50 * (1 - math.exp(-(raw_price - 200) / 100))
+            formula_price = 200 + 50 * (1 - math.exp(-(raw_price - 200) / 100))
 
         # Floor at $30
+        formula_price = max(30.0, formula_price)
+
+        # --- OIL PRICE INERTIA (Cal-1 v3) ---
+        # Price moves 60% toward equilibrium each round, 40% sticky from previous
+        previous_price = getattr(self.ws, '_previous_oil_price', self.ws.oil_price)
+        price = previous_price * 0.4 + formula_price * 0.6
         price = max(30.0, price)
+        self.ws._previous_oil_price = price  # store for next round
 
         # --- OIL REVENUE TO PRODUCERS ---
         for cid, country in self.ws.countries.items():
@@ -413,13 +426,13 @@ class WorldModelEngine:
         net_tariff_cost = tariff_info.get("net_gdp_cost", 0)
         tariff_hit = -(net_tariff_cost / max(old_gdp, 0.01)) * 1.5
 
-        # --- SANCTIONS HIT (stronger: -2% GDP per sanctions level) ---
-        sanctions_hit = -sanctions_damage * 2.0
+        # --- SANCTIONS HIT (Cal-2 v3: reduced from 2.0 to 1.5) ---
+        sanctions_hit = -sanctions_damage * 1.5
 
-        # Sanctions diminishing returns after 4 rounds
+        # Sanctions diminishing returns after 4 rounds (Cal-2 v3: 40% reduction, was 30%)
         sanc_rounds = eco.get("sanctions_rounds", 0)
         if sanc_rounds > 4:
-            adaptation = 0.70  # 30% less effective
+            adaptation = 0.60  # 40% less effective after 4 rounds
             sanctions_hit *= adaptation
 
         # --- OIL SHOCK (non-linear for importers) ---
@@ -1058,12 +1071,17 @@ class WorldModelEngine:
             delta -= abs(sanc_hit) * 0.8
 
         # --- INFLATION FRICTION (DELTA from baseline, not absolute) ---
+        # Cal-4 v3: Cap inflation friction at -0.50 per round to prevent
+        # extreme inflation deltas from overwhelming all other stability factors
         starting_infl = eco.get("starting_inflation", 0)
         inflation_delta = eco.get("inflation", 0) - starting_infl
+        inflation_friction = 0.0
         if inflation_delta > 3:
-            delta -= (inflation_delta - 3) * 0.05
+            inflation_friction -= (inflation_delta - 3) * 0.05
         if inflation_delta > 20:
-            delta -= (inflation_delta - 20) * 0.03
+            inflation_friction -= (inflation_delta - 20) * 0.03
+        inflation_friction = max(inflation_friction, -0.50)  # Cal-4 cap
+        delta += inflation_friction
 
         # --- CRISIS STATE PENALTY ---
         delta += CRISIS_STABILITY_PENALTY.get(eco_state, 0.0)
