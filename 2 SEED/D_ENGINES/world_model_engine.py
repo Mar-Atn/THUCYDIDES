@@ -4,7 +4,7 @@ TTT SEED -- World Model Engine v2
 Between-round batch processing. THREE-PASS architecture with FEEDBACK LOOPS.
 
 Pass 1: Deterministic formulas with CHAINED dependencies (each step feeds the next)
-Pass 2: AI contextual adjustment (aggressive heuristics, AI-ready architecture)
+Pass 2: Three-expert AI panel (KEYNES / CLAUSEWITZ / MACHIAVELLI) with majority-rule synthesis
 Pass 3: Coherence check + narrative generation (auto-fixes implausible states)
 
 v2 CHANGES from v1:
@@ -118,9 +118,9 @@ class WorldModelEngine:
         self._log.append("--- PASS 1: DETERMINISTIC (CHAINED) ---")
         det_results = self.deterministic_pass(all_actions, round_num)
 
-        # PASS 2: AI Contextual Adjustment (aggressive heuristics)
-        self._log.append("--- PASS 2: AI CONTEXTUAL ADJUSTMENT ---")
-        adj_results = self.ai_adjustment_pass(det_results, all_actions, round_num)
+        # PASS 2: Three-Expert AI Panel (KEYNES / CLAUSEWITZ / MACHIAVELLI)
+        self._log.append("--- PASS 2: EXPERT PANEL (KEYNES / CLAUSEWITZ / MACHIAVELLI) ---")
+        adj_results = self.pass_2_expert_panel(det_results, all_actions, round_num)
 
         # PASS 3: Coherence Check + Narrative
         self._log.append("--- PASS 3: COHERENCE CHECK ---")
@@ -131,7 +131,8 @@ class WorldModelEngine:
         final_results = {
             "round": round_num,
             "deterministic": det_results,
-            "ai_adjustments": adj_results,
+            "expert_panel": adj_results,
+            "ai_adjustments": adj_results.get("applied", []),
             "coherence_flags": flags,
             "narrative": narrative,
             "log": list(self._log),
@@ -1411,184 +1412,641 @@ class WorldModelEngine:
     # PASS 2: AI CONTEXTUAL ADJUSTMENT (aggressive heuristics)
     # ===================================================================
 
-    def ai_adjustment_pass(self, det_results: dict,
-                           actions: dict, round_num: int) -> dict:
-        """Aggressive AI adjustments producing VISIBLE effects.
+    # ===================================================================
+    # PASS 2: THREE-EXPERT AI PANEL
+    # ===================================================================
 
-        Structured for Pass 2 upgrade to real LLM calls:
-        each adjustment has type, variable, magnitude, and reasoning.
+    def pass_2_expert_panel(self, pass1_results, round_history, round_num):
+        """Three independent AI experts review Pass 1 results.
+
+        Each expert evaluates from their domain perspective.
+        Where 2 of 3 agree on direction, adjustment is applied.
+        Where they disagree, flag for moderator review.
+        All adjustments bounded at +/-30% per variable.
+
+        Legacy adjustments (market panic, capital flight, ceasefire rally,
+        brain drain, war loss shock, nuclear R&D pushback, tech breakthrough,
+        rally-around-the-flag, sanctions adaptation) are preserved inside
+        the appropriate expert function so nothing is lost.
         """
-        adjustments: dict = {}
+        self.expert_panel_flags = []  # reset each round
+
+        # Expert 1: KEYNES (economist)
+        self._log.append("  [KEYNES] Evaluating economic plausibility...")
+        keynes_adj = self._expert_keynes(pass1_results, round_history, round_num)
+        self._log.append(f"  [KEYNES] Produced {len(keynes_adj)} adjustment(s)")
+        for adj in keynes_adj:
+            self._log.append(f"    -> {adj['reason']}")
+
+        # Expert 2: CLAUSEWITZ (military strategist)
+        self._log.append("  [CLAUSEWITZ] Evaluating military consequences...")
+        clausewitz_adj = self._expert_clausewitz(pass1_results, round_history, round_num)
+        self._log.append(f"  [CLAUSEWITZ] Produced {len(clausewitz_adj)} adjustment(s)")
+        for adj in clausewitz_adj:
+            self._log.append(f"    -> {adj['reason']}")
+
+        # Expert 3: MACHIAVELLI (political scientist)
+        self._log.append("  [MACHIAVELLI] Evaluating political consequences...")
+        machiavelli_adj = self._expert_machiavelli(pass1_results, round_history, round_num)
+        self._log.append(f"  [MACHIAVELLI] Produced {len(machiavelli_adj)} adjustment(s)")
+        for adj in machiavelli_adj:
+            self._log.append(f"    -> {adj['reason']}")
+
+        # Synthesize: majority rule on direction, average on magnitude
+        self._log.append("  [SYNTHESIS] Combining expert opinions...")
+        final_adjustments = self._synthesize_expert_panel(
+            keynes_adj, clausewitz_adj, machiavelli_adj)
+        self._log.append(f"  [SYNTHESIS] {len(final_adjustments)} adjustment(s) to apply, "
+                         f"{len(self.expert_panel_flags)} flagged for moderator")
+
+        # Apply bounded adjustments
+        for adj in final_adjustments:
+            self._apply_bounded_adjustment(adj)
+            self._log.append(f"    APPLIED: {adj['country']}.{adj['variable']} "
+                             f"{adj['adjustment']:+.3f} [{adj.get('consensus', '?')}] "
+                             f"-- {adj['reason'][:120]}")
+
+        # Log moderator flags
+        for flag in self.expert_panel_flags:
+            self._log.append(f"    FLAG: {flag['country']}.{flag['variable']} -- "
+                             f"{flag['note']}")
+
+        return {
+            'keynes': keynes_adj,
+            'clausewitz': clausewitz_adj,
+            'machiavelli': machiavelli_adj,
+            'applied': final_adjustments,
+            'flags': list(self.expert_panel_flags),
+        }
+
+    # -------------------------------------------------------------------
+    # EXPERT 1: KEYNES (Economist)
+    # -------------------------------------------------------------------
+
+    def _expert_keynes(self, results, history, round_num):
+        """Economic plausibility review.
+
+        Checks:
+        1. Are GDP trajectories consistent with macro conditions?
+        2. Is oil price consistent with supply/demand?
+        3. Are sanctions producing realistic economic consequences?
+        4. Is inflation responding correctly to money printing?
+        5. Are trade interdependencies reflected?
+        6. Are producer windfalls/importer pain balanced?
+
+        Also incorporates legacy adjustments: market panic, capital flight,
+        sanctions adaptation, tech breakthrough optimism.
+        """
+        adjustments = []
+        oil_price = self.ws.oil_price
 
         for cid, c in self.ws.countries.items():
-            adj_list = []
-            eco = c["economic"]
-            pol = c["political"]
-            gdp = eco["gdp"]
-            eco_state = eco.get("economic_state", "normal")
-            regime = pol.get("regime_type", c.get("regime_type", "democracy"))
+            eco = c['economic']
+            pol = c['political']
+            tech = c['technology']
+            growth = eco.get('gdp_growth_rate', 0)
+            gdp = eco['gdp']
+            state = eco.get('economic_state', 'normal')
+            inflation = eco.get('inflation', 0)
+            start_inf = eco.get('starting_inflation', 0)
+            is_importer = not eco.get('oil_producer', False)
+            regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
+            prev_state = self._previous_states.get(cid, {}).get('economic_state', 'normal')
 
-            # --- PANIC: Country just entered CRISIS ---
-            prev_state = self._previous_states.get(cid, {}).get("economic_state", "normal")
-            if eco_state in ("crisis", "collapse") and prev_state not in ("crisis", "collapse"):
-                hit = gdp * 0.05  # additional 5% GDP hit
-                eco["gdp"] = max(eco["gdp"] - hit, 0.5)
-                adj_list.append({
-                    "type": "market_panic",
-                    "variable": "gdp",
-                    "adjustment": -hit,
-                    "reason": f"Market panic as {c.get('sim_name', cid)} enters economic {eco_state}"
+            # CHECK 1: GDP growing during major crisis -- implausible
+            if state in ('crisis', 'collapse') and growth > 0:
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': -growth - 1.0,  # force negative
+                    'reason': f'KEYNES: {cid} GDP growing ({growth:.1f}%) during {state} -- implausible. Forcing contraction.',
+                    'confidence': 'high'
                 })
 
-            # --- CAPITAL FLIGHT: stability < 3 ---
-            if pol["stability"] < 3 and eco_state != "collapse":
-                flight_pct = 0.08 if regime == "democracy" else 0.03
-                flight = gdp * flight_pct
-                eco["gdp"] = max(eco["gdp"] - flight, 0.5)
-                adj_list.append({
-                    "type": "capital_flight",
-                    "variable": "gdp",
-                    "adjustment": -flight,
-                    "reason": (f"Capital flight as {c.get('sim_name', cid)} stability "
-                               f"drops to {pol['stability']:.1f}")
-                })
-            elif pol["stability"] < 4:
-                # Milder flight
-                flight_pct = 0.03 if regime != "autocracy" else 0.01
-                flight = gdp * flight_pct
-                eco["gdp"] = max(eco["gdp"] - flight, 0.5)
-                adj_list.append({
-                    "type": "capital_flight_mild",
-                    "variable": "gdp",
-                    "adjustment": -flight,
-                    "reason": (f"Capital outflows as {c.get('sim_name', cid)} stability "
-                               f"at {pol['stability']:.1f}")
+            # CHECK 2: Oil importer growing normally during oil shock
+            if is_importer and oil_price > 150 and growth > 2.0:
+                penalty = min(growth - 0.5, 3.0)  # bring growth down but not crash
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': -penalty,
+                    'reason': f'KEYNES: {cid} growing {growth:.1f}% with oil at ${oil_price:.0f} -- oil shock drag.',
+                    'confidence': 'medium'
                 })
 
-            # --- CEASEFIRE RALLY: peace dividend ---
-            # Detect ceasefire by checking if country was at war last round but not now
-            was_at_war = self._previous_states.get(cid, {}).get("at_war", False)
-            at_war_now = self.ws.get_country_at_war(cid)
-            if was_at_war and not at_war_now:
-                eco["momentum"] = min(5.0, eco.get("momentum", 0) + 1.5)
-                adj_list.append({
-                    "type": "ceasefire_rally",
-                    "variable": "momentum",
-                    "adjustment": 1.5,
-                    "reason": f"Peace dividend: markets rally on {c.get('sim_name', cid)} ceasefire"
-                })
-
-            # --- SANCTIONS ADAPTATION: After 4+ rounds ---
-            sanc_rounds = eco.get("sanctions_rounds", 0)
-            if sanc_rounds > 4:
-                # Small GDP recovery (adaptation)
-                adaptation_boost = gdp * 0.02
-                eco["gdp"] += adaptation_boost
-                adj_list.append({
-                    "type": "sanctions_adaptation",
-                    "variable": "gdp",
-                    "adjustment": adaptation_boost,
-                    "reason": (f"{c.get('sim_name', cid)} adapts to sanctions "
-                               f"after {sanc_rounds} rounds")
-                })
-
-            # --- BRAIN DRAIN: democracies in crisis lose tech ---
-            if eco_state in ("crisis", "collapse") and regime == "democracy":
-                tech = c["technology"]
-                tech["ai_rd_progress"] = max(0, tech["ai_rd_progress"] - 0.02)
-                adj_list.append({
-                    "type": "brain_drain",
-                    "variable": "ai_rd_progress",
-                    "adjustment": -0.02,
-                    "reason": (f"Brain drain from {c.get('sim_name', cid)} "
-                               f"as skilled workers emigrate")
-                })
-
-            # --- WAR LOSS CONFIDENCE SHOCK ---
-            for combat in det_results.get("combat_secondary", []):
-                if (combat.get("defender") == cid and
-                        combat.get("defender_remaining", 1) == 0):
-                    pct = random.uniform(0.08, 0.15)
-                    hit = min(gdp * pct, gdp * 0.30)
-                    eco["gdp"] = max(eco["gdp"] - hit, 0.5)
-                    adj_list.append({
-                        "type": "war_loss_shock",
-                        "variable": "gdp",
-                        "adjustment": -hit,
-                        "reason": (f"Confidence collapses after defeat "
-                                   f"in {combat.get('zone', '?')}")
+            # CHECK 3: Oil producer NOT benefiting from high oil
+            if eco.get('oil_producer') and oil_price > 120:
+                resource_pct = eco.get('sector_resources', 0) / 100
+                if resource_pct > 0.2 and growth < 1.0:
+                    boost = min(2.0, resource_pct * 3)
+                    adjustments.append({
+                        'country': cid, 'variable': 'gdp_growth_rate',
+                        'adjustment': boost,
+                        'reason': f'KEYNES: {cid} is a major oil producer ({resource_pct*100:.0f}% resources) with oil at ${oil_price:.0f} -- should be benefiting.',
+                        'confidence': 'medium'
                     })
 
-            # --- G1: Nuclear R&D pushback on strikes ---
-            # When a country's territory is struck (missile/air), push back nuclear R&D
-            for combat in det_results.get("combat_secondary", []):
-                if combat.get("defender") == cid and combat.get("type") in (
-                        "missile_strike", "attack"):
-                    nuc_prog = tech.get("nuclear_rd_progress", 0)
-                    if nuc_prog > 0:
-                        pushback = 0.15
-                        tech["nuclear_rd_progress"] = max(0, nuc_prog - pushback)
-                        adj_list.append({
-                            "type": "nuclear_rd_pushback",
-                            "variable": "nuclear_rd_progress",
-                            "adjustment": -pushback,
-                            "reason": (f"Strike on {cid} territory damages "
-                                       f"nuclear R&D infrastructure"),
-                        })
-
-            # --- TECH BREAKTHROUGH OPTIMISM ---
-            tech_res = det_results.get("tech", {}).get(cid, {})
-            if tech_res.get("ai_levelup") or tech_res.get("nuclear_levelup"):
-                boost = gdp * 0.05
-                eco["gdp"] += boost
-                eco["momentum"] = min(5.0, eco.get("momentum", 0) + 0.5)
-                adj_list.append({
-                    "type": "tech_breakthrough_optimism",
-                    "variable": "gdp",
-                    "adjustment": boost,
-                    "reason": "Tech breakthrough sparks investor confidence."
+            # CHECK 4: Inflation spiral without GDP consequence
+            inf_delta = inflation - start_inf
+            if inf_delta > 20 and growth > 0:
+                penalty = min(inf_delta * 0.05, 2.0)
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': -penalty,
+                    'reason': f'KEYNES: {cid} inflation delta +{inf_delta:.0f}% should be dragging GDP.',
+                    'confidence': 'medium'
                 })
 
-            # --- RALLY AROUND THE FLAG (diminishing) ---
+            # CHECK 5: Major trading partner in crisis -- contagion check
+            # (supplements the deterministic contagion formula)
+            for partner_id, weight in self._get_bilateral_pairs(cid):
+                partner = self.ws.countries.get(partner_id, {})
+                partner_state = partner.get('economic', {}).get('economic_state', 'normal')
+                if partner_state in ('crisis', 'collapse') and weight > 0.10:
+                    if eco.get('momentum', 0) > -1:
+                        adjustments.append({
+                            'country': cid, 'variable': 'momentum',
+                            'adjustment': -0.5,
+                            'reason': f'KEYNES: {partner_id} in {partner_state} -- confidence contagion to {cid} (trade weight {weight:.0%}).',
+                            'confidence': 'medium'
+                        })
+
+            # CHECK 6: Printing money without sufficient inflation consequence
+            printed = eco.get('money_printed_this_round', 0)
+            if printed > 0 and inf_delta < printed * 2:
+                adjustments.append({
+                    'country': cid, 'variable': 'inflation',
+                    'adjustment': printed * 1.5,
+                    'reason': f'KEYNES: {cid} printed {printed:.1f} coins but inflation only +{inf_delta:.1f}% -- should be higher.',
+                    'confidence': 'low'
+                })
+
+            # --- LEGACY: Market panic on crisis entry ---
+            if state in ('crisis', 'collapse') and prev_state not in ('crisis', 'collapse'):
+                hit = gdp * 0.05
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp',
+                    'adjustment': -hit,
+                    'reason': f'KEYNES: Market panic as {c.get("sim_name", cid)} enters economic {state}.',
+                    'confidence': 'high'
+                })
+
+            # --- LEGACY: Capital flight (stability < 3 or < 4) ---
+            if pol['stability'] < 3 and state != 'collapse':
+                flight_pct = 0.08 if regime == 'democracy' else 0.03
+                flight = gdp * flight_pct
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp',
+                    'adjustment': -flight,
+                    'reason': f'KEYNES: Capital flight as {c.get("sim_name", cid)} stability drops to {pol["stability"]:.1f}.',
+                    'confidence': 'high'
+                })
+            elif pol['stability'] < 4:
+                flight_pct = 0.03 if regime != 'autocracy' else 0.01
+                flight = gdp * flight_pct
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp',
+                    'adjustment': -flight,
+                    'reason': f'KEYNES: Capital outflows as {c.get("sim_name", cid)} stability at {pol["stability"]:.1f}.',
+                    'confidence': 'medium'
+                })
+
+            # --- LEGACY: Sanctions adaptation after 4+ rounds ---
+            sanc_rounds = eco.get('sanctions_rounds', 0)
+            if sanc_rounds > 4:
+                adaptation_boost = gdp * 0.02
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp',
+                    'adjustment': adaptation_boost,
+                    'reason': f'KEYNES: {c.get("sim_name", cid)} adapts to sanctions after {sanc_rounds} rounds.',
+                    'confidence': 'medium'
+                })
+
+            # --- LEGACY: Tech breakthrough optimism ---
+            tech_res = results.get('tech', {}).get(cid, {})
+            if tech_res.get('ai_levelup') or tech_res.get('nuclear_levelup'):
+                boost = gdp * 0.05
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp',
+                    'adjustment': boost,
+                    'reason': f'KEYNES: Tech breakthrough sparks investor confidence in {cid}.',
+                    'confidence': 'medium'
+                })
+                adjustments.append({
+                    'country': cid, 'variable': 'momentum',
+                    'adjustment': 0.5,
+                    'reason': f'KEYNES: Tech breakthrough boosts economic momentum in {cid}.',
+                    'confidence': 'medium'
+                })
+
+        return adjustments
+
+    # -------------------------------------------------------------------
+    # EXPERT 2: CLAUSEWITZ (Military Strategist)
+    # -------------------------------------------------------------------
+
+    def _expert_clausewitz(self, results, history, round_num):
+        """Military consequence review.
+
+        Checks:
+        1. War casualties -> stability impact proportional?
+        2. Overstretch -> should there be additional penalties?
+        3. Blockade duration -> economic consequences scaling?
+        4. Military production vs economic state -- can a country in crisis maintain production?
+        5. Nuclear posture changes -> global stability impact?
+
+        Also incorporates legacy adjustments: war loss shock, nuclear R&D pushback,
+        ceasefire rally, brain drain.
+        """
+        adjustments = []
+
+        for cid, c in self.ws.countries.items():
+            pol = c['political']
+            eco = c['economic']
+            tech = c['technology']
+            gdp = eco['gdp']
+            eco_state = eco.get('economic_state', 'normal')
+            regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
+            was_at_war = self._previous_states.get(cid, {}).get('at_war', False)
+            at_war_now = self.ws.get_country_at_war(cid)
+
+            # CHECK 1: At war but stability too high
+            if at_war_now:
+                war_tiredness = pol.get('war_tiredness', 0)
+                stability = pol.get('stability', 5)
+                if war_tiredness > 3 and stability > 6:
+                    adjustments.append({
+                        'country': cid, 'variable': 'stability',
+                        'adjustment': -0.3,
+                        'reason': f'CLAUSEWITZ: {cid} war tiredness {war_tiredness:.1f} but stability {stability:.1f} -- prolonged war should erode stability more.',
+                        'confidence': 'medium'
+                    })
+
+            # CHECK 2: Overstretch -- forces committed to multiple theaters
+            if cid in ('columbia',):
+                # Count theaters where Columbia has forces
+                theaters = set()
+                for dep in getattr(self.ws, 'deployments', []):
+                    if dep.get('country') == cid:
+                        zone = dep.get('zone', '')
+                        if 'heartland' in zone or zone.startswith('ee_'):
+                            theaters.add('ereb')
+                        if 'persia' in zone or 'gulf' in zone:
+                            theaters.add('mashriq')
+                        if 'w(16' in zone or 'w(17' in zone or 'formosa' in zone:
+                            theaters.add('pacific')
+                        if 'col_' in zone:
+                            theaters.add('home')
+
+                if len(theaters) >= 3 and pol.get('stability', 5) > 5:
+                    adjustments.append({
+                        'country': cid, 'variable': 'stability',
+                        'adjustment': -0.2,
+                        'reason': f'CLAUSEWITZ: Columbia committed to {len(theaters)} theaters -- institutional strain.',
+                        'confidence': 'medium'
+                    })
+
+            # CHECK 3: Country in economic CRISIS still producing military at full rate
+            if eco_state in ('crisis', 'collapse'):
+                prod_penalty = -0.3 if eco_state == 'crisis' else -0.5
+                adjustments.append({
+                    'country': cid, 'variable': 'military_production_efficiency',
+                    'adjustment': prod_penalty,
+                    'reason': f'CLAUSEWITZ: {cid} in {eco_state} -- military production should be degraded.',
+                    'confidence': 'high'
+                })
+
+            # CHECK 4: Prolonged blockade without escalation pressure
+            active_blockades = getattr(self.ws, 'active_blockades', {})
+            for cp, info in active_blockades.items():
+                if info and isinstance(info, dict) and info.get('controller') == cid:
+                    duration = info.get('duration', 0)
+                    if duration >= 3 and pol.get('stability', 5) > 4:
+                        adjustments.append({
+                            'country': cid, 'variable': 'stability',
+                            'adjustment': -0.2,
+                            'reason': f'CLAUSEWITZ: {cid} maintaining blockade at {cp} for {duration} rounds -- military fatigue and logistic strain.',
+                            'confidence': 'low'
+                        })
+
+            # --- LEGACY: War loss confidence shock ---
+            for combat in results.get('combat_secondary', []):
+                if (combat.get('defender') == cid and
+                        combat.get('defender_remaining', 1) == 0):
+                    pct = random.uniform(0.08, 0.15)
+                    hit = min(gdp * pct, gdp * 0.30)
+                    adjustments.append({
+                        'country': cid, 'variable': 'gdp',
+                        'adjustment': -hit,
+                        'reason': f'CLAUSEWITZ: Confidence collapses in {cid} after defeat in {combat.get("zone", "?")}.',
+                        'confidence': 'high'
+                    })
+
+            # --- LEGACY: Nuclear R&D pushback on strikes ---
+            for combat in results.get('combat_secondary', []):
+                if combat.get('defender') == cid and combat.get('type') in (
+                        'missile_strike', 'attack'):
+                    nuc_prog = tech.get('nuclear_rd_progress', 0)
+                    if nuc_prog > 0:
+                        adjustments.append({
+                            'country': cid, 'variable': 'nuclear_rd_progress',
+                            'adjustment': -0.15,
+                            'reason': f'CLAUSEWITZ: Strike on {cid} territory damages nuclear R&D infrastructure.',
+                            'confidence': 'high'
+                        })
+
+            # --- LEGACY: Ceasefire rally (peace dividend) ---
+            if was_at_war and not at_war_now:
+                adjustments.append({
+                    'country': cid, 'variable': 'momentum',
+                    'adjustment': 1.5,
+                    'reason': f'CLAUSEWITZ: Peace dividend -- markets rally on {c.get("sim_name", cid)} ceasefire.',
+                    'confidence': 'high'
+                })
+
+            # --- LEGACY: Brain drain (democracies in crisis lose tech) ---
+            if eco_state in ('crisis', 'collapse') and regime == 'democracy':
+                adjustments.append({
+                    'country': cid, 'variable': 'ai_rd_progress',
+                    'adjustment': -0.02,
+                    'reason': f'CLAUSEWITZ: Brain drain from {c.get("sim_name", cid)} as skilled workers emigrate.',
+                    'confidence': 'medium'
+                })
+
+        return adjustments
+
+    # -------------------------------------------------------------------
+    # EXPERT 3: MACHIAVELLI (Political Scientist)
+    # -------------------------------------------------------------------
+
+    def _expert_machiavelli(self, results, history, round_num):
+        """Political consequence review.
+
+        Checks:
+        1. Election proximity -> should amplify all political effects
+        2. Ceasefire -> peace dividend on support/stability
+        3. Autocracy under sanctions -> resilience vs. fragility
+        4. Democratic accountability -> economic pain -> voter anger
+        5. Alliance behavior -> should fracture under divergent pressures
+
+        Also incorporates legacy adjustments: rally-around-the-flag.
+        """
+        adjustments = []
+        oil_price = self.ws.oil_price
+
+        for cid, c in self.ws.countries.items():
+            pol = c['political']
+            eco = c['economic']
+            regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
+            support = pol.get('political_support', 50)
+            stability = pol.get('stability', 5)
+            eco_state = eco.get('economic_state', 'normal')
+            was_at_war = self._previous_states.get(cid, {}).get('at_war', False)
+            at_war_now = self.ws.get_country_at_war(cid)
+
+            # CHECK 1: Election approaching -- amplify political effects
+            elections_soon = False
+            if cid == 'columbia' and round_num in (1, 4):  # before R2 midterms, before R5 presidential
+                elections_soon = True
+            if cid == 'heartland' and round_num in (2, 3):  # before R3-4 wartime election
+                elections_soon = True
+
+            if elections_soon:
+                # Economic pain should hurt support MORE as elections approach
+                if eco.get('gdp_growth_rate', 0) < 0:
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': -3.0,
+                        'reason': f'MACHIAVELLI: {cid} has elections approaching with negative GDP growth -- voter anger amplified.',
+                        'confidence': 'high'
+                    })
+                if oil_price > 150 and not eco.get('oil_producer', False):
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': -2.0,
+                        'reason': f'MACHIAVELLI: {cid} facing elections with oil at ${oil_price:.0f} -- cost of living crisis.',
+                        'confidence': 'medium'
+                    })
+
+            # CHECK 2: Just achieved ceasefire -- peace dividend
+            # (supplements the deterministic ceasefire recovery)
+            if was_at_war and not at_war_now:
+                if support < 60:
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': +5.0,
+                        'reason': f'MACHIAVELLI: {cid} achieved ceasefire -- public relief and hope.',
+                        'confidence': 'high'
+                    })
+
+            # CHECK 3: Autocracy under pressure -- is support too high or too low?
+            if regime == 'autocracy' and stability < 3:
+                if support > 50:
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': -5.0,
+                        'reason': f'MACHIAVELLI: {cid} autocracy with stability {stability:.1f} but support {support:.0f}% -- elite loyalty should be cracking.',
+                        'confidence': 'medium'
+                    })
+
+            # CHECK 4: Democracy with terrible economy but high support -- implausible
+            if regime == 'democracy' and eco_state in ('crisis', 'collapse'):
+                if support > 45:
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': -(support - 35),
+                        'reason': f'MACHIAVELLI: {cid} democracy in economic {eco_state} with {support:.0f}% support -- voters don\'t tolerate this.',
+                        'confidence': 'high'
+                    })
+
+            # CHECK 5: Country at war for 4+ rounds with no progress -- support erosion
+            war_tiredness = pol.get('war_tiredness', 0)
+            if war_tiredness > 3 and support > 40:
+                adjustments.append({
+                    'country': cid, 'variable': 'political_support',
+                    'adjustment': -2.0,
+                    'reason': f'MACHIAVELLI: {cid} war fatigue at {war_tiredness:.1f} -- "when does this end?"',
+                    'confidence': 'medium'
+                })
+
+            # --- LEGACY: Rally around the flag (diminishing) ---
             if at_war_now:
                 war_duration = 0
                 for w in self.ws.wars:
-                    if w.get("attacker") == cid or w.get("defender") == cid:
-                        start = w.get("start_round", 0)
+                    if w.get('attacker') == cid or w.get('defender') == cid:
+                        start = w.get('start_round', 0)
                         war_duration = (round_num - start if start >= 0
                                         else round_num + abs(start))
                 rally = max(10.0 - war_duration * 3.0, 0.0)
                 if rally > 0:
-                    bounded = min(rally, pol["political_support"] * 0.30)
-                    pol["political_support"] = clamp(
-                        pol["political_support"] + bounded, 0, 100)
-                    adj_list.append({
-                        "type": "rally_around_flag",
-                        "variable": "political_support",
-                        "adjustment": bounded,
-                        "reason": f"Rally effect in year {war_duration}, diminishing."
+                    bounded = min(rally, support * 0.30)
+                    adjustments.append({
+                        'country': cid, 'variable': 'political_support',
+                        'adjustment': bounded,
+                        'reason': f'MACHIAVELLI: Rally-around-the-flag effect in {cid}, year {war_duration} of war (diminishing).',
+                        'confidence': 'high'
                     })
 
-            # Bound all GDP adjustments: total AI adjustment cannot exceed 30% of GDP
-            total_gdp_adj = sum(
-                a["adjustment"] for a in adj_list if a["variable"] == "gdp"
-            )
-            prev_gdp = self._previous_states.get(cid, {}).get("gdp", gdp)
-            if prev_gdp > 0 and abs(total_gdp_adj) > prev_gdp * 0.30:
-                # Scale back proportionally
-                scale = (prev_gdp * 0.30) / abs(total_gdp_adj)
-                for a in adj_list:
-                    if a["variable"] == "gdp":
-                        a["adjustment"] *= scale
-                # Recompute GDP
-                eco["gdp"] = max(0.5, prev_gdp + sum(
-                    a["adjustment"] for a in adj_list if a["variable"] == "gdp"
-                ))
-
-            if adj_list:
-                adjustments[cid] = adj_list
-
         return adjustments
+
+    # -------------------------------------------------------------------
+    # SYNTHESIS: Majority Rule
+    # -------------------------------------------------------------------
+
+    def _synthesize_expert_panel(self, keynes, clausewitz, machiavelli):
+        """Combine three expert opinions using majority rule.
+
+        For each variable adjustment:
+        - If 2+ experts agree on DIRECTION (positive/negative), apply
+        - Magnitude = average of agreeing experts
+        - If all 3 disagree, flag for moderator (don't apply)
+        - All adjustments bounded at +/-30% of current value
+        - Single expert opinion: apply with reduced weight (x0.5)
+        """
+        from collections import defaultdict
+        by_target = defaultdict(list)
+
+        for adj_list, expert_name in [
+            (keynes, 'KEYNES'),
+            (clausewitz, 'CLAUSEWITZ'),
+            (machiavelli, 'MACHIAVELLI'),
+        ]:
+            for adj in adj_list:
+                key = (adj['country'], adj['variable'])
+                by_target[key].append({
+                    'expert': expert_name,
+                    'adjustment': adj['adjustment'],
+                    'reason': adj['reason'],
+                    'confidence': adj.get('confidence', 'medium'),
+                })
+
+        final = []
+        flags = []
+
+        for (country, variable), opinions in by_target.items():
+            if len(opinions) == 1:
+                # Single expert opinion -- apply with reduced weight (x0.5)
+                adj = opinions[0]
+                final.append({
+                    'country': country, 'variable': variable,
+                    'adjustment': adj['adjustment'] * 0.5,
+                    'reason': f"[{adj['expert']} solo] {adj['reason']}",
+                    'consensus': 'single',
+                })
+            elif len(opinions) >= 2:
+                # Check direction agreement
+                pos = [a for a in opinions if a['adjustment'] > 0]
+                neg = [a for a in opinions if a['adjustment'] < 0]
+
+                if len(pos) >= 2:
+                    # Majority positive
+                    avg = sum(a['adjustment'] for a in pos) / len(pos)
+                    reasons = '; '.join(a['reason'] for a in pos)
+                    final.append({
+                        'country': country, 'variable': variable,
+                        'adjustment': avg,
+                        'reason': f"[{len(pos)}/{len(opinions)} agree UP] {reasons}",
+                        'consensus': 'majority_positive',
+                    })
+                elif len(neg) >= 2:
+                    # Majority negative
+                    avg = sum(a['adjustment'] for a in neg) / len(neg)
+                    reasons = '; '.join(a['reason'] for a in neg)
+                    final.append({
+                        'country': country, 'variable': variable,
+                        'adjustment': avg,
+                        'reason': f"[{len(neg)}/{len(opinions)} agree DOWN] {reasons}",
+                        'consensus': 'majority_negative',
+                    })
+                else:
+                    # Disagreement -- flag for moderator
+                    flags.append({
+                        'country': country, 'variable': variable,
+                        'opinions': opinions,
+                        'note': f'Experts disagree on direction for {country}.{variable} -- flagged for moderator review',
+                    })
+
+        # Store flags for moderator
+        self.expert_panel_flags = flags
+
+        return final
+
+    # -------------------------------------------------------------------
+    # APPLY BOUNDED ADJUSTMENT
+    # -------------------------------------------------------------------
+
+    def _apply_bounded_adjustment(self, adj):
+        """Apply a single adjustment to the world state, bounded at +/-30% of current value.
+
+        Handles all known variable types: gdp, gdp_growth_rate, momentum,
+        inflation, stability, political_support, military_production_efficiency,
+        ai_rd_progress, nuclear_rd_progress.
+        """
+        cid = adj['country']
+        variable = adj['variable']
+        amount = adj['adjustment']
+        c = self.ws.countries.get(cid)
+        if not c:
+            return
+
+        eco = c['economic']
+        pol = c['political']
+        tech = c['technology']
+
+        # Map variable to (dict_ref, key, floor, ceiling)
+        VAR_MAP = {
+            'gdp':                          (eco, 'gdp', 0.5, None),
+            'gdp_growth_rate':              (eco, 'gdp_growth_rate', -20.0, 20.0),
+            'momentum':                     (eco, 'momentum', -5.0, 5.0),
+            'inflation':                    (eco, 'inflation', 0.0, None),
+            'stability':                    (pol, 'stability', 0.0, 10.0),
+            'political_support':            (pol, 'political_support', 0.0, 100.0),
+            'military_production_efficiency': (eco, 'military_production_efficiency', 0.1, 1.0),
+            'ai_rd_progress':               (tech, 'ai_rd_progress', 0.0, None),
+            'nuclear_rd_progress':          (tech, 'nuclear_rd_progress', 0.0, None),
+        }
+
+        if variable not in VAR_MAP:
+            self._log.append(f"    WARNING: Unknown variable '{variable}' for {cid}, skipping.")
+            return
+
+        target_dict, key, floor_val, ceil_val = VAR_MAP[variable]
+        current = target_dict.get(key, 0)
+
+        # Bound at +/-30% of current value (with minimum bound of 0.5 for small values)
+        if current != 0:
+            max_delta = abs(current) * 0.30
+        else:
+            max_delta = 0.5  # minimum bound for zero-valued variables
+        bounded_amount = max(-max_delta, min(max_delta, amount))
+
+        new_val = current + bounded_amount
+
+        # Apply floor/ceiling
+        if floor_val is not None:
+            new_val = max(floor_val, new_val)
+        if ceil_val is not None:
+            new_val = min(ceil_val, new_val)
+
+        target_dict[key] = new_val
+        adj['_bounded_from'] = amount
+        adj['_bounded_to'] = bounded_amount
+        adj['_new_value'] = new_val
+
+    # -------------------------------------------------------------------
+    # BILATERAL PAIRS HELPER
+    # -------------------------------------------------------------------
+
+    def _get_bilateral_pairs(self, country_id):
+        """Return list of (partner_id, trade_weight) for a country.
+
+        Uses the trade_weights matrix if available, falls back to
+        _get_trade_partners for hardcoded pairs.
+        """
+        # Try derived trade weights first
+        tw = self.trade_weights.get(country_id, {})
+        if tw:
+            return list(tw.items())
+        # Fallback to hardcoded partner list
+        return self._get_trade_partners(country_id)
 
     # ===================================================================
     # PASS 3: COHERENCE CHECK + NARRATIVE
