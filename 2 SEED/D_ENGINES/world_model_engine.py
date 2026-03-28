@@ -560,25 +560,26 @@ class WorldModelEngine:
         mil = c["military"]
         eco = c["economic"]
 
-        # Mandatory costs
+        # Mandatory costs (deducted before discretionary allocation)
         maint_rate = mil.get("maintenance_cost_per_unit", 0.3)
         total_units = sum(mil.get(ut, 0) for ut in UNIT_TYPES)
         maintenance = total_units * maint_rate
         social_baseline_cost = eco.get("social_spending_baseline", 0.25) * eco["gdp"]
-        mandatory = maintenance + social_baseline_cost
+        mandatory = maintenance + social_baseline_cost  # social IS mandatory
 
         discretionary = max(revenue - mandatory, 0.0)
         money_printed = 0.0
         deficit = 0.0
 
-        # Allocate from budget (or defaults)
-        social = min(budget.get("social_spending", discretionary * 0.3), revenue)
-        mil_budget = min(budget.get("military_total", discretionary * 0.3),
-                         max(revenue - social, 0))
-        tech_budget = min(budget.get("tech_total", discretionary * 0.1),
-                          max(revenue - social - mil_budget, 0))
+        # Allocate from budget (or defaults) -- discretionary spending ON TOP of mandatory
+        social_extra = min(budget.get("social_spending", discretionary * 0.3), discretionary)
+        remaining = max(discretionary - social_extra, 0)
+        mil_budget = min(budget.get("military_total", remaining * 0.5), remaining)
+        remaining = max(remaining - mil_budget, 0)
+        tech_budget = min(budget.get("tech_total", remaining * 0.3), remaining)
 
-        total_spending = social + mil_budget + tech_budget + maintenance
+        # Total spending = mandatory (maintenance + social baseline) + discretionary
+        total_spending = social_baseline_cost + social_extra + mil_budget + tech_budget + maintenance
 
         if total_spending > revenue:
             deficit = total_spending - revenue
@@ -605,11 +606,20 @@ class WorldModelEngine:
             surplus = revenue - total_spending
             eco["treasury"] += surplus
 
+        # Track actual social spending ratio for stability calculations
+        actual_social_total = social_baseline_cost + social_extra
+        gdp = eco["gdp"]
+        actual_social_ratio = (actual_social_total / gdp) if gdp > 0 else 0
+        # If we had to print money to cover mandatory, social was "funded" but via inflation
+        # If deficit, the social baseline was still spent (it's mandatory)
+        eco["_actual_social_ratio"] = round(actual_social_ratio, 4)
+
         return {
             "revenue": revenue, "mandatory": round(mandatory, 2),
             "maintenance": round(maintenance, 2),
+            "social_baseline_cost": round(social_baseline_cost, 2),
             "discretionary": round(discretionary, 2),
-            "social_spending": round(social, 2),
+            "social_spending": round(actual_social_total, 2),
             "military_budget": round(mil_budget, 2),
             "tech_budget": round(tech_budget, 2),
             "deficit": round(deficit, 2),
@@ -718,18 +728,30 @@ class WorldModelEngine:
     # ===================================================================
 
     def _calc_inflation(self, country_id: str, money_printed: float) -> float:
-        """Inflation with 15% natural decay, 80x money-printing multiplier."""
+        """Inflation with 15% natural decay on EXCESS above baseline only.
+
+        v2 fix: The 0.85 decay multiplier now applies only to the inflation
+        ABOVE starting_inflation (the structural/baseline level).  Countries
+        with high starting inflation (e.g. Persia 50%, Phrygia 45%) keep
+        their structural inflation unless active policy changes occur.
+        Only crisis-induced EXCESS inflation decays naturally.
+        """
         c = self.ws.countries[country_id]
         prev = c["economic"]["inflation"]
         gdp = c["economic"]["gdp"]
+        baseline = c["economic"].get("starting_inflation", 0)
 
-        # Natural decay
-        new_infl = prev * 0.85
+        # Separate structural (baseline) from crisis-induced (excess)
+        excess = max(0, prev - baseline)
+
+        # Only the EXCESS decays (structural inflation persists)
+        new_excess = excess * 0.85  # 15% decay per round
 
         # Money printing spike (aggressive: 80x multiplier)
         if gdp > 0 and money_printed > 0:
-            new_infl += (money_printed / gdp) * 80.0
+            new_excess += (money_printed / gdp) * 80.0
 
+        new_infl = baseline + new_excess
         new_infl = clamp(new_infl, 0.0, 500.0)
         return round(new_infl, 2)
 
@@ -1734,17 +1756,27 @@ class WorldModelEngine:
         return min(damage, 1.0)
 
     def _get_blockade_fraction(self, country_id: str) -> float:
+        """Blockade fraction for direct GDP impact via trade disruption.
+
+        NOTE (v2 fix): Gulf Gate / Hormuz are EXCLUDED here because their
+        economic impact is already fully captured through the oil price
+        channel (supply reduction + disruption multiplier -> oil_shock on GDP).
+        Including them here would double-count the impact.  Only chokepoints
+        whose disruption affects GDP through NON-oil channels (e.g. Formosa
+        Strait -> semiconductors, Malacca -> general trade) are counted.
+        """
         frac = 0.0
         c = self.ws.countries.get(country_id, {})
         eco = c.get("economic", {})
         for cp_name, status in self.ws.chokepoint_status.items():
             if status != "blocked":
                 continue
+            # Skip Gulf Gate / Hormuz -- impact comes through oil price
+            if cp_name in ("hormuz", "gulf_gate_ground"):
+                continue
             cp = CHOKEPOINTS.get(cp_name, {})
             impact = cp.get("trade_impact", cp.get("oil_impact", 0.1))
-            if cp_name in ("hormuz", "gulf_gate_ground") and not eco.get("oil_producer"):
-                frac += impact
-            elif cp_name == "malacca" and country_id == "cathay":
+            if cp_name == "malacca" and country_id == "cathay":
                 frac += impact * 2.0
             elif cp_name == "taiwan_strait":
                 dep = eco.get("formosa_dependency", 0)
@@ -1876,8 +1908,19 @@ class WorldModelEngine:
                     f"  Rare earth: Cathay restricts {target} at level {level} "
                     f"(trade cost: {level * 0.3:.1f} coins)")
 
+    # Mapping from blockade action keys to chokepoint_status keys
+    _BLOCKADE_TO_CHOKEPOINT = {
+        "formosa_strait": "taiwan_strait",
+        "gulf_gate": "hormuz",
+        "gulf_gate_ground": "gulf_gate_ground",
+        "caribe_passage": "caribbean",
+        "malacca": "malacca",
+        "suez": "suez",
+        "hormuz": "hormuz",
+    }
+
     def _apply_blockade_changes(self, changes: dict) -> None:
-        """Apply blockade declarations or removals."""
+        """Apply blockade declarations or removals, keeping chokepoint_status in sync."""
         if not changes:
             return
         for chokepoint, data in changes.items():
@@ -1891,7 +1934,22 @@ class WorldModelEngine:
                 if chokepoint == "formosa_strait":
                     self.ws.formosa_blockade = True
                 self._log.append(
-                    f"  Blockade: {chokepoint} declared by {data.get('blocker', '?')}")
+                    f"  Blockade: {chokepoint} declared by {data.get('blocker', data.get('controller', '?'))}")
+
+        # Sync chokepoint_status with active_blockades
+        self._sync_chokepoint_status()
+
+    def _sync_chokepoint_status(self) -> None:
+        """Keep chokepoint_status in sync with active_blockades."""
+        for blockade_key, cp_key in self._BLOCKADE_TO_CHOKEPOINT.items():
+            if blockade_key in self.ws.active_blockades:
+                self.ws.chokepoint_status[cp_key] = "blocked"
+            else:
+                # Only reset to open if not blocked by other means (e.g. ground forces)
+                if cp_key == "gulf_gate_ground" and "gulf_gate" in self.ws.ground_blockades:
+                    continue  # ground blockade still active from deployments
+                if self.ws.chokepoint_status.get(cp_key) == "blocked":
+                    self.ws.chokepoint_status[cp_key] = "open"
 
     def _apply_mobilization(self, country_id: str, level: str) -> None:
         c = self.ws.countries[country_id]
