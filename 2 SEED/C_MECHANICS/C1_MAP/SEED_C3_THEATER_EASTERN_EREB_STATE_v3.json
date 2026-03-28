@@ -534,5 +534,6 @@
       "key": "die_hard_2_1774633434953",
       "name": "Die Hard 2"
     }
-  ]
+  ],
+  "_coordinate_convention": "IMPORTANT: This JSON uses 0-indexed arrays. All human-facing documents use 1-indexed coordinates. Conversion: display_row = array_row + 1, display_col = array_col + 1. Theater size: 10 rows (display 1-10) x 10 cols (display 1-10)."
 }

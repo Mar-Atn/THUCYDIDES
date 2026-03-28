@@ -239,6 +239,7 @@ const countries = [
   { id:'persia',     name:'Persia',     color:'#4AD97A', bloc:'League' },
   { id:'gallia',     name:'Gallia',     color:'#2E86AB', bloc:'Western Treaty' },
   { id:'teutonia',   name:'Teutonia',   color:'#5B7FA6', bloc:'Western Treaty' },
+  { id:'thule',      name:'Thule',      color:'#5B7FA6', bloc:'Western Treaty' },
   { id:'albion',     name:'Albion',     color:'#3B6E8F', bloc:'Western Treaty' },
   { id:'freeland',   name:'Freeland',   color:'#4AA0A0', bloc:'Western Treaty' },
   { id:'ponte',      name:'Ponte',      color:'#7B9CB8', bloc:'Western Treaty' },
@@ -296,6 +297,8 @@ function geometricSVG(id, color, size=48) {
     choson: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.4*Math.cos(rad)}" y2="${half+s*0.4*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}`,
     caribe: `<circle cx="${half}" cy="${half}" r="${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.28}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
     sogdiana: `<line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.45}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.15}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.55}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.85}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.85}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/>`,
+    thule: `<polygon points="${half},${s*0.1} ${s*0.75},${s*0.35} ${s*0.75},${s*0.7} ${half},${s*0.9} ${s*0.25},${s*0.7} ${s*0.25},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><circle cx="${half}" cy="${half}" r="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    horn: `<polygon points="${half},${s*0.15} ${s*0.8},${half} ${half},${s*0.85} ${s*0.2},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-dasharray="${sw*2} ${sw}"/>`,
   };
   return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
 }
@@ -566,7 +569,7 @@ const hexData = [
   // Row 1
   {r:1,c:9,country:'freeland'},{r:1,c:10,country:'nordostan'},{r:1,c:11,country:'nordostan'},{r:1,c:15,country:'nordostan'},
   // Row 2
-  {r:2,c:2,country:'columbia'},{r:2,c:5,country:'teutonia'},{r:2,c:7,country:'albion'},{r:2,c:9,country:'freeland'},
+  {r:2,c:2,country:'columbia'},{r:2,c:5,country:'thule'},{r:2,c:7,country:'albion'},{r:2,c:9,country:'freeland'},
   {r:2,c:10,country:'heartland'},{r:2,c:11,country:'nordostan'},{r:2,c:12,country:'nordostan'},{r:2,c:13,country:'nordostan'},
   {r:2,c:14,country:'nordostan'},{r:2,c:15,country:'nordostan'},{r:2,c:17,country:'choson'},
   // Row 3
@@ -878,7 +881,7 @@ const theaterData = [
 const dieHard = {r:5, c:5};
 
 function renderTheaterMap(containerId) {
-  const hexSize = 32;
+  const hexSize = 28;  // same size as global map hexagons
   const w = hexSize * Math.sqrt(3);
   const h = hexSize * 2;
   const margin = hexSize * 3;
@@ -929,7 +932,7 @@ function renderTheaterMap(containerId) {
       const key = `${r},${c}`;
       if (!lookup[key]) {
         const {x, y} = tCenter(r, c);
-        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#EBEDF2" fill-opacity="0.3" stroke="#D8DCE5" stroke-width="0.5"/>`;
+        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#D4E4F0" fill-opacity="0.4" stroke="#D8DCE5" stroke-width="0.5"/>`;
       }
     }
   }
@@ -960,8 +963,21 @@ function renderTheaterMap(containerId) {
 
   // Front line — draw a thick dashed line between occupied and free Heartland hexes
   // Approximate front line path
-  svg += `<text x="${margin + 2 * w}" y="${margin - hexSize * 0.3}" text-anchor="middle" font-size="14" font-weight="700" fill="${heartColor}" font-family="'Playfair Display',serif" opacity="0.8">HEARTLAND</text>`;
-  svg += `<text x="${margin + 7.5 * w}" y="${margin - hexSize * 0.3}" text-anchor="middle" font-size="14" font-weight="700" fill="${nordColor}" font-family="'Playfair Display',serif" opacity="0.8">NORDOSTAN</text>`;
+  // Country labels at centroid of each country's hexes
+  const theaterCountryHexes = {nordostan: [], heartland: []};
+  theaterData.forEach(d => {
+    const {x, y} = tCenter(d.r, d.c);
+    // Use the OWNER (not occupier) for label positioning
+    if (theaterCountryHexes[d.o]) theaterCountryHexes[d.o].push({x, y});
+  });
+  Object.entries(theaterCountryHexes).forEach(([cid, hexes]) => {
+    if (hexes.length === 0) return;
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    const color = cid === 'nordostan' ? nordColor : heartColor;
+    const name = cid === 'nordostan' ? 'NORDOSTAN' : 'HEARTLAND';
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}" font-family="'Playfair Display',serif" opacity="0.5" letter-spacing="1" style="pointer-events:none;">${name}</text>`;
+  });
 
   // Military deployment indicators
   // Nordostan: 8 ground front (rows 3-6 east), 5 ground occupation (rows 2-4), 4 tac air, 1 AD

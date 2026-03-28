@@ -33,7 +33,7 @@
     },
     "thule": {
       "name": "Thule",
-      "color": "#7FA58A"
+      "color": "#8FB59A"
     },
     "freeland": {
       "name": "Freeland",
@@ -242,7 +242,7 @@
         "owner": "sea"
       },
       {
-        "owner": "teutonia"
+        "owner": "thule"
       },
       {
         "owner": "sea"
@@ -745,5 +745,6 @@
       "key": "die_hard_1",
       "name": "Die Hard"
     }
-  ]
+  ],
+  "_coordinate_convention": "IMPORTANT: This JSON uses 0-indexed arrays. All human-facing documents use 1-indexed coordinates. Conversion: display_row = array_row + 1, display_col = array_col + 1. Grid size: 10 rows (display 1-10) x 20 cols (display 1-20)."
 }

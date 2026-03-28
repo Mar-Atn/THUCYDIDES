@@ -118,11 +118,11 @@ caribe,tactical_air,1,caribe,Antiquated Soviet-era aircraft
 mirage,ground,2,mirage,Homeland professional force
 mirage,tactical_air,2,mirage,F-16s Mirage 2000s drones
 mirage,air_defense,2,mirage,THAAD Patriot IRIS-T
-albion,naval,2,"w(7,3)",Atlantic/home waters
+albion,naval,2,"w(8,4)",Atlantic/home waters
 nordostan,naval,2,nord_w2,Northern Fleet (Arctic/submarine)
-gallia,naval,1,"w(9,6)",Mediterranean/carrier group
-bharata,naval,2,"w(13,9)",Indian Ocean fleet
-yamato,naval,2,"w(19,4)",Pacific home waters
+gallia,naval,1,"w(10,7)",Mediterranean/carrier group
+bharata,naval,2,"w(14,10)",Indian Ocean fleet
+yamato,naval,2,"w(20,5)",Pacific home waters
 phrygia,naval,1,phrygia_1,Bosphorus/Med
 nordostan,ground,8,heartland_2,Front line offensive forces (theater rows 4-6)
 nordostan,ground,5,heartland_1,Occupation/rear security forces (theater rows 3-4)
@@ -134,14 +134,14 @@ heartland,ground,3,heartland_1,"Strategic reserve, capital defense, western logi
 heartland,tactical_air,2,heartland_2,"Front-line air support, drones, HIMARS"
 heartland,tactical_air,1,heartland_1,Air defense/strike reserve
 heartland,air_defense,1,heartland_1,Patriot/NASAMS protecting capital and infrastructure
-columbia,naval,3,"w(12,8)",Gulf — 2 CSGs for Operation Epic Fury
-columbia,naval,2,"w(9,6)",Mediterranean — Persia war support + Suez
-columbia,naval,2,"w(17,4)",East Cathay Sea — Formosa deterrence patrol
+columbia,naval,3,"w(13,9)",Gulf — 2 CSGs for Operation Epic Fury
+columbia,naval,2,"w(10,7)",Mediterranean — Persia war support + Suez
+columbia,naval,2,"w(18,5)",East Cathay Sea — Formosa deterrence patrol
 columbia,naval,1,col_main_2,Atlantic home port
 columbia,naval,1,col_main_3,Pacific home port
-columbia,naval,1,"w(13,9)",Indian Ocean presence
-cathay,naval,2,"w(16,7)",South Cathay Sea — Formosa southern approach
-cathay,naval,2,"w(17,4)",East Cathay Sea — Formosa northern approach
-cathay,naval,1,"w(18,6)",Near Formosa — eastern patrol
+columbia,naval,1,"w(14,10)",Indian Ocean presence
+cathay,naval,2,"w(17,8)",South Cathay Sea — Formosa southern approach
+cathay,naval,2,"w(18,5)",East Cathay Sea — Formosa northern approach
+cathay,naval,1,"w(19,7)",Near Formosa — eastern patrol
 cathay,naval,1,cathay_7,Home port — Hainan
 persia,ground,1,cp_gulf_gate,Ground forces maintaining Gulf Gate blockade — coastal missile batteries
