@@ -144,12 +144,21 @@ class WorldModelEngine:
         """Store previous round state for transition detection."""
         self._previous_states = {}
         for cid, c in self.ws.countries.items():
+            was_at_war = self.ws.get_country_at_war(cid)
             self._previous_states[cid] = {
                 "economic_state": c["economic"].get("economic_state", "normal"),
                 "gdp": c["economic"]["gdp"],
                 "stability": c["political"]["stability"],
-                "at_war": self.ws.get_country_at_war(cid),
+                "at_war": was_at_war,
             }
+            # BUG FIX 5: Track ceasefire_rounds_ago per country
+            prev_ceasefire = c.get('ceasefire_rounds_ago', 99)
+            prev_was_at_war = self._previous_states.get(cid, {}).get('at_war', False)
+            # If transitioning from war to peace this round, reset counter
+            # (actual detection happens after we check current state below)
+            # Increment existing counter each round
+            if prev_ceasefire < 99:
+                c['ceasefire_rounds_ago'] = prev_ceasefire + 1
 
     # ===================================================================
     # PASS 1: DETERMINISTIC (CHAINED FEEDBACK LOOPS)
@@ -1579,6 +1588,55 @@ class WorldModelEngine:
     # EXPERT 1: KEYNES (Economist)
     # -------------------------------------------------------------------
 
+    # -------------------------------------------------------------------
+    # BUG FIX 4: SHARED CRITICAL CHECKS (enables majority rule)
+    # -------------------------------------------------------------------
+
+    def _common_critical_checks(self, cid, c, expert_name, history, round_num):
+        """Checks that ALL three experts evaluate — enables majority rule."""
+        adjustments = []
+        eco = c['economic']
+        pol = c['political']
+
+        # SHARED CHECK A: Is GDP growth plausible given the overall situation?
+        growth = eco.get('gdp_growth_rate', 0)
+        state = eco.get('economic_state', 'normal')
+
+        if state == 'crisis' and growth > -1:
+            # All three experts should agree: crisis = contraction
+            adjustments.append({
+                'country': cid, 'variable': 'gdp_growth_rate',
+                'adjustment': -(growth + 2.0),  # force at least -2%
+                'reason': f'{expert_name}: {cid} in CRISIS with growth {growth:.1f}% — should be contracting.',
+                'confidence': 'high'
+            })
+
+        # SHARED CHECK B: Is stability consistent with economic state?
+        stability = pol.get('stability', 5)
+        if state == 'collapse' and stability > 3:
+            adjustments.append({
+                'country': cid, 'variable': 'stability',
+                'adjustment': -(stability - 2.5),
+                'reason': f'{expert_name}: {cid} in COLLAPSE with stability {stability:.1f} — should be much lower.',
+                'confidence': 'high'
+            })
+
+        # SHARED CHECK C: Is support consistent with stability?
+        support = pol.get('political_support', 50)
+        if stability < 3 and support > 50:
+            adjustments.append({
+                'country': cid, 'variable': 'political_support',
+                'adjustment': -(support - 35),
+                'reason': f'{expert_name}: {cid} stability {stability:.1f} but support {support:.0f}% — mismatch.',
+                'confidence': 'medium'
+            })
+
+        return adjustments
+
+    # -------------------------------------------------------------------
+    # EXPERT 1: KEYNES (Economist)
+    # -------------------------------------------------------------------
+
     def _expert_keynes(self, results, history, round_num):
         """Economic plausibility review.
 
@@ -1597,6 +1655,8 @@ class WorldModelEngine:
         oil_price = self.ws.oil_price
 
         for cid, c in self.ws.countries.items():
+            # Shared checks (enables majority rule)
+            adjustments.extend(self._common_critical_checks(cid, c, 'KEYNES', history, round_num))
             eco = c['economic']
             pol = c['political']
             tech = c['technology']
@@ -1609,9 +1669,12 @@ class WorldModelEngine:
             regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
             prev_state = self._previous_states.get(cid, {}).get('economic_state', 'normal')
 
+            # BUG FIX 5: Skip declining-trend acceleration for 2 rounds after ceasefire
+            ceasefire_recent = c.get('ceasefire_rounds_ago', 99) <= 2
+
             # TRAJECTORY CHECK: GDP declining for 3+ rounds = recession dynamic
             gdp_traj = self._analyze_trajectory(cid, 'economic.gdp', history)
-            if gdp_traj['rounds_declining'] >= 3 and growth > -1:
+            if not ceasefire_recent and gdp_traj['rounds_declining'] >= 3 and growth > -1:
                 adjustments.append({
                     'country': cid, 'variable': 'gdp_growth_rate',
                     'adjustment': -1.5,
@@ -1621,7 +1684,7 @@ class WorldModelEngine:
 
             # TRAJECTORY CHECK: Stability declining for 3+ rounds = crisis deepening
             stab_traj = self._analyze_trajectory(cid, 'political.stability', history)
-            if stab_traj['rounds_declining'] >= 3 and stab_traj['trend'] == 'falling':
+            if not ceasefire_recent and stab_traj['rounds_declining'] >= 3 and stab_traj['trend'] == 'falling':
                 # Momentum of decline should accelerate
                 adjustments.append({
                     'country': cid, 'variable': 'momentum',
@@ -1687,14 +1750,21 @@ class WorldModelEngine:
                         })
 
             # CHECK 6: Printing money without sufficient inflation consequence
+            # BUG FIX 2: Use ratio-based check instead of absolute (broken for high-inflation countries)
             printed = eco.get('money_printed_this_round', 0)
-            if printed > 0 and inf_delta < printed * 2:
-                adjustments.append({
-                    'country': cid, 'variable': 'inflation',
-                    'adjustment': printed * 1.5,
-                    'reason': f'KEYNES: {cid} printed {printed:.1f} coins but inflation only +{inf_delta:.1f}% -- should be higher.',
-                    'confidence': 'low'
-                })
+            if printed > 0:
+                printed_ratio = printed / max(gdp, 1) * 100  # printing as % of GDP
+                expected_inflation = printed_ratio * 8  # approximation multiplier
+                actual_excess = inf_delta
+                if printed_ratio > 2 and actual_excess < expected_inflation * 0.5:
+                    # Inflation response is less than 50% of expected — flag
+                    adj = min(expected_inflation - actual_excess, 10.0)  # cap at +10%
+                    adjustments.append({
+                        'country': cid, 'variable': 'inflation',
+                        'adjustment': adj,
+                        'reason': f'KEYNES: {cid} printed {printed_ratio:.1f}% of GDP but inflation only +{actual_excess:.1f}% (expected ~{expected_inflation:.0f}%) -- should be higher.',
+                        'confidence': 'medium'
+                    })
 
             # --- LEGACY: Market panic on crisis entry ---
             if state in ('crisis', 'collapse') and prev_state not in ('crisis', 'collapse'):
@@ -1707,21 +1777,20 @@ class WorldModelEngine:
                 })
 
             # --- LEGACY: Capital flight (stability < 3 or < 4) ---
+            # BUG FIX 1: Target gdp_growth_rate (soft) not gdp (hard)
             if pol['stability'] < 3 and state != 'collapse':
-                flight_pct = 0.08 if regime == 'democracy' else 0.03
-                flight = gdp * flight_pct
+                growth_hit = -3.0 if regime == 'democracy' else -1.5
                 adjustments.append({
-                    'country': cid, 'variable': 'gdp',
-                    'adjustment': -flight,
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': growth_hit,
                     'reason': f'KEYNES: Capital flight as {c.get("sim_name", cid)} stability drops to {pol["stability"]:.1f}.',
                     'confidence': 'high'
                 })
             elif pol['stability'] < 4:
-                flight_pct = 0.03 if regime != 'autocracy' else 0.01
-                flight = gdp * flight_pct
+                growth_hit = -1.5 if regime != 'autocracy' else -0.5
                 adjustments.append({
-                    'country': cid, 'variable': 'gdp',
-                    'adjustment': -flight,
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': growth_hit,
                     'reason': f'KEYNES: Capital outflows as {c.get("sim_name", cid)} stability at {pol["stability"]:.1f}.',
                     'confidence': 'medium'
                 })
@@ -1776,6 +1845,9 @@ class WorldModelEngine:
         adjustments = []
 
         for cid, c in self.ws.countries.items():
+            # Shared checks (enables majority rule)
+            adjustments.extend(self._common_critical_checks(cid, c, 'CLAUSEWITZ', history, round_num))
+
             pol = c['political']
             eco = c['economic']
             tech = c['technology']
@@ -1796,16 +1868,21 @@ class WorldModelEngine:
                 })
 
             # CHECK 1: At war but stability too high
+            # BUG FIX 6: Lowered thresholds — old check (tiredness>3, stability>6) never fired
+            # because by tiredness>3, stability is already <6. New: check if stability is
+            # NOT declining fast enough given war pressure.
             if at_war_now:
                 war_tiredness = pol.get('war_tiredness', 0)
                 stability = pol.get('stability', 5)
-                if war_tiredness > 3 and stability > 6:
-                    adjustments.append({
-                        'country': cid, 'variable': 'stability',
-                        'adjustment': -0.3,
-                        'reason': f'CLAUSEWITZ: {cid} war tiredness {war_tiredness:.1f} but stability {stability:.1f} -- prolonged war should erode stability more.',
-                        'confidence': 'medium'
-                    })
+                if war_tiredness > 2 and stability > 4:
+                    expected_stab = max(2, 7 - war_tiredness)
+                    if stability > expected_stab + 0.5:
+                        adjustments.append({
+                            'country': cid, 'variable': 'stability',
+                            'adjustment': -(stability - expected_stab) * 0.3,
+                            'reason': f'CLAUSEWITZ: {cid} tiredness {war_tiredness:.1f} but stability {stability:.1f} — should be closer to {expected_stab:.1f}.',
+                            'confidence': 'medium'
+                        })
 
             # CHECK 2: Overstretch -- forces committed to multiple theaters
             if cid in ('columbia',):
@@ -1882,6 +1959,8 @@ class WorldModelEngine:
 
             # --- LEGACY: Ceasefire rally (peace dividend) ---
             if was_at_war and not at_war_now:
+                # BUG FIX 5: Track ceasefire for trajectory exception
+                c['ceasefire_rounds_ago'] = 0
                 adjustments.append({
                     'country': cid, 'variable': 'momentum',
                     'adjustment': 1.5,
@@ -1920,6 +1999,9 @@ class WorldModelEngine:
         oil_price = self.ws.oil_price
 
         for cid, c in self.ws.countries.items():
+            # Shared checks (enables majority rule)
+            adjustments.extend(self._common_critical_checks(cid, c, 'MACHIAVELLI', history, round_num))
+
             pol = c['political']
             eco = c['economic']
             regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
@@ -2002,6 +2084,26 @@ class WorldModelEngine:
                     'adjustment': -2.0,
                     'reason': f'MACHIAVELLI: {cid} war fatigue at {war_tiredness:.1f} -- "when does this end?"',
                     'confidence': 'medium'
+                })
+
+            # BUG FIX 3: Deep-crisis low-support checks
+            # CHECK 6: Autocracy with critically low elite loyalty — regime fragility
+            if support < 25 and regime == 'autocracy':
+                if stability > 2:
+                    adjustments.append({
+                        'country': cid, 'variable': 'stability',
+                        'adjustment': -0.5,
+                        'reason': f'MACHIAVELLI: {cid} autocracy with only {support:.0f}% elite loyalty — regime fragility should erode stability.',
+                        'confidence': 'high'
+                    })
+
+            # CHECK 7: Approaching revolution threshold — death spiral
+            if support < 20:
+                adjustments.append({
+                    'country': cid, 'variable': 'political_support',
+                    'adjustment': -2.0,
+                    'reason': f'MACHIAVELLI: {cid} at {support:.0f}% support — death spiral: fear breeds defection breeds more fear.',
+                    'confidence': 'high'
                 })
 
             # --- LEGACY: Rally around the flag (diminishing) ---
