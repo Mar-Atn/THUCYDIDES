@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Emblem Options — 21 Countries × 3 Styles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --base: #F5F6F8;
+    --text: #1A2332;
+    --text-secondary: #4A5568;
+    --action: #1A5276;
+    --accent: #C4922A;
+    --card: #FFFFFF;
+    --border: #D8DCE5;
+    --danger: #C0392B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--base);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--text); }
+  h1 { font-size: 2rem; font-weight: 700; }
+  h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Sticky Nav */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 12px 32px; display: flex; align-items: center; gap: 32px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  nav .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: var(--action); }
+  nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+  nav a:hover { color: var(--action); }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .section { margin-bottom: 64px; }
+  .section-header {
+    border-bottom: 2px solid var(--action); padding-bottom: 8px; margin-bottom: 24px;
+  }
+  .style-label {
+    display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff;
+    margin-bottom: 12px;
+  }
+  .style-1-label { background: var(--action); }
+  .style-2-label { background: #7D5A3C; }
+  .style-3-label { background: #5B4A8A; }
+
+  /* Emblem Grid */
+  .emblem-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 16px;
+  }
+  .emblem-cell {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 8px; text-align: center; transition: box-shadow 0.2s;
+  }
+  .emblem-cell:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .emblem-cell .name { font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .emblem-cell .bloc { font-size: 9px; color: var(--text-secondary); }
+  .emblem-cell .color-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+
+  .three-up {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 32px;
+  }
+
+  /* Size comparison */
+  .size-row { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 16px; padding: 16px; background: var(--card); border-radius: 8px; border: 1px solid var(--border); }
+  .size-item { text-align: center; }
+  .size-item .label { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* Document Samples */
+  .doc-sample {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Role Brief Cover */
+  .role-brief {
+    width: 100%; aspect-ratio: 210/297; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  .role-brief .color-stripe { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
+  .role-brief .classified {
+    position: absolute; top: 20px; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; color: var(--danger); text-transform: uppercase;
+  }
+  .role-brief .emblem-wrap { margin-bottom: 16px; }
+  .role-brief .role-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  .role-brief .role-title { font-size: 0.95rem; color: var(--text-secondary); }
+
+  /* Badge Row */
+  .badge-row { display: flex; gap: 12px; padding: 16px; flex-wrap: wrap; }
+  .country-badge {
+    display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+  }
+
+  /* Status Table */
+  .status-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .status-table th { background: var(--action); color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .status-table .mono { font-size: 12px; }
+
+  /* Name Badge */
+  .name-badge {
+    width: 260px; height: 160px; border-radius: 8px; overflow: hidden;
+    background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center;
+  }
+  .name-badge .top-band { width: 100%; height: 8px; }
+  .name-badge .badge-content { padding: 12px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .name-badge .char-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-top: 8px; }
+  .name-badge .char-title { font-size: 11px; color: var(--text-secondary); }
+
+  .versions-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">TTT Emblem Options</span>
+  <a href="#emblems">Emblems</a>
+  <a href="#sizes">Sizes</a>
+  <a href="#documents">Documents</a>
+  <a href="#warmap">War Map</a>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: EMBLEM COMPARISON -->
+<!-- ============================================================ -->
+<div class="section" id="emblems">
+  <div class="section-header"><h1>Section 1: Emblem Comparison — 21 Countries × 3 Styles</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">Each country shown with its assigned color. Three distinct styles for comparison. All SVGs at 48×48.</p>
+
+  <!-- STYLE 1: GEOMETRIC -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-1-label">Style 1: Geometric Abstract</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Bauhaus/Isotype-inspired. Pure geometric shapes, 2px stroke, minimal.</p>
+    <div class="emblem-grid" id="grid-geometric"></div>
+  </div>
+
+  <!-- STYLE 2: PHOENICIAN -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-2-label">Style 2: Phoenician Letters</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Actual Phoenician alphabet forms (~1050 BCE). Angular, scratched-in-stone characters.</p>
+    <div class="emblem-grid" id="grid-phoenician"></div>
+  </div>
+
+  <!-- STYLE 3: LINEAR B -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-3-label">Style 3: Linear B Ideograms</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Mycenaean palace pictograms (~1450 BCE). Stylized drawings of real objects.</p>
+    <div class="emblem-grid" id="grid-linearb"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: SIZE COMPARISON -->
+<!-- ============================================================ -->
+<div class="section" id="sizes">
+  <div class="section-header"><h1>Section 2: Size Comparison</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">6 key countries at 16px, 24px, 48px, and 96px across all 3 styles.</p>
+  <div id="size-comparison"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: DOCUMENT SAMPLES -->
+<!-- ============================================================ -->
+<div class="section" id="documents">
+  <div class="section-header"><h1>Section 3: Document Samples with Emblems</h1></div>
+
+  <!-- Sample A: Role Brief Cover -->
+  <h2 style="margin-top:32px;">Sample A: Role Brief Cover Page</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">A4-proportioned cover for "DEALER — President of Columbia" in each emblem style.</p>
+  <div class="three-up" id="role-briefs"></div>
+
+  <!-- Sample B: Dashboard Badge Row -->
+  <h2 style="margin-top:32px;">Sample B: Dashboard Country Badge Row</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Horizontal badge strips for Columbia, Cathay, Nordostan, Heartland, Persia.</p>
+  <div id="badge-rows"></div>
+
+  <!-- Sample C: Status Table -->
+  <h2 style="margin-top:32px;">Sample C: Status Table</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Data table with inline emblems at 24px.</p>
+  <div class="three-up" id="status-tables"></div>
+
+  <!-- Sample D: Name Badge -->
+  <h2 style="margin-top:32px;">Sample D: Name Badge</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Physical badge card with country color band, emblem, character name, title.</p>
+  <div id="name-badges"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: WAR MAP MOCKUP -->
+<!-- ============================================================ -->
+<div class="section" id="warmap">
+  <div class="section-header"><h1>Section 4: War Map Mockup</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">Hex grid strategic map using Style 1 (Geometric) emblems. Two views: default strategic overview and crisis highlighting.</p>
+
+  <h2>Global Strategic View</h2>
+  <div class="doc-sample" style="padding:24px;margin-bottom:32px;" id="map-strategic"></div>
+
+  <h2>Crisis View — Eastern Ereb Theater (Heartland–Nordostan)</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">10×10 theater hex map. Nordostan territory (gray), Heartland territory (gold), occupied zones (striped). Die Hard position marked. Front line visible.</p>
+  <div class="doc-sample" style="padding:24px;margin-bottom:32px;" id="map-theater"></div>
+
+  <!-- Legend -->
+  <div class="doc-sample" style="padding:20px;" id="map-legend"></div>
+</div>
+
+</div><!-- container -->
+
+<script>
+// ===================================================================
+// DATA
+// ===================================================================
+const countries = [
+  { id:'columbia',   name:'Columbia',   color:'#4A90D9', bloc:'Western Treaty' },
+  { id:'cathay',     name:'Cathay',     color:'#D94A4A', bloc:'League' },
+  { id:'nordostan',  name:'Nordostan',  color:'#808080', bloc:'League' },
+  { id:'heartland',  name:'Heartland',  color:'#D4A843', bloc:'At war' },
+  { id:'persia',     name:'Persia',     color:'#4AD97A', bloc:'League' },
+  { id:'gallia',     name:'Gallia',     color:'#2E86AB', bloc:'Western Treaty' },
+  { id:'teutonia',   name:'Teutonia',   color:'#5B7FA6', bloc:'Western Treaty' },
+  { id:'albion',     name:'Albion',     color:'#3B6E8F', bloc:'Western Treaty' },
+  { id:'freeland',   name:'Freeland',   color:'#4AA0A0', bloc:'Western Treaty' },
+  { id:'ponte',      name:'Ponte',      color:'#7B9CB8', bloc:'Western Treaty' },
+  { id:'bharata',    name:'Bharata',    color:'#E67E22', bloc:'Non-aligned' },
+  { id:'formosa',    name:'Formosa',    color:'#3498DB', bloc:'\u2014' },
+  { id:'yamato',     name:'Yamato',     color:'#1ABC9C', bloc:'Western Treaty' },
+  { id:'hanguk',     name:'Hanguk',     color:'#2ECC71', bloc:'\u2014' },
+  { id:'phrygia',    name:'Phrygia',    color:'#9B59B6', bloc:'Swing' },
+  { id:'solaria',    name:'Solaria',    color:'#F1C40F', bloc:'Swing' },
+  { id:'mirage',     name:'Mirage',     color:'#A569BD', bloc:'Swing' },
+  { id:'levantia',   name:'Levantia',   color:'#5DADE2', bloc:'Western Treaty' },
+  { id:'choson',     name:'Choson',     color:'#8B4513', bloc:'League' },
+  { id:'caribe',     name:'Caribe',     color:'#CC7722', bloc:'\u2014' },
+  { id:'sogdiana',   name:'Sogdiana',   color:'#95A5A6', bloc:'Contested' },
+];
+
+const keyCountries = ['columbia','cathay','nordostan','heartland','persia','bharata'];
+const badgeCountries = ['columbia','cathay','nordostan','heartland','persia'];
+
+// Table data for status tables
+const tableData = [
+  { id:'columbia',  gdp:'28.4T', stability:'82', state:'Active' },
+  { id:'cathay',    gdp:'22.1T', stability:'78', state:'Active' },
+  { id:'nordostan', gdp:'2.8T',  stability:'55', state:'Mobilized' },
+  { id:'heartland', gdp:'0.9T',  stability:'31', state:'At War' },
+  { id:'persia',    gdp:'1.2T',  stability:'48', state:'Sanctioned' },
+];
+
+// ===================================================================
+// SVG GENERATORS
+// ===================================================================
+
+function geometricSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2/48);
+  const half = s/2, q = s/4, tq = s*3/4;
+  const paths = {
+    columbia: `<polygon points="${half},${s*0.1} ${s*0.87},${s*0.42} ${s*0.73},${s*0.9} ${s*0.27},${s*0.9} ${s*0.13},${s*0.42}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    cathay: `<polygon points="${half},${s*0.08} ${s*0.82},${q} ${s*0.82},${tq} ${half},${s*0.92} ${s*0.18},${tq} ${s*0.18},${q}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.68},${s*0.36} ${s*0.68},${s*0.64} ${half},${s*0.75} ${s*0.32},${s*0.64} ${s*0.32},${s*0.36}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    nordostan: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
+    heartland: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    persia: `<path d="M${s*0.15},${s*0.65} A${s*0.4},${s*0.4} 0 0,1 ${s*0.85},${s*0.65}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${half}" y1="${s*0.2}" x2="${half}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    gallia: `<rect x="${s*0.38}" y="${s*0.1}" width="${s*0.24}" height="${s*0.8}" rx="${s*0.02}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.28}" y1="${s*0.2}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    teutonia: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,45,90,135,180,225,270,315].map(a=>{const r1=s*0.25,r2=s*0.42,rad=a*Math.PI/180;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    albion: `<polygon points="${half},${s*0.1} ${s*0.85},${s*0.85} ${s*0.15},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    freeland: `<rect x="${s*0.15}" y="${s*0.15}" width="${s*0.7}" height="${s*0.7}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    ponte: `<path d="M${s*0.15},${s*0.8} Q${s*0.15},${s*0.2} ${half},${s*0.2} Q${s*0.85},${s*0.2} ${s*0.85},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    bharata: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.35*Math.cos(rad)}" y2="${half+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    formosa: `<rect x="${s*0.2}" y="${s*0.2}" width="${s*0.6}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.2}" x2="${s*0.4}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.2}" x2="${s*0.6}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.4}" x2="${s*0.8}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.6}" x2="${s*0.8}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/>`,
+    yamato: `<rect x="${s*0.15}" y="${s*0.6}" width="${s*0.12}" height="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.33}" y="${s*0.45}" width="${s*0.12}" height="${s*0.45}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.51}" y="${s*0.3}" width="${s*0.12}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.69}" y="${s*0.12}" width="${s*0.12}" height="${s*0.78}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    hanguk: `<circle cx="${s*0.25}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${s*0.75}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.25}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.75}" r="${s*0.06}" fill="${color}"/><line x1="${s*0.25}" y1="${half}" x2="${half}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.25}" x2="${s*0.75}" y2="${half}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.75}" y1="${half}" x2="${half}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.75}" x2="${s*0.25}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    phrygia: `<path d="M${s*0.1},${s*0.75} Q${s*0.1},${s*0.25} ${half},${s*0.25} Q${s*0.9},${s*0.25} ${s*0.9},${s*0.75}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.1}" y1="${s*0.75}" x2="${s*0.9}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/>`,
+    solaria: `${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>{const rad=a*Math.PI/180,r1=s*0.12,r2=s*0.4;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}<circle cx="${half}" cy="${half}" r="${s*0.1}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    mirage: `<polygon points="${half},${s*0.08} ${s*0.75},${half} ${half},${s*0.92} ${s*0.25},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.63},${half} ${half},${s*0.75} ${s*0.37},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    levantia: `<polygon points="${half},${s*0.08} ${s*0.86},${s*0.3} ${s*0.86},${s*0.7} ${half},${s*0.92} ${s*0.14},${s*0.7} ${s*0.14},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${half}" y1="${s*0.08}" x2="${half}" y2="${s*0.92}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.14}" y1="${half}" x2="${s*0.86}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    choson: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.4*Math.cos(rad)}" y2="${half+s*0.4*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}`,
+    caribe: `<circle cx="${half}" cy="${half}" r="${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.28}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    sogdiana: `<line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.45}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.15}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.55}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.85}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.85}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+function phoenicianSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2.5/48);
+  // Phoenician letter SVG paths — angular, stone-carved forms
+  const paths = {
+    // Aleph — ox head: inverted V with cross stroke
+    columbia: `<line x1="${s*0.3}" y1="${s*0.85}" x2="${s*0.5}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.7}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.36}" y1="${s*0.6}" x2="${s*0.64}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Beth — house: rectangular with triangular roof
+    cathay: `<polyline points="${s*0.2},${s*0.85} ${s*0.2},${s*0.35} ${s*0.5},${s*0.15} ${s*0.8},${s*0.35} ${s*0.8},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.2}" y1="${s*0.85}" x2="${s*0.8}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Gimel — camel: angular step shape
+    nordostan: `<polyline points="${s*0.25},${s*0.2} ${s*0.6},${s*0.2} ${s*0.6},${s*0.5} ${s*0.75},${s*0.5} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Daleth — door: right angle like a reversed L
+    heartland: `<polyline points="${s*0.25},${s*0.2} ${s*0.75},${s*0.2} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // He — window: figure like a stick person, vertical with arms
+    persia: `<line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.35}" x2="${s*0.5}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.6}" x2="${s*0.5}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Waw — hook: vertical line with hook at top
+    gallia: `<path d="M${s*0.5},${s*0.85} L${s*0.5},${s*0.35} Q${s*0.5},${s*0.15} ${s*0.35},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Zayin — weapon: vertical line with horizontal top (dagger/sword)
+    teutonia: `<line x1="${s*0.5}" y1="${s*0.2}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.2}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Heth — fence: H shape
+    albion: `<line x1="${s*0.25}" y1="${s*0.15}" x2="${s*0.25}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.75}" y1="${s*0.15}" x2="${s*0.75}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.5}" x2="${s*0.75}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Teth — wheel: circle with cross inside
+    bharata: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.32}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.18}" x2="${s*0.5}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.18}" y1="${s*0.5}" x2="${s*0.82}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Yodh — hand: small angular mark like an apostrophe/tick
+    formosa: `<polyline points="${s*0.55},${s*0.2} ${s*0.4},${s*0.5} ${s*0.55},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Kaph — palm: angular K-like shape
+    yamato: `<line x1="${s*0.3}" y1="${s*0.15}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.7}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Lamedh — goad: tall L shape, tallest Phoenician letter
+    freeland: `<polyline points="${s*0.65},${s*0.85} ${s*0.35},${s*0.85} ${s*0.35},${s*0.15} ${s*0.55},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Mem — water: zigzag/wave
+    phrygia: `<polyline points="${s*0.15},${s*0.35} ${s*0.3},${s*0.65} ${s*0.5},${s*0.35} ${s*0.7},${s*0.65} ${s*0.85},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Nun — serpent: wavy vertical
+    choson: `<path d="M${s*0.5},${s*0.15} Q${s*0.7},${s*0.35} ${s*0.35},${s*0.5} Q${s*0.2},${s*0.65} ${s*0.5},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Samekh — pillar: vertical with serifs top and bottom
+    ponte: `<line x1="${s*0.5}" y1="${s*0.2}" x2="${s*0.5}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.2}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.8}" x2="${s*0.7}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ayin — eye: circle (the original form was just a circle)
+    levantia: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.08}" fill="${color}"/>`,
+    // Pe — mouth: angular opening, like a reversed C with corner
+    solaria: `<polyline points="${s*0.65},${s*0.2} ${s*0.3},${s*0.2} ${s*0.3},${s*0.55} ${s*0.65},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.55}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Tsade — plant: forked stick
+    caribe: `<line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.5}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.3}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.7}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Qoph — needle's eye: circle on a vertical stick
+    mirage: `<circle cx="${s*0.5}" cy="${s*0.35}" r="${s*0.18}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.53}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Resh — head: reversed P / angular hook
+    hanguk: `<polyline points="${s*0.35},${s*0.85} ${s*0.35},${s*0.2} ${s*0.7},${s*0.2} ${s*0.7},${s*0.5}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Shin — tooth: W-like triple prong
+    sogdiana: `<polyline points="${s*0.15},${s*0.25} ${s*0.3},${s*0.8} ${s*0.5},${s*0.25} ${s*0.7},${s*0.8} ${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+function linearbSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2/48);
+  const paths = {
+    // Horse — simplified side view, head up, 4 legs
+    columbia: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.35},${s*0.4} L${s*0.55},${s*0.4} L${s*0.65},${s*0.5} L${s*0.65},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><path d="M${s*0.55},${s*0.4} L${s*0.65},${s*0.25} L${s*0.8},${s*0.15} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.55}" y1="${s*0.5}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ram — curved horns, stocky body
+    cathay: `<ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.3}" ry="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/><path d="M${s*0.7},${s*0.45} Q${s*0.85},${s*0.25} ${s*0.7},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.7},${s*0.45} Q${s*0.9},${s*0.3} ${s*0.82},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.7}" x2="${s*0.3}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.7}" x2="${s*0.6}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Stag — tall antlers, slender body
+    nordostan: `<line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.5}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.3}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.7}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.22}" x2="${s*0.25}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.22}" x2="${s*0.75}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.22}" ry="${s*0.13}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.35}" y1="${s*0.65}" x2="${s*0.35}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.65}" x2="${s*0.65}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Donkey — smaller, blockier than horse
+    heartland: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.7},${s*0.5} L${s*0.7},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.5}" x2="${s*0.6}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.65},${s*0.5} L${s*0.75},${s*0.35} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.78}" y1="${s*0.3}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Olive — branch with leaves
+    persia: `<path d="M${s*0.25},${s*0.8} Q${s*0.5},${s*0.3} ${s*0.75},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.42}" cy="${s*0.48}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.42},${s*0.48})"/><ellipse cx="${s*0.58}" cy="${s*0.35}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.58},${s*0.35})"/><ellipse cx="${s*0.72}" cy="${s*0.25}" rx="${s*0.06}" ry="${s*0.09}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.72},${s*0.25})"/>`,
+    // Wine vessel — cup/goblet shape
+    gallia: `<path d="M${s*0.3},${s*0.2} L${s*0.25},${s*0.55} Q${s*0.25},${s*0.7} ${s*0.5},${s*0.7} Q${s*0.75},${s*0.7} ${s*0.75},${s*0.55} L${s*0.7},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.5}" y1="${s*0.7}" x2="${s*0.5}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.82}" x2="${s*0.65}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Dagger — blade with hilt
+    teutonia: `<line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.72}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.42},${s*0.12} ${s*0.5},${s*0.55} ${s*0.58},${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.35}" y1="${s*0.62}" x2="${s*0.65}" y2="${s*0.62}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.72}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ship — simple vessel with mast and hull
+    albion: `<path d="M${s*0.1},${s*0.6} Q${s*0.2},${s*0.8} ${s*0.5},${s*0.8} Q${s*0.8},${s*0.8} ${s*0.9},${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.18}" x2="${s*0.5}" y2="${s*0.65}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.18} ${s*0.75},${s*0.4} ${s*0.5},${s*0.5}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Shield — figure-8 or oblong shield
+    freeland: `<path d="M${s*0.5},${s*0.12} Q${s*0.82},${s*0.12} ${s*0.82},${s*0.4} Q${s*0.82},${s*0.7} ${s*0.5},${s*0.88} Q${s*0.18},${s*0.7} ${s*0.18},${s*0.4} Q${s*0.18},${s*0.12} ${s*0.5},${s*0.12} Z" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Amphora — two-handled vessel
+    ponte: `<path d="M${s*0.35},${s*0.2} L${s*0.32},${s*0.55} Q${s*0.32},${s*0.8} ${s*0.5},${s*0.82} Q${s*0.68},${s*0.8} ${s*0.68},${s*0.55} L${s*0.65},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><path d="M${s*0.32},${s*0.32} Q${s*0.18},${s*0.32} ${s*0.18},${s*0.48} Q${s*0.18},${s*0.55} ${s*0.32},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.68},${s*0.32} Q${s*0.82},${s*0.32} ${s*0.82},${s*0.48} Q${s*0.82},${s*0.55} ${s*0.68},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Wheel — spoked wheel (Linear B ROTA)
+    bharata: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.08}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${s*0.5+s*0.08*Math.cos(rad)}" y1="${s*0.5+s*0.08*Math.sin(rad)}" x2="${s*0.5+s*0.35*Math.cos(rad)}" y2="${s*0.5+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    // Gold ingot — rectangular bar with marks
+    formosa: `<rect x="${s*0.2}" y="${s*0.3}" width="${s*0.6}" height="${s*0.35}" rx="${s*0.03}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.35}" x2="${s*0.4}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.35}" x2="${s*0.6}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Spear — long shaft with point
+    yamato: `<line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.12} ${s*0.4},${s*0.3} ${s*0.6},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Horn — curved horn shape
+    hanguk: `<path d="M${s*0.25},${s*0.7} Q${s*0.25},${s*0.2} ${s*0.6},${s*0.15} Q${s*0.8},${s*0.15} ${s*0.8},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.25}" cy="${s*0.72}" rx="${s*0.1}" ry="${s*0.08}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    // Spice/plant — small plant/herb
+    phrygia: `<line x1="${s*0.5}" y1="${s*0.88}" x2="${s*0.5}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.55} Q${s*0.3},${s*0.45} ${s*0.25},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.45} Q${s*0.7},${s*0.35} ${s*0.75},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.4} Q${s*0.35},${s*0.3} ${s*0.28},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Oil jar — round-bottomed storage vessel
+    solaria: `<ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.28}" ry="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><path d="M${s*0.42},${s*0.27} L${s*0.42},${s*0.18} Q${s*0.42},${s*0.12} ${s*0.5},${s*0.12} Q${s*0.58},${s*0.12} ${s*0.58},${s*0.18} L${s*0.58},${s*0.27}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Jewel — cut gem shape
+    mirage: `<polygon points="${s*0.5},${s*0.15} ${s*0.78},${s*0.4} ${s*0.65},${s*0.82} ${s*0.35},${s*0.82} ${s*0.22},${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.4}" x2="${s*0.7}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Arrow — projectile
+    levantia: `<line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.15} ${s*0.38},${s*0.32} ${s*0.62},${s*0.32}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.38}" y2="${s*0.78}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.62}" y2="${s*0.78}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Unknown glyph — abstract scrawl
+    choson: `<path d="M${s*0.2},${s*0.3} L${s*0.5},${s*0.15} L${s*0.8},${s*0.3} L${s*0.6},${s*0.5} L${s*0.8},${s*0.7} L${s*0.5},${s*0.85} L${s*0.2},${s*0.7} L${s*0.4},${s*0.5} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Grain — wheat stalk
+    caribe: `<line x1="${s*0.5}" y1="${s*0.88}" x2="${s*0.5}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.35}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.65}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.33}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.67}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.6}" x2="${s*0.35}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.6}" x2="${s*0.65}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Fragment — broken pottery shard
+    sogdiana: `<path d="M${s*0.2},${s*0.3} L${s*0.55},${s*0.2} L${s*0.75},${s*0.35} L${s*0.8},${s*0.6} L${s*0.6},${s*0.8} L${s*0.3},${s*0.75} L${s*0.15},${s*0.55} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round" stroke-dasharray="${s*0.04} ${s*0.03}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+// ===================================================================
+// RENDER FUNCTIONS
+// ===================================================================
+
+function getCountry(id) { return countries.find(c=>c.id===id); }
+
+function renderGrid(containerId, svgFn) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = countries.map(c => {
+    const tintBg = c.color + '12';
+    return `<div class="emblem-cell" style="border-top:3px solid ${c.color};">
+      <div style="background:${tintBg};border-radius:6px;padding:8px;display:inline-block;">${svgFn(c.id, c.color, 48)}</div>
+      <div class="name"><span class="color-dot" style="background:${c.color};"></span>${c.name}</div>
+      <div class="bloc">${c.bloc}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSizeComparison() {
+  const el = document.getElementById('size-comparison');
+  const sizes = [16,24,48,96];
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  let html = '';
+  fns.forEach(style => {
+    html += `<span class="style-label ${style.cls}">${style.name}</span>`;
+    keyCountries.forEach(cid => {
+      const c = getCountry(cid);
+      html += `<div class="size-row"><div style="font-weight:600;min-width:90px;font-size:13px;"><span class="color-dot" style="background:${c.color};"></span>${c.name}</div>`;
+      sizes.forEach(sz => {
+        html += `<div class="size-item">${style.fn(c.id, c.color, sz)}<div class="label">${sz}px</div></div>`;
+      });
+      html += `</div>`;
+    });
+    html += `<div style="height:24px;"></div>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderRoleBriefs() {
+  const el = document.getElementById('role-briefs');
+  const c = getCountry('columbia');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div>
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample">
+        <div class="role-brief" style="background:#fff;">
+          <div class="color-stripe" style="background:${c.color};"></div>
+          <div class="classified">Classified — Columbia Eyes Only</div>
+          <div class="emblem-wrap" style="margin-top:32px;">${style.fn('columbia', c.color, 96)}</div>
+          <div class="role-name">DEALER</div>
+          <div class="role-title">President of Columbia</div>
+          <div style="margin-top:16px;font-size:11px;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;">Thucydides Trap — Role Brief</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBadgeRows() {
+  const el = document.getElementById('badge-rows');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div style="margin-bottom:16px;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample" style="padding:4px;">
+        <div class="badge-row">
+          ${badgeCountries.map(cid => {
+            const c = getCountry(cid);
+            return `<div class="country-badge" style="background:${c.color}18;">
+              ${style.fn(c.id, c.color, 24)}
+              <span style="color:var(--text);">${c.name}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStatusTables() {
+  const el = document.getElementById('status-tables');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div>
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample">
+        <table class="status-table">
+          <thead><tr><th></th><th>Country</th><th>GDP</th><th>Stability</th><th>State</th></tr></thead>
+          <tbody>
+            ${tableData.map(row => {
+              const c = getCountry(row.id);
+              return `<tr>
+                <td>${style.fn(c.id, c.color, 24)}</td>
+                <td style="font-weight:600;"><span class="color-dot" style="background:${c.color};"></span>${c.name}</td>
+                <td class="mono">${row.gdp}</td>
+                <td class="mono">${row.stability}</td>
+                <td>${row.state}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderNameBadges() {
+  const el = document.getElementById('name-badges');
+  const c = getCountry('columbia');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = `<div class="versions-row">${fns.map(style => `
+    <div style="text-align:center;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="name-badge">
+        <div class="top-band" style="background:${c.color};"></div>
+        <div class="badge-content">
+          ${style.fn('columbia', c.color, 48)}
+          <div class="char-name">DEALER</div>
+          <div class="char-title">President of Columbia</div>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+renderGrid('grid-geometric', geometricSVG);
+renderGrid('grid-phoenician', phoenicianSVG);
+renderGrid('grid-linearb', linearbSVG);
+renderSizeComparison();
+renderRoleBriefs();
+renderBadgeRows();
+renderStatusTables();
+renderNameBadges();
+
+// ===================================================================
+// SECTION 4: WAR MAP
+// ===================================================================
+
+const hexData = [
+  // row, col, country (null = water)
+  // Row 1
+  {r:1,c:9,country:'freeland'},{r:1,c:10,country:'nordostan'},{r:1,c:11,country:'nordostan'},{r:1,c:15,country:'nordostan'},
+  // Row 2
+  {r:2,c:2,country:'columbia'},{r:2,c:5,country:'teutonia'},{r:2,c:7,country:'albion'},{r:2,c:9,country:'freeland'},
+  {r:2,c:10,country:'heartland'},{r:2,c:11,country:'nordostan'},{r:2,c:12,country:'nordostan'},{r:2,c:13,country:'nordostan'},
+  {r:2,c:14,country:'nordostan'},{r:2,c:15,country:'nordostan'},{r:2,c:17,country:'choson'},
+  // Row 3
+  {r:3,c:1,country:'columbia'},{r:3,c:2,country:'columbia'},{r:3,c:6,country:'albion'},{r:3,c:8,country:'teutonia'},
+  {r:3,c:9,country:'teutonia'},{r:3,c:10,country:'heartland',occupied:true},{r:3,c:11,country:'nordostan'},
+  {r:3,c:12,country:'nordostan'},{r:3,c:13,country:'nordostan'},{r:3,c:15,country:'nordostan'},
+  {r:3,c:16,country:'hanguk'},{r:3,c:18,country:'yamato'},
+  // Row 4
+  {r:4,c:2,country:'columbia'},{r:4,c:3,country:'columbia'},{r:4,c:4,country:'columbia'},
+  {r:4,c:8,country:'gallia'},{r:4,c:9,country:'gallia'},{r:4,c:10,country:'phrygia'},
+  {r:4,c:13,country:'sogdiana'},{r:4,c:14,country:'cathay'},{r:4,c:15,country:'cathay'},{r:4,c:16,country:'cathay'},
+  {r:4,c:18,country:'yamato'},
+  // Row 5
+  {r:5,c:2,country:'columbia'},{r:5,c:3,country:'columbia'},{r:5,c:7,country:'ponte'},
+  {r:5,c:9,country:'levantia'},{r:5,c:10,country:'phrygia'},{r:5,c:11,country:'persia'},
+  {r:5,c:12,country:'sogdiana'},{r:5,c:13,country:'sogdiana'},{r:5,c:14,country:'cathay'},{r:5,c:15,country:'cathay'},
+  // Row 6
+  {r:6,c:3,country:'columbia'},{r:6,c:8,country:'ponte'},{r:6,c:10,country:'solaria'},
+  {r:6,c:12,country:'persia'},{r:6,c:13,country:'bharata'},{r:6,c:14,country:'bharata'},{r:6,c:15,country:'cathay'},
+  {r:6,c:17,country:'formosa'},
+  // Row 7
+  {r:7,c:9,country:'solaria'},{r:7,c:10,country:'mirage'},{r:7,c:12,country:'persia'},
+  {r:7,c:13,country:'bharata'},{r:7,c:14,country:'bharata'},
+  // Row 8
+  {r:8,c:4,country:'caribe'},{r:8,c:9,country:'sogdiana'},{r:8,c:14,country:'bharata'},
+];
+
+// Capital hexes (for emblem placement) — pick representative hex per country
+const capitals = {
+  columbia:{r:4,c:3}, cathay:{r:5,c:14}, nordostan:{r:2,c:13}, heartland:{r:2,c:10},
+  persia:{r:6,c:12}, gallia:{r:4,c:8}, teutonia:{r:3,c:8}, albion:{r:2,c:7},
+  freeland:{r:1,c:9}, ponte:{r:5,c:7}, bharata:{r:7,c:13}, formosa:{r:6,c:17},
+  yamato:{r:4,c:18}, hanguk:{r:3,c:16}, phrygia:{r:5,c:10}, solaria:{r:6,c:10},
+  mirage:{r:7,c:10}, levantia:{r:5,c:9}, choson:{r:2,c:17}, caribe:{r:8,c:4},
+  sogdiana:{r:4,c:13},
+};
+
+// Country label positions (for largest cluster labels)
+const countryLabels = {
+  columbia:{r:3.5,c:2.5}, cathay:{r:5,c:15.5}, nordostan:{r:1.5,c:12.5}, heartland:{r:2.5,c:10},
+  persia:{r:6.5,c:12}, gallia:{r:4.5,c:8.5}, teutonia:{r:3.5,c:8.5}, albion:{r:2.8,c:6.5},
+  freeland:{r:1.5,c:9}, ponte:{r:5.5,c:7.5}, bharata:{r:7.5,c:13.5}, formosa:{r:6.5,c:17.5},
+  yamato:{r:3.5,c:18.5}, hanguk:{r:3.5,c:16.5}, phrygia:{r:5.5,c:10}, solaria:{r:7.5,c:9},
+  mirage:{r:7.5,c:10.5}, levantia:{r:5.5,c:9}, choson:{r:2.5,c:17.5}, caribe:{r:8.5,c:4},
+  sogdiana:{r:5,c:12.5},
+};
+
+const chokepoints = [
+  {r:6,c:16,name:'Formosa Strait'},
+  {r:7,c:11,name:'Gulf Gate'},
+  {r:7,c:3,name:'Caribe Passage'},
+];
+
+// Naval fleets: color@water(col,row)
+const navalFleets = [
+  {country:'columbia',count:3,r:8,c:12},{country:'columbia',count:2,r:6,c:9},
+  {country:'columbia',count:2,r:4,c:17},{country:'columbia',count:1,r:4,c:5},
+  {country:'columbia',count:1,r:9,c:13},
+  {country:'cathay',count:2,r:7,c:16},{country:'cathay',count:2,r:4,c:17},
+  {country:'cathay',count:1,r:6,c:18},
+  {country:'albion',count:2,r:3,c:7},
+  {country:'gallia',count:1,r:6,c:9},
+  {country:'bharata',count:2,r:9,c:13},
+  {country:'yamato',count:2,r:4,c:19},
+];
+
+function hexCenter(r, c, hexSize) {
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  // Match original map editor convention: ODD rows shifted right (row % 2 === 1)
+  // Extra left margin (2.5 * hexSize) for row labels, extra top (2.5 * hexSize) for col labels
+  const x = c * w + (r % 2 === 1 ? w/2 : 0) + hexSize * 2.5;
+  const y = r * h * 0.75 + hexSize * 2.5;
+  return {x, y};
+}
+
+function hexPoints(cx, cy, size) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = Math.PI / 180 * (60 * i - 30);
+    pts.push(`${cx + size * Math.cos(angle)},${cy + size * Math.sin(angle)}`);
+  }
+  return pts.join(' ');
+}
+
+function renderWarMap(containerId, crisisMode) {
+  const hexSize = 28;
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const svgW = 21 * w + hexSize * 5;  // 20 cols (0-19) + margins for grid labels
+  const svgH = 11 * h * 0.75 + hexSize * 5;  // 10 rows (0-9) + margins for grid labels
+
+  // Build lookup
+  const hexLookup = {};
+  hexData.forEach(hd => { hexLookup[`${hd.r},${hd.c}`] = hd; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;">`;
+
+  // Defs for crisis mode
+  if (crisisMode) {
+    svg += `<defs>
+      <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#C0392B" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#E67E22" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-yellow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#F1C40F" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#808080" stroke-width="2" stroke-opacity="0.4"/>
+      </pattern>
+    </defs>`;
+  } else {
+    svg += `<defs>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#808080" stroke-width="2" stroke-opacity="0.4"/>
+      </pattern>
+    </defs>`;
+  }
+
+  // Grid labels — column numbers across the top (display 1-20, data is 0-19)
+  for (let c = 0; c <= 19; c++) {
+    const {x} = hexCenter(0, c, hexSize);
+    svg += `<text x="${x}" y="${hexSize * 0.8}" text-anchor="middle" font-size="8" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  // Grid labels — row numbers on the left side (display 1-10, data is 0-9)
+  for (let r = 0; r <= 9; r++) {
+    const {y} = hexCenter(r, 0, hexSize);
+    svg += `<text x="${hexSize * 0.7}" y="${y + 3}" text-anchor="middle" font-size="8" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Draw water hexes for full 10-row grid (rows 0-9, cols 0-19) matching canonical grid
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 19; c++) {
+      const {x, y} = hexCenter(r, c, hexSize);
+      const key = `${r},${c}`;
+      const hd = hexLookup[key];
+      if (!hd) {
+        // Water hex
+        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#D4E4F0" fill-opacity="0.4" stroke="#D8DCE5" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Draw land hexes
+  hexData.forEach(hd => {
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    let filter = '';
+    if (crisisMode) {
+      // Heartland front
+      if (hd.country === 'heartland' || hd.occupied) filter = ' filter="url(#glow-red)"';
+      // Formosa area
+      if (hd.r === 6 && hd.c >= 16 && hd.c <= 17) filter = ' filter="url(#glow-yellow)"';
+      if (hd.country === 'formosa') filter = ' filter="url(#glow-yellow)"';
+    }
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="${c.color}" fill-opacity="0.55" stroke="#D8DCE5" stroke-width="1"${filter}/>`;
+    // Striped overlay for occupied Heartland
+    if (hd.occupied) {
+      svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="url(#stripes)" stroke="#C0392B" stroke-width="1.5"/>`;
+    }
+  });
+
+  // Chokepoints
+  chokepoints.forEach(cp => {
+    const {x, y} = hexCenter(cp.r, cp.c, hexSize);
+    let filter = '';
+    if (crisisMode) {
+      if (cp.name === 'Gulf Gate') filter = ' filter="url(#glow-orange)"';
+      if (cp.name === 'Formosa Strait') filter = ' filter="url(#glow-yellow)"';
+      if (cp.name === 'Caribe Passage') filter = ' filter="url(#glow-orange)"';
+    }
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="none" stroke="#E74C3C" stroke-width="2.5" stroke-dasharray="4 2"${filter}/>`;
+    svg += `<circle cx="${x}" cy="${y}" r="4" fill="#E74C3C"/>`;
+    svg += `<text x="${x}" y="${y-hexSize-4}" text-anchor="middle" font-size="8" font-weight="600" fill="#C0392B" font-family="'DM Sans',sans-serif">${cp.name}</text>`;
+  });
+
+  // Watermark emblem on EVERY land hex (very faint, background texture)
+  hexData.forEach(hd => {
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    // Draw emblem at ~60% hex size, very low opacity — like a watermark
+    const embSize = hexSize * 0.9;
+    svg += `<g opacity="0.12" transform="translate(${x - embSize/2}, ${y - embSize/2})">${geometricSVG(hd.country, c.color, embSize)}</g>`;
+  });
+
+  // Country labels — compute centroid from all hexes belonging to each country
+  const countryHexes = {};
+  hexData.forEach(hd => {
+    if (!countryHexes[hd.country]) countryHexes[hd.country] = [];
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    countryHexes[hd.country].push({x, y});
+  });
+
+  Object.entries(countryHexes).forEach(([cid, hexes]) => {
+    if (hexes.length < 2) return; // skip single-hex countries for label (too crowded)
+    const c = getCountry(cid);
+    if (!c) return;
+    // Centroid
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    // Label at centroid, slightly above center
+    const fontSize = hexes.length >= 5 ? 10 : 8;
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" font-weight="600" fill="#1A2332" font-family="'Playfair Display',serif" opacity="0.7" letter-spacing="0.5" style="text-transform:uppercase;pointer-events:none;">${c.name}</text>`;
+  });
+
+  // Single-hex country labels — place just below the hex
+  hexData.forEach(hd => {
+    if (!countryHexes[hd.country] || countryHexes[hd.country].length !== 1) return;
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    svg += `<text x="${x}" y="${y + hexSize + 10}" text-anchor="middle" font-size="7" font-weight="500" fill="#1A2332" font-family="'DM Sans',sans-serif" opacity="0.6">${c.name}</text>`;
+  });
+
+  // Naval fleets
+  navalFleets.forEach(fleet => {
+    const {x, y} = hexCenter(fleet.r, fleet.c, hexSize);
+    const c = getCountry(fleet.country);
+    if (!c) return;
+    for (let i = 0; i < fleet.count; i++) {
+      const offsetX = (i - (fleet.count-1)/2) * 6;
+      svg += `<circle cx="${x+offsetX}" cy="${y}" r="3" fill="${c.color}" stroke="#fff" stroke-width="0.5" opacity="0.85"/>`;
+    }
+  });
+
+  svg += '</svg>';
+
+  document.getElementById(containerId).innerHTML = svg;
+}
+
+function renderMapLegend() {
+  const el = document.getElementById('map-legend');
+  let html = '<h3 style="margin-bottom:12px;">Legend</h3><div style="display:flex;flex-wrap:wrap;gap:24px;font-size:12px;">';
+
+  // Country colors
+  html += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">';
+  countries.forEach(c => {
+    html += `<span style="display:inline-flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${c.color};opacity:0.6;border:1px solid ${c.color};"></span><span style="font-size:10px;">${c.name}</span></span>`;
+  });
+  html += '</div>';
+
+  html += '</div><div style="display:flex;gap:24px;margin-top:12px;font-size:11px;color:var(--text-secondary);">';
+  html += '<span><span style="display:inline-block;width:12px;height:12px;background:#D4E4F0;border:1px solid #D8DCE5;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Water</span>';
+  html += '<span><svg width="14" height="14" style="vertical-align:middle;margin-right:4px;"><circle cx="7" cy="7" r="4" fill="#E74C3C"/></svg>Chokepoint</span>';
+  html += '<span><svg width="14" height="14" style="vertical-align:middle;margin-right:4px;"><circle cx="7" cy="7" r="3" fill="#4A90D9" stroke="#fff" stroke-width="0.5"/></svg>Naval fleet unit</span>';
+  html += '<span><svg width="14" height="14" style="vertical-align:middle;margin-right:4px;"><rect width="14" height="14" fill="#D4A843" opacity="0.5"/><line x1="0" y1="0" x2="14" y2="14" stroke="#808080" stroke-width="1.5" opacity="0.5"/></svg>Occupied territory</span>';
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+renderWarMap('map-strategic', false);
+renderMapLegend();
+
+// ===================== EASTERN EREB THEATER MAP =====================
+
+const theaterData = [
+  // Row 0: all Nordostan (rear)
+  {r:0,c:0,o:'nordostan'},{r:0,c:1,o:'nordostan'},{r:0,c:2,o:'nordostan'},{r:0,c:3,o:'nordostan'},{r:0,c:4,o:'nordostan'},
+  {r:0,c:5,o:'nordostan'},{r:0,c:6,o:'nordostan'},{r:0,c:7,o:'nordostan'},{r:0,c:8,o:'nordostan'},{r:0,c:9,o:'nordostan'},
+  // Row 1: all Nordostan (rear)
+  {r:1,c:0,o:'nordostan'},{r:1,c:1,o:'nordostan'},{r:1,c:2,o:'nordostan'},{r:1,c:3,o:'nordostan'},{r:1,c:4,o:'nordostan'},
+  {r:1,c:5,o:'nordostan'},{r:1,c:6,o:'nordostan'},{r:1,c:7,o:'nordostan'},{r:1,c:8,o:'nordostan'},{r:1,c:9,o:'nordostan'},
+  // Row 2: Heartland west + Nordostan east
+  {r:2,c:0,o:'heartland'},{r:2,c:1,o:'heartland'},{r:2,c:2,o:'heartland'},
+  {r:2,c:3,o:'nordostan'},{r:2,c:4,o:'nordostan'},{r:2,c:5,o:'nordostan'},{r:2,c:6,o:'nordostan'},{r:2,c:7,o:'nordostan'},{r:2,c:8,o:'nordostan'},{r:2,c:9,o:'nordostan'},
+  // Row 3: Heartland west, OCCUPIED center, Nordostan east
+  {r:3,c:0,o:'heartland'},{r:3,c:1,o:'heartland'},{r:3,c:2,o:'heartland'},{r:3,c:3,o:'heartland'},
+  {r:3,c:4,o:'heartland',occ:'nordostan'},{r:3,c:5,o:'heartland',occ:'nordostan'},
+  {r:3,c:6,o:'nordostan'},{r:3,c:7,o:'nordostan'},{r:3,c:8,o:'nordostan'},{r:3,c:9,o:'nordostan'},
+  // Row 4: Heartland west, OCCUPIED center, Nordostan east
+  {r:4,c:0,o:'heartland'},{r:4,c:1,o:'heartland'},{r:4,c:2,o:'heartland'},{r:4,c:3,o:'heartland'},{r:4,c:4,o:'heartland'},
+  {r:4,c:5,o:'heartland',occ:'nordostan'},{r:4,c:6,o:'heartland',occ:'nordostan'},
+  {r:4,c:7,o:'nordostan'},{r:4,c:8,o:'nordostan'},{r:4,c:9,o:'nordostan'},
+  // Row 5: Heartland dominant, occupied east side
+  {r:5,c:0,o:'heartland'},{r:5,c:1,o:'heartland'},{r:5,c:2,o:'heartland'},{r:5,c:3,o:'heartland'},{r:5,c:4,o:'heartland'},{r:5,c:5,o:'heartland'},
+  {r:5,c:6,o:'heartland',occ:'nordostan'},
+  {r:5,c:7,o:'nordostan'},{r:5,c:8,o:'nordostan'},{r:5,c:9,o:'nordostan'},
+  // Row 6: Heartland west, occupied east
+  {r:6,c:0,o:'heartland'},{r:6,c:1,o:'heartland'},{r:6,c:2,o:'heartland'},{r:6,c:3,o:'heartland'},{r:6,c:4,o:'heartland'},
+  {r:6,c:5,o:'heartland',occ:'nordostan'},{r:6,c:6,o:'heartland',occ:'nordostan'},{r:6,c:7,o:'heartland',occ:'nordostan'},
+  {r:6,c:8,o:'nordostan'},{r:6,c:9,o:'nordostan'},
+  // Row 7: Heartland west, gaps in center, occupied pockets
+  {r:7,c:0,o:'heartland'},{r:7,c:1,o:'heartland'},{r:7,c:2,o:'heartland'},
+  {r:7,c:4,o:'heartland',occ:'nordostan'},
+  {r:7,c:8,o:'nordostan'},{r:7,c:9,o:'nordostan'},
+  // Row 8: Heartland west, occupied pockets
+  {r:8,c:0,o:'heartland'},{r:8,c:1,o:'heartland'},{r:8,c:2,o:'heartland'},
+  {r:8,c:4,o:'heartland',occ:'nordostan'},{r:8,c:5,o:'heartland',occ:'nordostan'},
+  // Row 9: Heartland south (rear)
+  {r:9,c:0,o:'heartland'},{r:9,c:1,o:'heartland'},
+];
+
+// Die Hard marker
+const dieHard = {r:5, c:5};
+
+function renderTheaterMap(containerId) {
+  const hexSize = 32;
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const margin = hexSize * 3;
+  const svgW = 11 * w + margin * 2;
+  const svgH = 11 * h * 0.75 + margin * 2;
+
+  function tCenter(r, c) {
+    const x = c * w + (r % 2 === 1 ? w/2 : 0) + margin;
+    const y = r * h * 0.75 + margin;
+    return {x, y};
+  }
+
+  const nordColor = '#808080';
+  const heartColor = '#D4A843';
+  const occColor = '#B05050';
+  const lookup = {};
+  theaterData.forEach(d => { lookup[`${d.r},${d.c}`] = d; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;">`;
+
+  // Defs
+  svg += `<defs>
+    <pattern id="t-stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="${nordColor}" stroke-width="2" stroke-opacity="0.5"/>
+    </pattern>
+    <filter id="t-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#C0392B" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // Grid labels — columns
+  for (let c = 0; c <= 9; c++) {
+    const {x} = tCenter(0, c);
+    svg += `<text x="${x}" y="${margin - hexSize * 1.2}" text-anchor="middle" font-size="9" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  // Grid labels — rows
+  for (let r = 0; r <= 9; r++) {
+    const {y} = tCenter(r, 0);
+    svg += `<text x="${margin - hexSize * 1.5}" y="${y + 3}" text-anchor="middle" font-size="9" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Empty hexes (background grid)
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 9; c++) {
+      const key = `${r},${c}`;
+      if (!lookup[key]) {
+        const {x, y} = tCenter(r, c);
+        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#EBEDF2" fill-opacity="0.3" stroke="#D8DCE5" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Land hexes
+  theaterData.forEach(d => {
+    const {x, y} = tCenter(d.r, d.c);
+    const baseColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const isOccupied = !!d.occ;
+    const isFrontLine = isOccupied; // occupied hexes are the front
+
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="${baseColor}" fill-opacity="${isOccupied ? 0.35 : 0.55}" stroke="${isOccupied ? occColor : '#D8DCE5'}" stroke-width="${isOccupied ? 1.5 : 0.8}"${isFrontLine ? ' filter="url(#t-glow)"' : ''}/>`;
+
+    if (isOccupied) {
+      svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="url(#t-stripes)"/>`;
+    }
+
+    // Watermark emblem on each hex
+    const embSize = hexSize * 0.7;
+    const embColor = d.o === 'nordostan' ? nordColor : heartColor;
+    svg += `<g opacity="0.10" transform="translate(${x - embSize/2}, ${y - embSize/2})">${geometricSVG(d.o, embColor, embSize)}</g>`;
+  });
+
+  // Die Hard marker
+  const dh = tCenter(dieHard.r, dieHard.c);
+  svg += `<circle cx="${dh.x}" cy="${dh.y}" r="${hexSize * 0.35}" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="3 2"/>`;
+  svg += `<text x="${dh.x}" y="${dh.y + 3}" text-anchor="middle" font-size="7" font-weight="700" fill="#C0392B" font-family="'DM Sans',sans-serif">DIE HARD</text>`;
+
+  // Front line — draw a thick dashed line between occupied and free Heartland hexes
+  // Approximate front line path
+  svg += `<text x="${margin + 2 * w}" y="${margin - hexSize * 0.3}" text-anchor="middle" font-size="14" font-weight="700" fill="${heartColor}" font-family="'Playfair Display',serif" opacity="0.8">HEARTLAND</text>`;
+  svg += `<text x="${margin + 7.5 * w}" y="${margin - hexSize * 0.3}" text-anchor="middle" font-size="14" font-weight="700" fill="${nordColor}" font-family="'Playfair Display',serif" opacity="0.8">NORDOSTAN</text>`;
+
+  // Military deployment indicators
+  // Nordostan: 8 ground front (rows 3-6 east), 5 ground occupation (rows 2-4), 4 tac air, 1 AD
+  // Heartland: 7 ground front (rows 3-7 west), 3 reserve (rows 8-9), 2 tac air, 1 AD
+  const deployments = [
+    // Nordostan front line forces
+    {r:3,c:7,type:'ground',count:3,color:nordColor},
+    {r:4,c:8,type:'ground',count:3,color:nordColor},
+    {r:5,c:8,type:'ground',count:2,color:nordColor},
+    {r:3,c:8,type:'air',count:2,color:nordColor},
+    {r:4,c:9,type:'air',count:2,color:nordColor},
+    {r:4,c:7,type:'ad',count:1,color:nordColor},
+    // Nordostan occupation forces
+    {r:3,c:5,type:'ground',count:2,color:nordColor},
+    {r:5,c:6,type:'ground',count:2,color:nordColor},
+    {r:6,c:6,type:'ground',count:1,color:nordColor},
+    // Heartland front line
+    {r:3,c:2,type:'ground',count:2,color:heartColor},
+    {r:4,c:3,type:'ground',count:2,color:heartColor},
+    {r:5,c:4,type:'ground',count:2,color:heartColor},
+    {r:6,c:3,type:'ground',count:1,color:heartColor},
+    {r:4,c:2,type:'air',count:1,color:heartColor},
+    {r:5,c:3,type:'air',count:1,color:heartColor},
+    // Heartland reserve
+    {r:8,c:1,type:'ground',count:2,color:heartColor},
+    {r:9,c:0,type:'ground',count:1,color:heartColor},
+    {r:8,c:0,type:'air',count:1,color:heartColor},
+    {r:7,c:1,type:'ad',count:1,color:heartColor},
+  ];
+
+  deployments.forEach(dep => {
+    const {x, y} = tCenter(dep.r, dep.c);
+    const offsetY = dep.type === 'air' ? -8 : dep.type === 'ad' ? 8 : 0;
+    for (let i = 0; i < dep.count; i++) {
+      const ox = (i - (dep.count-1)/2) * 7;
+      if (dep.type === 'ground') {
+        // Square for ground
+        svg += `<rect x="${x+ox-3.5}" y="${y+offsetY-3.5}" width="7" height="7" fill="${dep.color}" stroke="#fff" stroke-width="0.7" rx="1" opacity="0.85"/>`;
+      } else if (dep.type === 'air') {
+        // Triangle for air
+        svg += `<polygon points="${x+ox},${y+offsetY-4} ${x+ox-4},${y+offsetY+3} ${x+ox+4},${y+offsetY+3}" fill="${dep.color}" stroke="#fff" stroke-width="0.7" opacity="0.85"/>`;
+      } else if (dep.type === 'ad') {
+        // Circle for AD
+        svg += `<circle cx="${x+ox}" cy="${y+offsetY}" r="4" fill="none" stroke="${dep.color}" stroke-width="1.5" opacity="0.85"/>`;
+      }
+    }
+  });
+
+  // Legend for theater
+  svg += `<text x="${margin}" y="${svgH - 20}" font-size="10" fill="#4A5568" font-family="'DM Sans',sans-serif">`;
+  svg += `<tspan>■ Ground unit</tspan><tspan dx="16">▲ Tactical air</tspan><tspan dx="16">○ Air defense</tspan>`;
+  svg += `<tspan dx="16" fill="#B05050">▨ Occupied territory</tspan>`;
+  svg += `<tspan dx="16" fill="#C0392B">◎ Die Hard position</tspan>`;
+  svg += `</text>`;
+
+  svg += '</svg>';
+  document.getElementById(containerId).innerHTML = svg;
+}
+
+renderTheaterMap('map-theater');
+</script>
+
+</body>
+</html>
