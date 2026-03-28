@@ -149,7 +149,7 @@ class WorldState:
                         "gdp": float(row["gdp"]),
                         "gdp_growth_rate": float(row["gdp_growth_base"]),
                         "sectors": {
-                            "resources": float(row["sector_resources"]),
+                            "resources": self._override_sector(cid, "resources", float(row["sector_resources"])),
                             "industry": float(row["sector_industry"]),
                             "services": float(row["sector_services"]),
                             "technology": float(row["sector_technology"]),
@@ -166,10 +166,18 @@ class WorldState:
                         "social_spending_baseline": float(row.get("social_baseline", 0.25)),
                         "oil_revenue": 0.0,
                         "inflation_revenue_erosion": 0.0,
+                        # --- v2 new state variables ---
+                        "economic_state": "normal",       # normal/stressed/crisis/collapse
+                        "momentum": 0.0,                  # -5.0 to +5.0 confidence
+                        "crisis_rounds": 0,               # rounds in crisis/collapse
+                        "recovery_rounds": 0,             # rounds recovering
+                        "starting_inflation": float(row["inflation"]),  # baseline for delta
+                        "sanctions_rounds": 0,            # consecutive rounds under L2+ sanctions
+                        "formosa_disruption_rounds": 0,   # consecutive rounds of semiconductor disruption
                     },
                     "military": {
                         "ground": int(row.get("mil_ground", 0)),
-                        "naval": int(row.get("mil_naval", 0)),
+                        "naval": self._override_naval(cid, int(row.get("mil_naval", 0))),
                         "tactical_air": int(row.get("mil_tactical_air", 0)),
                         "strategic_missiles": int(row.get("mil_strategic_missiles", 0)),
                         "air_defense": int(row.get("mil_air_defense", 0)),
@@ -203,8 +211,8 @@ class WorldState:
                     "technology": {
                         "nuclear_level": int(row.get("nuclear_level", 0)),
                         "nuclear_rd_progress": float(row.get("nuclear_rd_progress", 0)),
-                        "ai_level": int(row.get("ai_level", 0)),
-                        "ai_rd_progress": float(row.get("ai_rd_progress", 0)),
+                        "ai_level": self._override_ai_level(cid, int(row.get("ai_level", 0))),
+                        "ai_rd_progress": self._override_ai_progress(cid, float(row.get("ai_rd_progress", 0))),
                     },
                     "diplomatic": {
                         "wars": [],
@@ -213,6 +221,34 @@ class WorldState:
                         "active_treaties": [],
                     },
                 }
+
+    # --- v2 Data Overrides (fixes from SEED TESTS2) ---
+
+    @staticmethod
+    def _override_naval(cid: str, csv_val: int) -> int:
+        """Columbia naval 10->11, Cathay naval 6->7."""
+        overrides = {"columbia": 11, "cathay": 7}
+        return overrides.get(cid, csv_val)
+
+    @staticmethod
+    def _override_sector(cid: str, sector: str, csv_val: float) -> float:
+        """Columbia resource sector 5->8."""
+        if cid == "columbia" and sector == "resources":
+            return 8.0
+        return csv_val
+
+    @staticmethod
+    def _override_ai_level(cid: str, csv_val: int) -> int:
+        """Cathay AI: fix to L3 (was L2 with 0.70 progress past 0.60 threshold)."""
+        if cid == "cathay":
+            return 3
+        return csv_val
+
+    @staticmethod
+    def _override_ai_progress(cid: str, csv_val: float) -> float:
+        """Columbia AI progress 0.60->0.80. Cathay AI progress 0.70->0.10 (now L3)."""
+        overrides = {"columbia": 0.80, "cathay": 0.10}
+        return overrides.get(cid, csv_val)
 
     def _load_zones(self, path: str) -> None:
         with open(path, "r") as f:
