@@ -1428,6 +1428,30 @@ class WorldModelEngine:
         brain drain, war loss shock, nuclear R&D pushback, tech breakthrough,
         rally-around-the-flag, sanctions adaptation) are preserved inside
         the appropriate expert function so nothing is lost.
+
+        PRODUCTION VERSION (Detailed Design / Build phase):
+        Replace heuristic expert functions with actual LLM API calls:
+
+        Expert prompts receive:
+        - Current round Pass 1 results (all country states)
+        - FULL history of all previous rounds (trajectory data)
+        - Event log (what actions were taken, what happened)
+
+        Expert prompts return:
+        - Structured JSON with bounded adjustments
+        - One-sentence justification per adjustment
+        - Confidence level (high/medium/low)
+
+        Constraints:
+        - Only SOFT variables can be adjusted (growth rates, stability, support, momentum)
+        - HARD variables (coins, units, tech levels) are formula-only
+        - Each adjustment bounded at ±30% of current value
+        - Temperature ~0 for consistency
+        - Processing time target: <30 seconds (3 parallel calls)
+        - Moderator only sees flagged disagreements, not routine adjustments
+
+        The heuristic version below implements the SAME logic as rules.
+        The LLM version replaces rules with reasoning.
         """
         self.expert_panel_flags = []  # reset each round
 
@@ -1480,6 +1504,78 @@ class WorldModelEngine:
         }
 
     # -------------------------------------------------------------------
+    # TRAJECTORY ANALYSIS HELPER
+    # -------------------------------------------------------------------
+
+    def _analyze_trajectory(self, country_id, variable_path, history):
+        """Analyze the trend of a variable over recent rounds.
+
+        Returns: {
+            'values': [r1_val, r2_val, ...],  # last N rounds
+            'trend': 'rising' | 'falling' | 'stable' | 'volatile',
+            'avg_change': float,  # average per-round change
+            'rounds_declining': int,  # consecutive rounds of decline
+            'rounds_growing': int,
+        }
+        """
+        values = []
+        for round_data in history:
+            # Extract the variable from historical round data
+            country_data = round_data.get('countries', {}).get(country_id, {})
+            # Navigate the path (e.g., 'economic.gdp' or 'political.stability')
+            parts = variable_path.split('.')
+            val = country_data
+            for p in parts:
+                if isinstance(val, dict):
+                    val = val.get(p, None)
+                else:
+                    val = None
+                    break
+            if val is not None:
+                values.append(float(val))
+
+        if len(values) < 2:
+            return {'values': values, 'trend': 'insufficient_data', 'avg_change': 0, 'rounds_declining': 0, 'rounds_growing': 0}
+
+        changes = [values[i] - values[i-1] for i in range(1, len(values))]
+        avg_change = sum(changes) / len(changes)
+
+        declining = 0
+        for c in reversed(changes):
+            if c < -0.01:
+                declining += 1
+            else:
+                break
+
+        growing = 0
+        for c in reversed(changes):
+            if c > 0.01:
+                growing += 1
+            else:
+                break
+
+        if abs(avg_change) < 0.1:
+            trend = 'stable'
+        elif declining >= 3:
+            trend = 'falling'
+        elif growing >= 3:
+            trend = 'rising'
+        elif max(changes) - min(changes) > abs(avg_change) * 3:
+            trend = 'volatile'
+        elif avg_change > 0:
+            trend = 'rising'
+        else:
+            trend = 'falling'
+
+        return {
+            'values': values,
+            'trend': trend,
+            'avg_change': avg_change,
+            'rounds_declining': declining,
+            'rounds_growing': growing,
+        }
+
+    # -------------------------------------------------------------------
     # EXPERT 1: KEYNES (Economist)
     # -------------------------------------------------------------------
 
@@ -1512,6 +1608,27 @@ class WorldModelEngine:
             is_importer = not eco.get('oil_producer', False)
             regime = pol.get('regime_type', c.get('regime_type', 'democracy'))
             prev_state = self._previous_states.get(cid, {}).get('economic_state', 'normal')
+
+            # TRAJECTORY CHECK: GDP declining for 3+ rounds = recession dynamic
+            gdp_traj = self._analyze_trajectory(cid, 'economic.gdp', history)
+            if gdp_traj['rounds_declining'] >= 3 and growth > -1:
+                adjustments.append({
+                    'country': cid, 'variable': 'gdp_growth_rate',
+                    'adjustment': -1.5,
+                    'reason': f'KEYNES: {cid} GDP declining for {gdp_traj["rounds_declining"]} rounds — recession momentum should accelerate contraction.',
+                    'confidence': 'high'
+                })
+
+            # TRAJECTORY CHECK: Stability declining for 3+ rounds = crisis deepening
+            stab_traj = self._analyze_trajectory(cid, 'political.stability', history)
+            if stab_traj['rounds_declining'] >= 3 and stab_traj['trend'] == 'falling':
+                # Momentum of decline should accelerate
+                adjustments.append({
+                    'country': cid, 'variable': 'momentum',
+                    'adjustment': -0.5,
+                    'reason': f'KEYNES: {cid} stability declining {stab_traj["rounds_declining"]} rounds — investor confidence eroding.',
+                    'confidence': 'medium'
+                })
 
             # CHECK 1: GDP growing during major crisis -- implausible
             if state in ('crisis', 'collapse') and growth > 0:
@@ -1668,6 +1785,16 @@ class WorldModelEngine:
             was_at_war = self._previous_states.get(cid, {}).get('at_war', False)
             at_war_now = self.ws.get_country_at_war(cid)
 
+            # TRAJECTORY CHECK: Military units declining — attrition wearing down
+            mil_traj = self._analyze_trajectory(cid, 'military.total_units', history)
+            if mil_traj['rounds_declining'] >= 2 and self.ws.get_country_at_war(cid):
+                adjustments.append({
+                    'country': cid, 'variable': 'stability',
+                    'adjustment': -0.3,
+                    'reason': f'CLAUSEWITZ: {cid} military strength declining for {mil_traj["rounds_declining"]} rounds — institutional strain from attrition.',
+                    'confidence': 'medium'
+                })
+
             # CHECK 1: At war but stability too high
             if at_war_now:
                 war_tiredness = pol.get('war_tiredness', 0)
@@ -1808,6 +1935,16 @@ class WorldModelEngine:
                 elections_soon = True
             if cid == 'heartland' and round_num in (2, 3):  # before R3-4 wartime election
                 elections_soon = True
+
+            # TRAJECTORY CHECK: Support declining toward election — amplified anxiety
+            support_traj = self._analyze_trajectory(cid, 'political.political_support', history)
+            if support_traj['trend'] == 'falling' and elections_soon:
+                adjustments.append({
+                    'country': cid, 'variable': 'political_support',
+                    'adjustment': support_traj['avg_change'] * 0.5,  # accelerate the decline
+                    'reason': f'MACHIAVELLI: {cid} support trending down ({support_traj["avg_change"]:.1f}/round) into election — panic among allies.',
+                    'confidence': 'high'
+                })
 
             if elections_soon:
                 # Economic pain should hurt support MORE as elections approach
@@ -1973,16 +2110,65 @@ class WorldModelEngine:
     # APPLY BOUNDED ADJUSTMENT
     # -------------------------------------------------------------------
 
+    # Variables that experts CAN adjust (soft/analytical)
+    SOFT_VARIABLES = {
+        'gdp_growth_rate',     # growth rate, not GDP directly
+        'stability',
+        'political_support',
+        'momentum',
+        'market_index',
+        'inflation',           # inflation rate adjustment
+        'oil_price',           # within bounds
+        'military_production_efficiency',  # efficiency, not unit counts
+        'ai_rd_progress',      # R&D progress (not level)
+        'nuclear_rd_progress', # R&D progress (not level)
+    }
+
+    # Variables that experts CANNOT adjust (hard/transactional)
+    HARD_VARIABLES = {
+        'gdp',                 # direct GDP level (only growth rate)
+        'treasury',            # coins on balance
+        'mil_ground',          # unit counts
+        'mil_naval',
+        'mil_tactical_air',
+        'mil_strategic_missiles',
+        'mil_air_defense',
+        'nuclear_level',       # tech levels
+        'ai_level',
+        'personal_coins',      # personal wealth
+        'debt_burden',         # debt is formula-driven
+        'war_status',          # player decisions
+        'tariff_level',        # player decisions
+        'sanctions_level',     # player decisions
+    }
+
     def _apply_bounded_adjustment(self, adj):
         """Apply a single adjustment to the world state, bounded at +/-30% of current value.
 
-        Handles all known variable types: gdp, gdp_growth_rate, momentum,
+        Handles all known variable types: gdp_growth_rate, momentum,
         inflation, stability, political_support, military_production_efficiency,
         ai_rd_progress, nuclear_rd_progress.
+
+        Enforces soft-variable-only constraint: hard variables (coins, units,
+        tech levels) cannot be adjusted by the expert panel.
         """
         cid = adj['country']
         variable = adj['variable']
         amount = adj['adjustment']
+
+        # Enforce soft-variable-only constraint
+        if variable in self.HARD_VARIABLES:
+            adj['rejected'] = True
+            adj['reject_reason'] = f'Cannot adjust hard variable: {variable}'
+            self._log.append(f"    REJECTED: {cid}.{variable} — hard variable (not adjustable by experts)")
+            return
+
+        if variable not in self.SOFT_VARIABLES:
+            adj['rejected'] = True
+            adj['reject_reason'] = f'Unknown variable: {variable} — not in soft/hard list'
+            self._log.append(f"    REJECTED: {cid}.{variable} — unknown variable (not in soft/hard list)")
+            return
+
         c = self.ws.countries.get(cid)
         if not c:
             return
@@ -1993,7 +2179,6 @@ class WorldModelEngine:
 
         # Map variable to (dict_ref, key, floor, ceiling)
         VAR_MAP = {
-            'gdp':                          (eco, 'gdp', 0.5, None),
             'gdp_growth_rate':              (eco, 'gdp_growth_rate', -20.0, 20.0),
             'momentum':                     (eco, 'momentum', -5.0, 5.0),
             'inflation':                    (eco, 'inflation', 0.0, None),
