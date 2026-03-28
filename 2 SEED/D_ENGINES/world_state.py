@@ -97,6 +97,9 @@ class WorldState:
         self.active_blockades: Dict[str, dict] = {}  # Chokepoint blockades (keyed by chokepoint name)
         self.rare_earth_restrictions: Dict[str, int] = {}  # country_id -> restriction level (1-3)
         self.formosa_blockade: bool = False  # Whether Formosa is under naval blockade
+        self.dollar_credibility: float = 100.0  # 0-100, eroded by Columbia money printing
+        self.formosa_resolved: bool = False  # Whether Formosa question has been resolved
+        self.oil_above_150_rounds: int = 0  # Consecutive rounds oil price > $150
 
     # --- CSV Loading ---
 
@@ -177,6 +180,7 @@ class WorldState:
                         "starting_inflation": float(row["inflation"]),  # baseline for delta
                         "sanctions_rounds": 0,            # consecutive rounds under L2+ sanctions
                         "formosa_disruption_rounds": 0,   # consecutive rounds of semiconductor disruption
+                        "market_index": 50,               # financial market confidence (0-100)
                     },
                     "military": {
                         "ground": int(row.get("mil_ground", 0)),
@@ -539,6 +543,9 @@ class WorldState:
             "active_blockades": copy.deepcopy(self.active_blockades),
             "rare_earth_restrictions": dict(self.rare_earth_restrictions),
             "formosa_blockade": self.formosa_blockade,
+            "dollar_credibility": self.dollar_credibility,
+            "formosa_resolved": self.formosa_resolved,
+            "oil_above_150_rounds": self.oil_above_150_rounds,
         }
 
     def save_to_json(self, path: str) -> None:
@@ -570,6 +577,9 @@ class WorldState:
         ws.active_blockades = d.get("active_blockades", {})
         ws.rare_earth_restrictions = d.get("rare_earth_restrictions", {})
         ws.formosa_blockade = d.get("formosa_blockade", False)
+        ws.dollar_credibility = d.get("dollar_credibility", 100.0)
+        ws.formosa_resolved = d.get("formosa_resolved", False)
+        ws.oil_above_150_rounds = d.get("oil_above_150_rounds", 0)
         return ws
 
     def to_json(self, indent: int = 2) -> str:

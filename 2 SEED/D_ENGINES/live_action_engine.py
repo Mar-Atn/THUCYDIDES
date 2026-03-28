@@ -55,7 +55,7 @@ MAX_COVERT_OPS_PER_ROUND = {
 
 # Amphibious assault ratios
 AMPHIBIOUS_RATIO_DEFAULT = 3  # 3:1 needed
-AMPHIBIOUS_RATIO_FORMOSA = 4  # 4:1 for Formosa
+AMPHIBIOUS_RATIO_FORMOSA = 3  # 3:1 for Formosa (reduced from 4:1 — still very hard)
 
 # Naval bombardment hit probability per unit
 NAVAL_BOMBARDMENT_HIT_PROB = 0.10

@@ -235,11 +235,21 @@ class WorldModelEngine:
             results["inflation"][cid] = new_inflation
             c["economic"]["inflation"] = new_inflation
 
+            # --- FIX 7: Track money printed for dollar credibility ---
+            c["economic"]["money_printed_this_round"] = bud_result.get("money_printed", 0)
+
             # --- STEP 8: Debt service update ---
             deficit = bud_result.get("deficit", 0)
             new_debt = self._calc_debt_service(cid, max(deficit, 0))
             results["debt"][cid] = new_debt
             c["economic"]["debt_burden"] = new_debt
+
+        # --- FIX 7: Update dollar credibility (global) ---
+        self._update_dollar_credibility()
+
+        # --- FIX 4: Auto-produce military for war countries ---
+        for cid in self.ws.countries:
+            self._auto_produce_military(cid)
 
         # --- STEP 9: Update economic state (crisis ladder) ---
         for cid in self.ws.countries:
@@ -276,6 +286,19 @@ class WorldModelEngine:
             new_sup = self._calc_political_support(cid, ev, round_num)
             results["support"][cid] = new_sup
             c["political"]["political_support"] = new_sup
+
+        # --- FIX 3: Update market index per country ---
+        for cid in self.ws.countries:
+            self._update_market_index(cid)
+
+        # --- FIX 12: Helmsman Legacy Clock ---
+        self._update_helmsman_legacy(round_num)
+
+        # --- FIX 6: Check capitulation ---
+        for cid in self.ws.countries:
+            if self._check_capitulation(cid):
+                results.setdefault("capitulation_flags", []).append(cid)
+                self._log.append(f"  CAPITULATION FLAG: {cid} may seek negotiated settlement")
 
         # --- Elections ---
         scheduled = SCHEDULED_EVENTS.get(round_num, [])
@@ -347,16 +370,22 @@ class WorldModelEngine:
             else:
                 disruption += 0.05
 
-        # --- DEMAND SIDE (GDP-linked) ---
+        # --- DEMAND SIDE (FIX 2: much stronger response to global economic state) ---
         demand = 1.0
         for cid, c in self.ws.countries.items():
-            eco_state = c["economic"].get("economic_state", "normal")
-            gdp = c["economic"]["gdp"]
-            if gdp >= MAJOR_ECONOMY_THRESHOLD:
-                if eco_state == "crisis":
-                    demand -= 0.05
-                elif eco_state == "collapse":
-                    demand -= 0.10
+            econ = c.get('economic', {})
+            state = econ.get('economic_state', 'normal')
+            gdp = econ.get('gdp', 0)
+            if state == 'stressed' and gdp > 20:
+                demand -= 0.03
+            if state == 'crisis' and gdp > 20:
+                demand -= 0.06
+            if state == 'collapse' and gdp > 20:
+                demand -= 0.10
+            # Also: GDP contraction directly reduces demand
+            growth = econ.get('gdp_growth_rate', 0)
+            if growth < -2 and gdp > 30:
+                demand -= 0.02  # major economy contracting reduces demand
 
         # Global GDP growth demand elasticity
         n_countries = len(self.ws.countries)
@@ -390,6 +419,19 @@ class WorldModelEngine:
         previous_price = getattr(self.ws, '_previous_oil_price', self.ws.oil_price)
         price = previous_price * 0.4 + formula_price * 0.6
         price = max(30.0, price)
+
+        # --- FIX 8: OIL VOLATILITY (oscillation + mean-reversion) ---
+        noise = random.gauss(0, 0.05)  # +/-5% random volatility
+        price *= (1 + noise)
+        # If price has been above $150 for 3+ rounds, add downward pressure
+        if price > 150:
+            self.ws.oil_above_150_rounds = getattr(self.ws, 'oil_above_150_rounds', 0) + 1
+        else:
+            self.ws.oil_above_150_rounds = 0
+        if self.ws.oil_above_150_rounds >= 3:
+            price *= 0.92  # demand destruction accelerates
+        price = max(30.0, price)
+
         self.ws._previous_oil_price = price  # store for next round
 
         # --- OIL REVENUE TO PRODUCERS ---
@@ -397,6 +439,10 @@ class WorldModelEngine:
             if country["economic"].get("oil_producer"):
                 resource_pct = country["economic"]["sectors"].get("resources", 0) / 100.0
                 oil_revenue = price * resource_pct * country["economic"]["gdp"] * 0.01
+                # FIX 11: Columbia oil revenue cap at 15% of GDP
+                if cid == 'columbia':
+                    gdp = country["economic"]["gdp"]
+                    oil_revenue = min(oil_revenue, gdp * 0.15)
                 country["economic"]["oil_revenue"] = round(max(oil_revenue, 0.0), 2)
             else:
                 country["economic"]["oil_revenue"] = 0.0
@@ -409,6 +455,32 @@ class WorldModelEngine:
             f"formosa={'BLOCKED' if formosa_blocked else 'open'})"
         )
         return price
+
+    # ===================================================================
+    # FIX 1: BILATERAL GDP DEPENDENCY
+    # ===================================================================
+
+    def _calc_bilateral_dependency(self, country_id):
+        """Major trading partners affect each other's GDP."""
+        BILATERAL_PAIRS = {
+            ('columbia', 'cathay'): 0.15,   # 15% mutual exposure
+            ('cathay', 'columbia'): 0.12,   # asymmetric -- Cathay more exposed to Columbia
+            ('teutonia', 'cathay'): 0.10,   # Germany-China trade
+            ('cathay', 'teutonia'): 0.08,
+            ('yamato', 'cathay'): 0.08,
+            ('hanguk', 'cathay'): 0.10,
+        }
+
+        total_drag = 0
+        for (a, b), weight in BILATERAL_PAIRS.items():
+            if a == country_id:
+                partner = self.ws.countries.get(b, {})
+                partner_growth = partner.get('economic', {}).get('gdp_growth_rate', 0)
+                if partner_growth < 0:
+                    # Partner contracting -> drags our GDP
+                    total_drag += partner_growth * weight  # negative * positive = negative
+
+        return total_drag  # additive to growth rate
 
     # ===================================================================
     # STEP 2: GDP GROWTH (with feedback loops and crisis states)
@@ -481,11 +553,26 @@ class WorldModelEngine:
         blockade_frac = self._get_blockade_fraction(country_id)
         blockade_hit = -blockade_frac * 0.4
 
+        # --- FIX 1: BILATERAL DEPENDENCY ---
+        bilateral_drag = self._calc_bilateral_dependency(country_id) / 100.0  # convert to decimal
+
         # --- COMPUTE GROWTH ---
         raw_growth = (base_growth + tariff_hit + sanctions_hit + oil_shock
                       + semi_hit + war_hit + tech_boost + momentum_effect
-                      + blockade_hit)
-        effective_growth = raw_growth * crisis_mult
+                      + blockade_hit + bilateral_drag)
+
+        # --- FIX 9: CRISIS MULTIPLIER DIRECTION ---
+        # For negative growth, AMPLIFY the contraction (not dampen it)
+        if raw_growth < 0:
+            crisis_amp = {
+                'normal': 1.0,
+                'stressed': 1.2,   # 20% worse in stressed
+                'crisis': 1.5,     # 50% worse in crisis
+                'collapse': 2.0,   # twice as bad in collapse
+            }
+            effective_growth = raw_growth * crisis_amp.get(eco_state, 1.0)
+        else:
+            effective_growth = raw_growth * crisis_mult  # growth dampened as before
 
         new_gdp = old_gdp * (1.0 + effective_growth)
         new_gdp = max(0.5, new_gdp)  # floor at 0.5 coins
@@ -499,6 +586,7 @@ class WorldModelEngine:
             f"oil={oil_shock*100:+.1f} semi={semi_hit*100:+.1f} "
             f"war={war_hit*100:+.1f} tech={tech_boost*100:+.1f} "
             f"momentum={momentum_effect*100:+.1f} blockade={blockade_hit*100:+.1f} "
+            f"bilateral={bilateral_drag*100:+.1f} "
             f"crisis_mult={crisis_mult:.2f} state={eco_state})"
         )
 
@@ -513,6 +601,7 @@ class WorldModelEngine:
             "tech_boost": round(tech_boost * 100, 2),
             "momentum_effect": round(momentum_effect * 100, 2),
             "blockade_hit": round(blockade_hit * 100, 2),
+            "bilateral_drag": round(bilateral_drag * 100, 2),
             "crisis_multiplier": crisis_mult,
             "economic_state": eco_state,
         }
@@ -574,18 +663,23 @@ class WorldModelEngine:
         eco = c["economic"]
 
         # Mandatory costs (deducted before discretionary allocation)
+        # FIX 10: Social Spending 70/30 Split -- 70% mandatory, 30% discretionary
         maint_rate = mil.get("maintenance_cost_per_unit", 0.3)
         total_units = sum(mil.get(ut, 0) for ut in UNIT_TYPES)
         maintenance = total_units * maint_rate
-        social_baseline_cost = eco.get("social_spending_baseline", 0.25) * eco["gdp"]
-        mandatory = maintenance + social_baseline_cost  # social IS mandatory
+        social_baseline = eco.get("social_spending_baseline", 0.25)
+        mandatory_social = social_baseline * eco["gdp"] * 0.70  # 70% mandatory
+        discretionary_social_pool = social_baseline * eco["gdp"] * 0.30  # 30% player can cut
+        social_baseline_cost = mandatory_social  # only mandatory portion is forced
+        mandatory = maintenance + social_baseline_cost
 
         discretionary = max(revenue - mandatory, 0.0)
         money_printed = 0.0
         deficit = 0.0
 
         # Allocate from budget (or defaults) -- discretionary spending ON TOP of mandatory
-        social_extra = min(budget.get("social_spending", discretionary * 0.3), discretionary)
+        # FIX 10: social_extra draws from the 30% discretionary social pool
+        social_extra = min(budget.get("social_spending", discretionary_social_pool), discretionary)
         remaining = max(discretionary - social_extra, 0)
         mil_budget = min(budget.get("military_total", remaining * 0.5), remaining)
         remaining = max(remaining - mil_budget, 0)
@@ -1637,6 +1731,152 @@ class WorldModelEngine:
         return "\n".join(lines)
 
     # ===================================================================
+    # FIX 3: FINANCIAL MARKET INDEX
+    # ===================================================================
+
+    def _get_trade_partners(self, country_id):
+        """Return list of (partner_id, weight) for trade partners."""
+        TRADE_PARTNER_WEIGHTS = {
+            'columbia': [('cathay', 0.6), ('teutonia', 0.3), ('yamato', 0.3), ('hanguk', 0.2), ('albion', 0.2)],
+            'cathay': [('columbia', 0.6), ('teutonia', 0.4), ('yamato', 0.3), ('hanguk', 0.4), ('bharata', 0.2)],
+            'teutonia': [('cathay', 0.4), ('columbia', 0.3), ('gallia', 0.3), ('albion', 0.2), ('freeland', 0.2)],
+            'yamato': [('columbia', 0.3), ('cathay', 0.4), ('hanguk', 0.3)],
+            'hanguk': [('cathay', 0.5), ('columbia', 0.3), ('yamato', 0.3)],
+            'bharata': [('columbia', 0.2), ('cathay', 0.3)],
+        }
+        return TRADE_PARTNER_WEIGHTS.get(country_id, [])
+
+    def _update_market_index(self, country_id):
+        """Financial market confidence. Affects investment, political support, GDP."""
+        c = self.ws.countries[country_id]
+        idx = c['economic'].get('market_index', 50)
+
+        # Positive drivers
+        if c['economic']['gdp_growth_rate'] > 2:
+            idx += 3
+        if c['economic']['economic_state'] == 'normal':
+            idx += 1
+        if c['political']['stability'] > 6:
+            idx += 1
+
+        # Negative drivers
+        if c['economic']['economic_state'] == 'crisis':
+            idx -= 8
+        if c['economic']['economic_state'] == 'collapse':
+            idx -= 15
+        if c['economic']['inflation'] > c['economic'].get('starting_inflation', 0) + 20:
+            idx -= 5
+        if self.ws.oil_price > 180:
+            idx -= 3
+
+        # Contagion from partner market crashes
+        for partner_id, weight in self._get_trade_partners(country_id):
+            partner = self.ws.countries.get(partner_id)
+            if partner:
+                partner_idx = partner['economic'].get('market_index', 50)
+                if partner_idx < 30:
+                    idx -= 3 * weight  # partner market crash drags ours
+
+        c['economic']['market_index'] = max(0, min(100, idx))
+
+        # CONSEQUENCES
+        if idx < 20:
+            c['economic']['gdp_growth_rate'] -= 3.0
+            c['political']['political_support'] -= 5.0
+            self._log.append(f"  MARKET CRASH {country_id}: index={idx:.0f}, GDP-3%, support-5")
+        elif idx < 30:
+            # Market crash -> capital flight, investment freeze
+            c['economic']['gdp_growth_rate'] -= 1.0  # additional GDP hit
+            c['political']['political_support'] -= 2.0  # voters angry
+            self._log.append(f"  MARKET STRESS {country_id}: index={idx:.0f}, GDP-1%, support-2")
+
+    # ===================================================================
+    # FIX 4: AUTO-PRODUCTION FOR WAR COUNTRIES
+    # ===================================================================
+
+    def _auto_produce_military(self, country_id):
+        """Auto-production: war countries produce ground, naval powers maintain fleet."""
+        c = self.ws.countries[country_id]
+        eco = c['economic']
+
+        # Ground: countries at war auto-produce 1 unit per round (if they have capacity)
+        if self.ws.get_country_at_war(country_id):
+            cap = int(c.get('military', {}).get('production_capacity', {}).get('ground', 0))
+            cost = float(c.get('military', {}).get('production_costs', {}).get('ground', 0))
+            if cap > 0 and eco.get('treasury', 0) >= cost:
+                c['military']['ground'] = int(c['military']['ground']) + 1
+                eco['treasury'] -= cost
+                self._log.append(
+                    f"  Auto-production {country_id}: +1 ground (war), "
+                    f"cost={cost:.1f}, treasury={eco['treasury']:.1f}")
+
+        # Naval: countries with naval >= 5 auto-produce 1 per 2 rounds
+        naval = int(c.get('military', {}).get('naval', 0))
+        if naval >= 5 and self.ws.round_num % 2 == 0:
+            cost = float(c.get('military', {}).get('production_costs', {}).get('naval', 0))
+            if eco.get('treasury', 0) >= cost * 0.5:  # half cost for maintenance replacement
+                c['military']['naval'] = naval + 1
+                eco['treasury'] -= cost * 0.5
+                self._log.append(
+                    f"  Auto-production {country_id}: +1 naval (maintenance), "
+                    f"cost={cost * 0.5:.1f}, treasury={eco['treasury']:.1f}")
+
+    # ===================================================================
+    # FIX 6: CAPITULATION MECHANIC
+    # ===================================================================
+
+    def _check_capitulation(self, country_id):
+        """Country under sustained blockade + economic crisis may capitulate."""
+        c = self.ws.countries[country_id]
+        if (c['economic']['economic_state'] == 'crisis' and
+                c['economic'].get('crisis_rounds', 0) >= 3):
+            return True  # flag for AI agent to consider
+        return False
+
+    # ===================================================================
+    # FIX 7: DOLLAR CREDIBILITY
+    # ===================================================================
+
+    def _update_dollar_credibility(self):
+        """Columbia money printing -> dollar weakens -> sanctions less effective."""
+        col = self.ws.countries.get('columbia', {})
+        printed = col.get('economic', {}).get('money_printed_this_round', 0)
+
+        credibility = getattr(self.ws, 'dollar_credibility', 100)
+
+        if printed > 0:
+            credibility -= printed * 2  # each coin printed erodes credibility
+        else:
+            # Natural recovery (slow)
+            credibility = min(100, credibility + 1)
+
+        self.ws.dollar_credibility = max(20, credibility)
+
+        if credibility < 90:
+            self._log.append(
+                f"  Dollar credibility: {credibility:.0f}/100 "
+                f"(printed={printed:.1f})")
+
+    # ===================================================================
+    # FIX 12: HELMSMAN LEGACY CLOCK
+    # ===================================================================
+
+    def _update_helmsman_legacy(self, round_num):
+        """Helmsman legacy pressure: if Formosa unresolved after R4, support erodes."""
+        if round_num < 4:
+            return
+        formosa_resolved = getattr(self.ws, 'formosa_resolved', False)
+        if formosa_resolved:
+            return
+        cathay = self.ws.countries.get('cathay')
+        if not cathay:
+            return
+        cathay['political']['political_support'] -= 2.0  # -2%/round after R4
+        self._log.append(
+            f"  HELMSMAN LEGACY: Formosa unresolved at R{round_num}, "
+            f"Cathay support -{2.0} (now {cathay['political']['political_support']:.1f})")
+
+    # ===================================================================
     # SANCTIONS & TARIFFS IMPACT
     # ===================================================================
 
@@ -1663,6 +1903,9 @@ class WorldModelEngine:
 
         effectiveness = 1.0 if coalition_coverage >= 0.6 else 0.3
         total_damage = sum(raw_impacts) * effectiveness
+        # FIX 7: Dollar credibility scales sanctions effectiveness
+        dollar_cred = getattr(self.ws, 'dollar_credibility', 100)
+        total_damage *= dollar_cred / 100.0
         total_damage = min(total_damage, 0.50)
 
         return total_damage, costs
