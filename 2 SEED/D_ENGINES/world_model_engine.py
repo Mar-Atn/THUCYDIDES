@@ -523,7 +523,11 @@ class WorldModelEngine:
         net_tariff_cost = tariff_info.get("net_gdp_cost", 0)
         tariff_hit = -(net_tariff_cost / max(old_gdp, 0.01)) * 1.5
 
-        # --- SANCTIONS HIT (Cal-2 v3: reduced from 2.0 to 1.5) ---
+        # --- SANCTIONS HIT ---
+        # sanctions_damage is from S-curve (0.0-0.50 range, see _calc_sanctions_impact)
+        # The 1.5× amplifies this to GDP growth impact:
+        #   e.g., S-curve gives 0.10 damage × 1.5 = -15% GDP growth hit
+        # H3 clarification: applied ONCE to the total S-curve output, not compounded.
         sanctions_hit = -sanctions_damage * 1.5
 
         # Sanctions diminishing returns after 4 rounds (Cal-2 v3: 40% reduction, was 30%)
@@ -555,7 +559,7 @@ class WorldModelEngine:
             # Severity ramps: 0.3, 0.5, 0.7, 0.9, 1.0
             severity = min(1.0, 0.3 + 0.2 * max(0, rounds_disrupted - 1))  # R1=0.3, R2=0.5, R3=0.7, R4=0.9, R5+=1.0
             tech_sector_pct = eco["sectors"].get("technology", 0) / 100.0
-            semi_hit = -dep * severity * tech_sector_pct
+            semi_hit = max(-0.10, -dep * severity * tech_sector_pct)  # Cap at -10% GDP per round (H7 fix)
 
         # --- WAR DAMAGE ---
         war_zones = self._count_war_zones(country_id)
@@ -1349,13 +1353,30 @@ class WorldModelEngine:
         elif eco_state == "collapse":
             crisis_penalty = -25.0
 
-        # Oil penalty for importers (NEW)
+        # Oil penalty for importers
         oil_penalty = 0.0
         if oil_price > 150 and not eco.get("oil_producer"):
             oil_penalty = -(oil_price - 150) * 0.1
 
+        # Political crisis modifiers (H5 fix — arrest/impeachment affect elections)
+        political_crisis_penalty = 0.0
+        # Check if incumbent arrested anyone this game
+        arrests_by_incumbent = sum(
+            1 for e in self.ws.events_log
+            if e.get("type") == "arrest" and e.get("country") == country_id
+        )
+        political_crisis_penalty -= arrests_by_incumbent * 5.0  # -5 per arrest
+
+        # Check if impeachment was initiated against incumbent
+        impeachment_events = sum(
+            1 for e in self.ws.events_log
+            if e.get("type") == "impeachment" and e.get("country") == country_id
+        )
+        political_crisis_penalty -= impeachment_events * 10.0  # -10 per impeachment
+
         ai_score = clamp(
-            50.0 + econ_perf + stab_factor + war_penalty + crisis_penalty + oil_penalty,
+            50.0 + econ_perf + stab_factor + war_penalty + crisis_penalty +
+            oil_penalty + political_crisis_penalty,
             0.0, 100.0)
 
         player_incumbent_pct = votes.get("incumbent_pct", 50.0)
@@ -2736,9 +2757,11 @@ class WorldModelEngine:
             sanctioner_gdp = self.ws.countries.get(sanctioner_id, {}).get(
                 "economic", {}).get("gdp", 0)
             coverage += (sanctioner_gdp / total_gdp) * (level / 3.0)
-            # Cost to sanctioner: proportional to bilateral trade weight
+            # Cost to sanctioner: proportional to bilateral trade weight × GDP
+            # Sanctions hurt the imposer too — lost trade, higher prices, supply chain disruption
             bw = tw.get(sanctioner_id, {}).get(target_id, 0.0)
-            costs[sanctioner_id] = level * bw * 0.012
+            sanctioner_gdp_val = self.ws.countries.get(sanctioner_id, {}).get("economic", {}).get("gdp", 0)
+            costs[sanctioner_id] = (level / 3.0) * bw * sanctioner_gdp_val * 0.10  # H4 fix: 10× higher imposer cost
 
         # S-curve effectiveness
         effectiveness = self._interpolate_s_curve(coverage, self._SANCTIONS_S_CURVE)

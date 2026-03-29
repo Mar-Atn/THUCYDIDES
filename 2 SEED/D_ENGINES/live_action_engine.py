@@ -1617,8 +1617,12 @@ class LiveActionEngine:
         def_air_in_zone = zone_forces.get(defender, {}).get("tactical_air", 0)
         air_support = 1 if def_air_in_zone > 0 else 0
 
+        # Die Hard and air support do NOT stack — max positional bonus = +1
+        # Both represent the same concept: fortified defensive position
+        positional_bonus = max(die_hard, air_support)  # 0 or 1, not 0/1/2
+
         att_total = att_ai_bonus + att_morale + amphibious_penalty
-        def_total = def_ai_bonus + def_morale + die_hard + air_support
+        def_total = def_ai_bonus + def_morale + positional_bonus
 
         return {
             "attacker_ai_l4": att_ai_bonus,
@@ -1627,7 +1631,8 @@ class LiveActionEngine:
             "defender_ai_l4": def_ai_bonus,
             "defender_morale": def_morale,
             "die_hard": die_hard,
-            "defender_air_support": air_support,
+            "air_support_raw": air_support,
+            "positional_bonus": positional_bonus,  # max(die_hard, air_support) — don't stack
             "attacker_total": att_total,
             "defender_total": def_total,
         }
