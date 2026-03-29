@@ -1,129 +1,110 @@
 # Detailed Design Checklist
 ## Thucydides Trap SIM — Stage 3
-**Version:** 1.0 | **Date:** 2026-03-30 | **Status:** PLANNING
-**Prerequisite:** SEED gate passed (pending test results)
+**Version:** 2.0 | **Date:** 2026-03-30 | **Status:** PLANNING
+**Prerequisite:** SEED gate PASSED
 
 ---
 
 ## What Detailed Design Produces
 
-The bridge from "what to build" (SEED) to "how to build" (code). Every deliverable here is DIRECTLY implementable — a developer reads it and writes code without asking questions.
+Everything needed so that BUILD can start with zero ambiguity. No code is written in this stage — only specifications, schemas, contracts, configurations, and content. The gate question: "Can a developer sit down and start coding without asking questions?"
 
 ---
 
-## D1 — DATABASE SCHEMA
+## A — FINAL SIM CALIBRATION
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D1.1 | **Complete PostgreSQL schema** — every table, column, type, constraint, index | `DET_D1_DATABASE_SCHEMA.sql` | Derived from F1 (data schema) + F2 (architecture) |
-| D1.2 | **RLS policies** — row-level security for every table, enforcing information asymmetry | Within schema file | Derived from F3 (data flows) visibility matrix |
-| D1.3 | **Seed data migration** — SQL to load all CSV starting data into the database | `DET_D1_SEED_DATA.sql` | Generated from C4 CSVs |
-| D1.4 | **Database functions** — stored procedures for atomic operations (e.g., transaction execution, AI context versioning) | Within schema file | Derived from engine interfaces |
+| # | Item | Deliverable |
+|---|------|------------|
+| A1 | **Role calibration** — verify all 40 roles have balanced starting positions, realistic card pools, correct powers | Updated roles.csv + role seeds |
+| A2 | **Data calibration** — final pass on all CSV numbers based on gate test results | Updated countries.csv + all CSVs |
+| A3 | **Artefact content** — write actual classified reports, cables, letters for each role pack | Role pack content files (per H3 templates) |
+| A4 | **Balance verification** — run calibration battery (focused tests on specific mechanics flagged during gate) | Test results in `10. TESTS/` |
 
-## D2 — SYSTEM CONTRACTS (the shared language)
+## B — DATABASE & INFRASTRUCTURE DESIGN
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D2.1 | **Event schema** — every event type, exact JSON payload structure | `DET_D2_SYSTEM_CONTRACTS.md` | Derived from G spec (every action → event) |
-| D2.2 | **Real-time channel map** — channel names, subscribers, message formats | Within contracts | Derived from G spec + F3 data flows |
-| D2.3 | **API endpoint specifications** — OpenAPI/Swagger format, request/response schemas | `DET_D2_API_SPEC.yaml` | Derived from F4 (API contracts) + G spec |
-| D2.4 | **Module interface contracts** — exact input/output per engine, per AI module | Within contracts | Derived from D engine interface + E2/E4 |
+| # | Item | Deliverable |
+|---|------|------------|
+| B1 | **Complete PostgreSQL schema** — every table, column, type, constraint, index, foreign key | `DET_B1_DATABASE_SCHEMA.sql` |
+| B2 | **RLS policies** — row-level security for every table, enforcing information asymmetry per F3 visibility matrix | Within schema file |
+| B3 | **Seed data migration** — SQL to load all CSV starting data into the database | `DET_B3_SEED_DATA.sql` |
+| B4 | **Database functions** — stored procedures for atomic operations (transaction execution, AI context versioning, election processing) | Within schema file |
 
-## D3 — TECHNOLOGY STACK & ARCHITECTURE
+## C — SYSTEM CONTRACTS (the shared language)
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D3.1 | **Tech stack decision** — final choices for all layers | `DET_D3_TECH_STACK.md` | React/Supabase/Python/Claude/ElevenLabs |
-| D3.2 | **Deployment architecture** — how services connect in production | Within tech stack | Vercel + Supabase Cloud + Python service host |
-| D3.3 | **Development environment setup** — how to get the project running locally | `DET_D3_DEV_SETUP.md` | |
-| D3.4 | **CI/CD pipeline** — automated testing and deployment | Within dev setup | |
+| # | Item | Deliverable |
+|---|------|------------|
+| C1 | **Event schema** — every event type, exact JSON payload | `DET_C1_SYSTEM_CONTRACTS.md` |
+| C2 | **Real-time channel map** — channel names, subscribers, message formats | Within contracts |
+| C3 | **API specification** — OpenAPI/Swagger, request/response schemas for all endpoints | `DET_C3_API_SPEC.yaml` |
+| C4 | **Module interface contracts** — exact input/output per engine, per AI module | Within contracts |
 
-## D4 — ENGINE PRODUCTION CODE
+## D — TECHNOLOGY & ENVIRONMENT SETUP
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D4.1 | **World Model Engine** — production Python, API wrapper, input validation | Port from SEED engine code | D8 formulas + existing Python |
-| D4.2 | **Live Action Engine** — production Python, real-time API | Port from SEED engine code | D8 formulas + existing Python |
-| D4.3 | **Transaction Engine** — production Python or Edge Function | Port from SEED engine code | C6 + existing Python |
-| D4.4 | **Engine test suite** — automated formula tests (Layer 1) | `tests/engine/` | Auto-generated from D8 expected values |
+| # | Item | Deliverable |
+|---|------|------------|
+| D1 | **Tech stack document** — final confirmed choices for all layers | `DET_D1_TECH_STACK.md` |
+| D2 | **Supabase project** — created, configured, schema deployed, seed data loaded | Live Supabase instance |
+| D3 | **Vercel project** — created, linked to Git repo, environment variables set | Live Vercel instance |
+| D4 | **API keys** — Anthropic (Claude), Google (Gemini), ElevenLabs (voice) — all provisioned and tested | Secure key storage |
+| D5 | **Git repository structure** — monorepo or multi-repo, branch strategy, CI/CD pipeline | Configured repo |
+| D6 | **Development environment** — local setup guide, tested on clean machine | `DET_D6_DEV_SETUP.md` |
+| D7 | **Verify all infrastructure** — can log in, can query database, can call LLM API, can deploy to Vercel, real-time subscriptions work | Verification checklist |
 
-## D5 — FRONTEND COMPONENTS
+## E — DEVELOPMENT PROCESS SETUP
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D5.1 | **Component architecture** — React component tree per interface | `DET_D5_COMPONENTS.md` | G spec info blocks → components |
-| D5.2 | **Participant Interface** — all screens, data binding, actions | React code | G spec G2 |
-| D5.3 | **Facilitator Dashboard** — god-view, controls, monitors | React code | G spec G3 |
-| D5.4 | **Public Display** — large-screen optimized | React code | G spec G4 |
-| D5.5 | **Hex map renderer** — interactive map component | React component | C1 map structure + H1 style |
+| # | Item | Deliverable |
+|---|------|------------|
+| E1 | **CLAUDE.md v2** — updated for BUILD phase: agent team for development, coding standards, testing protocols, commit conventions, review process | Updated CLAUDE.md |
+| E2 | **Agent team for BUILD** — which agents do what during development (frontend agent, backend agent, tester, etc.) | Updated `.claude/agents/` |
+| E3 | **Development plan** — module build sequence, sprint breakdown, milestones, demo points | `DET_E3_DEV_PLAN.md` |
+| E4 | **Testing architecture** — Layer 1/2/3 test infrastructure, CI/CD integration, how to run each layer | `DET_E4_TESTING_ARCH.md` |
+| E5 | **Module specifications** — per module: component list, data bindings, state management, real-time subscriptions | `DET_E5_MODULE_SPECS.md` |
 
-## D6 — AI INTEGRATION
+## F — COMPONENT DESIGN
 
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D6.1 | **AI Participant Module** — production implementation of cognitive core + SIM adapter | Code | E2 + CON_F1 + KING reference |
-| D6.2 | **Argus Module** — production implementation of 7-block prompt assembly + voice | Code | E4 + CON_F2 + KING reference |
-| D6.3 | **LLM provider abstraction** — switchable between Claude/Gemini at runtime | Code | E2 architecture |
-| D6.4 | **Voice integration** — ElevenLabs Conversational AI for Argus + AI participants | Code | E4 + CON_F1 |
-
-## D7 — COMMUNICATION SYSTEM
-
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D7.1 | **AI meeting system** — request/accept/voice/transcript | Code | G spec G5 |
-| D7.2 | **Team channels** — country group chat | Code | G spec G5 |
-| D7.3 | **Public broadcast** — moderator announcements | Code | G spec G5 |
-
-## D8 — TESTING INFRASTRUCTURE
-
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D8.1 | **Layer 1 test suite** — automated formula tests | `tests/` | D8 formulas → test cases |
-| D8.2 | **Layer 2 test suite** — module integration tests | `tests/` | G spec actions → test scenarios |
-| D8.3 | **Layer 3 test framework** — AI simulation test runner (production version of current Battery approach) | `tests/simulation/` | TESTER_CONCEPT.md + Battery 4 |
-| D8.4 | **Continuous testing pipeline** — tests run on every code change | CI/CD config | |
-
-## D9 — SCENARIO CONFIGURATOR
-
-| # | Item | Deliverable | Source |
-|---|------|------------|--------|
-| D9.1 | **Template management** — CRUD for scenario templates | Code | G spec G1 (Scenario Configurator) |
-| D9.2 | **AI-assisted context refresh** — update scenario to current events | Code | CON_G1 Section 12 |
-| D9.3 | **Role assignment UI** — drag-and-drop participant → role mapping | Code | CON_G1 Section 12 |
-| D9.4 | **Brief generation** — auto-generate role briefs from template | Code | H3 artefact templates |
-
----
-
-## Build Sequence
-
-```
-PHASE 1 — Foundation (D1, D2, D3)          ← 1-2 weeks
-  Database schema, system contracts, tech stack, dev environment
-
-PHASE 2 — Engines (D4)                      ← 1-2 weeks
-  Port Python engines to production, API wrappers, formula test suite
-
-PHASE 3 — Facilitator First (D5.3, D7.3)   ← 2-3 weeks
-  Facilitator dashboard + broadcast. Need this to test everything else.
-
-PHASE 4 — Participant Core (D5.2, D5.5)    ← 3-4 weeks
-  Participant interface + hex map. The main product.
-
-PHASE 5 — AI Integration (D6, D7.1)        ← 2-3 weeks
-  AI participants + Argus + AI meeting system
-
-PHASE 6 — Polish & Launch (D5.4, D8, D9)   ← 2-3 weeks
-  Public display, full test suite, scenario configurator
-```
-
-**Total estimated: 12-18 weeks from Detailed Design start to playable prototype.**
+| # | Item | Deliverable |
+|---|------|------------|
+| F1 | **Participant Interface components** — React component tree, data binding per info block, action flow per action type | `DET_F1_PARTICIPANT_COMPONENTS.md` |
+| F2 | **Facilitator Dashboard components** — same level of detail | `DET_F2_FACILITATOR_COMPONENTS.md` |
+| F3 | **Public Display components** | `DET_F3_PUBLIC_DISPLAY_COMPONENTS.md` |
+| F4 | **Hex map renderer specification** — how to render the map, unit placement, zoom, interaction | `DET_F4_MAP_RENDERER.md` |
+| F5 | **Engine API wrapper** — how Python engines are called from the web app (FastAPI routes, request/response formats) | `DET_F5_ENGINE_API.md` |
 
 ---
 
 ## Gate Criteria
 
-- All module integration tests pass (Layer 2)
-- AI simulation test produces credible 6-round game (Layer 3)
-- Facilitator can run a complete session from dashboard
-- 5 human participants + 10 AI participants play simultaneously without errors
-- Marat plays one full test session and approves
+Before BUILD starts:
+
+- [ ] All CSVs finalized and loaded into Supabase
+- [ ] Database schema deployed and verified (can query, RLS works)
+- [ ] All API keys provisioned and tested (LLM call works, voice works)
+- [ ] Vercel + Supabase + Git all connected and deployable
+- [ ] System contracts document complete (every event, channel, endpoint defined)
+- [ ] CLAUDE.md v2 approved by Marat
+- [ ] Development plan approved by Marat
+- [ ] At least 3 role artefact packs complete (for testing)
+- [ ] One "hello world" deployment: login page + role assignment + data display from Supabase
+
+---
+
+## Overall Product Lifecycle
+
+```
+IDEA
+  └── CONCEPT (what & why)                          ✅ PASSED
+        └── SEED (canonical specs)                   ✅ PASSED
+              └── DETAILED DESIGN (how, exactly)     ← WE ARE HERE
+                    └── [GATE: ready to build?]
+                          └── BUILD (implementation)
+                                ├── Module 1: Platform
+                                ├── Module 2: Engines
+                                ├── Module 3: Facilitator
+                                ├── Module 4: Participant
+                                ├── Module 5: AI Integration
+                                └── Module 6: Polish
+                                      └── TEST / OPERATE
+                                            └── LEARN → improve → next SIM
+```
+
+Each stage produces deliverables that feed the next. No stage is skipped. Marat signs off every gate.
