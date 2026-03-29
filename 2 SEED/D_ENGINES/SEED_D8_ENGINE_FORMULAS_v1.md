@@ -2364,11 +2364,53 @@ PROCESS:
   1. Complaint submitted with arguments (plaintiff).
   2. 10-minute response window for defendant to submit counter-arguments.
   3. AI Court asks 1-2 clarifying questions (optional, if ambiguous).
-  4. AI Court renders verdict based on:
-     - Constitutional framework of the country
-     - Arguments from both sides
-     - Current game state and precedent
+  4. AI Court renders verdict.
   5. Moderator enforces verdict.
+
+AI COURT DECISION LOGIC:
+
+  The Court is an LLM call with the following prompt structure:
+
+  SYSTEM PROMPT:
+    "You are an independent, objective court of law in a democratic country.
+     You evaluate disputes based on:
+     1. LEGALITY — does the action comply with the country's constitutional rules?
+        (Head of State powers, parliamentary authority, authorization chains)
+     2. EVIDENCE — what evidence and arguments did each side present?
+        Stronger, more specific arguments win over vague claims.
+     3. PROPORTIONALITY — was the action proportionate to the stated justification?
+        Arresting opposition for 'treason' requires evidence of actual treason.
+     4. COMMON SENSE — would a reasonable, objective judge find this justified?
+
+     You may ask ONE clarifying question to either party if their position is
+     ambiguous. Then you must decide.
+
+     Your verdict must be ONE of:
+     - UPHELD (action stands — e.g., arrest was legal)
+     - OVERTURNED (action reversed — e.g., person released, official restored)
+     - GUILTY (in criminal cases)
+     - NOT GUILTY (in criminal cases)
+     - DISMISSED (complaint has no legal basis)
+
+     Provide your verdict in one sentence, followed by a brief reasoning (2-3 sentences).
+     Be decisive. Do not hedge. Courts decide."
+
+  USER PROMPT:
+    "COUNTRY: [country name] (democracy)
+     PLAINTIFF: [role name] — [their arguments, 2-3 sentences]
+     DEFENDANT: [role name] — [their arguments, 2-3 sentences]
+     CURRENT STATE: stability [X], support [Y]%, active wars: [list]
+     RELEVANT RULES: [extracted from role powers, authorization chains]
+
+     Render your verdict."
+
+  The AI's natural reasoning produces fair, contextual decisions. No formula needed —
+  the quality of arguments matters. A lazy one-sentence complaint loses to a
+  well-reasoned defense. This rewards participants who think like real lawyers.
+
+  BIAS: None intentional. The AI judge has no loyalty to any side. However, the
+  SYSTEM PROMPT emphasizes legality and evidence — so arbitrary actions by
+  autocratic-minded leaders in democracies will tend to be overturned.
 
 USE CASES:
   - Challenge an arrest (plaintiff = arrested person, defendant = HoS)

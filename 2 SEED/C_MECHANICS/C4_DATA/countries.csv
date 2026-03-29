@@ -3,7 +3,7 @@ columbia,Columbia,United States,democracy,team,7,9,false,280,1.8,8,18,55,22,0.24
 cathay,Cathay,China,autocracy,team,5,5,false,190,4.0,5,52,30,13,0.20,45,0.5,12,false,false,na,0.25,2,0.20,25,7,12,4,3,2,4,3,5,1,3,0.3,1,15,8,58,0,0,0,2,0.80,3,0.10,,"cathay_1,cathay_2,cathay_3,cathay_4,cathay_5,cathay_6,cathay_7"
 nordostan,Nordostan,Russia,autocracy,team,3,4,false,20,1.0,40,25,25,10,0.20,6,5.0,2,true,true,normal,0.15,0.5,0.25,18,2,8,12,3,1.5,4,3,4,0,2,0.3,0,5,5,55,0,0,4,3,1.0,1,0.30,heartland,"nord_n1,nord_w1,nord_c1,nord_e1,nord_e2,nord_e3,nord_w2,nord_c2"
 heartland,Heartland,Ukraine,democracy,team,3,3,false,2.2,2.5,15,20,40,10,0.25,5,7.5,-0.8,false,false,na,0.10,0.3,0.20,10,0,3,0,1,1.5,0,3,2,0,1,0.3,0,4,5,52,0,0,4,0,0.0,1,0.40,nordostan,"heartland_1,heartland_2"
-persia,Persia,Iran,hybrid,team,3,3,false,5,-3.0,35,30,28,7,0.18,1,50.0,-1,true,true,normal,0.15,0,0.20,8,0,6,0,1,1,2,2,2,0,1,0.25,0,6,4,40,0,0,1,0,0.60,0,0.10,columbia;levantia,"persia_1,persia_2,persia_3"
+persia,Persia,Iran,hybrid,team,3,3,false,5,-3.0,35,30,28,7,0.18,1,50.0,-1,true,true,normal,0.15,0,0.20,8,0,6,1,1,1,2,2,2,0,1,0.25,0,6,4,40,0,0,1,0,0.30,0,0.10,columbia;levantia,"persia_1,persia_2,persia_3"
 gallia,Gallia,France,democracy,europe,1,1,false,34,1.0,5,20,55,20,0.45,8,2.5,-1,false,false,na,0.35,3,0.35,6,1,4,2,1,3,5,4,2,0,1,0.5,0,4,7,40,0,0,0,2,0.80,2,0.30,,"gallia_1,gallia_2"
 teutonia,Teutonia,Germany,democracy,europe,1,1,false,45,1.2,3,28,50,19,0.38,12,2.5,3,false,false,na,0.45,2,0.30,6,0,3,0,1,2.5,4,3.5,2,0,1,0.4,0,4,7,45,0,0,0,0,0.0,2,0.20,,"teutonia_1,teutonia_2"
 freeland,Freeland,Poland,democracy,europe,1,1,false,9,3.7,8,30,50,12,0.35,4,4.0,0,false,false,na,0.25,1,0.25,5,0,2,0,1,2,3,3,2,0,1,0.3,0,3,8,55,0,0,0,0,0.0,1,0.40,,freeland

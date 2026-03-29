@@ -522,44 +522,63 @@ class LiveActionEngine:
     # -----------------------------------------------------------------------
 
     def resolve_covert_op(self, country: str, op_type: str,
-                          target: str, details: Optional[dict] = None) -> dict:
-        """Espionage, sabotage, cyber, disinformation -- probability tables.
+                          target: str, role_id: str = None,
+                          details: Optional[dict] = None) -> dict:
+        """Intelligence, sabotage, cyber, disinformation, election meddling.
 
-        Rules:
-        - Limited per round per country (2 default, 3 for intelligence powers)
-        - Detection probability escalates with repeated ops against same target
-        - AI level improves success probability
+        Rules (updated 2026-03-30 per action review):
+        - Per-INDIVIDUAL card pools (from roles.csv: intelligence_pool, sabotage_cards, etc.)
+        - Each card consumed permanently — never recovers
+        - Intelligence requests ALWAYS return an answer (accuracy varies)
+        - Failed ops return low-accuracy info (not nothing)
+        - Detection and attribution are SEPARATE events
         """
         result = {
             "type": "covert_op",
             "op_type": op_type,
             "country": country,
             "target": target,
+            "role_id": role_id,
             "success": False,
             "detected": False,
+            "attributed": False,
         }
 
-        # Check op limit
-        max_ops = MAX_COVERT_OPS_PER_ROUND.get(
-            "intelligence_power" if country in INTELLIGENCE_POWERS else "default",
-            2
-        )
-        current_ops = self.covert_ops_this_round.get(country, 0)
-        if current_ops >= max_ops:
-            result["error"] = f"{country} has reached covert op limit ({max_ops}) this round"
-            self._log_action(result)
-            return result
+        # Check per-individual card pool
+        card_field_map = {
+            "espionage": "intelligence_pool",
+            "intelligence": "intelligence_pool",
+            "sabotage": "sabotage_cards",
+            "cyber": "cyber_cards",
+            "disinformation": "disinfo_cards",
+            "election_meddling": "election_meddling_cards",
+        }
+        card_field = card_field_map.get(op_type, "intelligence_pool")
 
-        self.covert_ops_this_round[country] = current_ops + 1
+        if role_id:
+            role = self.ws.get_role(role_id)
+            if role:
+                remaining = role.get(card_field, 0)
+                if remaining <= 0:
+                    result["error"] = f"{role_id} has no {op_type} cards remaining"
+                    self._log_action(result)
+                    return result
+                # Consume the card
+                role[card_field] = remaining - 1
+        else:
+            # Fallback: country-level limit (legacy compatibility)
+            max_ops = 3
+            current_ops = self.covert_ops_this_round.get(country, 0)
+            if current_ops >= max_ops:
+                result["error"] = f"{country} has reached covert op limit this round"
+                self._log_action(result)
+                return result
+            self.covert_ops_this_round[country] = current_ops + 1
 
         # Calculate success probability
         base_prob = COVERT_BASE_PROBABILITY.get(op_type, 0.50)
         ai_level = self.ws.countries.get(country, {}).get("technology", {}).get("ai_level", 0)
         prob = base_prob + ai_level * 0.05
-
-        # Intelligence power bonus
-        if country in INTELLIGENCE_POWERS:
-            prob += 0.05
 
         # Repeated ops penalty
         prev_ops_against_target = sum(
@@ -576,38 +595,57 @@ class LiveActionEngine:
         result["success"] = success
         result["success_probability"] = round(prob, 3)
 
-        # Roll for detection
+        # Roll for detection (target learns SOMETHING happened)
         detect_base = COVERT_DETECTION_BASE.get(op_type, 0.40)
         detect_prob = detect_base + prev_ops_against_target * 0.10
         detect_prob = clamp(detect_prob, 0.10, 0.90)
         detected = random.random() < detect_prob
         result["detected"] = detected
+
+        # Roll for attribution SEPARATELY (target learns WHO did it)
+        # Attribution only possible if detected first
+        attributed = False
+        if detected:
+            attribution_prob = {
+                "espionage": 0.30, "intelligence": 0.30,
+                "sabotage": 0.50, "cyber": 0.40,
+                "disinformation": 0.20, "election_meddling": 0.50,
+            }.get(op_type, 0.30)
+            attributed = random.random() < attribution_prob
+        result["attributed"] = attributed
         result["detection_probability"] = round(detect_prob, 3)
 
-        # Apply effects if successful
-        if success and target in self.ws.countries:
+        # Apply effects
+        if target in self.ws.countries:
             tc = self.ws.countries[target]
-            if op_type == "sabotage":
+
+            if op_type in ("espionage", "intelligence"):
+                # ALWAYS returns an answer — accuracy varies by success
+                # Success: high accuracy (85-90%). Failure: low accuracy (40-60%).
+                accuracy = 0.85 if success else 0.45
+                result["intelligence"] = self._gather_intelligence(target, details, accuracy)
+                result["accuracy"] = accuracy
+                # Intelligence ALWAYS has a result — never returns nothing
+
+            elif op_type == "sabotage" and success:
                 damage = tc["economic"]["gdp"] * 0.02
                 tc["economic"]["gdp"] = max(tc["economic"]["gdp"] - damage, 0.01)
                 result["damage"] = round(damage, 2)
-            elif op_type == "cyber":
+            elif op_type == "cyber" and success:
                 damage = tc["economic"]["gdp"] * 0.01
                 tc["economic"]["gdp"] = max(tc["economic"]["gdp"] - damage, 0.01)
                 result["damage"] = round(damage, 2)
-            elif op_type == "disinformation":
+            elif op_type == "disinformation" and success:
                 tc["political"]["stability"] = max(tc["political"]["stability"] - 0.3, 1)
                 tc["political"]["political_support"] = max(
-                    tc["political"]["political_support"] - 2, 0)
-                result["stability_impact"] = -0.3
-                result["support_impact"] = -2
-            elif op_type == "election_meddling":
-                tc["political"]["political_support"] = max(
                     tc["political"]["political_support"] - 3, 0)
+                result["stability_impact"] = -0.3
                 result["support_impact"] = -3
-            elif op_type == "espionage":
-                # Gather intelligence - return partial world state info
-                result["intelligence"] = self._gather_intelligence(target, details)
+            elif op_type == "election_meddling" and success:
+                shift = random.uniform(2, 5)  # 2-5% shift
+                tc["political"]["political_support"] = max(
+                    tc["political"]["political_support"] - shift, 0)
+                result["support_impact"] = round(-shift, 1)
 
         self.ws.log_event({
             "type": "covert_op",
@@ -620,20 +658,43 @@ class LiveActionEngine:
         self._log_action(result)
         return result
 
-    def _gather_intelligence(self, target: str, details: Optional[dict] = None) -> dict:
-        """Generate intelligence report for espionage operation."""
+    def _gather_intelligence(self, target: str, details: Optional[dict] = None,
+                              accuracy: float = 0.85) -> dict:
+        """Generate intelligence report — ALWAYS returns data, accuracy varies.
+
+        High accuracy (0.85-0.90): success — data is ±5% of real values
+        Low accuracy (0.40-0.60): failure — data is ±30% of real values, may be wrong
+        The recipient does NOT know the accuracy level — report looks the same.
+        """
         tc = self.ws.countries.get(target, {})
-        # Partial and possibly inaccurate information
-        noise = random.uniform(0.85, 1.15)
+
+        # Noise based on accuracy: high accuracy = ±5%, low = ±30%
+        if accuracy >= 0.75:
+            noise_range = 0.05  # ±5%
+        elif accuracy >= 0.50:
+            noise_range = 0.15  # ±15%
+        else:
+            noise_range = 0.30  # ±30% — seriously unreliable
+
+        def noisy(value, is_int=False):
+            noise = random.uniform(1.0 - noise_range, 1.0 + noise_range)
+            result = value * noise
+            return int(round(result)) if is_int else round(result, 1)
+
         intel = {
-            "gdp_estimate": round(tc.get("economic", {}).get("gdp", 0) * noise, 1),
-            "stability_estimate": round(
-                tc.get("political", {}).get("stability", 5) * noise, 1),
-            "military_ground_estimate": int(
-                tc.get("military", {}).get("ground", 0) * noise),
-            "military_naval_estimate": int(
-                tc.get("military", {}).get("naval", 0) * noise),
+            "gdp_estimate": noisy(tc.get("economic", {}).get("gdp", 0)),
+            "treasury_estimate": noisy(tc.get("economic", {}).get("treasury", 0)),
+            "stability_estimate": noisy(tc.get("political", {}).get("stability", 5)),
+            "support_estimate": noisy(tc.get("political", {}).get("political_support", 50)),
+            "military_ground_estimate": noisy(tc.get("military", {}).get("ground", 0), True),
+            "military_naval_estimate": noisy(tc.get("military", {}).get("naval", 0), True),
+            "military_air_estimate": noisy(tc.get("military", {}).get("tactical_air", 0), True),
             "nuclear_level": tc.get("technology", {}).get("nuclear_level", 0),
+            "nuclear_progress_estimate": noisy(
+                tc.get("technology", {}).get("nuclear_rd_progress", 0)),
+            "ai_level": tc.get("technology", {}).get("ai_level", 0),
+            "mobilization_pool_estimate": noisy(
+                tc.get("military", {}).get("mobilization_pool", 0), True),
         }
         return intel
 
@@ -662,21 +723,11 @@ class LiveActionEngine:
             self._log_action(result)
             return result
 
-        # Execute arrest
+        # Execute arrest — pure player removal, NO stability or support cost
+        # (per action review 2026-03-30: arrest is a standalone action, no mechanical linkages)
         role["status"] = "arrested"
         result["success"] = True
         result["note"] = f"{role['character_name']} arrested by {country}"
-
-        # Political support cost
-        c = self.ws.countries.get(country, {})
-        regime = c.get("political", {}).get("regime_type", "democracy")
-        support_cost = 3 if regime == "democracy" else 5
-        c["political"]["political_support"] = max(
-            c["political"]["political_support"] - support_cost, 0)
-        c["political"]["stability"] = max(
-            c["political"]["stability"] - 1, 1)
-
-        result["support_cost"] = support_cost
 
         self.ws.log_event({
             "type": "arrest",
