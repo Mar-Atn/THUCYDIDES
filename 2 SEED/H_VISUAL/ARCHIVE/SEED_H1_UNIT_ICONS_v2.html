@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Unit Icons v2 — Extended Gallery</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --card: #FFFFFF;
+    --card-border: #E0DDD6;
+    --text: #1A2332;
+    --text-muted: #6B7280;
+    --accent: #8B7355;
+    --accent-gold: #C9A84C;
+    --selected-border: #2D7A3A;
+    --selected-bg: #F0F8F1;
+    --columbia: #4A90D9;
+    --cathay: #D94A4A;
+    --nordostan: #808080;
+    --heartland: #D4A843;
+    --dark-bg: #1B2838;
+    --light-bg: #F5F6F8;
+    --water: #D4E4F0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .section-note {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Icon option cards */
+  .unit-type-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .icon-option {
+    flex: 1;
+    min-width: 150px;
+    max-width: 220px;
+    background: var(--light-bg);
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 14px;
+    text-align: center;
+    transition: border-color 0.15s;
+  }
+  .icon-option.selected {
+    border-color: var(--selected-border);
+    background: var(--selected-bg);
+  }
+  .icon-option .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .icon-option.selected .label {
+    color: var(--selected-border);
+  }
+  .selected-badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--selected-border);
+    color: white;
+    padding: 1px 6px;
+    border-radius: 3px;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+
+  .size-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .size-row .size-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 24px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bg-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 6px;
+  }
+  .bg-dark { background: var(--dark-bg); }
+  .bg-light-alt { background: var(--light-bg); }
+
+  /* Tank comparison */
+  .tank-compare {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .tank-card {
+    flex: 1;
+    min-width: 140px;
+    max-width: 200px;
+    text-align: center;
+    background: var(--light-bg);
+    border-radius: 6px;
+    padding: 16px;
+  }
+  .tank-card .large-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+
+  /* Hex styles */
+  .hex {
+    width: 52px;
+    height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  .hex-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    max-width: 36px;
+  }
+  .hex-demo-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .hex-demo-wrap {
+    text-align: center;
+  }
+
+  /* Hex grid for map */
+  .hex-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hex-row {
+    display: flex;
+    gap: 4px;
+  }
+  .hex-row.offset {
+    margin-left: 28px;
+    margin-top: -14px;
+  }
+  .hex-row:not(.offset) {
+    margin-top: -14px;
+  }
+  .hex-row:first-child { margin-top: 0; }
+
+  .hex-cell {
+    width: 52px;
+    height: 60px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .flex-center {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .grid-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .grid-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    border: 1px solid #ccc;
+  }
+
+  .size-compare-row {
+    display: flex;
+    gap: 24px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .size-compare-item {
+    text-align: center;
+  }
+  .size-compare-item .px-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .size-compare-icons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    background: var(--light-bg);
+    padding: 8px;
+    border-radius: 4px;
+  }
+  .section-spacer { height: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Thucydides Trap -- Unit Icons v2</h1>
+<p class="subtitle">Extended icon gallery with confirmed selections and new options. Economist-style flat silhouettes, monochrome, optimized for 12-32px. v2.0</p>
+
+<!-- ============================================================ -->
+<!-- SVG DEFINITIONS -->
+<!-- ============================================================ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+  <!-- ==================== NAVAL ==================== -->
+
+  <!-- NAVAL A: Warship side profile (destroyer) — CONFIRMED -->
+  <symbol id="naval-a" viewBox="0 0 24 24">
+    <path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- NAVAL E: Aircraft carrier profile (flat top, island) -->
+  <symbol id="naval-e" viewBox="0 0 24 24">
+    <path d="M1 14 L3 11 L21 11 L23 14 L22 16 L2 16 Z" fill="currentColor"/>
+    <rect x="2" y="9" width="20" height="2" rx="0.5" fill="currentColor"/>
+    <rect x="16" y="6" width="3" height="3" fill="currentColor"/>
+    <rect x="17" y="4" width="1" height="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- NAVAL F: Submarine silhouette -->
+  <symbol id="naval-f" viewBox="0 0 24 24">
+    <path d="M2 14 C2 11.5 5 10 8 10 L16 10 C19 10 22 11.5 22 14 C22 16.5 19 18 16 18 L8 18 C5 18 2 16.5 2 14 Z" fill="currentColor"/>
+    <rect x="10" y="7" width="2" height="3" rx="0.5" fill="currentColor"/>
+    <path d="M11 7 L11 5 L14 7 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== GROUND — ALL NEW ==================== -->
+
+  <!-- GROUND A-new: Classic tank (T-72/Leopard side view) -->
+  <symbol id="ground-a2" viewBox="0 0 24 24">
+    <path d="M5 11 L7 9 L13 9 L14 8 L14 7 L24 10 L24 11 L18 11 Z" fill="currentColor"/>
+    <path d="M3 12 L19 12 L20 13 L20 16 L2 16 L2 13 Z" fill="currentColor"/>
+    <circle cx="5" cy="17" r="2" fill="currentColor"/>
+    <circle cx="10" cy="17" r="2" fill="currentColor"/>
+    <circle cx="15" cy="17" r="2" fill="currentColor"/>
+    <path d="M3 16 L19 16 L19 18 C19 18 17 19 15 19 L7 19 C5 19 3 18 3 16 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- GROUND B-new: Heavy tank (Abrams/Merkava — blockier) -->
+  <symbol id="ground-b2" viewBox="0 0 24 24">
+    <rect x="6" y="8" width="9" height="4" rx="0.5" fill="currentColor"/>
+    <path d="M15 9 L24 9.5 L24 11 L15 11 Z" fill="currentColor"/>
+    <rect x="2" y="12" width="19" height="5" rx="1" fill="currentColor"/>
+    <path d="M3 17 L20 17 C20 19 18 20 16 20 L6 20 C4 20 3 19 3 17 Z" fill="currentColor"/>
+    <circle cx="5.5" cy="18.5" r="1.5" fill="currentColor"/>
+    <circle cx="10" cy="18.5" r="1.5" fill="currentColor"/>
+    <circle cx="14.5" cy="18.5" r="1.5" fill="currentColor"/>
+    <circle cx="18.5" cy="18.5" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <!-- GROUND C-new: Minimalist tank pictogram -->
+  <symbol id="ground-c2" viewBox="0 0 24 24">
+    <rect x="7" y="9" width="7" height="3" fill="currentColor"/>
+    <rect x="14" y="10" width="8" height="1.5" fill="currentColor"/>
+    <rect x="3" y="12" width="17" height="4" fill="currentColor"/>
+    <circle cx="6" cy="18" r="2" fill="currentColor"/>
+    <circle cx="12" cy="18" r="2" fill="currentColor"/>
+    <circle cx="17" cy="18" r="2" fill="currentColor"/>
+    <rect x="4" y="16.5" width="15" height="3" rx="1.5" fill="currentColor"/>
+  </symbol>
+
+  <!-- GROUND D-new: IFV (taller, smaller turret, troop compartment) -->
+  <symbol id="ground-d2" viewBox="0 0 24 24">
+    <rect x="10" y="7" width="5" height="3" rx="0.5" fill="currentColor"/>
+    <rect x="15" y="8" width="6" height="1" fill="currentColor"/>
+    <rect x="3" y="10" width="18" height="6" rx="1" fill="currentColor"/>
+    <rect x="4" y="11" width="2" height="3" rx="0.3" fill="var(--bg)" opacity="0.3"/>
+    <rect x="7" y="11" width="2" height="3" rx="0.3" fill="var(--bg)" opacity="0.3"/>
+    <path d="M3 16 L21 16 C21 18.5 19 20 17 20 L7 20 C5 20 3 18.5 3 16 Z" fill="currentColor"/>
+    <circle cx="6" cy="18" r="1.8" fill="currentColor"/>
+    <circle cx="11" cy="18" r="1.8" fill="currentColor"/>
+    <circle cx="16" cy="18" r="1.8" fill="currentColor"/>
+  </symbol>
+
+  <!-- GROUND E-new: Artillery / SPG (elevated barrel at ~45 deg) -->
+  <symbol id="ground-e2" viewBox="0 0 24 24">
+    <path d="M12 10 L14 10 L6 2 L5 3 Z" fill="currentColor"/>
+    <rect x="4" y="10" width="16" height="5" rx="1" fill="currentColor"/>
+    <path d="M4 15 L20 15 C20 17.5 18 19 16 19 L8 19 C6 19 4 17.5 4 15 Z" fill="currentColor"/>
+    <circle cx="7" cy="17" r="1.8" fill="currentColor"/>
+    <circle cx="12" cy="17" r="1.8" fill="currentColor"/>
+    <circle cx="17" cy="17" r="1.8" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== AIR DEFENSE ==================== -->
+
+  <!-- AD A: Radar dish / protective umbrella — CONFIRMED -->
+  <symbol id="ad-a" viewBox="0 0 24 24">
+    <path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="currentColor"/>
+    <rect x="11" y="9" width="2" height="11" fill="currentColor"/>
+    <rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/>
+  </symbol>
+
+  <!-- AD E: SAM launcher vehicle (Patriot/S-400 style) -->
+  <symbol id="ad-e" viewBox="0 0 24 24">
+    <rect x="3" y="14" width="18" height="4" rx="1" fill="currentColor"/>
+    <path d="M8 14 L8 11 L20 5 L21 6 L21 7 L10 12 L10 14 Z" fill="currentColor"/>
+    <path d="M19 4 L22 3 L22 5 L21 6 Z" fill="currentColor"/>
+    <path d="M14 8 L16 7 L17 9 L15 10 Z" fill="currentColor"/>
+    <circle cx="6" cy="19.5" r="2" fill="currentColor"/>
+    <circle cx="12" cy="19.5" r="2" fill="currentColor"/>
+    <circle cx="18" cy="19.5" r="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- AD F: THAAD-style vertical launcher -->
+  <symbol id="ad-f" viewBox="0 0 24 24">
+    <rect x="5" y="16" width="14" height="4" rx="1" fill="currentColor"/>
+    <rect x="8" y="4" width="2.5" height="12" rx="0.5" fill="currentColor"/>
+    <path d="M9.25 1 L11 4 L7.5 4 Z" fill="currentColor"/>
+    <rect x="13" y="6" width="2.5" height="10" rx="0.5" fill="currentColor"/>
+    <path d="M14.25 3 L16 6 L12.5 6 Z" fill="currentColor"/>
+    <circle cx="7" cy="21.5" r="1.5" fill="currentColor"/>
+    <circle cx="17" cy="21.5" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <!-- AD G: Iron Dome style (dome radar + small interceptors) -->
+  <symbol id="ad-g" viewBox="0 0 24 24">
+    <path d="M6 16 C6 12 9 9 12 9 C15 9 18 12 18 16 Z" fill="currentColor"/>
+    <rect x="5" y="16" width="14" height="3" rx="1" fill="currentColor"/>
+    <path d="M3 11 L5 8 L6 9 L4.5 11 Z" fill="currentColor"/>
+    <path d="M2 8 L4 5 L5 6 L3.5 8 Z" fill="currentColor"/>
+    <path d="M21 11 L19 8 L18 9 L19.5 11 Z" fill="currentColor"/>
+    <path d="M22 8 L20 5 L19 6 L20.5 8 Z" fill="currentColor"/>
+    <rect x="8" y="19" width="8" height="2" rx="0.5" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== TACTICAL AIR ==================== -->
+
+  <!-- TAC A: Fighter jet (top-down delta wing) — CONFIRMED -->
+  <symbol id="tac-a" viewBox="0 0 24 24">
+    <path d="M12 1 L13.5 6 L14 10 L20 14 L20 16 L14 14 L14 19 L17 21 L17 23 L12 21 L7 23 L7 21 L10 19 L10 14 L4 16 L4 14 L10 10 L10.5 6 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TAC D: Drone/UAV — CONFIRMED (alternative) -->
+  <symbol id="tac-d" viewBox="0 0 24 24">
+    <path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="currentColor"/>
+    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- TAC E: Cruise missile (sleek, small wings, horizontal) -->
+  <symbol id="tac-e" viewBox="0 0 24 24">
+    <path d="M1 12 L4 10.5 L18 10.5 L23 12 L18 13.5 L4 13.5 Z" fill="currentColor"/>
+    <path d="M6 10.5 L6 7 L8 7 L9 10.5 Z" fill="currentColor"/>
+    <path d="M6 13.5 L6 17 L8 17 L9 13.5 Z" fill="currentColor"/>
+    <path d="M16 10.5 L17 8 L19 9 L18 10.5 Z" fill="currentColor"/>
+    <path d="M16 13.5 L17 16 L19 15 L18 13.5 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TAC F: Attack helicopter (rotor + slim body + stub wings) -->
+  <symbol id="tac-f" viewBox="0 0 24 24">
+    <path d="M4 5 L20 5 L20 6 L13 6 L13 7 L4 6 Z" fill="currentColor"/>
+    <rect x="11.5" y="5" width="1" height="3" fill="currentColor"/>
+    <path d="M10 8 L14 8 L15 10 L14 12 L13 14 L12 16 L8 16 L7 14 L9 12 L9 10 Z" fill="currentColor"/>
+    <path d="M8 12 L5 11 L4 12 L5 13 L8 13 Z" fill="currentColor"/>
+    <path d="M14 12 L17 11 L18 12 L17 13 L14 13 Z" fill="currentColor"/>
+    <path d="M12 16 L13 18 L20 18 L20 19 L13 19 L12 20 L11 19 L4 19 L4 18 L11 18 Z" fill="currentColor"/>
+    <circle cx="8" cy="20" r="1" fill="currentColor"/>
+    <circle cx="16" cy="20" r="1" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== STRATEGIC MISSILES ==================== -->
+
+  <!-- STRAT A: ICBM vertical — CONFIRMED -->
+  <symbol id="strat-a" viewBox="0 0 24 24">
+    <path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- STRAT E: Mobile launcher / TEL (truck + missile on back) -->
+  <symbol id="strat-e" viewBox="0 0 24 24">
+    <rect x="2" y="14" width="20" height="4" rx="1" fill="currentColor"/>
+    <rect x="2" y="11" width="6" height="3" rx="0.5" fill="currentColor"/>
+    <path d="M9 14 L10 8 L12 8 L12 5 L13 3 L14 5 L14 8 L16 8 L17 10 L20 14 Z" fill="currentColor"/>
+    <circle cx="5" cy="19.5" r="2" fill="currentColor"/>
+    <circle cx="11" cy="19.5" r="2" fill="currentColor"/>
+    <circle cx="17" cy="19.5" r="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- STRAT F: Sub-launched missile (missile + water splash) -->
+  <symbol id="strat-f" viewBox="0 0 24 24">
+    <path d="M12 1 L14 5 L13.5 5 L13.5 14 L10.5 14 L10.5 5 L10 5 Z" fill="currentColor"/>
+    <path d="M8 14 L7 16 L5 17 L4 16 L5 15 L7 14 Z" fill="currentColor"/>
+    <path d="M16 14 L17 16 L19 17 L20 16 L19 15 L17 14 Z" fill="currentColor"/>
+    <path d="M3 17 C3 17 5 15 8 16 L10 17 L14 17 L16 16 C19 15 21 17 21 17 L22 19 L20 18 C18 17 16 18 14 19 L10 19 C8 18 6 17 4 18 L2 19 Z" fill="currentColor"/>
+    <path d="M1 20 C4 19 7 20 12 20 C17 20 20 19 23 20 L23 22 L1 22 Z" fill="currentColor"/>
+  </symbol>
+
+</svg>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: CONFIRMED PICKS -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 1: Confirmed Picks from v1</h2>
+<p class="section-note">These icons passed review and are locked in. Shown at 32px, 18px, and 12px on both backgrounds.</p>
+
+<div class="unit-type-row" id="confirmed-gallery"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: NEW OPTIONS GALLERY -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 2: New Options Gallery</h2>
+<p class="section-note">New icon candidates for each unit type. Shown at 32px, 18px, 12px on dark (#1B2838) and light (#F5F6F8) backgrounds.</p>
+
+<h3>Naval -- New Options</h3>
+<div class="unit-type-row" id="naval-new-gallery"></div>
+
+<h3>Ground -- All New Tank &amp; Vehicle Options</h3>
+<div class="unit-type-row" id="ground-new-gallery"></div>
+
+<h3>Air Defense -- New Options</h3>
+<div class="unit-type-row" id="ad-new-gallery"></div>
+
+<h3>Tactical Air -- New Options</h3>
+<div class="unit-type-row" id="tac-new-gallery"></div>
+
+<h3>Strategic Missiles -- New Options</h3>
+<div class="unit-type-row" id="strat-new-gallery"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: TANK COMPARISON -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 3: Tank Comparison (Special Focus)</h2>
+<p class="section-note">All 5 new ground options at 48px (large), then 18px and 12px. Tanks must read clearly at every size -- barrel + turret are the key identifiers.</p>
+
+<div class="tank-compare" id="tank-compare"></div>
+
+<div style="margin-top:24px;">
+  <h3>At 18px (map standard)</h3>
+  <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:16px;" id="tank-18"></div>
+  <h3>At 12px (compact)</h3>
+  <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;" id="tank-12"></div>
+</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: HEX STACKING TEST -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 4: Map Hex Stacking Test</h2>
+<p class="section-note">Unit combinations inside 48px hexes using confirmed icons plus best new options. Tested at 12px and 14px icon size.</p>
+
+<h3>At 12px Icon Size</h3>
+<div class="flex-center" id="hex-stack-12"></div>
+
+<div class="section-spacer"></div>
+<h3>At 14px Icon Size</h3>
+<div class="flex-center" id="hex-stack-14"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: FULL MAP PREVIEW -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 5: Full Map Preview</h2>
+<p class="section-note">4x6 hex grid showing realistic military deployment. Nordostan (gray), Heartland (gold), Columbia naval (blue), Cathay naval (red). Icons stacked, not counted.</p>
+
+<div style="display:flex;justify-content:center;padding:20px 0;">
+  <div id="map-grid"></div>
+</div>
+<div class="grid-legend" id="map-legend"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: SIZE RECOMMENDATION -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 6: Size Recommendation</h2>
+<p class="section-note">Side-by-side comparison at 10px, 12px, 14px, 16px. Full unit set at each size on both dark and light hex backgrounds.</p>
+
+<div id="size-rec"></div>
+</div>
+
+<div style="height:40px;"></div>
+<p style="color:var(--text-muted);font-size:11px;text-align:center;">TTT Unit Icon Gallery v2.0 -- Thucydides Trap Simulation -- MetaGames 2026</p>
+<div style="height:20px;"></div>
+
+<script>
+// ============================================================
+// HELPERS
+// ============================================================
+function iconSVG(id, size, color) {
+  const c = color || 'currentColor';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${c};display:block;flex-shrink:0;"><use href="#${id}"/></svg>`;
+}
+
+function makeOptionCard(id, label, isSelected) {
+  const selClass = isSelected ? ' selected' : '';
+  const badge = isSelected ? '<div class="selected-badge">SELECTED</div>' : '';
+  const darkColor = '#E8E4DC';
+  const lightColor = '#1A2332';
+  return `
+    <div class="icon-option${selClass}">
+      ${badge}
+      <div class="label">${label}</div>
+      <div class="size-row"><span class="size-label">32</span>${iconSVG(id, 32, '#1A2332')}</div>
+      <div class="size-row"><span class="size-label">18</span>${iconSVG(id, 18, '#1A2332')}</div>
+      <div class="size-row"><span class="size-label">12</span>${iconSVG(id, 12, '#1A2332')}</div>
+      <div class="bg-strip bg-dark">
+        ${iconSVG(id, 18, darkColor)} ${iconSVG(id, 12, darkColor)}
+      </div>
+      <div class="bg-strip bg-light-alt">
+        ${iconSVG(id, 18, lightColor)} ${iconSVG(id, 12, lightColor)}
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// SECTION 1: CONFIRMED PICKS
+// ============================================================
+const confirmed = [
+  { id: 'naval-a', label: 'Naval A: Warship Profile' },
+  { id: 'tac-a', label: 'Tac Air A: Fighter Jet' },
+  { id: 'tac-d', label: 'Tac Air D: Drone/UAV (alt)' },
+  { id: 'strat-a', label: 'Strategic A: ICBM' },
+  { id: 'ad-a', label: 'Air Defense A: Radar Dish' },
+];
+
+const confirmedEl = document.getElementById('confirmed-gallery');
+confirmedEl.innerHTML = confirmed.map(c => makeOptionCard(c.id, c.label, true)).join('');
+
+// ============================================================
+// SECTION 2: NEW OPTIONS
+// ============================================================
+const newOptions = {
+  'naval-new-gallery': [
+    { id: 'naval-e', label: 'E: Aircraft Carrier' },
+    { id: 'naval-f', label: 'F: Submarine' },
+  ],
+  'ground-new-gallery': [
+    { id: 'ground-a2', label: 'A-new: Classic Tank (T-72/Leopard)' },
+    { id: 'ground-b2', label: 'B-new: Heavy Tank (Abrams/Merkava)' },
+    { id: 'ground-c2', label: 'C-new: Minimalist Tank Pictogram' },
+    { id: 'ground-d2', label: 'D-new: IFV (Infantry Fighting Vehicle)' },
+    { id: 'ground-e2', label: 'E-new: Artillery / SPG' },
+  ],
+  'ad-new-gallery': [
+    { id: 'ad-e', label: 'E: SAM Launcher Vehicle' },
+    { id: 'ad-f', label: 'F: THAAD-style Vertical' },
+    { id: 'ad-g', label: 'G: Iron Dome Style' },
+  ],
+  'tac-new-gallery': [
+    { id: 'tac-e', label: 'E: Cruise Missile' },
+    { id: 'tac-f', label: 'F: Attack Helicopter' },
+  ],
+  'strat-new-gallery': [
+    { id: 'strat-e', label: 'E: Mobile Launcher (TEL)' },
+    { id: 'strat-f', label: 'F: Sub-Launched Missile' },
+  ],
+};
+
+Object.entries(newOptions).forEach(([elId, opts]) => {
+  const el = document.getElementById(elId);
+  el.innerHTML = opts.map(o => makeOptionCard(o.id, o.label, false)).join('');
+});
+
+// ============================================================
+// SECTION 3: TANK COMPARISON
+// ============================================================
+const tanks = [
+  { id: 'ground-a2', label: 'A-new: Classic' },
+  { id: 'ground-b2', label: 'B-new: Heavy' },
+  { id: 'ground-c2', label: 'C-new: Minimal' },
+  { id: 'ground-d2', label: 'D-new: IFV' },
+  { id: 'ground-e2', label: 'E-new: Artillery' },
+];
+
+const tankCompare = document.getElementById('tank-compare');
+tankCompare.innerHTML = tanks.map(t => `
+  <div class="tank-card">
+    <div class="large-icon">${iconSVG(t.id, 48, '#1A2332')}</div>
+    <div style="font-size:11px;font-weight:600;color:var(--accent);">${t.label}</div>
+  </div>
+`).join('');
+
+const tank18 = document.getElementById('tank-18');
+tank18.innerHTML = tanks.map(t => `
+  <div style="text-align:center;">
+    ${iconSVG(t.id, 18, '#1A2332')}
+    <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${t.label.split(':')[0]}</div>
+  </div>
+`).join('');
+
+const tank12 = document.getElementById('tank-12');
+tank12.innerHTML = tanks.map(t => `
+  <div style="text-align:center;">
+    ${iconSVG(t.id, 12, '#1A2332')}
+    <div style="font-size:9px;color:var(--text-muted);margin-top:2px;">${t.label.split(':')[0]}</div>
+  </div>
+`).join('');
+
+// ============================================================
+// SECTION 4: HEX STACKING
+// ============================================================
+function hexWithUnits(icons, bgColor, label, iconSize) {
+  const sz = iconSize || 12;
+  const inner = icons.map(ic => iconSVG(ic.id, sz, ic.color || '#1A2332')).join('');
+  return `
+    <div class="hex-demo-wrap">
+      <div class="hex" style="background:${bgColor || '#D8DDD0'};">
+        <div class="hex-inner">${inner}</div>
+      </div>
+      <div class="hex-demo-label">${label}</div>
+    </div>
+  `;
+}
+
+const stackConfigs = [
+  { icons: [{id:'ground-a2'},{id:'ground-a2'},{id:'ground-a2'}], bg:'#D8DDD0', label:'3 tanks' },
+  { icons: [{id:'naval-a',color:'#4A90D9'},{id:'naval-a',color:'#4A90D9'},{id:'tac-a',color:'#4A90D9'}], bg:'#D4E4F0', label:'2 ships + 1 jet' },
+  { icons: [{id:'ground-a2'},{id:'ad-e'},{id:'tac-a'},{id:'strat-a'}], bg:'#D8DDD0', label:'Combined arms' },
+];
+
+[12, 14].forEach(sz => {
+  const el = document.getElementById(`hex-stack-${sz}`);
+  el.innerHTML = stackConfigs.map(s => hexWithUnits(s.icons, s.bg, s.label, sz)).join('');
+});
+
+// ============================================================
+// SECTION 5: FULL MAP
+// ============================================================
+const waterBg = '#D4E4F0';
+const landBg = '#D8DDD0';
+const nordBg = '#C8C8C8';
+const heartBg = '#E8DCC0';
+const colBg = '#C8D8E8';
+const cathayBg = '#E8C8C8';
+
+const CC = '#D94A4A';   // Cathay
+const CO = '#4A90D9';   // Columbia
+const ND = '#808080';   // Nordostan
+const HL = '#D4A843';   // Heartland
+
+const e = (bg) => ({ bg, u: [] });
+
+// 4x6 grid: rows alternate 6 and 5 cells
+const mapRows = [
+  // Row 0 — 6 cells
+  { offset: false, cells: [
+    e(landBg),
+    { bg: nordBg, u: [{id:'ground-a2',c:ND},{id:'ground-a2',c:ND},{id:'tac-a',c:ND}] },
+    { bg: nordBg, u: [{id:'ground-a2',c:ND},{id:'ground-a2',c:ND},{id:'ground-a2',c:ND}] },
+    { bg: nordBg, u: [{id:'tac-a',c:ND},{id:'tac-a',c:ND},{id:'ground-a2',c:ND}] },
+    e(landBg),
+    e(landBg),
+  ]},
+  // Row 1 offset — 6 cells
+  { offset: true, cells: [
+    e(landBg),
+    { bg: nordBg, u: [{id:'ground-a2',c:ND},{id:'tac-a',c:ND}] },
+    { bg: heartBg, u: [{id:'ground-a2',c:HL},{id:'ground-a2',c:HL},{id:'ground-a2',c:HL},{id:'ad-a',c:HL}] },
+    { bg: heartBg, u: [{id:'ground-a2',c:HL},{id:'ground-a2',c:HL},{id:'ground-a2',c:HL},{id:'ground-a2',c:HL},{id:'tac-a',c:HL},{id:'tac-a',c:HL}] },
+    e(landBg),
+    e(landBg),
+  ]},
+  // Row 2 — 6 cells
+  { offset: false, cells: [
+    e(waterBg),
+    e(waterBg),
+    { bg: waterBg, u: [{id:'naval-a',c:CC},{id:'naval-a',c:CC}] },
+    e(landBg),
+    e(landBg),
+    e(landBg),
+  ]},
+  // Row 3 offset — 6 cells
+  { offset: true, cells: [
+    e(waterBg),
+    { bg: waterBg, u: [{id:'naval-a',c:CO},{id:'naval-a',c:CO},{id:'naval-a',c:CO}] },
+    e(waterBg),
+    e(landBg),
+    e(landBg),
+    e(landBg),
+  ]},
+];
+
+const mapGrid = document.getElementById('map-grid');
+let gridHTML = '';
+mapRows.forEach((row, ri) => {
+  const oc = row.offset ? ' offset' : '';
+  const mt = ri === 0 ? ' style="margin-top:0"' : '';
+  gridHTML += `<div class="hex-row${oc}"${mt}>`;
+  row.cells.forEach(cell => {
+    const unitsHTML = cell.u.map(u => iconSVG(u.id, 12, u.c)).join('');
+    gridHTML += `<div class="hex-cell" style="background:${cell.bg};"><div class="hex-inner">${unitsHTML}</div></div>`;
+  });
+  gridHTML += '</div>';
+});
+mapGrid.innerHTML = gridHTML;
+
+document.getElementById('map-legend').innerHTML = `
+  <span><span class="legend-dot" style="background:${nordBg}"></span> Nordostan</span>
+  <span><span class="legend-dot" style="background:${heartBg}"></span> Heartland</span>
+  <span><span class="legend-dot" style="background:${waterBg}"></span> Water</span>
+  <span><span class="legend-dot" style="background:${landBg}"></span> Neutral land</span>
+  <span>${iconSVG('ground-a2',12,ND)} Nordostan</span>
+  <span>${iconSVG('ground-a2',12,HL)} Heartland</span>
+  <span>${iconSVG('naval-a',12,CO)} Columbia</span>
+  <span>${iconSVG('naval-a',12,CC)} Cathay</span>
+`;
+
+// ============================================================
+// SECTION 6: SIZE RECOMMENDATION
+// ============================================================
+const sizeRec = document.getElementById('size-rec');
+const allIcons = ['naval-a','ground-a2','ad-a','tac-a','strat-a'];
+const sizes = [10, 12, 14, 16];
+
+let sizeHTML = '<div style="display:flex;gap:32px;flex-wrap:wrap;align-items:flex-start;">';
+sizes.forEach(sz => {
+  sizeHTML += `
+    <div class="size-compare-item">
+      <div class="px-label">${sz}px</div>
+      <div class="size-compare-icons" style="background:var(--dark-bg);">
+        ${allIcons.map(id => iconSVG(id, sz, '#E8E4DC')).join('')}
+      </div>
+      <div class="size-compare-icons" style="margin-top:4px;">
+        ${allIcons.map(id => iconSVG(id, sz, '#1A2332')).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--text-muted);margin-top:6px;max-width:120px;">
+        ${sz === 10 ? 'Very compact. Hard to distinguish types.' :
+          sz === 12 ? 'Compact. Types distinguishable. Good density.' :
+          sz === 14 ? 'Balanced. Clear shapes. Moderate density.' :
+          'Large. Very clear. Lower density on hexes.'}
+      </div>
+    </div>
+  `;
+});
+sizeHTML += '</div>';
+
+// Also show full set at each size in a hex context
+sizeHTML += '<h3 style="margin-top:24px;">In-Hex Density Test</h3>';
+sizeHTML += '<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;">';
+sizes.forEach(sz => {
+  const hexIcons = [{id:'ground-a2',color:ND},{id:'ground-a2',color:ND},{id:'tac-a',color:ND}];
+  const inner = hexIcons.map(ic => iconSVG(ic.id, sz, ic.color)).join('');
+  sizeHTML += `
+    <div class="hex-demo-wrap">
+      <div class="hex" style="background:${nordBg};">
+        <div class="hex-inner">${inner}</div>
+      </div>
+      <div class="hex-demo-label">${sz}px<br>2 tanks + 1 jet</div>
+    </div>
+  `;
+});
+sizeHTML += '</div>';
+
+sizeRec.innerHTML = sizeHTML;
+</script>
+
+</body>
+</html>

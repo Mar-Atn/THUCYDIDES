@@ -151,7 +151,7 @@ def assess_military_balance(ws: WorldState, country_id: str) -> dict:
         "ground": mil.get("ground", 0),
         "naval": mil.get("naval", 0),
         "air": mil.get("tactical_air", 0),
-        "missiles": mil.get("strategic_missiles", 0),
+        "missiles": mil.get("strategic_missile", 0),
         "enemies": enemies,
         "at_war": len(enemies) > 0,
         "overstretch": len(enemies) > 1,

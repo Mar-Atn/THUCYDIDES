@@ -48,6 +48,11 @@ yamato,the_assembly,member,false
 solaria,the_league,member,false
 solaria,the_cartel,leader,false
 solaria,the_assembly,member,false
+cathay,the_pact,co_leader,false
+nordostan,the_pact,co_leader,false
+bharata,the_pact,member,false
+persia,the_pact,observer,false
+phrygia,the_pact,dialogue_partner,false
 choson,the_assembly,member,false
 hanguk,the_assembly,member,false
 caribe,the_assembly,member,false

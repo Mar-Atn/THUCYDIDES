@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Unit Icons — Option Gallery v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --unit-color: #1A2332;
+    --bg: #111;
+    --card: #1A1D23;
+    --card-border: #2A2D33;
+    --text: #E8E4DC;
+    --text-muted: #8A8A8A;
+    --accent: #C9A84C;
+    --columbia: #4A90D9;
+    --cathay: #D94A4A;
+    --nordostan: #808080;
+    --heartland: #D4A843;
+    --persia: #4AD97A;
+    --albion: #3B6E8F;
+    --water: #D4E4F0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 40px;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  /* Section 1: Icon Gallery */
+  .unit-type-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .icon-option {
+    flex: 1;
+    min-width: 160px;
+    background: #22252B;
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+  }
+  .icon-option .label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+  }
+  .size-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  .size-row .size-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 30px;
+    text-align: right;
+  }
+  .icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .bg-dark {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #0A0D12;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 8px;
+  }
+  .bg-light {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #E8E4DC;
+    border-radius: 4px;
+    padding: 8px 12px;
+    margin-top: 4px;
+  }
+
+  /* Hex styles */
+  .hex-container {
+    position: relative;
+    display: inline-block;
+  }
+  .hex {
+    width: 48px;
+    height: 55px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  .hex-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+  }
+
+  /* Section 4: Hex grid */
+  .hex-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .hex-row {
+    display: flex;
+    gap: 4px;
+  }
+  .hex-row.offset {
+    margin-left: 26px;
+    margin-top: -14px;
+  }
+  .hex-row:not(.offset) {
+    margin-top: -14px;
+  }
+  .hex-row:first-child { margin-top: 0; }
+
+  .hex-cell {
+    width: 52px;
+    height: 60px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .hex-cell .hex-inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Country color test */
+  .color-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .color-swatch {
+    text-align: center;
+  }
+  .color-swatch .name {
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .color-icons {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #0A0D12;
+    padding: 8px 12px;
+    border-radius: 4px;
+  }
+  .color-icons-light {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    background: #E8E4DC;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-top: 4px;
+  }
+
+  .section-spacer { height: 40px; }
+
+  .flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .hex-demo-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .grid-legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .grid-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<h1>Thucydides Trap -- Unit Icon Options</h1>
+<p class="subtitle">Inline SVG icons for hex-map military units. All monochrome, single fill, CSS-variable colored. v1.0</p>
+
+<!-- ============================================================ -->
+<!-- SVG ICON DEFINITIONS (hidden, referenced via <use>) -->
+<!-- ============================================================ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <!-- NAVAL A: Side-view warship silhouette -->
+  <symbol id="naval-a" viewBox="0 0 24 24">
+    <path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="currentColor"/>
+  </symbol>
+  <!-- NAVAL B: Top-down hull -->
+  <symbol id="naval-b" viewBox="0 0 24 24">
+    <path d="M12 2 L16 8 L17 14 L16 18 L14 21 L12 22 L10 21 L8 18 L7 14 L8 8 Z" fill="currentColor"/>
+  </symbol>
+  <!-- NAVAL C: Anchor -->
+  <symbol id="naval-c" viewBox="0 0 24 24">
+    <path d="M12 2 C10.3 2 9 3.3 9 5 C9 6.3 9.8 7.4 11 7.8 L11 18.5 L7 15 L5.5 16.5 L12 22 L18.5 16.5 L17 15 L13 18.5 L13 7.8 C14.2 7.4 15 6.3 15 5 C15 3.3 13.7 2 12 2 Z M12 4 C12.6 4 13 4.4 13 5 C13 5.6 12.6 6 12 6 C11.4 6 11 5.6 11 5 C11 4.4 11.4 4 12 4 Z" fill="currentColor"/>
+  </symbol>
+  <!-- NAVAL D: Sail + hull -->
+  <symbol id="naval-d" viewBox="0 0 24 24">
+    <path d="M11 3 L11 14 L4 14 Z" fill="currentColor"/>
+    <path d="M3 16 L5 15 L19 15 L21 16 L20 18 L4 18 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- GROUND A: Tank silhouette -->
+  <symbol id="ground-a" viewBox="0 0 24 24">
+    <path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="currentColor"/>
+    <path d="M4 11 L20 11 L21 13 L21 15 L3 15 L3 13 Z" fill="currentColor"/>
+    <path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="currentColor"/>
+    <rect x="3" y="16" width="3" height="2" rx="1" fill="currentColor" opacity="0"/>
+  </symbol>
+  <!-- GROUND B: Soldier silhouette -->
+  <symbol id="ground-b" viewBox="0 0 24 24">
+    <circle cx="12" cy="4" r="3" fill="currentColor"/>
+    <path d="M8 8 L16 8 L17 9 L15 9 L15 14 L18 14 L18 16 L15 16 L15 22 L13 22 L13 16 L11 16 L11 22 L9 22 L9 16 L6 16 L6 14 L9 14 L9 9 L7 9 Z" fill="currentColor"/>
+  </symbol>
+  <!-- GROUND C: Shield with cross -->
+  <symbol id="ground-c" viewBox="0 0 24 24">
+    <path d="M12 2 L4 6 L4 12 C4 17 8 21 12 22 C16 21 20 17 20 12 L20 6 Z" fill="currentColor"/>
+    <path d="M11 7 L13 7 L13 11 L17 11 L17 13 L13 13 L13 17 L11 17 L11 13 L7 13 L7 11 L11 11 Z" fill="var(--card)"/>
+  </symbol>
+  <!-- GROUND D: Crossed swords -->
+  <symbol id="ground-d" viewBox="0 0 24 24">
+    <path d="M4 2 L6 2 L20 16 L22 18 L20 20 L18 22 L16 20 L2 6 L2 4 Z" fill="currentColor"/>
+    <path d="M20 2 L18 2 L4 16 L2 18 L4 20 L6 22 L8 20 L22 6 L22 4 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- AIR DEFENSE A: Radar dish / umbrella -->
+  <symbol id="ad-a" viewBox="0 0 24 24">
+    <path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="currentColor"/>
+    <rect x="11" y="9" width="2" height="11" fill="currentColor"/>
+    <rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/>
+  </symbol>
+  <!-- AIR DEFENSE B: Upward arrows -->
+  <symbol id="ad-b" viewBox="0 0 24 24">
+    <path d="M12 2 L16 8 L13.5 8 L13.5 11 L15 11 L12 6 L9 11 L10.5 11 L10.5 8 L8 8 Z" fill="currentColor"/>
+    <path d="M7 10 L10 15 L8.5 15 L8.5 22 L5.5 22 L5.5 15 L4 15 Z" fill="currentColor"/>
+    <path d="M17 10 L14 15 L15.5 15 L15.5 22 L18.5 22 L18.5 15 L20 15 Z" fill="currentColor"/>
+  </symbol>
+  <!-- AIR DEFENSE C: Shield with upward chevron -->
+  <symbol id="ad-c" viewBox="0 0 24 24">
+    <path d="M12 2 L4 6 L4 12 C4 17 8 21 12 22 C16 21 20 17 20 12 L20 6 Z" fill="currentColor"/>
+    <path d="M12 7 L7 13 L9 13 L12 10 L15 13 L17 13 Z" fill="var(--card)"/>
+    <path d="M12 12 L7 18 L9 18 L12 15 L15 18 L17 18 Z" fill="var(--card)"/>
+  </symbol>
+  <!-- AIR DEFENSE D: SAM launcher -->
+  <symbol id="ad-d" viewBox="0 0 24 24">
+    <rect x="3" y="18" width="18" height="3" rx="1" fill="currentColor"/>
+    <rect x="6" y="16" width="4" height="3" fill="currentColor"/>
+    <path d="M9 17 L18 5 L20 5 L20 7 L19 8 L11 17 Z" fill="currentColor"/>
+    <path d="M18 3 L22 3 L22 7 L18 5 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TACTICAL AIR A: Fighter jet top-down -->
+  <symbol id="tac-a" viewBox="0 0 24 24">
+    <path d="M12 1 L13.5 6 L14 10 L20 14 L20 16 L14 14 L14 19 L17 21 L17 23 L12 21 L7 23 L7 21 L10 19 L10 14 L4 16 L4 14 L10 10 L10.5 6 Z" fill="currentColor"/>
+  </symbol>
+  <!-- TACTICAL AIR B: Missile -->
+  <symbol id="tac-b" viewBox="0 0 24 24">
+    <path d="M12 1 L14 5 L14 16 L17 20 L17 23 L12 20 L7 23 L7 20 L10 16 L10 5 Z" fill="currentColor"/>
+  </symbol>
+  <!-- TACTICAL AIR C: Swept wing -->
+  <symbol id="tac-c" viewBox="0 0 24 24">
+    <path d="M12 4 L13 10 L22 16 L22 18 L13 14 L13 18 L12 20 L11 18 L11 14 L2 18 L2 16 L11 10 Z" fill="currentColor"/>
+  </symbol>
+  <!-- TACTICAL AIR D: Drone / UAV -->
+  <symbol id="tac-d" viewBox="0 0 24 24">
+    <path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="currentColor"/>
+    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- STRATEGIC MISSILES A: ICBM vertical -->
+  <symbol id="strat-a" viewBox="0 0 24 24">
+    <path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="currentColor"/>
+  </symbol>
+  <!-- STRATEGIC MISSILES B: Radiation trefoil simplified -->
+  <symbol id="strat-b" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="3" fill="currentColor"/>
+    <path d="M12 2 C9 2 6.5 3.5 5.5 6 L10 9 C10.5 8.4 11.2 8 12 8 C12.8 8 13.5 8.4 14 9 L18.5 6 C17.5 3.5 15 2 12 2 Z" fill="currentColor"/>
+    <path d="M4 9 C2.8 11.3 2.8 14 4.2 16.3 L9 14 C8.6 13.4 8.4 12.7 8.4 12 C8.4 11.2 8.7 10.5 9.2 9.8 Z" fill="currentColor"/>
+    <path d="M20 9 L14.8 9.8 C15.3 10.5 15.6 11.2 15.6 12 C15.6 12.7 15.4 13.4 15 14 L19.8 16.3 C21.2 14 21.2 11.3 20 9 Z" fill="currentColor"/>
+  </symbol>
+  <!-- STRATEGIC MISSILES C: Upward arrow with circle -->
+  <symbol id="strat-c" viewBox="0 0 24 24">
+    <path d="M12 1 L17 8 L14 8 L14 14 L10 14 L10 8 L7 8 Z" fill="currentColor"/>
+    <circle cx="12" cy="18" r="4" fill="currentColor"/>
+    <circle cx="12" cy="18" r="2" fill="var(--card)"/>
+  </symbol>
+  <!-- STRATEGIC MISSILES D: Mushroom cloud -->
+  <symbol id="strat-d" viewBox="0 0 24 24">
+    <path d="M8 12 C5 12 3 10 3 8 C3 5.5 5.5 4 7.5 4 C8 2.5 9.5 1 12 1 C14.5 1 16 2.5 16.5 4 C18.5 4 21 5.5 21 8 C21 10 19 12 16 12 Z" fill="currentColor"/>
+    <path d="M10 12 L9 16 L7 16 L7 18 L10 18 L10 22 L14 22 L14 18 L17 18 L17 16 L15 16 L14 12 Z" fill="currentColor"/>
+  </symbol>
+</svg>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: ICON GALLERY -->
+<!-- ============================================================ -->
+<div class="section-spacer"></div>
+<div class="card">
+<h2>Section 1: Icon Gallery</h2>
+<p style="color:var(--text-muted);font-size:12px;margin-bottom:20px;">Each unit type shown in 4 design options. Sizes: 32px (legend), 18px (map standard), 12px (compact). Dark and light backgrounds.</p>
+
+<!-- NAVAL -->
+<h3>Naval (Warships)</h3>
+<div class="unit-type-row" id="naval-gallery"></div>
+
+<!-- GROUND -->
+<h3>Ground (Army / Land Forces)</h3>
+<div class="unit-type-row" id="ground-gallery"></div>
+
+<!-- AIR DEFENSE -->
+<h3>Air Defense</h3>
+<div class="unit-type-row" id="ad-gallery"></div>
+
+<!-- TACTICAL AIR -->
+<h3>Tactical Air (Missiles, Drones, Strike)</h3>
+<div class="unit-type-row" id="tac-gallery"></div>
+
+<!-- STRATEGIC MISSILES -->
+<h3>Strategic Missiles (Nuclear / ICBM)</h3>
+<div class="unit-type-row" id="strat-gallery"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: SIZE TEST ON MAP HEX -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 2: Size Test on Map Hex</h2>
+<p style="color:var(--text-muted);font-size:12px;margin-bottom:20px;">Best-readability picks placed on 48px hexes. Demonstrates stacking multiple units in a single hex.</p>
+
+<div class="flex-center" id="hex-demos"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: COUNTRY COLOR TEST -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 3: Country Color Test</h2>
+<p style="color:var(--text-muted);font-size:12px;margin-bottom:20px;">Same icon set in each country's color, on dark and light backgrounds.</p>
+
+<div id="color-test"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: MAP INTEGRATION PREVIEW -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 4: Map Integration Preview</h2>
+<p style="color:var(--text-muted);font-size:12px;margin-bottom:20px;">5x5 hex grid with units placed on country-colored and water hexes.</p>
+
+<div style="display:flex;justify-content:center;padding:20px 0;">
+  <div id="map-grid"></div>
+</div>
+
+<div class="grid-legend" id="map-legend"></div>
+</div>
+
+<div style="height:40px;"></div>
+<p style="color:var(--text-muted);font-size:11px;text-align:center;">TTT Unit Icon Gallery v1.0 -- Thucydides Trap Simulation -- MetaGames 2026</p>
+<div style="height:20px;"></div>
+
+<script>
+// ============================================================
+// ICON RENDERING HELPERS
+// ============================================================
+
+function iconSVG(id, size, color) {
+  const c = color || 'var(--unit-color)';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${c};display:block;"><use href="#${id}"/></svg>`;
+}
+
+// Gallery data
+const units = [
+  { type: 'naval', label: 'Naval', options: [
+    { id: 'naval-a', label: 'A: Warship Profile' },
+    { id: 'naval-b', label: 'B: Top-Down Hull' },
+    { id: 'naval-c', label: 'C: Anchor' },
+    { id: 'naval-d', label: 'D: Sail + Hull' },
+  ]},
+  { type: 'ground', label: 'Ground', options: [
+    { id: 'ground-a', label: 'A: Tank' },
+    { id: 'ground-b', label: 'B: Soldier' },
+    { id: 'ground-c', label: 'C: Shield + Cross' },
+    { id: 'ground-d', label: 'D: Crossed Swords' },
+  ]},
+  { type: 'ad', label: 'Air Defense', options: [
+    { id: 'ad-a', label: 'A: Radar Dish' },
+    { id: 'ad-b', label: 'B: Upward Arrows' },
+    { id: 'ad-c', label: 'C: Shield + Chevron' },
+    { id: 'ad-d', label: 'D: SAM Launcher' },
+  ]},
+  { type: 'tac', label: 'Tactical Air', options: [
+    { id: 'tac-a', label: 'A: Fighter Jet' },
+    { id: 'tac-b', label: 'B: Missile' },
+    { id: 'tac-c', label: 'C: Swept Wing' },
+    { id: 'tac-d', label: 'D: Drone / UAV' },
+  ]},
+  { type: 'strat', label: 'Strategic', options: [
+    { id: 'strat-a', label: 'A: ICBM' },
+    { id: 'strat-b', label: 'B: Radiation Trefoil' },
+    { id: 'strat-c', label: 'C: Arrow + Circle' },
+    { id: 'strat-d', label: 'D: Mushroom Cloud' },
+  ]},
+];
+
+// Best picks for hex demos (most readable at 12px)
+const bestPicks = {
+  naval: 'naval-a',
+  ground: 'ground-a',
+  ad: 'ad-a',
+  tac: 'tac-a',
+  strat: 'strat-a',
+};
+
+const countries = [
+  { name: 'Columbia', color: '#4A90D9' },
+  { name: 'Cathay', color: '#D94A4A' },
+  { name: 'Nordostan', color: '#808080' },
+  { name: 'Heartland', color: '#D4A843' },
+  { name: 'Persia', color: '#4AD97A' },
+  { name: 'Albion', color: '#3B6E8F' },
+];
+
+// ============================================================
+// SECTION 1: Build Gallery
+// ============================================================
+units.forEach(unit => {
+  const container = document.getElementById(`${unit.type}-gallery`);
+  unit.options.forEach(opt => {
+    const div = document.createElement('div');
+    div.className = 'icon-option';
+    div.innerHTML = `
+      <div class="label">${opt.label}</div>
+      <div class="size-row">
+        <span class="size-label">32</span>
+        ${iconSVG(opt.id, 32)}
+      </div>
+      <div class="size-row">
+        <span class="size-label">18</span>
+        ${iconSVG(opt.id, 18)}
+      </div>
+      <div class="size-row">
+        <span class="size-label">12</span>
+        ${iconSVG(opt.id, 12)}
+      </div>
+      <div class="bg-dark">
+        ${iconSVG(opt.id, 18, '#E8E4DC')}
+        ${iconSVG(opt.id, 12, '#E8E4DC')}
+      </div>
+      <div class="bg-light">
+        ${iconSVG(opt.id, 18, '#1A2332')}
+        ${iconSVG(opt.id, 12, '#1A2332')}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+});
+
+// ============================================================
+// SECTION 2: Hex Demos
+// ============================================================
+function hexWithUnits(icons, bgColor, label) {
+  const inner = icons.map(ic => iconSVG(ic.id, ic.size || 12, ic.color || '#E8E4DC')).join('');
+  return `
+    <div style="text-align:center;">
+      <div class="hex" style="background:${bgColor || '#2A3A2A'};">
+        <div class="hex-inner">${inner}</div>
+      </div>
+      <div class="hex-demo-label">${label}</div>
+    </div>
+  `;
+}
+
+const hexDemos = document.getElementById('hex-demos');
+hexDemos.innerHTML = [
+  hexWithUnits(
+    [{id:'ground-a'},{id:'ground-a'},{id:'ground-a'}],
+    '#3A4A3A', '3x Ground'
+  ),
+  hexWithUnits(
+    [{id:'naval-a'},{id:'naval-a'},{id:'tac-a'}],
+    '#2A3A4A', '2x Naval + 1x Air'
+  ),
+  hexWithUnits(
+    [{id:'naval-a'},{id:'ground-a'},{id:'ad-a'},{id:'tac-a'},{id:'strat-a'}],
+    '#3A3A3A', '1 of each type'
+  ),
+  hexWithUnits(
+    [{id:'ground-a', color:'#D94A4A'},{id:'ground-a', color:'#D94A4A'},{id:'ad-a', color:'#D94A4A'}],
+    '#4A2A2A', 'Cathay forces'
+  ),
+  hexWithUnits(
+    [{id:'naval-a', color:'#4A90D9'},{id:'tac-a', color:'#4A90D9'}],
+    '#D4E4F0', 'Columbia (water hex)'
+  ),
+].join('');
+
+// ============================================================
+// SECTION 3: Country Colors
+// ============================================================
+const colorTest = document.getElementById('color-test');
+const allBest = ['naval-a','ground-a','ad-a','tac-a','strat-a'];
+
+countries.forEach(c => {
+  const div = document.createElement('div');
+  div.className = 'color-swatch';
+  div.style.marginBottom = '16px';
+  div.innerHTML = `
+    <div class="name" style="color:${c.color}">${c.name} <span style="color:var(--text-muted)">${c.color}</span></div>
+    <div class="color-icons">
+      ${allBest.map(id => iconSVG(id, 18, c.color)).join('')}
+      <span style="width:12px"></span>
+      ${allBest.map(id => iconSVG(id, 12, c.color)).join('')}
+    </div>
+    <div class="color-icons-light">
+      ${allBest.map(id => iconSVG(id, 18, c.color)).join('')}
+      <span style="width:12px"></span>
+      ${allBest.map(id => iconSVG(id, 12, c.color)).join('')}
+    </div>
+  `;
+  colorTest.appendChild(div);
+});
+
+// ============================================================
+// SECTION 4: Map Integration (5x5 hex grid)
+// ============================================================
+
+// Grid definition: 5 rows alternating 5 and 4 hexes
+// Each cell: { bg, units: [{id, color}] }
+const empty = (bg) => ({ bg, units: [] });
+const waterBg = '#D4E4F0';
+const landBg = '#C8D8C0';
+const cathayBg = '#E8C8C8';
+const columbiaBg = '#C8D8E8';
+const heartlandBg = '#E8DCC0';
+const cathayColor = '#D94A4A';
+const columbiaColor = '#4A90D9';
+const heartlandColor = '#D4A843';
+
+const gridRows = [
+  // Row 0 (5 cells)
+  { offset: false, cells: [
+    empty(landBg),
+    { bg: cathayBg, units: [{id:'naval-a',color:cathayColor},{id:'ground-a',color:cathayColor}] },
+    { bg: cathayBg, units: [{id:'ground-a',color:cathayColor},{id:'ground-a',color:cathayColor},{id:'ad-a',color:cathayColor}] },
+    empty(landBg),
+    empty(landBg),
+  ]},
+  // Row 1 (5 cells, offset)
+  { offset: true, cells: [
+    empty(landBg),
+    empty(waterBg),
+    { bg: waterBg, units: [{id:'naval-a',color:cathayColor}] },
+    { bg: heartlandBg, units: [{id:'ground-a',color:heartlandColor},{id:'ad-a',color:heartlandColor}] },
+    empty(landBg),
+  ]},
+  // Row 2 (5 cells)
+  { offset: false, cells: [
+    empty(landBg),
+    { bg: waterBg, units: [{id:'naval-a',color:columbiaColor},{id:'naval-a',color:columbiaColor}] },
+    empty(waterBg),
+    empty(landBg),
+    empty(landBg),
+  ]},
+  // Row 3 (5 cells, offset)
+  { offset: true, cells: [
+    empty(landBg),
+    { bg: waterBg, units: [{id:'naval-a',color:columbiaColor}] },
+    { bg: columbiaBg, units: [{id:'tac-a',color:columbiaColor},{id:'ground-a',color:columbiaColor}] },
+    { bg: columbiaBg, units: [{id:'naval-a',color:columbiaColor},{id:'tac-a',color:columbiaColor},{id:'ad-a',color:columbiaColor}] },
+    empty(landBg),
+  ]},
+  // Row 4 (5 cells)
+  { offset: false, cells: [
+    empty(landBg),
+    empty(waterBg),
+    empty(landBg),
+    empty(landBg),
+    empty(landBg),
+  ]},
+];
+
+const mapGrid = document.getElementById('map-grid');
+let gridHTML = '';
+
+gridRows.forEach((row, ri) => {
+  const offsetClass = row.offset ? ' offset' : '';
+  if (ri === 0) {
+    gridHTML += `<div class="hex-row${offsetClass}" style="margin-top:0">`;
+  } else {
+    gridHTML += `<div class="hex-row${offsetClass}">`;
+  }
+  row.cells.forEach(cell => {
+    const unitsHTML = cell.units.map(u => iconSVG(u.id, 12, u.color)).join('');
+    gridHTML += `<div class="hex-cell" style="background:${cell.bg};"><div class="hex-inner">${unitsHTML}</div></div>`;
+  });
+  gridHTML += '</div>';
+});
+
+mapGrid.innerHTML = gridHTML;
+
+// Legend
+const mapLegend = document.getElementById('map-legend');
+mapLegend.innerHTML = `
+  <span><span class="legend-dot" style="background:${cathayBg}"></span> Cathay territory</span>
+  <span><span class="legend-dot" style="background:${columbiaBg}"></span> Columbia territory</span>
+  <span><span class="legend-dot" style="background:${heartlandBg}"></span> Heartland territory</span>
+  <span><span class="legend-dot" style="background:${waterBg}"></span> Water</span>
+  <span><span class="legend-dot" style="background:${landBg}"></span> Neutral land</span>
+  <span>${iconSVG('naval-a',12,cathayColor)} Cathay units</span>
+  <span>${iconSVG('naval-a',12,columbiaColor)} Columbia units</span>
+  <span>${iconSVG('ground-a',12,heartlandColor)} Heartland units</span>
+`;
+</script>
+
+</body>
+</html>

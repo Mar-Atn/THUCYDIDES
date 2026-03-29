@@ -358,12 +358,10 @@ class WorldModelEngine:
         # --- SUPPLY SIDE ---
         supply = 1.0
 
-        # OPEC production decisions
+        # OPEC production decisions (5 levels: min/low/normal/high/max)
         for member, decision in self.ws.opec_production.items():
-            if decision == "low":
-                supply -= 0.06
-            elif decision == "high":
-                supply += 0.06
+            multiplier = OPEC_PRODUCTION_MULTIPLIER.get(decision, 1.0)
+            supply += (multiplier - 1.0) * 0.20  # scale contribution per member
 
         # Sanctions on oil producers reduce supply
         for producer in ("nordostan", "persia"):
@@ -803,8 +801,8 @@ class WorldModelEngine:
 
         # Cathay strategic missile growth
         if country_id == "cathay" and mil.get("strategic_missile_growth", 0) > 0:
-            mil["strategic_missiles"] = mil.get("strategic_missiles", 0) + 1
-            produced["strategic_missiles"] = 1
+            mil["strategic_missile"] = mil.get("strategic_missile", 0) + 1
+            produced["strategic_missile"] = 1
             self._log.append("  Cathay strategic missile: +1")
 
         if any(v > 0 for v in produced.values()):
@@ -848,6 +846,14 @@ class WorldModelEngine:
             tech["ai_level"] += 1
             tech["ai_rd_progress"] = 0.0
             result["ai_levelup"] = True
+            # When reaching L4, randomly determine if country gets combat bonus
+            # (determined once, never changes — per ACTION REVIEW 2026-03-30)
+            if tech["ai_level"] == 4:
+                tech["ai_l4_bonus"] = random.random() < 0.50
+                result["ai_l4_bonus"] = tech["ai_l4_bonus"]
+                self._log.append(
+                    f"  AI L4 COMBAT BONUS: {country_id} "
+                    f"{'GRANTED (+1)' if tech['ai_l4_bonus'] else 'NOT GRANTED'}")
             self._log.append(
                 f"  TECH BREAKTHROUGH: {country_id} AI->L{tech['ai_level']}")
 
@@ -2686,29 +2692,66 @@ class WorldModelEngine:
     # SANCTIONS & TARIFFS IMPACT
     # ===================================================================
 
+    # S-curve interpolation points for sanctions effectiveness
+    _SANCTIONS_S_CURVE = [
+        (0.0, 0.0), (0.3, 0.10), (0.5, 0.20),
+        (0.7, 0.60), (0.9, 0.90), (1.0, 1.0),
+    ]
+
+    @staticmethod
+    def _interpolate_s_curve(x: float, curve: List[Tuple[float, float]]) -> float:
+        """Linear interpolation on a piecewise curve."""
+        x = clamp(x, curve[0][0], curve[-1][0])
+        for i in range(len(curve) - 1):
+            x0, y0 = curve[i]
+            x1, y1 = curve[i + 1]
+            if x0 <= x <= x1:
+                t = (x - x0) / (x1 - x0) if x1 != x0 else 0.0
+                return y0 + t * (y1 - y0)
+        return curve[-1][1]
+
     def _calc_sanctions_impact(self, target_id: str) -> Tuple[float, Dict[str, float]]:
-        """Total sanctions damage to target + cost to each sanctioner."""
+        """S-curve sanctions model.
+
+        coverage = sum of (sanctioner_GDP / total_GDP) * (level / 3)
+        effectiveness = interpolate on S-curve
+        damage = max_damage * effectiveness * target_trade_openness
+        """
         sanctions = self.ws.bilateral.get("sanctions", {})
         tw = self.trade_weights
 
-        raw_impacts: List[float] = []
         costs: Dict[str, float] = {}
-        coalition_coverage = 0.0
+        total_gdp = sum(c["economic"]["gdp"] for c in self.ws.countries.values())
+        if total_gdp <= 0:
+            return 0.0, costs
 
+        # Compute coverage: weighted GDP share of sanctioning coalition
+        coverage = 0.0
         for sanctioner_id, targets in sanctions.items():
             if sanctioner_id.startswith("_"):
                 continue
             level = targets.get(target_id, 0)
             if level <= 0:
                 continue
+            sanctioner_gdp = self.ws.countries.get(sanctioner_id, {}).get(
+                "economic", {}).get("gdp", 0)
+            coverage += (sanctioner_gdp / total_gdp) * (level / 3.0)
+            # Cost to sanctioner: proportional to bilateral trade weight
             bw = tw.get(sanctioner_id, {}).get(target_id, 0.0)
-            raw_impact = level * bw * 0.03
-            raw_impacts.append(raw_impact)
-            coalition_coverage += bw
             costs[sanctioner_id] = level * bw * 0.012
 
-        effectiveness = 1.0 if coalition_coverage >= 0.6 else 0.3
-        total_damage = sum(raw_impacts) * effectiveness
+        # S-curve effectiveness
+        effectiveness = self._interpolate_s_curve(coverage, self._SANCTIONS_S_CURVE)
+
+        # Target trade openness (trade_balance magnitude / GDP as proxy, clamped 0-1)
+        target_c = self.ws.countries.get(target_id, {})
+        target_gdp = target_c.get("economic", {}).get("gdp", 1)
+        trade_bal = abs(target_c.get("economic", {}).get("trade_balance", 0))
+        trade_openness = clamp(trade_bal / max(target_gdp, 1) + 0.3, 0.0, 1.0)
+
+        max_damage = 0.50  # maximum possible sanctions damage fraction
+        total_damage = max_damage * effectiveness * trade_openness
+
         # FIX 7: Dollar credibility scales sanctions effectiveness
         dollar_cred = getattr(self.ws, 'dollar_credibility', 100)
         total_damage *= dollar_cred / 100.0
@@ -3150,7 +3193,7 @@ class WorldModelEngine:
 
     def _apply_opec_changes(self, changes: dict) -> None:
         for member, level in changes.items():
-            if level in ("low", "normal", "high"):
+            if level in ("min", "low", "normal", "high", "max"):
                 self.ws.opec_production[member] = level
 
     def _apply_rare_earth_changes(self, changes: dict) -> None:
@@ -3216,19 +3259,114 @@ class WorldModelEngine:
                 if self.ws.chokepoint_status.get(cp_key) == "blocked":
                     self.ws.chokepoint_status[cp_key] = "open"
 
+    # Stability cost lookup: (regime_type, at_war) -> stability cost
+    _MOBILIZATION_STABILITY_COST = {
+        ("democracy", False): 1.5,
+        ("democracy", True): 0.5,
+        ("autocracy", False): 0.3,
+        ("autocracy", True): 0.3,
+        ("hybrid", False): 0.5,
+        ("hybrid", True): 0.3,
+    }
+
+    # Special case: country under invasion gets minimal cost
+    _MOBILIZATION_UNDER_INVASION_COST = 0.2
+
     def _apply_mobilization(self, country_id: str, level: str) -> None:
+        """Finite depletable mobilization pool. Never recovers.
+
+        level: 'partial' = floor(remaining_pool / 2)
+               'full'    = all remaining pool
+        """
         c = self.ws.countries[country_id]
         mil = c["military"]
-        cap = mil.get("production_capacity", {})
-        mult = {"partial": 0.5, "general": 1.0, "total": 2.0}.get(level, 0)
-        stab_cost = {"partial": 0.5, "general": 1.0, "total": 2.0}.get(level, 0)
-        mobilized = int(cap.get("ground", 0) * mult)
+        pool = mil.get("mobilization_pool", 0)
+
+        if pool <= 0:
+            self._log.append(
+                f"  Mobilization {country_id} ({level}): REJECTED — pool exhausted")
+            return
+
+        if level == "partial":
+            mobilized = pool // 2  # floor division
+        elif level == "full":
+            mobilized = pool
+        else:
+            self._log.append(
+                f"  Mobilization {country_id} ({level}): REJECTED — invalid level")
+            return
+
+        if mobilized <= 0:
+            self._log.append(
+                f"  Mobilization {country_id} ({level}): REJECTED — pool too small for partial")
+            return
+
+        # Deduct from pool (never recovers)
+        mil["mobilization_pool"] = pool - mobilized
         mil["ground"] = mil.get("ground", 0) + mobilized
+
+        # Stability cost varies by regime_type + at_war
+        regime = c.get("regime_type", "democracy")
+        at_war = self.ws.get_country_at_war(country_id)
+
+        # Check if homeland is under invasion (enemy units in home zones)
+        home_zones = c.get("home_zones", [])
+        under_invasion = any(
+            zid in home_zones
+            and any(cid_f != country_id for cid_f in self.ws.zones.get(zid, {}).get("forces", {}))
+            for zid in home_zones
+        )
+
+        if under_invasion:
+            stab_cost = self._MOBILIZATION_UNDER_INVASION_COST
+        else:
+            stab_cost = self._MOBILIZATION_STABILITY_COST.get(
+                (regime, at_war), 0.5)
+
         c["political"]["stability"] = max(c["political"]["stability"] - stab_cost, 1)
         c["political"]["war_tiredness"] = (
             c["political"].get("war_tiredness", 0) + stab_cost * 0.5)
         self._log.append(
-            f"  Mobilization {country_id} ({level}): +{mobilized}G, stab-{stab_cost}")
+            f"  Mobilization {country_id} ({level}): +{mobilized}G from pool "
+            f"(remaining: {mil['mobilization_pool']}), stab-{stab_cost}")
+
+    def _apply_militia_call(self, country_id: str) -> None:
+        """Militia/Volunteer call — available only to countries under invasion or bombardment.
+
+        Generates 1-3 cheap militia ground units (0.5x combat effectiveness).
+        Represents popular resistance, revolutionary guard, volunteer fighters.
+        Minor stability cost. Gives the 'losing' side a desperation option.
+        """
+        c = self.ws.countries[country_id]
+        mil = c["military"]
+        pol = c["political"]
+
+        # Check eligibility: home territory must be occupied or under attack
+        home_zones = c.get("home_zones", [])
+        occupied = any(
+            d["zone"] in home_zones and d["country"] != country_id
+            for d in self.ws.deployments
+        )
+        at_war = len(c.get("diplomatic", {}).get("wars", [])) > 0 or bool(c.get("at_war_with"))
+
+        if not (occupied or at_war):
+            self._log.append(f"  Militia call {country_id}: REJECTED — not under attack")
+            return
+
+        # Militia capacity based on country size (GDP as proxy)
+        gdp = c["economic"]["gdp"]
+        militia_capacity = max(1, min(3, int(gdp / 30)))  # 1-3 units
+
+        # Add militia units (tagged as militia for 0.5x combat effectiveness)
+        mil["ground"] = mil.get("ground", 0) + militia_capacity
+        mil["militia_units"] = mil.get("militia_units", 0) + militia_capacity
+
+        # Minor stability cost
+        stab_cost = 0.3
+        pol["stability"] = max(pol["stability"] - stab_cost, 1)
+
+        self._log.append(
+            f"  Militia call {country_id}: +{militia_capacity}G (militia), stab-{stab_cost}")
 
     def _collate_events(self, actions: dict, results: dict) -> Dict[str, dict]:
         """Build per-country event dicts for stability/support calculations."""

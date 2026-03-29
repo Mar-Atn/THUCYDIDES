@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTT Tank Icons v5 — Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--base:#F5F6F8;--text:#1A2332;--text2:#4A5568;--action:#1A5276;--card:#fff;--border:#D8DCE5;--dark:#1B2838;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--base);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;}
+  h1,h2{font-family:'Playfair Display',serif;}
+  h1{font-size:1.6rem;margin-bottom:6px;}
+  h2{font-size:1.2rem;margin:32px 0 16px;border-bottom:2px solid var(--action);padding-bottom:4px;}
+  .c{max-width:1100px;margin:0 auto;padding:32px;}
+  .note{color:var(--text2);font-size:12px;margin-bottom:20px;}
+  .row{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:24px;}
+  .tk{text-align:center;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px 20px;flex:1;min-width:200px;}
+  .tk h4{font-size:11px;font-weight:600;color:var(--action);margin-bottom:4px;}
+  .tk .sub{font-size:10px;color:var(--text2);margin-bottom:12px;}
+  .szrow{display:flex;gap:16px;align-items:center;justify-content:center;margin:6px 0;}
+  .szrow span{font-size:9px;color:var(--text2);}
+  .dbg{background:var(--dark);padding:10px 16px;border-radius:5px;margin-top:8px;}
+  .cmp{display:flex;gap:28px;align-items:flex-end;flex-wrap:wrap;}
+  .cmp>div{text-align:center;}
+  .cmp .lbl{font-size:9px;color:var(--text2);margin-top:2px;}
+</style>
+</head>
+<body>
+<div class="c">
+<h1>Tank Icons v5 — Solid Realistic Silhouettes</h1>
+<p class="note">Gun barrel extends from the SIDE of the turret. Turret is a SOLID block sitting on the hull. Hull is complete, no gaps. Single unified silhouette.</p>
+
+<div class="row">
+
+<!-- TANK A: The key insight - ONE SINGLE PATH, no gaps, barrel from turret center-right -->
+<div class="tk">
+<h4>A. Solid Profile (Leopard 2)</h4>
+<div class="sub">Single path. Barrel from turret face. Solid throughout.</div>
+<!--
+  Anatomy (bottom to top):
+  - Track band: full width, bottom
+  - Hull: sits on tracks, sloped front, flat rear
+  - Turret: solid block, sits on hull at ~55% from front
+  - Barrel: extends RIGHT from turret front face, at turret mid-height
+-->
+<svg width="160" height="72" viewBox="0 0 160 72">
+  <!-- Track band -->
+  <path d="M18,56 Q10,56 10,52 L10,48 Q10,44 18,44 L130,44 Q138,44 138,48 L138,52 Q138,56 130,56 Z" fill="currentColor"/>
+  <!-- Road wheel cutouts -->
+  <circle cx="30" cy="50" r="4.5" fill="var(--base)"/><circle cx="50" cy="50" r="4.5" fill="var(--base)"/>
+  <circle cx="70" cy="50" r="4.5" fill="var(--base)"/><circle cx="90" cy="50" r="4.5" fill="var(--base)"/>
+  <circle cx="110" cy="50" r="4.5" fill="var(--base)"/><circle cx="126" cy="50" r="3.5" fill="var(--base)"/>
+  <!-- Hull -->
+  <path d="M14,44 L20,36 L28,34 L132,32 L136,36 L136,44 Z" fill="currentColor"/>
+  <!-- Turret - solid block on hull -->
+  <path d="M62,32 L66,24 L70,22 L108,20 L112,22 L112,32 Z" fill="currentColor"/>
+  <!-- Barrel - extends from turret front face at mid-turret height -->
+  <rect x="108" y="23" width="48" height="5" rx="2.5" fill="currentColor"/>
+</svg>
+
+<div class="szrow">
+  <div><svg width="64" height="28" viewBox="0 0 160 72"><path d="M18,56 Q10,56 10,52 L10,48 Q10,44 18,44 L130,44 Q138,44 138,48 L138,52 Q138,56 130,56 Z" fill="currentColor"/><circle cx="30" cy="50" r="4.5" fill="var(--base)"/><circle cx="55" cy="50" r="4.5" fill="var(--base)"/><circle cx="80" cy="50" r="4.5" fill="var(--base)"/><circle cx="105" cy="50" r="4.5" fill="var(--base)"/><circle cx="126" cy="50" r="3.5" fill="var(--base)"/><path d="M14,44 L20,36 L28,34 L132,32 L136,36 L136,44 Z" fill="currentColor"/><path d="M62,32 L66,24 L70,22 L108,20 L112,22 L112,32 Z" fill="currentColor"/><rect x="108" y="23" width="48" height="5" rx="2.5" fill="currentColor"/></svg><span>64px</span></div>
+  <div><svg width="36" height="16" viewBox="0 0 160 72"><path d="M16,56 Q8,56 8,50 L8,46 Q8,42 16,42 L132,42 Q140,42 140,46 L140,50 Q140,56 132,56 Z" fill="currentColor"/><path d="M12,42 L22,34 L134,30 L138,34 L138,42 Z" fill="currentColor"/><path d="M60,30 L66,22 L110,18 L114,22 L114,30 Z" fill="currentColor"/><rect x="110" y="20" width="50" height="6" rx="3" fill="currentColor"/></svg><span>36px</span></div>
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg><span>20px</span></div>
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M10,58 Q4,58 4,50 L4,40 Q4,36 12,36 L136,34 Q144,34 144,40 L144,52 Q144,58 136,58 Z" fill="currentColor"/><path d="M56,34 L62,20 L114,16 L118,20 L118,34 Z" fill="currentColor"/><rect x="114" y="17" width="46" height="8" rx="4" fill="currentColor"/></svg><span>14px</span></div>
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M8,58 Q2,58 2,50 L2,38 Q2,34 10,34 L138,32 Q146,32 146,38 L146,52 Q146,58 138,58 Z" fill="currentColor"/><path d="M54,32 L60,18 L116,14 L120,18 L120,32 Z" fill="currentColor"/><rect x="116" y="15" width="44" height="9" rx="4" fill="currentColor"/></svg><span>12px</span></div>
+</div>
+<div class="dbg szrow">
+  <div style="color:#E8ECF1"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#4A90D9"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#D94A4A"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#D4A843"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#808080"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg></div>
+</div>
+</div>
+
+<!-- TANK B: T-72 style, rounder turret -->
+<div class="tk">
+<h4>B. Solid Profile (T-72 / Eastern)</h4>
+<div class="sub">Rounded turret dome. Lower profile. Barrel from turret face.</div>
+<svg width="160" height="72" viewBox="0 0 160 72">
+  <path d="M18,56 Q10,56 10,52 L10,48 Q10,44 18,44 L130,44 Q138,44 138,48 L138,52 Q138,56 130,56 Z" fill="currentColor"/>
+  <circle cx="28" cy="50" r="4.5" fill="var(--base)"/><circle cx="46" cy="50" r="4.5" fill="var(--base)"/>
+  <circle cx="64" cy="50" r="4.5" fill="var(--base)"/><circle cx="82" cy="50" r="4.5" fill="var(--base)"/>
+  <circle cx="100" cy="50" r="4.5" fill="var(--base)"/><circle cx="118" cy="50" r="4.5" fill="var(--base)"/>
+  <path d="M14,44 L18,38 L24,36 L130,34 L134,38 L134,44 Z" fill="currentColor"/>
+  <!-- Rounded turret -->
+  <ellipse cx="82" cy="30" rx="24" ry="10" fill="currentColor"/>
+  <path d="M58,34 L106,34 L106,30 L58,30 Z" fill="currentColor"/>
+  <!-- Barrel from turret right edge -->
+  <rect x="104" y="27" width="52" height="5" rx="2.5" fill="currentColor"/>
+</svg>
+<div class="szrow">
+  <div><svg width="36" height="16" viewBox="0 0 160 72"><path d="M16,56 Q8,56 8,50 L8,46 Q8,42 16,42 L132,42 Q140,42 140,46 L140,50 Q140,56 132,56 Z" fill="currentColor"/><path d="M12,42 L18,36 L132,32 L136,36 L136,42 Z" fill="currentColor"/><ellipse cx="80" cy="28" rx="26" ry="10" fill="currentColor"/><path d="M56,32 L106,32 L106,28 L56,28 Z" fill="currentColor"/><rect x="104" y="25" width="52" height="6" rx="3" fill="currentColor"/></svg><span>36px</span></div>
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg><span>20px</span></div>
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M10,58 Q4,58 4,50 L4,40 Q4,34 12,34 L138,32 Q146,32 146,40 L146,52 Q146,58 138,58 Z" fill="currentColor"/><ellipse cx="76" cy="26" rx="30" ry="12" fill="currentColor"/><rect x="104" y="22" width="52" height="8" rx="4" fill="currentColor"/></svg><span>14px</span></div>
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M8,58 Q2,58 2,50 L2,38 Q2,32 10,32 L140,30 Q148,30 148,38 L148,52 Q148,58 140,58 Z" fill="currentColor"/><ellipse cx="74" cy="24" rx="32" ry="12" fill="currentColor"/><rect x="104" y="20" width="52" height="9" rx="4" fill="currentColor"/></svg><span>12px</span></div>
+</div>
+<div class="dbg szrow">
+  <div style="color:#E8ECF1"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#4A90D9"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#D94A4A"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#D4A843"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg></div>
+  <div style="color:#808080"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg></div>
+</div>
+</div>
+
+</div>
+
+<!-- TANK C: Unified single-path for small sizes -->
+<div class="row">
+<div class="tk">
+<h4>C. Single Path (maximum compactness)</h4>
+<div class="sub">One continuous filled shape. No separate parts. Best for 12px.</div>
+<svg width="160" height="72" viewBox="0 0 160 72">
+  <!-- Everything as one path: tracks → hull → turret → barrel → back down -->
+  <path d="
+    M18,58 Q8,58 8,52 L8,46 Q8,40 16,40
+    L16,36 L22,32 L56,30
+    L60,24 L64,20 L106,18 L110,20
+    L110,22 L156,22 L156,27 L110,27
+    L110,30 L56,32
+    L136,34 L140,38 L140,46 Q140,52 Q140,58 132,58 Z
+  " fill="currentColor"/>
+  <circle cx="30" cy="52" r="5" fill="var(--base)"/><circle cx="50" cy="52" r="5" fill="var(--base)"/>
+  <circle cx="70" cy="52" r="5" fill="var(--base)"/><circle cx="90" cy="52" r="5" fill="var(--base)"/>
+  <circle cx="110" cy="52" r="5" fill="var(--base)"/><circle cx="126" cy="52" r="4" fill="var(--base)"/>
+</svg>
+<div class="szrow">
+  <div><svg width="36" height="16" viewBox="0 0 160 72"><path d="M16,58 Q6,58 6,50 L6,44 Q6,38 14,38 L14,34 L24,30 L56,28 L60,22 L64,18 L108,16 L112,18 L112,20 L156,20 L156,26 L112,26 L112,28 L56,30 L138,32 L142,38 L142,50 Q142,58 134,58 Z" fill="currentColor"/></svg><span>36px</span></div>
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg><span>20px</span></div>
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M12,62 Q2,62 2,50 L2,40 Q2,34 10,34 L10,30 L22,26 L52,24 L56,18 L62,14 L112,12 L116,14 L116,16 L158,16 L158,24 L116,24 L116,26 L52,28 L142,30 L146,36 L146,50 Q146,62 138,62 Z" fill="currentColor"/></svg><span>14px</span></div>
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M10,64 Q0,64 0,50 L0,38 Q0,32 8,32 L8,28 L20,24 L50,22 L54,16 L60,12 L114,10 L118,12 L118,14 L160,14 L160,22 L118,22 L118,24 L50,26 L144,28 L148,34 L148,50 Q148,64 140,64 Z" fill="currentColor"/></svg><span>12px</span></div>
+</div>
+<div class="dbg szrow">
+  <div style="color:#E8ECF1"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg></div>
+  <div style="color:#4A90D9"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg></div>
+  <div style="color:#D94A4A"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg></div>
+  <div style="color:#D4A843"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg></div>
+  <div style="color:#808080"><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg></div>
+</div>
+</div>
+</div>
+
+<h2>Direct Comparison at Map Sizes</h2>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px;">
+<h3 style="font-family:'DM Sans';font-size:13px;font-weight:600;margin-bottom:12px;">20px (recommended map size)</h3>
+<div class="cmp">
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><path d="M58,36 L64,22 L112,18 L116,22 L116,36 Z" fill="currentColor"/><rect x="112" y="19" width="48" height="7" rx="3" fill="currentColor"/></svg><div class="lbl">A. Leopard</div></div>
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M12,58 Q6,58 6,52 L6,42 Q6,38 14,38 L134,36 Q142,36 142,40 L142,52 Q142,58 134,58 Z" fill="currentColor"/><ellipse cx="78" cy="28" rx="28" ry="12" fill="currentColor"/><rect x="104" y="24" width="52" height="7" rx="3" fill="currentColor"/></svg><div class="lbl">B. T-72</div></div>
+  <div><svg width="20" height="9" viewBox="0 0 160 72"><path d="M14,60 Q4,60 4,50 L4,42 Q4,36 12,36 L12,32 L24,28 L54,26 L58,20 L64,16 L110,14 L114,16 L114,18 L156,18 L156,25 L114,25 L114,28 L54,30 L140,32 L144,38 L144,50 Q144,60 136,60 Z" fill="currentColor"/></svg><div class="lbl">C. Single path</div></div>
+</div>
+
+<h3 style="font-family:'DM Sans';font-size:13px;font-weight:600;margin:16px 0 12px;">14px</h3>
+<div class="cmp">
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M10,58 Q4,58 4,50 L4,40 Q4,34 12,34 L136,32 Q144,32 144,40 L144,52 Q144,58 136,58 Z" fill="currentColor"/><path d="M56,34 L62,20 L114,16 L118,20 L118,34 Z" fill="currentColor"/><rect x="114" y="17" width="46" height="8" rx="4" fill="currentColor"/></svg><div class="lbl">A</div></div>
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M10,58 Q4,58 4,50 L4,40 Q4,34 12,34 L138,32 Q146,32 146,40 L146,52 Q146,58 138,58 Z" fill="currentColor"/><ellipse cx="76" cy="26" rx="30" ry="12" fill="currentColor"/><rect x="104" y="22" width="52" height="8" rx="4" fill="currentColor"/></svg><div class="lbl">B</div></div>
+  <div><svg width="14" height="6" viewBox="0 0 160 72"><path d="M12,62 Q2,62 2,50 L2,40 Q2,34 10,34 L10,30 L22,26 L52,24 L56,18 L62,14 L112,12 L116,14 L116,16 L158,16 L158,24 L116,24 L116,26 L52,28 L142,30 L146,36 L146,50 Q146,62 138,62 Z" fill="currentColor"/></svg><div class="lbl">C</div></div>
+</div>
+
+<h3 style="font-family:'DM Sans';font-size:13px;font-weight:600;margin:16px 0 12px;">12px (stress test)</h3>
+<div class="cmp">
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M8,58 Q2,58 2,50 L2,38 Q2,34 10,34 L138,32 Q146,32 146,38 L146,52 Q146,58 138,58 Z" fill="currentColor"/><path d="M54,32 L60,18 L116,14 L120,18 L120,32 Z" fill="currentColor"/><rect x="116" y="15" width="44" height="9" rx="4" fill="currentColor"/></svg><div class="lbl">A</div></div>
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M8,58 Q2,58 2,50 L2,38 Q2,32 10,32 L140,30 Q148,30 148,38 L148,52 Q148,58 140,58 Z" fill="currentColor"/><ellipse cx="74" cy="24" rx="32" ry="12" fill="currentColor"/><rect x="104" y="20" width="52" height="9" rx="4" fill="currentColor"/></svg><div class="lbl">B</div></div>
+  <div><svg width="12" height="5" viewBox="0 0 160 72"><path d="M10,64 Q0,64 0,50 L0,38 Q0,32 8,32 L8,28 L20,24 L50,22 L54,16 L60,12 L114,10 L118,12 L118,14 L160,14 L160,22 L118,22 L118,24 L50,26 L144,28 L148,34 L148,50 Q148,64 140,64 Z" fill="currentColor"/></svg><div class="lbl">C</div></div>
+</div>
+</div>
+
+<p style="text-align:center;color:var(--text2);font-size:11px;margin-top:40px;">
+TTT Unit Icons v5 — Solid Tank Profiles — Gun from turret face, solid hull, no gaps — METAGAMES 2026
+</p>
+
+</div>
+</body>
+</html>

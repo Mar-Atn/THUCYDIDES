@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTT Country Colors — Dual Palette Unification</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F5F6F8;--text:#1A2332;--text2:#4A5568;--border:#D8DCE5;--card:#fff;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;line-height:1.5;}
+  h1,h2,h3{font-family:'Playfair Display',serif;}
+  h1{font-size:1.6rem;margin-bottom:4px;}
+  h2{font-size:1.15rem;margin:32px 0 12px;border-bottom:2px solid #1A5276;padding-bottom:4px;}
+  .c{max-width:1200px;margin:0 auto;padding:32px;}
+  .note{color:var(--text2);font-size:12px;margin-bottom:20px;}
+  table{border-collapse:collapse;width:100%;margin-bottom:24px;}
+  th,td{padding:8px 12px;border:1px solid var(--border);text-align:left;font-size:12px;}
+  th{background:#EBEDF2;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;}
+  .swatch{display:inline-block;width:40px;height:24px;border-radius:4px;vertical-align:middle;margin-right:6px;border:1px solid rgba(0,0,0,0.1);}
+  .swatch-sm{display:inline-block;width:24px;height:24px;border-radius:3px;vertical-align:middle;border:1px solid rgba(0,0,0,0.1);}
+  .hex{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);}
+  .bloc{font-size:10px;color:var(--text2);font-style:italic;}
+  .issue{background:#FFF3E0;padding:2px 6px;border-radius:3px;font-size:10px;color:#B8762E;}
+  .ok{background:#E8F5E9;padding:2px 6px;border-radius:3px;font-size:10px;color:#2E7D4F;}
+  .row-vis{display:flex;gap:4px;align-items:center;}
+  .badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:500;}
+  .dark-strip{background:#1B2838;padding:16px;border-radius:8px;margin:16px 0;}
+  .preview-row{display:flex;gap:2px;flex-wrap:wrap;}
+  .preview-hex{width:48px;height:42px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;color:#fff;text-shadow:0 0 2px rgba(0,0,0,0.5);clip-path:polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Country Colors — Dual Palette Unification</h1>
+<p class="note">Each country gets ONE hue family at two levels: Vivid (UI/badges/charts) + Muted (map territory fill). Both must feel like the same country. Map editor colors are the starting point.</p>
+
+<h2>Current State: Two Disconnected Palettes</h2>
+
+<table>
+<tr>
+  <th>Country</th>
+  <th>Bloc</th>
+  <th>Map (current)</th>
+  <th>UI (current)</th>
+  <th>Aligned?</th>
+  <th>Issue</th>
+</tr>
+<tr>
+  <td><strong>Columbia</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#D4B896"></span><span class="hex">#D4B896 warm beige</span></td>
+  <td><span class="swatch" style="background:#4A90D9"></span><span class="hex">#4A90D9 bold blue</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Beige ≠ Blue. Completely different hue families.</td>
+</tr>
+<tr>
+  <td><strong>Cathay</strong></td><td class="bloc">League</td>
+  <td><span class="swatch" style="background:#E8D5A3"></span><span class="hex">#E8D5A3 pale gold</span></td>
+  <td><span class="swatch" style="background:#D94A4A"></span><span class="hex">#D94A4A bold red</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Gold ≠ Red. Completely different.</td>
+</tr>
+<tr>
+  <td><strong>Nordostan</strong></td><td class="bloc">League</td>
+  <td><span class="swatch" style="background:#D4A5A5"></span><span class="hex">#D4A5A5 dusty pink</span></td>
+  <td><span class="swatch" style="background:#808080"></span><span class="hex">#808080 neutral gray</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Pink ≠ Gray.</td>
+</tr>
+<tr>
+  <td><strong>Heartland</strong></td><td class="bloc">At war</td>
+  <td><span class="swatch" style="background:#A5C8A5"></span><span class="hex">#A5C8A5 sage green</span></td>
+  <td><span class="swatch" style="background:#D4A843"></span><span class="hex">#D4A843 warm gold</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Green ≠ Gold.</td>
+</tr>
+<tr>
+  <td><strong>Persia</strong></td><td class="bloc">League</td>
+  <td><span class="swatch" style="background:#C8A57A"></span><span class="hex">#C8A57A tan/brown</span></td>
+  <td><span class="swatch" style="background:#4AD97A"></span><span class="hex">#4AD97A bright green</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Tan ≠ Green.</td>
+</tr>
+<tr>
+  <td><strong>Gallia</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#B5A5C8"></span><span class="hex">#B5A5C8 lavender</span></td>
+  <td><span class="swatch" style="background:#2E86AB"></span><span class="hex">#2E86AB teal</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Purple ≠ Teal.</td>
+</tr>
+<tr>
+  <td><strong>Teutonia</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#8FB59A"></span><span class="hex">#8FB59A sage green</span></td>
+  <td><span class="swatch" style="background:#5B7FA6"></span><span class="hex">#5B7FA6 steel blue</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Green ≠ Blue.</td>
+</tr>
+<tr>
+  <td><strong>Albion</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#8AA5B5"></span><span class="hex">#8AA5B5 muted steel</span></td>
+  <td><span class="swatch" style="background:#3B6E8F"></span><span class="hex">#3B6E8F dark teal</span></td>
+  <td><span class="ok">~OK</span></td>
+  <td>Same blue-gray family, different saturation. Close enough.</td>
+</tr>
+<tr>
+  <td><strong>Freeland</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#D4B58A"></span><span class="hex">#D4B58A wheat</span></td>
+  <td><span class="swatch" style="background:#4AA0A0"></span><span class="hex">#4AA0A0 teal</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Wheat ≠ Teal.</td>
+</tr>
+<tr>
+  <td><strong>Ponte</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#D4A5B5"></span><span class="hex">#D4A5B5 dusty rose</span></td>
+  <td><span class="swatch" style="background:#7B9CB8"></span><span class="hex">#7B9CB8 muted blue</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Rose ≠ Blue.</td>
+</tr>
+<tr>
+  <td><strong>Bharata</strong></td><td class="bloc">Non-aligned</td>
+  <td><span class="swatch" style="background:#D4B5A5"></span><span class="hex">#D4B5A5 warm beige</span></td>
+  <td><span class="swatch" style="background:#E67E22"></span><span class="hex">#E67E22 orange</span></td>
+  <td><span class="issue">~CLOSE</span></td>
+  <td>Both warm tones. Beige → Orange is close if we push map warmer.</td>
+</tr>
+<tr>
+  <td><strong>Formosa</strong></td><td class="bloc">—</td>
+  <td><span class="swatch" style="background:#8AC8B5"></span><span class="hex">#8AC8B5 mint</span></td>
+  <td><span class="swatch" style="background:#3498DB"></span><span class="hex">#3498DB bright blue</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Mint ≠ Blue.</td>
+</tr>
+<tr>
+  <td><strong>Yamato</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#A5B5C8"></span><span class="hex">#A5B5C8 cool gray-blue</span></td>
+  <td><span class="swatch" style="background:#1ABC9C"></span><span class="hex">#1ABC9C teal</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Gray-blue ≠ Teal.</td>
+</tr>
+<tr>
+  <td><strong>Hanguk</strong></td><td class="bloc">—</td>
+  <td><span class="swatch" style="background:#A5C8D4"></span><span class="hex">#A5C8D4 light blue</span></td>
+  <td><span class="swatch" style="background:#2ECC71"></span><span class="hex">#2ECC71 green</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Blue ≠ Green.</td>
+</tr>
+<tr>
+  <td><strong>Phrygia</strong></td><td class="bloc">Swing</td>
+  <td><span class="swatch" style="background:#B5A08A"></span><span class="hex">#B5A08A warm brown</span></td>
+  <td><span class="swatch" style="background:#9B59B6"></span><span class="hex">#9B59B6 purple</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Brown ≠ Purple.</td>
+</tr>
+<tr>
+  <td><strong>Solaria</strong></td><td class="bloc">Swing</td>
+  <td><span class="swatch" style="background:#C8B896"></span><span class="hex">#C8B896 sand</span></td>
+  <td><span class="swatch" style="background:#F1C40F"></span><span class="hex">#F1C40F yellow</span></td>
+  <td><span class="ok">~OK</span></td>
+  <td>Both warm/golden. Sand → Yellow is close.</td>
+</tr>
+<tr>
+  <td><strong>Mirage</strong></td><td class="bloc">Swing</td>
+  <td><span class="swatch" style="background:#D4BFA5"></span><span class="hex">#D4BFA5 light tan</span></td>
+  <td><span class="swatch" style="background:#A569BD"></span><span class="hex">#A569BD purple</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Tan ≠ Purple.</td>
+</tr>
+<tr>
+  <td><strong>Levantia</strong></td><td class="bloc">Western Treaty</td>
+  <td><span class="swatch" style="background:#D4D4A5"></span><span class="hex">#D4D4A5 pale olive</span></td>
+  <td><span class="swatch" style="background:#5DADE2"></span><span class="hex">#5DADE2 sky blue</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Olive ≠ Blue.</td>
+</tr>
+<tr>
+  <td><strong>Choson</strong></td><td class="bloc">League</td>
+  <td><span class="swatch" style="background:#8A8A8A"></span><span class="hex">#8A8A8A neutral gray</span></td>
+  <td><span class="swatch" style="background:#8B4513"></span><span class="hex">#8B4513 brown</span></td>
+  <td><span class="issue">~CLOSE</span></td>
+  <td>Both neutral/dark. Could unify as dark gray-brown.</td>
+</tr>
+<tr>
+  <td><strong>Caribe</strong></td><td class="bloc">—</td>
+  <td><span class="swatch" style="background:#A5C8A0"></span><span class="hex">#A5C8A0 green</span></td>
+  <td><span class="swatch" style="background:#CC7722"></span><span class="hex">#CC7722 amber</span></td>
+  <td><span class="issue">NO</span></td>
+  <td>Green ≠ Amber.</td>
+</tr>
+<tr>
+  <td><strong>Sogdiana</strong></td><td class="bloc">Contested</td>
+  <td><span class="swatch" style="background:#C8C8A5"></span><span class="hex">#C8C8A5 pale khaki</span></td>
+  <td><span class="swatch" style="background:#95A5A6"></span><span class="hex">#95A5A6 gray</span></td>
+  <td><span class="ok">~OK</span></td>
+  <td>Both neutral/muted. Close enough for contested territory.</td>
+</tr>
+</table>
+
+<p class="note"><strong>Verdict: Only 3 of 21 countries are aligned.</strong> The map and UI palettes were designed independently. We need to unify.</p>
+
+<h2>Proposed Unified Palette</h2>
+<p class="note">Starting from the map editor colors (which you liked). For each, I derive a vivid version from the same hue. Where the map color works, I keep it. Where it conflicts with a neighbor, I adjust.</p>
+
+<table>
+<tr>
+  <th>Country</th>
+  <th>Bloc</th>
+  <th>Hue Family</th>
+  <th>Map (muted)</th>
+  <th>UI (vivid)</th>
+  <th>Light BG</th>
+  <th>Preview</th>
+</tr>
+
+<script>
+const countries = [
+  // PROPOSAL: unified hue families
+  // Western Treaty bloc — blues, teals, lavender
+  {id:'columbia', name:'Columbia', bloc:'Western Treaty', hue:'Steel Blue',
+   map:'#8AA5C8', ui:'#4A7FB8', light:'#E8EFF6'},
+  {id:'gallia', name:'Gallia', bloc:'Western Treaty', hue:'Lavender',
+   map:'#B5A5C8', ui:'#7B5EA7', light:'#F0EBF5'},
+  {id:'teutonia', name:'Teutonia', bloc:'Western Treaty', hue:'Forest Green',
+   map:'#8FB59A', ui:'#4A8C5E', light:'#EBF3ED'},
+  {id:'thule', name:'Thule', bloc:'Western Treaty', hue:'Forest Green (same as Teutonia)',
+   map:'#8FB59A', ui:'#4A8C5E', light:'#EBF3ED'},
+  {id:'albion', name:'Albion', bloc:'Western Treaty', hue:'Slate Blue',
+   map:'#8AA5B5', ui:'#4A7A8F', light:'#E8EFF3'},
+  {id:'freeland', name:'Freeland', bloc:'Western Treaty', hue:'Amber',
+   map:'#D4B58A', ui:'#B8892E', light:'#F5EDE0'},
+  {id:'ponte', name:'Ponte', bloc:'Western Treaty', hue:'Rose',
+   map:'#D4A5B5', ui:'#B55A78', light:'#F5E8ED'},
+  {id:'levantia', name:'Levantia', bloc:'Western Treaty', hue:'Olive Gold',
+   map:'#D4D4A5', ui:'#A5A040', light:'#F3F3E8'},
+  {id:'yamato', name:'Yamato', bloc:'Western Treaty', hue:'Cool Blue-Gray',
+   map:'#A5B5C8', ui:'#5A7A9B', light:'#EBF0F5'},
+
+  // League bloc — warm reds, earth tones
+  {id:'cathay', name:'Cathay', bloc:'League', hue:'Warm Red',
+   map:'#D4A5A5', ui:'#C05050', light:'#F5EAEA'},
+  {id:'nordostan', name:'Nordostan', bloc:'League', hue:'Dusty Mauve',
+   map:'#C8A0A0', ui:'#996060', light:'#F2EAEA'},
+  {id:'persia', name:'Persia', bloc:'League', hue:'Warm Tan',
+   map:'#C8A57A', ui:'#A07040', light:'#F2EBE0'},
+  {id:'choson', name:'Choson', bloc:'League', hue:'Dark Gray',
+   map:'#8A8A8A', ui:'#5A5A5A', light:'#EFEFEF'},
+
+  // Non-aligned / Swing
+  {id:'bharata', name:'Bharata', bloc:'Non-aligned', hue:'Warm Orange',
+   map:'#D4B5A5', ui:'#C07840', light:'#F5EDE5'},
+  {id:'formosa', name:'Formosa', bloc:'—', hue:'Mint/Teal',
+   map:'#8AC8B5', ui:'#3AA08A', light:'#E8F3F0'},
+  {id:'hanguk', name:'Hanguk', bloc:'—', hue:'Light Blue',
+   map:'#A5C8D4', ui:'#4A9AB8', light:'#E8F1F5'},
+  {id:'phrygia', name:'Phrygia', bloc:'Swing', hue:'Warm Brown',
+   map:'#B5A08A', ui:'#8A6A48', light:'#F0EBE5'},
+  {id:'solaria', name:'Solaria', bloc:'Swing', hue:'Golden Sand',
+   map:'#C8B896', ui:'#A89030', light:'#F3F0E5'},
+  {id:'mirage', name:'Mirage', bloc:'Swing', hue:'Warm Copper',
+   map:'#D4BFA5', ui:'#B08050', light:'#F5EEE5'},
+  {id:'heartland', name:'Heartland', bloc:'At war', hue:'Sage Green',
+   map:'#A5C8A5', ui:'#5A9A5A', light:'#EBF3EB'},
+  {id:'caribe', name:'Caribe', bloc:'—', hue:'Leaf Green',
+   map:'#A5C8A0', ui:'#5A9A50', light:'#EBF3EA'},
+  {id:'sogdiana', name:'Sogdiana', bloc:'Contested', hue:'Khaki',
+   map:'#C8C8A5', ui:'#8A8A60', light:'#F0F0E8'},
+  {id:'horn', name:'Horn', bloc:'Contested', hue:'Warm Gray',
+   map:'#B5A896', ui:'#8A7A68', light:'#F0ECE8'},
+];
+
+const table = document.querySelector('table:last-of-type');
+countries.forEach(c => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><strong>${c.name}</strong></td>
+    <td class="bloc">${c.bloc}</td>
+    <td style="font-size:11px;">${c.hue}</td>
+    <td><span class="swatch" style="background:${c.map}"></span><span class="hex">${c.map}</span></td>
+    <td><span class="swatch" style="background:${c.ui}"></span><span class="hex">${c.ui}</span></td>
+    <td><span class="swatch" style="background:${c.light}"></span><span class="hex">${c.light}</span></td>
+    <td>
+      <span class="badge" style="background:${c.light};color:${c.ui};border:1px solid ${c.ui}30;">${c.name}</span>
+    </td>
+  `;
+  table.appendChild(tr);
+});
+</script>
+</table>
+
+<h2>Visual Comparison</h2>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">Map Territory Fill (muted palette)</h3>
+<div class="preview-row" id="map-preview"></div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">UI Badges (vivid palette, light background)</h3>
+<div id="badge-preview" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;"></div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">UI Badges (vivid palette, dark background)</h3>
+<div class="dark-strip">
+<div id="badge-dark-preview" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+</div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">Chart Lines (vivid palette)</h3>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;">
+<svg width="100%" height="120" viewBox="0 0 600 120" id="chart-preview"></svg>
+</div>
+
+<h3 style="font-size:13px;margin:16px 0 8px;">Side by Side: Map Hex + UI Badge</h3>
+<div id="side-by-side" style="display:flex;flex-wrap:wrap;gap:12px;"></div>
+
+<h2>Discussion Points</h2>
+<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;">
+<ol style="font-size:13px;line-height:2;">
+  <li><strong>Columbia:</strong> Map was warm beige — now steel blue (muted). This is a big shift. Blue = western/NATO feel. Or keep the warm beige map and use blue only for UI?</li>
+  <li><strong>Cathay:</strong> Map was pale gold — now dusty red (map) with vivid red (UI). Red = traditional Cathay color. The gold map was pleasant but didn't say "Cathay."</li>
+  <li><strong>Heartland vs Caribe:</strong> Both are green in this proposal. Need differentiation — make Caribe more yellow-green or Heartland more blue-green?</li>
+  <li><strong>Nordostan:</strong> Dusty pink/mauve is unusual. Gray would be more "neutral." But gray is boring on the map. Keep the slight warm tone?</li>
+  <li><strong>Western Treaty countries:</strong> Should they share a color FAMILY (blues/teals) to signal alliance, or be maximally distinct for readability?</li>
+  <li><strong>Phrygia, Mirage, Solaria:</strong> All warm brown/copper/gold. Close to each other. Need more separation?</li>
+</ol>
+</div>
+
+<script>
+// Generate previews
+const mapPrev = document.getElementById('map-preview');
+const badgePrev = document.getElementById('badge-preview');
+const badgeDarkPrev = document.getElementById('badge-dark-preview');
+const sidePrev = document.getElementById('side-by-side');
+const chartPrev = document.getElementById('chart-preview');
+
+countries.forEach(c => {
+  // Map hex
+  mapPrev.innerHTML += `<div class="preview-hex" style="background:${c.map};">${c.name.slice(0,4)}</div>`;
+
+  // Badge light
+  badgePrev.innerHTML += `<span class="badge" style="background:${c.light};color:${c.ui};border:1px solid ${c.ui}30;">${c.name}</span>`;
+
+  // Badge dark
+  badgeDarkPrev.innerHTML += `<span class="badge" style="background:${c.ui}25;color:${c.ui};border:1px solid ${c.ui}40;">${c.name}</span>`;
+
+  // Side by side
+  sidePrev.innerHTML += `<div style="text-align:center;"><div class="preview-hex" style="background:${c.map};width:42px;height:36px;font-size:7px;">${c.name.slice(0,3)}</div><div style="margin-top:2px;"><span class="swatch-sm" style="background:${c.ui}"></span></div><div style="font-size:8px;color:var(--text2);">${c.name}</div></div>`;
+});
+
+// Chart lines
+const keyCountries = countries.filter(c => ['columbia','cathay','nordostan','heartland','persia','bharata','yamato','gallia'].includes(c.id));
+let chartSVG = '';
+keyCountries.forEach((c, i) => {
+  const y1 = 15 + i * 12;
+  const y2 = y1 + Math.random() * 20 - 10;
+  const y3 = y2 + Math.random() * 20 - 10;
+  chartSVG += `<line x1="0" y1="${y1}" x2="600" y2="${y1 + (i % 2 ? 15 : -10)}" stroke="${c.ui}" stroke-width="2" opacity="0.8"/>`;
+  chartSVG += `<text x="605" y="${y1 + (i % 2 ? 18 : -7)}" font-size="9" fill="${c.ui}" font-family="DM Sans,sans-serif">${c.name}</text>`;
+});
+chartPrev.innerHTML = chartSVG;
+</script>
+
+<p style="text-align:center;color:var(--text2);font-size:11px;margin-top:40px;">
+TTT Country Colors — Dual Palette Unification Draft — METAGAMES 2026
+</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Unit Icons v3 — Tank Design Focus</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --card: #FFFFFF;
+    --card-border: #E0DDD6;
+    --text: #1A2332;
+    --text-muted: #6B7280;
+    --accent: #8B7355;
+    --accent-gold: #C9A84C;
+    --confirmed-border: #2D7A3A;
+    --confirmed-bg: #F0F8F1;
+    --dark-bg: #1B2838;
+    --light-bg: #F5F6F8;
+    --columbia: #4A90D9;
+    --cathay: #D94A4A;
+    --nordostan: #808080;
+    --heartland: #D4A843;
+    --persia: #4AD97A;
+    --albion: #3B6E8F;
+    --water: #D4E4F0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 40px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: var(--text);
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--accent);
+    padding-bottom: 8px;
+  }
+  h3 {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+    margin-top: 20px;
+  }
+  .subtitle {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 32px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 28px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .section-note {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Confirmed strip */
+  .confirmed-strip {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .confirmed-item {
+    background: var(--confirmed-bg);
+    border: 2px solid var(--confirmed-border);
+    border-radius: 6px;
+    padding: 12px 16px;
+    text-align: center;
+    min-width: 120px;
+  }
+  .confirmed-item .label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--confirmed-border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .confirmed-sizes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .confirmed-sizes .sz {
+    text-align: center;
+  }
+  .confirmed-sizes .sz-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  /* Tank option cards */
+  .tank-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .tank-card {
+    background: var(--light-bg);
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 16px;
+    transition: border-color 0.15s;
+  }
+  .tank-card:hover { border-color: var(--accent); }
+  .tank-card .tank-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .tank-card .tank-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+  .tank-card .tank-sizes {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    margin-bottom: 10px;
+  }
+  .tank-card .tank-size-item {
+    text-align: center;
+  }
+  .tank-card .tank-size-item .px {
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .bg-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 6px;
+  }
+  .bg-row.dark { background: var(--dark-bg); }
+  .bg-row.light { background: var(--light-bg); border: 1px solid var(--card-border); }
+  .bg-row .bg-label {
+    font-size: 9px;
+    width: 30px;
+    flex-shrink: 0;
+  }
+  .bg-row.dark .bg-label { color: #8899AA; }
+  .bg-row.light .bg-label { color: var(--text-muted); }
+
+  /* Comparison grid */
+  .compare-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .compare-cell {
+    text-align: center;
+    min-width: 60px;
+    padding: 6px 8px;
+    background: var(--light-bg);
+    border-radius: 4px;
+  }
+  .compare-cell .cc-label {
+    font-size: 9px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    white-space: nowrap;
+  }
+
+  /* Hex styles */
+  .hex {
+    width: 52px;
+    height: 60px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  }
+  .hex-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    max-width: 36px;
+  }
+  .hex-demo-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1.2;
+  }
+  .hex-demos {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .hex-demo-wrap { text-align: center; }
+
+  /* Color test */
+  .color-test-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+  }
+  .color-test-item {
+    padding: 10px;
+    background: var(--light-bg);
+    border-radius: 6px;
+  }
+  .color-test-item .country-name {
+    font-size: 11px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .color-icons-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    padding: 4px 6px;
+    border-radius: 3px;
+    margin-bottom: 4px;
+  }
+  .color-icons-row.on-dark { background: var(--dark-bg); }
+  .color-icons-row.on-light { background: #FFFFFF; border: 1px solid #ddd; }
+
+  /* Map hex grid */
+  .hex-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .hex-row {
+    display: flex;
+    gap: 4px;
+  }
+  .hex-row.offset {
+    margin-left: 28px;
+    margin-top: -14px;
+  }
+  .hex-row:not(.offset) {
+    margin-top: -14px;
+  }
+  .hex-row:first-child { margin-top: 0; }
+  .hex-cell {
+    width: 52px;
+    height: 60px;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+  .hex-cell .hex-inner {
+    position: relative;
+    z-index: 1;
+  }
+  .hex-cell.striped {
+    background: repeating-linear-gradient(
+      45deg,
+      #D4A843,
+      #D4A843 3px,
+      #808080 3px,
+      #808080 6px
+    ) !important;
+  }
+
+  .grid-legend {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .grid-legend span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+    border: 1px solid #ccc;
+  }
+
+  .recommendation {
+    background: #FFF8E7;
+    border: 2px solid var(--accent-gold);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 16px;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+  .recommendation strong {
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+<h1>Thucydides Trap -- Tank Icon Design v3</h1>
+<p class="subtitle">All other unit types confirmed. This page focuses exclusively on nailing the tank icon. 2 kept options + 7 new designs. SVG silhouettes, single fill, facing right.</p>
+
+<!-- ============================================================ -->
+<!-- SVG DEFINITIONS -->
+<!-- ============================================================ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+
+  <!-- ==================== CONFIRMED ICONS (reference) ==================== -->
+
+  <!-- NAVAL: Warship side profile -->
+  <symbol id="naval" viewBox="0 0 24 24">
+    <path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TACTICAL AIR: Fighter jet top-down -->
+  <symbol id="fighter" viewBox="0 0 24 24">
+    <path d="M12 1 L13.5 6 L14 10 L20 14 L20 16 L14 14 L14 19 L17 21 L17 23 L12 21 L7 23 L7 21 L10 19 L10 14 L4 16 L4 14 L10 10 L10.5 6 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TACTICAL AIR: Drone/UAV -->
+  <symbol id="drone" viewBox="0 0 24 24">
+    <path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="currentColor"/>
+    <circle cx="12" cy="5" r="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- STRATEGIC: ICBM vertical -->
+  <symbol id="icbm" viewBox="0 0 24 24">
+    <path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- AIR DEFENSE: Radar dish umbrella -->
+  <symbol id="airdef" viewBox="0 0 24 24">
+    <path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="currentColor"/>
+    <rect x="11" y="9" width="2" height="11" fill="currentColor"/>
+    <rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== KEPT TANKS ==================== -->
+
+  <!-- v1-A: Original tank from v1 -->
+  <symbol id="tank-v1a" viewBox="0 0 24 24">
+    <path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="currentColor"/>
+    <path d="M4 11 L20 11 L21 13 L21 15 L3 15 L3 13 Z" fill="currentColor"/>
+    <path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- v2-B: Heavy Tank Abrams/Merkava style from v2 -->
+  <symbol id="tank-v2b" viewBox="0 0 24 24">
+    <rect x="6" y="8" width="9" height="4" rx="0.5" fill="currentColor"/>
+    <path d="M15 9 L24 9.5 L24 11 L15 11 Z" fill="currentColor"/>
+    <rect x="2" y="12" width="19" height="5" rx="1" fill="currentColor"/>
+    <path d="M3 17 L20 17 C20 19 18 20 16 20 L6 20 C4 20 3 19 3 17 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- ==================== 7 NEW TANK DESIGNS ==================== -->
+
+  <!-- TANK 1: "Economist Style" — Elegant minimal, exaggerated barrel, smooth curves, ~10 points -->
+  <symbol id="tank-1" viewBox="0 0 32 24">
+    <path d="M4 14 C4 12.5 5 11 7 11 L18 11 C20 11 21 12 21 13 L21 16 C21 17 20 18 18 18 L8 18 C6 18 4 17 4 16 Z" fill="currentColor"/>
+    <path d="M9 11 L9 9 C9 8.4 9.4 8 10 8 L16 8 C16.6 8 17 8.4 17 9 L17 11 Z" fill="currentColor"/>
+    <path d="M17 9 L28 8 C28.5 8 29 8.3 29 9 C29 9.7 28.5 10 28 10 L17 10 Z" fill="currentColor"/>
+    <ellipse cx="8" cy="19.5" rx="2.5" ry="2" fill="currentColor"/>
+    <ellipse cx="14" cy="19.5" rx="2.5" ry="2" fill="currentColor"/>
+    <ellipse cx="20" cy="19.5" rx="2.5" ry="2" fill="currentColor"/>
+    <rect x="5" y="18" width="17" height="2" rx="1" fill="currentColor"/>
+  </symbol>
+
+  <!-- TANK 2: "Stencil" — Bold, high-contrast, thick shapes, WWII propaganda style -->
+  <symbol id="tank-2" viewBox="0 0 32 24">
+    <path d="M3 13 L22 13 L23 15 L23 18 L2 18 L2 15 Z" fill="currentColor"/>
+    <path d="M8 13 L8 10 L18 10 L18 13 Z" fill="currentColor"/>
+    <path d="M18 11 L30 10 L30 12 L18 12 Z" fill="currentColor"/>
+    <path d="M2 18 L23 18 L23 20 C23 21.5 21 23 19 23 L6 23 C4 23 2 21.5 2 20 Z" fill="currentColor"/>
+  </symbol>
+
+  <!-- TANK 3: "Technical Profile" — Detailed, road wheels, sloped armor, recognition guide -->
+  <symbol id="tank-3" viewBox="0 0 32 24">
+    <path d="M6 12 L8 10 L14 10 L16 9 L16 8 L28 8.5 L28 10 L22 11 L22 12 Z" fill="currentColor"/>
+    <path d="M4 12 L22 12 L23 13 L23 17 L3 17 L3 13 Z" fill="currentColor"/>
+    <circle cx="6" cy="19" r="1.8" fill="currentColor"/>
+    <circle cx="10" cy="19" r="1.8" fill="currentColor"/>
+    <circle cx="14" cy="19" r="1.8" fill="currentColor"/>
+    <circle cx="18" cy="19" r="1.8" fill="currentColor"/>
+    <path d="M3.5 17 L22.5 17 C22.5 17.5 22 18 21 18.5 L21 20.5 C21 21 20.5 21.5 19.5 21.5 L6.5 21.5 C5.5 21.5 5 21 5 20.5 L5 18.5 C4 18 3.5 17.5 3.5 17 Z" fill="currentColor"/>
+    <rect x="4" y="13" width="1.5" height="2" rx="0.3" fill="currentColor" opacity="0"/>
+  </symbol>
+
+  <!-- TANK 4: "Geometric Minimal" — 3 shapes only: trapezoid hull, rectangle turret, line barrel -->
+  <symbol id="tank-4" viewBox="0 0 32 24">
+    <path d="M3 14 L5 12 L21 12 L23 14 L23 20 L3 20 Z" fill="currentColor"/>
+    <rect x="8" y="8" width="10" height="4" fill="currentColor"/>
+    <rect x="18" y="9" width="12" height="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- TANK 5: "Modern MBT" — Angular turret (Leopard 2/K2), composite armor, raised engine deck -->
+  <symbol id="tank-5" viewBox="0 0 32 24">
+    <path d="M7 11 L10 9 L17 9 L19 11 Z" fill="currentColor"/>
+    <path d="M19 9.5 L29 9 L29 10.5 L19 10.5 Z" fill="currentColor"/>
+    <path d="M3 11 L5 11 L5 12 L21 12 L22 11 L24 11 L24 13 L24 17 L2 17 L2 13 L3 12 Z" fill="currentColor"/>
+    <path d="M2 17 L24 17 L24 18.5 C24 20 22 21 20 21 L6 21 C4 21 2 20 2 18.5 Z" fill="currentColor"/>
+    <circle cx="5.5" cy="19.5" r="1.5" fill="currentColor"/>
+    <circle cx="9.5" cy="19.5" r="1.5" fill="currentColor"/>
+    <circle cx="13.5" cy="19.5" r="1.5" fill="currentColor"/>
+    <circle cx="17.5" cy="19.5" r="1.5" fill="currentColor"/>
+    <circle cx="21.5" cy="19.5" r="1.5" fill="currentColor"/>
+  </symbol>
+
+  <!-- TANK 6: "NATO Symbol Inspired" — Adapted NATO tank symbol into pictographic form -->
+  <symbol id="tank-6" viewBox="0 0 32 24">
+    <rect x="3" y="12" width="22" height="8" rx="1" fill="currentColor"/>
+    <path d="M3 20 L25 12" stroke="currentColor" stroke-width="2.5" fill="none"/>
+    <rect x="9" y="8" width="9" height="4" rx="0.5" fill="currentColor"/>
+    <rect x="18" y="9" width="10" height="2" fill="currentColor"/>
+  </symbol>
+
+  <!-- TANK 7: "Rounded/Friendly" — Softer edges, rounder turret, Risk board game evolved -->
+  <symbol id="tank-7" viewBox="0 0 32 24">
+    <path d="M4 17 C4 13 6 12 10 12 L20 12 C23 12 24 13 24 15 L24 17 Z" fill="currentColor"/>
+    <ellipse cx="14" cy="10" rx="5" ry="3" fill="currentColor"/>
+    <path d="M19 9 L28 8.5 C29 8.5 29.5 9 29.5 9.5 C29.5 10 29 10.5 28 10.5 L19 11 Z" fill="currentColor"/>
+    <path d="M3 17 L25 17 C25 19.5 23 21 20 21 L8 21 C5 21 3 19.5 3 17 Z" fill="currentColor"/>
+    <circle cx="7.5" cy="19" r="2" fill="currentColor"/>
+    <circle cx="13.5" cy="19" r="2" fill="currentColor"/>
+    <circle cx="19.5" cy="19" r="2" fill="currentColor"/>
+  </symbol>
+
+</svg>
+
+<!-- ============================================================ -->
+<!-- SECTION 1: CONFIRMED UNITS (reference strip) -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 1: Confirmed Units (Reference)</h2>
+<p class="section-note">All 5 non-tank unit types are locked. Shown at 32px, 18px, 12px for visual reference.</p>
+
+<div class="confirmed-strip" id="confirmed-strip"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: CURRENT BEST TANKS -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 2: Current Best Tank Options</h2>
+<p class="section-note">The two tank icons carried forward from v1 and v2. These are our baseline to beat.</p>
+
+<div class="tank-grid" id="kept-tanks"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: NEW TANK DESIGNS -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 3: New Tank Designs (7 Approaches)</h2>
+<p class="section-note">Each design explores a different visual strategy. Shown at 48px, 32px, 18px, 12px, and 10px on both dark and light backgrounds. The 12px test is critical -- that is map-compact size.</p>
+
+<div class="tank-grid" id="new-tanks"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: DIRECT COMPARISON GRID -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 4: Direct Comparison Grid</h2>
+<p class="section-note">All 9 tank options in a single row. Quick visual scan to find the most readable silhouette at each size.</p>
+
+<h3>At 18px (standard map)</h3>
+<div class="compare-row" id="compare-18"></div>
+
+<h3>At 12px (compact map -- the critical test)</h3>
+<div class="compare-row" id="compare-12"></div>
+
+<h3>At 10px (stress test)</h3>
+<div class="compare-row" id="compare-10"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: HEX INTEGRATION TEST -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 5: Hex Integration Test</h2>
+<p class="section-note">Each tank option shown as 3 units stacked inside a 52px hex. Tests which design packs best in tight spaces.</p>
+
+<div class="hex-demos" id="hex-test"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 6: COUNTRY COLOR TEST -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 6: Country Color Test</h2>
+<p class="section-note">Top 3 recommended candidates shown in all 6 country colors at 18px and 12px. Recommendation: Tank 2 (Stencil), Tank 4 (Geometric), Tank 5 (Modern MBT).</p>
+
+<div id="color-test"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 7: MAP CONTEXT -->
+<!-- ============================================================ -->
+<div class="card">
+<h2>Section 7: Eastern Ereb Front -- Map Context</h2>
+<p class="section-note">3x4 hex grid showing the Nordostan-Heartland border. Uses recommended best tank icon (Tank 2: Stencil) at 12px.</p>
+
+<div style="display:flex;justify-content:center;padding:20px 0;">
+  <div id="map-grid"></div>
+</div>
+
+<div class="grid-legend" id="map-legend"></div>
+</div>
+
+<div style="height:40px;"></div>
+<p style="color:var(--text-muted);font-size:11px;text-align:center;">TTT Unit Icons v3 -- Tank Design Focus -- Thucydides Trap Simulation -- MetaGames 2026</p>
+<div style="height:20px;"></div>
+
+<script>
+// ============================================================
+// ICON RENDERING HELPERS
+// ============================================================
+
+// v1-A and v2-B use 24x24 viewBox, new tanks use 32x24
+const tankViewBoxes = {
+  'tank-v1a': '0 0 24 24',
+  'tank-v2b': '0 0 24 24',
+  'tank-1': '0 0 32 24',
+  'tank-2': '0 0 32 24',
+  'tank-3': '0 0 32 24',
+  'tank-4': '0 0 32 24',
+  'tank-5': '0 0 32 24',
+  'tank-6': '0 0 32 24',
+  'tank-7': '0 0 32 24',
+};
+
+const confirmedViewBox = '0 0 24 24';
+
+function iconSVG(id, size, color) {
+  const c = color || 'currentColor';
+  const vb = tankViewBoxes[id] || confirmedViewBox;
+  // For wider tanks, make the SVG slightly wider than tall
+  const isWide = vb === '0 0 32 24';
+  const w = isWide ? Math.round(size * 1.33) : size;
+  const h = size;
+  return `<svg width="${w}" height="${h}" viewBox="${vb}" style="color:${c};display:block;"><use href="#${id}"/></svg>`;
+}
+
+function confirmedIcon(id, size, color) {
+  const c = color || 'currentColor';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="color:${c};display:block;"><use href="#${id}"/></svg>`;
+}
+
+// ============================================================
+// DATA
+// ============================================================
+
+const confirmedUnits = [
+  { id: 'naval', label: 'Naval: Warship' },
+  { id: 'fighter', label: 'Tac Air: Fighter' },
+  { id: 'drone', label: 'Tac Air: Drone' },
+  { id: 'icbm', label: 'Strategic: ICBM' },
+  { id: 'airdef', label: 'Air Defense: Radar' },
+];
+
+const keptTanks = [
+  { id: 'tank-v1a', name: 'v1-A: Original Tank', desc: 'From v1. Clean side profile, barrel extending right, curved track assembly.' },
+  { id: 'tank-v2b', name: 'v2-B: Heavy Tank', desc: 'From v2. Abrams/Merkava block style, thick barrel, 4 road wheels.' },
+];
+
+const newTanks = [
+  { id: 'tank-1', name: 'Tank 1: Economist Style', desc: 'Elegant minimal. Smooth curves, exaggerated barrel, ~10 SVG control points. Like an Economist magazine infographic.' },
+  { id: 'tank-2', name: 'Tank 2: Stencil', desc: 'Bold military stencil. Thick shapes, no fine detail. Would work spray-painted on a crate. WWII propaganda poster feel.' },
+  { id: 'tank-3', name: 'Tank 3: Technical Profile', desc: 'Detailed side-view. 4 visible road wheels, sloped front armor. Like a simplified Jane\'s Defence recognition guide.' },
+  { id: 'tank-4', name: 'Tank 4: Geometric Minimal', desc: 'Just 3 shapes: trapezoid hull, rectangle turret, rectangle barrel. No curves, no wheels. Pure geometry.' },
+  { id: 'tank-5', name: 'Tank 5: Modern MBT', desc: 'Modern main battle tank. Angular turret (Leopard 2/K2), composite armor angles, 5 road wheels. The "modern military" look.' },
+  { id: 'tank-6', name: 'Tank 6: NATO Symbol Inspired', desc: 'Based on NATO map symbol (rectangle + diagonal). Adapted into a pictographic tank with turret and barrel. Official military feel.' },
+  { id: 'tank-7', name: 'Tank 7: Rounded/Friendly', desc: 'Softer edges, elliptical turret, rounder hull. Less aggressive. Think Risk board game piece evolved. Better for business audience.' },
+];
+
+const allTanks = [...keptTanks, ...newTanks];
+const sizes = [48, 32, 18, 12, 10];
+
+const countries = [
+  { name: 'Columbia', color: '#4A90D9' },
+  { name: 'Cathay', color: '#D94A4A' },
+  { name: 'Nordostan', color: '#808080' },
+  { name: 'Heartland', color: '#D4A843' },
+  { name: 'Persia', color: '#4AD97A' },
+  { name: 'Albion', color: '#3B6E8F' },
+];
+
+// Top 3 recommendations for color test
+const top3 = ['tank-2', 'tank-4', 'tank-5'];
+
+// ============================================================
+// SECTION 1: Confirmed Units
+// ============================================================
+const strip = document.getElementById('confirmed-strip');
+confirmedUnits.forEach(u => {
+  const div = document.createElement('div');
+  div.className = 'confirmed-item';
+  div.innerHTML = `
+    <div class="label">${u.label}</div>
+    <div class="confirmed-sizes">
+      <div class="sz"><div class="sz-label">32</div>${confirmedIcon(u.id, 32, '#1A2332')}</div>
+      <div class="sz"><div class="sz-label">18</div>${confirmedIcon(u.id, 18, '#1A2332')}</div>
+      <div class="sz"><div class="sz-label">12</div>${confirmedIcon(u.id, 12, '#1A2332')}</div>
+    </div>
+  `;
+  strip.appendChild(div);
+});
+
+// ============================================================
+// SECTION 2: Kept Tanks
+// ============================================================
+function buildTankCard(tank, container) {
+  const div = document.createElement('div');
+  div.className = 'tank-card';
+  let sizesHTML = sizes.map(s => `
+    <div class="tank-size-item">
+      <div class="px">${s}px</div>
+      ${iconSVG(tank.id, s, '#1A2332')}
+    </div>
+  `).join('');
+
+  div.innerHTML = `
+    <div class="tank-name">${tank.name}</div>
+    <div class="tank-desc">${tank.desc}</div>
+    <div class="tank-sizes">${sizesHTML}</div>
+    <div class="bg-row dark">
+      <span class="bg-label">Dark</span>
+      ${iconSVG(tank.id, 18, '#E8E4DC')}
+      ${iconSVG(tank.id, 12, '#E8E4DC')}
+      ${iconSVG(tank.id, 10, '#E8E4DC')}
+    </div>
+    <div class="bg-row light">
+      <span class="bg-label">Light</span>
+      ${iconSVG(tank.id, 18, '#1A2332')}
+      ${iconSVG(tank.id, 12, '#1A2332')}
+      ${iconSVG(tank.id, 10, '#1A2332')}
+    </div>
+  `;
+  container.appendChild(div);
+}
+
+const keptContainer = document.getElementById('kept-tanks');
+keptTanks.forEach(t => buildTankCard(t, keptContainer));
+
+// ============================================================
+// SECTION 3: New Tanks
+// ============================================================
+const newContainer = document.getElementById('new-tanks');
+newTanks.forEach(t => buildTankCard(t, newContainer));
+
+// ============================================================
+// SECTION 4: Direct Comparison
+// ============================================================
+function buildCompareRow(containerId, size) {
+  const container = document.getElementById(containerId);
+  allTanks.forEach(tank => {
+    const cell = document.createElement('div');
+    cell.className = 'compare-cell';
+    const shortLabel = tank.name.split(':')[0].trim();
+    cell.innerHTML = `
+      ${iconSVG(tank.id, size, '#1A2332')}
+      <div class="cc-label">${shortLabel}</div>
+    `;
+    container.appendChild(cell);
+  });
+}
+
+buildCompareRow('compare-18', 18);
+buildCompareRow('compare-12', 12);
+buildCompareRow('compare-10', 10);
+
+// ============================================================
+// SECTION 5: Hex Integration Test
+// ============================================================
+const hexTest = document.getElementById('hex-test');
+allTanks.forEach(tank => {
+  const wrap = document.createElement('div');
+  wrap.className = 'hex-demo-wrap';
+  const iconSize = 12;
+  const icons = [
+    iconSVG(tank.id, iconSize, '#808080'),
+    iconSVG(tank.id, iconSize, '#808080'),
+    iconSVG(tank.id, iconSize, '#808080'),
+  ].join('');
+  const shortLabel = tank.name.split(':')[0].trim();
+  wrap.innerHTML = `
+    <div class="hex" style="background:#C8D8C0;">
+      <div class="hex-inner">${icons}</div>
+    </div>
+    <div class="hex-demo-label">${shortLabel}<br>3 units</div>
+  `;
+  hexTest.appendChild(wrap);
+});
+
+// ============================================================
+// SECTION 6: Country Color Test
+// ============================================================
+const colorTest = document.getElementById('color-test');
+top3.forEach(tankId => {
+  const tankInfo = allTanks.find(t => t.id === tankId);
+  const section = document.createElement('div');
+  section.style.marginBottom = '20px';
+
+  let html = `<h3 style="margin-top:16px;">${tankInfo.name}</h3>`;
+  html += '<div class="color-test-grid">';
+
+  countries.forEach(c => {
+    html += `
+      <div class="color-test-item">
+        <div class="country-name" style="color:${c.color}">${c.name}</div>
+        <div class="color-icons-row on-dark">
+          ${iconSVG(tankId, 18, c.color)}
+          ${iconSVG(tankId, 12, c.color)}
+          ${iconSVG(tankId, 10, c.color)}
+        </div>
+        <div class="color-icons-row on-light">
+          ${iconSVG(tankId, 18, c.color)}
+          ${iconSVG(tankId, 12, c.color)}
+          ${iconSVG(tankId, 10, c.color)}
+        </div>
+      </div>
+    `;
+  });
+
+  html += '</div>';
+  section.innerHTML = html;
+  colorTest.appendChild(section);
+});
+
+// ============================================================
+// SECTION 7: Map Context (Eastern Ereb Front)
+// ============================================================
+// Using Tank 2 (Stencil) as the recommended icon
+const mapTank = 'tank-2';
+const nordColor = '#808080';
+const heartColor = '#D4A843';
+const nordBg = '#D8D8D8';
+const heartBg = '#F0E6C8';
+const landBg = '#C8D8C0';
+
+function mapIcon(id, size, color) {
+  return iconSVG(id, size, color);
+}
+
+// 3x4 hex grid: 4 columns, 3 rows (alternating offset)
+// Row 0 (4 cells): land, Nordostan (4 tanks), Nordostan (3 tanks), land
+// Row 1 (4 cells, offset): Heartland (3 tanks), occupied/striped (2 Nord tanks), Nordostan empty, land
+// Row 2 (4 cells): land, Heartland (2 tanks), land, land
+const gridRows = [
+  { offset: false, cells: [
+    { bg: landBg, units: [] },
+    { bg: nordBg, units: [
+      {id:mapTank,c:nordColor},{id:mapTank,c:nordColor},{id:mapTank,c:nordColor},{id:mapTank,c:nordColor}
+    ]},
+    { bg: nordBg, units: [
+      {id:mapTank,c:nordColor},{id:mapTank,c:nordColor},{id:mapTank,c:nordColor}
+    ]},
+    { bg: landBg, units: [] },
+  ]},
+  { offset: true, cells: [
+    { bg: heartBg, units: [
+      {id:mapTank,c:heartColor},{id:mapTank,c:heartColor},{id:mapTank,c:heartColor}
+    ]},
+    { bg: 'striped', units: [
+      {id:mapTank,c:nordColor},{id:mapTank,c:nordColor}
+    ]},
+    { bg: nordBg, units: [] },
+    { bg: landBg, units: [] },
+  ]},
+  { offset: false, cells: [
+    { bg: landBg, units: [] },
+    { bg: heartBg, units: [
+      {id:mapTank,c:heartColor},{id:mapTank,c:heartColor}
+    ]},
+    { bg: landBg, units: [] },
+    { bg: landBg, units: [] },
+  ]},
+];
+
+const mapGrid = document.getElementById('map-grid');
+let gridHTML = '<div class="hex-grid">';
+
+gridRows.forEach((row, ri) => {
+  const offsetClass = row.offset ? ' offset' : '';
+  const mt = ri === 0 ? ' style="margin-top:0"' : '';
+  gridHTML += `<div class="hex-row${offsetClass}"${mt}>`;
+  row.cells.forEach(cell => {
+    const unitsHTML = cell.units.map(u => mapIcon(u.id, 11, u.c)).join('');
+    const isStriped = cell.bg === 'striped';
+    const bgStyle = isStriped ? '' : `background:${cell.bg};`;
+    const stripedClass = isStriped ? ' striped' : '';
+    gridHTML += `<div class="hex-cell${stripedClass}" style="${bgStyle}"><div class="hex-inner">${unitsHTML}</div></div>`;
+  });
+  gridHTML += '</div>';
+});
+
+gridHTML += '</div>';
+mapGrid.innerHTML = gridHTML;
+
+// Legend
+const mapLegend = document.getElementById('map-legend');
+mapLegend.innerHTML = `
+  <span><span class="legend-dot" style="background:${nordBg}"></span> Nordostan</span>
+  <span><span class="legend-dot" style="background:${heartBg}"></span> Heartland</span>
+  <span><span class="legend-dot" style="background:${landBg}"></span> Neutral</span>
+  <span><span class="legend-dot" style="background:repeating-linear-gradient(45deg,#D4A843,#D4A843 2px,#808080 2px,#808080 4px)"></span> Occupied</span>
+  <span>${mapIcon(mapTank, 12, nordColor)} Nordostan tanks</span>
+  <span>${mapIcon(mapTank, 12, heartColor)} Heartland tanks</span>
+`;
+</script>
+
+</body>
+</html>

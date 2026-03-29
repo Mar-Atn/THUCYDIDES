@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE THUCYDIDES TRAP — UX Style Guide (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   CSS CUSTOM PROPERTIES — DUAL THEME
+   ================================================================ */
+:root {
+  /* Light "Strategic Paper" — DEFAULT */
+  --base: #F5F6F8;
+  --base-mid: #EBEDF2;
+  --text: #1A2332;
+  --text-secondary: #4A5568;
+  --text-muted: #8494A7;
+  --action: #1A5276;
+  --action-hover: #154360;
+  --accent: #C4922A;
+  --card: #FFFFFF;
+  --border: #D8DCE5;
+  --success: #2E7D4F;
+  --warning: #B8762E;
+  --danger: #B03A3A;
+  --info: #2C6FA0;
+  --water: #D4E4F0;
+  --water-deep: #B5CCE0;
+  --nav-shadow: rgba(0,0,0,0.06);
+  --code-bg: #F0F2F5;
+  --theme-name: 'light';
+}
+:root.dark-theme {
+  /* Dark "Midnight Intelligence" — SECONDARY */
+  --base: #0D1B2A;
+  --base-mid: #1B2A3E;
+  --text: #D4DEE8;
+  --text-secondary: #7A8FA3;
+  --text-muted: #556B80;
+  --action: #5B9BD5;
+  --action-hover: #4A8BC5;
+  --accent: #E8B84D;
+  --card: #1B2A3E;
+  --border: #253D54;
+  --success: #5BAD7A;
+  --warning: #D4A03A;
+  --danger: #D45B5B;
+  --info: #5B9BD5;
+  --water: #1B2A3E;
+  --water-deep: #152535;
+  --nav-shadow: rgba(0,0,0,0.3);
+  --code-bg: #152535;
+  --theme-name: 'dark';
+}
+
+/* ================================================================
+   BASE RESET & TYPOGRAPHY
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--base);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  transition: background 0.3s, color 0.3s;
+}
+h1, h2, h3, h4 { font-family: 'Playfair Display', Georgia, serif; color: var(--text); line-height: 1.3; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+/* ================================================================
+   LAYOUT
+   ================================================================ */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--card); border-bottom: 1px solid var(--border);
+  padding: 10px 32px; display: flex; align-items: center; gap: 24px;
+  box-shadow: 0 1px 4px var(--nav-shadow);
+  transition: background 0.3s, border-color 0.3s;
+}
+nav .logo { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+nav .logo img { height: 24px; width: auto; }
+nav .logo span { font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 12px; color: var(--text-secondary); letter-spacing: 0.5px; }
+nav .title { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--text-secondary); letter-spacing: 1.5px; text-transform: uppercase; }
+.theme-toggle {
+  margin-left: auto; padding: 6px 18px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); color: var(--text); font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; letter-spacing: 0.5px;
+}
+.theme-toggle:hover { border-color: var(--action); color: var(--action); }
+
+.container { max-width: 1300px; margin: 0 auto; padding: 32px; }
+
+/* Collapsible sections */
+.section { margin-bottom: 48px; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: border-color 0.3s; }
+.section-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px 24px; cursor: pointer;
+  background: var(--card); border-bottom: 1px solid var(--border); transition: background 0.3s;
+  user-select: none;
+}
+.section-header h2 { font-size: 1.25rem; font-weight: 600; margin: 0; }
+.section-header .num { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--action); font-weight: 500; }
+.section-header .chevron { margin-left: auto; font-size: 18px; color: var(--text-muted); transition: transform 0.2s; }
+.section.collapsed .section-header .chevron { transform: rotate(-90deg); }
+.section-body { padding: 24px; background: var(--base); transition: background 0.3s; }
+.section.collapsed .section-body { display: none; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 20px; transition: background 0.3s, border-color 0.3s; }
+.subsection { margin-bottom: 28px; }
+.subsection h3 { font-size: 1.05rem; margin-bottom: 12px; color: var(--action); }
+.subsection h4 { font-size: 0.9rem; margin-bottom: 8px; font-weight: 600; }
+
+/* ================================================================
+   TABLES
+   ================================================================ */
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+th, td { padding: 7px 12px; border: 1px solid var(--border); text-align: left; }
+th { background: var(--action); color: #fff; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+td { vertical-align: middle; }
+
+/* ================================================================
+   UTILITY CLASSES
+   ================================================================ */
+.swatch { display: inline-block; width: 36px; height: 20px; border-radius: 3px; vertical-align: middle; border: 1px solid rgba(128,128,128,0.15); }
+.swatch-sm { width: 24px; height: 14px; }
+.hex-code { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-secondary); }
+.flex-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.flex-row-lg { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.text-center { text-align: center; }
+.mt-16 { margin-top: 16px; }
+.mb-8 { margin-bottom: 8px; }
+.mb-16 { margin-bottom: 16px; }
+.note { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
+
+/* Country badge */
+.country-badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px 4px 6px;
+  border-radius: 6px; font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+
+/* Status indicators */
+.status-normal { color: var(--text-secondary); }
+.status-stressed { color: var(--warning); border-left: 3px solid var(--warning); padding-left: 8px; }
+.status-crisis { color: var(--danger); border-left: 4px solid var(--danger); padding-left: 8px; font-weight: 600; }
+.status-collapse { color: #fff; background: var(--danger); padding: 2px 8px; border-radius: 4px; animation: pulse-subtle 2s ease-in-out infinite; }
+@keyframes pulse-subtle { 0%,100%{opacity:1;} 50%{opacity:0.7;} }
+
+/* Alert types */
+.alert { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; margin-bottom: 8px; border-left: 4px solid; }
+.alert-military { border-left-color: var(--danger); background: color-mix(in srgb, var(--danger) 8%, var(--card)); }
+.alert-diplomatic { border-left-color: var(--action); background: color-mix(in srgb, var(--action) 8%, var(--card)); }
+.alert-economic { border-left-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--card)); }
+.alert-election { border-left-color: var(--info); background: color-mix(in srgb, var(--info) 8%, var(--card)); }
+.alert-covert { border-left-color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 8%, var(--card)); }
+.alert .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* Sparkline */
+.sparkline { display: block; }
+
+/* Data card */
+.data-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; transition: all 0.3s; }
+.data-card .label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); }
+.data-card .sublabel { font-size: 10px; color: var(--text-muted); }
+.data-card .value { font-family: 'JetBrains Mono', monospace; font-size: 1.5rem; font-weight: 700; margin: 4px 0; }
+.data-card .change { font-size: 12px; font-weight: 600; }
+.data-card .change.up { color: var(--success); }
+.data-card .change.down { color: var(--danger); }
+
+/* Code block */
+.code-block { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 11px; line-height: 1.6; overflow-x: auto; white-space: pre; color: var(--text); transition: background 0.3s; }
+
+/* Doc samples */
+.doc-frame { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.doc-frame .doc-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 6px 12px; background: var(--card); border-bottom: 1px solid var(--border); }
+
+/* Map containers */
+.map-container { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--water-deep); padding: 12px; }
+
+/* ================================================================
+   PRINT
+   ================================================================ */
+@media print {
+  nav, .theme-toggle { display: none; }
+  .section { break-inside: avoid; border: none; }
+  .section-body { display: block !important; }
+  body { background: #fff; color: #1A2332; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<nav>
+  <span class="logo"><img src="assets/logo-metagames.png" alt="MetaGames"><span>MetaGames</span></span>
+  <span class="title">The Thucydides Trap &mdash; UX Style Guide</span>
+  <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">Dark Theme</button>
+</nav>
+
+<div class="container">
+
+<div style="text-align:center; margin: 24px 0 40px;">
+  <h1 style="font-size:2.2rem; font-weight:700;">THE THUCYDIDES TRAP</h1>
+  <p style="font-size:14px; color:var(--text-secondary); letter-spacing:1px; text-transform:uppercase; margin-top:4px;">UX Style Guide &mdash; Final Reference v1.0</p>
+  <p style="font-size:12px; color:var(--text-muted); margin-top:8px;">Frozen 2026-03-29 &middot; All elements approved &middot; MetaGames</p>
+</div>
+
+<!-- ============================================================
+     SECTION 1: COLOR SYSTEM
+     ============================================================ -->
+<div class="section" id="sec-colors">
+  <div class="section-header" onclick="toggleSection('sec-colors')">
+    <span class="num">01</span>
+    <h2>Color System</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <!-- Theme Palettes -->
+    <div class="subsection">
+      <h3>Theme Palettes</h3>
+      <div class="grid-2">
+        <!-- Light -->
+        <div class="card">
+          <h4 style="margin-bottom:12px;">Light &mdash; "Strategic Paper" (Default)</h4>
+          <table>
+            <tr><th>Token</th><th>Swatch</th><th>Hex</th><th>Usage</th></tr>
+            <tr><td>base</td><td><span class="swatch" style="background:#F5F6F8"></span></td><td class="hex-code">#F5F6F8</td><td>Background</td></tr>
+            <tr><td>text</td><td><span class="swatch" style="background:#1A2332"></span></td><td class="hex-code">#1A2332</td><td>Primary text</td></tr>
+            <tr><td>action</td><td><span class="swatch" style="background:#1A5276"></span></td><td class="hex-code">#1A5276</td><td>Buttons, links</td></tr>
+            <tr><td>accent</td><td><span class="swatch" style="background:#C4922A"></span></td><td class="hex-code">#C4922A</td><td>Highlights</td></tr>
+            <tr><td>card</td><td><span class="swatch" style="background:#FFFFFF;border:1px solid #D8DCE5"></span></td><td class="hex-code">#FFFFFF</td><td>Card surfaces</td></tr>
+            <tr><td>border</td><td><span class="swatch" style="background:#D8DCE5"></span></td><td class="hex-code">#D8DCE5</td><td>Dividers</td></tr>
+          </table>
+        </div>
+        <!-- Dark -->
+        <div class="card" style="background:#0D1B2A; color:#D4DEE8; border-color:#253D54;">
+          <h4 style="margin-bottom:12px; color:#D4DEE8;">Dark &mdash; "Midnight Intelligence"</h4>
+          <table style="border-color:#253D54;">
+            <tr><th>Token</th><th>Swatch</th><th>Hex</th><th>Usage</th></tr>
+            <tr style="border-color:#253D54;"><td style="color:#D4DEE8;border-color:#253D54;">base</td><td style="border-color:#253D54;"><span class="swatch" style="background:#0D1B2A;border:1px solid #253D54"></span></td><td class="hex-code" style="color:#7A8FA3">#0D1B2A</td><td style="color:#D4DEE8;border-color:#253D54;">Background</td></tr>
+            <tr><td style="color:#D4DEE8;border-color:#253D54;">text</td><td style="border-color:#253D54;"><span class="swatch" style="background:#D4DEE8"></span></td><td class="hex-code" style="color:#7A8FA3">#D4DEE8</td><td style="color:#D4DEE8;border-color:#253D54;">Primary text</td></tr>
+            <tr><td style="color:#D4DEE8;border-color:#253D54;">action</td><td style="border-color:#253D54;"><span class="swatch" style="background:#5B9BD5"></span></td><td class="hex-code" style="color:#7A8FA3">#5B9BD5</td><td style="color:#D4DEE8;border-color:#253D54;">Buttons, links</td></tr>
+            <tr><td style="color:#D4DEE8;border-color:#253D54;">accent</td><td style="border-color:#253D54;"><span class="swatch" style="background:#E8B84D"></span></td><td class="hex-code" style="color:#7A8FA3">#E8B84D</td><td style="color:#D4DEE8;border-color:#253D54;">Highlights</td></tr>
+            <tr><td style="color:#D4DEE8;border-color:#253D54;">card</td><td style="border-color:#253D54;"><span class="swatch" style="background:#1B2A3E;border:1px solid #253D54"></span></td><td class="hex-code" style="color:#7A8FA3">#1B2A3E</td><td style="color:#D4DEE8;border-color:#253D54;">Card surfaces</td></tr>
+            <tr><td style="color:#D4DEE8;border-color:#253D54;">border</td><td style="border-color:#253D54;"><span class="swatch" style="background:#253D54"></span></td><td class="hex-code" style="color:#7A8FA3">#253D54</td><td style="color:#D4DEE8;border-color:#253D54;">Dividers</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Semantic Colors -->
+    <div class="subsection">
+      <h3>Semantic Colors</h3>
+      <div class="flex-row-lg">
+        <div class="card text-center" style="min-width:120px;"><span class="swatch" style="background:var(--success);width:48px;height:28px;display:block;margin:0 auto 6px;border-radius:4px;"></span><div style="font-size:11px;font-weight:600;">Success</div><div class="hex-code">L:#2E7D4F D:#5BAD7A</div></div>
+        <div class="card text-center" style="min-width:120px;"><span class="swatch" style="background:var(--warning);width:48px;height:28px;display:block;margin:0 auto 6px;border-radius:4px;"></span><div style="font-size:11px;font-weight:600;">Warning</div><div class="hex-code">L:#B8762E D:#D4A03A</div></div>
+        <div class="card text-center" style="min-width:120px;"><span class="swatch" style="background:var(--danger);width:48px;height:28px;display:block;margin:0 auto 6px;border-radius:4px;"></span><div style="font-size:11px;font-weight:600;">Danger</div><div class="hex-code">L:#B03A3A D:#D45B5B</div></div>
+        <div class="card text-center" style="min-width:120px;"><span class="swatch" style="background:var(--info);width:48px;height:28px;display:block;margin:0 auto 6px;border-radius:4px;"></span><div style="font-size:11px;font-weight:600;">Info</div><div class="hex-code">L:#2C6FA0 D:#5B9BD5</div></div>
+        <div class="card text-center" style="min-width:120px;"><span class="swatch" style="background:var(--accent);width:48px;height:28px;display:block;margin:0 auto 6px;border-radius:4px;"></span><div style="font-size:11px;font-weight:600;">Accent/Gold</div><div class="hex-code">L:#C4922A D:#E8B84D</div></div>
+      </div>
+    </div>
+
+    <!-- Country Colors -->
+    <div class="subsection">
+      <h3>Country Color Table</h3>
+      <p class="note">All 22 countries + 1 contested territory. Map colors are muted. UI colors are vivid for badges/charts. Light BG is for tinted backgrounds.</p>
+      <div class="card" style="overflow-x:auto; padding:12px;">
+        <table id="country-color-table">
+          <thead>
+            <tr><th>Country</th><th>Bloc</th><th>Map</th><th>UI (Vivid)</th><th>Light BG</th><th>Badge Preview</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Organization Colors -->
+    <div class="subsection">
+      <h3>Organization Colors</h3>
+      <div class="flex-row-lg" id="org-colors"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 2: TYPOGRAPHY
+     ============================================================ -->
+<div class="section" id="sec-type">
+  <div class="section-header" onclick="toggleSection('sec-type')">
+    <span class="num">02</span>
+    <h2>Typography</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <h3>Font Families</h3>
+      <div class="grid-3">
+        <div class="card">
+          <div style="font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; margin-bottom:8px;">Playfair Display</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Headings (600/700)</div>
+          <div style="font-family:'Playfair Display',serif; font-size:14px; margin-top:8px;">ABCDEFGHIJKLM</div>
+          <div style="font-family:'Playfair Display',serif; font-size:14px;">abcdefghijklm 0123456789</div>
+        </div>
+        <div class="card">
+          <div style="font-family:'DM Sans',sans-serif; font-size:1.5rem; font-weight:600; margin-bottom:8px;">DM Sans</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Body text (400/500/600)</div>
+          <div style="font-family:'DM Sans',sans-serif; font-size:14px; margin-top:8px;">ABCDEFGHIJKLM</div>
+          <div style="font-family:'DM Sans',sans-serif; font-size:14px;">abcdefghijklm 0123456789</div>
+        </div>
+        <div class="card">
+          <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:500; margin-bottom:8px;">JetBrains Mono</div>
+          <div style="font-size:12px; color:var(--text-secondary);">Data/Numbers (400/500)</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:14px; margin-top:8px;">0123456789 +-=%$</div>
+          <div style="font-family:'JetBrains Mono',monospace; font-size:14px;">GDP: 280.4 | Oil: $198</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Type Scale</h3>
+      <div class="card">
+        <div style="font-family:'Playfair Display',serif; font-size:2.5rem; font-weight:700; margin-bottom:8px;">Display &mdash; 40px / Bold</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.75rem; font-weight:700; margin-bottom:8px;">H1 &mdash; 28px / Bold</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.375rem; font-weight:600; margin-bottom:8px;">H2 &mdash; 22px / Semibold</div>
+        <div style="font-family:'Playfair Display',serif; font-size:1.125rem; font-weight:600; margin-bottom:8px;">H3 &mdash; 18px / Semibold</div>
+        <div style="font-family:'DM Sans',sans-serif; font-size:1rem; margin-bottom:6px;">Body &mdash; 16px / Regular &mdash; Default text for paragraphs and descriptions</div>
+        <div style="font-family:'DM Sans',sans-serif; font-size:0.875rem; color:var(--text-secondary); margin-bottom:6px;">Body Small &mdash; 14px / Regular &mdash; Secondary text, table cells</div>
+        <div style="font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:500; color:var(--text-muted); margin-bottom:8px;">Caption &mdash; 12px / Medium &mdash; Labels, timestamps, annotations</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1.5rem; font-weight:700; color:var(--accent); margin-bottom:4px;">280.4 &mdash; Data Large (24px Mono Bold)</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1rem; font-weight:500;">$198.40 +2.3% &mdash; Data (16px Mono Medium)</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Map Label Specimen</h3>
+      <div class="card" style="text-align:center; padding:24px;">
+        <div style="font-family:'Playfair Display',serif; font-variant:small-caps; letter-spacing:0.1em; font-size:1.1rem; font-weight:600; margin-bottom:6px;">Columbia</div>
+        <div style="font-size:10px; text-transform:uppercase; color:var(--text-secondary); letter-spacing:0.08em; margin-bottom:6px;">WESTERN SEABOARD</div>
+        <div style="font-size:10px; font-style:italic; color:var(--accent);">Formosa Strait</div>
+        <div style="font-size:10px; font-style:italic; color:var(--text-muted); margin-top:4px;">Pacific Ocean</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 3: COUNTRY IDENTITY SYSTEM
+     ============================================================ -->
+<div class="section" id="sec-emblems">
+  <div class="section-header" onclick="toggleSection('sec-emblems')">
+    <span class="num">03</span>
+    <h2>Country Identity System</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <h3>Country Emblems &mdash; Style 1: Geometric Abstract</h3>
+      <p class="note">Bauhaus/Isotype-inspired. Shown at 48px, 24px, 16px. All geometric, single-weight line art.</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px,1fr)); gap:12px;" id="emblem-grid"></div>
+    </div>
+
+    <div class="subsection">
+      <h3>Organization Emblems</h3>
+      <p class="note">Shown at 48px and 24px. Consistent geometric vocabulary.</p>
+      <div class="flex-row-lg" id="org-emblem-grid"></div>
+    </div>
+
+    <div class="subsection">
+      <h3>Country Badge Components</h3>
+      <p class="note">Inline badges: emblem + name + country color tint. Light and dark backgrounds.</p>
+      <div class="card mb-16">
+        <div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:8px;">Active Theme</div>
+        <div class="flex-row" id="badge-row"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 4: MILITARY UNIT ICONS
+     ============================================================ -->
+<div class="section" id="sec-units">
+  <div class="section-header" onclick="toggleSection('sec-units')">
+    <span class="num">04</span>
+    <h2>Military Unit Icons</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <h3>Confirmed Unit Types &mdash; 3 Sizes</h3>
+      <p class="note">All in 24x24 viewBox. Ships render 20% larger (19px vs 16px) on maps.</p>
+      <div class="card" style="overflow-x:auto;">
+        <table id="unit-table">
+          <thead><tr><th>Type</th><th>32px</th><th>20px</th><th>14px</th><th>Description</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Tank Facing</h3>
+      <p class="note">Ground units face RIGHT (attacker/default) or LEFT (opposing force). Nordostan LEFT, Heartland RIGHT.</p>
+      <div class="card">
+        <div class="flex-row-lg">
+          <div class="text-center">
+            <div id="tank-right-demo"></div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">RIGHT (Heartland)</div>
+          </div>
+          <div style="font-size:18px; color:var(--text-muted);">vs</div>
+          <div class="text-center">
+            <div id="tank-left-demo"></div>
+            <div style="font-size:11px; color:var(--text-secondary); margin-top:4px;">LEFT (Nordostan)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Color Test &mdash; 6 Countries</h3>
+      <div class="card">
+        <div class="flex-row-lg" id="unit-color-test"></div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Hex Stacking Demo</h3>
+      <p class="note">Multiple units in one hex. Icons stack vertically, smaller at density.</p>
+      <div class="card" style="text-align:center;">
+        <svg width="120" height="140" viewBox="0 0 120 140" id="hex-stack-demo"></svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 5: COMPONENT LIBRARY
+     ============================================================ -->
+<div class="section" id="sec-components">
+  <div class="section-header" onclick="toggleSection('sec-components')">
+    <span class="num">05</span>
+    <h2>Component Library</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <h3>Data Cards</h3>
+      <div class="grid-3" id="data-cards"></div>
+    </div>
+
+    <div class="subsection">
+      <h3>Status Indicators</h3>
+      <div class="card">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="status-normal">Normal &mdash; Stability: 82 / 100</div>
+          <div class="status-stressed">Stressed &mdash; Stability: 55 / 100 (approaching threshold)</div>
+          <div class="status-crisis">Crisis &mdash; Stability: 31 / 100 (below critical threshold)</div>
+          <div><span class="status-collapse">Collapse &mdash; Stability: 12 / 100</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Alert Types</h3>
+      <div class="card" style="padding:12px;">
+        <div class="alert alert-military"><span class="icon">&#9876;</span> <strong>MILITARY ALERT:</strong>&nbsp; Nordostan launches offensive in Eastern Ereb theater, Row 5-6</div>
+        <div class="alert alert-diplomatic"><span class="icon">&#9993;</span> <strong>DIPLOMATIC:</strong>&nbsp; Cathay proposes bilateral summit with Columbia &mdash; pending response</div>
+        <div class="alert alert-economic"><span class="icon">&#9670;</span> <strong>ECONOMIC:</strong>&nbsp; Oil price shock &mdash; $198/barrel (+14%) after Gulf Gate escalation</div>
+        <div class="alert alert-election"><span class="icon">&#9744;</span> <strong>ELECTION:</strong>&nbsp; Heartland presidential election scheduled for Round 4</div>
+        <div class="alert alert-covert"><span class="icon">&#9676;</span> <strong>COVERT:</strong>&nbsp; Intelligence suggests Persia nuclear enrichment at 85% &mdash; unconfirmed</div>
+      </div>
+    </div>
+
+    <div class="subsection">
+      <h3>Status Table</h3>
+      <div class="card" style="overflow-x:auto; padding:12px;">
+        <table class="status-table" id="status-table-demo">
+          <thead><tr><th style="width:140px;">Country</th><th>GDP</th><th>Stability</th><th>Military</th><th>Oil Dep.</th><th>Status</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 6: DOCUMENT SAMPLES
+     ============================================================ -->
+<div class="section" id="sec-docs">
+  <div class="section-header" onclick="toggleSection('sec-docs')">
+    <span class="num">06</span>
+    <h2>Document Samples</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+    <div class="grid-2">
+
+      <!-- Participant Dashboard -->
+      <div class="doc-frame">
+        <div class="doc-label">Participant Dashboard &mdash; Columbia / Dealer</div>
+        <div id="dash-mockup" style="padding:16px; min-height:320px;"></div>
+      </div>
+
+      <!-- Presentation Slide -->
+      <div class="doc-frame">
+        <div class="doc-label">Presentation Slide &mdash; World Briefing</div>
+        <div id="slide-mockup" style="min-height:320px; background:#0D1B2A; color:#D4DEE8; padding:24px; position:relative;">
+          <div style="font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; color:#D4DEE8;">World Briefing &mdash; Round 3</div>
+          <div style="font-size:11px; color:#7A8FA3; margin-top:4px;">THE THUCYDIDES TRAP &middot; Turn 3 of 8 &middot; Year 2026</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-top:16px;">
+            <div style="background:#1B2A3E; border:1px solid #253D54; border-radius:6px; padding:12px;">
+              <div style="font-size:10px; color:#7A8FA3; text-transform:uppercase; letter-spacing:0.5px;">Oil Price</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#E8B84D;">$198.40</div>
+              <div style="font-size:11px; color:#D45B5B;">&#9650; +14.2%</div>
+            </div>
+            <div style="background:#1B2A3E; border:1px solid #253D54; border-radius:6px; padding:12px;">
+              <div style="font-size:10px; color:#7A8FA3; text-transform:uppercase; letter-spacing:0.5px;">Active Wars</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#D45B5B;">2</div>
+              <div style="font-size:11px; color:#7A8FA3;">E.Ereb + Persia</div>
+            </div>
+            <div style="background:#1B2A3E; border:1px solid #253D54; border-radius:6px; padding:12px;">
+              <div style="font-size:10px; color:#7A8FA3; text-transform:uppercase; letter-spacing:0.5px;">DEFCON</div>
+              <div style="font-family:'JetBrains Mono',monospace; font-size:1.3rem; font-weight:700; color:#E8B84D;">3</div>
+              <div style="font-size:11px; color:#7A8FA3;">Elevated</div>
+            </div>
+          </div>
+          <div style="position:absolute; bottom:12px; left:24px; display:flex; align-items:center; gap:4px;"><img src="assets/logo-metagames.png" style="height:16px; opacity:0.6;"><span style="font-size:10px; color:#556B80;">MetaGames</span></div>
+          <div style="position:absolute; bottom:12px; right:24px; font-size:10px; color:#556B80;">THE THUCYDIDES TRAP</div>
+        </div>
+      </div>
+
+      <!-- Role Brief Cover -->
+      <div class="doc-frame">
+        <div class="doc-label">Role Brief Cover &mdash; Light</div>
+        <div id="role-brief-mockup" style="background:#F5F6F8; color:#1A2332; padding:0; position:relative; aspect-ratio:210/297; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+          <div style="position:absolute; top:0; left:0; right:0; height:6px; background:#3A6B9F;"></div>
+          <div style="position:absolute; top:16px; font-size:9px; font-weight:700; letter-spacing:2px; color:#B03A3A; text-transform:uppercase;">CLASSIFIED &mdash; Columbia Eyes Only</div>
+          <div id="role-brief-emblem" style="margin-bottom:12px;"></div>
+          <div style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:#1A2332;">THE DEALER</div>
+          <div style="font-size:14px; color:#4A5568;">President of Columbia</div>
+          <div style="font-size:11px; color:#8494A7; margin-top:16px;">THE THUCYDIDES TRAP &mdash; Leadership Simulation</div>
+          <div style="position:absolute; bottom:12px; right:16px; display:flex; align-items:center; gap:4px;"><img src="assets/logo-metagames.png" style="height:14px; opacity:0.5;"><span style="font-size:9px; color:#8494A7;">MetaGames 2026</span></div>
+        </div>
+      </div>
+
+      <!-- Name Badge -->
+      <div class="doc-frame">
+        <div class="doc-label">Name Badge</div>
+        <div style="padding:24px; display:flex; justify-content:center;">
+          <div style="width:280px; height:170px; border-radius:8px; overflow:hidden; background:var(--card); border:1px solid var(--border); display:flex; flex-direction:column; align-items:center;">
+            <div style="width:100%; height:8px; background:#3A6B9F;"></div>
+            <div style="padding:14px; text-align:center; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+              <div id="badge-emblem-48"></div>
+              <div style="font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; margin-top:8px;">THE DEALER</div>
+              <div style="font-size:12px; color:var(--text-secondary);">President of Columbia</div>
+              <div style="font-size:10px; color:var(--text-muted); margin-top:8px;">Jane Smith</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 7: MAPS
+     ============================================================ -->
+<div class="section" id="sec-maps">
+  <div class="section-header" onclick="toggleSection('sec-maps')">
+    <span class="num">07</span>
+    <h2>Maps</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="subsection">
+      <h3>Global Strategic Map (10 x 20)</h3>
+      <p class="note">All land hexes with muted country colors, watermark emblems, country name centroids, chokepoint labels, and REAL deployment data.</p>
+      <div class="map-container" style="overflow-x:auto;">
+        <svg id="global-map" style="display:block; margin:0 auto;"></svg>
+      </div>
+    </div>
+
+    <div class="subsection" style="margin-top:32px;">
+      <h3>Eastern Ereb Theater Map (10 x 10)</h3>
+      <p class="note">Nordostan tanks face LEFT, Heartland tanks face RIGHT. Occupied zones with striped pattern. Die Hard marker at (6,6).</p>
+      <div style="max-width:70%; margin:0 auto;">
+        <div class="map-container" style="overflow-x:auto;">
+          <svg id="theater-map" style="display:block; margin:0 auto;"></svg>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ============================================================
+     SECTION 8: PRINT VARIANTS
+     ============================================================ -->
+<div class="section" id="sec-print">
+  <div class="section-header" onclick="toggleSection('sec-print')">
+    <span class="num">08</span>
+    <h2>Print Variants</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+
+    <div class="grid-2">
+      <!-- Role Brief Interior -->
+      <div class="doc-frame">
+        <div class="doc-label">Role Brief Interior Page (Print / Light)</div>
+        <div style="background:#F5F6F8; color:#1A2332; padding:24px; font-size:13px; line-height:1.7; min-height:400px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #1A5276; padding-bottom:6px; margin-bottom:16px;">
+            <span style="font-family:'Playfair Display',serif; font-size:1rem; font-weight:600; color:#1A5276;">THE DEALER &mdash; Columbia</span>
+            <span style="font-size:9px; font-weight:700; letter-spacing:2px; color:#B03A3A;">CLASSIFIED</span>
+          </div>
+          <div style="columns:2; column-gap:20px; font-family:'DM Sans',sans-serif;">
+            <p style="margin-bottom:10px;"><strong style="font-family:'Playfair Display',serif;">Character Background.</strong> You are the President of Columbia, the world's dominant superpower. Your economy dwarfs all others, your military spans every ocean, and your currency underwrites global trade. But your dominance is being challenged.</p>
+            <p style="margin-bottom:10px;">Cathay's GDP is projected to overtake Columbia's within a decade. Nordostan has invaded Heartland, testing your alliance commitments. Persia's nuclear program threatens the Gulf. And your own citizens are weary of foreign entanglements.</p>
+            <p style="margin-bottom:10px;"><strong style="font-family:'Playfair Display',serif;">Your Objectives.</strong></p>
+            <div style="background:#fff; border:1px solid #D8DCE5; border-radius:4px; padding:8px; font-size:12px; margin-bottom:10px;">
+              <div style="font-weight:600; color:#1A5276; margin-bottom:4px;">Primary Goals</div>
+              <div>1. Maintain global military supremacy</div>
+              <div>2. Prevent Cathay economic overtake</div>
+              <div>3. Resolve Heartland conflict favorably</div>
+            </div>
+            <p style="margin-bottom:10px;"><strong style="font-family:'Playfair Display',serif;">Ticking Clock.</strong> Congressional elections in Round 5. If stability drops below 60, your party loses the House and your budget is cut by 15%.</p>
+          </div>
+          <div style="text-align:right; font-size:9px; color:#8494A7; margin-top:16px; display:flex; align-items:center; justify-content:flex-end; gap:4px;"><img src="assets/logo-metagames.png" style="height:12px; opacity:0.4;"><span>MetaGames 2026 &middot; p.3</span></div>
+        </div>
+      </div>
+
+      <!-- Status Report -->
+      <div class="doc-frame">
+        <div class="doc-label">Status Report Page (Print / Light)</div>
+        <div style="background:#F5F6F8; color:#1A2332; padding:24px; font-size:13px; min-height:400px;">
+          <div style="border-bottom:2px solid #1A5276; padding-bottom:6px; margin-bottom:16px;">
+            <span style="font-family:'Playfair Display',serif; font-size:1rem; font-weight:600; color:#1A5276;">Global Status Report &mdash; End of Round 2</span>
+          </div>
+          <table style="font-size:12px; border-color:#D8DCE5;">
+            <thead><tr><th style="background:#1A5276;">Country</th><th style="background:#1A5276;">GDP (T)</th><th style="background:#1A5276;">Stab.</th><th style="background:#1A5276;">Mil. Units</th><th style="background:#1A5276;">Status</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600; color:#3A6B9F;">Columbia</td><td style="font-family:'JetBrains Mono',monospace;">28.4</td><td>82</td><td>58</td><td style="color:#2E7D4F;">Stable</td></tr>
+              <tr><td style="font-weight:600; color:#C4A030;">Cathay</td><td style="font-family:'JetBrains Mono',monospace;">22.1</td><td>78</td><td>48</td><td style="color:#2E7D4F;">Stable</td></tr>
+              <tr><td style="font-weight:600; color:#A06060;">Nordostan</td><td style="font-family:'JetBrains Mono',monospace;">2.8</td><td>55</td><td>45</td><td style="color:#B8762E;">Stressed</td></tr>
+              <tr><td style="font-weight:600; color:#5A9A5A;">Heartland</td><td style="font-family:'JetBrains Mono',monospace;">0.9</td><td>31</td><td>14</td><td style="color:#B03A3A;">At War</td></tr>
+              <tr><td style="font-weight:600; color:#9A7040;">Persia</td><td style="font-family:'JetBrains Mono',monospace;">1.2</td><td>48</td><td>16</td><td style="color:#B03A3A;">Sanctioned</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:16px; padding:10px; background:#fff; border:1px solid #D8DCE5; border-radius:4px; font-size:12px;">
+            <div style="font-weight:600; color:#C4922A; margin-bottom:4px;">Key Events This Round</div>
+            <div>&bull; Nordostan advances 2 hexes in Eastern Ereb theater</div>
+            <div>&bull; Oil price rises to $198/barrel after Gulf Gate tensions</div>
+            <div>&bull; Cathay-Columbia trade talks stall over semiconductor embargo</div>
+          </div>
+          <div style="text-align:right; font-size:9px; color:#8494A7; margin-top:16px; display:flex; align-items:center; justify-content:flex-end; gap:4px;"><img src="assets/logo-metagames.png" style="height:12px; opacity:0.4;"><span>MetaGames 2026</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TAILWIND CONFIG
+     ============================================================ -->
+<div class="section" id="sec-tailwind">
+  <div class="section-header" onclick="toggleSection('sec-tailwind')">
+    <span class="num">09</span>
+    <h2>Tailwind Config</h2>
+    <span class="chevron">&#9662;</span>
+  </div>
+  <div class="section-body">
+    <div class="code-block" id="tailwind-config"></div>
+  </div>
+</div>
+
+<div style="text-align:center; padding:32px 0 16px; font-size:11px; color:var(--text-muted);">
+  THE THUCYDIDES TRAP &mdash; UX Style Guide Final Reference &middot; MetaGames 2026<br>
+  All elements approved and frozen. This document is the single source of truth for visual implementation.
+</div>
+
+</div><!-- /container -->
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+// ================================================================
+// DATA
+// ================================================================
+const countries = [
+  { id:'columbia',  name:'Columbia',  color:'#3A6B9F', mapColor:'#9AB5D0', light:'#E8EFF6', bloc:'Western Treaty' },
+  { id:'cathay',    name:'Cathay',    color:'#C4A030', mapColor:'#E8D5A3', light:'#F8F2E5', bloc:'League' },
+  { id:'nordostan', name:'Nordostan', color:'#A06060', mapColor:'#D4A5A5', light:'#F5EAEA', bloc:'League' },
+  { id:'heartland', name:'Heartland', color:'#5A9A5A', mapColor:'#A5C8A5', light:'#EBF3EB', bloc:'At war' },
+  { id:'persia',    name:'Persia',    color:'#9A7040', mapColor:'#C8A57A', light:'#F2EBE0', bloc:'League' },
+  { id:'gallia',    name:'Gallia',    color:'#4A6FA0', mapColor:'#A5B8D4', light:'#EBF0F6', bloc:'Western Treaty' },
+  { id:'teutonia',  name:'Teutonia',  color:'#3A8A7A', mapColor:'#8AB5AA', light:'#E8F2EF', bloc:'Western Treaty' },
+  { id:'thule',     name:'Thule',     color:'#3A8A7A', mapColor:'#8AB5AA', light:'#E8F2EF', bloc:'Western Treaty' },
+  { id:'albion',    name:'Albion',    color:'#4A7A8F', mapColor:'#8AA5B5', light:'#E8EFF3', bloc:'Western Treaty' },
+  { id:'freeland',  name:'Freeland',  color:'#5A80A0', mapColor:'#A0B8C8', light:'#EBF1F5', bloc:'Western Treaty' },
+  { id:'ponte',     name:'Ponte',     color:'#6A9A8A', mapColor:'#A5C8B8', light:'#EBF3EF', bloc:'Western Treaty' },
+  { id:'bharata',   name:'Bharata',   color:'#B87850', mapColor:'#D4B5A5', light:'#F5EDE5', bloc:'Non-aligned' },
+  { id:'formosa',   name:'Formosa',   color:'#B89048', mapColor:'#DCC5A0', light:'#F5EEE0', bloc:'\u2014' },
+  { id:'yamato',    name:'Yamato',    color:'#5A7A9B', mapColor:'#A5B5C8', light:'#EBF0F5', bloc:'Western Treaty' },
+  { id:'hanguk',    name:'Hanguk',    color:'#4A8FA8', mapColor:'#A5C8D4', light:'#E8F1F5', bloc:'\u2014' },
+  { id:'phrygia',   name:'Phrygia',   color:'#8A6A48', mapColor:'#B5A08A', light:'#F0EBE5', bloc:'Swing' },
+  { id:'solaria',   name:'Solaria',   color:'#A89030', mapColor:'#C8B896', light:'#F3F0E5', bloc:'Swing' },
+  { id:'mirage',    name:'Mirage',    color:'#A88050', mapColor:'#D4BFA5', light:'#F5EEE5', bloc:'Swing' },
+  { id:'levantia',  name:'Levantia',  color:'#9A9A40', mapColor:'#D4D4A5', light:'#F3F3E8', bloc:'Western Treaty' },
+  { id:'choson',    name:'Choson',    color:'#5A5A5A', mapColor:'#8A8A8A', light:'#EFEFEF', bloc:'League' },
+  { id:'caribe',    name:'Caribe',    color:'#3A7AAA', mapColor:'#8AACCC', light:'#E8F0F6', bloc:'\u2014' },
+  { id:'sogdiana',  name:'Sogdiana',  color:'#8A8A60', mapColor:'#C8C8A5', light:'#F0F0E8', bloc:'Contested' },
+];
+
+const orgs = [
+  { id:'western_treaty', name:'Western Treaty', desc:'NATO', color:'#3A6FA0' },
+  { id:'the_league',     name:'The League',     desc:'BRICS+', color:'#C0392B' },
+  { id:'the_cartel',     name:'The Cartel',     desc:'OPEC+', color:'#F39C12' },
+  { id:'the_union',      name:'The Union',      desc:'EU', color:'#2E4057' },
+  { id:'the_council',    name:'The Council',    desc:'UNSC', color:'#1A5276' },
+  { id:'the_seven',      name:'The Seven',      desc:'G7', color:'#5B7FA6' },
+];
+
+// Country map for quick lookup
+const cMap = {};
+countries.forEach(c => cMap[c.id] = c);
+
+// ================================================================
+// SVG GENERATORS
+// ================================================================
+function geometricSVG(id, color, size) {
+  const s = size, sw = Math.max(1.2, size*2/48);
+  const half = s/2, q = s/4, tq = s*3/4;
+  const paths = {
+    columbia: `<polygon points="${half},${s*0.1} ${s*0.87},${s*0.42} ${s*0.73},${s*0.9} ${s*0.27},${s*0.9} ${s*0.13},${s*0.42}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    cathay: `<polygon points="${half},${s*0.08} ${s*0.82},${q} ${s*0.82},${tq} ${half},${s*0.92} ${s*0.18},${tq} ${s*0.18},${q}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.68},${s*0.36} ${s*0.68},${s*0.64} ${half},${s*0.75} ${s*0.32},${s*0.64} ${s*0.32},${s*0.36}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    nordostan: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
+    heartland: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    persia: `<path d="M${s*0.15},${s*0.65} A${s*0.4},${s*0.4} 0 0,1 ${s*0.85},${s*0.65}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${half}" y1="${s*0.2}" x2="${half}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    gallia: `<rect x="${s*0.38}" y="${s*0.1}" width="${s*0.24}" height="${s*0.8}" rx="${s*0.02}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.28}" y1="${s*0.2}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    teutonia: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,45,90,135,180,225,270,315].map(a=>{const r1=s*0.25,r2=s*0.42,rad=a*Math.PI/180;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    albion: `<polygon points="${half},${s*0.1} ${s*0.85},${s*0.85} ${s*0.15},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    freeland: `<rect x="${s*0.15}" y="${s*0.15}" width="${s*0.7}" height="${s*0.7}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    ponte: `<path d="M${s*0.15},${s*0.8} Q${s*0.15},${s*0.2} ${half},${s*0.2} Q${s*0.85},${s*0.2} ${s*0.85},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    bharata: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.35*Math.cos(rad)}" y2="${half+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    formosa: `<rect x="${s*0.2}" y="${s*0.2}" width="${s*0.6}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.2}" x2="${s*0.4}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.2}" x2="${s*0.6}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.4}" x2="${s*0.8}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.6}" x2="${s*0.8}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/>`,
+    yamato: `<rect x="${s*0.15}" y="${s*0.6}" width="${s*0.12}" height="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.33}" y="${s*0.45}" width="${s*0.12}" height="${s*0.45}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.51}" y="${s*0.3}" width="${s*0.12}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.69}" y="${s*0.12}" width="${s*0.12}" height="${s*0.78}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    hanguk: `<circle cx="${s*0.25}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${s*0.75}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.25}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.75}" r="${s*0.06}" fill="${color}"/><line x1="${s*0.25}" y1="${half}" x2="${half}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.25}" x2="${s*0.75}" y2="${half}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.75}" y1="${half}" x2="${half}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.75}" x2="${s*0.25}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    phrygia: `<path d="M${s*0.1},${s*0.75} Q${s*0.1},${s*0.25} ${half},${s*0.25} Q${s*0.9},${s*0.25} ${s*0.9},${s*0.75}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.1}" y1="${s*0.75}" x2="${s*0.9}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/>`,
+    solaria: `${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>{const rad=a*Math.PI/180,r1=s*0.12,r2=s*0.4;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}<circle cx="${half}" cy="${half}" r="${s*0.1}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    mirage: `<polygon points="${half},${s*0.08} ${s*0.75},${half} ${half},${s*0.92} ${s*0.25},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.63},${half} ${half},${s*0.75} ${s*0.37},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    levantia: `<polygon points="${half},${s*0.08} ${s*0.86},${s*0.3} ${s*0.86},${s*0.7} ${half},${s*0.92} ${s*0.14},${s*0.7} ${s*0.14},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${half}" y1="${s*0.08}" x2="${half}" y2="${s*0.92}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.14}" y1="${half}" x2="${s*0.86}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    choson: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.4*Math.cos(rad)}" y2="${half+s*0.4*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}`,
+    caribe: `<circle cx="${half}" cy="${half}" r="${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.28}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    sogdiana: `<line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.45}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.15}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.55}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.85}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.85}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/>`,
+    thule: `<polygon points="${half},${s*0.1} ${s*0.75},${s*0.35} ${s*0.75},${s*0.7} ${half},${s*0.9} ${s*0.25},${s*0.7} ${s*0.25},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><circle cx="${half}" cy="${half}" r="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+function orgSVG(id, color, size) {
+  const s = size, sw = Math.max(1.2, size*2/48), half = s/2;
+  const paths = {
+    western_treaty: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.38*Math.cos(rad)}" y2="${half+s*0.38*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}<circle cx="${half}" cy="${half}" r="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,90,180,270].map(a=>{const rad=a*Math.PI/180;return`<polygon points="${half+s*0.35*Math.cos(rad)},${half+s*0.35*Math.sin(rad)} ${half+s*0.1*Math.cos(rad+0.3)},${half+s*0.1*Math.sin(rad+0.3)} ${half+s*0.1*Math.cos(rad-0.3)},${half+s*0.1*Math.sin(rad-0.3)}" fill="${color}"/>`}).join('')}`,
+    the_league: `<circle cx="${s*0.35}" cy="${s*0.4}" r="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.65}" cy="${s*0.4}" r="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.5}" cy="${s*0.62}" r="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    the_cartel: `<path d="M${half},${s*0.08} C${s*0.72},${s*0.08} ${s*0.82},${s*0.5} ${half},${s*0.92} C${s*0.18},${s*0.5} ${s*0.28},${s*0.08} ${half},${s*0.08} Z" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    the_union: `${Array.from({length:12}).map((_,i)=>{const a=i*30*Math.PI/180;return`<circle cx="${half+s*0.32*Math.cos(a)}" cy="${half+s*0.32*Math.sin(a)}" r="${s*0.05}" fill="${color}"/>`}).join('')}`,
+    the_council: `<circle cx="${half}" cy="${half}" r="${s*0.38}" fill="none" stroke="${color}" stroke-width="${sw}"/><ellipse cx="${half}" cy="${half}" rx="${s*0.18}" ry="${s*0.38}" fill="none" stroke="${color}" stroke-width="${sw*0.7}"/><line x1="${s*0.12}" y1="${half}" x2="${s*0.88}" y2="${half}" stroke="${color}" stroke-width="${sw*0.7}"/>`,
+    the_seven: `${Array.from({length:7}).map((_,i)=>{const a=(i*360/7-90)*Math.PI/180,r=s*0.38;return`${i===0?'M':'L'}${half+r*Math.cos(a)},${half+r*Math.sin(a)}`}).join(' ')+' Z'} `.replace(/^(.*)$/,`<polygon points="${Array.from({length:7}).map((_,i)=>{const a=(i*360/7-90)*Math.PI/180;return`${half+s*0.38*Math.cos(a)},${half+s*0.38*Math.sin(a)}`}).join(' ')}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`)
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+// Unit icon SVGs
+function unitSVG(type, color, size, strokeColor) {
+  strokeColor = strokeColor || '#fff';
+  const sc = size / 24;
+  const sw = 0.6 * sc;
+  const icons = {
+    naval: `<path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="${color}" transform="scale(${sc})"/>`,
+    ground_right: `<path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="${color}" transform="scale(${sc})"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="${color}" transform="scale(${sc})"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="${color}" transform="scale(${sc})"/><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="none" stroke="${strokeColor}" stroke-width="${sw}" stroke-linejoin="round" transform="scale(${sc})"/>`,
+    ground_left: `<path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="${color}" transform="scale(${sc})"/><path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="${color}" transform="scale(${sc})"/><path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="${color}" transform="scale(${sc})"/><path d="M14 8 L6 8 L2 10 L2 11 L3 11 L3 13 L3 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 L21 15 L21 13 L22 13 L19 11 L14 11 Z" fill="none" stroke="${strokeColor}" stroke-width="${sw}" stroke-linejoin="round" transform="scale(${sc})"/>`,
+    tactical_air: `<path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="${color}" transform="scale(${sc})"/><circle cx="${12*sc}" cy="${5*sc}" r="${2*sc}" fill="${color}"/>`,
+    air_defense: `<path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="${color}" transform="scale(${sc})"/><rect x="${11*sc}" y="${9*sc}" width="${2*sc}" height="${11*sc}" fill="${color}"/><rect x="${7*sc}" y="${20*sc}" width="${10*sc}" height="${2*sc}" rx="${1*sc}" fill="${color}"/>`,
+    strategic_missile: `<path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="${color}" transform="scale(${sc})"/>`,
+  };
+  return icons[type] || '';
+}
+
+function unitIcon(type, color, size, strokeColor) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">${unitSVG(type, color, size, strokeColor)}</svg>`;
+}
+
+// ================================================================
+// THEME TOGGLE
+// ================================================================
+function toggleTheme() {
+  document.documentElement.classList.toggle('dark-theme');
+  const isDark = document.documentElement.classList.contains('dark-theme');
+  document.getElementById('themeBtn').textContent = isDark ? 'Light Theme' : 'Dark Theme';
+}
+
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('collapsed');
+}
+
+// ================================================================
+// RENDER: Country Color Table
+// ================================================================
+(function() {
+  const tbody = document.querySelector('#country-color-table tbody');
+  countries.forEach(c => {
+    const isDark = document.documentElement.classList.contains('dark-theme');
+    tbody.innerHTML += `<tr>
+      <td><strong>${c.name}</strong></td>
+      <td style="font-size:11px; color:var(--text-secondary);">${c.bloc}</td>
+      <td><span class="swatch swatch-sm" style="background:${c.mapColor}"></span> <span class="hex-code">${c.mapColor}</span></td>
+      <td><span class="swatch swatch-sm" style="background:${c.color}"></span> <span class="hex-code">${c.color}</span></td>
+      <td><span class="swatch swatch-sm" style="background:${c.light}"></span> <span class="hex-code">${c.light}</span></td>
+      <td><span class="country-badge" style="background:${c.light}; color:${c.color}; border:1px solid ${c.color}30;">${geometricSVG(c.id, c.color, 14)} ${c.name}</span></td>
+    </tr>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Organization Colors
+// ================================================================
+(function() {
+  const el = document.getElementById('org-colors');
+  orgs.forEach(o => {
+    el.innerHTML += `<div class="card text-center" style="min-width:120px;">
+      <span class="swatch" style="background:${o.color}; width:48px; height:28px; display:block; margin:0 auto 6px; border-radius:4px;"></span>
+      <div style="font-size:12px; font-weight:600;">${o.name}</div>
+      <div style="font-size:10px; color:var(--text-secondary);">${o.desc}</div>
+      <div class="hex-code">${o.color}</div>
+    </div>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Emblem Grid
+// ================================================================
+(function() {
+  const el = document.getElementById('emblem-grid');
+  countries.forEach(c => {
+    el.innerHTML += `<div class="card text-center" style="padding:10px;">
+      <div>${geometricSVG(c.id, c.color, 48)}</div>
+      <div style="display:flex; gap:8px; justify-content:center; align-items:flex-end; margin-top:6px;">
+        ${geometricSVG(c.id, c.color, 24)}
+        ${geometricSVG(c.id, c.color, 16)}
+      </div>
+      <div style="font-size:11px; font-weight:600; margin-top:6px;">${c.name}</div>
+    </div>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Organization Emblem Grid
+// ================================================================
+(function() {
+  const el = document.getElementById('org-emblem-grid');
+  orgs.forEach(o => {
+    el.innerHTML += `<div class="card text-center" style="padding:12px; min-width:140px;">
+      <div>${orgSVG(o.id, o.color, 48)}</div>
+      <div style="margin-top:6px;">${orgSVG(o.id, o.color, 24)}</div>
+      <div style="font-size:11px; font-weight:600; margin-top:6px;">${o.name}</div>
+      <div style="font-size:10px; color:var(--text-secondary);">${o.desc}</div>
+    </div>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Badge Row
+// ================================================================
+(function() {
+  const el = document.getElementById('badge-row');
+  countries.forEach(c => {
+    el.innerHTML += `<span class="country-badge" style="background:${c.light}; color:${c.color}; border:1px solid ${c.color}30;">${geometricSVG(c.id, c.color, 14)} ${c.name}</span>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Unit Icons Table
+// ================================================================
+(function() {
+  const tbody = document.querySelector('#unit-table tbody');
+  const types = [
+    { type:'naval', name:'Naval', desc:'Warship side profile (stepped superstructure). Renders 20% larger on maps.' },
+    { type:'ground_right', name:'Ground (Right)', desc:'Tank V4 sloped hull, facing RIGHT (attacker/default).' },
+    { type:'ground_left', name:'Ground (Left)', desc:'Tank V4 mirrored, facing LEFT (opposing force).' },
+    { type:'tactical_air', name:'Tactical Air', desc:'Drone/UAV with sensor dome.' },
+    { type:'air_defense', name:'Air Defense', desc:'Radar dish / protective umbrella.' },
+    { type:'strategic_missile', name:'Strategic', desc:'ICBM vertical.' },
+  ];
+  const color = '#3A6B9F';
+  types.forEach(t => {
+    tbody.innerHTML += `<tr>
+      <td style="font-weight:600;">${t.name}</td>
+      <td>${unitIcon(t.type, color, 32, '#F5F6F8')}</td>
+      <td>${unitIcon(t.type, color, 20, '#F5F6F8')}</td>
+      <td>${unitIcon(t.type, color, 14, '#F5F6F8')}</td>
+      <td style="font-size:11px; color:var(--text-secondary);">${t.desc}</td>
+    </tr>`;
+  });
+})();
+
+// Tank facing demo
+document.getElementById('tank-right-demo').innerHTML = unitIcon('ground_right', '#5A9A5A', 48, '#F5F6F8');
+document.getElementById('tank-left-demo').innerHTML = unitIcon('ground_left', '#A06060', 48, '#F5F6F8');
+
+// Unit color test
+(function() {
+  const el = document.getElementById('unit-color-test');
+  const testCountries = ['columbia','cathay','nordostan','heartland','persia','bharata'];
+  testCountries.forEach(id => {
+    const c = cMap[id];
+    el.innerHTML += `<div class="text-center">
+      <div style="margin-bottom:4px;">${unitIcon('ground_right', c.color, 28, '#F5F6F8')}</div>
+      <div style="margin-bottom:4px;">${unitIcon('naval', c.color, 28)}</div>
+      <div style="margin-bottom:4px;">${unitIcon('tactical_air', c.color, 28)}</div>
+      <div style="font-size:10px; font-weight:600; color:${c.color};">${c.name}</div>
+    </div>`;
+  });
+})();
+
+// Hex stacking demo
+(function() {
+  const svg = document.getElementById('hex-stack-demo');
+  const cx = 60, cy = 70, r = 50;
+  // hex shape
+  let hexPts = '';
+  for (let i = 0; i < 6; i++) {
+    const a = (60 * i - 30) * Math.PI / 180;
+    hexPts += `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)} `;
+  }
+  let s = `<polygon points="${hexPts}" fill="#A5C8A5" stroke="#7A9A7A" stroke-width="1.5"/>`;
+  // Stack 3 units
+  s += unitSVG('ground_right', '#5A9A5A', 16, '#fff').replace('transform="scale(', `transform="translate(22,40) scale(`);
+  s += unitSVG('ground_right', '#5A9A5A', 16, '#fff').replace('transform="scale(', `transform="translate(42,40) scale(`);
+  // Different approach: just place icons manually
+  svg.innerHTML = `
+    <polygon points="${hexPts}" fill="#A5C8A5" stroke="#7A9A7A" stroke-width="1.5"/>
+    <g transform="translate(20,35)">${unitIcon('ground_right', '#5A9A5A', 16, '#fff')}</g>
+    <g transform="translate(42,35)">${unitIcon('ground_right', '#5A9A5A', 16, '#fff')}</g>
+    <g transform="translate(62,35)">${unitIcon('ground_right', '#5A9A5A', 16, '#fff')}</g>
+    <g transform="translate(30,55)">${unitIcon('tactical_air', '#5A9A5A', 14)}</g>
+    <g transform="translate(50,55)">${unitIcon('air_defense', '#5A9A5A', 14)}</g>
+    <text x="60" y="110" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="var(--text-secondary)">5 units stacked</text>
+  `;
+})();
+
+// ================================================================
+// RENDER: Data Cards
+// ================================================================
+(function() {
+  const el = document.getElementById('data-cards');
+  const cards = [
+    { label:'GDP', sublabel:'Coins (billions)', value:'280.4', change:'+1.8%', up:true, points:[260,265,270,272,275,278,280,280.4] },
+    { label:'Stability', sublabel:'Index (0-100)', value:'82', change:'-2', up:false, points:[88,87,86,85,84,83,82,82] },
+    { label:'Oil Price', sublabel:'$/barrel', value:'198.40', change:'+14.2%', up:false, points:[130,138,148,155,160,172,185,198] },
+  ];
+  cards.forEach(card => {
+    // sparkline
+    const w = 140, h = 32;
+    const min = Math.min(...card.points), max = Math.max(...card.points);
+    const range = max - min || 1;
+    const pts = card.points.map((v,i) => `${(i/(card.points.length-1))*w},${h - ((v-min)/range)*h}`).join(' ');
+    const sparkColor = card.up ? 'var(--success)' : 'var(--danger)';
+
+    el.innerHTML += `<div class="data-card">
+      <div class="label">${card.label}</div>
+      <div class="sublabel">${card.sublabel}</div>
+      <div class="value" style="color:var(--text);">${card.value}</div>
+      <div class="change ${card.up?'up':'down'}">${card.up?'&#9650;':'&#9660;'} ${card.change}</div>
+      <svg class="sparkline" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="margin-top:8px;">
+        <polyline points="${pts}" fill="none" stroke="${sparkColor}" stroke-width="1.5"/>
+      </svg>
+    </div>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Status Table
+// ================================================================
+(function() {
+  const tbody = document.querySelector('#status-table-demo tbody');
+  const data = [
+    { id:'columbia', gdp:'28.4T', stab:'82', mil:'58', oil:'Low', status:'Active', statusColor:'var(--success)' },
+    { id:'cathay', gdp:'22.1T', stab:'78', mil:'48', oil:'Medium', status:'Active', statusColor:'var(--success)' },
+    { id:'nordostan', gdp:'2.8T', stab:'55', mil:'45', oil:'High', status:'Mobilized', statusColor:'var(--warning)' },
+    { id:'heartland', gdp:'0.9T', stab:'31', mil:'14', oil:'Medium', status:'At War', statusColor:'var(--danger)' },
+    { id:'persia', gdp:'1.2T', stab:'48', mil:'16', oil:'Export', status:'Sanctioned', statusColor:'var(--danger)' },
+  ];
+  data.forEach(d => {
+    const c = cMap[d.id];
+    tbody.innerHTML += `<tr>
+      <td><span class="country-badge" style="background:${c.light};color:${c.color};border:1px solid ${c.color}30;font-size:11px;padding:2px 8px 2px 4px;">${geometricSVG(c.id, c.color, 12)} ${c.name}</span></td>
+      <td class="mono" style="font-size:12px;">${d.gdp}</td>
+      <td class="mono" style="font-size:12px; color:${parseInt(d.stab)<50?'var(--danger)':parseInt(d.stab)<65?'var(--warning)':'var(--text)'};">${d.stab}</td>
+      <td class="mono" style="font-size:12px;">${d.mil}</td>
+      <td style="font-size:12px;">${d.oil}</td>
+      <td style="font-size:12px; font-weight:600; color:${d.statusColor};">${d.status}</td>
+    </tr>`;
+  });
+})();
+
+// ================================================================
+// RENDER: Dashboard Mockup
+// ================================================================
+(function() {
+  const el = document.getElementById('dash-mockup');
+  const c = cMap['columbia'];
+  el.innerHTML = `
+    <div style="background:var(--card); border:1px solid var(--border); border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+      <span style="display:inline-flex; align-items:center; gap:4px;"><img src="assets/logo-metagames.png" style="height:20px;"><span style="font-family:'DM Sans',sans-serif; font-size:11px; font-weight:600; color:var(--action);">MetaGames</span></span>
+      <span style="font-size:11px; color:var(--text-muted);">|</span>
+      <span style="font-size:11px; font-weight:600; letter-spacing:0.5px;">THE THUCYDIDES TRAP</span>
+      <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent);">Round 3 / 8</span>
+      <span style="font-size:11px; color:var(--text-muted);">12:45</span>
+      <span class="country-badge" style="background:${c.light};color:${c.color};border:1px solid ${c.color}30;font-size:10px;padding:2px 8px 2px 4px;">${geometricSVG('columbia', c.color, 12)} Columbia</span>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px;">
+      <div class="data-card" style="padding:10px 12px;">
+        <div class="label" style="font-size:9px;">GDP</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700;">280.4</div>
+        <div style="font-size:10px; color:var(--success);">&#9650; +1.8%</div>
+      </div>
+      <div class="data-card" style="padding:10px 12px;">
+        <div class="label" style="font-size:9px;">Stability</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700;">82</div>
+        <div style="font-size:10px; color:var(--danger);">&#9660; -2</div>
+      </div>
+      <div class="data-card" style="padding:10px 12px;">
+        <div class="label" style="font-size:9px;">Military</div>
+        <div style="font-family:'JetBrains Mono',monospace; font-size:1.1rem; font-weight:700;">58</div>
+        <div style="font-size:10px; color:var(--text-muted);">units deployed</div>
+      </div>
+    </div>
+    <div class="data-card" style="padding:10px 12px; margin-bottom:8px;">
+      <div style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-secondary); margin-bottom:6px;">Recent Alerts</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--danger);">&#9876; Nordostan advances in Eastern Ereb</div>
+      <div style="font-size:11px; margin-bottom:4px; color:var(--accent);">&#9670; Oil price spike: $198/bbl</div>
+      <div style="font-size:11px; color:var(--action);">&#9993; Cathay requests summit</div>
+    </div>
+  `;
+})();
+
+// Role brief emblem
+document.getElementById('role-brief-emblem').innerHTML = geometricSVG('columbia', '#3A6B9F', 64);
+document.getElementById('badge-emblem-48').innerHTML = geometricSVG('columbia', '#3A6B9F', 40);
+
+// ================================================================
+// RENDER: GLOBAL MAP
+// ================================================================
+(function() {
+  const svg = document.getElementById('global-map');
+  const ROWS = 10, COLS = 20;
+  const HEX_R = 28; // hex radius
+  const HEX_W = HEX_R * Math.sqrt(3);
+  const HEX_H = HEX_R * 2;
+  const PAD_X = 40, PAD_Y = 30;
+
+  const totalW = PAD_X * 2 + COLS * HEX_W + HEX_W * 0.5;
+  const totalH = PAD_Y * 2 + ROWS * HEX_H * 0.75 + HEX_H * 0.25;
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+  // Grid from JSON (0-indexed)
+  const grid = [
+    ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
+    ['sea','sea','sea','sea','sea','sea','sea','sea','sea','freeland','nordostan','nordostan','sea','sea','sea','nordostan','sea','sea','sea','sea'],
+    ['sea','sea','columbia','sea','sea','thule','sea','albion','sea','freeland','heartland','nordostan','nordostan','nordostan','nordostan','nordostan','sea','choson','sea','sea'],
+    ['sea','columbia','columbia','sea','sea','sea','albion','sea','teutonia','teutonia','heartland','nordostan','nordostan','nordostan','sea','nordostan','hanguk','sea','yamato','sea'],
+    ['sea','sea','columbia','columbia','columbia','sea','sea','sea','gallia','gallia','phrygia','sea','sea','sogdiana','cathay','cathay','cathay','sea','yamato','sea'],
+    ['sea','sea','columbia','columbia','sea','sea','sea','ponte','sea','levantia','phrygia','persia','sogdiana','sogdiana','cathay','cathay','sea','sea','sea','sea'],
+    ['sea','sea','sea','columbia','sea','sea','sea','sea','ponte','sea','solaria','sea','persia','bharata','bharata','cathay','sea','formosa','sea','sea'],
+    ['sea','sea','sea','sea','sea','sea','sea','sea','sea','solaria','mirage','sea','persia','bharata','bharata','sea','sea','sea','sea','sea'],
+    ['sea','sea','sea','sea','caribe','sea','sea','sea','sea','horn','sea','sea','sea','sea','bharata','sea','sea','sea','sea','sea'],
+    ['sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea','sea'],
+  ];
+
+  // Chokepoints (0-indexed)
+  const chokepoints = [
+    { name:'Formosa\nStrait', row:6, col:16 },
+    { name:'Gulf\nGate', row:7, col:11 },
+    { name:'Caribe\nPassage', row:7, col:3 },
+  ];
+
+  function hexCenter(row, col) {
+    const x = PAD_X + col * HEX_W + (row % 2 === 1 ? HEX_W / 2 : 0) + HEX_W / 2;
+    const y = PAD_Y + row * HEX_H * 0.75 + HEX_R;
+    return { x, y };
+  }
+
+  function hexPoints(cx, cy, r) {
+    let pts = '';
+    for (let i = 0; i < 6; i++) {
+      const a = (60 * i - 30) * Math.PI / 180;
+      pts += `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)} `;
+    }
+    return pts;
+  }
+
+  let mapHTML = '';
+
+  // Draw all hexes
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const owner = grid[r][c];
+      const {x, y} = hexCenter(r, c);
+      const country = cMap[owner];
+      const fillColor = owner === 'sea' ? 'var(--water-deep)' : (country ? country.mapColor : '#C8C8C8');
+      const strokeColor = owner === 'sea' ? 'rgba(128,128,128,0.15)' : 'rgba(128,128,128,0.25)';
+
+      mapHTML += `<polygon points="${hexPoints(x, y, HEX_R - 1)}" fill="${fillColor}" stroke="${strokeColor}" stroke-width="0.5"/>`;
+
+      // Watermark emblem on land hexes
+      if (owner !== 'sea' && country) {
+        mapHTML += `<g opacity="0.12" transform="translate(${x-6},${y-6})">${geometricSVG(owner, '#000', 12)}</g>`;
+      }
+    }
+  }
+
+  // Country centroids — collect all hexes per country, compute average
+  const countryHexes = {};
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const owner = grid[r][c];
+      if (owner !== 'sea') {
+        if (!countryHexes[owner]) countryHexes[owner] = [];
+        countryHexes[owner].push(hexCenter(r, c));
+      }
+    }
+  }
+
+  Object.entries(countryHexes).forEach(([id, hexes]) => {
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    const c = cMap[id];
+    if (c) {
+      mapHTML += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="central" font-family="Playfair Display,serif" font-variant="small-caps" letter-spacing="0.08em" font-size="8" font-weight="600" fill="var(--text)" opacity="0.7">${c.name}</text>`;
+    }
+  });
+
+  // Chokepoints
+  chokepoints.forEach(cp => {
+    const {x, y} = hexCenter(cp.row, cp.col);
+    mapHTML += `<polygon points="${hexPoints(x, y, HEX_R - 1)}" fill="none" stroke="var(--accent)" stroke-width="1" stroke-dasharray="3 2"/>`;
+    const lines = cp.name.split('\n');
+    lines.forEach((line, i) => {
+      mapHTML += `<text x="${x}" y="${y + (i - (lines.length-1)/2) * 9}" text-anchor="middle" dominant-baseline="central" font-size="7" font-style="italic" fill="var(--accent)" font-weight="500">${line}</text>`;
+    });
+  });
+
+  // Deployments — parse and aggregate per global hex
+  // Naval fleets on water hexes
+  const navalDeployments = [
+    { country:'columbia', count:3, col:13, row:9, label:'3' },
+    { country:'columbia', count:2, col:10, row:7, label:'2' },
+    { country:'columbia', count:2, col:18, row:5, label:'2' },
+    { country:'columbia', count:1, col:14, row:10, label:'1' },
+    { country:'albion', count:2, col:8, row:4, label:'2' },
+    { country:'nordostan', count:2, col:12, row:2, label:'2' },
+    { country:'gallia', count:1, col:10, row:7, label:'1' },
+    { country:'bharata', count:2, col:14, row:10, label:'2' },
+    { country:'yamato', count:2, col:20, row:5, label:'2' },
+    { country:'phrygia', count:1, col:11, row:5, label:'' },
+    { country:'cathay', count:2, col:17, row:8, label:'2' },
+    { country:'cathay', count:2, col:18, row:5, label:'2' },
+    { country:'cathay', count:1, col:19, row:7, label:'1' },
+  ];
+
+  // Draw naval icons (19px = 20% larger)
+  navalDeployments.forEach(nd => {
+    // Convert 1-indexed to 0-indexed
+    const {x, y} = hexCenter(nd.row - 1, nd.col - 1);
+    const c = cMap[nd.country];
+    if (c) {
+      mapHTML += `<g transform="translate(${x-9.5},${y-9.5})">${unitIcon('naval', c.color, 19)}</g>`;
+      if (nd.count > 1) {
+        mapHTML += `<text x="${x+8}" y="${y-6}" font-family="JetBrains Mono,monospace" font-size="7" font-weight="700" fill="${c.color}">${nd.count}</text>`;
+      }
+    }
+  });
+
+  // Major ground concentrations — show on land hexes with highest counts
+  const groundConcentrations = [
+    { country:'columbia', row:5, col:3, label:'10' },
+    { country:'cathay', row:5, col:17, label:'5' },
+    { country:'cathay', row:7, col:16, label:'4' },
+    { country:'nordostan', row:3, col:12, label:'5' },
+    { country:'bharata', row:7, col:15, label:'10' },
+    { country:'heartland', row:4, col:11, label:'7' },
+    { country:'freeland', row:3, col:10, label:'5' },
+    { country:'teutonia', row:4, col:9, label:'6' },
+    { country:'gallia', row:5, col:9, label:'4' },
+    { country:'formosa', row:7, col:18, label:'4' },
+    { country:'choson', row:3, col:18, label:'6' },
+    { country:'hanguk', row:4, col:17, label:'5' },
+  ];
+
+  groundConcentrations.forEach(gc => {
+    const {x, y} = hexCenter(gc.row - 1, gc.col - 1);
+    const c = cMap[gc.country];
+    if (c) {
+      const facing = gc.country === 'nordostan' ? 'ground_left' : 'ground_right';
+      mapHTML += `<g transform="translate(${x-8},${y+4})">${unitIcon(facing, c.color, 16, '#fff')}</g>`;
+      mapHTML += `<text x="${x+6}" y="${y+16}" font-family="JetBrains Mono,monospace" font-size="6" font-weight="700" fill="${c.color}">${gc.label}</text>`;
+    }
+  });
+
+  // Tactical air on key locations
+  const airConcentrations = [
+    { country:'columbia', row:5, col:3 },
+    { country:'cathay', row:5, col:17 },
+    { country:'columbia', row:7, col:13 },
+  ];
+  airConcentrations.forEach(ac => {
+    const {x, y} = hexCenter(ac.row - 1, ac.col - 1);
+    const c = cMap[ac.country];
+    if (c) {
+      mapHTML += `<g transform="translate(${x+6},${y-14})">${unitIcon('tactical_air', c.color, 14)}</g>`;
+    }
+  });
+
+  // Grid labels
+  for (let r = 0; r < ROWS; r++) {
+    mapHTML += `<text x="12" y="${PAD_Y + r * HEX_H * 0.75 + HEX_R}" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--text-muted)">${r+1}</text>`;
+  }
+  for (let c = 0; c < COLS; c++) {
+    const x = PAD_X + c * HEX_W + HEX_W / 2;
+    mapHTML += `<text x="${x}" y="14" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--text-muted)">${c+1}</text>`;
+  }
+
+  svg.innerHTML = mapHTML;
+})();
+
+// ================================================================
+// RENDER: THEATER MAP (Eastern Ereb)
+// ================================================================
+(function() {
+  const svg = document.getElementById('theater-map');
+  const ROWS = 10, COLS = 10;
+  const HEX_R = 30;
+  const HEX_W = HEX_R * Math.sqrt(3);
+  const HEX_H = HEX_R * 2;
+  const PAD_X = 32, PAD_Y = 24;
+
+  const totalW = PAD_X * 2 + COLS * HEX_W + HEX_W * 0.5;
+  const totalH = PAD_Y * 2 + ROWS * HEX_H * 0.75 + HEX_H * 0.25;
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('height', totalH);
+  svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
+
+  // Theater hex ownership and occupation from the structure file
+  // row,col -> { owner, occupied_by }
+  const theaterHexes = {};
+  // Nordostan rows 1-2 (all cols)
+  for (let c = 1; c <= 10; c++) { theaterHexes[`${1},${c}`] = { owner:'nordostan' }; theaterHexes[`${2},${c}`] = { owner:'nordostan' }; }
+  // Row 3
+  for (let c = 1; c <= 3; c++) theaterHexes[`${3},${c}`] = { owner:'heartland' };
+  for (let c = 4; c <= 10; c++) theaterHexes[`${3},${c}`] = { owner:'nordostan' };
+  // Row 4
+  for (let c = 1; c <= 4; c++) theaterHexes[`${4},${c}`] = { owner:'heartland' };
+  theaterHexes[`${4},5`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${4},6`] = { owner:'heartland', occupied:'nordostan' };
+  for (let c = 7; c <= 10; c++) theaterHexes[`${4},${c}`] = { owner:'nordostan' };
+  // Row 5
+  for (let c = 1; c <= 5; c++) theaterHexes[`${5},${c}`] = { owner:'heartland' };
+  theaterHexes[`${5},6`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${5},7`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${5},8`] = { owner:'nordostan' };
+  theaterHexes[`${5},9`] = { owner:'nordostan' };
+  theaterHexes[`${5},10`] = { owner:'nordostan' };
+  // Row 6
+  for (let c = 1; c <= 6; c++) theaterHexes[`${6},${c}`] = { owner:'heartland' };
+  theaterHexes[`${6},7`] = { owner:'heartland', occupied:'nordostan' };
+  for (let c = 8; c <= 10; c++) theaterHexes[`${6},${c}`] = { owner:'nordostan' };
+  // Row 7
+  for (let c = 1; c <= 5; c++) theaterHexes[`${7},${c}`] = { owner:'heartland' };
+  theaterHexes[`${7},6`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${7},7`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${7},8`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${7},9`] = { owner:'nordostan' };
+  theaterHexes[`${7},10`] = { owner:'nordostan' };
+  // Row 8
+  for (let c = 1; c <= 3; c++) theaterHexes[`${8},${c}`] = { owner:'heartland' };
+  theaterHexes[`${8},5`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${8},9`] = { owner:'nordostan' };
+  theaterHexes[`${8},10`] = { owner:'nordostan' };
+  // Row 9
+  for (let c = 1; c <= 3; c++) theaterHexes[`${9},${c}`] = { owner:'heartland' };
+  theaterHexes[`${9},5`] = { owner:'heartland', occupied:'nordostan' };
+  theaterHexes[`${9},6`] = { owner:'heartland', occupied:'nordostan' };
+  // Row 10
+  theaterHexes[`${10},1`] = { owner:'heartland' };
+  theaterHexes[`${10},2`] = { owner:'heartland' };
+
+  function hexCenter(row, col) {
+    const r0 = row - 1, c0 = col - 1;
+    const x = PAD_X + c0 * HEX_W + (r0 % 2 === 1 ? HEX_W / 2 : 0) + HEX_W / 2;
+    const y = PAD_Y + r0 * HEX_H * 0.75 + HEX_R;
+    return { x, y };
+  }
+
+  function hexPoints(cx, cy, r) {
+    let pts = '';
+    for (let i = 0; i < 6; i++) {
+      const a = (60 * i - 30) * Math.PI / 180;
+      pts += `${cx + r * Math.cos(a)},${cy + r * Math.sin(a)} `;
+    }
+    return pts;
+  }
+
+  // Defs for stripe pattern
+  let mapHTML = `<defs>
+    <pattern id="stripe-nord" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#A5C8A5"/>
+      <rect width="3" height="6" fill="#D4A5A5" opacity="0.5"/>
+    </pattern>
+  </defs>`;
+
+  // Draw hexes
+  for (let r = 1; r <= ROWS; r++) {
+    for (let c = 1; c <= COLS; c++) {
+      const key = `${r},${c}`;
+      const hex = theaterHexes[key];
+      const {x, y} = hexCenter(r, c);
+
+      if (!hex) {
+        // Empty / no hex
+        mapHTML += `<polygon points="${hexPoints(x, y, HEX_R - 1)}" fill="var(--base-mid)" stroke="rgba(128,128,128,0.1)" stroke-width="0.5" opacity="0.3"/>`;
+        continue;
+      }
+
+      const ownerC = cMap[hex.owner];
+      let fillColor = ownerC ? ownerC.mapColor : '#ccc';
+
+      if (hex.occupied) {
+        // Striped pattern for occupied zones
+        mapHTML += `<polygon points="${hexPoints(x, y, HEX_R - 1)}" fill="url(#stripe-nord)" stroke="rgba(128,128,128,0.3)" stroke-width="0.8"/>`;
+      } else {
+        mapHTML += `<polygon points="${hexPoints(x, y, HEX_R - 1)}" fill="${fillColor}" stroke="rgba(128,128,128,0.25)" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Die Hard marker at (6,6)
+  const dh = hexCenter(6, 6);
+  mapHTML += `<polygon points="${hexPoints(dh.x, dh.y, HEX_R - 1)}" fill="none" stroke="var(--danger)" stroke-width="2" stroke-dasharray="4 2"/>`;
+  mapHTML += `<text x="${dh.x}" y="${dh.y+2}" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7" font-weight="700" fill="var(--danger)">DIE HARD</text>`;
+
+  // Country labels
+  const hCentroid = hexCenter(6, 2);
+  mapHTML += `<text x="${hCentroid.x}" y="${hCentroid.y}" text-anchor="middle" font-family="Playfair Display,serif" font-variant="small-caps" letter-spacing="0.08em" font-size="10" font-weight="600" fill="#2A5A2A" opacity="0.6">Heartland</text>`;
+  const nCentroid = hexCenter(2, 7);
+  mapHTML += `<text x="${nCentroid.x}" y="${nCentroid.y}" text-anchor="middle" font-family="Playfair Display,serif" font-variant="small-caps" letter-spacing="0.08em" font-size="10" font-weight="600" fill="#6A3030" opacity="0.6">Nordostan</text>`;
+
+  // Deploy units from CSV
+  // Nordostan offensive forces — rows 4-6, face LEFT
+  // 8 ground in heartland_2 (front line rows 4-6)
+  const nordFront = [[4,7],[4,8],[5,8],[5,9],[6,8],[6,9],[4,9],[4,10]];
+  nordFront.forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x-8},${y-5})">${unitIcon('ground_left', '#A06060', 16, '#fff')}</g>`;
+  });
+  // 5 ground in heartland_1 (occupation/rear rows 3-4)
+  [[3,5],[3,6],[3,7],[3,8],[3,9]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x-8},${y-5})">${unitIcon('ground_left', '#A06060', 16, '#fff')}</g>`;
+  });
+  // 4 tac air front
+  [[4,8],[5,8],[6,8],[5,9]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x+4},${y-14})">${unitIcon('tactical_air', '#A06060', 12)}</g>`;
+  });
+  // 1 air defense
+  {
+    const {x,y} = hexCenter(5,10);
+    mapHTML += `<g transform="translate(${x-6},${y+6})">${unitIcon('air_defense', '#A06060', 12)}</g>`;
+  }
+
+  // Choson 2 ground
+  [[5,7],[6,7]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x-8},${y+6})">${unitIcon('ground_left', '#5A5A5A', 14, '#fff')}</g>`;
+  });
+
+  // Heartland defense — face RIGHT
+  // 7 ground front (rows 5-7)
+  [[5,3],[5,4],[5,5],[6,3],[6,4],[6,5],[7,4]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x-8},${y-5})">${unitIcon('ground_right', '#5A9A5A', 16, '#fff')}</g>`;
+  });
+  // 3 reserve (rows 7-9 western)
+  [[8,1],[8,2],[9,2]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x-8},${y-5})">${unitIcon('ground_right', '#5A9A5A', 16, '#fff')}</g>`;
+  });
+  // 2 tac air front
+  [[5,4],[6,4]].forEach(([r,c]) => {
+    const {x, y} = hexCenter(r, c);
+    mapHTML += `<g transform="translate(${x+4},${y-14})">${unitIcon('tactical_air', '#5A9A5A', 12)}</g>`;
+  });
+  // 1 tac air reserve
+  {
+    const {x,y} = hexCenter(8,2);
+    mapHTML += `<g transform="translate(${x+4},${y-14})">${unitIcon('tactical_air', '#5A9A5A', 12)}</g>`;
+  }
+  // 1 air defense
+  {
+    const {x,y} = hexCenter(8,1);
+    mapHTML += `<g transform="translate(${x-6},${y+6})">${unitIcon('air_defense', '#5A9A5A', 12)}</g>`;
+  }
+
+  // Grid labels
+  for (let r = 1; r <= ROWS; r++) {
+    const {x, y} = hexCenter(r, 1);
+    mapHTML += `<text x="12" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--text-muted)">${r}</text>`;
+  }
+  for (let c = 1; c <= COLS; c++) {
+    const {x, y} = hexCenter(1, c);
+    mapHTML += `<text x="${x}" y="12" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="var(--text-muted)">${c}</text>`;
+  }
+
+  svg.innerHTML = mapHTML;
+})();
+
+// ================================================================
+// RENDER: Tailwind Config
+// ================================================================
+(function() {
+  const el = document.getElementById('tailwind-config');
+  const countryColors = countries.map(c => `      '${c.id}': { DEFAULT: '${c.color}', map: '${c.mapColor}', light: '${c.light}' },`).join('\n');
+  const orgColors = orgs.map(o => `      '${o.id.replace(/_/g,'-')}': '${o.color}',`).join('\n');
+
+  el.textContent = `// tailwind.config.js — THE THUCYDIDES TRAP
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        // Light theme (default)
+        base: { 50: '#F5F6F8', 100: '#EBEDF2', 200: '#D8DCE5', 300: '#B8BFC9' },
+        text: { primary: '#1A2332', secondary: '#4A5568', muted: '#8494A7' },
+        action: { primary: '#1A5276', hover: '#154360' },
+        accent: { gold: '#C4922A' },
+        success: { DEFAULT: '#2E7D4F' },
+        warning: { DEFAULT: '#B8762E' },
+        danger: { DEFAULT: '#B03A3A' },
+        info: { DEFAULT: '#2C6FA0' },
+
+        // Dark theme
+        dark: {
+          base: { 900: '#0D1B2A', 800: '#1B2A3E', 700: '#253D54' },
+          text: { primary: '#D4DEE8', secondary: '#7A8FA3', muted: '#556B80' },
+          action: { primary: '#5B9BD5', hover: '#4A8BC5' },
+          accent: { gold: '#E8B84D' },
+        },
+
+        // Country colors (22 countries)
+        country: {
+${countryColors}
+        },
+
+        // Organization colors
+        org: {
+${orgColors}
+        },
+      },
+      fontFamily: {
+        heading: ['Playfair Display', 'Georgia', 'serif'],
+        body: ['DM Sans', 'system-ui', 'sans-serif'],
+        data: ['JetBrains Mono', 'monospace'],
+      },
+      fontSize: {
+        display: ['2.5rem', { lineHeight: '1.2', fontWeight: '700' }],
+        h1: ['1.75rem', { lineHeight: '1.3', fontWeight: '700' }],
+        h2: ['1.375rem', { lineHeight: '1.3', fontWeight: '600' }],
+        h3: ['1.125rem', { lineHeight: '1.4', fontWeight: '600' }],
+        body: ['1rem', { lineHeight: '1.6' }],
+        'body-sm': ['0.875rem', { lineHeight: '1.5' }],
+        caption: ['0.75rem', { lineHeight: '1.4', fontWeight: '500' }],
+        'data-lg': ['1.5rem', { lineHeight: '1.2', fontWeight: '700' }],
+      },
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '16px',
+        lg: '24px',
+        xl: '32px',
+        '2xl': '48px',
+      },
+      borderRadius: {
+        card: '8px',
+      },
+    },
+  },
+}`;
+})();
+
+</script>
+</body>
+</html>

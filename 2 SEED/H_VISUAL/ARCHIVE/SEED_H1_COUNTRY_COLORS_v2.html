@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTT Country Colors v2 — Unified Palette (Final)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#F5F6F8;--text:#1A2332;--text2:#4A5568;--border:#D8DCE5;--card:#fff;--dark:#1B2838;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+  h1,h2,h3{font-family:'Playfair Display',serif;}
+  h1{font-size:1.6rem;margin-bottom:4px;}
+  h2{font-size:1.15rem;margin:28px 0 10px;border-bottom:2px solid #1A5276;padding-bottom:4px;}
+  h3{font-size:0.95rem;margin:16px 0 8px;}
+  .c{max-width:1200px;margin:0 auto;padding:28px;}
+  .note{color:var(--text2);font-size:12px;margin-bottom:16px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:16px;}
+  table{border-collapse:collapse;width:100%;font-size:12px;}
+  th,td{padding:6px 10px;border:1px solid var(--border);}
+  th{background:#EBEDF2;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:0.5px;}
+  .sw{display:inline-block;width:36px;height:20px;border-radius:3px;vertical-align:middle;margin-right:4px;border:1px solid rgba(0,0,0,0.08);}
+  .hex{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+  .bloc{font-size:10px;color:var(--text2);}
+  .badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500;}
+  .dark-bg{background:var(--dark);padding:12px 16px;border-radius:6px;margin:8px 0;}
+  .phex{width:44px;height:38px;display:inline-flex;align-items:center;justify-content:center;font-size:7px;font-weight:600;color:#fff;text-shadow:0 0 2px rgba(0,0,0,0.4);clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);margin:1px;}
+  .row{display:flex;flex-wrap:wrap;gap:4px;align-items:center;}
+  .section{margin-bottom:32px;}
+</style>
+</head>
+<body>
+<div class="c">
+
+<h1>Country Colors v2 — Unified Dual Palette</h1>
+<p class="note">Map editor colors as base. Vivid derived from same hue family. Formosa close to Cathay. Caribe changed to marine blue.</p>
+
+<h2>Final Unified Palette — 23 Territories</h2>
+
+<div class="card" style="overflow-x:auto;">
+<table id="palette-table">
+<thead>
+<tr>
+  <th style="width:120px;">Country</th>
+  <th>Bloc</th>
+  <th>Hue</th>
+  <th>Map (territory)</th>
+  <th>UI (vivid)</th>
+  <th>Light BG</th>
+  <th>Badge (light)</th>
+  <th>Badge (dark)</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<h2>Map Preview — Territory Colors</h2>
+<p class="note">How territories look side by side on the map (muted palette).</p>
+
+<h3>All territories</h3>
+<div class="row" id="map-hexes"></div>
+
+<h3 style="margin-top:12px;">Grouped by region</h3>
+<div id="region-groups"></div>
+
+<h2>UI Preview — Badges & Labels</h2>
+
+<h3>Light background</h3>
+<div class="row" id="badges-light" style="margin-bottom:12px;"></div>
+
+<h3>Dark background</h3>
+<div class="dark-bg">
+<div class="row" id="badges-dark"></div>
+</div>
+
+<h2>Chart Line Preview</h2>
+<div class="card" style="padding:16px;">
+<svg width="100%" height="200" viewBox="0 0 700 200" id="chart-lines" style="display:block;"></svg>
+</div>
+
+<h2>Side-by-Side: Map Hex ↔ UI Badge</h2>
+<div class="row" id="side-by-side" style="gap:10px;"></div>
+
+<h2>Adjacency Check — Do Neighbors Clash?</h2>
+<p class="note">Countries that share hex borders must be visually distinguishable on the map.</p>
+<div class="card" id="adjacency-check"></div>
+
+<h2>Formosa ↔ Cathay Comparison</h2>
+<p class="note">Formosa should be close to Cathay but clearly distinguishable.</p>
+<div class="card" id="formosa-cathay"></div>
+
+<script>
+const C = [
+  // id, name, bloc, hue description, map color, UI vivid color, light bg
+  // === WESTERN TREATY ===
+  {id:'columbia',  name:'Columbia',  bloc:'Western Treaty', hue:'Warm Sand',
+   map:'#D4B896', ui:'#B08840', light:'#F5EDE0'},
+  {id:'gallia',    name:'Gallia',    bloc:'Western Treaty', hue:'Lavender',
+   map:'#B5A5C8', ui:'#7B5EA7', light:'#F0EBF5'},
+  {id:'teutonia',  name:'Teutonia',  bloc:'Western Treaty', hue:'Sage Green',
+   map:'#8FB59A', ui:'#4A8C5E', light:'#EBF3ED'},
+  {id:'thule',     name:'Thule',     bloc:'Western Treaty', hue:'Sage Green (=Teutonia)',
+   map:'#8FB59A', ui:'#4A8C5E', light:'#EBF3ED'},
+  {id:'albion',    name:'Albion',    bloc:'Western Treaty', hue:'Steel Blue-Gray',
+   map:'#8AA5B5', ui:'#4A7A8F', light:'#E8EFF3'},
+  {id:'freeland',  name:'Freeland',  bloc:'Western Treaty', hue:'Warm Wheat',
+   map:'#D4B58A', ui:'#B08830', light:'#F5EDE0'},
+  {id:'ponte',     name:'Ponte',     bloc:'Western Treaty', hue:'Dusty Rose',
+   map:'#D4A5B5', ui:'#A85A72', light:'#F5E8ED'},
+  {id:'levantia',  name:'Levantia',  bloc:'Western Treaty', hue:'Olive Gold',
+   map:'#D4D4A5', ui:'#9A9A40', light:'#F3F3E8'},
+  {id:'yamato',    name:'Yamato',    bloc:'Western Treaty', hue:'Cool Blue-Gray',
+   map:'#A5B5C8', ui:'#5A7A9B', light:'#EBF0F5'},
+
+  // === LEAGUE (BRICS+) ===
+  {id:'cathay',    name:'Cathay',    bloc:'League', hue:'Warm Gold',
+   map:'#E8D5A3', ui:'#C4A030', light:'#F8F2E5'},
+  {id:'nordostan', name:'Nordostan', bloc:'League', hue:'Dusty Rose-Gray',
+   map:'#D4A5A5', ui:'#A06060', light:'#F5EAEA'},
+  {id:'persia',    name:'Persia',    bloc:'League', hue:'Warm Tan/Bronze',
+   map:'#C8A57A', ui:'#9A7040', light:'#F2EBE0'},
+  {id:'choson',    name:'Choson',    bloc:'League', hue:'Dark Neutral Gray',
+   map:'#8A8A8A', ui:'#5A5A5A', light:'#EFEFEF'},
+
+  // === NON-ALIGNED / SWING ===
+  {id:'bharata',   name:'Bharata',   bloc:'Non-aligned', hue:'Warm Peach',
+   map:'#D4B5A5', ui:'#B87850', light:'#F5EDE5'},
+  {id:'formosa',   name:'Formosa',   bloc:'—', hue:'Pale Amber (near Cathay)',
+   map:'#E0CCA0', ui:'#B8982A', light:'#F6F0E3'},
+  {id:'hanguk',    name:'Hanguk',    bloc:'—', hue:'Light Blue',
+   map:'#A5C8D4', ui:'#4A8FA8', light:'#E8F1F5'},
+  {id:'phrygia',   name:'Phrygia',   bloc:'Swing', hue:'Warm Brown',
+   map:'#B5A08A', ui:'#8A6A48', light:'#F0EBE5'},
+  {id:'solaria',   name:'Solaria',   bloc:'Swing', hue:'Golden Sand',
+   map:'#C8B896', ui:'#A89030', light:'#F3F0E5'},
+  {id:'mirage',    name:'Mirage',    bloc:'Swing', hue:'Light Copper',
+   map:'#D4BFA5', ui:'#A88050', light:'#F5EEE5'},
+
+  // === WAR / SPECIAL ===
+  {id:'heartland', name:'Heartland', bloc:'At war', hue:'Soft Green',
+   map:'#A5C8A5', ui:'#5A9A5A', light:'#EBF3EB'},
+  {id:'caribe',    name:'Caribe',    bloc:'—', hue:'Marine Blue',
+   map:'#8AACCC', ui:'#3A7AAA', light:'#E8F0F6'},
+
+  // === CONTESTED ===
+  {id:'sogdiana',  name:'Sogdiana',  bloc:'Contested', hue:'Pale Khaki',
+   map:'#C8C8A5', ui:'#8A8A60', light:'#F0F0E8'},
+  {id:'horn',      name:'Horn',      bloc:'Contested', hue:'Warm Gray',
+   map:'#B5A896', ui:'#8A7A68', light:'#F0ECE8'},
+];
+
+// Render palette table
+const tbody = document.querySelector('#palette-table tbody');
+C.forEach(c => {
+  tbody.innerHTML += `<tr>
+    <td><strong>${c.name}</strong></td>
+    <td class="bloc">${c.bloc}</td>
+    <td style="font-size:10px;">${c.hue}</td>
+    <td><span class="sw" style="background:${c.map}"></span><span class="hex">${c.map}</span></td>
+    <td><span class="sw" style="background:${c.ui}"></span><span class="hex">${c.ui}</span></td>
+    <td><span class="sw" style="background:${c.light}"></span><span class="hex">${c.light}</span></td>
+    <td><span class="badge" style="background:${c.light};color:${c.ui};border:1px solid ${c.ui}30;">${c.name}</span></td>
+    <td style="background:#1B2838;"><span class="badge" style="background:${c.ui}20;color:${c.ui};border:1px solid ${c.ui}40;">${c.name}</span></td>
+  </tr>`;
+});
+
+// Map hexes
+const mh = document.getElementById('map-hexes');
+C.forEach(c => {
+  mh.innerHTML += `<div class="phex" style="background:${c.map};">${c.name.slice(0,4)}</div>`;
+});
+
+// Regional groups
+const rg = document.getElementById('region-groups');
+const groups = {
+  'Western Treaty': C.filter(c=>c.bloc==='Western Treaty'),
+  'League (BRICS+)': C.filter(c=>c.bloc==='League'),
+  'Non-aligned / Swing': C.filter(c=>['Non-aligned','Swing','—'].includes(c.bloc) && c.id!=='caribe'),
+  'War / Special': C.filter(c=>['At war'].includes(c.bloc) || c.id==='caribe'),
+  'Contested': C.filter(c=>c.bloc==='Contested'),
+};
+Object.entries(groups).forEach(([gname, members]) => {
+  let h = `<div style="margin:8px 0;"><span style="font-size:11px;font-weight:600;color:var(--text2);">${gname}:</span> `;
+  members.forEach(c => {
+    h += `<div class="phex" style="background:${c.map};width:38px;height:33px;font-size:6px;">${c.name.slice(0,4)}</div>`;
+  });
+  h += '</div>';
+  rg.innerHTML += h;
+});
+
+// Badges light
+const bl = document.getElementById('badges-light');
+C.forEach(c => {
+  bl.innerHTML += `<span class="badge" style="background:${c.light};color:${c.ui};border:1px solid ${c.ui}30;">${c.name}</span>`;
+});
+
+// Badges dark
+const bd = document.getElementById('badges-dark');
+C.forEach(c => {
+  bd.innerHTML += `<span class="badge" style="background:${c.ui}20;color:${c.ui};border:1px solid ${c.ui}40;">${c.name}</span>`;
+});
+
+// Chart lines
+const chartEl = document.getElementById('chart-lines');
+const keyIds = ['columbia','cathay','nordostan','heartland','persia','bharata','yamato','gallia','formosa','solaria'];
+const keyC = keyIds.map(id => C.find(c=>c.id===id));
+let chartSVG = '';
+// fake GDP trajectories
+const gdps = {
+  columbia:[280,285,290,295,300,305,310,315,320],
+  cathay:[190,198,206,214,222,230,238,246,254],
+  nordostan:[20,19,18,17,16.5,16,15.5,15,15],
+  heartland:[2.2,2.1,2.0,1.9,2.0,2.1,2.2,2.3,2.4],
+  persia:[5,4.5,4,3.5,3,2.8,2.6,2.5,2.5],
+  bharata:[42,45,48,51,54,57,60,64,68],
+  yamato:[43,43.4,43.8,44.2,44.5,44.8,45,45.3,45.5],
+  gallia:[34,34.3,34.6,35,35.2,35.5,35.8,36,36.3],
+  formosa:[8,8.2,8.5,8.7,9,9.2,9.5,9.7,10],
+  solaria:[11,12,13,14,13.5,13,12.5,12,11.5],
+};
+const xScale = 70;
+const yMin = 0, yMax = 340;
+const chartH = 180;
+keyC.forEach((c, i) => {
+  if (!c) return;
+  const data = gdps[c.id] || [];
+  const points = data.map((v, j) => {
+    const x = 40 + j * xScale;
+    const y = chartH - (v / yMax * chartH) + 10;
+    return `${x},${y}`;
+  }).join(' ');
+  chartSVG += `<polyline points="${points}" fill="none" stroke="${c.ui}" stroke-width="2" opacity="0.85"/>`;
+  const lastX = 40 + (data.length-1) * xScale + 8;
+  const lastY = chartH - (data[data.length-1] / yMax * chartH) + 10;
+  chartSVG += `<text x="${lastX}" y="${lastY+3}" font-size="9" fill="${c.ui}" font-family="DM Sans,sans-serif" font-weight="500">${c.name}</text>`;
+});
+// axes
+chartSVG += `<line x1="40" y1="${chartH+10}" x2="${40+8*xScale}" y2="${chartH+10}" stroke="#D8DCE5" stroke-width="0.5"/>`;
+for(let i=0;i<=8;i++){
+  chartSVG += `<text x="${40+i*xScale}" y="${chartH+22}" font-size="8" fill="#8899AA" text-anchor="middle" font-family="JetBrains Mono,monospace">R${i+1}</text>`;
+}
+chartEl.innerHTML = chartSVG;
+
+// Side by side
+const sbs = document.getElementById('side-by-side');
+C.filter(c=>!['thule','horn','sogdiana'].includes(c.id)).forEach(c => {
+  sbs.innerHTML += `<div style="text-align:center;"><div class="phex" style="background:${c.map};width:38px;height:33px;font-size:6px;">${c.name.slice(0,3)}</div><div style="margin-top:2px;"><span class="sw" style="width:20px;height:12px;background:${c.ui}"></span></div><div style="font-size:8px;color:var(--text2);">${c.name}</div></div>`;
+});
+
+// Adjacency check
+const adj = document.getElementById('adjacency-check');
+const neighbors = [
+  ['columbia','freeland','Share warm sand/wheat. Different saturation OK?'],
+  ['teutonia','heartland','Green sage vs soft green. Close — need to verify on map.'],
+  ['teutonia','freeland','Sage green vs warm wheat. Good contrast.'],
+  ['heartland','nordostan','Soft green vs dusty rose. Good contrast.'],
+  ['cathay','formosa','Gold vs pale amber. Intentionally close — nearby shade.'],
+  ['cathay','hanguk','Gold vs light blue. Good contrast.'],
+  ['cathay','yamato','Gold vs cool blue-gray. Good contrast.'],
+  ['persia','solaria','Bronze-tan vs golden sand. Similar warmth — check on map.'],
+  ['persia','mirage','Bronze vs copper. Both warm — may need separation.'],
+  ['phrygia','levantia','Brown vs olive. Adjacent in Mashriq — OK distinction.'],
+  ['gallia','ponte','Lavender vs dusty rose. Good contrast.'],
+  ['albion','teutonia','Steel blue-gray vs sage green. Good.'],
+  ['nordostan','choson','Dusty rose vs dark gray. Good contrast.'],
+  ['caribe','columbia','Marine blue vs warm sand. Excellent contrast.'],
+];
+let adjHTML = '<table><tr><th>Country A</th><th>Color A</th><th>Country B</th><th>Color B</th><th>Note</th></tr>';
+neighbors.forEach(([a, b, note]) => {
+  const ca = C.find(c=>c.id===a);
+  const cb = C.find(c=>c.id===b);
+  if(!ca||!cb) return;
+  adjHTML += `<tr>
+    <td>${ca.name} <span class="sw" style="width:24px;height:14px;background:${ca.map}"></span></td>
+    <td><span class="hex">${ca.map}</span></td>
+    <td>${cb.name} <span class="sw" style="width:24px;height:14px;background:${cb.map}"></span></td>
+    <td><span class="hex">${cb.map}</span></td>
+    <td style="font-size:11px;">${note}</td>
+  </tr>`;
+});
+adjHTML += '</table>';
+adj.innerHTML = adjHTML;
+
+// Formosa-Cathay comparison
+const fc = document.getElementById('formosa-cathay');
+const cathay = C.find(c=>c.id==='cathay');
+const formosa = C.find(c=>c.id==='formosa');
+fc.innerHTML = `
+<div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;">
+  <div style="text-align:center;">
+    <div class="phex" style="background:${cathay.map};width:64px;height:56px;font-size:10px;">Cathay</div>
+    <div style="font-size:10px;margin-top:4px;"><span class="sw" style="background:${cathay.map}"></span>${cathay.map}</div>
+    <div style="font-size:10px;"><span class="sw" style="background:${cathay.ui}"></span>${cathay.ui}</div>
+  </div>
+  <div style="font-size:24px;color:var(--text2);">↔</div>
+  <div style="text-align:center;">
+    <div class="phex" style="background:${formosa.map};width:64px;height:56px;font-size:10px;">Formosa</div>
+    <div style="font-size:10px;margin-top:4px;"><span class="sw" style="background:${formosa.map}"></span>${formosa.map}</div>
+    <div style="font-size:10px;"><span class="sw" style="background:${formosa.ui}"></span>${formosa.ui}</div>
+  </div>
+  <div style="font-size:24px;color:var(--text2);">|</div>
+  <div style="text-align:center;">
+    <div style="display:flex;gap:2px;">
+      <div class="phex" style="background:${cathay.map};width:48px;height:42px;font-size:8px;">Cat</div>
+      <div class="phex" style="background:${cathay.map};width:48px;height:42px;font-size:8px;">Cat</div>
+      <div class="phex" style="background:${formosa.map};width:48px;height:42px;font-size:8px;">For</div>
+    </div>
+    <div style="font-size:10px;color:var(--text2);margin-top:4px;">Adjacent on map — distinguishable?</div>
+  </div>
+  <div style="font-size:24px;color:var(--text2);">|</div>
+  <div>
+    <span class="badge" style="background:${cathay.light};color:${cathay.ui};border:1px solid ${cathay.ui}30;">Cathay</span>
+    <span class="badge" style="background:${formosa.light};color:${formosa.ui};border:1px solid ${formosa.ui}30;">Formosa</span>
+    <div style="font-size:10px;color:var(--text2);margin-top:4px;">UI badges — distinct enough?</div>
+  </div>
+</div>
+`;
+</script>
+
+<p style="text-align:center;color:var(--text2);font-size:11px;margin-top:40px;">
+TTT Country Colors v2 — Unified Dual Palette — Based on map editor colors — METAGAMES 2026
+</p>
+
+</div>
+</body>
+</html>

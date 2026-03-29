@@ -141,7 +141,8 @@ Every variable in the current `WorldState` class, classified against the princip
 | `production_capacity` (per type) | CONFIG | Yes | Set from CSV. |
 | `maintenance_cost_per_unit` | CONFIG | Yes | Set from CSV. |
 | `strategic_missile_growth` | CONFIG | Yes | Auto-production rate. Cathay-specific. |
-| `mobilization_pool` | CORE | Yes | Reserved for future mechanic. Currently 0. |
+| `mobilization_pool` | CORE | Yes | Available pool for mobilization. Depleted as units are mobilized. |
+| `militia_units` | CORE | Yes | Count of militia/volunteer units currently active. 0.5× combat effectiveness. Generated via militia call when homeland under attack. |
 
 ### Per-Country: Political
 

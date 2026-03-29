@@ -15,15 +15,15 @@ CSVs are the single source of truth for all quantitative and structural data. Th
 2 SEED/
 ├── SEED_DATA_SCHEMA.md          ← THIS FILE: documents every column
 ├── data/
-│   ├── countries.csv            ← 21 rows, ~45 columns
-│   ├── roles.csv                ← 40+ rows, ~20 columns
+│   ├── countries.csv            ← 21 rows, 48 columns
+│   ├── roles.csv                ← 40 rows, 29 columns
 │   ├── organizations.csv        ← 8+ rows, ~10 columns
 │   ├── org_memberships.csv      ← Many rows (country × org), ~4 columns
 │   ├── relationships.csv        ← ~420 rows (21×20), ~4 columns
 │   ├── tariffs.csv              ← Non-zero pairs only, ~3 columns
 │   ├── sanctions.csv            ← Non-zero pairs only, ~3 columns
 │   ├── deployments.csv          ← ~170 rows (every unit placement), ~4 columns
-│   ├── zones.csv                ← ~90 rows (all zones), ~6 columns
+│   ├── zones.csv                ← 57 rows (all zones), 7 columns
 │   ├── zone_adjacency.csv       ← ~300+ rows (all connections), ~3 columns
 │   └── artefacts.csv            ← Role pack items, ~6 columns
 │
@@ -93,6 +93,7 @@ One row per country. The master country record.
 | `prod_cap_tactical` | int | Max tactical air producible per round | `3` |
 | `maintenance_per_unit` | float | Cost per unit per round | `0.5` |
 | `strategic_missile_growth` | int | Auto-produced per round (Cathay only) | `0` |
+| `mobilization_pool` | int | Finite reserve of mobilizable ground units. Depleted by partial (half) or full (all) mobilization. Never recovers. Heartland/Nordostan start partially depleted. | `12` (Columbia), `4` (Heartland, 4 of 8 already used) |
 | **Political** |
 | `stability` | float | Starting stability (1-10) | `7` |
 | `political_support` | float | Starting support (0-100) | `38` |
@@ -134,6 +135,17 @@ One row per role. All 40+ roles in one file.
 | `powers` | string | Semicolon-separated power list | `set_tariffs;authorize_attack;fire_team_member;approve_nuclear` |
 | `objectives` | string | Top 3 objectives (semicolon-sep) | `secure_legacy;manage_succession;contain_cathay` |
 | `ticking_clock` | string | Personal urgency | `Term-limited, age 80. Legacy = reshaping world order.` |
+| `intelligence_pool` | int | Intelligence requests available per game | `4` |
+| `sabotage_cards` | int | Sabotage operations available per game | `1` |
+| `cyber_cards` | int | Cyber attack operations available per game | `1` |
+| `disinfo_cards` | int | Disinformation campaigns available per game | `1` |
+| `election_meddling_cards` | int | Election meddling operations (max 1) | `1` |
+| `assassination_cards` | int | Assassination attempts (max 1-2) | `1` |
+| `protest_stim_cards` | int | Protest stimulation cards | `0` or `1` |
+| `fatherland_appeal` | int | "Fatherland Needs You" one-time combat card | `1` (HoS only) |
+| `is_diplomat` | bool | Can authorize transactions on behalf of country | `true` |
+
+*(Columns `intelligence_pool` through `is_diplomat` added 2026-03-30 per CM-002 action review)*
 
 ---
 
@@ -232,6 +244,9 @@ Every zone on the global and theater maps.
 | `owner` | string | FK → countries.id (or `none`) | `columbia` |
 | `theater` | string | Theater if applicable (`global`/`eastern_ereb`). **SEED DECISION (2026-03-27):** Only `eastern_ereb` has a detailed theater map; all other regions use `global` hex resolution. Legacy values `mashriq`/`taiwan`/`caribbean`/`thule`/`korea` archived. | `global` |
 | `is_chokepoint` | bool | Maritime chokepoint? | `false` |
+| `die_hard` | bool | Fortified "Die Hard" position? +1 defender bonus in ground combat. | `false` (only `heartland_2` = `true` at game start) |
+
+*(Column `die_hard` added 2026-03-30 per CM-002 action review)*
 
 ---
 

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTT Relationship Map — B3 v3</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e17; color: #c8d0dc; font-family: 'Segoe UI', system-ui, sans-serif; overflow: hidden; }
+#container { width: 100vw; height: 100vh; position: relative; }
+svg { width: 100%; height: 100%; }
+
+#legend {
+  position: absolute; top: 16px; left: 16px;
+  background: rgba(10,14,23,0.94); border: 1px solid #2a3040;
+  border-radius: 8px; padding: 14px 18px; font-size: 12px;
+  z-index: 10; max-width: 240px;
+}
+#legend h3 { color: #e8ecf2; font-size: 14px; margin-bottom: 10px; }
+.legend-section { margin-bottom: 10px; }
+.legend-section h4 { color: #8090a8; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.legend-item { display: flex; align-items: center; gap: 8px; margin: 3px 0; }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.legend-line { width: 24px; height: 3px; flex-shrink: 0; border-radius: 1px; }
+.legend-line-dashed-cyan { width: 24px; height: 0; border-top: 2px dashed #06b6d4; flex-shrink: 0; }
+.legend-line-dashed-grey { width: 24px; height: 0; border-top: 2px dashed #4a5568; flex-shrink: 0; }
+
+#title {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(10,14,23,0.94); border: 1px solid #2a3040;
+  border-radius: 8px; padding: 14px 18px; text-align: right; z-index: 10;
+}
+#title h1 { color: #e8ecf2; font-size: 18px; font-weight: 600; }
+#title p { color: #6878a0; font-size: 12px; margin-top: 4px; }
+
+#tooltip {
+  position: absolute; display: none; pointer-events: none;
+  background: rgba(10,14,23,0.96); border: 1px solid #3a4a60;
+  border-radius: 6px; padding: 12px 16px; font-size: 12px;
+  max-width: 340px; z-index: 20;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+}
+#tooltip .tt-name { color: #e8ecf2; font-size: 15px; font-weight: 600; }
+#tooltip .tt-role { color: #8090a8; font-size: 11px; margin-bottom: 8px; }
+#tooltip .tt-rel { color: #b0b8c8; margin: 4px 0; line-height: 1.45; }
+#tooltip .tt-rel strong { color: #e0e4ec; }
+
+#controls {
+  position: absolute; bottom: 16px; left: 16px;
+  background: rgba(10,14,23,0.94); border: 1px solid #2a3040;
+  border-radius: 8px; padding: 10px 14px; font-size: 11px;
+  z-index: 10; color: #6878a0;
+}
+#controls span { color: #8898b8; }
+
+#filters {
+  position: absolute; bottom: 16px; right: 16px;
+  background: rgba(10,14,23,0.94); border: 1px solid #2a3040;
+  border-radius: 8px; padding: 10px 14px;
+  z-index: 10; display: flex; gap: 6px; flex-wrap: wrap;
+}
+.filter-btn {
+  background: #1a2030; border: 1px solid #2a3a50; border-radius: 4px;
+  color: #8898b8; font-size: 11px; padding: 4px 10px; cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-btn:hover { border-color: #4a5a70; color: #c0c8d8; }
+.filter-btn.active { border-color: #5a7a9a; color: #e0e8f0; background: #1a2a40; }
+
+.edge-label { font-size: 9px; fill: #5a6878; pointer-events: none; text-anchor: middle; dominant-baseline: middle; }
+</style>
+</head>
+<body>
+<div id="container">
+  <svg id="graph"></svg>
+
+  <div id="legend">
+    <h3>Relationship Map v3</h3>
+    <div class="legend-section">
+      <h4>Teams</h4>
+      <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Columbia</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#d94a4a"></div> Cathay</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Nordostan</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Heartland</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Persia</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Europe</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div> Solo countries</div>
+    </div>
+    <div class="legend-section">
+      <h4>Relationships</h4>
+      <div class="legend-item"><div class="legend-line" style="background:#22c55e"></div> Alliance / Warmth</div>
+      <div class="legend-item"><div class="legend-line" style="background:#f97316"></div> Tension / Rivalry</div>
+      <div class="legend-item"><div class="legend-line" style="background:#ef4444"></div> Hostile / At War</div>
+      <div class="legend-item"><div class="legend-line" style="background:#6366f1"></div> Dependency</div>
+      <div class="legend-item"><div class="legend-line-dashed-cyan"></div> Back-channel / Intermediary</div>
+      <div class="legend-item"><div class="legend-line-dashed-grey"></div> Internal team</div>
+    </div>
+  </div>
+
+  <div id="title">
+    <h1>THUCYDIDES TRAP</h1>
+    <p>B3 Relationship Map v3 | 37 roles, canonical names, validated</p>
+  </div>
+
+  <div id="tooltip"></div>
+
+  <div id="controls">
+    <span>Drag</span> nodes | <span>Scroll</span> zoom | <span>Hover</span> details | <span>Click</span> to pin
+  </div>
+
+  <div id="filters">
+    <div class="filter-btn active" data-filter="all">All</div>
+    <div class="filter-btn" data-filter="columbia">Columbia</div>
+    <div class="filter-btn" data-filter="cathay">Cathay</div>
+    <div class="filter-btn" data-filter="nordostan">Nordostan</div>
+    <div class="filter-btn" data-filter="heartland">Heartland</div>
+    <div class="filter-btn" data-filter="persia">Persia</div>
+    <div class="filter-btn" data-filter="europe">Europe</div>
+    <div class="filter-btn" data-filter="solo">Solo</div>
+    <div class="filter-btn" data-filter="cross">Cross-border</div>
+    <div class="filter-btn" data-filter="channels">Intermediaries</div>
+  </div>
+</div>
+
+<script>
+const TEAMS = {
+  columbia:  { color: '#4a90d9', label: 'Columbia' },
+  cathay:    { color: '#d94a4a', label: 'Cathay' },
+  nordostan: { color: '#8b5cf6', label: 'Nordostan' },
+  heartland: { color: '#f59e0b', label: 'Heartland' },
+  persia:    { color: '#10b981', label: 'Persia' },
+  europe:    { color: '#3b82f6', label: 'Europe' },
+  solo:      { color: '#6b7280', label: 'Solo' },
+};
+
+// ============================================================
+// ALL 37 CANONICAL ROLES
+// ============================================================
+const nodes = [
+  // COLUMBIA (7 roles)
+  { id: 'dealer',     label: 'Dealer',     team: 'columbia', role: 'President of Columbia — transactional, impulsive, respects strength', size: 18 },
+  { id: 'volt',       label: 'Volt',       team: 'columbia', role: 'VP — chosen successor, loyal but building own identity', size: 11 },
+  { id: 'anchor',     label: 'Anchor',     team: 'columbia', role: 'Secretary of State — hawk, Monroe Doctrine enforcer, presidential ambition', size: 14 },
+  { id: 'shield',     label: 'Shield',     team: 'columbia', role: 'Secretary of Defense — professional, institutional, co-signs military orders', size: 12 },
+  { id: 'shadow',     label: 'Shadow',     team: 'columbia', role: 'CIA Director — covert ops, regime change toolkit', size: 10 },
+  { id: 'fixer',      label: 'Fixer',      team: 'columbia', role: 'Back-channel envoy — personal friend, no diplomatic experience, talks to everyone', size: 13 },
+  { id: 'tribune',    label: 'Tribune',    team: 'columbia', role: 'Congressional Opposition Leader — war authorization weapon, constitutional check', size: 12 },
+  { id: 'challenger', label: 'Challenger', team: 'columbia', role: 'Opposition Presidential Candidate — populist insurgent, anti-establishment', size: 10 },
+
+  // CATHAY (5 roles — canonical names)
+  { id: 'helmsman',   label: 'Helmsman',   team: 'cathay', role: 'Chairman — strategic patience, absolute authority but fragile military command after purges', size: 18 },
+  { id: 'rampart',    label: 'Rampart',    team: 'cathay', role: 'PLA Marshal — new appointment after purge wave, untested loyalty, 36 generals removed', size: 12 },
+  { id: 'abacus',     label: 'Abacus',     team: 'cathay', role: 'Premier — economic manager, gaining autonomy, pro-business signals to entrepreneurs', size: 13 },
+  { id: 'circuit',    label: 'Circuit',    team: 'cathay', role: 'Tech/Industry Director — semiconductor self-sufficiency, civil-military fusion, tech summit host', size: 11 },
+  { id: 'sage',       label: 'Sage',       team: 'cathay', role: 'Party Elder — collective leadership tradition, institutional memory, quiet influence', size: 11 },
+
+  // NORDOSTAN (3 roles — canonical names, no Specter)
+  { id: 'pathfinder', label: 'Pathfinder', team: 'nordostan', role: 'President — war leader, fortress mentality, respects transactional leaders', size: 17 },
+  { id: 'ironhand',   label: 'Ironhand',   team: 'nordostan', role: 'Chief of General Staff — executes Heartland campaign, institutional subordination', size: 12 },
+  { id: 'compass_n',  label: 'Compass',    team: 'nordostan', role: 'PM — wartime economy, sanctions evasion, civilian budget collapsing under military spending', size: 11 },
+
+  // HEARTLAND (3 roles)
+  { id: 'beacon',     label: 'Beacon',     team: 'heartland', role: 'President — resistance leader, humiliated by Dealer, legitimacy eroding', size: 14 },
+  { id: 'bulwark',    label: 'Bulwark',    team: 'heartland', role: 'General — removed from command, army loves him, running for president R3-4', size: 13 },
+  { id: 'broker',     label: 'Broker',     team: 'heartland', role: 'Former President — peace candidate, knows European capitals, pragmatist', size: 12 },
+
+  // PERSIA (3 roles)
+  { id: 'furnace',    label: 'Furnace',    team: 'persia', role: 'Supreme Leader — installed by IRGC, starting to believe in own authority', size: 14 },
+  { id: 'anvil',      label: 'Anvil',      team: 'persia', role: 'IRGC Commander — kingmaker, true power, institutional interest over ideology', size: 14 },
+  { id: 'dawn',       label: 'Dawn',       team: 'persia', role: 'Reformist President — no power but represents 70M people wanting normal life', size: 10 },
+
+  // EUROPE (6 roles — including Ponte, Mariner, Pillar)
+  { id: 'lumiere',    label: 'Lumiere',    team: 'europe', role: 'President of Gallia — nuclear power, strategic autonomy, politically paralyzed at home', size: 14 },
+  { id: 'forge',      label: 'Forge',      team: 'europe', role: 'Chancellor of Teutonia — EU checkbook, Cathay-dependent industry, anxious about everything', size: 14 },
+  { id: 'sentinel',   label: 'Sentinel',   team: 'europe', role: 'PM of Freeland — frontline state, hawkish, moral authority ("we told you about Nordostan")', size: 13 },
+  { id: 'ponte',      label: 'Ponte',      team: 'europe', role: 'PM of Ponte — Dealer\'s favorite European, pragmatic nationalist, pro-Ukraine but EU-skeptic on integration', size: 12 },
+  { id: 'mariner',    label: 'Mariner',    team: 'europe', role: 'PM of Albion — nuclear power, Five Eyes, AUKUS, rebuilding EU ties, special relationship strained', size: 11 },
+  { id: 'pillar',     label: 'Pillar',     team: 'europe', role: 'EU Commissioner — sanctions enforcement, trade policy, institutional EU unity', size: 10 },
+
+  // SOLO (10 roles — all canonical names)
+  { id: 'wellspring', label: 'Wellspring', team: 'solo', role: 'Crown Prince of Solaria — warm ties with ALL major powers, petroyuan, $1T pledge to Columbia', size: 13 },
+  { id: 'scales',     label: 'Scales',     team: 'solo', role: 'PM of Bharata — non-aligned, tariff friction with Dealer, BRICS host, plays all sides', size: 13 },
+  { id: 'bazaar',     label: 'Bazaar',     team: 'solo', role: 'President of Phrygia — mediator for everything, NATO member courting everyone, Bosphorus control', size: 12 },
+  { id: 'chip',       label: 'Chip',       team: 'solo', role: 'President of Formosa — semiconductor shield, existential Cathay threat, split government', size: 12 },
+  { id: 'sakura',     label: 'Sakura',     team: 'solo', role: 'PM of Yamato — remilitarizing at historic pace, fears Columbia abandonment, Pacific cornerstone', size: 11 },
+  { id: 'citadel',    label: 'Citadel',    team: 'solo', role: 'PM of Levantia — wartime leader, Operation Epic Fury ally, undeclared nuclear capability', size: 12 },
+  { id: 'pyro',       label: 'Pyro',       team: 'solo', role: 'Supreme Leader of Choson — nuclear provocateur, troops fighting for Nordostan, patron dependency', size: 10 },
+  { id: 'vanguard',   label: 'Vanguard',   team: 'solo', role: 'President of Hanguk — political crisis (martial law aftermath), semiconductor power, Pacific ally', size: 10 },
+  { id: 'havana',     label: 'Havana',     team: 'solo', role: 'Leadership of Caribe — post-intervention survival, seeking Russia/China/Iran patrons', size: 9 },
+  { id: 'spire',      label: 'Spire',      team: 'solo', role: 'President of Mirage — investment/tech hub, hedging US/China, Gulf rivalry with Solaria', size: 10 },
+];
+
+// ============================================================
+// RELATIONSHIPS — validated, rebalanced
+// ============================================================
+const edges = [
+  // =============================================
+  // COLUMBIA INTERNAL
+  // =============================================
+  { from: 'dealer', to: 'tribune',    type: 'hostile',  label: 'Constitutional war', desc: 'Executive vs. legislature. Tribune weaponizing war authorization against administration. The domestic confrontation is more visceral than most foreign rivalries.' },
+  { from: 'dealer', to: 'challenger', type: 'tension',  label: 'Populist threat', desc: 'Challenger offers foreign leaders an alternative future. Anti-establishment mirror of Dealer. Can promise what Dealer can\'t deliver.' },
+  { from: 'dealer', to: 'volt',       type: 'internal', label: 'Patron \u2192 heir', desc: 'Chosen successor. Loyal but building own identity. Needs endorsement desperately. Dealer keeps him guessing.' },
+  { from: 'dealer', to: 'anchor',     type: 'internal', label: 'Succession rival', desc: 'Both want the legacy. Anchor drives Persia/Caribe policy harder than Dealer himself. Establishment hawk vs. transactional dealmaker.' },
+  { from: 'volt',   to: 'anchor',     type: 'tension',  label: 'Presidential race', desc: 'Direct competition for nomination. Volt closer to Dealer ideologically. Anchor has international credibility and Congressional base.' },
+  { from: 'dealer', to: 'shield',     type: 'internal', label: 'Institutional check', desc: 'Shield co-signs military orders. Professional. Respects but worries about overextension. Can slow the president.' },
+  { from: 'dealer', to: 'fixer',      type: 'alliance', label: 'Personal trust', desc: 'Old friend, no diplomatic baggage. Dealer trusts Fixer more than career diplomats. Fixer carries messages to Moscow, Beijing, Riyadh.' },
+
+  // =============================================
+  // CATHAY INTERNAL
+  // =============================================
+  { from: 'helmsman', to: 'rampart',  type: 'tension',  label: 'Purge survivor', desc: '36 generals purged since 2022. Previous marshal removed over Taiwan timeline disagreement. Rampart untested — loyal by appointment, not trust. CMC hollowed out.' },
+  { from: 'helmsman', to: 'abacus',   type: 'internal', label: 'Gaining autonomy', desc: 'Premier quietly gaining economic authority. Pro-business, reassuring entrepreneurs after crackdown. Operates within Helmsman\'s parameters but has real room.' },
+  { from: 'helmsman', to: 'circuit',  type: 'internal', label: 'National champion', desc: 'Tech summit with Jack Ma, Huawei, BYD, DeepSeek. Circuit executes semiconductor self-sufficiency. Helmsman NEEDS tech cooperation.' },
+  { from: 'helmsman', to: 'sage',     type: 'tension',  label: 'Collective vs. personal', desc: 'Sage embodies collective leadership tradition. Helmsman has centralized everything. Sage\'s quiet influence is a constraint Helmsman tolerates but resents.' },
+
+  // =============================================
+  // NORDOSTAN INTERNAL
+  // =============================================
+  { from: 'pathfinder', to: 'ironhand',  type: 'internal', label: 'War machine', desc: 'Military budget untouchable (40% federal spending, 8%+ GDP). Ironhand executes Heartland campaign. Pathfinder directs.' },
+  { from: 'pathfinder', to: 'compass_n', type: 'tension',  label: 'Guns eating butter', desc: 'Oil revenue down 34%. Budget cut 10% — all civilian. Real inflation 20%+. Compass manages impossible equation while military devours resources.' },
+
+  // =============================================
+  // HEARTLAND INTERNAL
+  // =============================================
+  { from: 'beacon',  to: 'bulwark', type: 'hostile',  label: 'EXPLOSIVE', desc: 'Beacon fired Bulwark fearing political threat. Army loves Bulwark. Running for president R3-4. Would win 64-36. Beacon\'s only hope: delay election or sign peace first.' },
+  { from: 'beacon',  to: 'broker',  type: 'tension',  label: 'Bitter history', desc: 'Former president vs. current. Fight vs. negotiate. Broker got defeat, Beacon got glory. Now roles reversing.' },
+  { from: 'bulwark', to: 'broker',  type: 'internal', label: 'Anti-Beacon coalition?', desc: 'Military victory vs. negotiated peace — opposite policies but shared enemy. Coalition possible but fragile.' },
+
+  // =============================================
+  // PERSIA INTERNAL
+  // =============================================
+  { from: 'anvil',   to: 'furnace', type: 'tension',  label: 'Kingmaker vs. King', desc: 'Anvil installed Furnace. Furnace starting to issue edicts without consulting Anvil. Pull too hard = break legitimacy. Let him run = he becomes threat.' },
+  { from: 'furnace', to: 'dawn',    type: 'tension',  label: 'Revolution vs. people', desc: 'Furnace = theological rigidity. Dawn = 70M people wanting normal life. 5M protested before the war. Dawn has no power but has legitimacy of the street.' },
+  { from: 'anvil',   to: 'dawn',    type: 'tension',  label: 'Safety valve', desc: 'Anvil keeps Dawn alive as controlled opposition. If street erupts, only Dawn can channel it. Neither elimination nor empowerment.' },
+
+  // =============================================
+  // EUROPE INTERNAL — now with alliance edges
+  // =============================================
+  { from: 'lumiere',  to: 'forge',     type: 'tension',  label: 'Autonomy vs. consensus', desc: 'Lumiere wants strategic autonomy + nuclear hedge. Forge wants stability + consensus. Franco-German engine under strain but still functioning.' },
+  { from: 'sentinel', to: 'forge',     type: 'tension',  label: 'Burden-sharing shame', desc: 'Sentinel spends 4.8% GDP defense. Forge struggling toward 3.5%. "We told you about Nordostan." Moral authority vs. economic constraint.' },
+  { from: 'lumiere',  to: 'sentinel',  type: 'alliance', label: 'Heartland solidarity', desc: 'Despite NATO-vs-autonomy split, both GENUINELY support Heartland. "Coalition of the willing" for defense. This shared commitment holds Europe together.' },
+  { from: 'ponte',    to: 'forge',     type: 'tension',  label: 'EU budget battles', desc: 'Ponte blocks EU spending and migration consensus. Forge needs EU unity — Ponte is the constant obstacle on fiscal integration.' },
+  { from: 'ponte',    to: 'pillar',    type: 'tension',  label: 'Sovereignty vs. institution', desc: 'Ponte challenges EU Commission authority on migration, fiscal rules. Pillar represents institutional unity that Ponte disrupts.' },
+  { from: 'forge',    to: 'pillar',    type: 'alliance', label: 'EU project', desc: 'Forge and Pillar share commitment to EU institutional coherence. Sanctions enforcement, trade policy, Heartland support packages.' },
+  { from: 'mariner',  to: 'sentinel',  type: 'alliance', label: 'Atlantic solidarity', desc: 'Both Atlanticist, both committed to Heartland. Mariner brings Five Eyes intel, Sentinel brings frontline credibility. Natural partnership.' },
+
+  // =============================================
+  // THE CENTRAL TRAP
+  // =============================================
+  { from: 'dealer',     to: 'helmsman',   type: 'hostile',  label: 'THE TRAP', desc: 'Trade war (level-3 tariffs), tech decoupling, Formosa flashpoint. BUT: transactional respect, warm personal language, planned state visits. They can deal — STRUCTURES pull them apart.' },
+
+  // =============================================
+  // DEALER\'S SURPRISING RAPPORT WITH "ENEMIES"
+  // =============================================
+  { from: 'dealer',     to: 'pathfinder', type: 'channel',  label: 'Personal rapport', desc: 'Countries at proxy war but leaders communicate easily. Alaska summit: Pathfinder dominated body language. Dealer admires strength. Pathfinder manages ego. WANT a deal on Heartland.' },
+  { from: 'fixer',      to: 'pathfinder', type: 'channel',  label: 'Moscow back-channel', desc: 'Fixer met Pathfinder for 5 hours in Moscow. No diplomatic experience but Dealer\'s personal trust. Carries proposals outside normal channels.' },
+  { from: 'fixer',      to: 'compass_n',  type: 'channel',  label: 'Miami talks', desc: 'Fixer met Nordostan envoy in Miami — weeks of secret talks produced 28-point peace plan. Excluded Heartland, allies, even some Columbia officials.' },
+
+  // =============================================
+  // DEALER AND ALLIES — contempt vs. warmth
+  // =============================================
+  { from: 'dealer',     to: 'lumiere',    type: 'tension',  label: 'Active contempt', desc: 'Dealer leaked Lumiere\'s private texts. Called Europe "decaying." Greenland threats. Lumiere building nuclear hedge = implicit rebuke. Relationship defined by humiliation.' },
+  { from: 'dealer',     to: 'forge',      type: 'tension',  label: 'Pay up or else', desc: 'Demanded 5% defense spending. Greenland takeover threats. Forge trying to court and criticize simultaneously. Former EU Council chief: "transatlantic relationship is dead."' },
+  { from: 'dealer',     to: 'ponte',      type: 'alliance', label: 'FAVORITE European', desc: 'Only EU leader invited to inauguration. Shared ideology + personal chemistry. Ponte as US-EU bridge — trusted where others are despised.' },
+  { from: 'dealer',     to: 'beacon',     type: 'tension',  label: 'Humiliation', desc: 'Oval Office shouting match — Beacon told to leave. Minerals deal under duress. Beacon depends on someone who despises him.' },
+
+  // =============================================
+  // ACTIVE WARS
+  // =============================================
+  { from: 'pathfinder', to: 'beacon',    type: 'hostile', label: 'AT WAR', desc: 'Existential for both. Pathfinder needs victory to justify fortress economy. Beacon needs survival to justify wartime authority. 28-point peace plan circulating.' },
+  { from: 'dealer',     to: 'furnace',   type: 'hostile', label: 'AT WAR', desc: 'Operation Epic Fury. Decapitation strike during negotiations. Furnace\'s father killed. Yet both sides still have reasons to talk — Furnace cannot survive indefinitely without sanctions relief.' },
+  { from: 'anvil',      to: 'shield',    type: 'hostile', label: 'Gulf Gate blockade', desc: 'IRGC blocking Gulf Gate — Anvil\'s main leverage. Wasting asset: 4-5 rounds max. Shield planning military response. Ground forces needed to break it.' },
+  { from: 'citadel',    to: 'furnace',   type: 'hostile', label: 'Multi-front war', desc: 'Levantia at war with Persia. Citadel has Mossad intelligence on Persia\'s surviving nuclear capacity. Direct strikes ongoing.' },
+  { from: 'citadel',    to: 'dealer',    type: 'alliance', label: 'Wartime partners', desc: 'Operation Epic Fury allies. Citadel has direct access to Dealer. Shared intelligence, coordinated strikes. The tightest military partnership in the SIM.' },
+
+  // =============================================
+  // STRATEGIC PARTNERSHIPS
+  // =============================================
+  { from: 'helmsman',   to: 'pathfinder', type: 'alliance', label: 'Partnership without limits', desc: 'Dense coordination: defense, tech, AI, energy, payments. ASYMMETRIC — Pathfinder becoming junior partner. Cathay hedges against post-Pathfinder future.' },
+  { from: 'pathfinder', to: 'furnace',    type: 'alliance', label: 'Sanctions brothers', desc: 'Both under Western sanctions. Arms trade, sanctions evasion. Choson troops fighting for Nordostan. Persia missiles via Nordostan tech.' },
+  { from: 'pathfinder', to: 'pyro',       type: 'alliance', label: 'Patron-client', desc: 'Pyro sends 11,000+ troops and millions of artillery shells to Heartland front. Pathfinder provides nuclear/missile technology in return. Symbiotic.' },
+
+  // =============================================
+  // DEPENDENCIES
+  // =============================================
+  { from: 'beacon',     to: 'dealer',     type: 'dependency', label: 'Military lifeline', desc: 'Heartland depends on Columbia for survival. Humiliating but existential. Dealer suspended aid once. Every weapon comes with political strings.' },
+  { from: 'chip',       to: 'dealer',     type: 'dependency', label: 'Strategic ambiguity', desc: 'Formosa relies on implied protection. No formal guarantee. $11B arms sale BUT Dealer cancelled defense meetings to avoid angering Helmsman.' },
+  { from: 'anvil',      to: 'helmsman',   type: 'dependency', label: 'Economic lifeline', desc: '48% of Persia\'s oil goes to Cathay. Without Cathay channels, economy collapses. Cathay has leverage — can squeeze or sustain at will.' },
+  { from: 'compass_n',  to: 'abacus',     type: 'dependency', label: 'Sanctions lifeline', desc: 'Nordostan economy depends on Cathay as buyer, tech supplier, financial channel. Growing asymmetry. Cathay sets the terms.' },
+  { from: 'forge',      to: 'abacus',     type: 'dependency', label: 'Auto industry hostage', desc: 'VW, BMW, BASF deeply dependent on Cathay market. Dealer demands restrictions. Forge trapped: obey Columbia = lose industry; resist = lose alliance.' },
+
+  // =============================================
+  // FORMOSA FLASHPOINT
+  // =============================================
+  { from: 'helmsman',   to: 'chip',       type: 'hostile',  label: 'Existential claim', desc: 'Largest military exercises ever (Dec 2025). PLA 2027 readiness target. BUT: purged generals, hollowed CMC, fragile economy. Semiconductor shield shrinking.' },
+  { from: 'chip',       to: 'sakura',     type: 'alliance', label: 'Shared fear', desc: 'Both face Cathay threat. TSMC building Japan fab. Yamato declared Taiwan contingency "existential." Both need Columbia but fear abandonment.' },
+  { from: 'shield',     to: 'rampart',    type: 'hostile',  label: 'Pacific arms race', desc: 'Naval buildup: Columbia 11 vs Cathay 7 (+1/round). Crossover R3-4. Yamato remilitarizing. The military dimension of the Trap.' },
+  { from: 'sakura',     to: 'helmsman',   type: 'hostile',  label: 'Existential threat', desc: 'Yamato declared Formosa contingency an "existential crisis." Cathay retaliated with rare earth restrictions. Remilitarizing at historic pace — fastest since 1945.' },
+  { from: 'bazaar',     to: 'chip',       type: 'channel',  label: 'Gray-zone channel', desc: 'Phrygia as potential intermediary for Cathay-Formosa communication. Bazaar talks to everyone — could facilitate autonomy deals or economic arrangements.' },
+
+  // =============================================
+  // INTERMEDIARY NETWORK
+  // =============================================
+  { from: 'fixer',      to: 'wellspring', type: 'channel', label: 'Money + mediation', desc: 'Family fund received $2B from Solaria. Wellspring first to call after inauguration. $1T investment pledge. Financial ties create personal channel.' },
+  { from: 'bazaar',     to: 'pathfinder', type: 'channel', label: 'Reliable interlocutor', desc: 'Phrygia refuses to sanction Nordostan. Grain deal mediator. Only country hosting direct Nordostan-Heartland talks. Pathfinder\'s "valued friend."' },
+  { from: 'bazaar',     to: 'dealer',     type: 'channel', label: 'Valued friend', desc: 'Dealer adjusted Bazaar\'s chair at White House. Loyalty during "exile" remembered. Nuclear cooperation deal. NATO\'s most unreliable member but Dealer\'s reliable contact.' },
+  { from: 'bazaar',     to: 'beacon',     type: 'channel', label: 'Istanbul talks', desc: 'Only country facilitating in-person Nordostan-Heartland negotiations. Grain corridor. Prisoner swaps. Both sides "feel comfortable" with Phrygia.' },
+  { from: 'dawn',       to: 'fixer',      type: 'channel', label: 'Reform channel', desc: 'If regime cracks, Dawn is the interlocutor the West talks to. Anvil knows this — keeps Dawn alive partly for this reason. A peace pathway for the Persia war.' },
+
+  // =============================================
+  // WELLSPRING — universal connector
+  // =============================================
+  { from: 'wellspring', to: 'helmsman',   type: 'alliance', label: 'Oil for influence', desc: '40%+ crude to Cathay. Petroyuan. BRICS+. MBS has warm personal ties with Dealer, Pathfinder, AND Helmsman simultaneously — unique position.' },
+  { from: 'wellspring', to: 'dealer',     type: 'alliance', label: 'Clean slate', desc: '$1T investment pledge. First foreign call. Personal warmth + transactional alignment. Solaria is Dealer\'s favorite partner.' },
+  { from: 'wellspring', to: 'pathfinder', type: 'alliance', label: 'OPEC+ partners', desc: 'Close oil production coordination. Wellspring ignored Columbia pressure to boost production after Heartland invasion. Pragmatic energy partnership.' },
+  { from: 'wellspring', to: 'spire',      type: 'tension',  label: 'Gulf rivalry', desc: 'Sibling rivalry between Solaria and Mirage. Compete for investment, tech hub status, Columbia favor. Cooperate on Persia threat but watch each other closely.' },
+
+  // =============================================
+  // SCALES (Bharata) — non-aligned center
+  // =============================================
+  { from: 'scales',     to: 'dealer',     type: 'tension',  label: 'Tariff friction', desc: 'Genuine personal warmth (stadium rallies, "Howdy Modi" legacy) overlaid with trade tension. Both sides made concessions but structural friction remains.' },
+  { from: 'scales',     to: 'helmsman',   type: 'tension',  label: 'Rival partners', desc: 'Border disputes unresolved. BUT: Bharata hosting 2026 BRICS. Invited Helmsman, who accepted. "Non-western, not anti-western." Cautious thaw.' },
+  { from: 'scales',     to: 'pathfinder', type: 'alliance', label: 'Deep partnership', desc: 'Pathfinder visited Delhi Dec 2025. Bharata dramatically increased Nordostan oil purchases. Defense cooperation. The multipolar embrace.' },
+  { from: 'scales',     to: 'wellspring', type: 'alliance', label: 'Energy + BRICS', desc: 'Two hedging powers with energy relationships and BRICS+ membership. Both non-aligned, both leveraging position. Natural partnership.' },
+
+  // =============================================
+  // PYRO (Choson) — nuclear provocateur
+  // =============================================
+  { from: 'pyro',       to: 'helmsman',   type: 'tension',  label: 'Embarrassing ally', desc: 'Treaty ally and buffer state. But Pyro\'s provocations embarrass Cathay. Nuclear tests complicate Helmsman\'s diplomacy. Tolerate or cut the cord?' },
+  { from: 'pyro',       to: 'dealer',     type: 'hostile',  label: 'Nuclear standoff', desc: 'Nuclear threat. Missile tests. But history of personal letters and summitry. Dealer\'s unpredictability matches Pyro\'s. Could flip to engagement.' },
+  { from: 'pyro',       to: 'vanguard',   type: 'hostile',  label: 'Existential threat', desc: 'Choson\'s nuclear arsenal pointed at Hanguk. The other Korean crisis — martial law at home, nuclear threat from north.' },
+
+  // =============================================
+  // VANGUARD (Hanguk) — crisis ally
+  // =============================================
+  { from: 'vanguard',   to: 'dealer',     type: 'tension',  label: 'Crisis ally', desc: 'Treaty ally in constitutional crisis (martial law aftermath). Semiconductor power (Samsung). Columbia needs Hanguk for Pacific security but political chaos limits cooperation.' },
+  { from: 'vanguard',   to: 'sakura',     type: 'tension',  label: 'Historical scars', desc: 'Shared Cathay/Choson threats. Both Pacific allies. But colonial history poisons the relationship. Trade wars, GSOMIA disputes. Forced cooperation despite mistrust.' },
+
+  // =============================================
+  // SPIRE (Mirage/UAE) — Gulf hedge
+  // =============================================
+  { from: 'spire',      to: 'dealer',     type: 'alliance', label: 'Defense client', desc: 'F-35 buyer, investment hub. But also hedging with Cathay tech infrastructure. Columbia needs Mirage as Persian Gulf staging ground.' },
+  { from: 'spire',      to: 'helmsman',   type: 'channel',  label: 'Tech bridge', desc: 'Mirage as technology crossroads between Columbia and Cathay. Investment fund courting both. Discreet channel for deals that can\'t happen directly.' },
+
+  // =============================================
+  // MARINER (Albion) — post-Brexit bridge
+  // =============================================
+  { from: 'mariner',    to: 'dealer',     type: 'tension',  label: 'Special relationship strained', desc: 'Five Eyes, AUKUS, shared intelligence. But Dealer\'s unpredictability strains trust. Albion multiplying alliances (AUKUS, GCAP) to hedge against Columbia unreliability.' },
+  { from: 'mariner',    to: 'lumiere',    type: 'alliance', label: 'Nuclear partners', desc: 'Two European nuclear powers. Post-Brexit rebuilding. Shared Heartland commitment. Lancaster House defense treaties. Natural partners on strategic autonomy.' },
+
+  // =============================================
+  // HAVANA (Caribe) — survival mode
+  // =============================================
+  { from: 'anchor',     to: 'havana',     type: 'hostile',  label: 'Monroe Doctrine', desc: 'Anchor drives Caribe policy — strategic AND personal (heritage). Monroe Doctrine enforced. Maduro captured. Regime change on the agenda.' },
+  { from: 'havana',     to: 'pathfinder', type: 'dependency', label: 'Patron seeking', desc: 'Seeking Nordostan protection. Intelligence cooperation. Havana needs patrons to survive Columbia pressure.' },
+  { from: 'havana',     to: 'helmsman',   type: 'dependency', label: 'Telecom + trade', desc: 'Cathay has telecom infrastructure in Caribe. Economic lifeline. Havana courting Cathay as counterweight to Columbia\'s Monroe Doctrine.' },
+
+  // =============================================
+  // KEY CROSS-BORDER PERSONAL CHANNELS
+  // =============================================
+  { from: 'broker',     to: 'forge',      type: 'alliance', label: 'EU accession path', desc: 'Broker\'s strategy = European integration. Forge controls EU checkbook. Window closing — Ponte blocks. Broker\'s last hope for Heartland.' },
+  { from: 'broker',     to: 'lumiere',    type: 'alliance', label: 'Paris channel', desc: 'Broker knows European capitals. Lumiere sees Heartland as strategic autonomy project. "Coalition of the willing" for peace.' },
+  { from: 'shadow',     to: 'ironhand',   type: 'hostile',  label: 'Intelligence war', desc: 'Columbia vs. Nordostan intelligence. Covert ops, sabotage, election interference. The invisible front that never stops.' },
+  { from: 'sage',       to: 'anchor',     type: 'channel',  label: 'FM back-channel', desc: 'Sage can explore deals leaders can\'t discuss publicly. Six rounds of talks already held. Calibrated for Dealer\'s transactional style.' },
+  { from: 'beacon',     to: 'sentinel',   type: 'alliance', label: 'Frontline brothers', desc: '80% of military aid transits Freeland. Borders the war. Not transactional — existential solidarity. Sentinel is Beacon\'s most reliable ally.' },
+  { from: 'sakura',     to: 'dealer',     type: 'tension',  label: 'Anxious ally', desc: 'Cornerstone Pacific alliance BUT Columbia signaling contraction. Yamato remilitarizing because it no longer trusts protection. Anxiety, not warmth.' },
+  { from: 'sakura',     to: 'shield',     type: 'alliance', label: 'Military alliance', desc: 'US-Japan military relationship is Pacific deterrence cornerstone. Joint exercises, base hosting, intelligence sharing. Shield\'s most capable partner.' },
+  { from: 'pillar',     to: 'beacon',     type: 'alliance', label: 'Institutional support', desc: 'EU sanctions on Nordostan, aid packages for Heartland, accession process — all flow through Pillar\'s institutional machinery.' },
+];
+
+// ============================================================
+// GRAPH ENGINE
+// ============================================================
+const svg = document.getElementById('graph');
+const tooltip = document.getElementById('tooltip');
+const W = window.innerWidth;
+const H = window.innerHeight;
+
+let activeFilter = 'all';
+let dragNode = null;
+let pinnedNode = null;
+let zoom = 1;
+let panX = 0, panY = 0;
+
+const teamPositions = {
+  columbia:  { x: W * 0.12, y: H * 0.32 },
+  cathay:    { x: W * 0.88, y: H * 0.28 },
+  nordostan: { x: W * 0.62, y: H * 0.08 },
+  heartland: { x: W * 0.38, y: H * 0.08 },
+  persia:    { x: W * 0.62, y: H * 0.85 },
+  europe:    { x: W * 0.25, y: H * 0.72 },
+  solo:      { x: W * 0.52, y: H * 0.50 },
+};
+
+nodes.forEach(n => {
+  const tp = teamPositions[n.team];
+  n.x = tp.x + (Math.random() - 0.5) * 150;
+  n.y = tp.y + (Math.random() - 0.5) * 120;
+  n.vx = 0; n.vy = 0;
+});
+
+const edgeColors = {
+  alliance: '#22c55e', tension: '#f97316', hostile: '#ef4444',
+  dependency: '#6366f1', internal: '#4a5568', channel: '#06b6d4',
+};
+const edgeWidths = {
+  alliance: 2, tension: 2, hostile: 3, dependency: 2, internal: 1, channel: 1.5,
+};
+
+function simulate() {
+  const alpha = 0.2, repulsion = 2500, attraction = 0.003, damping = 0.8, cohesion = 0.006;
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const a = nodes[i], b = nodes[j];
+      let dx = b.x - a.x, dy = b.y - a.y;
+      let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+      let force = repulsion / (dist * dist);
+      a.vx -= (dx/dist)*force*alpha; a.vy -= (dy/dist)*force*alpha;
+      b.vx += (dx/dist)*force*alpha; b.vy += (dy/dist)*force*alpha;
+    }
+  }
+  edges.forEach(e => {
+    const a = nodes.find(n => n.id === e.from);
+    const b = nodes.find(n => n.id === e.to);
+    if (!a || !b) return;
+    let dx = b.x - a.x, dy = b.y - a.y;
+    let dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    let ideal = e.type === 'internal' ? 65 : 170;
+    let force = (dist - ideal) * attraction;
+    a.vx += (dx/dist)*force*alpha; a.vy += (dy/dist)*force*alpha;
+    b.vx -= (dx/dist)*force*alpha; b.vy -= (dy/dist)*force*alpha;
+  });
+  nodes.forEach(n => {
+    const tp = teamPositions[n.team];
+    n.vx += (tp.x - n.x) * cohesion;
+    n.vy += (tp.y - n.y) * cohesion;
+  });
+  nodes.forEach(n => {
+    if (n === dragNode) return;
+    n.vx *= damping; n.vy *= damping;
+    n.x += n.vx; n.y += n.vy;
+    n.x = Math.max(50, Math.min(W-50, n.x));
+    n.y = Math.max(50, Math.min(H-50, n.y));
+  });
+}
+
+function isNodeVisible(n) {
+  if (activeFilter === 'all' || activeFilter === 'cross' || activeFilter === 'channels') return true;
+  return n.team === activeFilter;
+}
+function isEdgeVisible(e) {
+  const a = nodes.find(n => n.id === e.from), b = nodes.find(n => n.id === e.to);
+  if (!a || !b) return false;
+  if (activeFilter === 'all') return true;
+  if (activeFilter === 'cross') return e.type !== 'internal';
+  if (activeFilter === 'channels') return e.type === 'channel';
+  return a.team === activeFilter || b.team === activeFilter;
+}
+function isHighlighted(nodeId) {
+  if (!pinnedNode) return true;
+  if (nodeId === pinnedNode) return true;
+  return edges.some(e => (e.from === pinnedNode && e.to === nodeId) || (e.to === pinnedNode && e.from === nodeId));
+}
+
+function render() {
+  let html = `<g transform="translate(${panX},${panY}) scale(${zoom})">`;
+  edges.forEach(e => {
+    if (!isEdgeVisible(e)) return;
+    const a = nodes.find(n => n.id === e.from), b = nodes.find(n => n.id === e.to);
+    if (!a || !b) return;
+    let vis = isNodeVisible(a) && isNodeVisible(b);
+    let hi = isHighlighted(a.id) && isHighlighted(b.id);
+    let opacity = vis ? (hi ? 0.75 : 0.08) : 0.05;
+    const color = edgeColors[e.type] || '#555';
+    const width = edgeWidths[e.type] || 1.5;
+    const dash = e.type === 'internal' ? '4,4' : e.type === 'channel' ? '6,3' : 'none';
+    html += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="${color}" stroke-width="${width}" stroke-opacity="${opacity}" stroke-dasharray="${dash}" data-from="${e.from}" data-to="${e.to}" class="edge"/>`;
+    if (opacity > 0.3) {
+      html += `<text x="${(a.x+b.x)/2}" y="${(a.y+b.y)/2 - 6}" class="edge-label" opacity="${opacity*0.9}">${e.label}</text>`;
+    }
+  });
+  nodes.forEach(n => {
+    const vis = isNodeVisible(n), hi = isHighlighted(n.id);
+    const opacity = vis ? (hi ? 1 : 0.12) : 0.08;
+    const color = TEAMS[n.team].color, r = n.size;
+    if (vis && hi) html += `<circle cx="${n.x}" cy="${n.y}" r="${r+7}" fill="${color}" opacity="0.1"/>`;
+    if (n.id === pinnedNode) html += `<circle cx="${n.x}" cy="${n.y}" r="${r+4}" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>`;
+    html += `<circle cx="${n.x}" cy="${n.y}" r="${r}" fill="${color}" opacity="${opacity}" stroke="#0a0e17" stroke-width="2" class="node" data-id="${n.id}" style="cursor:pointer"/>`;
+    html += `<text x="${n.x}" y="${n.y + r + 14}" text-anchor="middle" fill="#c8d0dc" font-size="10" font-weight="500" opacity="${opacity}">${n.label}</text>`;
+  });
+  html += '</g>';
+  svg.innerHTML = html;
+  svg.querySelectorAll('.node').forEach(el => {
+    el.addEventListener('mouseenter', onNodeHover);
+    el.addEventListener('mouseleave', onNodeLeave);
+    el.addEventListener('mousedown', onNodeDown);
+    el.addEventListener('click', onNodeClick);
+  });
+}
+
+function onNodeHover(e) {
+  const id = e.target.dataset.id;
+  const node = nodes.find(n => n.id === id);
+  if (!node) return;
+  const rels = edges.filter(ed => ed.from === id || ed.to === id);
+  tooltip.innerHTML = `<div class="tt-name">${node.label}</div><div class="tt-role">${node.role}</div>` +
+    rels.map(r => {
+      const oid = r.from === id ? r.to : r.from;
+      const o = nodes.find(n => n.id === oid);
+      return `<div class="tt-rel"><span style="color:${edgeColors[r.type]}">\u25CF</span> <strong>${o ? o.label : oid}</strong> \u2014 ${r.desc}</div>`;
+    }).join('');
+  tooltip.style.display = 'block';
+}
+function onNodeLeave() { tooltip.style.display = 'none'; }
+function onNodeClick(e) { const id = e.target.dataset.id; pinnedNode = pinnedNode === id ? null : id; }
+function onNodeDown(e) { dragNode = nodes.find(n => n.id === e.target.dataset.id); e.preventDefault(); }
+
+document.addEventListener('mousemove', e => {
+  if (tooltip.style.display === 'block') { tooltip.style.left = (e.clientX+15)+'px'; tooltip.style.top = (e.clientY-10)+'px'; }
+  if (dragNode) { dragNode.x = (e.clientX-panX)/zoom; dragNode.y = (e.clientY-panY)/zoom; dragNode.vx = 0; dragNode.vy = 0; }
+});
+document.addEventListener('mouseup', () => { dragNode = null; });
+svg.addEventListener('wheel', e => { e.preventDefault(); zoom *= e.deltaY > 0 ? 0.95 : 1.05; zoom = Math.max(0.3, Math.min(3, zoom)); });
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    pinnedNode = null;
+  });
+});
+
+function loop() { simulate(); render(); requestAnimationFrame(loop); }
+loop();
+</script>
+</body>
+</html>

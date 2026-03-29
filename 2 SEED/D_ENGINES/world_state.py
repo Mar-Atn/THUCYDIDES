@@ -31,7 +31,19 @@ CHOKEPOINTS = {
     "gulf_gate_ground": {"zone": "cp_gulf_gate", "oil_impact": 0.60, "ground_blockade": True},
 }
 
-UNIT_TYPES = ["ground", "naval", "tactical_air", "strategic_missiles", "air_defense"]
+UNIT_TYPES = ["ground", "naval", "tactical_air", "strategic_missile", "air_defense"]
+
+# Formosa encirclement blockade: the 6 sea zones surrounding Formosa island.
+# Full blockade requires naval presence in 3+ of these zones.
+# 1 friendly ship in any of these zones = instant downgrade to partial.
+FORMOSA_SURROUNDING_ZONES = [
+    "w(16,7)",   # South China Sea (west approach)
+    "w(17,7)",   # Formosa Strait
+    "w(18,7)",   # East China Sea (north approach)
+    "w(17,8)",   # Pacific east approach
+    "w(16,8)",   # South approach
+    "w(18,8)",   # Northeast approach
+]
 
 # Cal-3 v3: Tech boost applied to GROWTH RATE, not GDP multiplier.
 # L3 adds +1.5 percentage points to growth rate (not x1.15 to GDP).
@@ -42,7 +54,7 @@ AI_LEVEL_COMBAT_BONUS = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2}
 NUCLEAR_RD_THRESHOLDS = {0: 0.60, 1: 0.80, 2: 1.00}
 AI_RD_THRESHOLDS = {0: 0.20, 1: 0.40, 2: 0.60, 3: 1.00}
 
-OPEC_PRODUCTION_MULTIPLIER = {"low": 0.80, "normal": 1.00, "high": 1.20}
+OPEC_PRODUCTION_MULTIPLIER = {"min": 0.70, "low": 0.85, "normal": 1.00, "high": 1.15, "max": 1.30}
 PRODUCTION_TIER_COST = {"normal": 1.0, "accelerated": 2.0, "maximum": 4.0}
 PRODUCTION_TIER_OUTPUT = {"normal": 1.0, "accelerated": 2.0, "maximum": 3.0}
 
@@ -155,7 +167,7 @@ class WorldState:
                         "gdp": float(row["gdp"]),
                         "gdp_growth_rate": float(row["gdp_growth_base"]),
                         "sectors": {
-                            "resources": self._override_sector(cid, "resources", float(row["sector_resources"])),
+                            "resources": float(row["sector_resources"]),
                             "industry": float(row["sector_industry"]),
                             "services": float(row["sector_services"]),
                             "technology": float(row["sector_technology"]),
@@ -182,16 +194,16 @@ class WorldState:
                         "formosa_disruption_rounds": 0,   # consecutive rounds of semiconductor disruption
                         "market_index": 50,               # financial market confidence (0-100)
                         # --- Flat sector aliases for per-sector tariff calculations ---
-                        "sector_resources": self._override_sector(cid, "resources", float(row["sector_resources"])),
+                        "sector_resources": float(row["sector_resources"]),
                         "sector_industry": float(row["sector_industry"]),
                         "sector_services": float(row["sector_services"]),
                         "sector_technology": float(row["sector_technology"]),
                     },
                     "military": {
                         "ground": int(row.get("mil_ground", 0)),
-                        "naval": self._override_naval(cid, int(row.get("mil_naval", 0))),
+                        "naval": int(row.get("mil_naval", 0)),
                         "tactical_air": int(row.get("mil_tactical_air", 0)),
-                        "strategic_missiles": int(row.get("mil_strategic_missiles", 0)),
+                        "strategic_missile": int(row.get("mil_strategic_missiles", 0)),
                         "air_defense": int(row.get("mil_air_defense", 0)),
                         "production_costs": {
                             "ground": float(row.get("prod_cost_ground", 3)),
@@ -205,7 +217,7 @@ class WorldState:
                         },
                         "maintenance_cost_per_unit": float(row.get("maintenance_per_unit", 0.3)),
                         "strategic_missile_growth": int(float(row.get("strategic_missile_growth", 0))),
-                        "mobilization_pool": 0,
+                        "mobilization_pool": int(float(row.get("mobilization_pool", 0))),
                     },
                     "political": {
                         "stability": float(row.get("stability", 5)),
@@ -224,8 +236,8 @@ class WorldState:
                         "nuclear_level": int(row.get("nuclear_level", 0)),
                         "nuclear_rd_progress": float(row.get("nuclear_rd_progress", 0)),
                         "nuclear_tested": int(row.get("nuclear_level", 0)) >= 1,  # L1+ start tested
-                        "ai_level": self._override_ai_level(cid, int(row.get("ai_level", 0))),
-                        "ai_rd_progress": self._override_ai_progress(cid, float(row.get("ai_rd_progress", 0))),
+                        "ai_level": int(row.get("ai_level", 0)),
+                        "ai_rd_progress": float(row.get("ai_rd_progress", 0)),
                     },
                     "diplomatic": {
                         "wars": [],
@@ -235,33 +247,9 @@ class WorldState:
                     },
                 }
 
-    # --- v2 Data Overrides (fixes from SEED TESTS2) ---
-
-    @staticmethod
-    def _override_naval(cid: str, csv_val: int) -> int:
-        """Columbia naval 10->11, Cathay naval 6->7."""
-        overrides = {"columbia": 11, "cathay": 7}
-        return overrides.get(cid, csv_val)
-
-    @staticmethod
-    def _override_sector(cid: str, sector: str, csv_val: float) -> float:
-        """Columbia resource sector 5->8."""
-        if cid == "columbia" and sector == "resources":
-            return 8.0
-        return csv_val
-
-    @staticmethod
-    def _override_ai_level(cid: str, csv_val: int) -> int:
-        """Cathay AI: fix to L3 (was L2 with 0.70 progress past 0.60 threshold)."""
-        if cid == "cathay":
-            return 3
-        return csv_val
-
-    @staticmethod
-    def _override_ai_progress(cid: str, csv_val: float) -> float:
-        """Columbia AI progress 0.60->0.80. Cathay AI progress 0.70->0.10 (now L3)."""
-        overrides = {"columbia": 0.80, "cathay": 0.10}
-        return overrides.get(cid, csv_val)
+    # --- v2 Data Overrides: REMOVED ---
+    # Overrides for Columbia naval, sector_resources, Cathay naval, ai_level, ai_progress
+    # were merged into countries.csv on 2026-03-29. CSV is now the single source of truth.
 
     def _load_zones(self, path: str) -> None:
         with open(path, "r") as f:
@@ -351,7 +339,11 @@ class WorldState:
                 country_id = row.get("country_id", "")
                 if org_id not in self.org_memberships:
                     self.org_memberships[org_id] = []
-                self.org_memberships[org_id].append(country_id)
+                self.org_memberships[org_id].append({
+                    "country": country_id,
+                    "role_in_org": row.get("role_in_org", "member"),
+                    "has_veto": row.get("has_veto", "false").lower() == "true",
+                })
 
     def _load_roles(self, path: str) -> None:
         with open(path, "r") as f:
@@ -374,6 +366,7 @@ class WorldState:
                     "personal_coins": float(row.get("personal_coins", 0)),
                     "expansion_role": row.get("expansion_role", "false").lower() == "true",
                     "ai_candidate": row.get("ai_candidate", "false").lower() == "true",
+                    "intelligence_pool": int(row.get("intelligence_pool", 0)),
                     "powers": row.get("powers", "").split(";") if row.get("powers") else [],
                     "objectives": row.get("objectives", "").split(";") if row.get("objectives") else [],
                     "ticking_clock": row.get("ticking_clock", ""),

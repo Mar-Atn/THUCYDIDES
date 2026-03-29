@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT — Print & Event Templates (H4)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --base: #F5F6F8; --card: #FFFFFF; --border: #D8DCE5;
+  --text: #1A2332; --text-secondary: #4A5568; --text-muted: #8494A7;
+  --action: #1A5276; --accent: #C4922A; --danger: #B03A3A;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', system-ui, sans-serif; background: #E8E9EC; color: var(--text); padding: 40px; }
+
+h1.page-title { font-family: 'Playfair Display', Georgia, serif; font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.page-subtitle { text-align: center; color: var(--text-secondary); font-size: 0.875rem; margin-bottom: 48px; }
+.template-section { margin-bottom: 64px; }
+.template-section > h2 { font-family: 'Playfair Display', Georgia, serif; font-size: 1.25rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.template-section > p.desc { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 24px; }
+
+/* ================================================================
+   TEMPLATE 1: NAME BADGE (86mm × 54mm — standard badge size)
+   ================================================================ */
+.badge-row { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+.badge {
+  width: 320px; height: 200px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.badge-stripe { height: 8px; }
+.badge-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 20px; text-align: center; }
+.badge-emblem { width: 36px; height: 36px; border-radius: 50%; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1rem; }
+.badge-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+.badge-title { font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px; }
+.badge-country { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 6px; }
+.badge-footer { padding: 6px 0; text-align: center; font-size: 0.6rem; color: var(--text-muted); border-top: 1px solid #F0F2F5; }
+
+/* ================================================================
+   TEMPLATE 2: TABLE SIGN (tent card — landscape, folded)
+   ================================================================ */
+.table-sign {
+  width: 400px; height: 180px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.table-sign-stripe { height: 6px; }
+.table-sign-content {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px;
+  padding: 16px 24px;
+}
+.table-sign-emblem {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.3rem;
+  flex-shrink: 0;
+}
+.table-sign-text { text-align: left; }
+.table-sign-name { font-family: 'Playfair Display', Georgia, serif; font-size: 1.6rem; font-weight: 700; color: var(--text); }
+.table-sign-role { font-size: 0.85rem; color: var(--text-secondary); }
+.table-sign-country { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+/* ================================================================
+   TEMPLATE 3: SCHEDULE BOARD (round timeline)
+   ================================================================ */
+.schedule {
+  max-width: 700px; margin: 0 auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.schedule-header {
+  background: #1A2332; color: #fff; padding: 20px 28px;
+  text-align: center;
+}
+.schedule-title { font-family: 'Playfair Display', Georgia, serif; font-size: 1.4rem; font-weight: 700; }
+.schedule-day { font-size: 0.8rem; color: #7A8FA3; margin-top: 4px; }
+.schedule-body { padding: 0; }
+.schedule-row {
+  display: flex; align-items: stretch;
+  border-bottom: 1px solid #F0F2F5;
+}
+.schedule-row:last-child { border-bottom: none; }
+.schedule-time {
+  width: 100px; flex-shrink: 0;
+  padding: 12px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem; font-weight: 500;
+  color: var(--text-secondary);
+  background: #FAFBFC;
+  border-right: 1px solid #F0F2F5;
+  display: flex; align-items: center;
+}
+.schedule-event { flex: 1; padding: 12px 16px; }
+.schedule-event-name { font-weight: 600; font-size: 0.9rem; color: var(--text); }
+.schedule-event-detail { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+.schedule-row.highlight { background: #FFF8E8; }
+.schedule-row.highlight .schedule-time { background: #FFF3D5; }
+.schedule-row.highlight .schedule-event-name { color: var(--accent); }
+.schedule-row.break { opacity: 0.6; }
+.schedule-row.break .schedule-event-name { font-style: italic; font-weight: 400; }
+
+/* ================================================================
+   TEMPLATE 4: ROLE BRIEF COVER
+   ================================================================ */
+.brief-cover {
+  width: 500px; height: 700px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  page-break-inside: avoid;
+}
+.brief-cover-stripe { height: 10px; }
+.brief-cover-body {
+  flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  padding: 48px 40px; text-align: center;
+}
+.brief-cover-emblem {
+  width: 80px; height: 80px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 2rem;
+  margin-bottom: 24px;
+}
+.brief-cover-character {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2.5rem; font-weight: 700; color: var(--text);
+  line-height: 1.1;
+}
+.brief-cover-title {
+  font-size: 1.1rem; color: var(--text-secondary);
+  margin-top: 8px;
+}
+.brief-cover-country {
+  font-size: 0.85rem; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-top: 16px;
+}
+.brief-cover-classification {
+  margin-top: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem; letter-spacing: 2px;
+  padding: 4px 12px;
+  border-radius: 2px;
+}
+.brief-cover-classification.country { color: var(--warning); border: 1px solid var(--warning); }
+.brief-cover-classification.role { color: var(--danger); border: 1px solid var(--danger); }
+.brief-cover-footer {
+  padding: 16px 24px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.brief-cover-sim {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);
+}
+.brief-cover-logo { font-size: 0.65rem; color: var(--text-muted); }
+
+/* ================================================================
+   TEMPLATE 5: DECISION FORM (quick-reference action card)
+   ================================================================ */
+.decision-form {
+  max-width: 500px; margin: 0 auto;
+  background: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.decision-form-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+}
+.decision-form-icon {
+  width: 32px; height: 32px; border-radius: 6px;
+  background: var(--action); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: 700;
+}
+.decision-form-title { font-weight: 600; font-size: 1rem; color: var(--text); }
+.decision-form-subtitle { font-size: 0.75rem; color: var(--text-muted); }
+.decision-form-body { padding: 16px 24px; }
+.form-field { margin-bottom: 14px; }
+.form-label { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.form-input {
+  width: 100%; padding: 8px 12px;
+  border: 1px solid var(--border); border-radius: 4px;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem;
+  background: #FAFBFC;
+}
+.form-hint { font-size: 0.7rem; color: var(--text-muted); margin-top: 2px; }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-field { flex: 1; }
+.decision-form-footer {
+  padding: 12px 24px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.form-deadline { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--danger); }
+.form-auth { font-size: 0.7rem; color: var(--text-muted); }
+
+@media print {
+  body { background: #fff; padding: 0; }
+  .template-section > h2, .template-section > p.desc, h1.page-title, .page-subtitle { display: none; }
+  .badge, .table-sign, .schedule, .brief-cover, .decision-form {
+    box-shadow: none; page-break-inside: avoid;
+  }
+  .badge-row { page-break-after: always; }
+  .brief-cover { page-break-after: always; }
+}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">PRINT & EVENT TEMPLATES</h1>
+<p class="page-subtitle">H4 — Production templates for physical SIM materials. All use H1 UX Style system.</p>
+
+<!-- ================================================================
+     TEMPLATE 1: NAME BADGES
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 1 — Name Badges</h2>
+  <p class="desc">Standard badge size (86×54mm equivalent). Country color stripe. Character name prominent. Print double-sided with lanyard slot.</p>
+
+  <div class="badge-row">
+    <div class="badge">
+      <div class="badge-stripe" style="background: #3A6B9F;"></div>
+      <div class="badge-content">
+        <div class="badge-emblem" style="background: #3A6B9F;">D</div>
+        <div class="badge-name">Dealer</div>
+        <div class="badge-title">President of Columbia</div>
+        <div class="badge-country">Columbia</div>
+      </div>
+      <div class="badge-footer">THE THUCYDIDES TRAP — MetaGames</div>
+    </div>
+
+    <div class="badge">
+      <div class="badge-stripe" style="background: #C4A030;"></div>
+      <div class="badge-content">
+        <div class="badge-emblem" style="background: #C4A030;">H</div>
+        <div class="badge-name">Helmsman</div>
+        <div class="badge-title">Chairman of Cathay</div>
+        <div class="badge-country">Cathay</div>
+      </div>
+      <div class="badge-footer">THE THUCYDIDES TRAP — MetaGames</div>
+    </div>
+
+    <div class="badge">
+      <div class="badge-stripe" style="background: #5A9A5A;"></div>
+      <div class="badge-content">
+        <div class="badge-emblem" style="background: #5A9A5A;">B</div>
+        <div class="badge-name">Beacon</div>
+        <div class="badge-title">President of Heartland</div>
+        <div class="badge-country">Heartland</div>
+      </div>
+      <div class="badge-footer">THE THUCYDIDES TRAP — MetaGames</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 2: TABLE SIGN
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 2 — Table Sign (Tent Card)</h2>
+  <p class="desc">Folded tent card for negotiation tables. Country emblem + character name visible from across the room.</p>
+
+  <div class="table-sign">
+    <div class="table-sign-stripe" style="background: #A06060;"></div>
+    <div class="table-sign-content">
+      <div class="table-sign-emblem" style="background: #A06060;">P</div>
+      <div class="table-sign-text">
+        <div class="table-sign-name">Pathfinder</div>
+        <div class="table-sign-role">President of Nordostan</div>
+        <div class="table-sign-country">Nordostan</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 3: SCHEDULE BOARD
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 3 — Schedule Board</h2>
+  <p class="desc">Posted in the main room. Current round highlighted in gold. Updated by moderator each round.</p>
+
+  <div class="schedule">
+    <div class="schedule-header">
+      <div class="schedule-title">THE THUCYDIDES TRAP</div>
+      <div class="schedule-day">Day 1 — Rounds 1 through 4</div>
+    </div>
+    <div class="schedule-body">
+      <div class="schedule-row">
+        <div class="schedule-time">09:00</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Check-in & World Briefing</div>
+          <div class="schedule-event-detail">Rules, role distribution, Q&A — 45 min</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">09:45</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Read Briefs & Talk to Argus</div>
+          <div class="schedule-event-detail">Set personal goals, prepare strategy — 30 min</div>
+        </div>
+      </div>
+      <div class="schedule-row highlight">
+        <div class="schedule-time">10:15</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">ROUND 1 — H2 2026</div>
+          <div class="schedule-event-detail">80 min negotiation + 10 min submissions</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">11:45</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">World Update R1</div>
+          <div class="schedule-event-detail">Engine results + deployment window — 15 min</div>
+        </div>
+      </div>
+      <div class="schedule-row highlight">
+        <div class="schedule-time">12:00</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">ROUND 2 — H1 2027</div>
+          <div class="schedule-event-detail">75 min negotiation + Columbia mid-term elections</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">13:25</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">World Update R2</div>
+          <div class="schedule-event-detail">Mid-term results announced — 15 min</div>
+        </div>
+      </div>
+      <div class="schedule-row break">
+        <div class="schedule-time">13:40</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Lunch — stay in role</div>
+          <div class="schedule-event-detail">The lunch table is a negotiation venue — 50 min</div>
+        </div>
+      </div>
+      <div class="schedule-row highlight">
+        <div class="schedule-time">14:30</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">ROUND 3 — H2 2027</div>
+          <div class="schedule-event-detail">65 min + UNGA vote + Heartland election</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">15:50</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">World Update R3</div>
+          <div class="schedule-event-detail">15 min</div>
+        </div>
+      </div>
+      <div class="schedule-row break">
+        <div class="schedule-time">16:05</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Break</div>
+          <div class="schedule-event-detail">15 min</div>
+        </div>
+      </div>
+      <div class="schedule-row highlight">
+        <div class="schedule-time">16:20</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">ROUND 4 — H1 2028</div>
+          <div class="schedule-event-detail">60 min negotiation — halfway point</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">17:35</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Extended World Update R4</div>
+          <div class="schedule-event-detail">"State of the world at the halfway point" — 15 min</div>
+        </div>
+      </div>
+      <div class="schedule-row">
+        <div class="schedule-time">17:50</div>
+        <div class="schedule-event">
+          <div class="schedule-event-name">Press Conference & Day Close</div>
+          <div class="schedule-event-detail">SIM pauses — stay in role until tomorrow — 10 min</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 4: ROLE BRIEF COVER
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 4 — Role Brief Cover</h2>
+  <p class="desc">Front page of the physical role pack. Country-branded. Classification level visible. Handed to participant at check-in.</p>
+
+  <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+    <div class="brief-cover">
+      <div class="brief-cover-stripe" style="background: #3A6B9F;"></div>
+      <div class="brief-cover-body">
+        <div class="brief-cover-emblem" style="background: #3A6B9F;">D</div>
+        <div class="brief-cover-character">Dealer</div>
+        <div class="brief-cover-title">President of Columbia</div>
+        <div class="brief-cover-country">Columbia</div>
+        <div class="brief-cover-classification role">ROLE — EYES ONLY</div>
+      </div>
+      <div class="brief-cover-footer">
+        <span class="brief-cover-sim">The Thucydides Trap</span>
+        <span class="brief-cover-logo">MetaGames</span>
+      </div>
+    </div>
+
+    <div class="brief-cover">
+      <div class="brief-cover-stripe" style="background: #9A7040;"></div>
+      <div class="brief-cover-body">
+        <div class="brief-cover-emblem" style="background: #9A7040;">A</div>
+        <div class="brief-cover-character">Anvil</div>
+        <div class="brief-cover-title">IRGC Commander</div>
+        <div class="brief-cover-country">Persia</div>
+        <div class="brief-cover-classification role">ROLE — EYES ONLY</div>
+      </div>
+      <div class="brief-cover-footer">
+        <span class="brief-cover-sim">The Thucydides Trap</span>
+        <span class="brief-cover-logo">MetaGames</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 5: DECISION FORM (quick-reference card)
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 5 — Decision Form</h2>
+  <p class="desc">Quick-reference card for common actions. Can be printed as physical handout or rendered in web app. Shows what to fill in, authorization needed, deadline.</p>
+
+  <div class="decision-form">
+    <div class="decision-form-header">
+      <div class="decision-form-icon">$</div>
+      <div>
+        <div class="decision-form-title">Budget Allocation</div>
+        <div class="decision-form-subtitle">Submit before end of round — defaults apply if missed</div>
+      </div>
+    </div>
+    <div class="decision-form-body">
+      <div class="form-field">
+        <div class="form-label">Revenue This Round</div>
+        <div class="form-input" style="background: #F5F6F8; color: var(--text-muted);">42 coins (auto-calculated)</div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <div class="form-label">Social Spending %</div>
+          <div class="form-input">____</div>
+          <div class="form-hint">Baseline: 30%. Below → stability risk.</div>
+        </div>
+        <div class="form-field">
+          <div class="form-label">Ground Production %</div>
+          <div class="form-input">____</div>
+          <div class="form-hint">Cost: 3 coins/unit</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <div class="form-label">Naval Production %</div>
+          <div class="form-input">____</div>
+          <div class="form-hint">Cost: 5 coins/unit</div>
+        </div>
+        <div class="form-field">
+          <div class="form-label">Tech R&D %</div>
+          <div class="form-input">____</div>
+          <div class="form-hint">Nuclear or AI track</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-field">
+          <div class="form-label">Reserves %</div>
+          <div class="form-input">____</div>
+          <div class="form-hint">Added to treasury</div>
+        </div>
+        <div class="form-field">
+          <div class="form-label">Total</div>
+          <div class="form-input" style="font-weight: 700;">Must = 100%</div>
+        </div>
+      </div>
+    </div>
+    <div class="decision-form-footer">
+      <span class="form-deadline">DEADLINE: End of round</span>
+      <span class="form-auth">Authorization: Head of State</span>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

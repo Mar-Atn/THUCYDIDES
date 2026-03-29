@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT — Artefact Templates (H3)</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   BASE STYLES — from H1 UX Style Guide
+   ================================================================ */
+:root {
+  --base: #F5F6F8;
+  --card: #FFFFFF;
+  --border: #D8DCE5;
+  --text: #1A2332;
+  --text-secondary: #4A5568;
+  --text-muted: #8494A7;
+  --action: #1A5276;
+  --accent: #C4922A;
+  --success: #2E7D4F;
+  --warning: #B8762E;
+  --danger: #B03A3A;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  background: #E8E9EC;
+  color: var(--text);
+  padding: 40px;
+}
+
+h1.page-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text);
+  text-align: center;
+  margin-bottom: 8px;
+}
+.page-subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 48px;
+}
+
+.template-section {
+  margin-bottom: 64px;
+}
+.template-section > h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.template-section > p.desc {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  margin-bottom: 24px;
+}
+
+/* ================================================================
+   ARTEFACT 1: CLASSIFIED INTELLIGENCE REPORT
+   ================================================================ */
+.intel-report {
+  background: var(--card);
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.intel-header {
+  background: #1A2332;
+  color: #D4DEE8;
+  padding: 20px 28px 16px;
+}
+.intel-classification {
+  display: inline-block;
+  background: var(--danger);
+  color: #fff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 3px 10px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+.intel-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 4px;
+}
+.intel-subtitle {
+  font-size: 0.85rem;
+  color: #7A8FA3;
+}
+.intel-meta {
+  display: flex;
+  gap: 24px;
+  padding: 12px 28px;
+  background: #F0F2F5;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.intel-meta-item { display: flex; flex-direction: column; }
+.intel-meta-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.65rem; color: var(--text-muted); margin-bottom: 2px; }
+.intel-meta-value { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text); }
+.intel-body {
+  padding: 24px 28px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text);
+}
+.intel-body h3 {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--action);
+  margin: 20px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #E8EBF0;
+}
+.intel-body h3:first-child { margin-top: 0; }
+.intel-body p { margin-bottom: 10px; }
+.intel-body .highlight {
+  background: #FFF8E8;
+  border-left: 3px solid var(--accent);
+  padding: 8px 12px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+}
+.intel-footer {
+  padding: 12px 28px;
+  background: #F0F2F5;
+  border-top: 1px solid var(--border);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ================================================================
+   ARTEFACT 2: DIPLOMATIC CABLE / TELEGRAM
+   ================================================================ */
+.cable {
+  background: #FFFFF5;
+  max-width: 620px;
+  margin: 0 auto;
+  border: 2px solid #C8C0A0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.cable-header {
+  padding: 16px 24px 12px;
+  border-bottom: 2px solid #C8C0A0;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cable-routing {
+  font-size: 0.7rem;
+  color: #8A7A60;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.cable-priority {
+  display: inline-block;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+.cable-priority.routine { background: var(--text-muted); }
+.cable-priority.confidential { background: var(--warning); }
+.cable-priority.secret { background: var(--danger); }
+.cable-fields {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  line-height: 1.8;
+}
+.cable-field-label { color: #8A7A60; font-weight: 500; }
+.cable-field-value { color: var(--text); }
+.cable-body {
+  padding: 20px 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.cable-body .para-num {
+  color: #8A7A60;
+  font-size: 0.7rem;
+  margin-right: 4px;
+}
+.cable-footer {
+  padding: 10px 24px;
+  border-top: 2px solid #C8C0A0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #8A7A60;
+}
+
+/* ================================================================
+   ARTEFACT 3: PERSONAL LETTER / EMAIL
+   ================================================================ */
+.letter {
+  background: var(--card);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 36px 40px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.letter-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.letter-from {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.letter-from-title {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.letter-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.letter-body {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+.letter-body p { margin-bottom: 12px; }
+.letter-body .salutation {
+  font-style: italic;
+  margin-bottom: 16px;
+}
+.letter-body .closing {
+  margin-top: 24px;
+  font-style: italic;
+}
+.letter-body .signature {
+  margin-top: 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.letter-classification {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  padding: 2px 8px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+
+/* ================================================================
+   ARTEFACT 4: PRESS REPORT / NEWS BULLETIN
+   ================================================================ */
+.press {
+  background: var(--card);
+  max-width: 660px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.press-masthead {
+  text-align: center;
+  padding: 16px 24px 12px;
+  border-bottom: 3px double var(--text);
+}
+.press-name {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+.press-tagline {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.press-date-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 24px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-family: 'JetBrains Mono', monospace;
+}
+.press-headline {
+  padding: 20px 24px 8px;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+.press-byline {
+  padding: 0 24px 16px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.press-body {
+  padding: 0 24px 24px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text);
+  column-count: 2;
+  column-gap: 24px;
+  column-rule: 1px solid var(--border);
+}
+.press-body p { margin-bottom: 10px; }
+.press-body .lead { font-weight: 600; }
+
+/* ================================================================
+   ARTEFACT 5: BRIEFING DOCUMENT
+   ================================================================ */
+.briefing {
+  background: var(--card);
+  max-width: 680px;
+  margin: 0 auto;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  page-break-inside: avoid;
+}
+.briefing-stripe {
+  height: 6px;
+  /* Country color — set inline */
+}
+.briefing-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.briefing-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.briefing-badge .dot {
+  width: 10px; height: 10px; border-radius: 50%;
+}
+.briefing-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.briefing-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+.briefing-body {
+  padding: 20px 28px 28px;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.briefing-body h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--action);
+  margin: 20px 0 8px;
+}
+.briefing-body h3:first-child { margin-top: 0; }
+.briefing-body p { margin-bottom: 10px; }
+.briefing-body table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0;
+  font-size: 0.8rem;
+}
+.briefing-body th {
+  text-align: left;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-bottom: 2px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.briefing-body td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #F0F2F5;
+}
+.briefing-body .data {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+
+/* ================================================================
+   PRINT STYLES
+   ================================================================ */
+@media print {
+  body { background: #fff; padding: 0; }
+  .template-section > h2, .template-section > p.desc, h1.page-title, .page-subtitle { display: none; }
+  .intel-report, .cable, .letter, .press, .briefing {
+    box-shadow: none;
+    page-break-inside: avoid;
+    page-break-after: always;
+    margin: 0;
+    max-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+
+<h1 class="page-title">ARTEFACT TEMPLATES</h1>
+<p class="page-subtitle">H3 — Five template types for role pack documents. Fill with scenario content.</p>
+
+<!-- ================================================================
+     TEMPLATE 1: CLASSIFIED INTELLIGENCE REPORT
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 1 — Classified Intelligence Report</h2>
+  <p class="desc">Used for: spy agency assessments, military intelligence, threat analyses. Included in military/intelligence role packs.</p>
+
+  <div class="intel-report">
+    <div class="intel-header">
+      <div class="intel-classification">TOP SECRET // ROLE ONLY</div>
+      <div class="intel-title">Assessment: Cathay Naval Buildup — Pacific Theater Implications</div>
+      <div class="intel-subtitle">Directorate of Strategic Analysis — Columbia Intelligence Service</div>
+    </div>
+    <div class="intel-meta">
+      <div class="intel-meta-item">
+        <span class="intel-meta-label">Date</span>
+        <span class="intel-meta-value">H2 2026 (R1)</span>
+      </div>
+      <div class="intel-meta-item">
+        <span class="intel-meta-label">Clearance</span>
+        <span class="intel-meta-value">SHIELD, SHADOW only</span>
+      </div>
+      <div class="intel-meta-item">
+        <span class="intel-meta-label">Source Reliability</span>
+        <span class="intel-meta-value">B — Usually Reliable</span>
+      </div>
+      <div class="intel-meta-item">
+        <span class="intel-meta-label">Reference</span>
+        <span class="intel-meta-value">CIS-2026-0847</span>
+      </div>
+    </div>
+    <div class="intel-body">
+      <h3>Key Judgments</h3>
+      <p>Cathay's naval expansion continues to exceed previous estimates. Current force projection capability has reached 7 capital naval groups, with shipyard capacity supporting +1 group per 6-month cycle. At current rates, parity with Columbia Pacific Fleet will be achieved by H1 2028.</p>
+
+      <div class="highlight">
+        <strong>CRITICAL:</strong> Satellite imagery confirms three new drydock facilities at [REDACTED] capable of simultaneous capital ship construction. This was not in previous assessments.
+      </div>
+
+      <h3>Formosa Strait Assessment</h3>
+      <p>PLA exercises in December 2025 demonstrated a new amphibious assault doctrine incorporating drone swarms for shore suppression. If executed against Formosa, current defensive deployments would face a 3:1 disadvantage within 72 hours of offensive initiation.</p>
+      <p>However, recent PLA command purges have degraded operational readiness. An estimated 36 senior officers have been removed since 2022, including the CMC Vice Chairman. The new Rampart has no combat command experience.</p>
+
+      <h3>Recommended Actions</h3>
+      <p>1. Accelerate Pacific Fleet rotation schedule to maintain visible presence.<br>
+      2. Propose joint exercises with Yamato and Hanguk in Formosa Strait approaches.<br>
+      3. Brief Dealer on revised timeline — current "2029 crossover" estimate should be moved to 2028.</p>
+    </div>
+    <div class="intel-footer">
+      <span>CIS-2026-0847 | Page 1 of 1</span>
+      <span>TOP SECRET // ROLE ONLY — Do not distribute</span>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 2: DIPLOMATIC CABLE / TELEGRAM
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 2 — Diplomatic Cable</h2>
+  <p class="desc">Used for: embassy communications, backchannel messages, foreign ministry dispatches. Telegram aesthetic.</p>
+
+  <div class="cable">
+    <div class="cable-header">
+      <div class="cable-routing">DIPLOMATIC CABLE — ENCRYPTED CHANNEL</div>
+      <span class="cable-priority secret">SECRET</span>
+      <div class="cable-fields">
+        <span class="cable-field-label">FROM:</span> <span class="cable-field-value">EMBASSY SOLARIA — AMBASSADOR'S OFFICE</span><br>
+        <span class="cable-field-label">TO:</span> <span class="cable-field-value">ANCHOR — SECRETARY OF STATE, COLUMBIA</span><br>
+        <span class="cable-field-label">DATE:</span> <span class="cable-field-value">H2 2026 (PRE-ROUND 1)</span><br>
+        <span class="cable-field-label">SUBJECT:</span> <span class="cable-field-value">WELLSPRING PRIVATE REMARKS RE: BRICS+ CURRENCY</span>
+      </div>
+    </div>
+    <div class="cable-body"><span class="para-num">1.</span> During private dinner at Crown Prince's residence on [DATE], Wellspring made the following remarks to Ambassador, apparently unprompted:
+
+<span class="para-num">2.</span> QUOTE: "The dollar has been good to us. But when your president threatens to freeze our assets every time we disagree on oil prices, you make the alternative look attractive. I don't WANT a BRICS currency. But I need your people to understand that I CAN want one." END QUOTE.
+
+<span class="para-num">3.</span> Assessment: Wellspring is signaling, not committing. He wants concessions — likely on the F-35 delivery timeline and the pending arms package — in exchange for continued dollar loyalty. Recommend we use this as leverage in the Round 1 bilateral, not as a threat indicator.
+
+<span class="para-num">4.</span> Wellspring separately asked whether Dealer would consider a personal summit "somewhere warm" in the first half-year. Suggest this be offered — it costs nothing and flatters.</div>
+    <div class="cable-footer">
+      CABLE REF: COL-SOL-2026-0093 | DECRYPT: ANCHOR EYES ONLY
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 3: PERSONAL LETTER / EMAIL
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 3 — Personal Letter</h2>
+  <p class="desc">Used for: private communications between leaders, personal appeals, back-channel proposals. Handwritten feel.</p>
+
+  <div class="letter">
+    <div class="letter-header">
+      <div class="letter-classification">PRIVATE — EYES ONLY</div>
+      <div class="letter-from">Broker</div>
+      <div class="letter-from-title">Former President of Heartland</div>
+      <div class="letter-date">June 2026 — delivered by personal courier</div>
+    </div>
+    <div class="letter-body">
+      <p class="salutation">Dear Chancellor Forge,</p>
+
+      <p>I write to you not as a politician seeking advantage, but as someone who has watched his country bleed for three years and believes there is another way.</p>
+
+      <p>You know my position. Beacon will fight until there is nothing left to fight for — and the army will follow Bulwark, not him. The election will come in months, not years. When it does, Heartland will have a new leader. Whether that leader pursues war or peace depends on what Europe offers in the next six months.</p>
+
+      <p>I am asking for one thing: a clear signal that EU accession remains on the table. Not a promise — I know you cannot promise. A signal. A meeting in Brussels. A joint statement. Something I can show my people that says: there is a future beyond this war, and Europe is part of it.</p>
+
+      <p>If that signal comes, I can build a coalition for negotiation. If it doesn't, Bulwark wins, and the war goes on until there's nothing left to integrate into your Union.</p>
+
+      <p>You have my number. I'll be in Warsaw next week.</p>
+
+      <p class="closing">With respect and urgency,</p>
+      <p class="signature">Broker</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 4: PRESS REPORT / NEWS BULLETIN
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 4 — Press Report</h2>
+  <p class="desc">Used for: news bulletins, press releases, public information. Distributed to all participants or specific audiences.</p>
+
+  <div class="press">
+    <div class="press-masthead">
+      <div class="press-name">THE GLOBAL DISPATCH</div>
+      <div class="press-tagline">Independent Reporting from the World's Capitals</div>
+    </div>
+    <div class="press-date-bar">
+      <span>Vol. XLII No. 7</span>
+      <span>H2 2026</span>
+      <span>PUBLIC</span>
+    </div>
+    <div class="press-headline">Gulf Gate Crisis Enters Fourth Month as Oil Tops $140</div>
+    <div class="press-byline">Global Dispatch Staff — Muscat Bureau</div>
+    <div class="press-body">
+      <p class="lead">The Persian blockade of the Gulf Gate shipping lane has now lasted four months, pushing Brent crude past $140 per barrel and triggering emergency energy summits across three continents.</p>
+
+      <p>OPEC+ members convened in Riyadh last week but failed to agree on a coordinated response. Wellspring proposed a production increase to compensate for lost Persian exports; Cathay's Abacus offered to release strategic reserves. Neither measure passed.</p>
+
+      <p>In Columbia, the economic impact is becoming political. Tribune introduced a resolution demanding the administration present a plan to reopen the Gulf Gate within 90 days. "We cannot fight a war in Persia and pretend the gas pump doesn't exist," Tribune told reporters.</p>
+
+      <p>Military analysts estimate that breaking the blockade would require ground forces — air power alone cannot neutralize Persia's coastal missile batteries. Shield has reportedly presented Dealer with three options, none of which can be executed before Round 2.</p>
+
+      <p>Meanwhile, countries with overland oil supply routes — notably Cathay, which receives 48% of Persia's exports via pipeline — are largely insulated. "The Gulf Gate crisis is a Western problem," one Cathay diplomat remarked privately. "We send our condolences."</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     TEMPLATE 5: COUNTRY BRIEFING DOCUMENT
+     ================================================================ -->
+<div class="template-section">
+  <h2>Template 5 — Country Briefing</h2>
+  <p class="desc">Used for: role pack cover documents, country situation summaries, round-start briefings. Country-branded.</p>
+
+  <div class="briefing">
+    <div class="briefing-stripe" style="background: #5A9A5A;"></div>
+    <div class="briefing-header">
+      <div class="briefing-badge">
+        <div class="dot" style="background: #5A9A5A;"></div>
+        HEARTLAND — SITUATION BRIEFING
+      </div>
+      <div class="briefing-title">The War at a Crossroads</div>
+      <div class="briefing-subtitle">Opening briefing for the Heartland team — H2 2026</div>
+    </div>
+    <div class="briefing-body">
+      <h3>Your Situation</h3>
+      <p>Three years of war. The front line has not moved meaningfully in eighteen months. Your economy survives on Columbia's weapons and Europe's money. Your president's approval is falling. Your most popular general has been fired and is running against him. A peace plan you didn't write is circulating in capitals you weren't invited to.</p>
+
+      <h3>Key Numbers</h3>
+      <table>
+        <tr><th>Indicator</th><th>Value</th><th>Trend</th></tr>
+        <tr><td>GDP</td><td class="data">45 coins</td><td>Declining (war damage)</td></tr>
+        <tr><td>Military — Ground</td><td class="data">18 units</td><td>Stable (Columbia resupply)</td></tr>
+        <tr><td>Stability</td><td class="data">6 / 10</td><td>At risk</td></tr>
+        <tr><td>Presidential Approval</td><td class="data">52%</td><td>Falling</td></tr>
+        <tr><td>War Tiredness</td><td class="data">3 / 10</td><td>Rising</td></tr>
+      </table>
+
+      <h3>Your Three Paths</h3>
+      <p><strong>Beacon's path:</strong> Continue the resistance. Hold the line. Wait for Nordostan to crack under sanctions. Risk: the election comes before Nordostan does.</p>
+      <p><strong>Bulwark's path:</strong> Fight harder. Win the election. Take command back. Counteroffensive. Risk: Columbia may not fund escalation, and you have no reserves.</p>
+      <p><strong>Broker's path:</strong> Negotiate. EU integration as the prize. Accept losses for a future. Risk: Nordostan keeps what it took, and your people call it surrender.</p>
+
+      <h3>What You Need to Decide</h3>
+      <p>Before the first round ends, your team must align — or not — on which path you're pursuing. The world will respond to your signal. If you look divided, allies hedge. If you look unified, you have leverage. Choose carefully.</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT Emblem Options — 21 Countries × 3 Styles</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --base: #F5F6F8;
+    --base-mid: #EBEDF2;
+    --text: #1A2332;
+    --text-secondary: #4A5568;
+    --action: #1A5276;
+    --accent: #C4922A;
+    --card: #FFFFFF;
+    --border: #D8DCE5;
+    --danger: #C0392B;
+    --success: #2ECC71;
+    --water: #D4E4F0;
+    --water-opacity: 0.4;
+    --hex-opacity: 0.55;
+    --label-color: #1A2332;
+    --label-opacity: 0.7;
+    --nav-shadow: rgba(0,0,0,0.06);
+  }
+  :root.dark-theme {
+    --base: #0D1B2A;
+    --base-mid: #1B2A3E;
+    --text: #D4DEE8;
+    --text-secondary: #7A8FA3;
+    --action: #5B9BD5;
+    --accent: #E8B84D;
+    --card: #1B2A3E;
+    --border: #253D54;
+    --danger: #D45B5B;
+    --success: #5BAD7A;
+    --water: #1B2A3E;
+    --water-opacity: 0.6;
+    --hex-opacity: 0.65;
+    --label-color: #D4DEE8;
+    --label-opacity: 0.8;
+    --nav-shadow: rgba(0,0,0,0.3);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--base);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  h1, h2, h3, h4 { font-family: 'Playfair Display', serif; color: var(--text); }
+  h1 { font-size: 2rem; font-weight: 700; }
+  h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; }
+  h3 { font-size: 1.15rem; font-weight: 600; margin-bottom: 0.75rem; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Sticky Nav */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--card); border-bottom: 1px solid var(--border);
+    padding: 12px 32px; display: flex; align-items: center; gap: 32px;
+    box-shadow: 0 1px 4px var(--nav-shadow);
+  }
+  nav .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: var(--action); }
+  nav a { color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 13px; letter-spacing: 0.5px; text-transform: uppercase; }
+  nav a:hover { color: var(--action); }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 32px; }
+  .section { margin-bottom: 64px; }
+  .section-header {
+    border-bottom: 2px solid var(--action); padding-bottom: 8px; margin-bottom: 24px;
+  }
+  .style-label {
+    display: inline-block; padding: 4px 12px; border-radius: 4px; font-size: 11px;
+    font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #fff;
+    margin-bottom: 12px;
+  }
+  .style-1-label { background: var(--action); }
+  .style-2-label { background: #7D5A3C; }
+  .style-3-label { background: #5B4A8A; }
+
+  /* Emblem Grid */
+  .emblem-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 16px;
+  }
+  .emblem-cell {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 8px; text-align: center; transition: box-shadow 0.2s;
+  }
+  .emblem-cell:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .emblem-cell .name { font-size: 11px; font-weight: 600; margin-top: 6px; }
+  .emblem-cell .bloc { font-size: 9px; color: var(--text-secondary); }
+  .emblem-cell .color-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; vertical-align: middle;
+  }
+
+  .three-up {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 24px; margin-bottom: 32px;
+  }
+
+  /* Size comparison */
+  .size-row { display: flex; align-items: flex-end; gap: 24px; margin-bottom: 16px; padding: 16px; background: var(--card); border-radius: 8px; border: 1px solid var(--border); }
+  .size-item { text-align: center; }
+  .size-item .label { font-size: 10px; color: var(--text-secondary); margin-top: 4px; }
+
+  /* Document Samples */
+  .doc-sample {
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    overflow: hidden;
+  }
+
+  /* Role Brief Cover */
+  .role-brief {
+    width: 100%; aspect-ratio: 210/297; position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px; text-align: center;
+  }
+  .role-brief .color-stripe { position: absolute; top: 0; left: 0; right: 0; height: 6px; }
+  .role-brief .classified {
+    position: absolute; top: 20px; font-size: 10px; font-weight: 700;
+    letter-spacing: 2px; color: var(--danger); text-transform: uppercase;
+  }
+  .role-brief .emblem-wrap { margin-bottom: 16px; }
+  .role-brief .role-name { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  .role-brief .role-title { font-size: 0.95rem; color: var(--text-secondary); }
+
+  /* Badge Row */
+  .badge-row { display: flex; gap: 12px; padding: 16px; flex-wrap: wrap; }
+  .country-badge {
+    display: flex; align-items: center; gap: 8px; padding: 6px 14px 6px 8px;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+  }
+
+  /* Status Table */
+  .status-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .status-table th { background: var(--action); color: #fff; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .status-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .status-table .mono { font-size: 12px; }
+
+  /* Name Badge */
+  .name-badge {
+    width: 260px; height: 160px; border-radius: 8px; overflow: hidden;
+    background: var(--card); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center;
+  }
+  .name-badge .top-band { width: 100%; height: 8px; }
+  .name-badge .badge-content { padding: 12px; text-align: center; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .name-badge .char-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; margin-top: 8px; }
+  .name-badge .char-title { font-size: 11px; color: var(--text-secondary); }
+
+  .versions-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* Theme Toggle Button */
+  .theme-toggle {
+    margin-left: auto;
+    padding: 6px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+  }
+  .theme-toggle:hover { border-color: var(--action); color: var(--action); }
+
+  /* Map Theme Toggle */
+  .map-toggle-bar {
+    display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+  }
+  .map-toggle-btn {
+    padding: 5px 14px; border-radius: 5px; border: 1px solid var(--border);
+    background: var(--card); color: var(--text-secondary); font-size: 11px;
+    font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .map-toggle-btn.active { background: var(--action); color: #fff; border-color: var(--action); }
+  .map-toggle-btn:hover:not(.active) { border-color: var(--action); color: var(--action); }
+
+  /* Theme Comparison Section */
+  .compare-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px;
+  }
+  .compare-col-header {
+    font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600;
+    text-align: center; padding: 10px; border-radius: 8px 8px 0 0;
+    letter-spacing: 0.5px;
+  }
+  .compare-panel {
+    border-radius: 8px; overflow: hidden; border: 1px solid;
+  }
+  .compare-panel-light { border-color: #D8DCE5; }
+  .compare-panel-dark { border-color: #253D54; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">TTT Emblem Options</span>
+  <a href="#emblems">Emblems</a>
+  <a href="#sizes">Sizes</a>
+  <a href="#documents">Documents</a>
+  <a href="#theme-compare">Theme Compare</a>
+  <a href="#warmap">War Map</a>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle-btn">Dark Theme</button>
+</nav>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- SECTION 1: EMBLEM COMPARISON -->
+<!-- ============================================================ -->
+<div class="section" id="emblems">
+  <div class="section-header"><h1>Section 1: Emblem Comparison — 21 Countries × 3 Styles</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">Each country shown with its assigned color. Three distinct styles for comparison. All SVGs at 48×48.</p>
+
+  <!-- STYLE 1: GEOMETRIC -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-1-label">Style 1: Geometric Abstract</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Bauhaus/Isotype-inspired. Pure geometric shapes, 2px stroke, minimal.</p>
+    <div class="emblem-grid" id="grid-geometric"></div>
+  </div>
+
+  <!-- STYLE 2: PHOENICIAN -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-2-label">Style 2: Phoenician Letters</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Actual Phoenician alphabet forms (~1050 BCE). Angular, scratched-in-stone characters.</p>
+    <div class="emblem-grid" id="grid-phoenician"></div>
+  </div>
+
+  <!-- STYLE 3: LINEAR B -->
+  <div style="margin-bottom:40px;">
+    <span class="style-label style-3-label">Style 3: Linear B Ideograms</span>
+    <p style="margin-bottom:16px;color:var(--text-secondary);font-size:13px;">Mycenaean palace pictograms (~1450 BCE). Stylized drawings of real objects.</p>
+    <div class="emblem-grid" id="grid-linearb"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 2: SIZE COMPARISON -->
+<!-- ============================================================ -->
+<div class="section" id="sizes">
+  <div class="section-header"><h1>Section 2: Size Comparison</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">6 key countries at 16px, 24px, 48px, and 96px across all 3 styles.</p>
+  <div id="size-comparison"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 3: DOCUMENT SAMPLES -->
+<!-- ============================================================ -->
+<div class="section" id="documents">
+  <div class="section-header"><h1>Section 3: Document Samples with Emblems</h1></div>
+
+  <!-- Sample A: Role Brief Cover -->
+  <h2 style="margin-top:32px;">Sample A: Role Brief Cover Page</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">A4-proportioned cover for "DEALER — President of Columbia" in each emblem style.</p>
+  <div class="three-up" id="role-briefs"></div>
+
+  <!-- Sample B: Dashboard Badge Row -->
+  <h2 style="margin-top:32px;">Sample B: Dashboard Country Badge Row</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Horizontal badge strips for Columbia, Cathay, Nordostan, Heartland, Persia.</p>
+  <div id="badge-rows"></div>
+
+  <!-- Sample C: Status Table -->
+  <h2 style="margin-top:32px;">Sample C: Status Table</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Data table with inline emblems at 24px.</p>
+  <div class="three-up" id="status-tables"></div>
+
+  <!-- Sample D: Name Badge -->
+  <h2 style="margin-top:32px;">Sample D: Name Badge</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Physical badge card with country color band, emblem, character name, title.</p>
+  <div id="name-badges"></div>
+
+  <!-- Sample E: Web App Participant Dashboard -->
+  <h2 style="margin-top:32px;">Sample E: Web App Participant Dashboard</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Full-width participant dashboard for "DEALER — President of Columbia". Strategic Paper LIGHT theme. Three emblem style variants.</p>
+  <div id="dashboard-samples"></div>
+
+  <!-- Sample F: Presentation Slide — World Briefing -->
+  <h2 style="margin-top:32px;">Sample F: Presentation Slide — World Briefing</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">16:9 dark slide for projected world briefings. Round 3 summary with key metrics, mini map, and event feed.</p>
+  <div id="slide-samples"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 5: THEME COMPARISON — LIGHT vs DARK -->
+<!-- ============================================================ -->
+<div class="section" id="theme-compare">
+  <div class="section-header"><h1>Section 5: Theme Comparison — Strategic Paper vs Midnight Intelligence</h1></div>
+  <p style="margin-bottom:32px;color:var(--text-secondary);">Side-by-side comparison of key document samples in both themes. Left = Light "Strategic Paper", Right = Dark "Midnight Intelligence". All use Style 1 (Geometric) emblems.</p>
+
+  <!-- A: Dashboard -->
+  <h2 style="margin-top:24px;">Dashboard Mockup</h2>
+  <div class="compare-grid" id="compare-dashboard"></div>
+
+  <!-- B: Presentation Slide -->
+  <h2 style="margin-top:24px;">Presentation Slide</h2>
+  <div class="compare-grid" id="compare-slide"></div>
+
+  <!-- C: Role Brief Cover -->
+  <h2 style="margin-top:24px;">Role Brief Cover</h2>
+  <div class="compare-grid" id="compare-rolebrief"></div>
+
+  <!-- D: Name Badge -->
+  <h2 style="margin-top:24px;">Name Badge</h2>
+  <div class="compare-grid" id="compare-badge"></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- SECTION 4: WAR MAP MOCKUP -->
+<!-- ============================================================ -->
+<div class="section" id="warmap">
+  <div class="section-header"><h1>Section 4: War Map Mockup</h1></div>
+  <p style="margin-bottom:24px;color:var(--text-secondary);">Hex grid strategic map using Style 1 (Geometric) emblems. Two views: default strategic overview and crisis highlighting.</p>
+
+  <h2>Selected Military Unit Icons</h2>
+  <p style="color:var(--text-secondary);margin-bottom:16px;">These confirmed icons are used on the maps below. Shown at 32px, 20px, 14px in multiple country colors.</p>
+  <div id="unit-icon-gallery" class="doc-sample" style="padding:24px;margin-bottom:32px;"></div>
+
+  <h2>Global Strategic View</h2>
+  <div class="map-toggle-bar">
+    <span style="font-size:12px;color:var(--text-secondary);font-weight:600;">Map Theme:</span>
+    <button class="map-toggle-btn active" onclick="setMapTheme('light',this)" data-map="strategic">Light</button>
+    <button class="map-toggle-btn" onclick="setMapTheme('dark',this)" data-map="strategic">Dark</button>
+  </div>
+  <div class="doc-sample" style="padding:24px;margin-bottom:32px;" id="map-strategic"></div>
+
+  <h2>Crisis View — Eastern Ereb Theater (Heartland–Nordostan)</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">10×10 theater hex map. Nordostan territory (dusty rose), Heartland territory (soft green), occupied zones (striped). Die Hard position marked. Front line visible.</p>
+  <div class="map-toggle-bar">
+    <span style="font-size:12px;color:var(--text-secondary);font-weight:600;">Map Theme:</span>
+    <button class="map-toggle-btn active" onclick="setMapTheme('light',this)" data-map="theater">Light</button>
+    <button class="map-toggle-btn" onclick="setMapTheme('dark',this)" data-map="theater">Dark</button>
+  </div>
+  <div class="doc-sample" style="padding:24px;margin-bottom:32px;max-width:70%;" id="map-theater"></div>
+
+  <!-- Legend -->
+  <div class="doc-sample" style="padding:20px;" id="map-legend"></div>
+</div>
+
+</div><!-- container -->
+
+<script>
+// ===================================================================
+// DATA
+// ===================================================================
+const countries = [
+  { id:'columbia',   name:'Columbia',   color:'#3A6B9F', mapColor:'#9AB5D0', light:'#E8EFF6', bloc:'Western Treaty' },
+  { id:'cathay',     name:'Cathay',     color:'#C4A030', mapColor:'#E8D5A3', light:'#F8F2E5', bloc:'League' },
+  { id:'nordostan',  name:'Nordostan',  color:'#A06060', mapColor:'#D4A5A5', light:'#F5EAEA', bloc:'League' },
+  { id:'heartland',  name:'Heartland',  color:'#5A9A5A', mapColor:'#A5C8A5', light:'#EBF3EB', bloc:'At war' },
+  { id:'persia',     name:'Persia',     color:'#9A7040', mapColor:'#C8A57A', light:'#F2EBE0', bloc:'League' },
+  { id:'gallia',     name:'Gallia',     color:'#4A6FA0', mapColor:'#A5B8D4', light:'#EBF0F6', bloc:'Western Treaty' },
+  { id:'teutonia',   name:'Teutonia',   color:'#3A8A7A', mapColor:'#8AB5AA', light:'#E8F2EF', bloc:'Western Treaty' },
+  { id:'thule',      name:'Thule',      color:'#3A8A7A', mapColor:'#8AB5AA', light:'#E8F2EF', bloc:'Western Treaty' },
+  { id:'albion',     name:'Albion',     color:'#4A7A8F', mapColor:'#8AA5B5', light:'#E8EFF3', bloc:'Western Treaty' },
+  { id:'freeland',   name:'Freeland',   color:'#5A80A0', mapColor:'#A0B8C8', light:'#EBF1F5', bloc:'Western Treaty' },
+  { id:'ponte',      name:'Ponte',      color:'#6A9A8A', mapColor:'#A5C8B8', light:'#EBF3EF', bloc:'Western Treaty' },
+  { id:'bharata',    name:'Bharata',    color:'#B87850', mapColor:'#D4B5A5', light:'#F5EDE5', bloc:'Non-aligned' },
+  { id:'formosa',    name:'Formosa',    color:'#B89048', mapColor:'#DCC5A0', light:'#F5EEE0', bloc:'\u2014' },
+  { id:'yamato',     name:'Yamato',     color:'#5A7A9B', mapColor:'#A5B5C8', light:'#EBF0F5', bloc:'Western Treaty' },
+  { id:'hanguk',     name:'Hanguk',     color:'#4A8FA8', mapColor:'#A5C8D4', light:'#E8F1F5', bloc:'\u2014' },
+  { id:'phrygia',    name:'Phrygia',    color:'#8A6A48', mapColor:'#B5A08A', light:'#F0EBE5', bloc:'Swing' },
+  { id:'solaria',    name:'Solaria',    color:'#A89030', mapColor:'#C8B896', light:'#F3F0E5', bloc:'Swing' },
+  { id:'mirage',     name:'Mirage',     color:'#A88050', mapColor:'#D4BFA5', light:'#F5EEE5', bloc:'Swing' },
+  { id:'levantia',   name:'Levantia',   color:'#9A9A40', mapColor:'#D4D4A5', light:'#F3F3E8', bloc:'Western Treaty' },
+  { id:'choson',     name:'Choson',     color:'#5A5A5A', mapColor:'#8A8A8A', light:'#EFEFEF', bloc:'League' },
+  { id:'caribe',     name:'Caribe',     color:'#3A7AAA', mapColor:'#8AACCC', light:'#E8F0F6', bloc:'\u2014' },
+  { id:'sogdiana',   name:'Sogdiana',   color:'#8A8A60', mapColor:'#C8C8A5', light:'#F0F0E8', bloc:'Contested' },
+];
+
+const keyCountries = ['columbia','cathay','nordostan','heartland','persia','bharata'];
+const badgeCountries = ['columbia','cathay','nordostan','heartland','persia'];
+
+// Table data for status tables
+const tableData = [
+  { id:'columbia',  gdp:'28.4T', stability:'82', state:'Active' },
+  { id:'cathay',    gdp:'22.1T', stability:'78', state:'Active' },
+  { id:'nordostan', gdp:'2.8T',  stability:'55', state:'Mobilized' },
+  { id:'heartland', gdp:'0.9T',  stability:'31', state:'At War' },
+  { id:'persia',    gdp:'1.2T',  stability:'48', state:'Sanctioned' },
+];
+
+// ===================================================================
+// SVG GENERATORS
+// ===================================================================
+
+function geometricSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2/48);
+  const half = s/2, q = s/4, tq = s*3/4;
+  const paths = {
+    columbia: `<polygon points="${half},${s*0.1} ${s*0.87},${s*0.42} ${s*0.73},${s*0.9} ${s*0.27},${s*0.9} ${s*0.13},${s*0.42}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    cathay: `<polygon points="${half},${s*0.08} ${s*0.82},${q} ${s*0.82},${tq} ${half},${s*0.92} ${s*0.18},${tq} ${s*0.18},${q}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.68},${s*0.36} ${s*0.68},${s*0.64} ${half},${s*0.75} ${s*0.32},${s*0.64} ${s*0.32},${s*0.36}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    nordostan: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
+    heartland: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    persia: `<path d="M${s*0.15},${s*0.65} A${s*0.4},${s*0.4} 0 0,1 ${s*0.85},${s*0.65}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${half}" y1="${s*0.2}" x2="${half}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    gallia: `<rect x="${s*0.38}" y="${s*0.1}" width="${s*0.24}" height="${s*0.8}" rx="${s*0.02}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.28}" y1="${s*0.2}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    teutonia: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,45,90,135,180,225,270,315].map(a=>{const r1=s*0.25,r2=s*0.42,rad=a*Math.PI/180;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    albion: `<polygon points="${half},${s*0.1} ${s*0.85},${s*0.85} ${s*0.15},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    freeland: `<rect x="${s*0.15}" y="${s*0.15}" width="${s*0.7}" height="${s*0.7}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    ponte: `<path d="M${s*0.15},${s*0.8} Q${s*0.15},${s*0.2} ${half},${s*0.2} Q${s*0.85},${s*0.2} ${s*0.85},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    bharata: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.35*Math.cos(rad)}" y2="${half+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    formosa: `<rect x="${s*0.2}" y="${s*0.2}" width="${s*0.6}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.2}" x2="${s*0.4}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.2}" x2="${s*0.6}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.4}" x2="${s*0.8}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.2}" y1="${s*0.6}" x2="${s*0.8}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/>`,
+    yamato: `<rect x="${s*0.15}" y="${s*0.6}" width="${s*0.12}" height="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.33}" y="${s*0.45}" width="${s*0.12}" height="${s*0.45}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.51}" y="${s*0.3}" width="${s*0.12}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.69}" y="${s*0.12}" width="${s*0.12}" height="${s*0.78}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    hanguk: `<circle cx="${s*0.25}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${s*0.75}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.25}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.75}" r="${s*0.06}" fill="${color}"/><line x1="${s*0.25}" y1="${half}" x2="${half}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.25}" x2="${s*0.75}" y2="${half}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.75}" y1="${half}" x2="${half}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/><line x1="${half}" y1="${s*0.75}" x2="${s*0.25}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    phrygia: `<path d="M${s*0.1},${s*0.75} Q${s*0.1},${s*0.25} ${half},${s*0.25} Q${s*0.9},${s*0.25} ${s*0.9},${s*0.75}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.1}" y1="${s*0.75}" x2="${s*0.9}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/>`,
+    solaria: `${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>{const rad=a*Math.PI/180,r1=s*0.12,r2=s*0.4;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}<circle cx="${half}" cy="${half}" r="${s*0.1}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    mirage: `<polygon points="${half},${s*0.08} ${s*0.75},${half} ${half},${s*0.92} ${s*0.25},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.63},${half} ${half},${s*0.75} ${s*0.37},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    levantia: `<polygon points="${half},${s*0.08} ${s*0.86},${s*0.3} ${s*0.86},${s*0.7} ${half},${s*0.92} ${s*0.14},${s*0.7} ${s*0.14},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${half}" y1="${s*0.08}" x2="${half}" y2="${s*0.92}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.14}" y1="${half}" x2="${s*0.86}" y2="${half}" stroke="${color}" stroke-width="${sw}"/>`,
+    choson: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.4*Math.cos(rad)}" y2="${half+s*0.4*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}`,
+    caribe: `<circle cx="${half}" cy="${half}" r="${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.28}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    sogdiana: `<line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.45}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.15}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.55}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.85}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.85}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/>`,
+    thule: `<polygon points="${half},${s*0.1} ${s*0.75},${s*0.35} ${s*0.75},${s*0.7} ${half},${s*0.9} ${s*0.25},${s*0.7} ${s*0.25},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><circle cx="${half}" cy="${half}" r="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    horn: `<polygon points="${half},${s*0.15} ${s*0.8},${half} ${half},${s*0.85} ${s*0.2},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-dasharray="${sw*2} ${sw}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+function phoenicianSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2.5/48);
+  // Phoenician letter SVG paths — angular, stone-carved forms
+  const paths = {
+    // Aleph — ox head: inverted V with cross stroke
+    columbia: `<line x1="${s*0.3}" y1="${s*0.85}" x2="${s*0.5}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.7}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.36}" y1="${s*0.6}" x2="${s*0.64}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Beth — house: rectangular with triangular roof
+    cathay: `<polyline points="${s*0.2},${s*0.85} ${s*0.2},${s*0.35} ${s*0.5},${s*0.15} ${s*0.8},${s*0.35} ${s*0.8},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.2}" y1="${s*0.85}" x2="${s*0.8}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Gimel — camel: angular step shape
+    nordostan: `<polyline points="${s*0.25},${s*0.2} ${s*0.6},${s*0.2} ${s*0.6},${s*0.5} ${s*0.75},${s*0.5} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Daleth — door: right angle like a reversed L
+    heartland: `<polyline points="${s*0.25},${s*0.2} ${s*0.75},${s*0.2} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // He — window: figure like a stick person, vertical with arms
+    persia: `<line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.35}" x2="${s*0.5}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.6}" x2="${s*0.5}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Waw — hook: vertical line with hook at top
+    gallia: `<path d="M${s*0.5},${s*0.85} L${s*0.5},${s*0.35} Q${s*0.5},${s*0.15} ${s*0.35},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Zayin — weapon: vertical line with horizontal top (dagger/sword)
+    teutonia: `<line x1="${s*0.5}" y1="${s*0.2}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.2}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Heth — fence: H shape
+    albion: `<line x1="${s*0.25}" y1="${s*0.15}" x2="${s*0.25}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.75}" y1="${s*0.15}" x2="${s*0.75}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.5}" x2="${s*0.75}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Teth — wheel: circle with cross inside
+    bharata: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.32}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.18}" x2="${s*0.5}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.18}" y1="${s*0.5}" x2="${s*0.82}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Yodh — hand: small angular mark like an apostrophe/tick
+    formosa: `<polyline points="${s*0.55},${s*0.2} ${s*0.4},${s*0.5} ${s*0.55},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Kaph — palm: angular K-like shape
+    yamato: `<line x1="${s*0.3}" y1="${s*0.15}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.7}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Lamedh — goad: tall L shape, tallest Phoenician letter
+    freeland: `<polyline points="${s*0.65},${s*0.85} ${s*0.35},${s*0.85} ${s*0.35},${s*0.15} ${s*0.55},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Mem — water: zigzag/wave
+    phrygia: `<polyline points="${s*0.15},${s*0.35} ${s*0.3},${s*0.65} ${s*0.5},${s*0.35} ${s*0.7},${s*0.65} ${s*0.85},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Nun — serpent: wavy vertical
+    choson: `<path d="M${s*0.5},${s*0.15} Q${s*0.7},${s*0.35} ${s*0.35},${s*0.5} Q${s*0.2},${s*0.65} ${s*0.5},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Samekh — pillar: vertical with serifs top and bottom
+    ponte: `<line x1="${s*0.5}" y1="${s*0.2}" x2="${s*0.5}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.2}" x2="${s*0.7}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.8}" x2="${s*0.7}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ayin — eye: circle (the original form was just a circle)
+    levantia: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.08}" fill="${color}"/>`,
+    // Pe — mouth: angular opening, like a reversed C with corner
+    solaria: `<polyline points="${s*0.65},${s*0.2} ${s*0.3},${s*0.2} ${s*0.3},${s*0.55} ${s*0.65},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.55}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Tsade — plant: forked stick
+    caribe: `<line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.5}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.3}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.7}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Qoph — needle's eye: circle on a vertical stick
+    mirage: `<circle cx="${s*0.5}" cy="${s*0.35}" r="${s*0.18}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.53}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Resh — head: reversed P / angular hook
+    hanguk: `<polyline points="${s*0.35},${s*0.85} ${s*0.35},${s*0.2} ${s*0.7},${s*0.2} ${s*0.7},${s*0.5}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    // Shin — tooth: W-like triple prong
+    sogdiana: `<polyline points="${s*0.15},${s*0.25} ${s*0.3},${s*0.8} ${s*0.5},${s*0.25} ${s*0.7},${s*0.8} ${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+function linearbSVG(id, color, size=48) {
+  const s = size, sw = Math.max(1.5, size*2/48);
+  const paths = {
+    // Horse — simplified side view, head up, 4 legs
+    columbia: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.35},${s*0.4} L${s*0.55},${s*0.4} L${s*0.65},${s*0.5} L${s*0.65},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><path d="M${s*0.55},${s*0.4} L${s*0.65},${s*0.25} L${s*0.8},${s*0.15} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.55}" y1="${s*0.5}" x2="${s*0.55}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ram — curved horns, stocky body
+    cathay: `<ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.3}" ry="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/><path d="M${s*0.7},${s*0.45} Q${s*0.85},${s*0.25} ${s*0.7},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.7},${s*0.45} Q${s*0.9},${s*0.3} ${s*0.82},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.7}" x2="${s*0.3}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.7}" x2="${s*0.6}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Stag — tall antlers, slender body
+    nordostan: `<line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.5}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.3}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.7}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.22}" x2="${s*0.25}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.22}" x2="${s*0.75}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.22}" ry="${s*0.13}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.35}" y1="${s*0.65}" x2="${s*0.35}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.65}" x2="${s*0.65}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Donkey — smaller, blockier than horse
+    heartland: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.7},${s*0.5} L${s*0.7},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.5}" x2="${s*0.6}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.65},${s*0.5} L${s*0.75},${s*0.35} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.78}" y1="${s*0.3}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Olive — branch with leaves
+    persia: `<path d="M${s*0.25},${s*0.8} Q${s*0.5},${s*0.3} ${s*0.75},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.42}" cy="${s*0.48}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.42},${s*0.48})"/><ellipse cx="${s*0.58}" cy="${s*0.35}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.58},${s*0.35})"/><ellipse cx="${s*0.72}" cy="${s*0.25}" rx="${s*0.06}" ry="${s*0.09}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.72},${s*0.25})"/>`,
+    // Wine vessel — cup/goblet shape
+    gallia: `<path d="M${s*0.3},${s*0.2} L${s*0.25},${s*0.55} Q${s*0.25},${s*0.7} ${s*0.5},${s*0.7} Q${s*0.75},${s*0.7} ${s*0.75},${s*0.55} L${s*0.7},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.5}" y1="${s*0.7}" x2="${s*0.5}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.82}" x2="${s*0.65}" y2="${s*0.82}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Dagger — blade with hilt
+    teutonia: `<line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.72}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.42},${s*0.12} ${s*0.5},${s*0.55} ${s*0.58},${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.35}" y1="${s*0.62}" x2="${s*0.65}" y2="${s*0.62}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.72}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Ship — simple vessel with mast and hull
+    albion: `<path d="M${s*0.1},${s*0.6} Q${s*0.2},${s*0.8} ${s*0.5},${s*0.8} Q${s*0.8},${s*0.8} ${s*0.9},${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.18}" x2="${s*0.5}" y2="${s*0.65}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.18} ${s*0.75},${s*0.4} ${s*0.5},${s*0.5}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Shield — figure-8 or oblong shield
+    freeland: `<path d="M${s*0.5},${s*0.12} Q${s*0.82},${s*0.12} ${s*0.82},${s*0.4} Q${s*0.82},${s*0.7} ${s*0.5},${s*0.88} Q${s*0.18},${s*0.7} ${s*0.18},${s*0.4} Q${s*0.18},${s*0.12} ${s*0.5},${s*0.12} Z" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Amphora — two-handled vessel
+    ponte: `<path d="M${s*0.35},${s*0.2} L${s*0.32},${s*0.55} Q${s*0.32},${s*0.8} ${s*0.5},${s*0.82} Q${s*0.68},${s*0.8} ${s*0.68},${s*0.55} L${s*0.65},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><path d="M${s*0.32},${s*0.32} Q${s*0.18},${s*0.32} ${s*0.18},${s*0.48} Q${s*0.18},${s*0.55} ${s*0.32},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.68},${s*0.32} Q${s*0.82},${s*0.32} ${s*0.82},${s*0.48} Q${s*0.82},${s*0.55} ${s*0.68},${s*0.55}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Wheel — spoked wheel (Linear B ROTA)
+    bharata: `<circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${s*0.5}" cy="${s*0.5}" r="${s*0.08}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${s*0.5+s*0.08*Math.cos(rad)}" y1="${s*0.5+s*0.08*Math.sin(rad)}" x2="${s*0.5+s*0.35*Math.cos(rad)}" y2="${s*0.5+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    // Gold ingot — rectangular bar with marks
+    formosa: `<rect x="${s*0.2}" y="${s*0.3}" width="${s*0.6}" height="${s*0.35}" rx="${s*0.03}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.35}" x2="${s*0.4}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.35}" x2="${s*0.6}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Spear — long shaft with point
+    yamato: `<line x1="${s*0.5}" y1="${s*0.12}" x2="${s*0.5}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.12} ${s*0.4},${s*0.3} ${s*0.6},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Horn — curved horn shape
+    hanguk: `<path d="M${s*0.25},${s*0.7} Q${s*0.25},${s*0.2} ${s*0.6},${s*0.15} Q${s*0.8},${s*0.15} ${s*0.8},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.25}" cy="${s*0.72}" rx="${s*0.1}" ry="${s*0.08}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    // Spice/plant — small plant/herb
+    phrygia: `<line x1="${s*0.5}" y1="${s*0.88}" x2="${s*0.5}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.55} Q${s*0.3},${s*0.45} ${s*0.25},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.45} Q${s*0.7},${s*0.35} ${s*0.75},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.5},${s*0.4} Q${s*0.35},${s*0.3} ${s*0.28},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Oil jar — round-bottomed storage vessel
+    solaria: `<ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.28}" ry="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><path d="M${s*0.42},${s*0.27} L${s*0.42},${s*0.18} Q${s*0.42},${s*0.12} ${s*0.5},${s*0.12} Q${s*0.58},${s*0.12} ${s*0.58},${s*0.18} L${s*0.58},${s*0.27}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Jewel — cut gem shape
+    mirage: `<polygon points="${s*0.5},${s*0.15} ${s*0.78},${s*0.4} ${s*0.65},${s*0.82} ${s*0.35},${s*0.82} ${s*0.22},${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.4}" x2="${s*0.7}" y2="${s*0.4}" stroke="${color}" stroke-width="${sw}"/>`,
+    // Arrow — projectile
+    levantia: `<line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><polygon points="${s*0.5},${s*0.15} ${s*0.38},${s*0.32} ${s*0.62},${s*0.32}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.38}" y2="${s*0.78}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.85}" x2="${s*0.62}" y2="${s*0.78}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Unknown glyph — abstract scrawl
+    choson: `<path d="M${s*0.2},${s*0.3} L${s*0.5},${s*0.15} L${s*0.8},${s*0.3} L${s*0.6},${s*0.5} L${s*0.8},${s*0.7} L${s*0.5},${s*0.85} L${s*0.2},${s*0.7} L${s*0.4},${s*0.5} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    // Grain — wheat stalk
+    caribe: `<line x1="${s*0.5}" y1="${s*0.88}" x2="${s*0.5}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.35}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.65}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.33}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.67}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.6}" x2="${s*0.35}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.6}" x2="${s*0.65}" y2="${s*0.5}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    // Fragment — broken pottery shard
+    sogdiana: `<path d="M${s*0.2},${s*0.3} L${s*0.55},${s*0.2} L${s*0.75},${s*0.35} L${s*0.8},${s*0.6} L${s*0.6},${s*0.8} L${s*0.3},${s*0.75} L${s*0.15},${s*0.55} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round" stroke-dasharray="${s*0.04} ${s*0.03}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+// ===================================================================
+// RENDER FUNCTIONS
+// ===================================================================
+
+function getCountry(id) { return countries.find(c=>c.id===id); }
+
+function renderGrid(containerId, svgFn) {
+  const el = document.getElementById(containerId);
+  el.innerHTML = countries.map(c => {
+    const tintBg = c.light || (c.color + '12');
+    return `<div class="emblem-cell" style="border-top:3px solid ${c.color};">
+      <div style="background:${tintBg};border-radius:6px;padding:8px;display:inline-block;">${svgFn(c.id, c.color, 48)}</div>
+      <div class="name"><span class="color-dot" style="background:${c.color};"></span>${c.name}</div>
+      <div class="bloc">${c.bloc}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSizeComparison() {
+  const el = document.getElementById('size-comparison');
+  const sizes = [16,24,48,96];
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  let html = '';
+  fns.forEach(style => {
+    html += `<span class="style-label ${style.cls}">${style.name}</span>`;
+    keyCountries.forEach(cid => {
+      const c = getCountry(cid);
+      html += `<div class="size-row"><div style="font-weight:600;min-width:90px;font-size:13px;"><span class="color-dot" style="background:${c.color};"></span>${c.name}</div>`;
+      sizes.forEach(sz => {
+        html += `<div class="size-item">${style.fn(c.id, c.color, sz)}<div class="label">${sz}px</div></div>`;
+      });
+      html += `</div>`;
+    });
+    html += `<div style="height:24px;"></div>`;
+  });
+  el.innerHTML = html;
+}
+
+function renderRoleBriefs() {
+  const el = document.getElementById('role-briefs');
+  const c = getCountry('columbia');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div>
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample">
+        <div class="role-brief" style="background:#fff;">
+          <div class="color-stripe" style="background:${c.color};"></div>
+          <div class="classified">Classified — Columbia Eyes Only</div>
+          <div class="emblem-wrap" style="margin-top:32px;">${style.fn('columbia', c.color, 96)}</div>
+          <div class="role-name">DEALER</div>
+          <div class="role-title">President of Columbia</div>
+          <div style="margin-top:16px;font-size:11px;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;">Thucydides Trap — Role Brief</div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBadgeRows() {
+  const el = document.getElementById('badge-rows');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div style="margin-bottom:16px;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample" style="padding:4px;">
+        <div class="badge-row">
+          ${badgeCountries.map(cid => {
+            const c = getCountry(cid);
+            return `<div class="country-badge" style="background:${c.light || (c.color+'18')};">
+              ${style.fn(c.id, c.color, 24)}
+              <span style="color:var(--text);">${c.name}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStatusTables() {
+  const el = document.getElementById('status-tables');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = fns.map(style => `
+    <div>
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample">
+        <table class="status-table">
+          <thead><tr><th></th><th>Country</th><th>GDP</th><th>Stability</th><th>State</th></tr></thead>
+          <tbody>
+            ${tableData.map(row => {
+              const c = getCountry(row.id);
+              return `<tr>
+                <td>${style.fn(c.id, c.color, 24)}</td>
+                <td style="font-weight:600;"><span class="color-dot" style="background:${c.color};"></span>${c.name}</td>
+                <td class="mono">${row.gdp}</td>
+                <td class="mono">${row.stability}</td>
+                <td>${row.state}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderNameBadges() {
+  const el = document.getElementById('name-badges');
+  const c = getCountry('columbia');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+  el.innerHTML = `<div class="versions-row">${fns.map(style => `
+    <div style="text-align:center;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="name-badge">
+        <div class="top-band" style="background:${c.color};"></div>
+        <div class="badge-content">
+          ${style.fn('columbia', c.color, 48)}
+          <div class="char-name">DEALER</div>
+          <div class="char-title">President of Columbia</div>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function renderDashboardSamples() {
+  const el = document.getElementById('dashboard-samples');
+  const c = getCountry('columbia');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+
+  el.innerHTML = fns.map(style => `
+    <div style="margin-bottom:24px;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample" style="background:#F5F6F8;overflow:hidden;">
+        <!-- Top Nav Bar -->
+        <div style="display:flex;align-items:center;gap:16px;padding:8px 16px;background:#1A2332;color:#fff;font-size:12px;">
+          <span style="font-family:'Playfair Display',serif;font-weight:700;color:#C4922A;font-size:13px;">MetaGames</span>
+          <span style="font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:10px;">The Thucydides Trap</span>
+          <span style="flex:1;"></span>
+          <span style="background:#1A5276;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:600;">Round 3</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:#C4922A;">42:15</span>
+          <span style="display:inline-flex;align-items:center;gap:4px;">${style.fn('columbia', '#fff', 18)} <span style="font-weight:600;">DEALER</span></span>
+        </div>
+        <!-- Main Layout -->
+        <div style="display:flex;min-height:320px;">
+          <!-- Sidebar -->
+          <div style="width:140px;background:#fff;border-right:1px solid #D8DCE5;padding:12px 0;">
+            <div style="border-left:3px solid ${c.color};padding:6px 12px;font-size:11px;font-weight:600;color:#1A5276;background:${c.color}10;">Home</div>
+            ${['Map','Budget','Military','Diplomacy','Intel','Comms'].map(item => `<div style="padding:6px 12px 6px 15px;font-size:11px;color:#4A5568;cursor:pointer;">${item}</div>`).join('')}
+            <div style="margin-top:16px;padding:8px 12px;text-align:center;">
+              ${style.fn('columbia', c.color, 48)}
+              <div style="font-size:10px;font-weight:600;margin-top:4px;color:#1A2332;">Columbia</div>
+            </div>
+          </div>
+          <!-- Content -->
+          <div style="flex:1;padding:16px 20px;">
+            <!-- Metric Cards Row 1 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #2ECC71;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">GDP</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#C4922A;">285.1</div>
+                <div style="font-size:10px;color:#2ECC71;font-weight:600;">+1.8%</div>
+              </div>
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #C0392B;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Stability</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#C4922A;">6.95</div>
+                <div style="font-size:10px;color:#C0392B;font-weight:600;">-0.05</div>
+              </div>
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #C0392B;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Oil Price</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#C4922A;">$198</div>
+                <div style="font-size:10px;color:#C0392B;font-weight:600;">-$39</div>
+              </div>
+            </div>
+            <!-- Metric Cards Row 2 -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;">
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #C0392B;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Naval</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#1A2332;">9 units</div>
+                <div style="font-size:10px;color:#C0392B;font-weight:600;">-1</div>
+              </div>
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #C0392B;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Support</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#1A2332;">37%</div>
+                <div style="font-size:10px;color:#C0392B;font-weight:600;">-1%</div>
+              </div>
+              <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;border-top:3px solid #C0392B;">
+                <div style="font-size:10px;color:#4A5568;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Treasury</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#1A2332;">42 coins</div>
+                <div style="font-size:10px;color:#C0392B;font-weight:600;">-8</div>
+              </div>
+            </div>
+            <!-- Activity Feed -->
+            <div style="background:#fff;border:1px solid #D8DCE5;border-radius:8px;padding:12px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1A2332;margin-bottom:8px;">Activity Feed</div>
+              <div style="font-size:11px;color:#4A5568;line-height:1.8;">
+                <div><span style="color:#C0392B;font-weight:600;">MILITARY</span> Gulf Gate assault -- partial success</div>
+                <div><span style="color:#1A5276;font-weight:600;">DIPLO</span> Meeting request from Pathfinder (Cathay)</div>
+                <div><span style="color:#E67E22;font-weight:600;">DOMESTIC</span> Midterms in 1 round</div>
+                <div><span style="color:#C0392B;font-weight:600;">WARNING</span> Shield: Pacific fleet below minimum threshold</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom Status Bar -->
+        <div style="display:flex;align-items:center;gap:16px;padding:6px 16px;background:#fff;border-top:1px solid #D8DCE5;font-size:10px;color:#4A5568;">
+          <span style="display:inline-flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:${c.color};display:inline-block;"></span> Columbia</span>
+          <span>Economy: <strong style="color:#2ECC71;">NORMAL</strong></span>
+          <span>War: <strong style="color:#C0392B;">Persia</strong></span>
+          <span style="flex:1;"></span>
+          <span>Round 3 / 8</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderSlideSamples() {
+  const el = document.getElementById('slide-samples');
+  const fns = [
+    {name:'Geometric', fn:geometricSVG, cls:'style-1-label'},
+    {name:'Phoenician', fn:phoenicianSVG, cls:'style-2-label'},
+    {name:'Linear B', fn:linearbSVG, cls:'style-3-label'},
+  ];
+
+  el.innerHTML = fns.map(style => `
+    <div style="margin-bottom:24px;">
+      <span class="style-label ${style.cls}">${style.name}</span>
+      <div class="doc-sample" style="aspect-ratio:16/9;background:#1B2838;position:relative;overflow:hidden;padding:24px 32px;display:flex;flex-direction:column;">
+        <!-- Title -->
+        <div style="margin-bottom:20px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#fff;letter-spacing:0.5px;">THE THUCYDIDES TRAP</div>
+          <div style="font-size:12px;color:#8494A7;margin-top:2px;">Round 3 World Briefing</div>
+        </div>
+        <!-- Metric Cards -->
+        <div style="display:flex;gap:12px;margin-bottom:20px;">
+          ${[
+            {label:'OIL PRICE',value:'$198',sub:'bbl'},
+            {label:'POWER GAP',value:'0.693',sub:'C/N ratio'},
+            {label:'ACTIVE WARS',value:'2',sub:'theaters'},
+            {label:'NUCLEAR USE',value:'0',sub:'detonations'},
+          ].map(m => `
+            <div style="background:#243447;border:1px solid #2D4A5E;border-radius:6px;padding:10px 14px;min-width:90px;">
+              <div style="font-size:9px;color:#8494A7;text-transform:uppercase;letter-spacing:1px;font-weight:600;">${m.label}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:#C4922A;margin-top:2px;">${m.value}</div>
+              <div style="font-size:9px;color:#5A7A94;">${m.sub}</div>
+            </div>
+          `).join('')}
+        </div>
+        <!-- Map + Events -->
+        <div style="display:flex;gap:20px;flex:1;">
+          <!-- Mini Map placeholder -->
+          <div style="width:55%;background:#1A2332;border:1px solid #2D4A5E;border-radius:6px;padding:12px;position:relative;overflow:hidden;">
+            <div style="font-size:9px;color:#5A7A94;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Strategic Overview</div>
+            <!-- Simplified mini hex grid -->
+            <svg width="100%" viewBox="0 0 300 140" xmlns="http://www.w3.org/2000/svg">
+              <!-- Simplified world outline with colored country blocks -->
+              ${[
+                {x:30,y:40,w:40,h:50,color:'#D4B896',name:'COL'},
+                {x:90,y:30,w:20,h:20,color:'#8AA5B5',name:'ALB'},
+                {x:100,y:50,w:25,h:25,color:'#8FB59A',name:'TEU'},
+                {x:115,y:35,w:20,h:25,color:'#A5C8A5',name:'HRT'},
+                {x:125,y:25,w:40,h:30,color:'#D4A5A5',name:'NRD'},
+                {x:130,y:55,w:20,h:20,color:'#B5A08A',name:'PHR'},
+                {x:150,y:65,w:30,h:30,color:'#D4B5A5',name:'BHR'},
+                {x:175,y:40,w:50,h:50,color:'#E8D5A3',name:'CTH'},
+                {x:230,y:50,w:15,h:15,color:'#A5B5C8',name:'YAM'},
+                {x:220,y:80,w:10,h:10,color:'#E0CCA0',name:'FOR'},
+                {x:140,y:75,w:15,h:15,color:'#C8A57A',name:'PER'},
+                {x:125,y:80,w:15,h:15,color:'#C8B896',name:'SOL'},
+              ].map(b => `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="2" fill="${b.color}" fill-opacity="0.5" stroke="${b.color}" stroke-width="0.5"/><text x="${b.x+b.w/2}" y="${b.y+b.h/2+3}" text-anchor="middle" font-size="6" fill="#fff" font-family="'DM Sans',sans-serif" font-weight="600" opacity="0.8">${b.name}</text>`).join('')}
+              <!-- War indicators -->
+              <circle cx="140" cy="68" r="4" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="2 1"/>
+              <circle cx="220" cy="75" r="4" fill="none" stroke="#E67E22" stroke-width="1.5" stroke-dasharray="2 1"/>
+              <!-- Ship icons as small marks -->
+              <circle cx="120" cy="90" r="2" fill="#B08840"/><circle cx="123" cy="90" r="2" fill="#B08840"/>
+              <circle cx="205" cy="60" r="2" fill="#C4A030"/><circle cx="208" cy="60" r="2" fill="#C4A030"/>
+            </svg>
+          </div>
+          <!-- Key Events -->
+          <div style="width:45%;">
+            <div style="font-size:9px;color:#5A7A94;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600;">Key Events</div>
+            <div style="font-size:11px;color:#D0D8E0;line-height:2;">
+              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#9A7040;margin-right:6px;vertical-align:middle;"></span>Gulf Gate partially breached</div>
+              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C4A030;margin-right:6px;vertical-align:middle;"></span>Cathay: 7 ships near Formosa</div>
+              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#A06060;margin-right:6px;vertical-align:middle;"></span>Nordostan treasury depleted</div>
+              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#B08840;margin-right:6px;vertical-align:middle;"></span>Columbia midterms approaching</div>
+            </div>
+            <!-- Country emblems row -->
+            <div style="display:flex;gap:6px;margin-top:16px;align-items:center;">
+              ${['columbia','cathay','nordostan','heartland','persia'].map(cid => {
+                const cc = `getCountry('${cid}')`;
+                return `<span id="_slide_${style.name}_${cid}"></span>`;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+        <!-- Footer -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:12px;">
+          <span style="font-family:'Playfair Display',serif;font-size:11px;color:#5A7A94;font-weight:600;">MetaGames</span>
+          <span style="font-size:10px;color:#5A7A94;letter-spacing:1px;text-transform:uppercase;">The Thucydides Trap</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  // Fill in the dynamic emblems on slides
+  fns.forEach(style => {
+    ['columbia','cathay','nordostan','heartland','persia'].forEach(cid => {
+      const cc = getCountry(cid);
+      const span = document.getElementById(`_slide_${style.name}_${cid}`);
+      if (span && cc) {
+        span.innerHTML = style.fn(cid, '#8494A7', 20);
+      }
+    });
+  });
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+renderGrid('grid-geometric', geometricSVG);
+renderGrid('grid-phoenician', phoenicianSVG);
+renderGrid('grid-linearb', linearbSVG);
+renderSizeComparison();
+renderRoleBriefs();
+renderBadgeRows();
+renderStatusTables();
+renderNameBadges();
+renderDashboardSamples();
+renderSlideSamples();
+
+// ===================================================================
+// SECTION 4: WAR MAP
+// ===================================================================
+
+const hexData = [
+  // row, col, country (null = water)
+  // Row 1
+  {r:1,c:9,country:'freeland'},{r:1,c:10,country:'nordostan'},{r:1,c:11,country:'nordostan'},{r:1,c:15,country:'nordostan'},
+  // Row 2
+  {r:2,c:2,country:'columbia'},{r:2,c:5,country:'thule'},{r:2,c:7,country:'albion'},{r:2,c:9,country:'freeland'},
+  {r:2,c:10,country:'heartland'},{r:2,c:11,country:'nordostan'},{r:2,c:12,country:'nordostan'},{r:2,c:13,country:'nordostan'},
+  {r:2,c:14,country:'nordostan'},{r:2,c:15,country:'nordostan'},{r:2,c:17,country:'choson'},
+  // Row 3
+  {r:3,c:1,country:'columbia'},{r:3,c:2,country:'columbia'},{r:3,c:6,country:'albion'},{r:3,c:8,country:'teutonia'},
+  {r:3,c:9,country:'teutonia'},{r:3,c:10,country:'heartland',occupied:true},{r:3,c:11,country:'nordostan'},
+  {r:3,c:12,country:'nordostan'},{r:3,c:13,country:'nordostan'},{r:3,c:15,country:'nordostan'},
+  {r:3,c:16,country:'hanguk'},{r:3,c:18,country:'yamato'},
+  // Row 4
+  {r:4,c:2,country:'columbia'},{r:4,c:3,country:'columbia'},{r:4,c:4,country:'columbia'},
+  {r:4,c:8,country:'gallia'},{r:4,c:9,country:'gallia'},{r:4,c:10,country:'phrygia'},
+  {r:4,c:13,country:'sogdiana'},{r:4,c:14,country:'cathay'},{r:4,c:15,country:'cathay'},{r:4,c:16,country:'cathay'},
+  {r:4,c:18,country:'yamato'},
+  // Row 5
+  {r:5,c:2,country:'columbia'},{r:5,c:3,country:'columbia'},{r:5,c:7,country:'ponte'},
+  {r:5,c:9,country:'levantia'},{r:5,c:10,country:'phrygia'},{r:5,c:11,country:'persia'},
+  {r:5,c:12,country:'sogdiana'},{r:5,c:13,country:'sogdiana'},{r:5,c:14,country:'cathay'},{r:5,c:15,country:'cathay'},
+  // Row 6
+  {r:6,c:3,country:'columbia'},{r:6,c:8,country:'ponte'},{r:6,c:10,country:'solaria'},
+  {r:6,c:12,country:'persia'},{r:6,c:13,country:'bharata'},{r:6,c:14,country:'bharata'},{r:6,c:15,country:'cathay'},
+  {r:6,c:17,country:'formosa'},
+  // Row 7
+  {r:7,c:9,country:'solaria'},{r:7,c:10,country:'mirage'},{r:7,c:12,country:'persia'},
+  {r:7,c:13,country:'bharata'},{r:7,c:14,country:'bharata'},
+  // Row 8
+  {r:8,c:4,country:'caribe'},{r:8,c:9,country:'horn'},{r:8,c:14,country:'bharata'},
+];
+
+// Capital hexes (for emblem placement) — pick representative hex per country
+const capitals = {
+  columbia:{r:4,c:3}, cathay:{r:5,c:14}, nordostan:{r:2,c:13}, heartland:{r:2,c:10},
+  persia:{r:6,c:12}, gallia:{r:4,c:8}, teutonia:{r:3,c:8}, albion:{r:2,c:7},
+  freeland:{r:1,c:9}, ponte:{r:5,c:7}, bharata:{r:7,c:13}, formosa:{r:6,c:17},
+  yamato:{r:4,c:18}, hanguk:{r:3,c:16}, phrygia:{r:5,c:10}, solaria:{r:6,c:10},
+  mirage:{r:7,c:10}, levantia:{r:5,c:9}, choson:{r:2,c:17}, caribe:{r:8,c:4},
+  sogdiana:{r:4,c:13},
+};
+
+// Country label positions (for largest cluster labels)
+const countryLabels = {
+  columbia:{r:3.5,c:2.5}, cathay:{r:5,c:15.5}, nordostan:{r:1.5,c:12.5}, heartland:{r:2.5,c:10},
+  persia:{r:6.5,c:12}, gallia:{r:4.5,c:8.5}, teutonia:{r:3.5,c:8.5}, albion:{r:2.8,c:6.5},
+  freeland:{r:1.5,c:9}, ponte:{r:5.5,c:7.5}, bharata:{r:7.5,c:13.5}, formosa:{r:6.5,c:17.5},
+  yamato:{r:3.5,c:18.5}, hanguk:{r:3.5,c:16.5}, phrygia:{r:5.5,c:10}, solaria:{r:7.5,c:9},
+  mirage:{r:7.5,c:10.5}, levantia:{r:5.5,c:9}, choson:{r:2.5,c:17.5}, caribe:{r:8.5,c:4},
+  sogdiana:{r:5,c:12.5},
+};
+
+const chokepoints = [
+  {r:6,c:16,name:'Formosa Strait'},
+  {r:7,c:11,name:'Gulf Gate'},
+  {r:7,c:3,name:'Caribe Passage'},
+];
+
+// Naval fleets: color@water(col,row)
+const navalFleets = [
+  {country:'columbia',count:3,r:8,c:12},{country:'columbia',count:2,r:6,c:9},
+  {country:'columbia',count:2,r:4,c:17},{country:'columbia',count:1,r:4,c:5},
+  {country:'columbia',count:1,r:9,c:13},
+  {country:'cathay',count:2,r:7,c:16},{country:'cathay',count:2,r:4,c:17},
+  {country:'cathay',count:1,r:6,c:18},
+  {country:'albion',count:2,r:3,c:7},
+  {country:'gallia',count:1,r:6,c:9},
+  {country:'bharata',count:2,r:9,c:13},
+  {country:'yamato',count:2,r:4,c:19},
+];
+
+function hexCenter(r, c, hexSize) {
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  // Match original map editor convention: ODD rows shifted right (row % 2 === 1)
+  // Extra left margin (2.5 * hexSize) for row labels, extra top (2.5 * hexSize) for col labels
+  const x = c * w + (r % 2 === 1 ? w/2 : 0) + hexSize * 2.5;
+  const y = r * h * 0.75 + hexSize * 2.5;
+  return {x, y};
+}
+
+function hexPoints(cx, cy, size) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = Math.PI / 180 * (60 * i - 30);
+    pts.push(`${cx + size * Math.cos(angle)},${cy + size * Math.sin(angle)}`);
+  }
+  return pts.join(' ');
+}
+
+function renderWarMap(containerId, crisisMode) {
+  const hexSize = 28;
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const svgW = 21 * w + hexSize * 5;  // 20 cols (0-19) + margins for grid labels
+  const svgH = 11 * h * 0.75 + hexSize * 5;  // 10 rows (0-9) + margins for grid labels
+
+  // Build lookup
+  const hexLookup = {};
+  hexData.forEach(hd => { hexLookup[`${hd.r},${hd.c}`] = hd; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;">`;
+
+  // Defs for crisis mode
+  if (crisisMode) {
+    svg += `<defs>
+      <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#C0392B" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#E67E22" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="glow-yellow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="blur"/>
+        <feFlood flood-color="#F1C40F" flood-opacity="0.5" result="color"/>
+        <feComposite in="color" in2="blur" operator="in" result="glow"/>
+        <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#A06060" stroke-width="2" stroke-opacity="0.4"/>
+      </pattern>
+    </defs>`;
+  } else {
+    svg += `<defs>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="0" x2="0" y2="6" stroke="#A06060" stroke-width="2" stroke-opacity="0.4"/>
+      </pattern>
+    </defs>`;
+  }
+
+  // Grid labels — column numbers across the top (display 1-20, data is 0-19)
+  for (let c = 0; c <= 19; c++) {
+    const {x} = hexCenter(0, c, hexSize);
+    svg += `<text x="${x}" y="${hexSize * 0.8}" text-anchor="middle" font-size="8" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  // Grid labels — row numbers on the left side (display 1-10, data is 0-9)
+  for (let r = 0; r <= 9; r++) {
+    const {y} = hexCenter(r, 0, hexSize);
+    svg += `<text x="${hexSize * 0.7}" y="${y + 3}" text-anchor="middle" font-size="8" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Draw water hexes for full 10-row grid (rows 0-9, cols 0-19) matching canonical grid
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 19; c++) {
+      const {x, y} = hexCenter(r, c, hexSize);
+      const key = `${r},${c}`;
+      const hd = hexLookup[key];
+      if (!hd) {
+        // Water hex
+        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#D4E4F0" fill-opacity="0.4" stroke="#D8DCE5" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Draw land hexes
+  hexData.forEach(hd => {
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    let filter = '';
+    if (crisisMode) {
+      // Heartland front
+      if (hd.country === 'heartland' || hd.occupied) filter = ' filter="url(#glow-red)"';
+      // Formosa area
+      if (hd.r === 6 && hd.c >= 16 && hd.c <= 17) filter = ' filter="url(#glow-yellow)"';
+      if (hd.country === 'formosa') filter = ' filter="url(#glow-yellow)"';
+    }
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="${c.mapColor||c.color}" fill-opacity="0.55" stroke="#D8DCE5" stroke-width="1"${filter}/>`;
+    // Striped overlay for occupied Heartland
+    if (hd.occupied) {
+      svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="url(#stripes)" stroke="#C0392B" stroke-width="1.5"/>`;
+    }
+  });
+
+  // Chokepoints
+  chokepoints.forEach(cp => {
+    const {x, y} = hexCenter(cp.r, cp.c, hexSize);
+    let filter = '';
+    if (crisisMode) {
+      if (cp.name === 'Gulf Gate') filter = ' filter="url(#glow-orange)"';
+      if (cp.name === 'Formosa Strait') filter = ' filter="url(#glow-yellow)"';
+      if (cp.name === 'Caribe Passage') filter = ' filter="url(#glow-orange)"';
+    }
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="none" stroke="#C0392B" stroke-width="1.2" stroke-dasharray="3 2" stroke-opacity="0.7"${filter}/>`;
+    svg += `<text x="${x}" y="${y+1}" text-anchor="middle" dominant-baseline="middle" font-size="6" font-weight="600" fill="#C0392B" font-family="'DM Sans',sans-serif" style="pointer-events:none;">${cp.name}</text>`;
+  });
+
+  // Watermark emblem on EVERY land hex (very faint, background texture)
+  hexData.forEach(hd => {
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    // Draw emblem at ~60% hex size, very low opacity — like a watermark
+    const embSize = hexSize * 0.9;
+    svg += `<g opacity="0.12" transform="translate(${x - embSize/2}, ${y - embSize/2})">${geometricSVG(hd.country, c.mapColor||c.color, embSize)}</g>`;
+  });
+
+  // Country labels — compute centroid from all hexes belonging to each country
+  const countryHexes = {};
+  hexData.forEach(hd => {
+    if (!countryHexes[hd.country]) countryHexes[hd.country] = [];
+    const {x, y} = hexCenter(hd.r, hd.c, hexSize);
+    countryHexes[hd.country].push({x, y});
+  });
+
+  // ALL country labels — at geometric center of territory, font scaled by size
+  Object.entries(countryHexes).forEach(([cid, hexes]) => {
+    const c = getCountry(cid);
+    if (!c) return;
+    // Centroid of all hexes belonging to this country
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    // Font size scales with territory size
+    const fontSize = hexes.length >= 6 ? 9 : hexes.length >= 3 ? 7.5 : 5.5;
+    const fontFamily = hexes.length >= 3 ? "'Playfair Display',serif" : "'DM Sans',sans-serif";
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" font-weight="600" fill="#1A2332" font-family="${fontFamily}" opacity="0.7" letter-spacing="0.3" style="text-transform:uppercase;pointer-events:none;">${c.name}</text>`;
+  });
+
+  // Naval fleets — proper warship icons (16px on global map)
+  navalFleets.forEach(fleet => {
+    const {x, y} = hexCenter(fleet.r, fleet.c, hexSize);
+    const c = getCountry(fleet.country);
+    if (!c) return;
+    const iconSz = 19; // ships 20% larger than ground units
+    const overlap = iconSz * 0.55;
+    for (let i = 0; i < fleet.count; i++) {
+      const ox = (i - (fleet.count-1)/2) * overlap;
+      svg += `<g transform="translate(${x+ox-iconSz/2}, ${y-iconSz/2})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="${c.color}" stroke="#fff" stroke-width="1"/></svg></g>`;
+    }
+  });
+
+  // Major ground deployments on global map — 16px icons, multi-row stacking
+  const globalGroundDeployments = [
+    {r:5,c:11,country:'persia',count:4},          // persia_2 ME war zone
+    {r:3,c:9,country:'columbia',count:2},          // columbia troops in teutonia area
+    {r:5,c:14,country:'cathay',count:5},           // cathay_3 central
+    {r:4,c:16,country:'cathay',count:4},           // cathay_6 SE
+    {r:2,c:13,country:'nordostan',count:5},        // nord_c1
+    {r:7,c:13,country:'bharata',count:10},         // bharata_2
+    {r:1,c:9,country:'freeland',count:5},          // freeland
+    {r:3,c:8,country:'teutonia',count:6},          // teutonia_1
+    {r:6,c:17,country:'formosa',count:4},          // formosa
+  ];
+
+  function renderGlobalGroundIcons(dep) {
+    const {x, y} = hexCenter(dep.r, dep.c, hexSize);
+    const c = getCountry(dep.country);
+    if (!c) return;
+    const iconSz = 16;
+    const overlap = iconSz * 0.65;
+    const perRow = 3;
+    const total = Math.min(dep.count, 6);
+    const rows = [];
+    let remaining = total;
+    while (remaining > 0) {
+      const thisRow = Math.min(remaining, perRow);
+      rows.push(thisRow);
+      remaining -= thisRow;
+    }
+    rows.forEach((rowCount, ri) => {
+      const rowY = y - (rows.length - 1) * (iconSz * 0.55) / 2 + ri * (iconSz * 0.55);
+      for (let i = 0; i < rowCount; i++) {
+        const ox = (i - (rowCount-1)/2) * overlap;
+        svg += `<g transform="translate(${x+ox-iconSz/2}, ${rowY-iconSz/2})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="${c.color}" stroke="#fff" stroke-width="0.5"/></svg></g>`;
+      }
+    });
+    if (dep.count > 6) {
+      svg += `<text x="${x + perRow * overlap / 2 + 4}" y="${y + 4}" font-size="7" font-weight="700" fill="${c.color}" font-family="'JetBrains Mono',monospace">+${dep.count-6}</text>`;
+    }
+  }
+  globalGroundDeployments.forEach(renderGlobalGroundIcons);
+
+  // Major air deployments on global map — 16px jet icons
+  const globalAirDeployments = [
+    {r:4,c:3,country:'columbia',count:5},  // col_main_1
+    {r:5,c:14,country:'cathay',count:5},   // cathay_3
+    {r:7,c:13,country:'bharata',count:4},  // bharata_2
+  ];
+  globalAirDeployments.forEach(dep => {
+    const {x, y} = hexCenter(dep.r, dep.c, hexSize);
+    const c = getCountry(dep.country);
+    if (!c) return;
+    const iconSz = 14;
+    const overlap = iconSz * 0.6;
+    const showCount = Math.min(dep.count, 3);
+    for (let i = 0; i < showCount; i++) {
+      const ox = (i - (showCount-1)/2) * overlap;
+      svg += `<g transform="translate(${x+ox-iconSz/2}, ${y-iconSz-4})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M12 2 L14 8 L22 14 L22 16 L14 14 L14 20 L17 22 L17 23 L12 21 L7 23 L7 22 L10 20 L10 14 L2 16 L2 14 L10 8 Z" fill="${c.color}" stroke="#fff" stroke-width="0.8"/></svg></g>`;
+    }
+    if (dep.count > 3) {
+      svg += `<text x="${x + showCount * overlap / 2 + 2}" y="${y - iconSz}" font-size="7" font-weight="700" fill="${c.color}" font-family="'JetBrains Mono',monospace">+${dep.count-3}</text>`;
+    }
+  });
+
+  svg += '</svg>';
+
+  document.getElementById(containerId).innerHTML = svg;
+}
+
+function renderMapLegend() {
+  const el = document.getElementById('map-legend');
+  let html = '<h3 style="margin-bottom:12px;">Legend</h3><div style="display:flex;flex-wrap:wrap;gap:24px;font-size:12px;">';
+
+  // Country colors
+  html += '<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">';
+  countries.forEach(c => {
+    html += `<span style="display:inline-flex;align-items:center;gap:3px;"><span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${c.color};opacity:0.6;border:1px solid ${c.color};"></span><span style="font-size:10px;">${c.name}</span></span>`;
+  });
+  html += '</div>';
+
+  html += '</div><div style="display:flex;gap:24px;margin-top:12px;font-size:11px;color:var(--text-secondary);align-items:center;">';
+  html += '<span><span style="display:inline-block;width:12px;height:12px;background:#D4E4F0;border:1px solid #D8DCE5;border-radius:2px;vertical-align:middle;margin-right:4px;"></span>Water</span>';
+  html += '<span><svg width="14" height="14" style="vertical-align:middle;margin-right:4px;"><circle cx="7" cy="7" r="4" fill="#E74C3C"/></svg>Chokepoint</span>';
+  html += `<span><svg width="16" height="12" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px;"><path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="#B08840" stroke="#fff" stroke-width="0.5"/></svg>Naval fleet</span>`;
+  html += `<span><svg width="16" height="12" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px;"><path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="#555"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="#555"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="#555"/></svg>Ground unit</span>`;
+  html += `<span><svg width="14" height="14" viewBox="0 0 24 24" style="vertical-align:middle;margin-right:4px;"><path d="M12 2 L14 8 L22 14 L22 16 L14 14 L14 20 L17 22 L17 23 L12 21 L7 23 L7 22 L10 20 L10 14 L2 16 L2 14 L10 8 Z" fill="#555"/></svg>Tactical air</span>`;
+  html += '<span><svg width="14" height="14" style="vertical-align:middle;margin-right:4px;"><rect width="14" height="14" fill="#A5C8A5" opacity="0.5"/><line x1="0" y1="0" x2="14" y2="14" stroke="#A06060" stroke-width="1.5" opacity="0.5"/></svg>Occupied territory</span>';
+  html += '</div>';
+
+  el.innerHTML = html;
+}
+
+// ===== UNIT ICON GALLERY =====
+(function() {
+  const el = document.getElementById('unit-icon-gallery');
+  const colors = [
+    {name:'Columbia', c:'#B08840'}, {name:'Cathay', c:'#C4A030'},
+    {name:'Nordostan', c:'#A06060'}, {name:'Heartland', c:'#5A9A5A'},
+    {name:'Persia', c:'#9A7040'}, {name:'Albion', c:'#4A7A8F'}
+  ];
+  const sizes = [32, 20, 14];
+
+  // === EXACT CONFIRMED ICON PATHS (from v1 naval/ad/strat, v2 drone, v6 tank V4) ===
+  function shipSVG(color, sz) {
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="${color}"/></svg>`;
+  }
+  function tankRSVG(color, sz) {
+    // V4 Tank RIGHT: 3 fills (no stroke) + 1 combined OUTER outline only
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="${color}"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="${color}"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="${color}"/><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="none" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></svg>`;
+  }
+  function tankLSVG(color, sz) {
+    // V4 Tank LEFT: 3 fills + 1 combined OUTER outline only
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="${color}"/><path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="${color}"/><path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="${color}"/><path d="M14 8 L6 8 L2 10 L2 11 L3 11 L3 13 L3 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 L21 15 L21 13 L22 13 L19 11 L14 11 Z" fill="none" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></svg>`;
+  }
+  function droneSVG(color, sz) {
+    // Tac-D: Drone/UAV with sensor dome — confirmed pick
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="${color}"/><circle cx="12" cy="5" r="2" fill="${color}"/></svg>`;
+  }
+  function radarSVG(color, sz) {
+    // AD-A: Radar dish umbrella — confirmed pick (exact v1 path)
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="${color}"/><rect x="11" y="9" width="2" height="11" fill="${color}"/><rect x="7" y="20" width="10" height="2" rx="1" fill="${color}"/></svg>`;
+  }
+  function icbmSVG(color, sz) {
+    // Strat-A: ICBM vertical — confirmed pick (exact v1 path)
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="${color}"/></svg>`;
+  }
+
+  const units = [
+    {name:'Naval — Warship Profile (v1-A)', fn:shipSVG},
+    {name:'Ground — Tank V4 Sloped (→ right)', fn:tankRSVG},
+    {name:'Ground — Tank V4 Sloped (← left)', fn:tankLSVG},
+    {name:'Tactical Air — Drone/UAV (v2-D)', fn:droneSVG},
+    {name:'Air Defense — Radar Dish (v1-A)', fn:radarSVG},
+    {name:'Strategic — ICBM (v1-A)', fn:icbmSVG},
+  ];
+
+  let html = '';
+  units.forEach(u => {
+    html += '<div style="margin-bottom:20px;"><h3 style="font-family:Playfair Display,serif;font-size:14px;margin-bottom:8px;">' + u.name + '</h3>';
+    html += '<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center;">';
+    // Sizes on light bg
+    sizes.forEach(sz => {
+      html += '<div style="text-align:center;">';
+      colors.forEach(col => {
+        html += u.fn(col.c, sz) + ' ';
+      });
+      html += '<div style="font-size:9px;color:#4A5568;">' + sz + 'px</div></div>';
+    });
+    // On dark bg
+    html += '<div style="background:#1B2838;padding:8px 12px;border-radius:4px;text-align:center;">';
+    colors.forEach(col => {
+      html += u.fn(col.c, 20) + ' ';
+    });
+    html += '<div style="font-size:9px;color:#8899AA;">on dark</div></div>';
+    html += '</div></div>';
+  });
+
+  html += '<p style="font-size:11px;color:#4A5568;margin-top:12px;">Colors: Columbia sand, Cathay gold, Nordostan rose, Heartland green, Persia bronze, Albion steel. Enemy tanks face each other on theater maps.</p>';
+  el.innerHTML = html;
+})();
+
+renderWarMap('map-strategic', false);
+renderMapLegend();
+
+// ===================== EASTERN EREB THEATER MAP =====================
+
+const theaterData = [
+  // Row 0: all Nordostan (rear)
+  {r:0,c:0,o:'nordostan'},{r:0,c:1,o:'nordostan'},{r:0,c:2,o:'nordostan'},{r:0,c:3,o:'nordostan'},{r:0,c:4,o:'nordostan'},
+  {r:0,c:5,o:'nordostan'},{r:0,c:6,o:'nordostan'},{r:0,c:7,o:'nordostan'},{r:0,c:8,o:'nordostan'},{r:0,c:9,o:'nordostan'},
+  // Row 1: all Nordostan (rear)
+  {r:1,c:0,o:'nordostan'},{r:1,c:1,o:'nordostan'},{r:1,c:2,o:'nordostan'},{r:1,c:3,o:'nordostan'},{r:1,c:4,o:'nordostan'},
+  {r:1,c:5,o:'nordostan'},{r:1,c:6,o:'nordostan'},{r:1,c:7,o:'nordostan'},{r:1,c:8,o:'nordostan'},{r:1,c:9,o:'nordostan'},
+  // Row 2: Heartland west + Nordostan east
+  {r:2,c:0,o:'heartland'},{r:2,c:1,o:'heartland'},{r:2,c:2,o:'heartland'},
+  {r:2,c:3,o:'nordostan'},{r:2,c:4,o:'nordostan'},{r:2,c:5,o:'nordostan'},{r:2,c:6,o:'nordostan'},{r:2,c:7,o:'nordostan'},{r:2,c:8,o:'nordostan'},{r:2,c:9,o:'nordostan'},
+  // Row 3: Heartland west, OCCUPIED center, Nordostan east
+  {r:3,c:0,o:'heartland'},{r:3,c:1,o:'heartland'},{r:3,c:2,o:'heartland'},{r:3,c:3,o:'heartland'},
+  {r:3,c:4,o:'heartland',occ:'nordostan'},{r:3,c:5,o:'heartland',occ:'nordostan'},
+  {r:3,c:6,o:'nordostan'},{r:3,c:7,o:'nordostan'},{r:3,c:8,o:'nordostan'},{r:3,c:9,o:'nordostan'},
+  // Row 4: Heartland west, OCCUPIED center, Nordostan east
+  {r:4,c:0,o:'heartland'},{r:4,c:1,o:'heartland'},{r:4,c:2,o:'heartland'},{r:4,c:3,o:'heartland'},{r:4,c:4,o:'heartland'},
+  {r:4,c:5,o:'heartland',occ:'nordostan'},{r:4,c:6,o:'heartland',occ:'nordostan'},
+  {r:4,c:7,o:'nordostan'},{r:4,c:8,o:'nordostan'},{r:4,c:9,o:'nordostan'},
+  // Row 5: Heartland dominant, occupied east side
+  {r:5,c:0,o:'heartland'},{r:5,c:1,o:'heartland'},{r:5,c:2,o:'heartland'},{r:5,c:3,o:'heartland'},{r:5,c:4,o:'heartland'},{r:5,c:5,o:'heartland'},
+  {r:5,c:6,o:'heartland',occ:'nordostan'},
+  {r:5,c:7,o:'nordostan'},{r:5,c:8,o:'nordostan'},{r:5,c:9,o:'nordostan'},
+  // Row 6: Heartland west, occupied east
+  {r:6,c:0,o:'heartland'},{r:6,c:1,o:'heartland'},{r:6,c:2,o:'heartland'},{r:6,c:3,o:'heartland'},{r:6,c:4,o:'heartland'},
+  {r:6,c:5,o:'heartland',occ:'nordostan'},{r:6,c:6,o:'heartland',occ:'nordostan'},{r:6,c:7,o:'heartland',occ:'nordostan'},
+  {r:6,c:8,o:'nordostan'},{r:6,c:9,o:'nordostan'},
+  // Row 7: Heartland west, gaps in center, occupied pockets
+  {r:7,c:0,o:'heartland'},{r:7,c:1,o:'heartland'},{r:7,c:2,o:'heartland'},
+  {r:7,c:4,o:'heartland',occ:'nordostan'},
+  {r:7,c:8,o:'nordostan'},{r:7,c:9,o:'nordostan'},
+  // Row 8: Heartland west, occupied pockets
+  {r:8,c:0,o:'heartland'},{r:8,c:1,o:'heartland'},{r:8,c:2,o:'heartland'},
+  {r:8,c:4,o:'heartland',occ:'nordostan'},{r:8,c:5,o:'heartland',occ:'nordostan'},
+  // Row 9: Heartland south (rear)
+  {r:9,c:0,o:'heartland'},{r:9,c:1,o:'heartland'},
+];
+
+// Die Hard marker
+const dieHard = {r:5, c:5};
+
+function renderTheaterMap(containerId) {
+  const hexSize = 28;  // same size as global map hexagons
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const margin = hexSize * 3;
+  const svgW = 11 * w + margin * 2;
+  const svgH = 11 * h * 0.75 + margin * 2;
+
+  function tCenter(r, c) {
+    const x = c * w + (r % 2 === 1 ? w/2 : 0) + margin;
+    const y = r * h * 0.75 + margin;
+    return {x, y};
+  }
+
+  const nordColor = '#D4A5A5';
+  const nordUI = '#A06060';
+  const heartColor = '#A5C8A5';
+  const heartUI = '#5A9A5A';
+  const occColor = '#B05050';
+  const lookup = {};
+  theaterData.forEach(d => { lookup[`${d.r},${d.c}`] = d; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;">`;
+
+  // Defs
+  svg += `<defs>
+    <pattern id="t-stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="6" stroke="${nordUI}" stroke-width="2" stroke-opacity="0.5"/>
+    </pattern>
+    <filter id="t-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feFlood flood-color="#C0392B" flood-opacity="0.3" result="color"/>
+      <feComposite in="color" in2="blur" operator="in" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>`;
+
+  // Grid labels — columns
+  for (let c = 0; c <= 9; c++) {
+    const {x} = tCenter(0, c);
+    svg += `<text x="${x}" y="${margin - hexSize * 1.2}" text-anchor="middle" font-size="9" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  // Grid labels — rows
+  for (let r = 0; r <= 9; r++) {
+    const {y} = tCenter(r, 0);
+    svg += `<text x="${margin - hexSize * 1.5}" y="${y + 3}" text-anchor="middle" font-size="9" font-weight="500" fill="#8494A7" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Empty hexes (background grid)
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 9; c++) {
+      const key = `${r},${c}`;
+      if (!lookup[key]) {
+        const {x, y} = tCenter(r, c);
+        svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="#D4E4F0" fill-opacity="0.4" stroke="#D8DCE5" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Land hexes
+  theaterData.forEach(d => {
+    const {x, y} = tCenter(d.r, d.c);
+    const baseColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const isOccupied = !!d.occ;
+    const isFrontLine = isOccupied; // occupied hexes are the front
+
+    svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="${baseColor}" fill-opacity="${isOccupied ? 0.35 : 0.55}" stroke="${isOccupied ? occColor : '#D8DCE5'}" stroke-width="${isOccupied ? 1.5 : 0.8}"${isFrontLine ? ' filter="url(#t-glow)"' : ''}/>`;
+
+    if (isOccupied) {
+      svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="url(#t-stripes)"/>`;
+    }
+
+    // Watermark emblem on each hex
+    const embSize = hexSize * 0.7;
+    const embColor = d.o === 'nordostan' ? nordColor : heartColor;
+    svg += `<g opacity="0.10" transform="translate(${x - embSize/2}, ${y - embSize/2})">${geometricSVG(d.o, embColor, embSize)}</g>`;
+  });
+
+  // Die Hard marker
+  const dh = tCenter(dieHard.r, dieHard.c);
+  svg += `<circle cx="${dh.x}" cy="${dh.y}" r="${hexSize * 0.35}" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="3 2"/>`;
+  svg += `<text x="${dh.x}" y="${dh.y + 3}" text-anchor="middle" font-size="7" font-weight="700" fill="#C0392B" font-family="'DM Sans',sans-serif">DIE HARD</text>`;
+
+  // Front line — draw a thick dashed line between occupied and free Heartland hexes
+  // Approximate front line path
+  // Country labels at centroid of each country's hexes
+  const theaterCountryHexes = {nordostan: [], heartland: []};
+  theaterData.forEach(d => {
+    const {x, y} = tCenter(d.r, d.c);
+    // Use the OWNER (not occupier) for label positioning
+    if (theaterCountryHexes[d.o]) theaterCountryHexes[d.o].push({x, y});
+  });
+  Object.entries(theaterCountryHexes).forEach(([cid, hexes]) => {
+    if (hexes.length === 0) return;
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    const color = cid === 'nordostan' ? nordUI : heartUI;
+    const name = cid === 'nordostan' ? 'NORDOSTAN' : 'HEARTLAND';
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}" font-family="'Playfair Display',serif" opacity="0.5" letter-spacing="1" style="pointer-events:none;">${name}</text>`;
+  });
+
+  // Military deployment indicators — proper SVG unit icons at 20-22px
+  // Tank facing: Nordostan faces LEFT (toward Heartland), Heartland faces RIGHT (toward Nordostan)
+  // Choson faces LEFT (alongside Nordostan)
+  const tIconSz = 20; // theater icon size
+
+  // SVG icon generators for theater map
+  // === CONFIRMED ICONS (exact same as gallery above) ===
+  function tankRight(color, sz) {
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="${color}"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="${color}"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="${color}"/><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="none" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></svg>`;
+  }
+  function tankLeft(color, sz) {
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="${color}"/><path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="${color}"/><path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="${color}"/><path d="M14 8 L6 8 L2 10 L2 11 L3 11 L3 13 L3 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 L21 15 L21 13 L22 13 L19 11 L14 11 Z" fill="none" stroke="#fff" stroke-width="0.6" stroke-linejoin="round"/></svg>`;
+  }
+  function jetIcon(color, sz) {
+    // Drone/UAV (tac-d confirmed)
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="${color}"/><circle cx="12" cy="5" r="2" fill="${color}"/></svg>`;
+  }
+  function radarIcon(color, sz) {
+    // Radar dish (ad-a confirmed, exact v1 path)
+    return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="${color}"/><rect x="11" y="9" width="2" height="11" fill="${color}"/><rect x="7" y="20" width="10" height="2" rx="1" fill="${color}"/></svg>`;
+  }
+
+  // Multi-row stacking helper for theater hexes
+  function renderTheaterIcons(cx, cy, icons) {
+    // icons: [{html, sz}]
+    const perRow = 3;
+    const overlap = tIconSz * 0.65;
+    const rowH = tIconSz * 0.6;
+    const rows = [];
+    let remaining = [...icons];
+    while (remaining.length > 0) {
+      rows.push(remaining.splice(0, perRow));
+    }
+    const totalH = rows.length * rowH;
+    rows.forEach((row, ri) => {
+      const rowY = cy - totalH/2 + ri * rowH;
+      row.forEach((icon, ci) => {
+        const ox = (ci - (row.length-1)/2) * overlap;
+        svg += `<g transform="translate(${cx+ox-icon.sz/2}, ${rowY-icon.sz/2})">${icon.html}</g>`;
+      });
+    });
+  }
+
+  // Deployment data with side info
+  const theaterDeployments = [
+    // Nordostan front line forces (8 ground + 4 tac air + 1 AD)
+    {r:3,c:7,type:'ground',count:3,color:nordUI,side:'nord'},
+    {r:4,c:8,type:'ground',count:3,color:nordUI,side:'nord'},
+    {r:5,c:8,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:3,c:8,type:'air',count:2,color:nordUI,side:'nord'},
+    {r:4,c:9,type:'air',count:2,color:nordUI,side:'nord'},
+    {r:4,c:7,type:'ad',count:1,color:nordUI,side:'nord'},
+    // Nordostan occupation forces (5 ground)
+    {r:3,c:5,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:5,c:6,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:6,c:6,type:'ground',count:1,color:nordUI,side:'nord'},
+    // Choson support (2 ground alongside Nordostan)
+    {r:5,c:7,type:'ground',count:2,color:'#5A5A5A',side:'choson'},
+    // Heartland front line (7 ground + 2 tac air)
+    {r:3,c:2,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:4,c:3,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:5,c:4,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:6,c:3,type:'ground',count:1,color:heartUI,side:'heart'},
+    {r:4,c:2,type:'air',count:1,color:heartUI,side:'heart'},
+    {r:5,c:3,type:'air',count:1,color:heartUI,side:'heart'},
+    // Heartland reserve (3 ground + 1 air + 1 AD)
+    {r:8,c:1,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:9,c:0,type:'ground',count:1,color:heartUI,side:'heart'},
+    {r:8,c:0,type:'air',count:1,color:heartUI,side:'heart'},
+    {r:7,c:1,type:'ad',count:1,color:heartUI,side:'heart'},
+  ];
+
+  // Group deployments by hex to stack properly
+  const hexGroups = {};
+  theaterDeployments.forEach(dep => {
+    const key = `${dep.r},${dep.c}`;
+    if (!hexGroups[key]) hexGroups[key] = [];
+    // Build icon list for this hex
+    for (let i = 0; i < dep.count; i++) {
+      let html = '';
+      if (dep.type === 'ground') {
+        html = (dep.side === 'heart') ? tankRight(dep.color, tIconSz) : tankLeft(dep.color, tIconSz);
+      } else if (dep.type === 'air') {
+        html = jetIcon(dep.color, tIconSz);
+      } else if (dep.type === 'ad') {
+        html = radarIcon(dep.color, tIconSz);
+      }
+      hexGroups[key].push({html, sz: tIconSz});
+    }
+  });
+
+  // Render each hex's icons with multi-row stacking
+  Object.entries(hexGroups).forEach(([key, icons]) => {
+    const [r, c] = key.split(',').map(Number);
+    const {x, y} = tCenter(r, c);
+    renderTheaterIcons(x, y, icons);
+  });
+
+  // Theater legend with proper icons (larger, 16px)
+  const legY = svgH - 32;
+  const legX = margin;
+  const legSz = 16;
+  // Tank icon
+  svg += `<g transform="translate(${legX}, ${legY})">${tankRight('#555', legSz)}</g>`;
+  svg += `<text x="${legX + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#4A5568" font-family="'DM Sans',sans-serif">Ground</text>`;
+  // Jet icon
+  svg += `<g transform="translate(${legX + 80}, ${legY})">${jetIcon('#555', legSz)}</g>`;
+  svg += `<text x="${legX + 80 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#4A5568" font-family="'DM Sans',sans-serif">Tac Air</text>`;
+  // Radar icon
+  svg += `<g transform="translate(${legX + 160}, ${legY})">${radarIcon('#555', legSz)}</g>`;
+  svg += `<text x="${legX + 160 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#4A5568" font-family="'DM Sans',sans-serif">Air Def</text>`;
+  // Occupied
+  svg += `<rect x="${legX + 240}" y="${legY + 1}" width="${legSz}" height="${legSz}" fill="${heartColor}" fill-opacity="0.35" stroke="#B05050" stroke-width="1"/>`;
+  svg += `<text x="${legX + 240 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#B05050" font-family="'DM Sans',sans-serif">Occupied</text>`;
+  // Die Hard
+  svg += `<circle cx="${legX + 330 + legSz/2}" cy="${legY + legSz/2}" r="${legSz*0.4}" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="2 1"/>`;
+  svg += `<text x="${legX + 330 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#C0392B" font-family="'DM Sans',sans-serif">Die Hard</text>`;
+  // Choson label
+  svg += `<g transform="translate(${legX + 415}, ${legY})">${tankLeft('#5A5A5A', legSz)}</g>`;
+  svg += `<text x="${legX + 415 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#5A5A5A" font-family="'DM Sans',sans-serif">Choson</text>`;
+
+  svg += '</svg>';
+  document.getElementById(containerId).innerHTML = svg;
+}
+
+renderTheaterMap('map-theater');
+
+// ===================================================================
+// THEME TOGGLE
+// ===================================================================
+let currentTheme = 'light';
+
+function toggleTheme() {
+  const root = document.documentElement;
+  const btn = document.getElementById('theme-toggle-btn');
+  if (currentTheme === 'light') {
+    root.classList.add('dark-theme');
+    currentTheme = 'dark';
+    btn.textContent = 'Light Theme';
+  } else {
+    root.classList.remove('dark-theme');
+    currentTheme = 'light';
+    btn.textContent = 'Dark Theme';
+  }
+}
+
+// ===================================================================
+// MAP THEME TOGGLE
+// ===================================================================
+let mapThemes = { strategic: 'light', theater: 'light' };
+
+function setMapTheme(theme, btn) {
+  const mapType = btn.getAttribute('data-map');
+  mapThemes[mapType] = theme;
+  // Update button states
+  const bar = btn.parentElement;
+  bar.querySelectorAll('.map-toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Re-render maps
+  if (mapType === 'strategic') {
+    renderWarMap('map-strategic', false, theme);
+  } else {
+    renderTheaterMap('map-theater', theme);
+  }
+}
+
+// Patch renderWarMap to accept theme parameter
+const _origRenderWarMap = renderWarMap;
+renderWarMap = function(containerId, crisisMode, mapTheme) {
+  mapTheme = mapTheme || 'light';
+  const isDark = mapTheme === 'dark';
+  const waterColor = isDark ? '#1B2A3E' : '#D4E4F0';
+  const waterOpacity = isDark ? '0.6' : '0.4';
+  const hexOpacity = isDark ? '0.7' : '0.55';
+  const borderColor = isDark ? '#253D54' : '#D8DCE5';
+  const labelColor = isDark ? '#D4DEE8' : '#1A2332';
+  const labelOpacity = isDark ? '0.8' : '0.7';
+  const bgColor = isDark ? '#0D1B2A' : 'transparent';
+  const gridLabelColor = isDark ? '#506070' : '#8494A7';
+
+  const hexSize = 28;
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const svgW = 21 * w + hexSize * 5;
+  const svgH = 11 * h * 0.75 + hexSize * 5;
+
+  const hexLookup = {};
+  hexData.forEach(hd => { hexLookup[`${hd.r},${hd.c}`] = hd; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;background:${bgColor};border-radius:8px;">`;
+
+  if (crisisMode) {
+    svg += `<defs>
+      <filter id="glow-red" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#C0392B" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#E67E22" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="glow-yellow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="blur"/><feFlood flood-color="#F1C40F" flood-opacity="0.5" result="color"/><feComposite in="color" in2="blur" operator="in" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#A06060" stroke-width="2" stroke-opacity="0.4"/></pattern>
+    </defs>`;
+  } else {
+    svg += `<defs><pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#A06060" stroke-width="2" stroke-opacity="0.4"/></pattern></defs>`;
+  }
+
+  // Grid labels
+  for (let c = 0; c <= 19; c++) {
+    const pos = hexCenter(0, c, hexSize);
+    svg += `<text x="${pos.x}" y="${hexSize * 0.8}" text-anchor="middle" font-size="8" font-weight="500" fill="${gridLabelColor}" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  for (let r = 0; r <= 9; r++) {
+    const pos = hexCenter(r, 0, hexSize);
+    svg += `<text x="${hexSize * 0.7}" y="${pos.y + 3}" text-anchor="middle" font-size="8" font-weight="500" fill="${gridLabelColor}" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Water hexes
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 19; c++) {
+      const pos = hexCenter(r, c, hexSize);
+      const key = `${r},${c}`;
+      if (!hexLookup[key]) {
+        svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="${waterColor}" fill-opacity="${waterOpacity}" stroke="${borderColor}" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Land hexes
+  hexData.forEach(hd => {
+    const pos = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    let filter = '';
+    if (crisisMode) {
+      if (hd.country === 'heartland' || hd.occupied) filter = ' filter="url(#glow-red)"';
+      if (hd.r === 6 && hd.c >= 16 && hd.c <= 17) filter = ' filter="url(#glow-yellow)"';
+      if (hd.country === 'formosa') filter = ' filter="url(#glow-yellow)"';
+    }
+    svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="${c.mapColor||c.color}" fill-opacity="${hexOpacity}" stroke="${borderColor}" stroke-width="1"${filter}/>`;
+    if (hd.occupied) {
+      svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="url(#stripes)" stroke="#C0392B" stroke-width="1.5"/>`;
+    }
+  });
+
+  // Chokepoints
+  chokepoints.forEach(cp => {
+    const pos = hexCenter(cp.r, cp.c, hexSize);
+    let filter = '';
+    if (crisisMode) {
+      if (cp.name === 'Gulf Gate') filter = ' filter="url(#glow-orange)"';
+      if (cp.name === 'Formosa Strait') filter = ' filter="url(#glow-yellow)"';
+      if (cp.name === 'Caribe Passage') filter = ' filter="url(#glow-orange)"';
+    }
+    svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="none" stroke="#C0392B" stroke-width="1.2" stroke-dasharray="3 2" stroke-opacity="0.7"${filter}/>`;
+    svg += `<text x="${pos.x}" y="${pos.y+1}" text-anchor="middle" dominant-baseline="middle" font-size="6" font-weight="600" fill="#E74C3C" font-family="'DM Sans',sans-serif" style="pointer-events:none;">${cp.name}</text>`;
+  });
+
+  // Watermark emblems
+  hexData.forEach(hd => {
+    const pos = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    const embSize = hexSize * 0.9;
+    svg += `<g opacity="0.12" transform="translate(${pos.x - embSize/2}, ${pos.y - embSize/2})">${geometricSVG(hd.country, c.mapColor||c.color, embSize)}</g>`;
+  });
+
+  // Country labels
+  const countryHexesMap = {};
+  hexData.forEach(hd => {
+    if (!countryHexesMap[hd.country]) countryHexesMap[hd.country] = [];
+    const pos = hexCenter(hd.r, hd.c, hexSize);
+    countryHexesMap[hd.country].push(pos);
+  });
+  Object.entries(countryHexesMap).forEach(([cid, hexes]) => {
+    const c = getCountry(cid);
+    if (!c) return;
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    const fontSize = hexes.length >= 6 ? 9 : hexes.length >= 3 ? 7.5 : 5.5;
+    const fontFamily = hexes.length >= 3 ? "'Playfair Display',serif" : "'DM Sans',sans-serif";
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="${fontSize}" font-weight="600" fill="${labelColor}" font-family="${fontFamily}" opacity="${labelOpacity}" letter-spacing="0.3" style="text-transform:uppercase;pointer-events:none;">${c.name}</text>`;
+  });
+
+  // (Single-hex labels now handled above via unified centroid approach)
+  // Skip legacy single-hex block
+  const _skipSingleHex = true; if (!_skipSingleHex) hexData.forEach(hd => {
+    if (!countryHexesMap[hd.country] || countryHexesMap[hd.country].length !== 1) return;
+    const pos = hexCenter(hd.r, hd.c, hexSize);
+    const c = getCountry(hd.country);
+    if (!c) return;
+    svg += `<text x="${pos.x}" y="${pos.y + hexSize * 0.35}" text-anchor="middle" dominant-baseline="middle" font-size="5.5" font-weight="600" fill="${labelColor}" font-family="'DM Sans',sans-serif" opacity="0.7" style="pointer-events:none;">${c.name}</text>`;
+  });
+
+  // Naval fleets
+  const strokeColor = isDark ? '#0D1B2A' : '#fff';
+  navalFleets.forEach(fleet => {
+    const pos = hexCenter(fleet.r, fleet.c, hexSize);
+    const c = getCountry(fleet.country);
+    if (!c) return;
+    const iconSz = 19; // ships 20% larger than ground units
+    const overlap = iconSz * 0.55;
+    for (let i = 0; i < fleet.count; i++) {
+      const ox = (i - (fleet.count-1)/2) * overlap;
+      svg += `<g transform="translate(${pos.x+ox-iconSz/2}, ${pos.y-iconSz/2})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="${c.color}" stroke="${strokeColor}" stroke-width="0.5"/></svg></g>`;
+    }
+  });
+
+  // Ground deployments
+  const globalGroundDeployments = [
+    {r:5,c:11,country:'persia',count:4},
+    {r:3,c:9,country:'columbia',count:2},
+    {r:5,c:14,country:'cathay',count:5},
+    {r:4,c:16,country:'cathay',count:4},
+    {r:2,c:13,country:'nordostan',count:5},
+    {r:7,c:13,country:'bharata',count:10},
+    {r:1,c:9,country:'freeland',count:5},
+    {r:3,c:8,country:'teutonia',count:6},
+    {r:6,c:17,country:'formosa',count:4},
+  ];
+
+  globalGroundDeployments.forEach(function(dep) {
+    const pos = hexCenter(dep.r, dep.c, hexSize);
+    const c = getCountry(dep.country);
+    if (!c) return;
+    const iconSz = 16;
+    const overlap = iconSz * 0.65;
+    const perRow = 3;
+    const total = Math.min(dep.count, 6);
+    const rows = [];
+    let remaining = total;
+    while (remaining > 0) { const thisRow = Math.min(remaining, perRow); rows.push(thisRow); remaining -= thisRow; }
+    rows.forEach((rowCount, ri) => {
+      const rowY = pos.y - (rows.length - 1) * (iconSz * 0.55) / 2 + ri * (iconSz * 0.55);
+      for (let i = 0; i < rowCount; i++) {
+        const ox = (i - (rowCount-1)/2) * overlap;
+        svg += `<g transform="translate(${pos.x+ox-iconSz/2}, ${rowY-iconSz/2})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="${c.color}" stroke="${strokeColor}" stroke-width="0.5"/></svg></g>`;
+      }
+    });
+    if (dep.count > 6) {
+      svg += `<text x="${pos.x + perRow * overlap / 2 + 4}" y="${pos.y + 4}" font-size="7" font-weight="700" fill="${c.color}" font-family="'JetBrains Mono',monospace">+${dep.count-6}</text>`;
+    }
+  });
+
+  // Air deployments
+  const globalAirDeployments = [
+    {r:4,c:3,country:'columbia',count:5},
+    {r:5,c:14,country:'cathay',count:5},
+    {r:7,c:13,country:'bharata',count:4},
+  ];
+  globalAirDeployments.forEach(dep => {
+    const pos = hexCenter(dep.r, dep.c, hexSize);
+    const c = getCountry(dep.country);
+    if (!c) return;
+    const iconSz = 14;
+    const overlap = iconSz * 0.6;
+    const showCount = Math.min(dep.count, 3);
+    for (let i = 0; i < showCount; i++) {
+      const ox = (i - (showCount-1)/2) * overlap;
+      svg += `<g transform="translate(${pos.x+ox-iconSz/2}, ${pos.y-iconSz-4})"><svg width="${iconSz}" height="${iconSz}" viewBox="0 0 24 24"><path d="M12 2 L14 8 L22 14 L22 16 L14 14 L14 20 L17 22 L17 23 L12 21 L7 23 L7 22 L10 20 L10 14 L2 16 L2 14 L10 8 Z" fill="${c.color}" stroke="${strokeColor}" stroke-width="0.5"/></svg></g>`;
+    }
+    if (dep.count > 3) {
+      svg += `<text x="${pos.x + showCount * overlap / 2 + 2}" y="${pos.y - iconSz}" font-size="7" font-weight="700" fill="${c.color}" font-family="'JetBrains Mono',monospace">+${dep.count-3}</text>`;
+    }
+  });
+
+  svg += '</svg>';
+  document.getElementById(containerId).innerHTML = svg;
+};
+
+// Patch renderTheaterMap to accept theme parameter
+const _origRenderTheaterMap = renderTheaterMap;
+renderTheaterMap = function(containerId, mapTheme) {
+  mapTheme = mapTheme || 'light';
+  const isDark = mapTheme === 'dark';
+  const waterColor = isDark ? '#1B2A3E' : '#D4E4F0';
+  const waterOpacity = isDark ? '0.6' : '0.4';
+  const borderColor = isDark ? '#253D54' : '#D8DCE5';
+  const gridLabelColor = isDark ? '#506070' : '#8494A7';
+  const bgColor = isDark ? '#0D1B2A' : 'transparent';
+  const strokeColor = isDark ? '#0D1B2A' : '#fff';
+
+  const hexSize = 28;
+  const w = hexSize * Math.sqrt(3);
+  const h = hexSize * 2;
+  const margin = hexSize * 3;
+  const svgW = 11 * w + margin * 2;
+  const svgH = 11 * h * 0.75 + margin * 2;
+
+  function tCenter(r, c) {
+    const x = c * w + (r % 2 === 1 ? w/2 : 0) + margin;
+    const y = r * h * 0.75 + margin;
+    return {x, y};
+  }
+
+  const nordColor = '#D4A5A5';
+  const nordUI = '#A06060';
+  const heartColor = '#A5C8A5';
+  const heartUI = '#5A9A5A';
+  const occColor = '#B05050';
+  const lookup = {};
+  theaterData.forEach(d => { lookup[`${d.r},${d.c}`] = d; });
+
+  let svg = `<svg width="100%" viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="font-family:'DM Sans',sans-serif;background:${bgColor};border-radius:8px;">`;
+
+  svg += `<defs>
+    <pattern id="t-stripes" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="${nordUI}" stroke-width="2" stroke-opacity="0.5"/></pattern>
+    <filter id="t-glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="blur"/><feFlood flood-color="#C0392B" flood-opacity="0.3" result="color"/><feComposite in="color" in2="blur" operator="in" result="glow"/><feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>`;
+
+  // Grid labels
+  for (let c = 0; c <= 9; c++) {
+    const pos = tCenter(0, c);
+    svg += `<text x="${pos.x}" y="${margin - hexSize * 1.2}" text-anchor="middle" font-size="9" font-weight="500" fill="${gridLabelColor}" font-family="'JetBrains Mono',monospace">${c + 1}</text>`;
+  }
+  for (let r = 0; r <= 9; r++) {
+    const pos = tCenter(r, 0);
+    svg += `<text x="${margin - hexSize * 1.5}" y="${pos.y + 3}" text-anchor="middle" font-size="9" font-weight="500" fill="${gridLabelColor}" font-family="'JetBrains Mono',monospace">${r + 1}</text>`;
+  }
+
+  // Empty hexes
+  for (let r = 0; r <= 9; r++) {
+    for (let c = 0; c <= 9; c++) {
+      const key = `${r},${c}`;
+      if (!lookup[key]) {
+        const pos = tCenter(r, c);
+        svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="${waterColor}" fill-opacity="${waterOpacity}" stroke="${borderColor}" stroke-width="0.5"/>`;
+      }
+    }
+  }
+
+  // Land hexes
+  theaterData.forEach(d => {
+    const pos = tCenter(d.r, d.c);
+    const baseColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const isOccupied = !!d.occ;
+    const isFrontLine = isOccupied;
+    svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="${baseColor}" fill-opacity="${isOccupied ? (isDark ? 0.4 : 0.35) : (isDark ? 0.7 : 0.55)}" stroke="${isOccupied ? occColor : borderColor}" stroke-width="${isOccupied ? 1.5 : 0.8}"${isFrontLine ? ' filter="url(#t-glow)"' : ''}/>`;
+    if (isOccupied) {
+      svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="url(#t-stripes)"/>`;
+    }
+    const embSize = hexSize * 0.7;
+    const embColor = d.o === 'nordostan' ? nordColor : heartColor;
+    svg += `<g opacity="0.10" transform="translate(${pos.x - embSize/2}, ${pos.y - embSize/2})">${geometricSVG(d.o, embColor, embSize)}</g>`;
+  });
+
+  // Die Hard
+  const dh = tCenter(dieHard.r, dieHard.c);
+  svg += `<circle cx="${dh.x}" cy="${dh.y}" r="${hexSize * 0.35}" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="3 2"/>`;
+  svg += `<text x="${dh.x}" y="${dh.y + 3}" text-anchor="middle" font-size="7" font-weight="700" fill="#C0392B" font-family="'DM Sans',sans-serif">DIE HARD</text>`;
+
+  // Country labels
+  const theaterCountryHexes2 = {nordostan: [], heartland: []};
+  theaterData.forEach(d => {
+    const pos = tCenter(d.r, d.c);
+    if (theaterCountryHexes2[d.o]) theaterCountryHexes2[d.o].push(pos);
+  });
+  Object.entries(theaterCountryHexes2).forEach(([cid, hexes]) => {
+    if (hexes.length === 0) return;
+    const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
+    const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
+    const color = cid === 'nordostan' ? nordUI : heartUI;
+    const name = cid === 'nordostan' ? 'NORDOSTAN' : 'HEARTLAND';
+    svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}" font-family="'Playfair Display',serif" opacity="${isDark ? 0.6 : 0.5}" letter-spacing="1" style="pointer-events:none;">${name}</text>`;
+  });
+
+  // Theater icons
+  const tIconSz = 20;
+  function tankRight(color, sz) { return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="${color}"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="${color}"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="${color}"/><path d="M10 8 L18 8 L22 10 L22 11 L21 11 L21 13 L21 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 L3 15 L3 13 L2 13 L5 11 L10 11 Z" fill="none" stroke="${strokeColor}" stroke-width="0.6" stroke-linejoin="round"/></svg>`; }
+  function tankLeft(color, sz) { return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="${color}"/><path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="${color}"/><path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="${color}"/><path d="M14 8 L6 8 L2 10 L2 11 L3 11 L3 13 L3 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 L21 15 L21 13 L22 13 L19 11 L14 11 Z" fill="none" stroke="${strokeColor}" stroke-width="0.6" stroke-linejoin="round"/></svg>`; }
+  function jetIcon(color, sz) { return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="${color}" stroke="${strokeColor}" stroke-width="0.5"/><circle cx="12" cy="5" r="2" fill="${color}"/></svg>`; }
+  function radarIcon(color, sz) { return `<svg width="${sz}" height="${sz}" viewBox="0 0 24 24"><path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="${color}" stroke="${strokeColor}" stroke-width="0.5"/><rect x="11" y="9" width="2" height="11" fill="${color}"/><rect x="7" y="20" width="10" height="2" rx="1" fill="${color}"/></svg>`; }
+
+  function renderTheaterIcons2(cx, cy, icons) {
+    const perRow = 3;
+    const overlap = tIconSz * 0.65;
+    const rowH = tIconSz * 0.6;
+    const rows = [];
+    let remaining = [...icons];
+    while (remaining.length > 0) { rows.push(remaining.splice(0, perRow)); }
+    const totalH = rows.length * rowH;
+    rows.forEach((row, ri) => {
+      const rowY = cy - totalH/2 + ri * rowH;
+      row.forEach((icon, ci) => {
+        const ox = (ci - (row.length-1)/2) * overlap;
+        svg += `<g transform="translate(${cx+ox-icon.sz/2}, ${rowY-icon.sz/2})">${icon.html}</g>`;
+      });
+    });
+  }
+
+  const theaterDeployments2 = [
+    {r:3,c:7,type:'ground',count:3,color:nordUI,side:'nord'},
+    {r:4,c:8,type:'ground',count:3,color:nordUI,side:'nord'},
+    {r:5,c:8,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:3,c:8,type:'air',count:2,color:nordUI,side:'nord'},
+    {r:4,c:9,type:'air',count:2,color:nordUI,side:'nord'},
+    {r:4,c:7,type:'ad',count:1,color:nordUI,side:'nord'},
+    {r:3,c:5,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:5,c:6,type:'ground',count:2,color:nordUI,side:'nord'},
+    {r:6,c:6,type:'ground',count:1,color:nordUI,side:'nord'},
+    {r:5,c:7,type:'ground',count:2,color:'#5A5A5A',side:'choson'},
+    {r:3,c:2,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:4,c:3,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:5,c:4,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:6,c:3,type:'ground',count:1,color:heartUI,side:'heart'},
+    {r:4,c:2,type:'air',count:1,color:heartUI,side:'heart'},
+    {r:5,c:3,type:'air',count:1,color:heartUI,side:'heart'},
+    {r:8,c:1,type:'ground',count:2,color:heartUI,side:'heart'},
+    {r:9,c:0,type:'ground',count:1,color:heartUI,side:'heart'},
+    {r:8,c:0,type:'air',count:1,color:heartUI,side:'heart'},
+    {r:7,c:1,type:'ad',count:1,color:heartUI,side:'heart'},
+  ];
+
+  const hexGroups2 = {};
+  theaterDeployments2.forEach(dep => {
+    const key = `${dep.r},${dep.c}`;
+    if (!hexGroups2[key]) hexGroups2[key] = [];
+    for (let i = 0; i < dep.count; i++) {
+      let html = '';
+      if (dep.type === 'ground') { html = (dep.side === 'heart') ? tankRight(dep.color, tIconSz) : tankLeft(dep.color, tIconSz); }
+      else if (dep.type === 'air') { html = jetIcon(dep.color, tIconSz); }
+      else if (dep.type === 'ad') { html = radarIcon(dep.color, tIconSz); }
+      hexGroups2[key].push({html, sz: tIconSz});
+    }
+  });
+
+  Object.entries(hexGroups2).forEach(([key, icons]) => {
+    const [r, c] = key.split(',').map(Number);
+    const pos = tCenter(r, c);
+    renderTheaterIcons2(pos.x, pos.y, icons);
+  });
+
+  // Theater legend
+  const legTextColor = isDark ? '#7A8FA3' : '#4A5568';
+  const legY = svgH - 32;
+  const legX = margin;
+  const legSz = 16;
+  svg += `<g transform="translate(${legX}, ${legY})">${tankRight('#555', legSz)}</g>`;
+  svg += `<text x="${legX + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="${legTextColor}" font-family="'DM Sans',sans-serif">Ground</text>`;
+  svg += `<g transform="translate(${legX + 80}, ${legY})">${jetIcon('#555', legSz)}</g>`;
+  svg += `<text x="${legX + 80 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="${legTextColor}" font-family="'DM Sans',sans-serif">Tac Air</text>`;
+  svg += `<g transform="translate(${legX + 160}, ${legY})">${radarIcon('#555', legSz)}</g>`;
+  svg += `<text x="${legX + 160 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="${legTextColor}" font-family="'DM Sans',sans-serif">Air Def</text>`;
+  svg += `<rect x="${legX + 240}" y="${legY + 1}" width="${legSz}" height="${legSz}" fill="${heartColor}" fill-opacity="0.35" stroke="#B05050" stroke-width="1"/>`;
+  svg += `<text x="${legX + 240 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#B05050" font-family="'DM Sans',sans-serif">Occupied</text>`;
+  svg += `<circle cx="${legX + 330 + legSz/2}" cy="${legY + legSz/2}" r="${legSz*0.4}" fill="none" stroke="#C0392B" stroke-width="1.5" stroke-dasharray="2 1"/>`;
+  svg += `<text x="${legX + 330 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#C0392B" font-family="'DM Sans',sans-serif">Die Hard</text>`;
+  svg += `<g transform="translate(${legX + 415}, ${legY})">${tankLeft('#5A5A5A', legSz)}</g>`;
+  svg += `<text x="${legX + 415 + legSz + 4}" y="${legY + legSz*0.65}" font-size="10" fill="#5A5A5A" font-family="'DM Sans',sans-serif">Choson</text>`;
+
+  svg += '</svg>';
+  document.getElementById(containerId).innerHTML = svg;
+};
+
+// Re-render maps with new themed functions
+renderWarMap('map-strategic', false, 'light');
+renderTheaterMap('map-theater', 'light');
+
+// ===================================================================
+// THEME COMPARISON SECTION — Side-by-Side Rendering
+// ===================================================================
+
+function renderCompareSection() {
+  const c = getCountry('columbia');
+
+  // Theme configs (hardcoded, not CSS variables)
+  const light = {
+    name: 'Strategic Paper',
+    base: '#F5F6F8', baseMid: '#EBEDF2', text: '#1A2332', textSec: '#4A5568',
+    action: '#1A5276', accent: '#C4922A', card: '#FFFFFF', border: '#D8DCE5',
+    danger: '#C0392B', success: '#2ECC71',
+  };
+  const dark = {
+    name: 'Midnight Intelligence',
+    base: '#0D1B2A', baseMid: '#1B2A3E', text: '#D4DEE8', textSec: '#7A8FA3',
+    action: '#5B9BD5', accent: '#E8B84D', card: '#1B2A3E', border: '#253D54',
+    danger: '#D45B5B', success: '#5BAD7A',
+  };
+  const themes = [light, dark];
+
+  // --- DASHBOARD ---
+  document.getElementById('compare-dashboard').innerHTML = themes.map(t => {
+    const isD = t === dark;
+    return `<div class="compare-panel compare-panel-${isD ? 'dark' : 'light'}">
+      <div class="compare-col-header" style="background:${t.action};color:#fff;">${t.name}</div>
+      <div style="background:${t.base};overflow:hidden;">
+        <!-- Top Nav -->
+        <div style="display:flex;align-items:center;gap:12px;padding:6px 12px;background:${isD ? '#0A1420' : '#1A2332'};color:#fff;font-size:10px;">
+          <span style="font-family:'Playfair Display',serif;font-weight:700;color:${t.accent};font-size:11px;">MetaGames</span>
+          <span style="font-weight:600;letter-spacing:1px;text-transform:uppercase;font-size:8px;">The Thucydides Trap</span>
+          <span style="flex:1;"></span>
+          <span style="background:${t.action};padding:2px 6px;border-radius:3px;font-size:8px;font-weight:600;">Round 3</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${t.accent};">42:15</span>
+          <span style="display:inline-flex;align-items:center;gap:3px;">${geometricSVG('columbia', '#fff', 14)} <span style="font-weight:600;">DEALER</span></span>
+        </div>
+        <!-- Main -->
+        <div style="display:flex;min-height:200px;">
+          <!-- Sidebar -->
+          <div style="width:90px;background:${t.card};border-right:1px solid ${t.border};padding:8px 0;">
+            <div style="border-left:3px solid ${c.color};padding:4px 8px;font-size:9px;font-weight:600;color:${t.action};background:${c.color}10;">Home</div>
+            ${['Map','Budget','Military','Diplo'].map(item => `<div style="padding:4px 8px 4px 11px;font-size:9px;color:${t.textSec};">${item}</div>`).join('')}
+            <div style="margin-top:8px;padding:6px 8px;text-align:center;">
+              ${geometricSVG('columbia', c.color, 32)}
+              <div style="font-size:8px;font-weight:600;margin-top:2px;color:${t.text};">Columbia</div>
+            </div>
+          </div>
+          <!-- Content -->
+          <div style="flex:1;padding:10px 12px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+              <div style="background:${t.card};border:1px solid ${t.border};border-radius:6px;padding:8px;border-top:2px solid ${t.success};">
+                <div style="font-size:8px;color:${t.textSec};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">GDP</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${t.accent};">285.1</div>
+                <div style="font-size:8px;color:${t.success};font-weight:600;">+1.8%</div>
+              </div>
+              <div style="background:${t.card};border:1px solid ${t.border};border-radius:6px;padding:8px;border-top:2px solid ${t.danger};">
+                <div style="font-size:8px;color:${t.textSec};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Stability</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${t.accent};">6.95</div>
+                <div style="font-size:8px;color:${t.danger};font-weight:600;">-0.05</div>
+              </div>
+              <div style="background:${t.card};border:1px solid ${t.border};border-radius:6px;padding:8px;border-top:2px solid ${t.danger};">
+                <div style="font-size:8px;color:${t.textSec};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">Oil Price</div>
+                <div style="font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;color:${t.accent};">$198</div>
+                <div style="font-size:8px;color:${t.danger};font-weight:600;">-$39</div>
+              </div>
+            </div>
+            <!-- Activity Feed -->
+            <div style="background:${t.card};border:1px solid ${t.border};border-radius:6px;padding:8px;">
+              <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${t.text};margin-bottom:4px;">Activity Feed</div>
+              <div style="font-size:9px;color:${t.textSec};line-height:1.8;">
+                <div><span style="color:${t.danger};font-weight:600;">MILITARY</span> Gulf Gate assault</div>
+                <div><span style="color:${t.action};font-weight:600;">DIPLO</span> Meeting from Pathfinder</div>
+                <div><span style="color:#E67E22;font-weight:600;">DOMESTIC</span> Midterms in 1 round</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Bottom -->
+        <div style="display:flex;align-items:center;gap:12px;padding:4px 12px;background:${t.card};border-top:1px solid ${t.border};font-size:8px;color:${t.textSec};">
+          <span style="display:inline-flex;align-items:center;gap:3px;"><span style="width:6px;height:6px;border-radius:50%;background:${c.color};display:inline-block;"></span> Columbia</span>
+          <span>Economy: <strong style="color:${t.success};">NORMAL</strong></span>
+          <span style="flex:1;"></span>
+          <span>Round 3 / 8</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // --- PRESENTATION SLIDE ---
+  document.getElementById('compare-slide').innerHTML = themes.map(t => {
+    const isD = t === dark;
+    const slideBg = isD ? '#0A1420' : '#1B2838';
+    const slideCard = isD ? '#1B2A3E' : '#243447';
+    const slideCardBorder = isD ? '#253D54' : '#2D4A5E';
+    const slideSubtext = isD ? '#506070' : '#5A7A94';
+    const slideText = isD ? '#D4DEE8' : '#D0D8E0';
+    return `<div class="compare-panel compare-panel-${isD ? 'dark' : 'light'}">
+      <div class="compare-col-header" style="background:${t.action};color:#fff;">${t.name}</div>
+      <div style="aspect-ratio:16/9;background:${slideBg};position:relative;overflow:hidden;padding:16px 20px;display:flex;flex-direction:column;">
+        <div style="margin-bottom:12px;">
+          <div style="font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;color:#fff;letter-spacing:0.5px;">THE THUCYDIDES TRAP</div>
+          <div style="font-size:10px;color:${slideSubtext};margin-top:1px;">Round 3 World Briefing</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          ${[{label:'OIL PRICE',value:'$198'},{label:'POWER GAP',value:'0.693'},{label:'ACTIVE WARS',value:'2'},{label:'NUCLEAR',value:'0'}].map(m => `
+            <div style="background:${slideCard};border:1px solid ${slideCardBorder};border-radius:4px;padding:6px 8px;min-width:55px;">
+              <div style="font-size:7px;color:${slideSubtext};text-transform:uppercase;letter-spacing:0.5px;font-weight:600;">${m.label}</div>
+              <div style="font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:${t.accent};margin-top:1px;">${m.value}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="font-size:9px;color:${slideText};line-height:1.8;flex:1;">
+          <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#9A7040;margin-right:4px;vertical-align:middle;"></span>Gulf Gate breached</div>
+          <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#C4A030;margin-right:4px;vertical-align:middle;"></span>Cathay: 7 ships near Formosa</div>
+          <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#A06060;margin-right:4px;vertical-align:middle;"></span>Nordostan treasury depleted</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;">
+          <span style="font-family:'Playfair Display',serif;font-size:9px;color:${slideSubtext};font-weight:600;">MetaGames</span>
+          <span style="font-size:8px;color:${slideSubtext};letter-spacing:1px;text-transform:uppercase;">The Thucydides Trap</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // --- ROLE BRIEF COVER ---
+  document.getElementById('compare-rolebrief').innerHTML = themes.map(t => {
+    const isD = t === dark;
+    return `<div class="compare-panel compare-panel-${isD ? 'dark' : 'light'}">
+      <div class="compare-col-header" style="background:${t.action};color:#fff;">${t.name}</div>
+      <div style="background:${t.card};">
+        <div style="width:100%;aspect-ratio:210/297;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;background:${t.card};">
+          <div style="position:absolute;top:0;left:0;right:0;height:6px;background:${c.color};"></div>
+          <div style="position:absolute;top:20px;font-size:10px;font-weight:700;letter-spacing:2px;color:${t.danger};text-transform:uppercase;">Classified -- Columbia Eyes Only</div>
+          <div style="margin-top:32px;margin-bottom:16px;">${geometricSVG('columbia', c.color, 96)}</div>
+          <div style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:${t.text};">DEALER</div>
+          <div style="font-size:0.95rem;color:${t.textSec};">President of Columbia</div>
+          <div style="margin-top:16px;font-size:11px;color:${t.textSec};letter-spacing:1px;text-transform:uppercase;">Thucydides Trap -- Role Brief</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // --- NAME BADGE ---
+  document.getElementById('compare-badge').innerHTML = themes.map(t => {
+    const isD = t === dark;
+    return `<div class="compare-panel compare-panel-${isD ? 'dark' : 'light'}">
+      <div class="compare-col-header" style="background:${t.action};color:#fff;">${t.name}</div>
+      <div style="background:${t.base};padding:24px;display:flex;justify-content:center;">
+        <div style="width:260px;height:160px;border-radius:8px;overflow:hidden;background:${t.card};border:1px solid ${t.border};display:flex;flex-direction:column;align-items:center;">
+          <div style="width:100%;height:8px;background:${c.color};"></div>
+          <div style="padding:12px;text-align:center;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            ${geometricSVG('columbia', c.color, 48)}
+            <div style="font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-top:8px;color:${t.text};">DEALER</div>
+            <div style="font-size:11px;color:${t.textSec};">President of Columbia</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderCompareSection();
+</script>
+
+</body>
+</html>

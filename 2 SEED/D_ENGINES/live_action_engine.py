@@ -82,16 +82,15 @@ class LiveActionEngine:
     def resolve_attack(self, attacker_country: str, defender_country: str,
                        zone: str, units: int,
                        origin_zone: Optional[str] = None) -> dict:
-        """RISK combat with all modifiers.
+        """RISK combat with simplified integer modifiers (ACTION REVIEW 2026-03-30).
 
         Rules:
         - Each unit pair rolls 1d6 + modifiers
-        - Defender wins ties (defender advantage)
-        - Morale modifier from stability
-        - Tech modifier from AI level
-        - Terrain modifier for defenders in home/capital zones
-        - Amphibious: requires 3:1 (4:1 for Formosa), naval prerequisite
-        - Must leave at least 1 unit in origin zone
+        - Attacker needs >= defender + 1 to win (ties = defender holds)
+        - Simplified modifiers: AI L4 (+1 random), low morale (-1),
+          die hard (+1 def), amphibious (-1 att), air support (+1 def binary)
+        - REMOVED: naval support, militia modifier, home territory, capital,
+          scaled air/morale, 3:1 amphibious ratio
         """
         result = {
             "type": "attack",
@@ -115,31 +114,8 @@ class LiveActionEngine:
         def_forces = zone_forces.get(defender_country, {})
         def_ground = def_forces.get("ground", 0)
 
-        # Check for amphibious assault
+        # Check for amphibious assault (simplified: -1 modifier replaces ratio requirement)
         is_amphibious = self._is_amphibious_attack(origin_zone, zone)
-        if is_amphibious:
-            # Check naval prerequisite
-            sea_zones = self._get_intervening_sea_zones(origin_zone, zone)
-            for sz in sea_zones:
-                att_naval = self.ws.get_naval_in_zone(sz, attacker_country)
-                def_naval = sum(
-                    f.get("naval", 0) for cid, f in self.ws.get_zone_forces(sz).items()
-                    if cid != attacker_country
-                )
-                if att_naval <= def_naval:
-                    result["error"] = f"Naval superiority required in {sz} for amphibious assault"
-                    self.action_log.append(result)
-                    return result
-
-            # Check force ratio
-            required_ratio = AMPHIBIOUS_RATIO_FORMOSA if zone == "g_formosa" else AMPHIBIOUS_RATIO_DEFAULT
-            if def_ground > 0 and units < def_ground * required_ratio:
-                result["error"] = (
-                    f"Amphibious assault requires {required_ratio}:1 ratio. "
-                    f"Need {def_ground * required_ratio} units, have {units}"
-                )
-                self.action_log.append(result)
-                return result
 
         # Uncontested capture
         if def_ground == 0:
@@ -166,10 +142,10 @@ class LiveActionEngine:
         for _ in range(pairs):
             a_roll = random.randint(1, 6) + modifiers["attacker_total"]
             d_roll = random.randint(1, 6) + modifiers["defender_total"]
-            if a_roll > d_roll:
+            if a_roll >= d_roll + 1:  # attacker needs >= defender + 1
                 d_losses += 1
             else:
-                a_losses += 1  # defender wins ties
+                a_losses += 1  # defender wins ties and +0 draws
 
         # Apply losses
         att_remaining = units - a_losses
@@ -212,69 +188,154 @@ class LiveActionEngine:
     # BLOCKADE
     # -----------------------------------------------------------------------
 
-    def resolve_blockade(self, country: str, zone: str) -> dict:
-        """Naval blockade -- check minimum force requirements.
+    def resolve_blockade(self, country: str, zone: str,
+                         level: str = "full") -> dict:
+        """Ground-force blockade at chokepoints (ACTION REVIEW 2026-03-30).
 
-        Gulf Gate special mechanic:
-        - Ground-based blockade: if a country holds ground units on me_gulf_gate,
-          air strikes CANNOT break the blockade. Only ground invasion can.
-        - Naval blockade: requires at least 1 naval unit on the water hex.
+        Key changes:
+        - Blockade requires GROUND FORCES at chokepoint (not naval superiority)
+        - level: "full" or "partial"
+        - Formosa special: full requires naval in 3+ surrounding sea zones.
+          1 friendly ship at any adjacent zone = automatic downgrade to partial.
+
+        Breaking a blockade: destroy ALL military units at chokepoint,
+        or blocker lifts voluntarily.
         """
         result = {
             "type": "blockade",
             "country": country,
             "zone": zone,
+            "level": level,
             "success": False,
         }
 
-        # Check for ground blockade (Gulf Gate)
-        if zone == "cp_gulf_gate":
-            zone_forces = self.ws.get_zone_forces(zone)
-            country_forces = zone_forces.get(country, {})
-            ground = country_forces.get("ground", 0)
-            naval = country_forces.get("naval", 0)
+        if level not in ("full", "partial"):
+            result["error"] = f"Invalid blockade level: {level}. Must be 'full' or 'partial'."
+            self._log_action(result)
+            return result
 
-            if ground >= 1:
-                # Ground-based blockade -- air can't break it
-                self.ws.ground_blockades["gulf_gate"] = {
-                    "controller": country,
-                    "ground_units": ground,
-                    "naval_units": naval,
-                    "breakable_by_air": False,
-                    "requires_ground_invasion": True,
-                }
-                self.ws.chokepoint_status["gulf_gate_ground"] = "blocked"
-                result["success"] = True
-                result["blockade_type"] = "ground"
-                result["note"] = (
-                    "Ground-based Gulf Gate blockade. Air strikes cannot break this. "
-                    "Requires ground invasion of me_gulf_gate zone."
+        # --- FORMOSA SPECIAL BLOCKADE ---
+        if zone in ("formosa", "g_formosa"):
+            return self._resolve_formosa_blockade(country, zone, level, result)
+
+        # --- STANDARD CHOKEPOINT BLOCKADE (ground forces required) ---
+        zone_forces = self.ws.get_zone_forces(zone)
+        country_forces = zone_forces.get(country, {})
+        ground = country_forces.get("ground", 0)
+
+        if ground < 1:
+            result["error"] = (
+                f"{country} has no ground forces at {zone}. "
+                "Ground forces required for blockade."
+            )
+            self._log_action(result)
+            return result
+
+        # Ground blockade established
+        self.ws.ground_blockades[zone] = {
+            "controller": country,
+            "ground_units": ground,
+            "level": level,
+            "breakable_by_air": False,
+            "requires_ground_invasion": True,
+        }
+
+        # Apply to chokepoint status
+        for cp_name, cp_data in CHOKEPOINTS.items():
+            if cp_data["zone"] == zone:
+                self.ws.chokepoint_status[cp_name] = "blocked"
+                result["chokepoint"] = cp_name
+                break
+
+        self.ws.active_blockades[zone] = {
+            "controller": country,
+            "level": level,
+            "type": "ground",
+        }
+
+        result["success"] = True
+        result["blockade_type"] = "ground"
+        result["blockade_level"] = level
+        result["note"] = (
+            f"Ground blockade at {zone} ({level}). "
+            "Air strikes cannot break — requires ground invasion or voluntary lift."
+        )
+        self._log_action(result)
+        return result
+
+    def _resolve_formosa_blockade(self, country: str, zone: str,
+                                   level: str, result: dict) -> dict:
+        """Formosa special blockade rules.
+
+        Full blockade: requires naval units in 3+ surrounding sea zones.
+        Any 1 friendly (to Formosa) ship at any adjacent zone = automatic
+        downgrade to partial. Partial = strait only.
+        """
+        # Get adjacent sea zones around Formosa
+        adjacent = self.ws.get_adjacent_zones(zone)
+        sea_zones = [a["zone"] for a in adjacent
+                     if self.ws.zones.get(a["zone"], {}).get("type", "").startswith("sea")]
+
+        # Count how many sea zones the blocker has naval presence in
+        zones_with_naval = 0
+        for sz in sea_zones:
+            blocker_naval = self.ws.get_naval_in_zone(sz, country)
+            if blocker_naval > 0:
+                zones_with_naval += 1
+
+        if level == "full":
+            if zones_with_naval < 3:
+                result["error"] = (
+                    f"Formosa full blockade requires naval in 3+ surrounding zones. "
+                    f"{country} has naval in {zones_with_naval} zones."
                 )
                 self._log_action(result)
                 return result
 
-        # Standard naval blockade
-        zone_forces = self.ws.get_zone_forces(zone)
-        country_naval = zone_forces.get(country, {}).get("naval", 0)
+            # Check for any friendly (to Formosa) ship in adjacent zones
+            # that would auto-downgrade to partial
+            formosa_owner = self.ws.zones.get(zone, {}).get("owner", "formosa")
+            friendly_ship_present = False
+            for sz in sea_zones:
+                sz_forces = self.ws.get_zone_forces(sz)
+                for cid, forces in sz_forces.items():
+                    if cid == country:
+                        continue  # skip the blocker
+                    naval = forces.get("naval", 0)
+                    if naval > 0 and cid != country:
+                        # Any non-blocker ship = friendly to Formosa for this purpose
+                        friendly_ship_present = True
+                        break
+                if friendly_ship_present:
+                    break
 
-        if country_naval < 1:
-            result["error"] = f"{country} has no naval units in {zone}"
-            self._log_action(result)
-            return result
+            if friendly_ship_present:
+                level = "partial"
+                result["auto_downgraded"] = True
+                result["downgrade_reason"] = (
+                    "Friendly ship detected at adjacent zone — "
+                    "full blockade automatically downgraded to partial"
+                )
 
-        # Apply blockade to relevant chokepoint
-        for cp_name, cp_data in CHOKEPOINTS.items():
-            if cp_data["zone"] == zone:
-                self.ws.chokepoint_status[cp_name] = "blocked"
-                result["success"] = True
-                result["blockade_type"] = "naval"
-                result["chokepoint"] = cp_name
-                break
-        else:
-            # Not a chokepoint, but zone is blocked
-            result["success"] = True
-            result["blockade_type"] = "zone_control"
+        # Establish blockade
+        self.ws.active_blockades["formosa"] = {
+            "controller": country,
+            "level": level,
+            "type": "naval",
+        }
+        self.ws.formosa_blockade = True
+        self.ws.chokepoint_status["taiwan_strait"] = "blocked"
 
+        result["success"] = True
+        result["blockade_type"] = "naval"
+        result["blockade_level"] = level
+        result["level"] = level  # update in case downgraded
+        result["chokepoint"] = "taiwan_strait"
+        result["note"] = (
+            f"Formosa blockade ({level}). "
+            + ("Strait only — partial." if level == "partial"
+               else "Full naval encirclement.")
+        )
         self._log_action(result)
         return result
 
@@ -307,7 +368,7 @@ class LiveActionEngine:
             return result
 
         mil = c["military"]
-        if mil.get("strategic_missiles", 0) <= 0:
+        if mil.get("strategic_missile", 0) <= 0:
             result["error"] = f"{launcher} has no strategic missiles"
             self._log_action(result)
             return result
@@ -322,7 +383,7 @@ class LiveActionEngine:
                 return result
 
         # Consume missile
-        mil["strategic_missiles"] -= 1
+        mil["strategic_missile"] -= 1
 
         # Air defense interception
         zone_forces = self.ws.get_zone_forces(target_zone)
@@ -688,12 +749,28 @@ class LiveActionEngine:
     # ASSASSINATION
     # -----------------------------------------------------------------------
 
-    def resolve_assassination(self, country: str, target_role: str) -> dict:
-        """50% base +/- modifiers. Detection 60-80%."""
+    # Country-specific assassination bonuses (international)
+    _ASSASSINATION_COUNTRY_BONUS = {
+        "levantia": 0.30,   # total 50% (20% + 30%)
+        "nordostan": 0.10,  # total 30% (20% + 10%)
+    }
+
+    def resolve_assassination(self, country: str, target_role: str,
+                              domestic: bool = False) -> dict:
+        """Assassination (ACTION REVIEW 2026-03-30).
+
+        1 card per game per eligible role.
+        Domestic: 60% base hit.
+        International: 20% base + country-specific bonuses.
+        No AI tech or intel chief modifiers. Raw probability.
+        Hit = 50% kill, 50% survive (injured + martyr effect).
+        International: higher chance of being revealed if failed.
+        """
         result = {
             "type": "assassination",
             "country": country,
             "target_role": target_role,
+            "domestic": domestic,
             "success": False,
             "detected": False,
         }
@@ -704,30 +781,29 @@ class LiveActionEngine:
             self._log_action(result)
             return result
 
-        # Base probability
-        prob = 0.50
-        # Intelligence power bonus
-        if country in INTELLIGENCE_POWERS:
-            prob += 0.10
-        # AI level bonus
-        ai_level = self.ws.countries.get(country, {}).get(
-            "technology", {}).get("ai_level", 0)
-        prob += ai_level * 0.03
+        # Base probability — domestic vs international
+        if domestic:
+            prob = 0.60
+        else:
+            prob = 0.20
+            # Country-specific bonuses (international only)
+            prob += self._ASSASSINATION_COUNTRY_BONUS.get(country, 0.0)
 
-        success = random.random() < prob
-        detected = random.random() < random.uniform(0.60, 0.80)
+        hit = random.random() < prob
 
-        result["success"] = success
+        # Detection: international failures have higher reveal chance
+        if domestic:
+            detected = random.random() < 0.50
+        else:
+            detected = random.random() < (0.70 if not hit else 0.40)
+
+        result["hit"] = hit
         result["detected"] = detected
         result["probability"] = round(prob, 3)
 
-        if success:
-            # Target killed unless survival dice saves them
-            survival = random.randint(1, 6)
-            if survival >= 4:  # survive on 4-6
-                result["target_survived"] = True
-                result["note"] = f"{role['character_name']} survived assassination attempt"
-            else:
+        if hit:
+            # 50/50 kill or survive
+            if random.random() < 0.50:
                 role["status"] = "dead"
                 result["target_survived"] = False
                 result["note"] = f"{role['character_name']} killed"
@@ -739,12 +815,31 @@ class LiveActionEngine:
                     tc["political"]["political_support"] = clamp(
                         tc["political"]["political_support"] + 15, 0, 100)
                     result["martyr_effect"] = 15
+            else:
+                result["target_survived"] = True
+                result["note"] = (
+                    f"{role['character_name']} survived — injured. "
+                    "Martyr effect boosts support."
+                )
+                # Survived assassination still triggers martyr sympathy
+                target_country = role["country_id"]
+                if target_country in self.ws.countries:
+                    tc = self.ws.countries[target_country]
+                    tc["political"]["political_support"] = clamp(
+                        tc["political"]["political_support"] + 10, 0, 100)
+                    result["martyr_effect"] = 10
+
+            result["success"] = True
+        else:
+            result["success"] = False
+            result["note"] = "Assassination attempt failed"
 
         self.ws.log_event({
             "type": "assassination",
             "country": country,
             "target_role": target_role,
-            "success": success,
+            "domestic": domestic,
+            "hit": hit,
             "detected": detected,
         })
         self._log_action(result)
@@ -755,10 +850,17 @@ class LiveActionEngine:
     # -----------------------------------------------------------------------
 
     def resolve_coup(self, country: str, plotters: List[str]) -> dict:
-        """Coup attempt probability based on stability, support, conspirators.
+        """Coup attempt (ACTION REVIEW 2026-03-30).
 
-        Requires: at least one plotter with military/security access.
-        Success probability = f(stability, support, co-conspirators, military units).
+        Two conspirators required: initiator + co-conspirator.
+        Any two roles within the same country can attempt.
+        Base 15%
+        + active_protest: +25%
+        + stability < 3: +15%
+        + stability 3-4: +5%
+        + support < 30%: +10%
+        Success: initiator becomes HoS, old HoS arrested.
+        Failure: both exposed (arrested, world learns).
         """
         result = {
             "type": "coup",
@@ -773,75 +875,87 @@ class LiveActionEngine:
             self._log_action(result)
             return result
 
-        # Check for military plotter
-        has_military = any(
-            self.ws.roles.get(p, {}).get("is_military_chief", False)
-            for p in plotters
-        )
-        if not has_military:
-            result["error"] = "Coup requires at least one plotter with military access"
+        # Require exactly 2 conspirators
+        if len(plotters) < 2:
+            result["error"] = "Coup requires two conspirators (initiator + co-conspirator)"
             self._log_action(result)
             return result
+
+        # Verify both plotters are roles in the same country
+        for p in plotters[:2]:
+            role = self.ws.roles.get(p)
+            if not role:
+                result["error"] = f"Role {p} not found"
+                self._log_action(result)
+                return result
+            if role["country_id"] != country:
+                result["error"] = f"Role {p} is not in {country}"
+                self._log_action(result)
+                return result
 
         pol = c["political"]
         stability = pol["stability"]
         support = pol["political_support"]
 
         # Base probability
-        prob = 0.05
-        if stability < 5:
-            prob += (5 - stability) * 0.05
-        if support < 40:
-            prob += (40 - support) / 100.0 * 0.15
-        prob += len(plotters) * 0.05
-        if has_military:
+        prob = 0.15
+
+        # Active protest bonus
+        if pol.get("protest_risk", False) or pol.get("protest_active", False):
+            prob += 0.25
+
+        # Stability bonuses
+        if stability < 3:
+            prob += 0.15
+        elif stability <= 4:
+            prob += 0.05
+
+        # Low support bonus
+        if support < 30:
             prob += 0.10
 
-        prob = clamp(prob, 0.0, 0.85)
+        prob = clamp(prob, 0.0, 0.90)
 
         success = random.random() < prob
         result["success"] = success
         result["probability"] = round(prob, 3)
 
-        if success:
-            # New leader: first military plotter
-            new_leader_id = None
-            for p in plotters:
-                role = self.ws.roles.get(p)
-                if role and role["is_military_chief"]:
-                    new_leader_id = p
-                    break
-            if not new_leader_id:
-                new_leader_id = plotters[0]
+        initiator_id = plotters[0]
+        co_conspirator_id = plotters[1]
 
-            # Remove old head of state
+        if success:
+            # Initiator becomes HoS, old HoS arrested
             old_hos = self.ws.get_head_of_state(country)
             if old_hos:
                 old_hos["status"] = "arrested"
                 old_hos["is_head_of_state"] = False
 
-            # Install new leader
-            new_role = self.ws.roles.get(new_leader_id)
-            if new_role:
-                new_role["is_head_of_state"] = True
-                result["new_leader"] = new_leader_id
+            initiator_role = self.ws.roles.get(initiator_id)
+            if initiator_role:
+                initiator_role["is_head_of_state"] = True
+                result["new_leader"] = initiator_id
 
             pol["stability"] = max(stability - 2, 1)
-            pol["political_support"] = max(support - 15, 0)
-            result["note"] = f"Coup successful. {new_leader_id} takes power."
+            result["note"] = (
+                f"Coup successful. {initiator_id} takes power. "
+                f"Former leader arrested."
+            )
         else:
-            # Failed coup: plotters arrested
-            for p in plotters:
+            # Failed: both conspirators exposed
+            for p in plotters[:2]:
                 role = self.ws.roles.get(p)
                 if role:
-                    role["status"] = "arrested"
+                    role["status"] = "exposed"
             pol["stability"] = max(stability - 1, 1)
-            result["note"] = "Coup failed. Plotters arrested."
+            result["note"] = (
+                f"Coup failed. {initiator_id} and {co_conspirator_id} exposed. "
+                "Ruler and world learn of the attempt."
+            )
 
         self.ws.log_event({
             "type": "coup",
             "country": country,
-            "plotters": plotters,
+            "plotters": plotters[:2],
             "success": success,
         })
         self._log_action(result)
@@ -897,6 +1011,197 @@ class LiveActionEngine:
                     break
 
         result["units_destroyed"] = destroyed
+        self._log_action(result)
+        return result
+
+    # -----------------------------------------------------------------------
+    # AIR/DRONE STRIKE — Tactical air units strike ground targets
+    # -----------------------------------------------------------------------
+
+    def resolve_air_strike(self, country: str, target_zone: str,
+                           air_units_sent: Optional[int] = None) -> dict:
+        """Full tactical air combat system.
+
+        Air units strike a target zone. Defender's air defense intercepts with
+        degrading probability per AD unit. Intercepted air units are DESTROYED.
+        Surviving air units strike at 15% hit rate per unit.
+
+        Range: Global map = adjacent hexes. Theater map = 2 hexes.
+        """
+        result = {
+            "type": "air_strike",
+            "country": country,
+            "target_zone": target_zone,
+            "air_sent": 0,
+            "intercepted_destroyed": 0,
+            "strikes_landed": 0,
+            "ground_units_destroyed": 0,
+            "air_returned": 0,
+        }
+
+        c = self.ws.countries.get(country)
+        if not c:
+            result["error"] = f"Country {country} not found"
+            self._log_action(result)
+            return result
+
+        available_air = c["military"].get("tactical_air", 0)
+        if available_air <= 0:
+            result["error"] = f"{country} has no tactical air units"
+            self._log_action(result)
+            return result
+
+        # Determine how many air units to send (default: all available)
+        air_sent = min(air_units_sent or available_air, available_air)
+        result["air_sent"] = air_sent
+
+        # --- STEP 1: Air Defense Interception ---
+        # Collect AD units in target zone's coverage area
+        # (coverage = target zone + adjacent zones)
+        defender_ad = 0
+        zone_forces = self.ws.get_zone_forces(target_zone)
+        for cid, forces in zone_forces.items():
+            if cid != country:
+                defender_ad += forces.get("air_defense", 0)
+        # Also check adjacent zones for AD coverage
+        adjacent = self.ws.get_adjacent_zones(target_zone) if hasattr(self.ws, 'get_adjacent_zones') else []
+        for adj_zone in adjacent:
+            adj_forces = self.ws.get_zone_forces(adj_zone) if adj_zone else {}
+            for cid, forces in adj_forces.items():
+                if cid != country:
+                    defender_ad += forces.get("air_defense", 0)
+
+        # Each AD unit runs its own interception sequence
+        intercepted = 0
+        incoming_remaining = air_sent
+
+        for ad_unit in range(defender_ad):
+            if incoming_remaining <= 0:
+                break
+            attempt = 0
+            while incoming_remaining > 0:
+                attempt += 1
+                # Degrading interception: 95%, 80%, 75%, 70%, 65%, 60% floor
+                if attempt == 1:
+                    rate = 0.95
+                elif attempt == 2:
+                    rate = 0.80
+                else:
+                    rate = max(0.60, 0.75 - (attempt - 3) * 0.05)
+
+                if random.random() < rate:
+                    intercepted += 1
+                    incoming_remaining -= 1
+                else:
+                    incoming_remaining -= 1  # missed — this air unit gets through
+                    break  # AD unit moves to next incoming (but sequence continues)
+                # Actually: each AD processes ALL incoming sequentially
+                # Re-thinking: each incoming air unit faces ONE intercept attempt
+                # from the AD pool. Let me simplify.
+                break  # One attempt per incoming per AD unit
+
+        # Simpler model: each incoming air unit faces one intercept attempt.
+        # AD units are distributed across incoming. Each AD unit handles
+        # ceil(air_sent / defender_ad) attempts with degrading rate.
+        intercepted = 0
+        surviving = []
+        if defender_ad > 0:
+            for i in range(air_sent):
+                # Which AD unit handles this? Round-robin.
+                ad_idx = i % defender_ad
+                attempt_num = (i // defender_ad) + 1
+                # Degrading rate per attempt number for this AD unit
+                if attempt_num == 1:
+                    rate = 0.95
+                elif attempt_num == 2:
+                    rate = 0.80
+                else:
+                    rate = max(0.60, 0.75 - (attempt_num - 3) * 0.05)
+
+                if random.random() < rate:
+                    intercepted += 1
+                else:
+                    surviving.append(i)
+        else:
+            surviving = list(range(air_sent))
+
+        survivors = air_sent - intercepted
+        result["intercepted_destroyed"] = intercepted
+
+        # Destroy intercepted air units from attacker's military
+        c["military"]["tactical_air"] = max(0, available_air - intercepted)
+
+        # --- STEP 2: Surviving air units strike ---
+        ground_destroyed = 0
+        for _ in range(survivors):
+            if random.random() < 0.15:
+                ground_destroyed += 1
+
+        result["strikes_landed"] = survivors
+
+        # Apply ground damage
+        if ground_destroyed > 0:
+            remaining_to_destroy = ground_destroyed
+            for cid, forces in zone_forces.items():
+                if cid == country or remaining_to_destroy <= 0:
+                    continue
+                ground = forces.get("ground", 0)
+                actual_loss = min(remaining_to_destroy, ground)
+                forces["ground"] = max(ground - actual_loss, 0)
+                if cid in self.ws.countries:
+                    self.ws.countries[cid]["military"]["ground"] = max(
+                        self.ws.countries[cid]["military"]["ground"] - actual_loss, 0)
+                remaining_to_destroy -= actual_loss
+
+        result["ground_units_destroyed"] = ground_destroyed
+        result["air_returned"] = survivors
+
+        self._log_action(result)
+        self.ws.log_event({
+            "type": "air_strike",
+            "attacker": country,
+            "target_zone": target_zone,
+            "air_sent": air_sent,
+            "intercepted": intercepted,
+            "ground_destroyed": ground_destroyed,
+            "air_lost": intercepted,
+        })
+
+        return result
+
+    def resolve_airfield_vulnerability(self, target_zone: str,
+                                        attacking_country: str) -> dict:
+        """When a zone is attacked (ground or air), stationed air units risk destruction.
+
+        20% chance per air unit of being destroyed 'on the ground' (parked aircraft,
+        airfield damage, carrier strikes on ports).
+        Called BEFORE ground combat or air defense in the target zone.
+        """
+        result = {"type": "airfield_vulnerability", "zone": target_zone, "destroyed": 0}
+
+        zone_forces = self.ws.get_zone_forces(target_zone)
+        for cid, forces in zone_forces.items():
+            if cid == attacking_country:
+                continue
+            air_in_zone = forces.get("tactical_air", 0)
+            destroyed = 0
+            for _ in range(air_in_zone):
+                if random.random() < 0.20:
+                    destroyed += 1
+            if destroyed > 0:
+                forces["tactical_air"] = max(0, air_in_zone - destroyed)
+                if cid in self.ws.countries:
+                    self.ws.countries[cid]["military"]["tactical_air"] = max(
+                        0, self.ws.countries[cid]["military"]["tactical_air"] - destroyed)
+                result["destroyed"] += destroyed
+
+        if result["destroyed"] > 0:
+            self.ws.log_event({
+                "type": "airfield_attack",
+                "zone": target_zone,
+                "air_destroyed_on_ground": result["destroyed"],
+            })
+
         self._log_action(result)
         return result
 
@@ -1094,40 +1399,59 @@ class LiveActionEngine:
 
     def _build_combat_modifiers(self, attacker: str, defender: str,
                                  zone: str, is_amphibious: bool) -> dict:
+        """Simplified integer-only modifiers (ACTION REVIEW 2026-03-30).
+
+        Modifiers kept:
+        - AI L4: +1 if country has ai_level==4 AND random flag was set when L4 reached
+        - Low morale: -1 if stability <= 3
+        - Die Hard: +1 defender if zone has die_hard flag
+        - Amphibious: -1 attacker
+        - Air support: +1 defender if ANY tactical_air > 0 in zone (binary)
+
+        REMOVED: naval support, militia modifier, home territory, capital,
+                 scaled air support, proportional morale.
+        """
         att_c = self.ws.countries.get(attacker, {})
         def_c = self.ws.countries.get(defender, {})
 
-        att_ai = att_c.get("technology", {}).get("ai_level", 0)
-        def_ai = def_c.get("technology", {}).get("ai_level", 0)
+        # --- AI L4 bonus: +1 if ai_level == 4 and random flag set ---
+        att_ai_bonus = 0
+        if att_c.get("technology", {}).get("ai_level", 0) == 4:
+            if att_c.get("technology", {}).get("ai_l4_bonus", False):
+                att_ai_bonus = 1
 
-        att_stab = att_c.get("political", {}).get("stability", 5)
-        def_stab = def_c.get("political", {}).get("stability", 5)
-        att_morale = max((att_stab - 5) * 0.5, -2)
-        def_morale = max((def_stab - 5) * 0.5, -2)
+        def_ai_bonus = 0
+        if def_c.get("technology", {}).get("ai_level", 0) == 4:
+            if def_c.get("technology", {}).get("ai_l4_bonus", False):
+                def_ai_bonus = 1
 
-        # Terrain bonus for defender
-        terrain = 0
+        # --- Low morale: -1 if stability <= 3 ---
+        att_morale = -1 if att_c.get("political", {}).get("stability", 5) <= 3 else 0
+        def_morale = -1 if def_c.get("political", {}).get("stability", 5) <= 3 else 0
+
+        # --- Die Hard: +1 defender if zone has die_hard flag ---
         zone_data = self.ws.zones.get(zone, {})
-        if zone_data.get("type") in ("land_home",):
-            terrain = 1
-        if "capital" in zone or "core" in zone:
-            terrain = 2
+        die_hard = 1 if zone_data.get("die_hard", False) else 0
 
-        # Amphibious penalty
+        # --- Amphibious: -1 attacker ---
         amphibious_penalty = -1 if is_amphibious else 0
 
-        att_total = (AI_LEVEL_COMBAT_BONUS.get(att_ai, 0) +
-                     att_morale + amphibious_penalty)
-        def_total = (AI_LEVEL_COMBAT_BONUS.get(def_ai, 0) +
-                     def_morale + terrain)
+        # --- Air support: +1 defender if any tactical_air > 0 (binary yes/no) ---
+        zone_forces = self.ws.get_zone_forces(zone) if hasattr(self.ws, 'get_zone_forces') else {}
+        def_air_in_zone = zone_forces.get(defender, {}).get("tactical_air", 0)
+        air_support = 1 if def_air_in_zone > 0 else 0
+
+        att_total = att_ai_bonus + att_morale + amphibious_penalty
+        def_total = def_ai_bonus + def_morale + die_hard + air_support
 
         return {
-            "attacker_tech": AI_LEVEL_COMBAT_BONUS.get(att_ai, 0),
+            "attacker_ai_l4": att_ai_bonus,
             "attacker_morale": att_morale,
             "amphibious_penalty": amphibious_penalty,
-            "defender_tech": AI_LEVEL_COMBAT_BONUS.get(def_ai, 0),
+            "defender_ai_l4": def_ai_bonus,
             "defender_morale": def_morale,
-            "terrain": terrain,
+            "die_hard": die_hard,
+            "defender_air_support": air_support,
             "attacker_total": att_total,
             "defender_total": def_total,
         }
