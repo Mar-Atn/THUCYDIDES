@@ -962,6 +962,131 @@ class LiveActionEngine:
         return result
 
     # -----------------------------------------------------------------------
+    # NAVAL COMBAT (ship vs ship)
+    # -----------------------------------------------------------------------
+
+    def resolve_naval_combat(self, attacker: str, defender: str,
+                             sea_zone: str) -> dict:
+        """Ship vs ship combat in a sea zone.
+
+        Same RISK dice as ground: 1d6 per pair, attacker needs >= defender + 1.
+        No terrain modifiers (open sea). Carrier air support applies (+1).
+        Sunk ship = all embarked units (ground + air) also lost.
+        Moderator must be present.
+        """
+        result = {
+            "type": "naval_combat",
+            "attacker": attacker,
+            "defender": defender,
+            "sea_zone": sea_zone,
+            "attacker_ships_committed": 0,
+            "attacker_losses": 0,
+            "defender_losses": 0,
+            "embarked_units_lost": {"attacker": {}, "defender": {}},
+            "success": False,
+        }
+
+        # Get naval forces in the zone
+        att_naval = self.ws.get_naval_in_zone(sea_zone, attacker)
+        def_naval = self.ws.get_naval_in_zone(sea_zone, defender)
+
+        if att_naval <= 0:
+            result["error"] = f"{attacker} has no ships in {sea_zone}"
+            self._log_action(result)
+            return result
+        if def_naval <= 0:
+            result["error"] = f"{defender} has no ships in {sea_zone}"
+            self._log_action(result)
+            return result
+
+        result["attacker_ships_committed"] = att_naval
+
+        # Modifiers (simplified — open sea, no terrain)
+        att_c = self.ws.countries.get(attacker, {})
+        def_c = self.ws.countries.get(defender, {})
+
+        # AI L4 bonus
+        att_mod = 1 if att_c.get("technology", {}).get("ai_l4_bonus", False) else 0
+        def_mod = 1 if def_c.get("technology", {}).get("ai_l4_bonus", False) else 0
+
+        # Low morale
+        if att_c.get("political", {}).get("stability", 5) <= 3:
+            att_mod -= 1
+        if def_c.get("political", {}).get("stability", 5) <= 3:
+            def_mod -= 1
+
+        # Carrier air support: +1 if any tactical_air embarked on ships in this zone
+        # (check country military for embarked air)
+        att_air = att_c.get("military", {}).get("tactical_air", 0)
+        def_air = def_c.get("military", {}).get("tactical_air", 0)
+        if att_air > 0:
+            att_mod += 1
+        if def_air > 0:
+            def_mod += 1
+
+        # RISK dice combat — same as ground
+        a_losses = 0
+        d_losses = 0
+        pairs = min(att_naval, def_naval)
+
+        for _ in range(pairs):
+            a_roll = random.randint(1, 6) + att_mod
+            d_roll = random.randint(1, 6) + def_mod
+            if a_roll >= d_roll + 1:
+                d_losses += 1
+            else:
+                a_losses += 1
+
+        # Apply losses
+        att_embarked_lost = {"ground": 0, "tactical_air": 0}
+        def_embarked_lost = {"ground": 0, "tactical_air": 0}
+
+        # Attacker ship losses — each sunk ship loses embarked units
+        if a_losses > 0:
+            att_c["military"]["naval"] = max(0, att_c["military"]["naval"] - a_losses)
+            # Embarked units lost: 1 ground + up to 5 air per sunk ship
+            ground_per_ship = min(1, att_c["military"].get("ground", 0) // max(att_naval, 1))
+            air_per_ship = min(5, att_c["military"].get("tactical_air", 0) // max(att_naval, 1))
+            att_ground_lost = min(a_losses * ground_per_ship, att_c["military"].get("ground", 0))
+            att_air_lost = min(a_losses * air_per_ship, att_c["military"].get("tactical_air", 0))
+            att_c["military"]["ground"] = max(0, att_c["military"].get("ground", 0) - att_ground_lost)
+            att_c["military"]["tactical_air"] = max(0, att_c["military"].get("tactical_air", 0) - att_air_lost)
+            att_embarked_lost = {"ground": att_ground_lost, "tactical_air": att_air_lost}
+
+        # Defender ship losses
+        if d_losses > 0:
+            def_c["military"]["naval"] = max(0, def_c["military"]["naval"] - d_losses)
+            ground_per_ship = min(1, def_c["military"].get("ground", 0) // max(def_naval, 1))
+            air_per_ship = min(5, def_c["military"].get("tactical_air", 0) // max(def_naval, 1))
+            def_ground_lost = min(d_losses * ground_per_ship, def_c["military"].get("ground", 0))
+            def_air_lost = min(d_losses * air_per_ship, def_c["military"].get("tactical_air", 0))
+            def_c["military"]["ground"] = max(0, def_c["military"].get("ground", 0) - def_ground_lost)
+            def_c["military"]["tactical_air"] = max(0, def_c["military"].get("tactical_air", 0) - def_air_lost)
+            def_embarked_lost = {"ground": def_ground_lost, "tactical_air": def_air_lost}
+
+        result["attacker_losses"] = a_losses
+        result["defender_losses"] = d_losses
+        result["embarked_units_lost"]["attacker"] = att_embarked_lost
+        result["embarked_units_lost"]["defender"] = def_embarked_lost
+        result["success"] = d_losses > a_losses  # attacker "wins" if they sank more
+
+        self._log_action(result)
+        self.ws.log_event({
+            "type": "naval_combat",
+            "attacker": attacker,
+            "defender": defender,
+            "sea_zone": sea_zone,
+            "attacker_ships_lost": a_losses,
+            "defender_ships_lost": d_losses,
+            "embarked_lost": {
+                "attacker": att_embarked_lost,
+                "defender": def_embarked_lost,
+            },
+        })
+
+        return result
+
+    # -----------------------------------------------------------------------
     # NAVAL BOMBARDMENT
     # -----------------------------------------------------------------------
 

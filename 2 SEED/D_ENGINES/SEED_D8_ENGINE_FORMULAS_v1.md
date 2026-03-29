@@ -2417,6 +2417,72 @@ HEARTLAND IMPEACHMENT:
 
 ---
 
+# PART 6J: NAVAL COMBAT (ship vs ship)
+
+*(Added 2026-03-30)*
+
+## resolve_naval_combat (Live Action Engine)
+
+Ship-to-ship battle in a sea zone. Same RISK dice as ground combat but simpler — no terrain, no Die Hard. Open sea.
+
+```
+inputs:
+  attacker: str         -- attacking country
+  defender: str         -- defending country
+  sea_zone: str         -- where the battle happens
+
+modifiers (integers, same as ground):
+  AI L4 bonus:    +1 if country has ai_l4_bonus flag
+  Low morale:     -1 if stability <= 3
+  Carrier air:    +1 if country has tactical_air embarked on ships (yes/no)
+
+  No terrain. No Die Hard. No amphibious. Open sea = clean fight.
+
+resolution:
+  Pairs matched (min of attacker ships, defender ships)
+  Each pair: attacker rolls 1d6 + mods, defender rolls 1d6 + mods
+  Attacker needs >= defender + 1 to win pair
+  Ties = defender holds (same as ground)
+  Loser of each pair loses 1 ship
+
+CRITICAL — embarked units go down with the ship:
+  Each sunk ship loses ALL embarked units:
+    - Up to 1 ground unit (transport)
+    - Up to 5 tactical air units (carrier)
+  These are permanently destroyed. Not recovered.
+
+  This makes naval losses VERY costly — you don't just lose a ship,
+  you lose everything on it. A fleet defeat can wipe out an
+  expeditionary force in one battle.
+
+output:
+  attacker_losses: int (ships sunk)
+  defender_losses: int (ships sunk)
+  embarked_units_lost: per side (ground + air destroyed)
+```
+
+### Worked Example
+
+Columbia (4 ships, 2 with ground troops, 2 with 3 air each) attacks Cathay (3 ships, 1 with 4 air) in Formosa Strait.
+
+Columbia modifiers: AI L3 (no L4 bonus = +0), stability 7 (+0), carrier air (+1) = **+1**
+Cathay modifiers: AI L3 (no L4 bonus = +0), stability 8 (+0), carrier air (+1) = **+1**
+
+3 pairs (limited by Cathay's 3 ships):
+
+| Pair | Columbia (1d6+1) | Cathay (1d6+1) | Result |
+|:----:|:---:|:---:|--------|
+| 1 | 5+1=6 | 3+1=4 | 6 >= 5 → Columbia wins. Cathay loses 1 ship + 4 embarked air. |
+| 2 | 2+1=3 | 4+1=5 | 3 < 5 → Cathay wins. Columbia loses 1 ship + 1 embarked ground. |
+| 3 | 4+1=5 | 4+1=5 | Equal → defender holds. Columbia loses 1 ship + 3 embarked air. |
+
+Result: Columbia loses 2 ships (+ 1 ground + 3 air). Cathay loses 1 ship (+ 4 air).
+Cathay holds the strait with 2 remaining ships. Columbia retreats with 2 ships.
+
+**The embarked losses are devastating.** Columbia lost not just 2 ships but also a ground unit and 3 air units — an entire carrier air group gone. Naval warfare is high-stakes.
+
+---
+
 # PART 7: KNOWN LIMITATIONS AND DEFERRED MECHANICS
 
 ## Not in the Engine
@@ -2435,7 +2501,7 @@ HEARTLAND IMPEACHMENT:
 | **Intelligence fog of war** | Partial | Espionage returns noisy estimates (+/-15%). No systematic information hiding between players -- deferred to orchestrator/moderator. |
 | **Refugee flows** | Not modeled | War and collapse do not generate refugee movements that affect neighboring countries. |
 | **Cyber warfare (strategic)** | Simplified | Cyber is one of five covert op types with a flat 1% GDP damage. No modeling of critical infrastructure vulnerability. |
-| **Naval combat (fleet battles)** | Not separate | Naval combat is folded into the general RISK dice system. No separate fleet engagement mechanic. |
+| **Naval combat (fleet battles)** | **Implemented (2026-03-30)** | RISK dice in sea zones. Sunk ship = all embarked units (1 ground + up to 5 air) also lost. Same modifiers as ground (AI L4, morale, carrier air). See Part 6J below. |
 | **Air superiority** | Implicit | Tactical air units are counted but there is no separate air superiority phase. Air defense only intercepts missiles. |
 | **Occupation governance** | Not modeled | Capturing a zone transfers ownership but there are no occupation costs, resistance, or governance mechanics. |
 | **Territory liberation** | Manual | No automatic reconquest mechanic. Players must order attacks to retake zones. |
