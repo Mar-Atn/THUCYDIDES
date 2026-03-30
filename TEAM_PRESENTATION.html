@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE THUCYDIDES TRAP — Team Briefing</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --base: #F5F6F8; --card: #FFFFFF; --border: #D8DCE5;
+  --text: #1A2332; --text-sec: #4A5568; --text-muted: #8494A7;
+  --action: #1A5276; --accent: #C4922A; --danger: #B03A3A; --success: #2E7D4F;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'DM Sans',system-ui,sans-serif; background:var(--base); color:var(--text); line-height:1.6; }
+
+.hero {
+  background: linear-gradient(135deg, #0D1B2A 0%, #1A2332 50%, #1A5276 100%);
+  color:#fff; padding:80px 40px 60px; text-align:center;
+}
+.hero h1 { font-family:'Playfair Display',serif; font-size:3rem; font-weight:700; letter-spacing:2px; }
+.hero .subtitle { font-size:1.1rem; color:#7A8FA3; margin-top:8px; }
+.hero .status { display:inline-block; background:var(--accent); color:#fff; padding:6px 20px; border-radius:20px; font-size:0.85rem; font-weight:600; margin-top:20px; }
+
+.container { max-width:960px; margin:0 auto; padding:40px 20px; }
+
+h2 { font-family:'Playfair Display',serif; font-size:1.8rem; color:var(--text); margin:48px 0 16px; padding-bottom:8px; border-bottom:2px solid var(--border); }
+h3 { font-size:1.1rem; font-weight:600; color:var(--action); margin:24px 0 8px; }
+
+.card { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:24px; margin:16px 0; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+.card-accent { border-left:4px solid var(--accent); }
+.card-danger { border-left:4px solid var(--danger); }
+.card-success { border-left:4px solid var(--success); }
+
+.stat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin:16px 0; }
+.stat { background:var(--card); border:1px solid var(--border); border-radius:8px; padding:20px; text-align:center; }
+.stat .number { font-family:'JetBrains Mono',monospace; font-size:2rem; font-weight:700; color:var(--action); }
+.stat .label { font-size:0.8rem; color:var(--text-muted); margin-top:4px; }
+
+.lifecycle { display:flex; align-items:center; gap:0; margin:24px 0; flex-wrap:wrap; }
+.lifecycle-step { padding:12px 20px; font-size:0.85rem; font-weight:600; border-radius:4px; position:relative; }
+.lifecycle-step.done { background:var(--success); color:#fff; }
+.lifecycle-step.current { background:var(--accent); color:#fff; }
+.lifecycle-step.future { background:#E8EBF0; color:var(--text-muted); }
+.lifecycle-arrow { font-size:1.2rem; color:var(--text-muted); padding:0 4px; }
+
+table { width:100%; border-collapse:collapse; margin:12px 0; font-size:0.9rem; }
+th { text-align:left; padding:8px 12px; border-bottom:2px solid var(--border); color:var(--text-sec); font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px; }
+td { padding:8px 12px; border-bottom:1px solid #F0F2F5; }
+
+.question-card { background:var(--card); border:2px solid var(--accent); border-radius:8px; padding:24px; margin:24px 0; }
+.question-card h4 { font-family:'Playfair Display',serif; font-size:1.2rem; color:var(--accent); margin-bottom:12px; }
+.question-card .context { font-size:0.9rem; color:var(--text-sec); margin-bottom:16px; }
+.options { display:flex; gap:12px; flex-wrap:wrap; }
+.option { flex:1; min-width:180px; padding:16px; border:2px solid var(--border); border-radius:8px; text-align:center; cursor:default; transition:all 0.2s; }
+.option:hover { border-color:var(--accent); }
+.option .opt-label { font-weight:600; font-size:0.95rem; margin-bottom:4px; }
+.option .opt-desc { font-size:0.8rem; color:var(--text-muted); }
+.option.selected { border-color:var(--accent); background:#FFF8E8; }
+
+.color-swatch { display:inline-block; width:20px; height:20px; border-radius:50%; vertical-align:middle; margin-right:6px; border:1px solid rgba(0,0,0,0.1); }
+
+.embed-frame { border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:16px 0; }
+.embed-label { background:#F0F2F5; padding:8px 16px; font-size:0.8rem; font-weight:600; color:var(--text-sec); }
+
+.test-bar { display:flex; align-items:center; gap:8px; margin:4px 0; }
+.test-bar .bar { flex:1; height:24px; background:#E8EBF0; border-radius:4px; overflow:hidden; }
+.test-bar .fill { height:100%; border-radius:4px; }
+.test-bar .score { font-family:'JetBrains Mono',monospace; font-size:0.85rem; font-weight:600; width:40px; text-align:right; }
+
+footer { background:#1A2332; color:#7A8FA3; text-align:center; padding:24px; font-size:0.8rem; margin-top:60px; }
+
+@media(max-width:768px) {
+  .hero h1 { font-size:2rem; }
+  .stat-grid { grid-template-columns:1fr 1fr; }
+  .options { flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>THE THUCYDIDES TRAP</h1>
+  <div class="subtitle">MetaGames Immersive Leadership Simulation — Team Briefing</div>
+  <div class="status">SEED STAGE COMPLETE — Preparing for Detailed Design</div>
+</div>
+
+<div class="container">
+
+<!-- ============================================ -->
+<!-- SECTION 1: WHAT WE'RE BUILDING -->
+<!-- ============================================ -->
+<h2>1. What We're Building</h2>
+
+<div class="card card-accent">
+  <h3>The Scenario</h3>
+  <p>A rising power (Cathay) is approaching the strength of the ruling power (Columbia). History says this ends in war — the "Thucydides Trap." Participants play world leaders during the most dangerous 3-4 years in the 21st century.</p>
+  <p style="margin-top:12px"><strong>The question for every participant:</strong> Can you prove history wrong? Or will you win the war it predicts?</p>
+</div>
+
+<div class="stat-grid">
+  <div class="stat"><div class="number">21</div><div class="label">Countries</div></div>
+  <div class="stat"><div class="number">40</div><div class="label">Roles (37 core + 3 expansion)</div></div>
+  <div class="stat"><div class="number">6-8</div><div class="label">Rounds (each = 6 months)</div></div>
+  <div class="stat"><div class="number">25-39</div><div class="label">Human Participants</div></div>
+  <div class="stat"><div class="number">10</div><div class="label">AI-Operated Countries</div></div>
+  <div class="stat"><div class="number">32</div><div class="label">Action Types</div></div>
+</div>
+
+<h3>The Five Flashpoints</h3>
+<table>
+  <tr><th>Crisis</th><th>What's Happening</th><th>Why It Matters</th></tr>
+  <tr><td><strong>Heartland-Nordostan War</strong></td><td>3-year invasion, front stalled, peace plan leaked</td><td>Existential for both. Columbia funds one side, Cathay funds the other.</td></tr>
+  <tr><td><strong>Persia War</strong></td><td>Columbia/Levantia struck Persia. Gulf Gate blockade active.</td><td>Oil at $140+. Every importer suffers. Ground invasion needed to break blockade.</td></tr>
+  <tr><td><strong>Formosa Flashpoint</strong></td><td>Cathay's military exercises largest ever. Naval crossover at R3-4.</td><td>60% of global advanced semiconductors. Blockade or invasion = tech crisis.</td></tr>
+  <tr><td><strong>Columbia Election</strong></td><td>Presidential election at R5. Three candidates. 38% approval.</td><td>Every foreign policy decision is also a campaign decision.</td></tr>
+  <tr><td><strong>Nuclear Shadows</strong></td><td>9 nuclear powers. Persia close to 10th. Choson has sole launch authority.</td><td>Every escalation path eventually passes through a nuclear decision point.</td></tr>
+</table>
+
+<!-- ============================================ -->
+<!-- SECTION 2: DEVELOPMENT STATUS -->
+<!-- ============================================ -->
+<h2>2. Where We Are</h2>
+
+<div class="lifecycle">
+  <div class="lifecycle-step done">IDEA</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step done">CONCEPT</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step done">SEED</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step current">DETAILED DESIGN</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step future">BUILD</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step future">TEST/OPERATE</div>
+  <div class="lifecycle-arrow">→</div>
+  <div class="lifecycle-step future">LEARN</div>
+</div>
+
+<div class="card card-success">
+  <h3>SEED Stage — Completed March 30, 2026</h3>
+  <p>44 of 50 deliverables complete. Gate passed after 11 tests, ~80 simulated rounds, and 21 issues addressed. The complete SIM design is locked — scenario, roles, mechanics, engines, data, web app spec, visual design, AI systems.</p>
+</div>
+
+<h3>What Was Built in 5 Days</h3>
+<div class="stat-grid">
+  <div class="stat"><div class="number">44/50</div><div class="label">SEED Deliverables</div></div>
+  <div class="stat"><div class="number">~20K</div><div class="label">Lines of Design</div></div>
+  <div class="stat"><div class="number">5,000</div><div class="label">Lines of Engine Code (Python)</div></div>
+  <div class="stat"><div class="number">80+</div><div class="label">Simulated Rounds Tested</div></div>
+</div>
+
+<h3>Test Results (4 Batteries)</h3>
+<div class="card">
+  <div class="test-bar"><span style="width:80px">Baseline</span><div class="bar"><div class="fill" style="width:70%;background:var(--accent)"></div></div><div class="score">7.0</div></div>
+  <div class="test-bar"><span style="width:80px">Formosa</span><div class="bar"><div class="fill" style="width:72%;background:var(--accent)"></div></div><div class="score">7.2</div></div>
+  <div class="test-bar"><span style="width:80px">Sanctions</span><div class="bar"><div class="fill" style="width:68%;background:var(--accent)"></div></div><div class="score">6.8</div></div>
+  <div class="test-bar"><span style="width:80px">Nuclear</span><div class="bar"><div class="fill" style="width:75%;background:var(--success)"></div></div><div class="score">7.5</div></div>
+  <div class="test-bar"><span style="width:80px">Economic</span><div class="bar"><div class="fill" style="width:70%;background:var(--accent)"></div></div><div class="score">7.0</div></div>
+  <div class="test-bar"><span style="width:80px">Political</span><div class="bar"><div class="fill" style="width:60%;background:var(--danger)"></div></div><div class="score">6.0</div></div>
+  <div class="test-bar"><span style="width:80px">Covert Ops</span><div class="bar"><div class="fill" style="width:60%;background:var(--danger)"></div></div><div class="score">6.0</div></div>
+  <p style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">Average: 6.9/10. Target: 8.0+ by launch. All blockers fixed. Nuclear deterrence, sanctions adaptation, and narrative emergence rated "brilliant" by tester.</p>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 3: DESIGN HIGHLIGHTS -->
+<!-- ============================================ -->
+<h2>3. Design Highlights</h2>
+
+<h3>Visual Identity — "The Economist meets McKinsey"</h3>
+<div class="card">
+  <p>Two themes: <strong>"Strategic Paper"</strong> (light, default) and <strong>"Midnight Intelligence"</strong> (dark, for projections).</p>
+  <div style="display:flex;gap:16px;margin-top:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px;padding:20px;background:#F5F6F8;border:1px solid #D8DCE5;border-radius:8px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#1A2332">Light Theme</div>
+      <div style="font-size:0.85rem;color:#4A5568;margin-top:4px">Clean, typography-led, data-rich</div>
+      <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#1A5276">GDP: 280 coins</div>
+      <div style="margin-top:4px"><span style="color:#C4922A;font-weight:600">■</span> Accent gold for key metrics</div>
+    </div>
+    <div style="flex:1;min-width:200px;padding:20px;background:#0D1B2A;border-radius:8px">
+      <div style="font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#D4DEE8">Dark Theme</div>
+      <div style="font-size:0.85rem;color:#7A8FA3;margin-top:4px">Immersive, intelligence-briefing feel</div>
+      <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.9rem;color:#5B9BD5">GDP: 280 coins</div>
+      <div style="margin-top:4px;color:#7A8FA3"><span style="color:#E8B84D;font-weight:600">■</span> Accent gold for key metrics</div>
+    </div>
+  </div>
+</div>
+
+<h3>Country Color System (22 territories)</h3>
+<div class="card">
+  <div style="display:flex;flex-wrap:wrap;gap:8px">
+    <span><span class="color-swatch" style="background:#3A6B9F"></span>Columbia</span>
+    <span><span class="color-swatch" style="background:#C4A030"></span>Cathay</span>
+    <span><span class="color-swatch" style="background:#A06060"></span>Nordostan</span>
+    <span><span class="color-swatch" style="background:#5A9A5A"></span>Heartland</span>
+    <span><span class="color-swatch" style="background:#9A7040"></span>Persia</span>
+    <span><span class="color-swatch" style="background:#4A6FA0"></span>Gallia</span>
+    <span><span class="color-swatch" style="background:#3A8A7A"></span>Teutonia</span>
+    <span><span class="color-swatch" style="background:#5A80A0"></span>Freeland</span>
+    <span><span class="color-swatch" style="background:#4A7A8F"></span>Albion</span>
+    <span><span class="color-swatch" style="background:#6A9A8A"></span>Ponte</span>
+    <span><span class="color-swatch" style="background:#B87850"></span>Bharata</span>
+    <span><span class="color-swatch" style="background:#9A9A40"></span>Levantia</span>
+    <span><span class="color-swatch" style="background:#B89048"></span>Formosa</span>
+    <span><span class="color-swatch" style="background:#8A6A48"></span>Phrygia</span>
+    <span><span class="color-swatch" style="background:#5A7A9B"></span>Yamato</span>
+    <span><span class="color-swatch" style="background:#A89030"></span>Solaria</span>
+    <span><span class="color-swatch" style="background:#4A8FA8"></span>Hanguk</span>
+    <span><span class="color-swatch" style="background:#A88050"></span>Mirage</span>
+    <span><span class="color-swatch" style="background:#5A5A5A"></span>Choson</span>
+    <span><span class="color-swatch" style="background:#3A7AAA"></span>Caribe</span>
+  </div>
+  <p style="margin-top:12px;font-size:0.85rem;color:var(--text-muted)">Western Treaty bloc harmonized in blue-green-teal. League bloc in warm reds/earth tones. Non-aligned in amber/brown. Each country has 3 color variants: vivid (UI), muted (map), light (badge background).</p>
+</div>
+
+<h3>Key Mechanics Designed</h3>
+<div class="card">
+  <table>
+    <tr><th>Mechanic</th><th>Design Choice</th></tr>
+    <tr><td>Ground combat</td><td>RISK dice with integer modifiers. Attacker needs ≥ defender + 1. Real dice or app dice. Moderator present.</td></tr>
+    <tr><td>Naval blockade</td><td>Ground forces on shore (not naval superiority). Formosa requires 3-zone encirclement. 1 friendly ship deblocks to partial.</td></tr>
+    <tr><td>Nuclear</td><td>5-tier system. 10-minute real-time authorization clock. Country-specific chains (Columbia: 3 people. Choson: leader alone).</td></tr>
+    <tr><td>Sanctions</td><td>S-curve coalition model. West alone = modest. Add swing states = devastating. Cathay joining = game over.</td></tr>
+    <tr><td>Intelligence</td><td>Per-individual request pools. Always returns an answer (accuracy varies 40-90%). Wrong answers look identical to right ones.</td></tr>
+    <tr><td>Court (democracies)</td><td>AI judge. Both sides submit arguments. Common sense verdict. Moderator enforces.</td></tr>
+    <tr><td>Communication</td><td>Humans talk FACE TO FACE. App only handles AI meetings and team channels.</td></tr>
+    <tr><td>AI assistant (Argus)</td><td>Voice-first personal mentor. 7-block prompt. Remembers everything. Named for the hundred-eyed giant.</td></tr>
+  </table>
+</div>
+
+<h3>Relationship Graph</h3>
+<div class="card">
+  <p>87 key relationships mapped across all 37 core roles. Interactive graph available at <code>2 SEED/B_ACTORS/SEED_B3_RELATIONSHIPS_v1.html</code></p>
+  <p style="margin-top:8px;font-size:0.85rem;color:var(--text-muted)">Research-grounded personal dynamics: Trump-Putin rapport despite proxy war, Meloni as Trump's favorite European, MBS hedging all sides, Modi's "tariffed betrayal." Each relationship written asymmetrically — Dealer's view of Helmsman differs from Helmsman's view of Dealer.</p>
+</div>
+
+<!-- ============================================ -->
+<!-- SECTION 4: TEAM QUESTIONS -->
+<!-- ============================================ -->
+<h2>4. We Need Your Input</h2>
+
+<p style="color:var(--text-sec);margin-bottom:24px">The following design choices have been made but we value your perspective. Please share your preference for each — either in person or via message to Marat.</p>
+
+<!-- QUESTION 1 -->
+<div class="question-card">
+  <h4>Q1: Default UI Theme</h4>
+  <div class="context">The app has two themes. Which should be the DEFAULT for participants during the simulation?</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Light ("Strategic Paper")</div>
+      <div class="opt-desc">Clean, professional, newspaper feel. Better readability on phones. Current default.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Dark ("Midnight Intelligence")</div>
+      <div class="opt-desc">Immersive, intelligence-briefing feel. Better for atmosphere. More dramatic.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">User Choice</div>
+      <div class="opt-desc">Let each participant toggle. Development cost: minimal.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 2 -->
+<div class="question-card">
+  <h4>Q2: Country Naming Approach</h4>
+  <div class="context">All countries have fictional names that hint at their real parallels. The names were chosen to be evocative but not offensive. Some examples: Columbia (USA), Cathay (China), Nordostan (Russia), Heartland (Ukraine), Persia (Iran).</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Keep Current Names</div>
+      <div class="opt-desc">Already developed. Participants figure out parallels naturally. Creates distance from real politics.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">More Abstract</div>
+      <div class="opt-desc">Less recognizable names. More fictional distance. Harder for participants to orient.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Real Names</div>
+      <div class="opt-desc">USA, China, Russia. Maximum clarity. But political sensitivity risk for corporate audiences.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 3 -->
+<div class="question-card">
+  <h4>Q3: Role Character Names</h4>
+  <div class="context">Each role has a code name: Dealer (US President), Helmsman (Chinese Chairman), Beacon (Ukrainian President), Anvil (IRGC Commander). These are the names participants use during the SIM.</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Keep Code Names Only</div>
+      <div class="opt-desc">"I'm the Dealer." Atmospheric. Creates immersion. Current approach.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Code Name + Title</div>
+      <div class="opt-desc">"I'm Dealer, President of Columbia." Clearer for new participants.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Code Name + Real Parallel</div>
+      <div class="opt-desc">"I'm Dealer (think: Trump)." Maximum clarity but breaks fiction.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 4 -->
+<div class="question-card">
+  <h4>Q4: Map Style</h4>
+  <div class="context">The global map is a 10×20 hex grid. Currently designed as a clean, schematic map (functional, not decorative). It could be upgraded to a more atmospheric "fantasy cartography" style.</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Schematic (Current)</div>
+      <div class="opt-desc">Clean hexes, labeled, functional. Fastest to read. Lowest production cost.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Atlas/Geographic</div>
+      <div class="opt-desc">Terrain textures, ocean shading, geographic feel. More immersive. Higher production cost.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Fantasy Cartography</div>
+      <div class="opt-desc">Parchment, illustrated borders, compass rose. Maximum atmosphere. Highest cost.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 5 -->
+<div class="question-card">
+  <h4>Q5: AI Assistant Voice Character</h4>
+  <div class="context">Argus (the AI assistant) speaks to participants via voice. It should feel different from AI country participants. What personality fits best?</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Sharp Colleague</div>
+      <div class="opt-desc">Fast, direct, slightly warm. Like a smart analyst who's on your side. Current design.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Calm Authority</div>
+      <div class="opt-desc">Measured, reassuring, slightly formal. Like a senior diplomat briefing you.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Warm Coach</div>
+      <div class="opt-desc">Encouraging, supportive, asks questions. Like a leadership coach during a crisis exercise.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 6 -->
+<div class="question-card">
+  <h4>Q6: Physical Dice vs App Dice for Combat</h4>
+  <div class="context">Ground attacks and naval combat use RISK-style dice. Both players roll, moderator witnesses. Should this be physical dice in the room or digital in the app?</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">Physical Dice</div>
+      <div class="opt-desc">Real dice on the table. Maximum drama. Tangible. But slower, needs moderator to record.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">App Dice</div>
+      <div class="opt-desc">Animated roll in the app. Automatic recording. Faster. But less visceral.</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">Both Available</div>
+      <div class="opt-desc">Moderator chooses per situation. Physical for big moments, app for routine. Maximum flexibility.</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUESTION 7 -->
+<div class="question-card">
+  <h4>Q7: What Excites You Most?</h4>
+  <div class="context">Open question. What aspect of this simulation most interests you? What would you want to experience as a participant?</div>
+  <div class="options">
+    <div class="option">
+      <div class="opt-label">The Negotiations</div>
+      <div class="opt-desc">Face-to-face deals, back-channels, alliance building, betrayal</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">The Military Drama</div>
+      <div class="opt-desc">Naval battles, nuclear brinkmanship, the Formosa invasion decision</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">The Economic Warfare</div>
+      <div class="opt-desc">Sanctions, oil prices, trade wars, currency competition</div>
+    </div>
+    <div class="option">
+      <div class="opt-label">The Internal Politics</div>
+      <div class="opt-desc">Elections, impeachment, coups, the tension between leaders on the same team</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  THE THUCYDIDES TRAP — MetaGames Immersive Leadership Simulation<br>
+  Team Briefing | March 2026 | Confidential
+</footer>
+
+</body>
+</html>
