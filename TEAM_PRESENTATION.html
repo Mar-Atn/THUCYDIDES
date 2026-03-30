@@ -315,109 +315,48 @@ footer { background:#1A2332; color:#7A8FA3; text-align:center; padding:24px; fon
 
 <h3>Global Map — Hex Grid (current state)</h3>
 <div class="card">
-  <p style="margin-bottom:12px">10×20 hex grid. Indian Ocean centered. 21 countries + contested territories. 3 chokepoints (Gulf Gate, Formosa Strait, Caribe Passage). Interactive editor built for Marat to hand-place territories.</p>
-  <svg viewBox="0 0 800 420" style="width:100%;background:#D4E4F0;border-radius:8px;border:1px solid var(--border)">
-    <!-- Water background -->
-    <rect width="800" height="420" fill="#D4E4F0" rx="8"/>
-    <!-- Simplified country territories as hex clusters -->
-    <!-- Columbia (Americas, left) -->
-    <polygon points="60,120 80,108 100,120 100,144 80,156 60,144" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="60,160 80,148 100,160 100,184 80,196 60,184" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="100,140 120,128 140,140 140,164 120,176 100,164" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="100,180 120,168 140,180 140,204 120,216 100,204" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="140,160 160,148 180,160 180,184 160,196 140,184" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="140,200 160,188 180,200 180,224 160,236 140,224" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <polygon points="60,200 80,188 100,200 100,224 80,236 60,224" fill="#9AB5D0" stroke="#fff" stroke-width="1"/>
-    <text x="110" y="175" font-family="Playfair Display,serif" font-size="11" font-weight="600" fill="#1A5276" text-anchor="middle">Columbia</text>
-    <!-- Caribe -->
-    <polygon points="140,240 160,228 180,240 180,264 160,276 140,264" fill="#8AACCC" stroke="#fff" stroke-width="1"/>
-    <text x="160" y="258" font-family="DM Sans,sans-serif" font-size="8" fill="#3A7AAA" text-anchor="middle">Caribe</text>
-    <!-- Europe cluster -->
-    <polygon points="300,80 320,68 340,80 340,104 320,116 300,104" fill="#8AA5B5" stroke="#fff" stroke-width="1"/>
-    <text x="320" y="98" font-family="DM Sans,sans-serif" font-size="7" fill="#4A7A8F" text-anchor="middle">Albion</text>
-    <polygon points="340,100 360,88 380,100 380,124 360,136 340,124" fill="#A5B8D4" stroke="#fff" stroke-width="1"/>
-    <polygon points="380,100 400,88 420,100 420,124 400,136 380,124" fill="#A5B8D4" stroke="#fff" stroke-width="1"/>
-    <text x="380" y="118" font-family="DM Sans,sans-serif" font-size="7" fill="#4A6FA0" text-anchor="middle">Gallia</text>
-    <polygon points="380,60 400,48 420,60 420,84 400,96 380,84" fill="#8AB5AA" stroke="#fff" stroke-width="1"/>
-    <polygon points="420,60 440,48 460,60 460,84 440,96 420,84" fill="#8AB5AA" stroke="#fff" stroke-width="1"/>
-    <text x="420" y="78" font-family="DM Sans,sans-serif" font-size="7" fill="#3A8A7A" text-anchor="middle">Teutonia</text>
-    <polygon points="460,80 480,68 500,80 500,104 480,116 460,104" fill="#A0B8C8" stroke="#fff" stroke-width="1"/>
-    <text x="480" y="98" font-family="DM Sans,sans-serif" font-size="7" fill="#5A80A0" text-anchor="middle">Freeland</text>
-    <polygon points="380,140 400,128 420,140 420,164 400,176 380,164" fill="#A5C8B8" stroke="#fff" stroke-width="1"/>
-    <text x="400" y="158" font-family="DM Sans,sans-serif" font-size="7" fill="#6A9A8A" text-anchor="middle">Ponte</text>
-    <!-- Heartland (contested) -->
-    <polygon points="500,60 520,48 540,60 540,84 520,96 500,84" fill="#A5C8A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="540,60 560,48 580,60 580,84 560,96 540,84" fill="#A5C8A5" stroke="#e65100" stroke-width="2" stroke-dasharray="4,3"/>
-    <text x="540" y="78" font-family="DM Sans,sans-serif" font-size="7" fill="#5A9A5A" text-anchor="middle">Heartland</text>
-    <!-- Nordostan (large) -->
-    <polygon points="500,20 520,8 540,20 540,44 520,56 500,44" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="540,20 560,8 580,20 580,44 560,56 540,44" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="580,20 600,8 620,20 620,44 600,56 580,44" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="620,20 640,8 660,20 660,44 640,56 620,44" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="660,20 680,8 700,20 700,44 680,56 660,44" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="580,60 600,48 620,60 620,84 600,96 580,84" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="620,60 640,48 660,60 660,84 640,96 620,84" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="700,40 720,28 740,40 740,64 720,76 700,64" fill="#D4A5A5" stroke="#fff" stroke-width="1"/>
-    <text x="620" y="38" font-family="Playfair Display,serif" font-size="11" font-weight="600" fill="#8A4040" text-anchor="middle">Nordostan</text>
-    <!-- Persia + Gulf -->
-    <polygon points="460,200 480,188 500,200 500,224 480,236 460,224" fill="#C8A57A" stroke="#fff" stroke-width="1"/>
-    <polygon points="500,200 520,188 540,200 540,224 520,236 500,224" fill="#C8A57A" stroke="#fff" stroke-width="1"/>
-    <polygon points="460,240 480,228 500,240 500,264 480,276 460,264" fill="#C8A57A" stroke="#fff" stroke-width="1"/>
-    <text x="490" y="218" font-family="DM Sans,sans-serif" font-size="8" fill="#9A7040" text-anchor="middle">Persia</text>
-    <!-- Gulf Gate chokepoint -->
-    <circle cx="520" cy="260" r="8" fill="none" stroke="#B03A3A" stroke-width="2" stroke-dasharray="3,2"/>
-    <text x="520" y="280" font-family="DM Sans,sans-serif" font-size="6" fill="#B03A3A" text-anchor="middle">Gulf Gate</text>
-    <!-- Solaria -->
-    <polygon points="500,260 520,248 540,260 540,284 520,296 500,284" fill="#C8B896" stroke="#fff" stroke-width="1"/>
-    <polygon points="540,260 560,248 580,260 580,284 560,296 540,284" fill="#C8B896" stroke="#fff" stroke-width="1"/>
-    <text x="540" y="278" font-family="DM Sans,sans-serif" font-size="7" fill="#A89030" text-anchor="middle">Solaria</text>
-    <!-- Bharata -->
-    <polygon points="560,200 580,188 600,200 600,224 580,236 560,224" fill="#D4B5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="600,200 620,188 640,200 640,224 620,236 600,224" fill="#D4B5A5" stroke="#fff" stroke-width="1"/>
-    <polygon points="580,240 600,228 620,240 620,264 600,276 580,264" fill="#D4B5A5" stroke="#fff" stroke-width="1"/>
-    <text x="600" y="225" font-family="DM Sans,sans-serif" font-size="8" fill="#B87850" text-anchor="middle">Bharata</text>
-    <!-- Cathay (large, east) -->
-    <polygon points="640,100 660,88 680,100 680,124 660,136 640,124" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="680,100 700,88 720,100 720,124 700,136 680,124" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="640,140 660,128 680,140 680,164 660,176 640,164" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="680,140 700,128 720,140 720,164 700,176 680,164" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="640,180 660,168 680,180 680,204 660,216 640,204" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="680,180 700,168 720,180 720,204 700,216 680,204" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <polygon points="720,140 740,128 760,140 760,164 740,176 720,164" fill="#E8D5A3" stroke="#fff" stroke-width="1"/>
-    <text x="690" y="155" font-family="Playfair Display,serif" font-size="11" font-weight="600" fill="#8A7020" text-anchor="middle">Cathay</text>
-    <!-- Formosa -->
-    <polygon points="740,200 760,188 780,200 780,224 760,236 740,224" fill="#DCC5A0" stroke="#fff" stroke-width="1"/>
-    <text x="760" y="218" font-family="DM Sans,sans-serif" font-size="7" fill="#B89048" text-anchor="middle">Formosa</text>
-    <!-- Formosa Strait chokepoint -->
-    <circle cx="740" cy="190" r="8" fill="none" stroke="#B03A3A" stroke-width="2" stroke-dasharray="3,2"/>
-    <text x="740" y="182" font-family="DM Sans,sans-serif" font-size="6" fill="#B03A3A" text-anchor="middle">Formosa Strait</text>
-    <!-- Yamato -->
-    <polygon points="740,100 760,88 780,100 780,124 760,136 740,124" fill="#A5B5C8" stroke="#fff" stroke-width="1"/>
-    <polygon points="740,140 760,128 780,140 780,164 760,176 740,164" fill="#A5B5C8" stroke="#fff" stroke-width="1"/>
-    <text x="760" y="138" font-family="DM Sans,sans-serif" font-size="7" fill="#5A7A9B" text-anchor="middle">Yamato</text>
-    <!-- Phrygia -->
-    <polygon points="420,140 440,128 460,140 460,164 440,176 420,164" fill="#B5A08A" stroke="#fff" stroke-width="1"/>
-    <polygon points="420,180 440,168 460,180 460,204 440,216 420,204" fill="#B5A08A" stroke="#fff" stroke-width="1"/>
-    <text x="440" y="178" font-family="DM Sans,sans-serif" font-size="7" fill="#8A6A48" text-anchor="middle">Phrygia</text>
-    <!-- Levantia -->
-    <polygon points="420,220 440,208 460,220 460,244 440,256 420,244" fill="#D4D4A5" stroke="#fff" stroke-width="1"/>
-    <text x="440" y="238" font-family="DM Sans,sans-serif" font-size="7" fill="#9A9A40" text-anchor="middle">Levantia</text>
-    <!-- Choson + Hanguk -->
-    <polygon points="720,80 740,68 760,80 760,104 740,116 720,104" fill="#8A8A8A" stroke="#fff" stroke-width="1"/>
-    <text x="740" y="98" font-family="DM Sans,sans-serif" font-size="6" fill="#5A5A5A" text-anchor="middle">Choson</text>
-    <polygon points="740,60 760,48 780,60 780,84 760,96 740,84" fill="#A5C8D4" stroke="#fff" stroke-width="1"/>
-    <text x="760" y="78" font-family="DM Sans,sans-serif" font-size="6" fill="#4A8FA8" text-anchor="middle">Hanguk</text>
-    <!-- Legend -->
-    <rect x="20" y="340" width="760" height="70" fill="rgba(255,255,255,0.85)" rx="4"/>
-    <text x="40" y="358" font-family="DM Sans,sans-serif" font-size="9" font-weight="600" fill="#1A2332">Map Legend</text>
-    <circle cx="40" cy="375" r="6" fill="none" stroke="#B03A3A" stroke-width="2" stroke-dasharray="3,2"/>
-    <text x="52" y="379" font-family="DM Sans,sans-serif" font-size="8" fill="#4A5568">Chokepoint</text>
-    <line x1="120" y1="370" x2="150" y2="370" stroke="#e65100" stroke-width="2" stroke-dasharray="4,3"/>
-    <text x="155" y="374" font-family="DM Sans,sans-serif" font-size="8" fill="#4A5568">Contested/Occupied</text>
-    <rect x="280" y="368" width="12" height="12" fill="#D4E4F0" stroke="#aaa" stroke-width="0.5"/>
-    <text x="297" y="378" font-family="DM Sans,sans-serif" font-size="8" fill="#4A5568">Water</text>
-    <text x="40" y="398" font-family="DM Sans,sans-serif" font-size="8" fill="#8494A7">10×20 hex grid | Indian Ocean centered | Full interactive version: 2 SEED/C_MECHANICS/C1_MAP/SEED_C1_MAP_EDITOR_v1.html</text>
-  </svg>
+  <p style="margin-bottom:12px">10×20 pointy-top hex grid. Indian Ocean centered. 21 countries + contested territories. 3 chokepoints. Hand-edited by Marat in our interactive map editor.</p>
+  <div style="text-align:center;margin:16px 0">
+    <p style="font-size:0.85rem;color:var(--text-sec);margin-bottom:12px">
+      <strong>The actual map is interactive</strong> — open <code>2 SEED/C_MECHANICS/C1_MAP/SEED_C1_MAP_EDITOR_v1.html</code> to explore.
+      Below is a schematic overview of the geopolitical layout:
+    </p>
+  </div>
+  <div style="background:#D4E4F0;border-radius:8px;padding:24px;position:relative;min-height:320px;overflow:hidden">
+    <!-- Schematic layout using positioned country blocks -->
+    <div style="display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(5,1fr);gap:4px;height:280px">
+      <!-- Row 1: Americas + Europe + Nordostan -->
+      <div style="grid-column:1/3;grid-row:1/3;background:#9AB5D0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:#1A5276;border:2px solid #7A9AB8">Columbia</div>
+      <div style="grid-column:3;grid-row:2;background:#D4E4F0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#5A7A9A;font-style:italic">Atlantic</div>
+      <div style="grid-column:4;grid-row:1;background:#8AA5B5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:600">Albion</div>
+      <div style="grid-column:4/6;grid-row:2;background:linear-gradient(135deg,#A5B8D4,#8AB5AA);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;font-weight:600">Gallia Teutonia</div>
+      <div style="grid-column:6;grid-row:1;background:#A0B8C8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:600">Freeland</div>
+      <div style="grid-column:6/9;grid-row:1;display:flex"></div>
+      <div style="grid-column:5/10;grid-row:1;background:#D4A5A5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:#6A3030;border:2px solid #B08080;margin-left:80px">Nordostan</div>
+      <!-- Row 2-3: Heartland, Phrygia, Persia, Bharata, Cathay -->
+      <div style="grid-column:6;grid-row:2;background:#A5C8A5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#3A6A3A;font-weight:600;border:2px dashed #e65100">Heartland</div>
+      <div style="grid-column:5;grid-row:3;background:#B5A08A;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:600">Phrygia</div>
+      <div style="grid-column:5;grid-row:4;background:#D4D4A5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#7A7A30;font-weight:600">Levantia</div>
+      <div style="grid-column:6;grid-row:3/5;background:#C8A57A;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#6A4820;font-weight:600;border:2px solid #B03A3A">Persia ⚔</div>
+      <div style="grid-column:7;grid-row:3/5;background:#D4B5A5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#8A5030;font-weight:600">Bharata</div>
+      <div style="grid-column:8/10;grid-row:2/4;background:#E8D5A3;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:600;color:#8A7020;border:2px solid #C4A030">Cathay</div>
+      <!-- Row 3-4: Gulf, Solaria, Formosa, Yamato -->
+      <div style="grid-column:6/7;grid-row:5;background:#C8B896;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#7A6820;font-weight:600">Solaria</div>
+      <div style="grid-column:7;grid-row:5;background:#D4BFA5;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#8A6030;font-weight:600">Mirage</div>
+      <div style="grid-column:10;grid-row:2;background:#A5B5C8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#3A5A7B;font-weight:600">Yamato</div>
+      <div style="grid-column:10;grid-row:1;background:#A5C8D4;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#3A7090;font-weight:600">Hanguk</div>
+      <div style="grid-column:10;grid-row:3;background:#DCC5A0;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#8A6A20;font-weight:600;border:2px solid #B03A3A">Formosa</div>
+      <div style="grid-column:9;grid-row:1;background:#8A8A8A;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:600">Choson</div>
+      <!-- Americas south -->
+      <div style="grid-column:2;grid-row:3;background:#8AACCC;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:600">Caribe</div>
+      <div style="grid-column:4;grid-row:3;background:#A5C8B8;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:8px;color:#4A7A6A;font-weight:600">Ponte</div>
+    </div>
+    <!-- Chokepoint markers -->
+    <div style="position:absolute;bottom:65px;left:52%;font-size:9px;color:#B03A3A;font-weight:700">⊘ Gulf Gate</div>
+    <div style="position:absolute;top:55%;right:4%;font-size:9px;color:#B03A3A;font-weight:700">⊘ Formosa Strait</div>
+    <div style="position:absolute;top:52%;left:14%;font-size:9px;color:#B03A3A;font-weight:700">⊘ Caribe Passage</div>
+  </div>
+  <p style="font-size:0.8rem;color:var(--text-muted);margin-top:8px"><em>Schematic layout — not to scale. Actual map is a 10×20 pointy-top hex grid with proper tessellation, water hexes, unit placement, and chokepoint markers. Open the interactive map editor for the full experience.</em></p>
 </div>
 
 <h3>20 Key Design Decisions — What We Discussed and Why</h3>
