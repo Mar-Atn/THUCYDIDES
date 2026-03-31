@@ -8,11 +8,13 @@
 
 **Global Map:** 10×20 hex grid, 22 countries, 3 chokepoints (Formosa Strait, Gulf Gate, Caribe Passage)
 
-**Theater Maps:** Only Eastern Ereb has a detailed theater map (10×10 hexes).
-Other theaters (Formosa, Mashriq, Caribbean, Thule, Korea) resolved at global hex level:
-- Formosa blockade: fleet occupies all water hexes adjacent to Formosa global hex
-- Gulf Gate blockade: Persia coast hex ground forces maintain blockade
-- Amphibious assault: 4:1 ratio applies at global hex level
+**Theater Maps:** Two detailed theater maps:
+1. **Eastern Ereb** (10×10 hexes) — Sarmatia-Ruthenia front. Active at start.
+2. **Mashriq** (10×10 hexes, 70 land hexes) — Persia/Gulf war theater. Active at start. Persia (51 hexes), Mirage (8), Phrygia (6), Solaria (5). Provides tactical depth for Gulf Gate blockade, ground invasion paths, and air campaign.
+
+Other theaters (Formosa, Caribbean, Thule, Korea) resolved at global hex level:
+- Formosa blockade: fleet occupies water hexes adjacent to Formosa
+- Amphibious assault: modifiers apply at global hex level
 - Caribbean/Thule/Korea: political events, 1 hex resolution sufficient
 
 **Global-Theater Link:** Eastern Ereb theater hexes link to global hexes:

@@ -1,58 +1,183 @@
 id,display_name,type,owner,theater,is_chokepoint,die_hard
-col_nw,Columbia Northwest,land_home,columbia,americas,false,false
-col_w,Columbia West,land_home,columbia,americas,false,false
-col_main_1,Columbia Central,land_home,columbia,americas,false,false
-col_main_2,Columbia East,land_home,columbia,americas,false,false
-col_main_3,Columbia South Central,land_home,columbia,americas,false,false
-col_main_4,Columbia Southeast,land_home,columbia,americas,false,false
-col_south,Columbia South,land_home,columbia,americas,false,false
-caribe,Caribe,land_home,caribe,americas,false,false
-cp_caribe_passage,Caribe Passage,chokepoint,none,americas,true,false
-thule,Thule,land_contested,teutonia,ereb,false,false
-albion,Albion,land_home,albion,ereb,false,false
-teutonia_1,Teutonia North,land_home,teutonia,ereb,false,false
-teutonia_2,Teutonia South,land_home,teutonia,ereb,false,false
-freeland,Freeland,land_home,freeland,ereb,false,false
-gallia_1,Gallia West,land_home,gallia,ereb,false,false
-gallia_2,Gallia East,land_home,gallia,ereb,false,false
-ponte,Ponte,land_home,ponte,ereb,false,false
+col_nw,Columbia Northwest,land_home,columbia,americas,false,
+,false,,,,,
+col_w,Columbia West,land_home,columbia,americas,false,
+,false,,,,,
+col_main_1,Columbia Central,land_home,columbia,americas,false,
+,false,,,,,
+col_main_2,Columbia East,land_home,columbia,americas,false,
+,false,,,,,
+col_main_3,Columbia South Central,land_home,columbia,americas,false,
+,false,,,,,
+col_main_4,Columbia Southeast,land_home,columbia,americas,false,
+,false,,,,,
+col_south,Columbia South,land_home,columbia,americas,false,
+,false,,,,,
+caribe,Caribe,land_home,caribe,americas,false,
+,false,,,,,
+cp_caribe_passage,Caribe Passage,chokepoint,none,americas,true,
+,false,,,,,
+thule,Thule,land_contested,teutonia,ereb,false,
+,false,,,,,
+albion,Albion,land_home,albion,ereb,false,
+,false,,,,,
+teutonia_1,Teutonia North,land_home,teutonia,ereb,false,
+,false,,,,,
+teutonia_2,Teutonia South,land_home,teutonia,ereb,false,
+,false,,,,,
+freeland,Freeland,land_home,freeland,ereb,false,
+,false,,,,,
+gallia_1,Gallia West,land_home,gallia,ereb,false,
+,false,,,,,
+gallia_2,Gallia East,land_home,gallia,ereb,false,
+,false,,,,,
+ponte,Ponte,land_home,ponte,ereb,false,
+,false,,,,,
 ruthenia_1,Ruthenia West,land_home,ruthenia,ereb,false,false
 ruthenia_2,Ruthenia East,land_contested,ruthenia,ereb,false,true
-nord_n1,Sarmatia Arctic,land_home,sarmatia,ereb,false,false
-nord_w1,Sarmatia West,land_home,sarmatia,ereb,false,false
-nord_w2,Sarmatia Southwest,land_home,sarmatia,ereb,false,false
-nord_c1,Sarmatia Central,land_home,sarmatia,ereb,false,false
-nord_c2,Sarmatia South Central,land_home,sarmatia,ereb,false,false
-nord_e1,Sarmatia East,land_home,sarmatia,ereb,false,false
-nord_e2,Sarmatia Far East,land_home,sarmatia,ereb,false,false
-nord_e3,Sarmatia Pacific,land_home,sarmatia,ereb,false,false
-sogdiana_1,Sogdiana North,land_contested,none,mashriq,false,false
-sogdiana_2,Sogdiana South,land_contested,none,mashriq,false,false
-sogdiana_3,Sogdiana East,land_contested,none,mashriq,false,false
-phrygia_1,Phrygia East,land_home,phrygia,mashriq,false,false
-phrygia_2,Phrygia South,land_home,phrygia,mashriq,false,false
-levantia,Levantia,land_home,levantia,mashriq,false,false
-persia_1,Persia North,land_home,persia,mashriq,false,false
-persia_2,Persia West,land_home,persia,mashriq,false,false
-persia_3,Persia East,land_home,persia,mashriq,false,false
-solaria_1,Solaria West,land_home,solaria,mashriq,false,false
-solaria_2,Solaria East,land_home,solaria,mashriq,false,false
-horn,Horn of Africa,land_contested,none,mashriq,false,false
-mirage,Mirage,land_home,mirage,mashriq,false,false
-cp_gulf_gate,Gulf Gate,chokepoint,none,mashriq,true,false
-bharata_1,Bharata South,land_home,bharata,asu,false,false
-bharata_2,Bharata North,land_home,bharata,asu,false,false
-bharata_3,Bharata East,land_home,bharata,asu,false,false
-choson,Choson,land_home,choson,asu,false,false
-hanguk,Hanguk,land_home,hanguk,asu,false,false
-cathay_1,Cathay Northwest,land_home,cathay,asu,false,false
-cathay_2,Cathay West,land_home,cathay,asu,false,false
-cathay_3,Cathay Central,land_home,cathay,asu,false,false
-cathay_4,Cathay Northeast,land_home,cathay,asu,false,false
-cathay_5,Cathay Southwest,land_home,cathay,asu,false,false
-cathay_6,Cathay Southeast,land_home,cathay,asu,false,false
-cathay_7,Cathay South,land_home,cathay,asu,false,false
-yamato_1,Yamato North,land_home,yamato,asu,false,false
-yamato_2,Yamato South,land_home,yamato,asu,false,false
-formosa,Formosa,land_home,formosa,asu,false,false
-cp_formosa_strait,Formosa Strait,chokepoint,none,asu,true,false
+nord_n1,Sarmatia Arctic,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_w1,Sarmatia West,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_w2,Sarmatia Southwest,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_c1,Sarmatia Central,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_c2,Sarmatia South Central,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_e1,Sarmatia East,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_e2,Sarmatia Far East,land_home,sarmatia,ereb,false,
+,false,,,,,
+nord_e3,Sarmatia Pacific,land_home,sarmatia,ereb,false,
+,false,,,,,
+sogdiana_1,Sogdiana North,land_contested,none,mashriq,false,
+,false,,,,,
+sogdiana_2,Sogdiana South,land_contested,none,mashriq,false,
+,false,,,,,
+sogdiana_3,Sogdiana East,land_contested,none,mashriq,false,
+,false,,,,,
+phrygia_1,Phrygia East,land_home,phrygia,mashriq,false,
+,false,,,,,
+phrygia_2,Phrygia South,land_home,phrygia,mashriq,false,
+,false,,,,,
+levantia,Levantia,land_home,levantia,mashriq,false,
+,false,,,,,
+persia_1,Persia North,land_home,persia,mashriq,false,
+,false,,,,,
+persia_2,Persia West,land_home,persia,mashriq,false,
+,false,,,,,
+persia_3,Persia East,land_home,persia,mashriq,false,
+,false,,,,,
+solaria_1,Solaria West,land_home,solaria,mashriq,false,
+,false,,,,,
+solaria_2,Solaria East,land_home,solaria,mashriq,false,
+,false,,,,,
+horn,Horn of Africa,land_contested,none,mashriq,false,
+,false,,,,,
+mirage,Mirage,land_home,mirage,mashriq,false,
+,false,,,,,
+cp_gulf_gate,Gulf Gate,chokepoint,none,mashriq,true,
+,false,,,,,
+bharata_1,Bharata South,land_home,bharata,asu,false,
+,false,,,,,
+bharata_2,Bharata North,land_home,bharata,asu,false,
+,false,,,,,
+bharata_3,Bharata East,land_home,bharata,asu,false,
+,false,,,,,
+choson,Choson,land_home,choson,asu,false,
+,false,,,,,
+hanguk,Hanguk,land_home,hanguk,asu,false,
+,false,,,,,
+cathay_1,Cathay Northwest,land_home,cathay,asu,false,
+,false,,,,,
+cathay_2,Cathay West,land_home,cathay,asu,false,
+,false,,,,,
+cathay_3,Cathay Central,land_home,cathay,asu,false,
+,false,,,,,
+cathay_4,Cathay Northeast,land_home,cathay,asu,false,
+,false,,,,,
+cathay_5,Cathay Southwest,land_home,cathay,asu,false,
+,false,,,,,
+cathay_6,Cathay Southeast,land_home,cathay,asu,false,
+,false,,,,,
+cathay_7,Cathay South,land_home,cathay,asu,false,
+,false,,,,,
+yamato_1,Yamato North,land_home,yamato,asu,false,
+,false,,,,,
+yamato_2,Yamato South,land_home,yamato,asu,false,
+,false,,,,,
+formosa,Formosa,land_home,formosa,asu,false,
+,false,,,,,
+cp_formosa_strait,Formosa Strait,chokepoint,none,asu,true,
+,false,,,,,
+t_persia_1,Persia Theater 1,land_home,persia,mashriq,false,false
+t_persia_2,Persia Theater 2,land_home,persia,mashriq,false,false
+t_persia_3,Persia Theater 3,land_home,persia,mashriq,false,false
+t_persia_4,Persia Theater 4,land_home,persia,mashriq,false,false
+t_persia_5,Persia Theater 5,land_home,persia,mashriq,false,false
+t_persia_6,Persia Theater 6,land_home,persia,mashriq,false,false
+t_persia_7,Persia Theater 7,land_home,persia,mashriq,false,false
+t_persia_8,Persia Theater 8,land_home,persia,mashriq,false,false
+t_persia_9,Persia Theater 9,land_home,persia,mashriq,false,false
+t_persia_10,Persia Theater 10,land_home,persia,mashriq,false,false
+t_persia_11,Persia Theater 11,land_home,persia,mashriq,false,false
+t_persia_12,Persia Theater 12,land_home,persia,mashriq,false,false
+t_persia_13,Persia Theater 13,land_home,persia,mashriq,false,false
+t_persia_14,Persia Theater 14,land_home,persia,mashriq,false,false
+t_persia_15,Persia Theater 15,land_home,persia,mashriq,false,false
+t_persia_16,Persia Theater 16,land_home,persia,mashriq,false,false
+t_persia_17,Persia Theater 17,land_home,persia,mashriq,false,false
+t_persia_18,Persia Theater 18,land_home,persia,mashriq,false,false
+t_persia_19,Persia Theater 19,land_home,persia,mashriq,false,false
+t_persia_20,Persia Theater 20,land_home,persia,mashriq,false,false
+t_persia_21,Persia Theater 21,land_home,persia,mashriq,false,false
+t_persia_22,Persia Theater 22,land_home,persia,mashriq,false,false
+t_persia_23,Persia Theater 23,land_home,persia,mashriq,false,false
+t_persia_24,Persia Theater 24,land_home,persia,mashriq,false,false
+t_persia_25,Persia Theater 25,land_home,persia,mashriq,false,false
+t_persia_26,Persia Theater 26,land_home,persia,mashriq,false,false
+t_persia_27,Persia Theater 27,land_home,persia,mashriq,false,false
+t_persia_28,Persia Theater 28,land_home,persia,mashriq,false,false
+t_persia_29,Persia Theater 29,land_home,persia,mashriq,false,false
+t_persia_30,Persia Theater 30,land_home,persia,mashriq,false,false
+t_persia_31,Persia Theater 31,land_home,persia,mashriq,false,false
+t_persia_32,Persia Theater 32,land_home,persia,mashriq,false,false
+t_persia_33,Persia Theater 33,land_home,persia,mashriq,false,false
+t_persia_34,Persia Theater 34,land_home,persia,mashriq,false,false
+t_persia_35,Persia Theater 35,land_home,persia,mashriq,false,false
+t_persia_36,Persia Theater 36,land_home,persia,mashriq,false,false
+t_persia_37,Persia Theater 37,land_home,persia,mashriq,false,false
+t_persia_38,Persia Theater 38,land_home,persia,mashriq,false,false
+t_persia_39,Persia Theater 39,land_home,persia,mashriq,false,false
+t_persia_40,Persia Theater 40,land_home,persia,mashriq,false,false
+t_persia_41,Persia Theater 41,land_home,persia,mashriq,false,false
+t_persia_42,Persia Theater 42,land_home,persia,mashriq,false,false
+t_persia_43,Persia Theater 43,land_home,persia,mashriq,false,false
+t_persia_44,Persia Theater 44,land_home,persia,mashriq,false,false
+t_persia_45,Persia Theater 45,land_home,persia,mashriq,false,false
+t_persia_46,Persia Theater 46,land_home,persia,mashriq,false,false
+t_persia_47,Persia Theater 47,land_home,persia,mashriq,false,false
+t_persia_48,Persia Theater 48,land_home,persia,mashriq,false,false
+t_persia_49,Persia Theater 49,land_home,persia,mashriq,false,false
+t_persia_50,Persia Theater 50,land_home,persia,mashriq,false,false
+t_persia_51,Persia Theater 51,land_home,persia,mashriq,false,false
+t_solaria_1,Solaria Theater 1,land_home,solaria,mashriq,false,false
+t_solaria_2,Solaria Theater 2,land_home,solaria,mashriq,false,false
+t_solaria_3,Solaria Theater 3,land_home,solaria,mashriq,false,false
+t_solaria_4,Solaria Theater 4,land_home,solaria,mashriq,false,false
+t_solaria_5,Solaria Theater 5,land_home,solaria,mashriq,false,false
+t_mirage_1,Mirage Theater 1,land_home,mirage,mashriq,false,false
+t_mirage_2,Mirage Theater 2,land_home,mirage,mashriq,false,false
+t_mirage_3,Mirage Theater 3,land_home,mirage,mashriq,false,false
+t_mirage_4,Mirage Theater 4,land_home,mirage,mashriq,false,false
+t_mirage_5,Mirage Theater 5,land_home,mirage,mashriq,false,false
+t_mirage_6,Mirage Theater 6,land_home,mirage,mashriq,false,false
+t_mirage_7,Mirage Theater 7,land_home,mirage,mashriq,false,false
+t_mirage_8,Mirage Theater 8,land_home,mirage,mashriq,false,false
+t_phrygia_1,Phrygia Theater 1,land_home,phrygia,mashriq,false,false
+t_phrygia_2,Phrygia Theater 2,land_home,phrygia,mashriq,false,false
+t_phrygia_3,Phrygia Theater 3,land_home,phrygia,mashriq,false,false
+t_phrygia_4,Phrygia Theater 4,land_home,phrygia,mashriq,false,false
+t_phrygia_5,Phrygia Theater 5,land_home,phrygia,mashriq,false,false
+t_phrygia_6,Phrygia Theater 6,land_home,phrygia,mashriq,false,false
