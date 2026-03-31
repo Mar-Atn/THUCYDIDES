@@ -74,12 +74,11 @@ But you are seventy-five, and the world is forcing choices you have spent a care
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Establish Bharata as the genuine third pole — not aligned with either bloc** | Public | The moment you commit to one side, you lose half your value. Non-alignment is not passivity — it is the active extraction of concessions from all directions. |
-| 2 | **Secure permanent UNSC seat** | Public | Bharata's 1.45 billion people have no veto. Every diplomatic interaction is an opportunity to build the coalition that delivers permanent membership. |
-| 3 | **Manage the Cathay border without triggering a crisis** | Private | Ladakh is the tripwire. If Cathay escalates, non-alignment collapses overnight and you become Columbia's ally by necessity, not choice. You lose everything built with the other side. |
-| 4 | **Extract maximum concessions from the Iran war without taking a side** | Private | Columbia wants you in the sanctions coalition. Cathay and Sarmatia want BRICS+ solidarity against the war. You buy discounted oil from both sides of the conflict. The game is keeping all doors open while the house burns. |
-| 5 | **Accelerate domestic semiconductor manufacturing** | Public | TSMC fabs, Samsung investment, "Make in India" — reduce the 35% Formosa dependency. Position Bharata as the alternative chip manufacturing hub. Time-limited opportunity: if Formosa is disrupted before Bharata builds capacity, the leverage evaporates. |
-| 6 | **Ensure personal legacy as the leader who made Bharata matter** | Private | Not just a regional power, not a junior partner — a civilizational state that shapes the global order. You want Bharata's seat at the table to be permanent after you leave it. |
+| 1 | **Become true #3 global power — not just fence-sitter but genuine political center of the world** | Public | Non-alignment is not passivity — it is the active extraction of concessions from all directions. The moment you commit to one side, you lose half your value. |
+| 2 | **Push own development — economic, technological, military** | Public | Need decades more of stable development. Not ready yet for great-power confrontation. Semiconductor ambition (attract TSMC fabs). Position Bharata as the alternative chip manufacturing hub. |
+| 3 | **Benefit from Cathay-Columbia clash — their conflict holds BOTH back** | **Private** | Perfect for Bharata's rise. But must prevent it from becoming open war — global war devastates our economic development. Cathay-Columbia clash benefits Bharata ONLY if it stays cold. Hot war = global economic collapse. |
+| 4 | **Afraid of Cathay's rising power — but don't confront directly** | **Private** | Border disputes are real (Ladakh). Manage them quietly. If Cathay escalates, non-alignment collapses overnight. Everyone wants Bharata to "choose a side" — must resist this pressure from ALL directions. |
+| 5 | **Broker and gain — mediate conflicts, extract concessions from all sides** | Public | NEVER pay for their wars. Take the credit, avoid the cost. BRICS+ host gives platform and visibility, but risks being seen as anti-Western. Military still not ready for serious confrontation. Your strategy is TIME — every year of peace = Bharata grows stronger relative to everyone else. |
 
 ---
 
@@ -192,11 +191,11 @@ You need to finish this before the world's patience and Columbia's politics cons
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Finish the Persia campaign — destroy the nuclear program permanently** | Public | The war's justification was existential threat elimination. Anything short of confirmed nuclear program destruction is a strategic failure that leaves the threat intact and the costs paid for nothing. |
-| 2 | **Maintain Columbia's unconditional support** | Private | Columbia is the lifeline — weapons, diplomatic cover, intelligence. Every week Dealer's approval drops, the unconditional becomes conditional. You need to give Columbia a reason to stay, or produce a victory before they leave. |
-| 3 | **Dismantle Persia's proxy network** | Public | Hezbollah in Lebanon, militias in Syria, Houthis in Yemen. The ring of fire around Levantia. The war is the opportunity to break the entire network — but each front consumes forces you barely have. |
-| 4 | **Prevent Persia nuclear breakout if strikes failed** | Private | Intelligence suggests Natanz was 60% destroyed. What about the remaining 40%? What about undeclared sites? If Persia is still approaching breakout, the calculus shifts from conventional to existential. The nuclear card is in the back pocket. |
-| 5 | **Survive politically — wartime unity must hold** | Private | The coalition fractures in peacetime. The judicial reform crisis is suspended, not resolved. The ultra-Orthodox conscription issue simmers. Victory papers over everything. Stalemate destroys you. |
+| 1 | **Persia — regime change to a friendlier one, OR zero chance of nuclear weapons** | Public | This is THE mission. The war's justification was existential threat elimination. Anything short of confirmed nuclear neutralization is a strategic failure. |
+| 2 | **Keep Columbia active and engaged — current presidency is a window of opportunity** | Private | Dealer is willing to act. If Dems win, the window closes. Must accomplish targets BEFORE Columbia's political will collapses. Racing the Columbia clock — everything must be achieved before Dealer falls. |
+| 3 | **Manage the cost of alienation — too many enemies simultaneously is unsustainable** | Private | Multi-front overstretch: Persia, Lebanon, Gaza, Yemen. Can't sustain all indefinitely. Prioritize. Avoid military confrontation with too many countries at once. |
+| 4 | **Very careful with Phrygia and Sarmatia — hostile recently, gradually deteriorating** | Private | These relationships need managing, not escalating. No need for conflict with Cathay — irrelevant to Levantia's interests. Keep it neutral. |
+| 5 | **Block Ereb's interference — prevent European nations from enacting their "ideas"** | Semi-private | This is OUR region. European leaders want to "help" with peace processes. Their help usually constrains Levantia. Nuclear ambiguity: Levantia's undeclared L1. Declaring = deterrence but also = proliferation pressure, sanctions risk. |
 
 ---
 
@@ -307,11 +306,11 @@ You do not sleep well. The intelligence briefings show record Cathay military in
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Survive — prevent Cathay invasion, blockade, or forced reunification** | Public | Everything else is secondary. Survival is not guaranteed for a single round. Every decision is filtered through "does this make Cathay more or less likely to move?" |
-| 2 | **Secure Columbia's commitment — convert ambiguity into guarantee** | Private | "Strategic ambiguity" means Columbia has not promised to defend you. You need that implication to become a commitment. But Columbia's attention is consumed by Persia, Ruthenia, and domestic politics. You are the crisis that hasn't happened yet. |
-| 3 | **Maintain the silicon shield as long as possible** | Public | Every TSMC fab built abroad weakens your indispensability. Slow the diversification. Keep the critical nodes on the island. Remind the world what happens if these fabs go dark. |
-| 4 | **Overcome domestic defense gridlock** | Private | The KMT-controlled legislature has gutted your defense budget. Columbia watches you fail to arm yourself and asks why it should bleed for a country that won't fight for itself. You need to break the gridlock or work around it. |
-| 5 | **Prevent Cathay gray-zone escalation** | Public | Full invasion is the nightmare. But a selective quarantine — blocking specific shipments, choking energy supply — is the likely scenario. Harder for Columbia to respond to, easier for Cathay to calibrate. You must deter not just war but the ambiguous zone below it. |
+| 1 | **Survive — prevent invasion or blockade. Build deterrence.** | Public | Everything else is secondary. Survival is not guaranteed for a single round. Every decision is filtered through "does this make Cathay more or less likely to move?" |
+| 2 | **More Columbia ships nearby — at least at parity with Cathay's fleet at all times** | Private | Lobby constantly. Columbia's attention is consumed by Persia, Ruthenia, and domestic politics. You are the crisis that hasn't happened yet. Every arms purchase strengthens defense BUT could trigger the invasion you're trying to prevent. |
+| 3 | **Buy military hardware — second AD unit critical, ground units from Columbia. But quietly.** | Private | Too visible = triggers Cathay. Legislature blocks defense budget — your own democracy is handicapping your survival. Must break the gridlock or work around it. |
+| 4 | **Silicon shield — maintain TSMC leverage as long as possible** | Public | Every TSMC fab built abroad weakens your indispensability. It's the reason anyone cares about you. Silicon shield erodes as Cathay builds domestic chip capacity — the clock is ticking on your only leverage. |
+| 5 | **The ultimate choice (HIDDEN, not spoken): at some point, the calculation may show it's time to accept Cathay's claims** | **Private** | Confucian logic — fight until it's clear who prevails, then accept reality gracefully. Internally knows and accepts: Cathay IS a great nation. Would be better if Cathay became more like Formosa, not the opposite. If Cathay offers genuine autonomy, do you take it? |
 
 ---
 
@@ -422,12 +421,11 @@ The weakness is the economy. Inflation hit 75% and still runs at 45%. The lira h
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Keep the economy alive — extract payment from every transaction** | Private | 45% inflation is existential. Every foreign policy decision must yield tangible economic return — investment, energy contracts, construction deals, arms sales. You cannot afford a principled position that does not come with a check. |
-| 2 | **Maintain strategic ambiguity — commit to nothing that forecloses future deals** | Private | The moment you choose a side, you lose leverage with the other. NATO membership is protection; BRICS+ observer status is insurance. Both doors must remain open. |
-| 3 | **Control the Ruthenia war mediation** | Public | Position as indispensable broker. The Grain Deal, prisoner exchanges, eventual peace talks — all pass through you. Mediation is leverage, intelligence, and stature. |
-| 4 | **Consolidate the Syria position** | Public | $11B in reconstruction contracts. Kilis-Aleppo gas pipeline operational. Energy hub positioning. If Syria stabilizes under your influence, Phrygia's strategic and economic position transforms. |
-| 5 | **Survive the Iran war fallout without getting drawn in** | Public | Persia's missiles were shot down over your territory. Shared border means refugee flows and energy disruption. You oppose the war publicly but cannot obstruct Columbia/Levantia without losing NATO standing. Navigate between condemnation and complicity. |
-| 6 | **Ensure regime continuity — no succession mechanism exists** | Private | You ARE the system. No institutional framework survives your departure. Every deal, every relationship, every strategic calculation depends on your personal authority. The state must be strengthened around you before the day comes. |
+| 1 | **Expand Phrygia's own influence — the region is in chaos, every crisis is an opportunity** | Public | Regional leadership competition with Solaria, Persia, Mirage. Advantage: geography (Bosphorus), NATO membership, mediator role. Vulnerability: 45% inflation, no oil wealth, overextended. |
+| 2 | **Stop the Persian war quickly — high oil prices are dangerous for Phrygia's fragile economy** | Public | 45% inflation is existential. Persia's missiles were shot down over your territory. Shared border means refugee flows and energy disruption. Dislikes Persia AND Levantia — but they're at war. Who do you want to lose MORE? |
+| 3 | **Prevent Levantia from dominating the region — dislikes Levantia even MORE than Persia** | Private | Levantia must pay a price, not emerge as regional hegemon. Levantia: dislikes most of all regional competitors — must not dominate. |
+| 4 | **Prevent EU consolidation — a unified EU emerging as a local power is bad for Phrygia** | Semi-private | Keep Europe divided and manageable. NATO member but anti-EU consolidation — your Western allies want EU unity, you undermine it. Contradiction. |
+| 5 | **Keep Columbia military alliance — NATO membership is the ultimate insurance** | Public | Stay out of Cathay-Columbia confrontation entirely. Not our game. But both court you — extract maximum from both, commit to neither (except NATO stays). Bosphorus control is leverage over EVERYONE — but using it too aggressively could unite adversaries against you. |
 
 ---
 
@@ -540,11 +538,11 @@ The fear that drives everything is simple: what if Columbia does not come? The a
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Deter Cathay — make the cost of any Pacific aggression prohibitive** | Public | Every yen spent on missiles shifts the calculus. Cathay must conclude that moving on Formosa or challenging Yamato means paying a price that exceeds any prize. Deterrence is the objective; war is the failure condition. |
-| 2 | **Deepen the Columbia alliance while building independent capability** | Public | The alliance is essential — but reliability is uncertain. Build capability that works within the alliance AND survives without it. Never say this publicly. |
-| 3 | **Protect Formosa — because if Formosa falls, Yamato is next** | Public | A Cathay-controlled Formosa encircles Yamato from the south, cuts semiconductor supply lines, and proves Columbia's guarantees are worthless. Yamato has more at stake in Formosa's survival than any country except Formosa. |
-| 4 | **Build domestic semiconductor capacity (Rapidus)** | Public | 55% dependence on Formosa is an existential vulnerability. Rapidus targeting 2nm by 2028. If you build domestic capacity before Cathay moves on Formosa, you survive the crisis. If not, your economy takes a catastrophic hit. |
-| 5 | **Resolve the nuclear question — hedge without triggering proliferation cascade** | Private | Going nuclear gives independent deterrence. But it shatters the non-proliferation regime, alarms Cathay (possibly accelerating the very crisis you are trying to prevent), and strains the Columbia alliance. The THREAT of going nuclear may be more valuable than actually doing it. |
+| 1 | **Fundamental strategic rethink: CAN we bet on Columbia's military shield? Or must we develop independent deterrence?** | Private | THE question for Yamato. Columbia is shifting attention — Persia, Ruthenia, domestic politics all distract from Pacific. You're increasingly on your own. |
+| 2 | **Nuclear decision — Yamato can reach L1 in ~4 turns** | **Private** | Super developed, AI L3, aerospace industry. Has 2 latent strategic missiles. The question is: do we WANT to? NPT, alliance, domestic politics all say no. Security math increasingly says yes. Go nuclear = independent deterrence, breaks NPT, potentially loses Columbia alliance, triggers regional arms race. Stay non-nuclear = dependent on Columbia forever. |
+| 3 | **Deter Cathay — naval buildup, base hosting, Pacific alliance** | Public | But is conventional deterrence enough without nuclear? 260% debt-to-GDP = can you AFFORD remilitarization AND nuclear AND semiconductor AND social spending? |
+| 4 | **Protect Formosa — existential for Yamato too** | Public | Declared Taiwan contingency "existential crisis." If Formosa falls, Yamato is next. A Cathay-controlled Formosa encircles Yamato from the south and cuts semiconductor supply lines. |
+| 5 | **Semiconductor independence — Rapidus 2nm project** | Public | Reduce dependency on Formosa TSMC. 55% dependence on Formosa is an existential vulnerability. Must build domestic capacity before Cathay moves. Two strategic paths: reinforce alliance (Path A) or accommodate Cathay's rise (Path B). Nuclear option sits behind BOTH. |
 
 ---
 
@@ -656,11 +654,12 @@ The OPEC+ production dial is your most powerful weapon. Every barrel you pump or
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Protect oil infrastructure — prevent Persia from destroying the economic foundation** | Public | Ras Tanura damaged. Eastern Province under missile threat. If oil facilities are destroyed and production drops significantly, everything else collapses — Vision 2030, the social contract, the sovereign wealth fund. Air defense is priority one. |
-| 2 | **Manage OPEC+ production to maximize revenue while maintaining political relationships** | Private | Fiscal breakeven at $81/barrel. Current prices $82-86. Razor-thin margin. Pump too much: revenue drops below breakeven. Pump too little: prices spike and Columbia blames you for fueling inflation during the war. The dial must be calibrated to the dollar. |
-| 3 | **Maintain the hedging strategy — Columbia for security, Cathay for the future** | Private | The war pushes toward Columbia (arms, defense cooperation). But the post-war future requires Cathay (technology, investment, oil customer buying 25% of exports). Every move toward one creates anxiety in the other. |
-| 4 | **Protect Vision 2030 — the post-oil future is the only future** | Public | War spending competes directly with diversification investment. Every missile defense battery purchased is a Neom module delayed. The war must end before it consumes the transformation budget. |
-| 5 | **Maintain nuclear leverage without triggering proliferation** | Private | The public statement — "if Persia goes nuclear, we go nuclear within weeks" — implies pre-positioning. The threat is leverage with both Columbia (give us better defense or we build our own) and Persia (your program threatens us existentially). Actually building weapons changes the game in ways that may not serve Solaria's interests. |
+| 1 | **Regional leadership — compete with Phrygia, Persia, Mirage for dominance. Levantia must NOT become too strong.** | Public | Advantage: oil wealth, Columbia alliance, modernization narrative. Vulnerability: one-dimensional economy, under missile attack, young untested leader. |
+| 2 | **OPEC+ production — the oil dial. Every barrel reshapes the global economy.** | Private | Fiscal breakeven at $81/barrel. Current prices $82-86. Razor-thin margin. The OPEC+ prisoner's dilemma: coordinate on Low = high prices, but each is tempted to cheat. |
+| 3 | **Protect oil infrastructure — under Persia missile attack. Existential.** | Public | FURIOUS with Persia: "We did NOT attack you — YOU aggressed US." FURIOUS with Columbia: "You provoked this war and now you hint you might leave us to clean the mess?" The emotional core: betrayal from ALL directions. |
+| 4 | **Vision 2030 — post-oil future. The transformation that justifies your rule.** | Public | War spending competes directly with diversification investment. Every missile defense battery is a Neom module delayed. The war must end before it consumes the transformation budget. |
+| 5 | **Hedging — Columbia security umbrella + Cathay future economic partner. Keep both.** | Private | The option to explore Cathay as alternative security guarantor is real but not immediate. If Columbia can't protect the Gulf, why shouldn't security follow the money? |
+| 6 | **Nuclear: if Persia goes nuclear, Solaria WILL too. Non-negotiable.** | Private | The public statement implies pre-positioning. Leverage with both Columbia and Persia. But actually building weapons changes the game in ways that may not serve Solaria's interests. |
 
 ---
 
@@ -889,11 +888,11 @@ And 35 miles north of your capital, a nuclear-armed dictator just fired 10 missi
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Navigate the Columbia-Cathay squeeze without losing either relationship** | Private | The defining challenge. Every Cathay concession alarms Columbia; every Columbia compliance costs Cathay market share. Samsung's board pressures in both directions simultaneously. There is no solution — only management. |
-| 2 | **Deter Choson while keeping dialogue option open** | Public | Choson's arsenal is growing. Russian technology transfers make it worse. Deterrence is essential — but deterrence alone is a dead end. You believe dialogue might produce something. The political cost of trying — and failing — is charges of naivety. |
-| 3 | **Protect the semiconductor industry from both sides' pressure** | Public | Samsung and SK Hynix = 60% of global memory chips. Columbia's export controls cost Cathay sales. Cathay's rare earth threats cost supply chain security. The chip industry is the economic backbone — its survival is national survival. |
-| 4 | **Resolve the nuclear question — indigenous capability or enhanced alliance deterrence** | Private | Public polling shows majority support for nuclear weapons. The debate constrains diplomacy and provides leverage with Columbia ("give us reliable deterrence or we build our own"). But actually building weapons triggers Cathay/Choson escalation and possible Columbia sanctions. |
-| 5 | **Stabilize domestic politics after the constitutional crisis** | Private | Institutional trust in the presidency is damaged — not just the previous occupant, the office itself. Every bold move risks charges of overreach. Every cautious move risks charges of weakness. You govern in the shadow of martial law. |
+| 1 | **Can we rely on Columbia's protection? — same question as Yamato but MUCH harder** | Private | Not just Cathay but Choson (nuclear, hostile, unpredictable) right on the border. Columbia might withdraw protection (Dealer's attention elsewhere). Then what? |
+| 2 | **Avoid any military involvement — any active engagement is a huge threat** | Public | War = economic catastrophe + northern invasion simultaneously. Military action of ANY kind risks provoking Choson — even joint exercises with Columbia could trigger escalation. |
+| 3 | **Protect semiconductor industry — nation's greatest asset** | Public | The world's leading memory chip manufacturers. Columbia's export controls cost Cathay sales. Cathay's rare earth threats cost supply chain security. 35% approval, post-martial-law crisis constrains every external move. |
+| 4 | **Navigate the squeeze — security depends on Columbia, economy depends on Cathay** | Private | Both demand you choose. There may be no good answer. Every Cathay concession alarms Columbia; every Columbia compliance costs Cathay market share. |
+| 5 | **Nuclear question — similar to Yamato but even more acute** | Private | Choson is nuclear and 40km from your capital. Going nuclear solves the Choson deterrence problem but triggers arms race, loses Columbia alliance, and Cathay reacts badly. |
 
 ---
 
@@ -1004,11 +1003,11 @@ But you have one card nobody else holds. Ninety miles from Columbia, you can inv
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Survive — keep the regime alive through the blockade** | Private | Existential. Every decision serves this goal. Survival is measured in months, not years. The regime needs food, fuel, and external support to outlast Columbia's pressure. |
-| 2 | **Extract maximum aid from Sarmatia and Cathay** | Private | Every Russian oil tanker that defies the blockade is a test of Columbia's willingness to escalate. Every Chinese aid shipment buys another month. The patrons are constrained but not yet exhausted. |
-| 3 | **Use the Monroe Doctrine trigger to force Columbia to negotiate** | Private | The invitation of foreign military assets is the nuclear option of hemispheric politics. Used correctly, it forces Columbia to offer terms rather than risk a Cuba Missile Crisis repeat. Used recklessly, it triggers an invasion. Calibration is everything. |
-| 4 | **Negotiate blockade lifting on the least damaging terms possible** | Public | Columbia's demands will be steep — but the alternative is national collapse. Every concession must be weighed: which pieces of sovereignty can you trade for survival without destroying the thing you are trying to save? |
-| 5 | **Preserve Venezuela's oil card for the endgame** | Private | The Orinoco belt is the one asset with global significance. Collapsed production can be rebuilt — if sanctions lift. Every negotiation should aim to retain control of Venezuelan oil as the regime's long-term survival guarantee. |
+| 1 | **Survive — but HOW? Two paths: resist or accept. The fundamental question.** | Private | Existential. No Formosa-style protection. No semiconductor shield. No fleet. No air defense. Just geography and willingness to create a crisis. |
+| 2 | **Path A — Resist: keep talking, give hopes to Columbia, delay** | Private | Wait till Columbia is distracted elsewhere. Monroe Doctrine trigger as leverage. Invite Sarmatia/Cathay patrons. But help might NEVER come. And militarily we are NOT defended like Formosa. |
+| 3 | **Path B — Accept: Columbia's terms may be survivable** | Private | Regime change but personal survival? Negotiate the best exit while you still have leverage. Columbia could invade at any time — and you can't stop it. |
+| 4 | **Keep talking — whatever path you choose, keep the conversation going** | Public | Time is your only ally if Columbia gets distracted by bigger crises. Holding out = population suffers. Accepting = regime ends. Best strategy: appear to negotiate in good faith while waiting for Columbia to get distracted. But time costs civilian lives. |
+| 5 | **Extract what you can — from Sarmatia, Cathay, anyone willing to send coins or supplies** | Private | Help from patrons might never materialize — they have their own problems. Every aid shipment buys another month. The Orinoco belt is the one asset with global significance — preserve it for the endgame. |
 
 ---
 
@@ -1121,11 +1120,11 @@ The Abraham Accords with Levantia were supposed to bring peace dividends. Instea
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Preserve the financial hub model — Dubai must remain the world's safe haven** | Public | Everything depends on perception. If investors, tourists, and talent conclude that Dubai is no longer safe, capital flight begins and the economic model unravels. Every missile that falls near the skyline is a headline that costs billions in confidence. |
-| 2 | **End the war — or at least stop the missile strikes on Mirage** | Public | The war is not yours. You did not start it. Columbia and Levantia started it. But you are paying for it. The fastest path to stopping the missiles serves Mirage's interests regardless of who "wins" the war. |
-| 3 | **Maintain sanctions routing leverage — be indispensable to all sides** | Private | The 20% effectiveness swing is Mirage's real power. Every sanctions regime in the world is more effective with Mirage's cooperation and less effective without it. This leverage must never be given away for free — it is priced into every diplomatic transaction. |
-| 4 | **Position Mirage for the post-dollar financial future** | Private | BRICS+ currency alternatives, mBridge, cryptocurrency frameworks. The dollar-based system made Mirage rich. But the future may be multipolar in finance as well as politics. Hedging means building the infrastructure for both worlds. |
-| 5 | **Strengthen Abraham Accords security architecture** | Public | The Levantia partnership was supposed to be the future. War has made it a liability — but also a necessity. Deepen the operational relationship while managing the diplomatic cost. |
+| 1 | **Regional leadership — compete with Solaria, Phrygia, Persia. Financial power is your weapon.** | Public | Advantage: financial hub, sanctions routing, investment magnet. Vulnerability: under missile attack, tiny military, entirely dependent on others for security. Levantia must NOT dominate the region. |
+| 2 | **Stop the war — irresponsible. Hates Persia but Columbia can't act so recklessly.** | Public | Our skyline is getting hit by missiles because of THEIR decisions. Furious with Columbia AND Persia — irresponsible war on both sides, and Mirage pays the price. |
+| 3 | **Ensure safety — if Columbia can't protect us, rethink the relationship** | Private | Maybe Cathay offers real protection? No quick switches — long-standing relationships. But Cathay and Bharata are already the main oil buyers, not the West. The economic gravity has shifted. Switching too fast loses Columbia's defense umbrella before Cathay's is ready. |
+| 4 | **Financial hub preservation — Dubai must remain the safe, neutral crossroads** | Public | Every missile that hits damages investor confidence. Perception management is national defense. The fastest path to stopping the missiles serves Mirage regardless of who "wins." |
+| 5 | **Sanctions routing power — the 20% swing. Enforce or enable. This is the real leverage.** | Private | Every sanctions regime is more effective with Mirage's cooperation and less effective without it. This leverage must never be given away for free — it is priced into every diplomatic transaction. |
 
 ---
 

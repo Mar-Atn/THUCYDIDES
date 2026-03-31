@@ -80,12 +80,11 @@ The question you cannot answer is the one that will define your legacy: when doe
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Survive politically — remain president through and after the wartime election** | Private | Every decision filtered through "does this keep me in power?" Losing the presidency means losing control of Ruthenia's future — and possibly facing accountability for wartime decisions. But clinging to power while the country bleeds creates its own moral crisis. |
-| 2 | **No formal territorial concessions — preserve sovereignty over all internationally recognized territory** | Public | The dead demand it. The nation's honor demands it. 82% of the population finds ceding Zaporizhzhia and Kherson unacceptable. But holding this line means the war continues, and the war is killing the country. |
-| 3 | **Secure EU membership — the only guarantee that cannot be revoked by one American election** | Public | EU accession is the structural security guarantee. Unlike NATO (blocked), unlike bilateral promises (broken — see Budapest Memorandum), EU membership is institutional, irreversible, and real. Must overcome Ponte's veto. |
-| 4 | **Maintain Western aid at current or increased levels** | Public | Without Western aid, the state collapses within 2-3 rounds. Every diplomatic interaction with Columbia and Europe is simultaneously a policy discussion and a fundraising call. Dignity and dependency — the permanent tension. |
-| 5 | **Prevent Bulwark and Broker from building alternative power centers that undermine presidential authority** | Private | Shadow diplomacy by rivals — meeting foreign leaders, making promises "if elected" — erodes Beacon's negotiating position. Every foreign leader who takes a meeting with Bulwark is hedging against Beacon. |
-| 6 | **Ensure any peace deal includes security guarantees with teeth — Western troops on the ground, not paper promises** | Public | Budapest Memorandum was paper. NATO Article 5 commitment was paper until Columbia's president questioned it. Ruthenia needs bodies on the line — European soldiers whose presence makes Sarmatia's next invasion an attack on Europe itself. |
+| 1 | **Peace on acceptable terms — the country is tired. YOU are tired.** | Public | "Acceptable" means: no rewarding aggression, guarantees against future attack. WANTS peace — but acceptable terms may not exist. Sarmatia demands Die Hard withdrawal + territory acceptance. Can you accept this? The dead demand honor. The living demand an end. |
+| 2 | **Security guarantees — NATO membership, EU membership, bilateral defense pacts** | Public | Peace without guarantees is just a pause before the next invasion. Budapest Memorandum was paper. Ruthenia needs bodies on the line — European soldiers whose presence makes Sarmatia's next invasion an attack on Europe itself. |
+| 3 | **Survive politically — remain president through the election** | Private | But this is secondary to peace now. Delay elections (keep power to negotiate peace yourself) vs. call them (risk Bulwark winning and pursuing military escalation instead). Every decision filtered through survival but peace takes priority. |
+| 4 | **Maintain Western aid — until peace is achieved, the lifeline cannot be cut** | Public | Without Western aid, the state collapses within 2-3 rounds. Dealer's peace plan may not include the guarantees you need — take a bad deal vs. lose Columbia's support. |
+| 5 | **Prevent rivals from getting a better deal — if Bulwark or Broker negotiate behind your back** | Private | They might give away what you've bled to hold. Shadow diplomacy by rivals — meeting foreign leaders, making promises "if elected" — erodes Beacon's negotiating position. |
 
 ---
 
@@ -202,11 +201,11 @@ The soldiers send you letters. They send you petitions. They say: come back. The
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the wartime election and become president** | Public | Bulwark believes — genuinely, not just ambitiously — that he is the best person to lead Ruthenia through this crisis. Professional military conviction, not vanity. But the ambition is real too. |
-| 2 | **Improve the military situation — recover territory or decisively strengthen the front line** | Public | The current grinding strategy wastes lives. With proper resources and operational planning, Ruthenia can achieve more than a stalemate. Bulwark's presidency is premised on the promise of better military outcomes. |
-| 3 | **Secure maximum Western military commitment — especially from Columbia** | Public | Bypass the politicians. Military-to-military relationships are more reliable than political promises. Work directly with Shield and the Pentagon. Get the weapons, the intelligence, the logistics support that the front line needs. |
-| 4 | **Prevent a premature peace deal that freezes current lines** | Public | A ceasefire that freezes the front line is a Sarmatia victory — it allows them to rearm and attack again. Only military strength produces durable peace. Peace comes after victory, not instead of it. |
-| 5 | **Maintain military institutional integrity — prevent politicization of the armed forces** | Private | Beacon's removal of Bulwark was political. If the military becomes a political instrument, it loses the professional competence that has kept Ruthenia alive. The army must serve the nation, not any president. Including, if he wins, Bulwark himself. |
+| 1 | **Win wartime election** | Public | Bulwark believes — genuinely, not just ambitiously — that he is the best person to lead Ruthenia through this crisis. Professional military conviction, not vanity. But the ambition is real too. |
+| 2 | **Peace FASTER — more realistic about terms than Beacon** | **Private** | Territory losses may be inevitable. More realistic about terms — knows territory is lost, but admitting it before election is fatal. Wants peace faster but can't say it publicly — base expects a fighter. |
+| 3 | **Make Beacon own the peace — let the president sign the humiliating deal** | **Private** | Then run as "I would have done better." Cynical play (let Beacon own the loss) vs. moral play (help negotiate best deal). Coalition with Broker (both want peace) vs. competition (both want presidency). |
+| 4 | **Manage military units — active military command, deploy forces, authorize operations** | Public | Direct military authority. Deploy forces, authorize operations, maintain the front. The army trusts Bulwark more than any civilian leader. |
+| 5 | **Secure Western military commitment — direct military-to-military with Shield, Sentinel, Mariner** | Public | Bypass the politicians. Military-to-military relationships are more reliable than political promises. Work directly with Shield and the Pentagon. |
 
 ---
 
@@ -323,11 +322,11 @@ The EU is your card. You believe — and this is sincere, not just tactical — 
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the wartime election and become president** | Public | Broker believes he is the only candidate who can secure Ruthenia's long-term future through institutional integration rather than military promises. |
-| 2 | **Lock in EU accession — irreversible commitment, not candidate status** | Public | EU membership IS the peace deal. Trade territorial flexibility for locked-in accession. Once inside the EU, Ruthenia is protected by institutional solidarity, economic integration, and the collective weight of 450 million people. Territory can be recovered over decades. Sovereignty lost to state failure cannot be recovered at all. |
-| 3 | **Negotiate peace from strength — extract maximum security guarantees** | Public | Not surrender. Smart peace. Territory-for-security. Western troops on the ground. Economic reconstruction guaranteed. The best deal Ruthenia can get — not the perfect deal Beacon demands and cannot achieve. |
-| 4 | **Overcome Ponte's EU veto** | Semi-private | Ponte blocks Ruthenia's accession. Broker has connections to European leaders who might pressure Ponte — or find procedural alternatives. This is where Broker's European network delivers concrete value. |
-| 5 | **Restore personal reputation — prove that experience and pragmatism are what Ruthenia needs** | Private | The oligarch label, the corruption allegations, the loss to a comedian — all of it burns. Winning the presidency and securing EU membership would be the ultimate vindication. This is personal. |
+| 1 | **Win wartime election** | Public | Broker believes he is the only candidate who can secure Ruthenia's long-term future through institutional integration rather than military promises. |
+| 2 | **Manage Ruthenia's economy — budget, aid allocation, trade** | Public | FUNCTIONAL JOB — every round. Every coin of Western aid passes through your hands. Economic authority equals real power AND real responsibility. Budget/aid allocation, EU economic diplomacy. |
+| 3 | **Lock in EU accession — economic integration IS the peace strategy** | Public | EU membership IS the peace deal. Trade territorial flexibility for locked-in accession. Build European economic relationships (Forge, Pillar, Ponte). This is where Broker's European network delivers concrete value. |
+| 4 | **Negotiate realistic peace terms — pragmatic on territory, insistent on guarantees** | Public | Not surrender. Smart peace. Territory-for-security. Western troops on the ground. Economic reconstruction guaranteed. The best deal Ruthenia can get — not the perfect deal Beacon demands and cannot achieve. |
+| 5 | **Build European economic relationships (Forge, Pillar, Ponte)** | Semi-private | Managing Western aid pipeline. Former president who runs the economy AND campaigns for peace. The oligarch label, the corruption allegations — all of it burns. Winning would be vindication. |
 
 ---
 

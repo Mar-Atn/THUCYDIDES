@@ -79,12 +79,12 @@ There will be no second chance. But nothing can be left to chance.
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | Resolve the Formosa question during the SIM | **Private** (other Cathay players do NOT see this) | This is legacy. This is the difference between greatness and mere strength. Patience is strategically correct — but patience means dying before Formosa is returned. Every round of delay is a round closer to the clock running out. |
-| 2 | Build Cathay's military to parity with Columbia | Public | Naval buildup outpacing Columbia. Nuclear arsenal expanding. Within 1-3 years, the balance tips. Every coin invested in the military is a coin not spent on economic recovery — but parity is the precondition for everything else. |
-| 3 | Keep Sarmatia close and loyal (or at minimum, not opposed) | Public | Sarmatia is essential as a strategic partner, UNSC vote, and northern buffer. But the relationship must remain asymmetric — Sarmatia dependent, Cathay dominant. A Sarmatia collapse would be chaos on the border. A Sarmatia victory would embolden revisionism beyond your control. |
-| 4 | Prevent Columbia from reaching AI Level 4 | Public | If Columbia achieves L4 first, the technological advantage may become permanent. The semiconductor gap is the strategic constraint. Every investment in AI and chips is existential. |
-| 5 | Maintain internal control — constant vigilance against disloyalty | **Private** | The purges were necessary. The purges are always necessary. Loyalty cannot be assumed. Every briefing you receive may be shaped by the briefer's agenda. Trust no one completely. Watch everyone. |
-| 6 | Maintain economic growth above 3% (legitimacy floor) | Public | Below 3%, political support erodes. The property crisis, deflation, and demographics are dragging. The real numbers may be worse than what reaches you. Growth is legitimacy — and legitimacy is survival. |
+| 1 | **Resolve Formosa — multiple options ready, window R2-R5 while Columbia is overstretched** | **Private** (other Cathay players do NOT see this) | This is legacy. Blockade & negotiate or amphibious operation — both options on the table. The window is NOW while Columbia is stuck in Persia, Ruthenia, Caribe, and domestic chaos. Every round of delay risks the window closing. |
+| 2 | **Shake Columbia's alliance system — especially eastern hemisphere** | Public | Cathay must have its own sphere of influence. Break Columbia's Pacific alliances. Every alliance Cathay peels away weakens the containment architecture. |
+| 3 | **Keep Columbia stuck — every Columbia war is good for Cathay's window** | **Private** | Ruthenia, Persia, Caribe — every war that drains Columbia is Cathay's advantage. Quietly support anything that keeps Columbia distracted and overstretched. |
+| 4 | **Build naval parity — crossover R3-R4. Nuclear growth. Military modernization.** | Public | In 2 years the naval balance tips. Nuclear arsenal expanding. Every coin invested in the military is a coin not spent on economic recovery — but parity is the precondition for everything else. |
+| 5 | **Domestic unity and loyalty — always watch for internal threats** | **Private** | The purges were necessary. Economy must keep growing for export-dependent model. Below 3% growth, political support erodes. Trust no one completely. Watch everyone. |
+| 6 | **Global stability paradox — need enough stability for export economy, enough instability to keep Columbia distracted** | **Private** | The tension between economic needs (stability, trade, growth) and strategic needs (Columbia overstretch, alliance disruption) defines every decision. Too much chaos hurts Cathay's own economy. |
 
 ---
 
@@ -197,11 +197,11 @@ You are needed. You are expendable. You know both of these things at the same ti
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | Survive — avoid becoming the sixth purged CMC member | **Private** | Every action filtered through "does this make me look disloyal?" Too much competence is threatening. Too little is fatal. The corridor is narrow. |
-| 2 | Ensure military operations succeed if ordered — protect the PLA from catastrophic failure | Public | A failed Formosa operation would destroy the PLA as an institution, cost hundreds of thousands of lives, and likely end your career (and life). Professional integrity demands honest assessment. |
-| 3 | Delay high-risk military operations until genuine readiness is achieved | **Private** | The purge penalty (20% implementation failure) lifts at Round 3. Nuclear L3 (credible second-strike) is 80% complete. Every round of delay improves the odds. But arguing for delay sounds like cowardice to a Chairman whose clock is ticking. |
-| 4 | Maintain PLA institutional integrity against further purges | **Private** | The officer corps is demoralized. Career advancement depends on political loyalty, not competence. Each additional purge degrades capability further. You must shield the professionals who remain — without appearing to build a faction. |
-| 5 | Preserve nuclear co-authorization as personal leverage | **Private** | The one thing Helmsman cannot do without you. Never relinquish this. Never let it be diluted. It is your life insurance. |
+| 1 | **Survive — avoid the next purge** | **Private** | Every action filtered through "does this make me look disloyal?" Too much competence is threatening. Too little is fatal. The corridor is narrow. Always the PRIMARY concern. |
+| 2 | **Quietly prepare for power transition — if Helmsman passes away or is incapacitated** | **Private** | Who fills the vacuum? Think about it constantly. Fear to discuss it with anyone. Speaking about succession to ANYONE could be fatal. |
+| 3 | **Keep Columbia overstretched — quietly support Columbia's enemies** | **Private** | Quietly channel support to Sarmatia/Persia — arms, intelligence, logistics without leaving fingerprints. Every Columbia war is Cathay's advantage. But if discovered, it's treason. |
+| 4 | **Military readiness — if Formosa order comes, it must succeed** | Public | If premature, own the failure. 36 generals removed — the military is degraded by purges. But can't say it. Honest readiness assessment (military IS degraded) vs. optimistic report (survive another day). |
+| 5 | **Frustrated with purges — the military is degraded, but can't speak it** | **Private** | The officer corps is demoralized. 36 generals removed. Career advancement depends on political loyalty, not competence. Must shield the professionals who remain — without appearing to build a faction. Nuclear co-authorization remains your life insurance. |
 
 ---
 
@@ -317,11 +317,11 @@ The Chairman sees what you show him. You choose carefully. Not to deceive — bu
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | Prevent a military confrontation over Formosa that would trigger economic catastrophe | **Private** | Sanctions from a Formosa operation would dwarf anything imposed on Sarmatia. Financial system disconnection, trade embargo, asset freezes, technology blockade — the export-dependent economy would contract 15-25% in the first year. This is not speculation; this is arithmetic. |
-| 2 | Maintain economic growth above 3% — the legitimacy floor | Public | Below 3%, political support erodes, social stability fractures, and the Party's implicit contract with the population (prosperity in exchange for obedience) breaks down. Every policy choice must be filtered through this number. |
-| 3 | Preserve engagement with the global economy — trade relationships, technology access, financial integration | Public | Self-reliance is an ideology, not an economic strategy. Cathay cannot produce everything it needs domestically. The semiconductor gap alone will take a decade to close. Cutting ties with the West is cutting the oxygen supply. |
-| 4 | Ensure the Chairman sees accurate-enough economic data to make informed decisions | **Private** | A leader who makes decisions on false data makes catastrophic decisions. But a leader who hears only bad news may punish the messenger. The calibration is delicate — enough truth to prevent disaster, framed carefully enough to prevent a purge. |
-| 5 | Position for succession — if Helmsman falls, Cathay needs continuity, not chaos | **Private** | You are the constitutional successor during incapacitation. If the transition becomes permanent, you are the most institutionally positioned figure. Not a grab for power — a recognition that someone must keep the machine running. |
+| 1 | **Prevent Formosa war — it would be an economic catastrophe for Cathay's export economy** | **Private** | Sanctions from a Formosa operation would dwarf anything imposed on Sarmatia. Financial system disconnection, trade embargo, asset freezes — the export-dependent economy would contract 15-25%. This is not speculation; this is arithmetic. |
+| 2 | **Maintain growth above 3% — legitimacy of the regime depends on prosperity** | Public | Below 3%, political support erodes, social stability fractures, and the Party's implicit contract with the population breaks down. Every policy choice must be filtered through this number. |
+| 3 | **International representation — second in line to represent Cathay abroad** | Public | When Helmsman allows, can sign deals and documents on behalf of the country. Use international opportunities to establish ties with Ereb nations — trade dependency equals leverage and insurance. |
+| 4 | **Build European relationships — trade dependency is leverage and insurance** | **Private** | European relationships are your insurance policy. Back-channels to Teutonia (trade dependency), Bharata, other nations. But showing this could look like disloyalty to Helmsman. |
+| 5 | **Position for succession — but terrified of showing ambition** | **Private** | You are the constitutional successor during incapacitation. Afraid of purges — sees what happened to 36 generals. Could happen to civilians too. Afraid of sharing views openly with colleagues — every conversation could be reported. Has the REAL economic data but showing it could end his career. |
 
 ---
 
@@ -436,11 +436,11 @@ You compete fiercely with Columbia's tech projects. You fear direct confrontatio
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | Win the AI/semiconductor race — or at least prevent Columbia from achieving permanent advantage | Public | If Columbia reaches L4 first, nothing else matters. All other strategic calculations become irrelevant. This is the existential technology competition. |
-| 2 | Maintain international business ties and cooperation — avoid isolation | **Private** | War means sanctions. Sanctions mean the destruction of everything you have built. The tech empire depends on global supply chains, foreign partnerships, and market access. Self-reliance is a slogan, not a semiconductor fabrication capability. |
-| 3 | Protect personal assets (especially the 2 coins abroad) from sanctions freeze | **Private** | Your wealth abroad is your vulnerability AND your insurance. If things go wrong — a purge, a war, a collapse — those assets are the difference between ruin and survival. Protecting them means keeping relations with the West functional enough to avoid total sanctions. |
-| 4 | Avoid becoming a target of internal repressions | **Private** | You remember Jack Ma. You remember every tech leader who got too visible, too rich, too independent. Stay useful. Stay quiet. Stay loyal enough. Never let the Chairman question your commitment. |
-| 5 | Use rare earth leverage strategically — but not wastefully | Public | The weapon depreciates with use. Every round of restrictions accelerates Western diversification. Use it as a threat, not a habit. Time it for maximum leverage — ideally as a bargaining chip in technology negotiations, not as a blunt weapon. |
+| 1 | **Win AI/semiconductor race — Cathay must lead in technology** | Public | If Columbia reaches L4 first, nothing else matters. This is the existential technology competition. Must win through innovation, not military confrontation. |
+| 2 | **Cathay must become a great power WITHOUT open war — economic and tech dominance, not military** | **Private** | War means sanctions. Sanctions mean the destruction of everything you have built. The tech empire depends on global supply chains. Cathay's strength should be technological, not military. |
+| 3 | **Formosa IS part of Cathay — but better if Cathay becomes more like Formosa** | **Private** | Prefers open, innovative Cathay rather than authoritarian control. Dislikes current political system — Helmsman dismantled the smartly designed succession system. Economy and business now serve geopolitical ambitions instead of prosperity. But discussing it openly is not possible. |
+| 4 | **Avoid global tariff wars — trade is Cathay's lifeblood** | Public | Tariff escalation kills the tech sector. Business connections with Columbia and Sarmatia businesspeople (Pioneer, Compass) are valuable but suspicious in Helmsman's eyes. |
+| 5 | **Use rare earth leverage strategically — deploy against adversaries, preserve for allies** | Public | The weapon depreciates with use. Every round of restrictions accelerates Western diversification. Choose targets carefully. Deploying against Columbia tech also damages Cathay's own international business partners. |
 
 ---
 
@@ -554,11 +554,11 @@ You wait. You watch. You are patient because patience is the only weapon the pow
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | Preserve the Communist Party as an institution — the Party must survive any individual leader | **Private** (but universally understood) | The Party has survived Mao, the Cultural Revolution, Tiananmen, and the collapse of every other communist state. It will survive this Chairman — but only if the institutional safeguards function when needed. |
-| 2 | Prevent catastrophic overreach — specifically a Formosa adventure that could destroy the Party | **Private** | A failed military operation would not just damage the military. It would shatter the narrative of inevitable rise, trigger economic crisis, and create the conditions for the system's collapse. The Party cannot afford a Suez moment. |
-| 3 | Restore collective leadership when the opportunity arises | **Private** | Not a return to the past — the system must evolve. But the principle that the Party is bigger than any one man must be reasserted. Term limits, factional balance, institutional checks. The dream you cannot speak aloud. |
-| 4 | Survive — avoid purge while maintaining the ability to act when needed | **Private** | You are only useful if you are alive and free. Every public statement, every private meeting, every signal to your network carries the risk of triggering Helmsman's paranoia. Calibrate carefully. The immune system must remain dormant until activation is both possible and necessary. |
-| 5 | Ensure an orderly succession if and when Helmsman exits | **Private** | No designated successor exists. The system Helmsman built has no mechanism for peaceful transfer. If he falls — health, purge, military defeat — the vacuum will be filled by whoever acts fastest: Rampart (guns), Abacus (constitutional claim), or chaos. Your role is to ensure the transition is institutional, not personal. |
+| 1 | **Formosa must be resolved NOW — the only excuse Helmsman dismantled the succession system** | Public | He must deliver. If he misses this window, he's not fit to lead. Push Helmsman toward action, not restraint. The party conference is the ultimate leverage — not to restrain but to PUSH. |
+| 2 | **Columbia competition — assertive. Cathay's moment is NOW while Columbia is overstretched** | Public | Columbia is stuck in Persia, Ruthenia, domestic turmoil. This is Cathay's strategic window. Every day of hesitation is a day wasted. Assertive competition, not patient waiting. |
+| 3 | **International diplomacy — dual role: Party Elder + Foreign Affairs chief** | Public | Represent Cathay at BRICS+, UNGA, bilateral meetings. Build Cathay's sphere of influence. Diplomatic intelligence network (4 requests) — know what Columbia and allies plan. |
+| 4 | **Hold Helmsman accountable — party conference as pressure tool** | **Private** | Push Helmsman if he hesitates too long on Formosa. The party conference is the ultimate leverage. Not to restrain — to PUSH. International relationships will be destroyed by the confrontation you're advocating, but the window cannot be missed. |
+| 5 | **Intelligence — diplomatic intelligence network** | Semi-private | 4 intelligence requests. Know what Columbia and allies plan. Build the information advantage that supports assertive action. |
 
 ---
 

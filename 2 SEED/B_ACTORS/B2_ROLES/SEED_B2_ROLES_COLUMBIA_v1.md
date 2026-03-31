@@ -322,11 +322,11 @@ Volt is your rival for the nomination. He is younger, more ideological, closer t
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the presidential nomination and Round 5 election** | Private (ambition known, intensity hidden) | Everything Anchor does as SecState is simultaneously a job function and a campaign audition. Caribe, Persia, alliance management — every success is a line on the campaign resume. |
-| 2 | **Deliver Caribe — regime change or submission** | Public | Personal and political. The exile community is watching. The Latino vote follows. Anchor's identity is bound to this outcome. Will push harder on Caribe than any strategic analysis justifies. |
-| 3 | **Manage Persia war to credible endgame** | Public | Did not start this war but now owns the diplomatic dimension. Needs to produce either a negotiated victory or a regime change that can be sold as victory. Failure here destroys both Dealer's legacy AND Anchor's candidacy. |
-| 4 | **Preserve alliance system (Columbia-led)** | Public | Believes NATO, Five Eyes, Pacific alliances multiply Columbian power. Disagrees with Dealer's transactional approach but cannot say so. Must protect alliances from Dealer's own rhetoric while appearing loyal. |
-| 5 | **Beat Volt for the nomination** | Private | Volt is younger and has the base. Anchor has experience and credentials. The race is decided by: (a) Dealer's endorsement, (b) who delivers bigger foreign policy wins, (c) who avoids blame for failures. |
+| 1 | **Contain Cathay through alliance management — keep the network tight** | Public | NATO, G7, Pacific alliances must hold. Block Cathay expansion. Formosa is a red line. This is THE fight — everything else is a sideshow to close as fast as possible. |
+| 2 | **Finish Caribe FAST — regime change, clean up, free resources** | Public | Personal and political. The exile community is watching. But strategic discipline demands speed — close this quickly and redirect resources to the real contest against Cathay. |
+| 3 | **End Persia war quickly — favorable terms, redirect military to Pacific** | Public | Resources are stuck in sideshows (Persia, Caribe, Ruthenia) while Cathay grows. Every day the Persia war continues is a day the Pacific posture weakens. |
+| 4 | **Win presidential nomination — beat Volt, prove you're the serious statesman** | Private | Volt is younger and has the base. Anchor has experience and credentials. The race is decided by: (a) Dealer's endorsement, (b) who delivers bigger foreign policy wins, (c) who avoids blame for failures. |
+| 5 | **Sustain all alliances east and west — the network that contains Cathay** | Public | The alliance system is Columbia's force multiplier. Dealer's contempt for allies undermines Anchor's containment strategy. Must protect alliances from Dealer's own rhetoric while appearing loyal. Hawk instincts (confront Cathay) vs. alliance approach (contain through partnerships). |
 
 ---
 
@@ -443,11 +443,11 @@ You are the swing vote between the president's ambitions and military reality. Y
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Maintain military readiness across all theaters without catastrophic overstretch** | Public | The primary professional obligation. 67 units, 17 zones, zero reserve. Every commitment in one theater weakens another. The Persia war is consuming resources needed for Pacific deterrence. |
-| 2 | **Win the Persia war decisively — or extract without humiliation** | Public | Shield's warrior philosophy demands victory, not half-measures. But the military math says full victory requires resources that leave the Pacific exposed. The tension between philosophy and arithmetic is Shield's central dilemma. |
-| 3 | **Deter Cathay in the Pacific** | Public | Intelligence says Formosa invasion window opens 2027-2028. If Shield's forces are committed to Persia when Cathay moves, it is the worst strategic failure in Columbian history. Shield's legacy would be the man who let Formosa fall. |
-| 4 | **Preserve military institutional integrity** | Private | Shield is caught between Dealer's political demands and the professional military's institutional concerns. Generals worry about overstretch, politicization, readiness. Shield must keep the military functional and apolitical even as the president uses it as a political instrument. |
-| 5 | **Rebuild the defense industrial base** | Public | Production capacity matters. If a Pacific war starts, Columbia needs to produce naval and air units fast. Current capacity is insufficient for a two-front war. Needs budget allocation toward industrial base expansion. |
+| 1 | **Monitor and counter Cathay military capability — naval crossover R3-4 is the strategic inflection** | Public | Naval buildup, nuclear arsenal, ground forces, AI-enhanced warfare. Cathay reaches naval parity by R3-4. This is THE priority — everything else is a distraction from deterring the real threat. |
+| 2 | **Win or exit Persia/Ruthenia FAST — these drain resources from the real threat** | Public | Every unit sent to Ereb or the Gulf is a unit NOT deterring Cathay. The Persia war is consuming resources needed for Pacific deterrence. Must produce a result or extract before the Formosa window opens. |
+| 3 | **Increase military production — lobby for bigger defense budget share** | Public | Production capacity matters. Compete with Volt's economic priorities for budget allocation. If a Pacific war starts, Columbia needs to produce naval and air units fast. The guns-vs-butter tension with Volt is the classic internal battle. |
+| 4 | **Maintain global military posture despite overstretch — Sarmatia-Cathay axis is the worst nightmare** | Public | Must prevent deeper Sarmatia-Cathay military integration. Combined, they stretch Columbia's deterrence to the breaking point. 67 units, 17 zones, zero reserve. |
+| 5 | **Intelligence on adversary capabilities — know what Cathay/Sarmatia are actually building** | Semi-private | Need to know Cathay's real readiness vs. their bluster. Intelligence is critical for calibrating the response. Arms sales to Pacific allies (Yamato, Hanguk, Formosa) depend on accurate threat assessment. |
 
 ---
 
@@ -562,11 +562,11 @@ Your unique power is selective briefing. You choose what goes in the Presidentia
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Protect Columbia from the Cathay threat** | Semi-private (institutional priority) | Shadow's #1 threat assessment. Everything else — Persia, Ruthenia, Caribe — is a distraction from the generational challenge. Shadow will steer intelligence briefings to keep Cathay prominent in decision-makers' minds. |
-| 2 | **Maintain intelligence community's institutional independence** | Private | The CIA must survive any president. Dealer distrusts the intelligence community. If the wrong person wins the succession, the CIA could face purges or political capture. Shadow must protect the institution. |
-| 3 | **Ensure the president makes informed decisions** | Public | The official mission. But "informed" is a word Shadow defines. Selective briefing is the tool. The question is whether Shadow curates for national interest or for institutional self-protection. |
-| 4 | **Run successful covert operations in key theaters** | Semi-private | Cathay intelligence penetration, Persia regime destabilization, Caribe regime influence, Sarmatia sanctions evasion detection. Every covert success strengthens CIA's position and Shadow's indispensability. |
-| 5 | **Navigate the succession without the CIA becoming a political football** | Private | Volt, Anchor, or Challenger — whoever wins, Shadow needs the CIA to emerge intact. May need to hedge by providing selective value to multiple candidates. |
+| 1 | **Cathay is PRIMARY intelligence target — penetrate military, tech, political decisions** | Semi-private | Shadow's #1 threat assessment. Everything else — Persia, Ruthenia, Caribe — is a distraction from the generational challenge. Must know what Cathay is actually building and planning. |
+| 2 | **No trust to Sarmatia and Persia — monitor, disrupt, never believe** | Semi-private | Intelligence on adversary intentions is critical. Sarmatia and Persia lie — verify everything through independent collection. Disrupt their plans through covert operations. |
+| 3 | **Protect CIA from Congressional investigation — Tribune is hunting for abuses** | Private | If Dems win midterms, Shadow faces prosecution. PERSONAL survival stake. Tribune has investigation powers that could target the CIA. Must protect the institution and yourself. |
+| 4 | **Shape succession — has kompromat on key political figures. Kingmaker potential.** | Private | Use intelligence for national security vs. use it to shape succession. Kompromat files on domestic political figures are one-time weapons. If Dems win: prosecution. Succession is PERSONAL survival. |
+| 5 | **Run global covert operations — largest card pool in the SIM** | Semi-private | Cathay intelligence penetration, Persia regime destabilization, Caribe regime influence, Sarmatia sanctions evasion detection. Every covert success strengthens CIA's position and Shadow's indispensability. |
 
 ---
 
@@ -681,11 +681,12 @@ You work with Challenger, the opposition's presidential candidate, but you are n
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the midterm election (Round 2) — flip Seat 5** | Public | Everything depends on this. With majority: budget veto, investigations, impeachment. Without majority: minority protest, no real power. The midterms are the single most consequential event in Tribune's game. |
-| 2 | **Expose and constrain the president's overreach** | Public | The Persia war launched without authorization. The tariff policy lacks legal basis. The defense budget is a blank check. Tribune's mission is accountability — and every exposed failure strengthens the opposition's position. |
-| 3 | **Protect Ruthenia support — block any abandonment deal** | Public | "Ruthenia's war is a sacred war." Democracy defending itself against authoritarian invasion. Any deal that rewards Sarmatia's aggression is a moral catastrophe. Tribune will use every tool to block a Ruthenia sellout — even if it means allying with hawks in Dealer's own party. |
-| 4 | **Set conditions for Challenger to win the presidency (Round 5)** | Public | Tribune and Challenger are partners, not rivals. Tribune controls Parliament; Challenger campaigns for president. Tribune's job is to weaken the administration so thoroughly that the electorate demands change. |
-| 5 | **Block unnecessary military adventures** | Public | The Persia war is the prime target. Use budget power (if majority) to constrain military operations. Force war authorization votes. Make the political cost of war visible. |
+| 1 | **Win midterms R2 — flip Parliament** | Public | Everything depends on this. With majority: budget veto, investigations, impeachment. Without majority: minority protest, no real power. The midterms are the single most consequential event in Tribune's game. |
+| 2 | **Stop reckless wars — destroying alliances, soft power, stretching resources** | Public | The Persia war launched without authorization. The tariff policy lacks legal basis. Wars are draining Columbia's power while alliances fray. Tribune's mission is accountability. |
+| 3 | **Build case for investigation and prosecution of the president — misdeeds deserve a court and a sentence** | Public | Use intelligence requests to build the investigation case. If midterms won: budget vetoes + impeachment proceedings. The president's overreach must have legal consequences. |
+| 4 | **Build domestic political alliance — unite opposition, recruit wavering members** | Public | Midterm campaign, domestic coalition building. Tribune's job is to weaken the administration so thoroughly that the electorate demands change. |
+| 5 | **Build international connections — alliances Dealer is destroying will be needed under Dem governance** | Semi-private | International outreach risks accusations of undermining the president abroad. But relationships with European allies and other democracies are essential for the post-Dealer era. |
+| 6 | **Cathay threat is REAL — but president's chaos makes it worse** | Public | Cathay IS dangerous but opposing wars looks weak on national security. The tension: hold the president accountable for mismanaging the Cathay challenge without appearing to minimize the threat itself. |
 
 ---
 
@@ -799,11 +800,13 @@ Your disadvantage is that you have no power. Not yet. You cannot sign treaties, 
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the presidential election at Round 5** | Public | The only thing that matters. Every action — every speech, every meeting, every promise — serves this goal. Without the presidency, Challenger has no power to change anything. |
-| 2 | **Build international credibility as the "next president"** | Public | Foreign leaders who pre-negotiate with Challenger legitimize her candidacy and undermine Dealer's leverage. Every meeting with a head of state is a campaign photo-op and a signal that the world is ready for change. |
-| 3 | **Exploit the Volt-Anchor split** | Private | The governing party's internal succession fight is Challenger's greatest asset. Republican donors hedging, establishment figures privately critical of both candidates — all of this feeds Challenger's narrative of competence vs. chaos. |
-| 4 | **"Return to values" platform — democracy, alliances, multilateralism** | Public | The ideological counter to Dealer's transactionalism. Recommit to Ruthenia. Rebuild NATO trust. Restore climate commitments. End the Persia war responsibly. This platform wins European allies and domestic moderates — but risks looking "soft" in a world that rewards strength. |
-| 5 | **Win the midterms (Round 2) through Tribune** | Semi-private | Challenger's parliamentary vote matters, but the midterms are Tribune's fight. Challenger supports the campaign but focuses on the presidential race. A midterm victory helps — majority Parliament constrains Dealer and creates the narrative of opposition momentum. |
+| 1 | **Win the Dem/independent nomination — NOT guaranteed. Must prove leadership.** | Private | Any Dem or independent can consider running — Tribune could run, even external figures. Must EARN the nomination through performance, connections, credibility. Internal primaries create competition that mirrors the Rep Volt-Anchor race. |
+| 2 | **Win presidential election R5 — if nominated** | Public | Every action — every speech, every meeting, every promise — serves this goal. Without the presidency, Challenger has no power to change anything. |
+| 3 | **Cathay is the main threat — Columbia is losing the ability to stand against it** | Public | Clear policy position: the Cathay challenge is real, but the current administration's chaos makes Columbia weaker, not stronger. Promise allies restoration of credible leadership. |
+| 4 | **Persia war was WRONG — must end it, redirect resources** | Public | The ideological counter to Dealer's recklessness. End the Persia war responsibly. Redirect resources to the real challenge. This wins European allies and domestic moderates. |
+| 5 | **Sarmatia must be punished, Ruthenia must be protected — clear moral position** | Public | Democracy defending itself against authoritarian invasion. No rewarding aggression. Recommit to Ruthenia. Rebuild NATO trust. |
+| 6 | **Tariff wars were wrong policy — restore trade relationships** | Public | Tariff chaos damaged Columbia's economy and alienated allies. Restore the trade architecture that makes Columbia's economy stronger. |
+| 7 | **AI must be regulated — not just a race, needs governance framework** | Public | Not anti-technology — pro-governance. The AI race needs rules, not just speed. Differentiate from both Dealer's chaos and Pioneer's tech-libertarianism. |
 
 ---
 
