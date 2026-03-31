@@ -1374,9 +1374,18 @@ class WorldModelEngine:
         )
         political_crisis_penalty -= impeachment_events * 10.0  # -10 per impeachment
 
+        # Foreign policy SUCCESS bonuses (CM-006 — role review)
+        foreign_policy_bonus = 0.0
+        for e in self.ws.events_log:
+            if e.get("type") == "ceasefire" or e.get("type") == "agreement":
+                if country_id in e.get("signatories", []):
+                    foreign_policy_bonus += 7.0  # peace deal signed
+            if e.get("type") == "territory_capture" and e.get("country") == country_id:
+                foreign_policy_bonus += 5.0  # territorial gain
+
         ai_score = clamp(
             50.0 + econ_perf + stab_factor + war_penalty + crisis_penalty +
-            oil_penalty + political_crisis_penalty,
+            oil_penalty + political_crisis_penalty + foreign_policy_bonus,
             0.0, 100.0)
 
         player_incumbent_pct = votes.get("incumbent_pct", 50.0)

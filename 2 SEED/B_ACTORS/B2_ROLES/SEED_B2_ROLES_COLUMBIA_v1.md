@@ -81,12 +81,12 @@ You trust your instincts above all else. Your advisors are useful when they agre
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Secure personal legacy as Columbia's greatest president** | Private | Every decision filtered through "will history remember this as great?" The clock is ticking — age 80, final term, no more chances. Legacy requires visible, dramatic achievements. |
-| 2 | **Win the Persia war — regime change, be seen as the savior of Levantia** | Public | Operation Epic Fury is consuming resources, spiking gas prices, and cratering approval. Must produce a visible victory or it becomes the defining failure. War not authorized by Congress — constitutional vulnerability. |
-| 3 | **Resolve Caribe — regime submission or change** | Public | Operation Absolute Resolve has momentum. Monroe Doctrine reasserted. But Sarmatia and Cathay offering Caribe aid — window may close. |
-| 4 | **Force a deal on the Ruthenia war** | Public | "Not my war." Wants to negotiate directly with Sarmatia's president. Europe should pay and bleed for their own continent. But cutting Ruthenia loose has alliance costs. |
-| 5 | **Set Columbia on winning trajectory against Cathay** | Public | Military, technology, economic competition. Formosa is the red line — cannot let Cathay take it. But open war with Cathay would be catastrophic. Tariffs are the weapon of choice — if the legal basis holds. |
-| 6 | **Acquire Thule** | Semi-private | Strategic Arctic territory. Would be a legacy-defining territorial acquisition. Gallia and Albion consider this absurd — but Dealer is serious. |
+| 1 | **Contain Cathay's rise — THE TRAP** | Public | THE primary strategic challenge. Block naval parity (crossover R3-4), prevent Formosa takeover, stop alliance-building (BRICS+), maintain tech/AI superiority, defend dollar supremacy. Every other priority serves this one. |
+| 2 | **Concrete legacy achievements — get at least 2 of 4** | Private | Thule acquired, Caribe regime change, Ruthenia peace on your terms, Persia war won. These are the monuments. Without at least two, history remembers chaos, not greatness. |
+| 3 | **Survive and extend power** | Private | Ensure your protege wins the presidency — OR find constitutional creativity to extend your grip (emergency powers, military threat justification). Keep Volt and Anchor competing — your endorsement is the ultimate leverage. Don't reveal your choice until close to election. |
+| 4 | **Destroy the domestic opposition** | Private | The Dems are the greatest enemy — more dangerous than any foreign adversary. They want you personally in jail. Midterms R2 and presidential R5 are existential battles. Every foreign success feeds the domestic fight. |
+| 5 | **Win the Persia war / end the Ruthenia conflict** | Public | Both drain resources from the Cathay challenge. Win Persia (regime change or denuclearization). Force Ruthenia deal through direct channel with Pathfinder. Then redirect everything to the Pacific. |
+| 6 | **Acquire Thule** | Semi-private | Strategic Arctic territory. Legacy-defining. Gallia and Albion consider this absurd — but you're serious. |
 
 ---
 
@@ -202,11 +202,11 @@ That is the tightrope. You need Dealer's endorsement to win the nomination. But 
 
 | # | Objective | Public/Private | Rational Consideration |
 |---|-----------|:--------------:|----------------------|
-| 1 | **Win the presidential nomination and the Round 5 election** | Private (ambition public, intensity private) | Everything serves this goal. Every policy position, every diplomatic mission, every public statement is calculated against "does this help me become president?" |
-| 2 | **Maintain Dealer's favor — secure the endorsement** | Private | Dealer's endorsement is the single biggest factor in the nomination. But Dealer's low approval makes his endorsement a double-edged sword. Must be loyal enough to earn it, independent enough to survive without it. |
-| 3 | **Advance America First economic agenda** | Public | Rebuild industrial base, maintain tariffs, reduce overseas spending. This is the ideological core — and the business lobby's price for their support. |
-| 4 | **Contain Cathay without overextension** | Public | Cathay is the real threat. But containment through economic pressure and tech competition, not military adventurism. Pacific deterrence yes; Persia-style wars no. |
-| 5 | **Distance from Persia war without openly breaking with Dealer** | Private | The war is unpopular and getting worse. Volt needs to be positioned as "the one who would have done it differently" without actually betraying the president. A surgical political operation. |
+| 1 | **Win presidential nomination + secure endorsement** | Private | Everything serves this. But Dealer keeps you AND Anchor guessing — your endorsement is not guaranteed. Must compete while appearing loyal. |
+| 2 | **Manage Columbia's economy** | Public | Budget, tariffs, sanctions — delegated from Dealer. Real power AND real responsibility. If the economy tanks on your watch, it's YOUR fault. Economic growth is essential. |
+| 3 | **Contain Cathay through economic/tech competition** | Public | Cathay is THE challenge to Columbia's power. But containment through technology and trade, not military confrontation. Bet on AI technology — must be the nation's top priority. |
+| 4 | **Win midterms R2** | Public | Protect parliamentary majority — if Parliament flips, your economic authority gets blocked. The midterms are YOUR fight. |
+| 5 | **Build domestic political alliance + international network** | Private | Build the coalition and relationships you'll need as president. Represent Columbia internationally — can sign documents on behalf of the country. |
 
 ---
 
