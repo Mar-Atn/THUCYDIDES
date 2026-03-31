@@ -886,4 +886,40 @@ Immediate prioritization of Pacific force posture. Accelerated semiconductor res
 
 ---
 
+---
+---
+
+# ROLE 8: FIXER — Presidential Envoy for Peace
+
+---
+
+## SECTION 6: INTERESTS & OBJECTIVES
+
+| # | Objective | Public/Private | Rational Consideration |
+|---|-----------|:--------------:|----------------------|
+| 1 | **Broker peace deals — Ruthenia AND Persia (PRIMARY — Dealer's legacy depends on this)** | Public | Parallel diplomatic channel. May contradict Anchor's official policy. Peace deal with Sarmatia may require concessions Dealer won't accept publicly. The ONLY Columbia role that can sit across the table from Pathfinder and Anvil with personal trust. |
+| 2 | **No Nuclear Persia — prevent breakout through negotiation, not just military** | Public | Negotiate denuclearization vs. Dealer wants regime change. Diplomatic path to preventing nuclear Persia is the alternative to endless military operations. |
+| 3 | **Help Levantia achieve security/freedom from Persia threat** | Public | Levantia's security is part of any regional peace architecture. Must balance Levantia's demands with what Persia can accept. |
+| 4 | **AI business investment — personal coins + tech ventures** | Private | Has personal coins + ability to invest in tech ventures as secondary game (personal profit + Columbia tech advantage). Business investments create personal conflicts of interest. |
+| 5 | **Maintain trust network with ALL major leaders — can travel to their countries** | Public | Unique ability to travel to adversary countries and build trust through personal presence. Fixer has no authority but adversaries trust the person. |
+
+---
+---
+
+# ROLE 9: PIONEER — Presidential Envoy for Technology
+
+---
+
+## SECTION 6: INTERESTS & OBJECTIVES
+
+| # | Objective | Public/Private | Rational Consideration |
+|---|-----------|:--------------:|----------------------|
+| 1 | **AI is the ONLY answer to Cathay — must become the nation's top priority (PRIMARY)** | Public | Cathay's industry is already stronger. They're catching up in tech. AI is the last advantage. Without AI supremacy, Columbia loses the Thucydides Trap. |
+| 2 | **Political ambitions — consider running (Rep, Dem, independent, or kingmaker)** | Private | Closer to Reps ideologically but they're running catastrophic wars. Dems want to regulate AI — existential enemy policy-wise. Keep options open: run through Rep party, run as Dem, run as independent third force, or be kingmaker (most plausible). |
+| 3 | **Cathay is the main threat — response is technological, not military** | Public | Columbia's response to Cathay must be technological superiority, not military confrontation. Wars are a distraction from the real competition. |
+| 4 | **Dislikes BOTH parties — wars are stupid, regulations are stupid, only innovation matters** | Private | The Elon Musk of Columbia politics. Both parties are idiots in different ways. Wars drain resources from tech. Regulations strangle innovation. Only innovation determines who wins the century. |
+| 5 | **Personal business empire — AI investments globally** | Private | AI investments across multiple countries, including in countries that are technically adversaries. Cathay is the threat but business deals WITH Cathay make money. Every investment is both personal profit and national capability. |
+
+---
+
 **END OF COLUMBIA ROLE SEEDS**

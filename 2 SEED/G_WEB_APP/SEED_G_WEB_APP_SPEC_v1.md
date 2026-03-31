@@ -888,6 +888,13 @@ Actions that don't fit the generic templates above. These are the powers that de
 | **Veto implementation** | Anvil | Block specific agreement/treaty | Anvil can block execution of agreements Furnace/Dawn signed. Creates political event (stability cost to both sides). |
 | **Suppress / permit dissent** | Anvil | Suppress / Permit / Ignore | Affects Dawn's political support, street protest probability, and stability. |
 | **Partial blockade adjustment** | Anvil | Full (100%) / Partial (50%) / Open (0%) | Adjusts Gulf Gate blockade intensity. Partial allows some traffic (reduces oil impact but maintains leverage). |
+| **Proxy terrorist attack** | Furnace (2 cards), Anvil (3 cards) | Target country + target type (military/economic/infrastructure) | Replaces sabotage for Persia roles. Same mechanic but 30% detection rate (lower than sabotage). Uses proxy/militia networks. If detected: -5% political support + diplomatic crisis event. |
+
+#### Solaria-Specific Specials
+
+| Action | Available to | Input | Effect |
+|--------|-------------|-------|--------|
+| **Proxy attack** | Wellspring (1 card) | Target country + target type | Proxy/militia capability. Same mechanic as Persia proxy terrorist attack. 30% detection. Wellspring has regional proxy networks. |
 
 ---
 

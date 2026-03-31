@@ -1475,6 +1475,36 @@ ATTRIBUTION: Results revealed publicly at Phase B world update (no attribution).
 
 ---
 
+**6B-2. Proxy Terrorist Attack (replaces Sabotage for Persia roles + Solaria)**
+
+```
+PURPOSE: Replaces sabotage mechanic for Persia roles (Furnace, Anvil) and Solaria (Wellspring).
+  These countries use proxy/militia networks instead of direct sabotage operations.
+  Same underlying mechanic as Sabotage but flavored as proxy terrorism.
+
+POOL:
+  Furnace: 2 cards per game
+  Anvil: 3 cards per game
+  Wellspring: 1 card per game
+
+DETECTION: 30% base (lower than sabotage — proxy attacks are harder to attribute)
+TARGET TYPES: Military target / Economic target / Infrastructure target
+SUCCESS: 40% base + intel chief bonus (+10%)
+RESULT: Success/failure — binary outcome.
+  Military target: destroy 1-2 units
+  Economic target: -2% GDP
+  Infrastructure target: -0.5 stability in target country
+
+ATTRIBUTION: Results revealed publicly at Phase B world update.
+  30% detection probability (vs. 40% for standard sabotage).
+  If detected: -5% political support for sponsoring country, diplomatic crisis event.
+
+NOTE: Proxy attack cards replace sabotage_cards for these roles in roles.csv.
+  These roles do NOT have standard sabotage — proxy attack IS their sabotage equivalent.
+```
+
+---
+
 **6C. Cyber Attack**
 
 ```
