@@ -1,0 +1,2136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Thucydides Trap — An Immersive Leadership Simulation</title>
+<meta name="description" content="An immersive leadership simulation by MetaGames. Lead a nation through the most consequential power shift of our time.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%230D1B2A'/%3E%3Ctext x='16' y='24' font-family='Georgia,serif' font-size='24' font-weight='bold' fill='%23E8B84D' text-anchor='middle'%3EM%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ================================================================
+   RESET & BASE
+   ================================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --base: #0D1B2A;
+  --base-mid: #111F30;
+  --card: #1B2A3E;
+  --border: #253D54;
+  --text: #D4DEE8;
+  --text-secondary: #7A8FA3;
+  --text-muted: #556B80;
+  --action: #5B9BD5;
+  --accent: #E8B84D;
+  --success: #5BAD7A;
+  --danger: #D45B5B;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--base);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+a { color: var(--action); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--accent); }
+
+/* ================================================================
+   HEX GRID BACKGROUND PATTERN
+   ================================================================ */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23253D54' stroke-width='0.5' opacity='0.04'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23253D54' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 56px 100px;
+}
+
+/* ================================================================
+   LANGUAGE SYSTEM
+   ================================================================ */
+[data-lang] { display: none; }
+[data-lang="en"] { display: block; }
+span[data-lang="en"], a[data-lang="en"] { display: inline; }
+
+/* ================================================================
+   NAV BAR
+   ================================================================ */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: rgba(13, 27, 42, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-logo img {
+  height: 24px;
+  width: auto;
+  opacity: 0.7;
+}
+
+.nav-logo span {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.lang-switcher {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.lang-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.lang-btn:not(:last-child) {
+  border-right: 1px solid var(--border);
+}
+
+.lang-btn:hover {
+  color: var(--text);
+  background: rgba(91, 155, 213, 0.1);
+}
+
+.lang-btn.active {
+  color: var(--accent);
+  background: rgba(232, 184, 77, 0.1);
+}
+
+/* ================================================================
+   SECTIONS — SHARED
+   ================================================================ */
+.section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 32px;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.section-text {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  max-width: 780px;
+}
+
+.section-text + .section-text {
+  margin-top: 20px;
+}
+
+/* Fade-in animation */
+.fade-in {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.fade-in.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ================================================================
+   SECTION DIVIDERS — country emblem strip
+   ================================================================ */
+.section-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  flex: 1;
+  max-width: 200px;
+  height: 1px;
+  background: rgba(232, 184, 77, 0.15);
+}
+.section-divider svg {
+  opacity: 0.25;
+  flex-shrink: 0;
+}
+
+/* ================================================================
+   HERO
+   ================================================================ */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 80px 32px 40px;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.hero-content {
+  max-width: 900px;
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  line-height: 1.15;
+}
+
+.hero-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.hero-tagline {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  color: var(--text);
+  opacity: 0.7;
+}
+
+/* Hero hex map background */
+.hero-map-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.hero-map-bg svg {
+  width: 100%;
+  max-width: 1400px;
+  height: auto;
+  opacity: 0.30;
+}
+@keyframes chokepointPulse {
+  0%, 100% { opacity: 0.12; r: 12; }
+  50% { opacity: 0.35; r: 18; }
+}
+.chokepoint-glow {
+  animation: chokepointPulse 4s ease-in-out infinite;
+}
+.chokepoint-glow-2 {
+  animation: chokepointPulse 4s ease-in-out infinite;
+  animation-delay: 1.3s;
+}
+.chokepoint-glow-3 {
+  animation: chokepointPulse 4s ease-in-out infinite;
+  animation-delay: 2.6s;
+}
+
+/* Unit icons in hero */
+.hero-unit {
+  opacity: 0.08;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: scrollBounce 2s ease-in-out infinite;
+  z-index: 2;
+}
+
+.scroll-indicator svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--text-muted);
+  stroke-width: 2;
+  fill: none;
+}
+
+@keyframes scrollBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ================================================================
+   EXPLANATION SECTION
+   ================================================================ */
+.explanation {
+  background: var(--base-mid);
+}
+
+.explanation .section-text em {
+  color: var(--text);
+  font-style: italic;
+}
+
+/* ================================================================
+   DATA DYNAMICS SHOWCASE
+   ================================================================ */
+.data-dynamics {
+  background: var(--base);
+  padding: 80px 32px;
+  position: relative;
+  z-index: 1;
+}
+.data-dynamics-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.data-dynamics-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  text-align: center;
+}
+.data-dynamics-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 40px;
+}
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+.mini-chart {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 24px 20px 16px;
+}
+.mini-chart-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+.mini-chart-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+.mini-chart-value .unit { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+.mini-chart svg { display: block; width: 100%; }
+.mini-chart-caption {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ================================================================
+   VALUE CARDS (2x2 GRID)
+   ================================================================ */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.value-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 36px 32px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.value-card:hover {
+  border-color: rgba(232, 184, 77, 0.3);
+  box-shadow: 0 0 30px rgba(232, 184, 77, 0.05);
+}
+
+.value-card-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 20px;
+}
+
+.value-card-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.value-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--accent);
+}
+
+.value-card p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+/* Card visual accents */
+.card-accent {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+.value-card:hover .card-accent {
+  opacity: 0.2;
+  transition: opacity 0.3s;
+}
+
+/* Card 2 mini dashboard */
+.mini-dashboard-accent {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(13, 27, 42, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  opacity: 0.18;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+}
+.value-card:hover .mini-dashboard-accent {
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.mini-db-label { font-size: 8px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.mini-db-value { font-size: 16px; font-weight: 700; color: var(--text); }
+.mini-db-change { font-size: 9px; color: var(--success); }
+
+/* Card 3 chat bubble */
+.chat-bubble-accent {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  max-width: 200px;
+  background: rgba(13, 27, 42, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 8px 8px 2px 8px;
+  padding: 8px 12px;
+  opacity: 0.18;
+  pointer-events: none;
+  font-family: 'DM Sans', sans-serif;
+}
+.value-card:hover .chat-bubble-accent {
+  opacity: 0.35;
+  transition: opacity 0.3s;
+}
+.chat-sender { font-size: 8px; color: #C4A030; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+.chat-text { font-size: 10px; color: var(--text-secondary); font-style: italic; line-height: 1.4; }
+
+/* Card 4 country emblems */
+.emblem-grid-accent {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  opacity: 0.18;
+  pointer-events: none;
+}
+.value-card:hover .emblem-grid-accent {
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+/* ================================================================
+   STEPS / HOW IT WORKS
+   ================================================================ */
+.steps {
+  background: var(--base-mid);
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  margin-top: 48px;
+}
+
+.step-item {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.step-content h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.step-content p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.75;
+  max-width: 680px;
+}
+
+/* Connector line between steps */
+.step-item:not(:last-child) {
+  position: relative;
+  padding-bottom: 8px;
+}
+
+/* Role Brief artifact */
+.role-brief-artifact {
+  margin-top: 24px;
+  display: inline-block;
+  transform: rotate(-2deg);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0;
+  max-width: 340px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.role-brief-stripe {
+  height: 6px;
+  background: #3A6B9F;
+}
+.role-brief-body {
+  padding: 20px 24px;
+}
+.role-brief-classified {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--danger);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  border: 1px solid var(--danger);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.role-brief-emblem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.role-brief-role {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+.role-brief-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.role-brief-bio {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  position: relative;
+}
+.role-brief-bio::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 24px;
+  background: linear-gradient(transparent, var(--card));
+}
+
+/* World Update artifact */
+.world-update-artifact {
+  margin-top: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 520px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.world-update-header {
+  background: rgba(232, 184, 77, 0.08);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.world-update-body { padding: 20px; }
+.world-update-metrics {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.wu-metric {
+  flex: 1;
+  background: rgba(13, 27, 42, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  text-align: center;
+}
+.wu-metric-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.wu-metric-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 2px 0;
+}
+.wu-events {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.wu-event {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  padding: 4px 0 4px 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.wu-event::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.wu-event.military::before { background: var(--danger); }
+.wu-event.diplomatic::before { background: var(--action); }
+
+/* ================================================================
+   EXPERIENCE / TESTIMONIALS
+   ================================================================ */
+.experience {
+  background: var(--base-mid);
+  padding: 100px 32px;
+  position: relative;
+  z-index: 1;
+}
+.experience-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.experience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+.quote-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 28px;
+  position: relative;
+}
+.quote-mark {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 3rem;
+  color: var(--accent);
+  opacity: 0.4;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.quote-text {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+.quote-author {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ================================================================
+   PRACTICAL INFO
+   ================================================================ */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.info-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 32px 28px;
+}
+
+.info-card h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--accent);
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+
+.info-card p, .info-card li {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.info-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.info-card li {
+  padding: 4px 0;
+  padding-left: 16px;
+  position: relative;
+}
+
+.info-card li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+}
+
+/* ================================================================
+   ABOUT
+   ================================================================ */
+.about {
+  background: var(--base-mid);
+  text-align: center;
+}
+
+.about-logo {
+  height: 40px;
+  width: auto;
+  opacity: 0.6;
+  margin-bottom: 24px;
+}
+
+.about .section-text {
+  margin: 0 auto;
+  text-align: center;
+}
+
+.about-link {
+  display: inline-block;
+  margin-top: 20px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--action);
+  letter-spacing: 1px;
+}
+
+/* ================================================================
+   CTA
+   ================================================================ */
+.cta {
+  text-align: center;
+  padding: 120px 32px;
+}
+
+.cta-button {
+  display: inline-block;
+  background: var(--accent);
+  color: var(--base);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 18px 56px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 4px 24px rgba(232, 184, 77, 0.2);
+}
+
+.cta-button:hover {
+  background: #D4A840;
+  color: var(--base);
+  box-shadow: 0 6px 32px rgba(232, 184, 77, 0.35);
+  transform: translateY(-2px);
+}
+
+.cta-note {
+  margin-top: 24px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.cta-contact {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cta-contact a {
+  color: var(--action);
+}
+
+/* ================================================================
+   FOOTER
+   ================================================================ */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.footer-inner {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.footer-logo img {
+  height: 20px;
+  opacity: 0.5;
+}
+
+.footer-logo span {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+}
+
+footer p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.footer-links a {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.footer-privacy {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  opacity: 0.7;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 900px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+  .experience-grid {
+    grid-template-columns: 1fr;
+  }
+  .section {
+    padding: 64px 20px;
+  }
+  nav {
+    padding: 10px 16px;
+  }
+  .hero {
+    padding: 80px 20px 40px;
+  }
+  .role-brief-artifact,
+  .world-update-artifact {
+    max-width: 100%;
+  }
+  .card-accent,
+  .mini-dashboard-accent,
+  .chat-bubble-accent,
+  .emblem-grid-accent {
+    display: none;
+  }
+  .data-dynamics {
+    padding: 60px 20px;
+  }
+  .experience {
+    padding: 64px 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .hero-title {
+    letter-spacing: 0;
+  }
+  .step-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .step-number {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+  .lang-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .world-update-metrics {
+    flex-direction: column;
+  }
+  .section-divider {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+     NAV
+     ================================================================ -->
+<nav>
+  <div class="nav-logo">
+    <img src="assets/logo-metagames.png" alt="MetaGames">
+    <span>MetaGames</span>
+  </div>
+  <div class="lang-switcher">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('el')">&Epsilon;&Lambda;</button>
+    <button class="lang-btn" onclick="setLang('ru')">&Rcy;&Ucy;</button>
+  </div>
+</nav>
+
+<!-- ================================================================
+     HERO — with interactive hex map background
+     ================================================================ -->
+<section class="hero">
+  <div class="hero-map-bg" id="heroMap"></div>
+
+  <div class="hero-content">
+    <div data-lang="en">
+      <h1 class="hero-title">THE THUCYDIDES TRAP</h1>
+      <p class="hero-subtitle">An Immersive Leadership Simulation</p>
+      <p class="hero-tagline">Leave 4 years in one day</p>
+    </div>
+    <div data-lang="el">
+      <h1 class="hero-title">&#919; &#928;&#913;&#915;&#921;&#916;&#913; &#932;&#927;&#933; &#920;&#927;&#933;&#922;&#933;&#916;&#921;&#916;&#919;</h1>
+      <p class="hero-subtitle">&#924;&#953;&#945; &#914;&#953;&#969;&#956;&#945;&#964;&#953;&#954;&#942; &#928;&#961;&#959;&#963;&#959;&#956;&#959;&#943;&#969;&#963;&#951; &#919;&#947;&#949;&#963;&#943;&#945;&#962;</p>
+      <p class="hero-tagline">&#918;&#942;&#963;&#949; 4 &#967;&#961;&#972;&#957;&#953;&#945; &#963;&#949; &#956;&#943;&#945; &#956;&#941;&#961;&#945;</p>
+    </div>
+    <div data-lang="ru">
+      <h1 class="hero-title">&#1051;&#1054;&#1042;&#1059;&#1064;&#1050;&#1040; &#1060;&#1059;&#1050;&#1048;&#1044;&#1048;&#1044;&#1040;</h1>
+      <p class="hero-subtitle">&#1048;&#1084;&#1084;&#1077;&#1088;&#1089;&#1080;&#1074;&#1085;&#1072;&#1103; &#1051;&#1080;&#1076;&#1077;&#1088;&#1089;&#1082;&#1072;&#1103; &#1057;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1103;</p>
+      <p class="hero-tagline">&#1055;&#1088;&#1086;&#1078;&#1080;&#1074;&#1080; 4 &#1075;&#1086;&#1076;&#1072; &#1079;&#1072; &#1086;&#1076;&#1080;&#1085; &#1076;&#1077;&#1085;&#1100;</p>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTION DIVIDER
+     ================================================================ -->
+<div class="section-divider" id="divider1"></div>
+
+<!-- ================================================================
+     WHAT IS THE THUCYDIDES TRAP?
+     ================================================================ -->
+<section class="section explanation">
+  <div class="section-inner fade-in">
+    <!-- EN -->
+    <div data-lang="en">
+      <p class="section-label">The Phenomenon</p>
+      <h2 class="section-title">What Is the Thucydides Trap?</h2>
+      <p class="section-text">Thucydides, the ancient Greek historian, observed that when a rising power threatens to displace a ruling power, war becomes almost inevitable. Writing about the Peloponnesian War between Athens and Sparta, he concluded: <em>"It was the rise of Athens and the fear that this instilled in Sparta that made war inevitable."</em> He called this structural tension "the Trap."</p>
+      <p class="section-text">Today, the world faces its most consequential instance: the shift in global power between established and rising superpowers, complicated by active conflicts, nuclear arsenals, economic interdependence, and technological revolution. Harvard professor Graham Allison studied 16 cases of major power transitions over 500 years. Twelve ended in war. Only four avoided it.</p>
+      <p class="section-text">Our simulation places you at the center of this challenge. You lead a nation. Your decisions &mdash; on trade, alliances, military posture, technology &mdash; shape the future of a fictional world that mirrors our own. The question is not whether the Trap exists. <em>The question is whether leadership can escape it.</em></p>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <p class="section-label">&#932;&#959; &#934;&#945;&#953;&#957;&#972;&#956;&#949;&#957;&#959;</p>
+      <h2 class="section-title">&#932;&#953; &#949;&#943;&#957;&#945;&#953; &#951; &#928;&#945;&#947;&#943;&#948;&#945; &#964;&#959;&#965; &#920;&#959;&#965;&#954;&#965;&#948;&#943;&#948;&#951;;</h2>
+      <p class="section-text">&#927; &#920;&#959;&#965;&#954;&#965;&#948;&#943;&#948;&#951;&#962;, &#959; &#956;&#949;&#947;&#940;&#955;&#959;&#962; &#904;&#955;&#955;&#951;&#957;&#945;&#962; &#953;&#963;&#964;&#959;&#961;&#953;&#954;&#972;&#962;, &#960;&#945;&#961;&#945;&#964;&#942;&#961;&#951;&#963;&#949; &#972;&#964;&#953; &#972;&#964;&#945;&#957; &#956;&#953;&#945; &#945;&#957;&#949;&#961;&#967;&#972;&#956;&#949;&#957;&#951; &#948;&#973;&#957;&#945;&#956;&#951; &#945;&#960;&#949;&#953;&#955;&#949;&#943; &#957;&#945; &#949;&#954;&#964;&#959;&#960;&#943;&#963;&#949;&#953; &#964;&#951;&#957; &#954;&#965;&#961;&#943;&#945;&#961;&#967;&#951;, &#959; &#960;&#972;&#955;&#949;&#956;&#959;&#962; &#947;&#943;&#957;&#949;&#964;&#945;&#953; &#963;&#967;&#949;&#948;&#972;&#957; &#945;&#957;&#945;&#960;&#972;&#966;&#949;&#965;&#954;&#964;&#959;&#962;. &#915;&#961;&#940;&#966;&#959;&#957;&#964;&#945;&#962; &#947;&#953;&#945; &#964;&#959;&#957; &#928;&#949;&#955;&#959;&#960;&#959;&#957;&#957;&#951;&#963;&#953;&#945;&#954;&#972; &#928;&#972;&#955;&#949;&#956;&#959; &#956;&#949;&#964;&#945;&#958;&#973; &#913;&#952;&#942;&#957;&#945;&#962; &#954;&#945;&#953; &#931;&#960;&#940;&#961;&#964;&#951;&#962;, &#954;&#945;&#964;&#941;&#955;&#951;&#958;&#949;: <em>&laquo;&#905;&#964;&#945;&#957; &#951; &#940;&#957;&#959;&#948;&#959;&#962; &#964;&#951;&#962; &#913;&#952;&#942;&#957;&#945;&#962; &#954;&#945;&#953; &#959; &#966;&#972;&#946;&#959;&#962; &#960;&#959;&#965; &#945;&#965;&#964;&#942; &#949;&#957;&#941;&#960;&#957;&#949;&#965;&#963;&#949; &#963;&#964;&#951; &#931;&#960;&#940;&#961;&#964;&#951; &#960;&#959;&#965; &#954;&#945;&#964;&#941;&#963;&#964;&#951;&#963;&#945;&#957; &#964;&#959;&#957; &#960;&#972;&#955;&#949;&#956;&#959; &#945;&#957;&#945;&#960;&#972;&#966;&#949;&#965;&#954;&#964;&#959;.&raquo;</em> &#913;&#965;&#964;&#942; &#964;&#951; &#948;&#959;&#956;&#953;&#954;&#942; &#941;&#957;&#964;&#945;&#963;&#951; &#964;&#951;&#957; &#959;&#957;&#972;&#956;&#945;&#963;&#949; &laquo;&#928;&#945;&#947;&#943;&#948;&#945;&raquo;.</p>
+      <p class="section-text">&#931;&#942;&#956;&#949;&#961;&#945;, &#959; &#954;&#972;&#963;&#956;&#959;&#962; &#945;&#957;&#964;&#953;&#956;&#949;&#964;&#969;&#960;&#943;&#950;&#949;&#953; &#964;&#951;&#957; &#960;&#953;&#959; &#954;&#961;&#943;&#963;&#953;&#956;&#951; &#949;&#954;&#948;&#959;&#967;&#942; &#964;&#959;&#965; &#966;&#945;&#953;&#957;&#959;&#956;&#941;&#957;&#959;&#965;: &#964;&#951; &#956;&#949;&#964;&#945;&#964;&#972;&#960;&#953;&#963;&#951; &#964;&#951;&#962; &#960;&#945;&#947;&#954;&#972;&#963;&#956;&#953;&#945;&#962; &#953;&#963;&#967;&#973;&#959;&#962; &#956;&#949;&#964;&#945;&#958;&#973; &#954;&#945;&#952;&#953;&#949;&#961;&#969;&#956;&#941;&#957;&#969;&#957; &#954;&#945;&#953; &#945;&#957;&#949;&#961;&#967;&#972;&#956;&#949;&#957;&#969;&#957; &#965;&#960;&#949;&#961;&#948;&#965;&#957;&#940;&#956;&#949;&#969;&#957;, &#960;&#949;&#961;&#953;&#960;&#955;&#949;&#947;&#956;&#941;&#957;&#951; &#945;&#960;&#972; &#949;&#957;&#949;&#961;&#947;&#941;&#962; &#963;&#965;&#947;&#954;&#961;&#959;&#973;&#963;&#949;&#953;&#962;, &#960;&#965;&#961;&#951;&#957;&#953;&#954;&#940; &#959;&#960;&#955;&#959;&#963;&#964;&#940;&#963;&#953;&#945;, &#959;&#953;&#954;&#959;&#957;&#959;&#956;&#953;&#954;&#942; &#945;&#955;&#955;&#951;&#955;&#949;&#958;&#940;&#961;&#964;&#951;&#963;&#951; &#954;&#945;&#953; &#964;&#949;&#967;&#957;&#959;&#955;&#959;&#947;&#953;&#954;&#942; &#949;&#960;&#945;&#957;&#940;&#963;&#964;&#945;&#963;&#951;. &#927; &#954;&#945;&#952;&#951;&#947;&#951;&#964;&#942;&#962; &#964;&#959;&#965; Harvard Graham Allison &#956;&#949;&#955;&#941;&#964;&#951;&#963;&#949; 16 &#960;&#949;&#961;&#953;&#960;&#964;&#974;&#963;&#949;&#953;&#962; &#956;&#949;&#947;&#940;&#955;&#969;&#957; &#956;&#949;&#964;&#945;&#946;&#940;&#963;&#949;&#969;&#957; &#953;&#963;&#967;&#973;&#959;&#962; &#963;&#949; 500 &#967;&#961;&#972;&#957;&#953;&#945;. &#916;&#974;&#948;&#949;&#954;&#945; &#954;&#945;&#964;&#941;&#955;&#951;&#958;&#945;&#957; &#963;&#949; &#960;&#972;&#955;&#949;&#956;&#959;. &#924;&#972;&#957;&#959; &#964;&#941;&#963;&#963;&#949;&#961;&#953;&#962; &#964;&#959;&#957; &#945;&#960;&#941;&#966;&#965;&#947;&#945;&#957;.</p>
+      <p class="section-text">&#919; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#943;&#969;&#963;&#942; &#956;&#945;&#962; &#963;&#945;&#962; &#964;&#959;&#960;&#959;&#952;&#949;&#964;&#949;&#943; &#963;&#964;&#959; &#954;&#941;&#957;&#964;&#961;&#959; &#945;&#965;&#964;&#942;&#962; &#964;&#951;&#962; &#960;&#961;&#972;&#954;&#955;&#951;&#963;&#951;&#962;. &#919;&#947;&#949;&#943;&#963;&#964;&#949; &#949;&#957;&#972;&#962; &#941;&#952;&#957;&#959;&#965;&#962;. &#927;&#953; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#953;&#962; &#963;&#945;&#962; &mdash; &#947;&#953;&#945; &#964;&#959; &#949;&#956;&#960;&#972;&#961;&#953;&#959;, &#964;&#953;&#962; &#963;&#965;&#956;&#956;&#945;&#967;&#943;&#949;&#962;, &#964;&#951; &#963;&#964;&#961;&#945;&#964;&#953;&#969;&#964;&#953;&#954;&#942; &#963;&#964;&#940;&#963;&#951;, &#964;&#951;&#957; &#964;&#949;&#967;&#957;&#959;&#955;&#959;&#947;&#943;&#945; &mdash; &#948;&#953;&#945;&#956;&#959;&#961;&#966;&#974;&#957;&#959;&#965;&#957; &#964;&#959; &#956;&#941;&#955;&#955;&#959;&#957; &#949;&#957;&#972;&#962; &#966;&#945;&#957;&#964;&#945;&#963;&#964;&#953;&#954;&#959;&#973; &#954;&#972;&#963;&#956;&#959;&#965; &#960;&#959;&#965; &#945;&#957;&#964;&#953;&#954;&#945;&#964;&#959;&#960;&#964;&#961;&#943;&#950;&#949;&#953; &#964;&#959;&#957; &#948;&#953;&#954;&#972; &#956;&#945;&#962;. &#932;&#959; &#949;&#961;&#974;&#964;&#951;&#956;&#945; &#948;&#949;&#957; &#949;&#943;&#957;&#945;&#953; &#945;&#957; &#951; &#928;&#945;&#947;&#943;&#948;&#945; &#965;&#960;&#940;&#961;&#967;&#949;&#953;. <em>&#932;&#959; &#949;&#961;&#974;&#964;&#951;&#956;&#945; &#949;&#943;&#957;&#945;&#953; &#945;&#957; &#951; &#951;&#947;&#949;&#963;&#943;&#945; &#956;&#960;&#959;&#961;&#949;&#943; &#957;&#945; &#964;&#951;&#957; &#945;&#960;&#959;&#966;&#973;&#947;&#949;&#953;.</em></p>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <p class="section-label">&#1060;&#1077;&#1085;&#1086;&#1084;&#1077;&#1085;</p>
+      <h2 class="section-title">&#1063;&#1090;&#1086; &#1090;&#1072;&#1082;&#1086;&#1077; &#1051;&#1086;&#1074;&#1091;&#1096;&#1082;&#1072; &#1060;&#1091;&#1082;&#1080;&#1076;&#1080;&#1076;&#1072;?</h2>
+      <p class="section-text">&#1060;&#1091;&#1082;&#1080;&#1076;&#1080;&#1076;, &#1076;&#1088;&#1077;&#1074;&#1085;&#1077;&#1075;&#1088;&#1077;&#1095;&#1077;&#1089;&#1082;&#1080;&#1081; &#1080;&#1089;&#1090;&#1086;&#1088;&#1080;&#1082;, &#1079;&#1072;&#1084;&#1077;&#1090;&#1080;&#1083;, &#1095;&#1090;&#1086; &#1082;&#1086;&#1075;&#1076;&#1072; &#1074;&#1086;&#1089;&#1093;&#1086;&#1076;&#1103;&#1097;&#1072;&#1103; &#1076;&#1077;&#1088;&#1078;&#1072;&#1074;&#1072; &#1091;&#1075;&#1088;&#1086;&#1078;&#1072;&#1077;&#1090; &#1074;&#1099;&#1090;&#1077;&#1089;&#1085;&#1080;&#1090;&#1100; &#1075;&#1086;&#1089;&#1087;&#1086;&#1076;&#1089;&#1090;&#1074;&#1091;&#1102;&#1097;&#1091;&#1102;, &#1074;&#1086;&#1081;&#1085;&#1072; &#1089;&#1090;&#1072;&#1085;&#1086;&#1074;&#1080;&#1090;&#1089;&#1103; &#1087;&#1086;&#1095;&#1090;&#1080; &#1085;&#1077;&#1080;&#1079;&#1073;&#1077;&#1078;&#1085;&#1086;&#1081;. &#1054;&#1087;&#1080;&#1089;&#1099;&#1074;&#1072;&#1103; &#1055;&#1077;&#1083;&#1086;&#1087;&#1086;&#1085;&#1085;&#1077;&#1089;&#1089;&#1082;&#1091;&#1102; &#1074;&#1086;&#1081;&#1085;&#1091; &#1084;&#1077;&#1078;&#1076;&#1091; &#1040;&#1092;&#1080;&#1085;&#1072;&#1084;&#1080; &#1080; &#1057;&#1087;&#1072;&#1088;&#1090;&#1086;&#1081;, &#1086;&#1085; &#1079;&#1072;&#1082;&#1083;&#1102;&#1095;&#1080;&#1083;: <em>&laquo;&#1048;&#1084;&#1077;&#1085;&#1085;&#1086; &#1074;&#1086;&#1079;&#1074;&#1099;&#1096;&#1077;&#1085;&#1080;&#1077; &#1040;&#1092;&#1080;&#1085; &#1080; &#1089;&#1090;&#1088;&#1072;&#1093;, &#1082;&#1086;&#1090;&#1086;&#1088;&#1099;&#1081; &#1086;&#1085;&#1086; &#1074;&#1085;&#1091;&#1096;&#1080;&#1083;&#1086; &#1057;&#1087;&#1072;&#1088;&#1090;&#1077;, &#1089;&#1076;&#1077;&#1083;&#1072;&#1083;&#1080; &#1074;&#1086;&#1081;&#1085;&#1091; &#1085;&#1077;&#1080;&#1079;&#1073;&#1077;&#1078;&#1085;&#1086;&#1081;.&raquo;</em> &#1069;&#1090;&#1086; &#1089;&#1090;&#1088;&#1091;&#1082;&#1090;&#1091;&#1088;&#1085;&#1086;&#1077; &#1085;&#1072;&#1087;&#1088;&#1103;&#1078;&#1077;&#1085;&#1080;&#1077; &#1086;&#1085; &#1085;&#1072;&#1079;&#1074;&#1072;&#1083; &laquo;&#1051;&#1086;&#1074;&#1091;&#1096;&#1082;&#1086;&#1081;&raquo;.</p>
+      <p class="section-text">&#1057;&#1077;&#1075;&#1086;&#1076;&#1085;&#1103; &#1084;&#1080;&#1088; &#1089;&#1090;&#1086;&#1083;&#1082;&#1085;&#1091;&#1083;&#1089;&#1103; &#1089; &#1085;&#1072;&#1080;&#1073;&#1086;&#1083;&#1077;&#1077; &#1079;&#1085;&#1072;&#1095;&#1080;&#1084;&#1099;&#1084; &#1087;&#1088;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077;&#1084; &#1101;&#1090;&#1086;&#1075;&#1086; &#1092;&#1077;&#1085;&#1086;&#1084;&#1077;&#1085;&#1072;: &#1089;&#1084;&#1077;&#1097;&#1077;&#1085;&#1080;&#1077;&#1084; &#1075;&#1083;&#1086;&#1073;&#1072;&#1083;&#1100;&#1085;&#1086;&#1081; &#1074;&#1083;&#1072;&#1089;&#1090;&#1080; &#1084;&#1077;&#1078;&#1076;&#1091; &#1091;&#1089;&#1090;&#1086;&#1103;&#1074;&#1096;&#1080;&#1084;&#1080;&#1089;&#1103; &#1080; &#1074;&#1086;&#1089;&#1093;&#1086;&#1076;&#1103;&#1097;&#1080;&#1084;&#1080; &#1089;&#1074;&#1077;&#1088;&#1093;&#1076;&#1077;&#1088;&#1078;&#1072;&#1074;&#1072;&#1084;&#1080;, &#1086;&#1089;&#1083;&#1086;&#1078;&#1085;&#1105;&#1085;&#1085;&#1099;&#1084; &#1072;&#1082;&#1090;&#1080;&#1074;&#1085;&#1099;&#1084;&#1080; &#1082;&#1086;&#1085;&#1092;&#1083;&#1080;&#1082;&#1090;&#1072;&#1084;&#1080;, &#1103;&#1076;&#1077;&#1088;&#1085;&#1099;&#1084;&#1080; &#1072;&#1088;&#1089;&#1077;&#1085;&#1072;&#1083;&#1072;&#1084;&#1080;, &#1101;&#1082;&#1086;&#1085;&#1086;&#1084;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1081; &#1074;&#1079;&#1072;&#1080;&#1084;&#1086;&#1079;&#1072;&#1074;&#1080;&#1089;&#1080;&#1084;&#1086;&#1089;&#1090;&#1100;&#1102; &#1080; &#1090;&#1077;&#1093;&#1085;&#1086;&#1083;&#1086;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1081; &#1088;&#1077;&#1074;&#1086;&#1083;&#1102;&#1094;&#1080;&#1077;&#1081;. &#1055;&#1088;&#1086;&#1092;&#1077;&#1089;&#1089;&#1086;&#1088; &#1043;&#1072;&#1088;&#1074;&#1072;&#1088;&#1076;&#1072; &#1043;&#1088;&#1101;&#1084; &#1069;&#1083;&#1083;&#1080;&#1089;&#1086;&#1085; &#1080;&#1079;&#1091;&#1095;&#1080;&#1083; 16 &#1089;&#1083;&#1091;&#1095;&#1072;&#1077;&#1074; &#1082;&#1088;&#1091;&#1087;&#1085;&#1099;&#1093; &#1089;&#1084;&#1077;&#1085; &#1074;&#1083;&#1072;&#1089;&#1090;&#1080; &#1079;&#1072; 500 &#1083;&#1077;&#1090;. &#1044;&#1074;&#1077;&#1085;&#1072;&#1076;&#1094;&#1072;&#1090;&#1100; &#1079;&#1072;&#1082;&#1086;&#1085;&#1095;&#1080;&#1083;&#1080;&#1089;&#1100; &#1074;&#1086;&#1081;&#1085;&#1086;&#1081;. &#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1095;&#1077;&#1090;&#1099;&#1088;&#1077; &#1077;&#1105; &#1080;&#1079;&#1073;&#1077;&#1078;&#1072;&#1083;&#1080;.</p>
+      <p class="section-text">&#1053;&#1072;&#1096;&#1072; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1103; &#1089;&#1090;&#1072;&#1074;&#1080;&#1090; &#1074;&#1072;&#1089; &#1074; &#1094;&#1077;&#1085;&#1090;&#1088; &#1101;&#1090;&#1086;&#1075;&#1086; &#1074;&#1099;&#1079;&#1086;&#1074;&#1072;. &#1042;&#1099; &#1074;&#1086;&#1079;&#1075;&#1083;&#1072;&#1074;&#1083;&#1103;&#1077;&#1090;&#1077; &#1075;&#1086;&#1089;&#1091;&#1076;&#1072;&#1088;&#1089;&#1090;&#1074;&#1086;. &#1042;&#1072;&#1096;&#1080; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1103; &mdash; &#1086; &#1090;&#1086;&#1088;&#1075;&#1086;&#1074;&#1083;&#1077;, &#1089;&#1086;&#1102;&#1079;&#1072;&#1093;, &#1074;&#1086;&#1077;&#1085;&#1085;&#1086;&#1081; &#1087;&#1086;&#1079;&#1080;&#1094;&#1080;&#1080;, &#1090;&#1077;&#1093;&#1085;&#1086;&#1083;&#1086;&#1075;&#1080;&#1103;&#1093; &mdash; &#1092;&#1086;&#1088;&#1084;&#1080;&#1088;&#1091;&#1102;&#1090; &#1073;&#1091;&#1076;&#1091;&#1097;&#1077;&#1077; &#1074;&#1099;&#1084;&#1099;&#1096;&#1083;&#1077;&#1085;&#1085;&#1086;&#1075;&#1086; &#1084;&#1080;&#1088;&#1072;, &#1082;&#1086;&#1090;&#1086;&#1088;&#1099;&#1081; &#1086;&#1090;&#1088;&#1072;&#1078;&#1072;&#1077;&#1090; &#1085;&#1072;&#1096;. &#1042;&#1086;&#1087;&#1088;&#1086;&#1089; &#1085;&#1077; &#1074; &#1090;&#1086;&#1084;, &#1089;&#1091;&#1097;&#1077;&#1089;&#1090;&#1074;&#1091;&#1077;&#1090; &#1083;&#1080; &#1051;&#1086;&#1074;&#1091;&#1096;&#1082;&#1072;. <em>&#1042;&#1086;&#1087;&#1088;&#1086;&#1089; &#1074; &#1090;&#1086;&#1084;, &#1084;&#1086;&#1078;&#1077;&#1090; &#1083;&#1080; &#1083;&#1080;&#1076;&#1077;&#1088;&#1089;&#1090;&#1074;&#1086; &#1077;&#1105; &#1080;&#1079;&#1073;&#1077;&#1078;&#1072;&#1090;&#1100;.</em></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     DATA DYNAMICS SHOWCASE
+     ================================================================ -->
+<div class="data-dynamics fade-in">
+  <div class="data-dynamics-inner">
+    <p class="data-dynamics-label">Simulation Engine</p>
+    <p class="data-dynamics-subtitle">From our AI-powered simulation engine &mdash; real dynamics, real consequences</p>
+    <div class="charts-row">
+      <!-- Oil Price Chart -->
+      <div class="mini-chart">
+        <div class="mini-chart-title">Global Oil Price</div>
+        <div class="mini-chart-value">$163 <span class="unit">/barrel</span></div>
+        <svg viewBox="0 0 240 80" fill="none">
+          <defs>
+            <linearGradient id="oilGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#E8B84D" stop-opacity="0.3"/>
+              <stop offset="100%" stop-color="#E8B84D" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="20" x2="240" y2="20" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="40" x2="240" y2="40" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="60" x2="240" y2="60" stroke="#253D54" stroke-width="0.5"/>
+          <!-- Data: $80, $95, $118, $137, $155, $163, $152, $98 -->
+          <!-- Scaled: 80=68, 95=58, 118=42, 137=30, 155=18, 163=12, 152=20, 98=55 -->
+          <path d="M0,68 L34,58 L69,42 L103,30 L137,18 L171,12 L206,20 L240,55" stroke="#E8B84D" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M0,68 L34,58 L69,42 L103,30 L137,18 L171,12 L206,20 L240,55 L240,80 L0,80 Z" fill="url(#oilGrad)"/>
+          <!-- Peak marker -->
+          <circle cx="171" cy="12" r="3" fill="#E8B84D"/>
+        </svg>
+        <div class="mini-chart-caption">Rounds 1-8 &middot; Peak at R5 during Gulf crisis</div>
+      </div>
+
+      <!-- Power Gap Chart -->
+      <div class="mini-chart">
+        <div class="mini-chart-title">Cathay / Columbia GDP Ratio</div>
+        <div class="mini-chart-value">0.85</div>
+        <svg viewBox="0 0 240 80" fill="none">
+          <defs>
+            <linearGradient id="gapGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#D45B5B" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#D45B5B" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="20" x2="240" y2="20" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="40" x2="240" y2="40" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="60" x2="240" y2="60" stroke="#253D54" stroke-width="0.5"/>
+          <!-- Parity line at 1.0 -->
+          <line x1="0" y1="10" x2="240" y2="10" stroke="#D45B5B" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.5"/>
+          <text x="242" y="13" font-family="JetBrains Mono, monospace" font-size="7" fill="#D45B5B" opacity="0.6">PARITY</text>
+          <!-- Data: 0.68, 0.70, 0.72, 0.75, 0.78, 0.81, 0.83, 0.85 -->
+          <!-- Scaled: 0.68=56, 0.70=52, 0.72=48, 0.75=42, 0.78=36, 0.81=30, 0.83=26, 0.85=22 -->
+          <path d="M0,56 L34,52 L69,48 L103,42 L137,36 L171,30 L206,26 L240,22" stroke="#D45B5B" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M0,56 L34,52 L69,48 L103,42 L137,36 L171,30 L206,26 L240,22 L240,80 L0,80 Z" fill="url(#gapGrad)"/>
+          <circle cx="240" cy="22" r="3" fill="#D45B5B"/>
+        </svg>
+        <div class="mini-chart-caption">The gap is closing &middot; Parity triggers the Trap</div>
+      </div>
+
+      <!-- Naval Balance Chart -->
+      <div class="mini-chart">
+        <div class="mini-chart-title">Naval Capital Ships</div>
+        <div class="mini-chart-value" style="font-size:1rem;">
+          <span style="color:#3A6B9F;">Columbia 9</span> &nbsp;/&nbsp; <span style="color:#C4A030;">Cathay 14</span>
+        </div>
+        <svg viewBox="0 0 240 80" fill="none">
+          <line x1="0" y1="20" x2="240" y2="20" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="40" x2="240" y2="40" stroke="#253D54" stroke-width="0.5"/>
+          <line x1="0" y1="60" x2="240" y2="60" stroke="#253D54" stroke-width="0.5"/>
+          <!-- Columbia: 11, 11, 10, 10, 10, 9, 9, 9 -->
+          <!-- Cathay:    7,  8,  9, 10, 11, 12, 13, 14 -->
+          <!-- Scale: value * (70/15) inverted from top. 15=top=5, 7=bottom=67 -->
+          <!-- Columbia: 11=29, 11=29, 10=33, 10=33, 10=33, 9=38, 9=38, 9=38 -->
+          <!-- Cathay:    7=48,  8=43,  9=38, 10=33, 11=29, 12=24, 13=19, 14=14 -->
+          <path d="M0,29 L34,29 L69,33 L103,33 L137,33 L171,38 L206,38 L240,38" stroke="#3A6B9F" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M0,48 L34,43 L69,38 L103,33 L137,29 L171,24 L206,19 L240,14" stroke="#C4A030" stroke-width="2" fill="none" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- Crossing marker -->
+          <circle cx="103" cy="33" r="4" fill="none" stroke="#E8B84D" stroke-width="1" opacity="0.6"/>
+          <!-- Labels -->
+          <text x="2" y="26" font-family="JetBrains Mono, monospace" font-size="7" fill="#3A6B9F" opacity="0.7">COL</text>
+          <text x="2" y="52" font-family="JetBrains Mono, monospace" font-size="7" fill="#C4A030" opacity="0.7">CAT</text>
+        </svg>
+        <div class="mini-chart-caption">Lines cross at Round 4 &middot; Cathay achieves naval superiority</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SECTION DIVIDER
+     ================================================================ -->
+<div class="section-divider" id="divider2"></div>
+
+<!-- ================================================================
+     WHY ATTEND?
+     ================================================================ -->
+<section class="section">
+  <div class="section-inner fade-in">
+    <!-- EN -->
+    <div data-lang="en">
+      <p class="section-label">Why Attend</p>
+      <h2 class="section-title">Four Reasons to Be in the Room</h2>
+      <div class="card-grid">
+        <!-- Card 1: World Order — hex map fragment accent -->
+        <div class="value-card">
+          <div class="card-accent" id="card1Accent"></div>
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="24" cy="24" r="20"/>
+              <line x1="4" y1="24" x2="44" y2="24"/>
+              <ellipse cx="24" cy="24" rx="10" ry="20"/>
+              <path d="M8 14h32M8 34h32"/>
+            </svg>
+          </div>
+          <h3>Explore the New World Order</h3>
+          <p>The global system that kept peace for decades is fracturing. Understand the forces &mdash; economic, military, technological, political &mdash; that are reshaping the world. Experience them firsthand, not as theory but as decisions you must make under pressure.</p>
+        </div>
+        <!-- Card 2: Leadership — mini dashboard accent -->
+        <div class="value-card">
+          <div class="mini-dashboard-accent">
+            <div class="mini-db-label">GDP</div>
+            <div class="mini-db-value">280</div>
+            <div class="mini-db-change">+1.8%</div>
+          </div>
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <path d="M24 4v40M4 24h40"/>
+              <path d="M12 12l24 24M36 12L12 36"/>
+              <circle cx="24" cy="24" r="8"/>
+            </svg>
+          </div>
+          <h3>Develop Your Leadership</h3>
+          <p>Communication under stress. Strategic thinking with incomplete information. Coalition-building across conflicting interests. Decision-making when every choice has consequences. This is not a lecture &mdash; it is practice.</p>
+        </div>
+        <!-- Card 3: AI — chat bubble accent -->
+        <div class="value-card">
+          <div class="chat-bubble-accent">
+            <div class="chat-sender">HELMSMAN</div>
+            <div class="chat-text">"The strait remains open &mdash; for now. But our patience has limits."</div>
+          </div>
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <rect x="8" y="14" width="32" height="24" rx="3"/>
+              <circle cx="24" cy="26" r="6"/>
+              <path d="M18 26h-4M34 26h-4"/>
+              <path d="M24 8v6"/>
+              <circle cx="24" cy="6" r="2"/>
+            </svg>
+          </div>
+          <h3>Experience AI as a Partner</h3>
+          <p>For the first time, AI participants operate alongside humans as equals in a shared world model. They negotiate, deceive, cooperate, and compete &mdash; indistinguishable from human players. Explore what partnership with AI really means.</p>
+        </div>
+        <!-- Card 4: Connect — country emblems accent -->
+        <div class="value-card">
+          <div class="emblem-grid-accent" id="card4Emblems"></div>
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="16" cy="20" r="6"/>
+              <circle cx="32" cy="20" r="6"/>
+              <circle cx="24" cy="34" r="6"/>
+              <line x1="20" y1="24" x2="22" y2="30"/>
+              <line x1="28" y1="24" x2="26" y2="30"/>
+              <line x1="22" y1="20" x2="26" y2="20"/>
+            </svg>
+          </div>
+          <h3>Connect and Have Fun</h3>
+          <p>An intense, immersive full-day experience is the fastest way to build real connections. You will meet exceptional people, face impossible dilemmas together, and share stories for years. This is serious play at its best.</p>
+        </div>
+      </div>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <p class="section-label">&#915;&#953;&#945;&#964;&#943; &#957;&#945; &#963;&#965;&#956;&#956;&#949;&#964;&#940;&#963;&#967;&#949;&#964;&#949;</p>
+      <h2 class="section-title">&#932;&#941;&#963;&#963;&#949;&#961;&#953;&#962; &#955;&#972;&#947;&#959;&#953; &#957;&#945; &#949;&#943;&#963;&#964;&#949; &#949;&#954;&#949;&#943;</h2>
+      <div class="card-grid">
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="24" cy="24" r="20"/><line x1="4" y1="24" x2="44" y2="24"/><ellipse cx="24" cy="24" rx="10" ry="20"/><path d="M8 14h32M8 34h32"/>
+            </svg>
+          </div>
+          <h3>&#917;&#958;&#949;&#961;&#949;&#965;&#957;&#942;&#963;&#964;&#949; &#964;&#951; &#925;&#941;&#945; &#928;&#945;&#947;&#954;&#972;&#963;&#956;&#953;&#945; &#932;&#940;&#958;&#951;</h3>
+          <p>&#932;&#959; &#960;&#945;&#947;&#954;&#972;&#963;&#956;&#953;&#959; &#963;&#973;&#963;&#964;&#951;&#956;&#945; &#960;&#959;&#965; &#948;&#953;&#945;&#964;&#942;&#961;&#951;&#963;&#949; &#964;&#951;&#957; &#949;&#953;&#961;&#942;&#957;&#951; &#947;&#953;&#945; &#948;&#949;&#954;&#945;&#949;&#964;&#943;&#949;&#962; &#948;&#953;&#945;&#961;&#961;&#951;&#947;&#957;&#973;&#949;&#964;&#945;&#953;. &#922;&#945;&#964;&#945;&#957;&#959;&#942;&#963;&#964;&#949; &#964;&#953;&#962; &#948;&#965;&#957;&#940;&#956;&#949;&#953;&#962; &mdash; &#959;&#953;&#954;&#959;&#957;&#959;&#956;&#953;&#954;&#941;&#962;, &#963;&#964;&#961;&#945;&#964;&#953;&#969;&#964;&#953;&#954;&#941;&#962;, &#964;&#949;&#967;&#957;&#959;&#955;&#959;&#947;&#953;&#954;&#941;&#962;, &#960;&#959;&#955;&#953;&#964;&#953;&#954;&#941;&#962; &mdash; &#960;&#959;&#965; &#945;&#957;&#945;&#948;&#953;&#945;&#956;&#959;&#961;&#966;&#974;&#957;&#959;&#965;&#957; &#964;&#959;&#957; &#954;&#972;&#963;&#956;&#959;. &#914;&#953;&#974;&#963;&#964;&#949; &#964;&#949;&#962; &#940;&#956;&#949;&#963;&#945;, &#972;&#967;&#953; &#969;&#962; &#952;&#949;&#969;&#961;&#943;&#945; &#945;&#955;&#955;&#940; &#969;&#962; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#953;&#962; &#960;&#959;&#965; &#960;&#961;&#941;&#960;&#949;&#953; &#957;&#945; &#960;&#940;&#961;&#949;&#964;&#949; &#965;&#960;&#972; &#960;&#943;&#949;&#963;&#951;.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <path d="M24 4v40M4 24h40"/><path d="M12 12l24 24M36 12L12 36"/><circle cx="24" cy="24" r="8"/>
+            </svg>
+          </div>
+          <h3>&#913;&#957;&#945;&#960;&#964;&#973;&#958;&#964;&#949; &#964;&#951;&#957; &#919;&#947;&#949;&#963;&#943;&#945; &#963;&#945;&#962;</h3>
+          <p>&#917;&#960;&#953;&#954;&#959;&#953;&#957;&#969;&#957;&#943;&#945; &#965;&#960;&#972; &#960;&#943;&#949;&#963;&#951;. &#931;&#964;&#961;&#945;&#964;&#951;&#947;&#953;&#954;&#942; &#963;&#954;&#941;&#968;&#951; &#956;&#949; &#949;&#955;&#955;&#953;&#960;&#942; &#960;&#955;&#951;&#961;&#959;&#966;&#972;&#961;&#951;&#963;&#951;. &#916;&#951;&#956;&#953;&#959;&#965;&#961;&#947;&#943;&#945; &#963;&#965;&#956;&#956;&#945;&#967;&#953;&#974;&#957; &#956;&#949;&#964;&#945;&#958;&#973; &#945;&#957;&#964;&#953;&#954;&#961;&#959;&#965;&#972;&#956;&#949;&#957;&#969;&#957; &#963;&#965;&#956;&#966;&#949;&#961;&#972;&#957;&#964;&#969;&#957;. &#923;&#942;&#968;&#951; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#969;&#957; &#972;&#964;&#945;&#957; &#954;&#940;&#952;&#949; &#949;&#960;&#953;&#955;&#959;&#947;&#942; &#941;&#967;&#949;&#953; &#963;&#965;&#957;&#941;&#960;&#949;&#953;&#949;&#962;. &#913;&#965;&#964;&#972; &#948;&#949;&#957; &#949;&#943;&#957;&#945;&#953; &#948;&#953;&#940;&#955;&#949;&#958;&#951; &mdash; &#949;&#943;&#957;&#945;&#953; &#940;&#963;&#954;&#951;&#963;&#951;.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <rect x="8" y="14" width="32" height="24" rx="3"/><circle cx="24" cy="26" r="6"/><path d="M18 26h-4M34 26h-4"/><path d="M24 8v6"/><circle cx="24" cy="6" r="2"/>
+            </svg>
+          </div>
+          <h3>&#914;&#953;&#974;&#963;&#964;&#949; &#964;&#951;&#957; &#932;&#949;&#967;&#957;&#951;&#964;&#942; &#925;&#959;&#951;&#956;&#959;&#963;&#973;&#957;&#951; &#969;&#962; &#931;&#965;&#957;&#949;&#961;&#947;&#940;&#964;&#951;</h3>
+          <p>&#915;&#953;&#945; &#960;&#961;&#974;&#964;&#951; &#966;&#959;&#961;&#940;, &#963;&#965;&#956;&#956;&#949;&#964;&#941;&#967;&#959;&#957;&#964;&#949;&#962; &#956;&#949; &#932;&#949;&#967;&#957;&#951;&#964;&#942; &#925;&#959;&#951;&#956;&#959;&#963;&#973;&#957;&#951; &#955;&#949;&#953;&#964;&#959;&#965;&#961;&#947;&#959;&#973;&#957; &#948;&#943;&#960;&#955;&#945; &#963;&#949; &#945;&#957;&#952;&#961;&#974;&#960;&#959;&#965;&#962; &#969;&#962; &#943;&#963;&#959;&#953; &#963;&#949; &#941;&#957;&#945; &#954;&#959;&#953;&#957;&#972; &#956;&#959;&#957;&#964;&#941;&#955;&#959; &#954;&#972;&#963;&#956;&#959;&#965;. &#916;&#953;&#945;&#960;&#961;&#945;&#947;&#956;&#945;&#964;&#949;&#973;&#959;&#957;&#964;&#945;&#953;, &#949;&#958;&#945;&#960;&#945;&#964;&#959;&#973;&#957;, &#963;&#965;&#957;&#949;&#961;&#947;&#940;&#950;&#959;&#957;&#964;&#945;&#953; &#954;&#945;&#953; &#945;&#957;&#964;&#945;&#947;&#969;&#957;&#943;&#950;&#959;&#957;&#964;&#945;&#953; &mdash; &#945;&#948;&#953;&#940;&#954;&#961;&#953;&#964;&#945; &#945;&#960;&#972; &#945;&#957;&#952;&#961;&#974;&#960;&#953;&#957;&#959;&#965;&#962; &#960;&#945;&#943;&#954;&#964;&#949;&#962;. &#917;&#958;&#949;&#961;&#949;&#965;&#957;&#942;&#963;&#964;&#949; &#964;&#953; &#963;&#951;&#956;&#945;&#943;&#957;&#949;&#953; &#960;&#961;&#945;&#947;&#956;&#945;&#964;&#953;&#954;&#940; &#951; &#963;&#965;&#957;&#949;&#961;&#947;&#945;&#963;&#943;&#945; &#956;&#949; &#964;&#951;&#957; AI.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="16" cy="20" r="6"/><circle cx="32" cy="20" r="6"/><circle cx="24" cy="34" r="6"/><line x1="20" y1="24" x2="22" y2="30"/><line x1="28" y1="24" x2="26" y2="30"/><line x1="22" y1="20" x2="26" y2="20"/>
+            </svg>
+          </div>
+          <h3>&#916;&#953;&#954;&#964;&#965;&#969;&#952;&#949;&#943;&#964;&#949; &#954;&#945;&#953; &#916;&#953;&#945;&#963;&#954;&#949;&#948;&#940;&#963;&#964;&#949;</h3>
+          <p>&#924;&#953;&#945; &#941;&#957;&#964;&#959;&#957;&#951;, &#946;&#953;&#969;&#956;&#945;&#964;&#953;&#954;&#942; &#949;&#956;&#960;&#949;&#953;&#961;&#943;&#945; &#956;&#953;&#945;&#962; &#951;&#956;&#941;&#961;&#945;&#962; &#949;&#943;&#957;&#945;&#953; &#959; &#960;&#953;&#959; &#947;&#961;&#942;&#947;&#959;&#961;&#959;&#962; &#964;&#961;&#972;&#960;&#959;&#962; &#957;&#945; &#967;&#964;&#943;&#963;&#949;&#964;&#949; &#960;&#961;&#945;&#947;&#956;&#945;&#964;&#953;&#954;&#941;&#962; &#963;&#967;&#941;&#963;&#949;&#953;&#962;. &#920;&#945; &#963;&#965;&#957;&#945;&#957;&#964;&#942;&#963;&#949;&#964;&#949; &#949;&#958;&#945;&#953;&#961;&#949;&#964;&#953;&#954;&#959;&#973;&#962; &#945;&#957;&#952;&#961;&#974;&#960;&#959;&#965;&#962;, &#952;&#945; &#945;&#957;&#964;&#953;&#956;&#949;&#964;&#969;&#960;&#943;&#963;&#949;&#964;&#949; &#956;&#945;&#950;&#943; &#945;&#948;&#973;&#957;&#945;&#964;&#945; &#948;&#953;&#955;&#942;&#956;&#956;&#945;&#964;&#945; &#954;&#945;&#953; &#952;&#945; &#956;&#959;&#953;&#961;&#945;&#963;&#964;&#949;&#943;&#964;&#949; &#953;&#963;&#964;&#959;&#961;&#943;&#949;&#962; &#947;&#953;&#945; &#967;&#961;&#972;&#957;&#953;&#945;. &#913;&#965;&#964;&#972; &#949;&#943;&#957;&#945;&#953; &#963;&#959;&#946;&#945;&#961;&#972; &#960;&#945;&#953;&#967;&#957;&#943;&#948;&#953; &#963;&#964;&#945; &#954;&#945;&#955;&#973;&#964;&#949;&#961;&#940; &#964;&#959;&#965;.</p>
+        </div>
+      </div>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <p class="section-label">&#1047;&#1072;&#1095;&#1077;&#1084; &#1091;&#1095;&#1072;&#1089;&#1090;&#1074;&#1086;&#1074;&#1072;&#1090;&#1100;</p>
+      <h2 class="section-title">&#1063;&#1077;&#1090;&#1099;&#1088;&#1077; &#1087;&#1088;&#1080;&#1095;&#1080;&#1085;&#1099; &#1073;&#1099;&#1090;&#1100; &#1074; &#1082;&#1086;&#1084;&#1085;&#1072;&#1090;&#1077;</h2>
+      <div class="card-grid">
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="24" cy="24" r="20"/><line x1="4" y1="24" x2="44" y2="24"/><ellipse cx="24" cy="24" rx="10" ry="20"/><path d="M8 14h32M8 34h32"/>
+            </svg>
+          </div>
+          <h3>&#1048;&#1089;&#1089;&#1083;&#1077;&#1076;&#1091;&#1081;&#1090;&#1077; &#1053;&#1086;&#1074;&#1099;&#1081; &#1052;&#1080;&#1088;&#1086;&#1074;&#1086;&#1081; &#1055;&#1086;&#1088;&#1103;&#1076;&#1086;&#1082;</h3>
+          <p>&#1043;&#1083;&#1086;&#1073;&#1072;&#1083;&#1100;&#1085;&#1072;&#1103; &#1089;&#1080;&#1089;&#1090;&#1077;&#1084;&#1072;, &#1089;&#1086;&#1093;&#1088;&#1072;&#1085;&#1103;&#1074;&#1096;&#1072;&#1103; &#1084;&#1080;&#1088; &#1076;&#1077;&#1089;&#1103;&#1090;&#1080;&#1083;&#1077;&#1090;&#1080;&#1103;&#1084;&#1080;, &#1088;&#1072;&#1089;&#1087;&#1072;&#1076;&#1072;&#1077;&#1090;&#1089;&#1103;. &#1055;&#1086;&#1081;&#1084;&#1080;&#1090;&#1077; &#1089;&#1080;&#1083;&#1099; &mdash; &#1101;&#1082;&#1086;&#1085;&#1086;&#1084;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1077;, &#1074;&#1086;&#1077;&#1085;&#1085;&#1099;&#1077;, &#1090;&#1077;&#1093;&#1085;&#1086;&#1083;&#1086;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1077;, &#1087;&#1086;&#1083;&#1080;&#1090;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1077; &mdash; &#1082;&#1086;&#1090;&#1086;&#1088;&#1099;&#1077; &#1087;&#1077;&#1088;&#1077;&#1089;&#1090;&#1088;&#1072;&#1080;&#1074;&#1072;&#1102;&#1090; &#1084;&#1080;&#1088;. &#1055;&#1088;&#1086;&#1095;&#1091;&#1074;&#1089;&#1090;&#1074;&#1091;&#1081;&#1090;&#1077; &#1080;&#1093; &#1085;&#1072; &#1089;&#1077;&#1073;&#1077; &mdash; &#1085;&#1077; &#1082;&#1072;&#1082; &#1090;&#1077;&#1086;&#1088;&#1080;&#1102;, &#1072; &#1082;&#1072;&#1082; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1103;, &#1082;&#1086;&#1090;&#1086;&#1088;&#1099;&#1077; &#1074;&#1099; &#1076;&#1086;&#1083;&#1078;&#1085;&#1099; &#1087;&#1088;&#1080;&#1085;&#1080;&#1084;&#1072;&#1090;&#1100; &#1087;&#1086;&#1076; &#1076;&#1072;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077;&#1084;.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <path d="M24 4v40M4 24h40"/><path d="M12 12l24 24M36 12L12 36"/><circle cx="24" cy="24" r="8"/>
+            </svg>
+          </div>
+          <h3>&#1056;&#1072;&#1079;&#1074;&#1080;&#1074;&#1072;&#1081;&#1090;&#1077; &#1089;&#1074;&#1086;&#1105; &#1083;&#1080;&#1076;&#1077;&#1088;&#1089;&#1090;&#1074;&#1086;</h3>
+          <p>&#1050;&#1086;&#1084;&#1084;&#1091;&#1085;&#1080;&#1082;&#1072;&#1094;&#1080;&#1103; &#1074; &#1091;&#1089;&#1083;&#1086;&#1074;&#1080;&#1103;&#1093; &#1089;&#1090;&#1088;&#1077;&#1089;&#1089;&#1072;. &#1057;&#1090;&#1088;&#1072;&#1090;&#1077;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1077; &#1084;&#1099;&#1096;&#1083;&#1077;&#1085;&#1080;&#1077; &#1089; &#1085;&#1077;&#1087;&#1086;&#1083;&#1085;&#1086;&#1081; &#1080;&#1085;&#1092;&#1086;&#1088;&#1084;&#1072;&#1094;&#1080;&#1077;&#1081;. &#1055;&#1086;&#1089;&#1090;&#1088;&#1086;&#1077;&#1085;&#1080;&#1077; &#1082;&#1086;&#1072;&#1083;&#1080;&#1094;&#1080;&#1081; &#1089;&#1088;&#1077;&#1076;&#1080; &#1082;&#1086;&#1085;&#1092;&#1083;&#1080;&#1082;&#1090;&#1091;&#1102;&#1097;&#1080;&#1093; &#1080;&#1085;&#1090;&#1077;&#1088;&#1077;&#1089;&#1086;&#1074;. &#1055;&#1088;&#1080;&#1085;&#1103;&#1090;&#1080;&#1077; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1081;, &#1082;&#1086;&#1075;&#1076;&#1072; &#1082;&#1072;&#1078;&#1076;&#1099;&#1081; &#1074;&#1099;&#1073;&#1086;&#1088; &#1080;&#1084;&#1077;&#1077;&#1090; &#1087;&#1086;&#1089;&#1083;&#1077;&#1076;&#1089;&#1090;&#1074;&#1080;&#1103;. &#1069;&#1090;&#1086; &#1085;&#1077; &#1083;&#1077;&#1082;&#1094;&#1080;&#1103; &mdash; &#1101;&#1090;&#1086; &#1087;&#1088;&#1072;&#1082;&#1090;&#1080;&#1082;&#1072;.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <rect x="8" y="14" width="32" height="24" rx="3"/><circle cx="24" cy="26" r="6"/><path d="M18 26h-4M34 26h-4"/><path d="M24 8v6"/><circle cx="24" cy="6" r="2"/>
+            </svg>
+          </div>
+          <h3>&#1054;&#1097;&#1091;&#1090;&#1080;&#1090;&#1077; &#1048;&#1048; &#1082;&#1072;&#1082; &#1087;&#1072;&#1088;&#1090;&#1085;&#1105;&#1088;&#1072;</h3>
+          <p>&#1042;&#1087;&#1077;&#1088;&#1074;&#1099;&#1077; &#1091;&#1095;&#1072;&#1089;&#1090;&#1085;&#1080;&#1082;&#1080; &#1085;&#1072; &#1073;&#1072;&#1079;&#1077; &#1048;&#1048; &#1076;&#1077;&#1081;&#1089;&#1090;&#1074;&#1091;&#1102;&#1090; &#1085;&#1072;&#1088;&#1072;&#1074;&#1085;&#1077; &#1089; &#1083;&#1102;&#1076;&#1100;&#1084;&#1080; &#1074; &#1077;&#1076;&#1080;&#1085;&#1086;&#1081; &#1084;&#1086;&#1076;&#1077;&#1083;&#1080; &#1084;&#1080;&#1088;&#1072;. &#1054;&#1085;&#1080; &#1074;&#1077;&#1076;&#1091;&#1090; &#1087;&#1077;&#1088;&#1077;&#1075;&#1086;&#1074;&#1086;&#1088;&#1099;, &#1086;&#1073;&#1084;&#1072;&#1085;&#1099;&#1074;&#1072;&#1102;&#1090;, &#1089;&#1086;&#1090;&#1088;&#1091;&#1076;&#1085;&#1080;&#1095;&#1072;&#1102;&#1090; &#1080; &#1082;&#1086;&#1085;&#1082;&#1091;&#1088;&#1080;&#1088;&#1091;&#1102;&#1090; &mdash; &#1085;&#1077;&#1086;&#1090;&#1083;&#1080;&#1095;&#1080;&#1084;&#1086; &#1086;&#1090; &#1080;&#1075;&#1088;&#1086;&#1082;&#1086;&#1074;-&#1083;&#1102;&#1076;&#1077;&#1081;. &#1059;&#1079;&#1085;&#1072;&#1081;&#1090;&#1077;, &#1095;&#1090;&#1086; &#1085;&#1072; &#1089;&#1072;&#1084;&#1086;&#1084; &#1076;&#1077;&#1083;&#1077; &#1086;&#1079;&#1085;&#1072;&#1095;&#1072;&#1077;&#1090; &#1087;&#1072;&#1088;&#1090;&#1085;&#1105;&#1088;&#1089;&#1090;&#1074;&#1086; &#1089; &#1048;&#1048;.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-card-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="#E8B84D" stroke-width="1.5">
+              <circle cx="16" cy="20" r="6"/><circle cx="32" cy="20" r="6"/><circle cx="24" cy="34" r="6"/><line x1="20" y1="24" x2="22" y2="30"/><line x1="28" y1="24" x2="26" y2="30"/><line x1="22" y1="20" x2="26" y2="20"/>
+            </svg>
+          </div>
+          <h3>&#1054;&#1073;&#1097;&#1072;&#1081;&#1090;&#1077;&#1089;&#1100; &#1080; &#1087;&#1086;&#1083;&#1091;&#1095;&#1072;&#1081;&#1090;&#1077; &#1091;&#1076;&#1086;&#1074;&#1086;&#1083;&#1100;&#1089;&#1090;&#1074;&#1080;&#1077;</h3>
+          <p>&#1048;&#1085;&#1090;&#1077;&#1085;&#1089;&#1080;&#1074;&#1085;&#1099;&#1081;, &#1080;&#1084;&#1084;&#1077;&#1088;&#1089;&#1080;&#1074;&#1085;&#1099;&#1081; &#1086;&#1087;&#1099;&#1090; &#1085;&#1072; &#1094;&#1077;&#1083;&#1099;&#1081; &#1076;&#1077;&#1085;&#1100; &mdash; &#1101;&#1090;&#1086; &#1089;&#1072;&#1084;&#1099;&#1081; &#1073;&#1099;&#1089;&#1090;&#1088;&#1099;&#1081; &#1089;&#1087;&#1086;&#1089;&#1086;&#1073; &#1087;&#1086;&#1089;&#1090;&#1088;&#1086;&#1080;&#1090;&#1100; &#1085;&#1072;&#1089;&#1090;&#1086;&#1103;&#1097;&#1080;&#1077; &#1089;&#1074;&#1103;&#1079;&#1080;. &#1042;&#1099; &#1074;&#1089;&#1090;&#1088;&#1077;&#1090;&#1080;&#1090;&#1077; &#1080;&#1089;&#1082;&#1083;&#1102;&#1095;&#1080;&#1090;&#1077;&#1083;&#1100;&#1085;&#1099;&#1093; &#1083;&#1102;&#1076;&#1077;&#1081;, &#1074;&#1084;&#1077;&#1089;&#1090;&#1077; &#1089;&#1090;&#1086;&#1083;&#1082;&#1085;&#1105;&#1090;&#1077;&#1089;&#1100; &#1089; &#1085;&#1077;&#1074;&#1086;&#1079;&#1084;&#1086;&#1078;&#1085;&#1099;&#1084;&#1080; &#1076;&#1080;&#1083;&#1077;&#1084;&#1084;&#1072;&#1084;&#1080; &#1080; &#1073;&#1091;&#1076;&#1077;&#1090;&#1077; &#1076;&#1077;&#1083;&#1080;&#1090;&#1100;&#1089;&#1103; &#1080;&#1089;&#1090;&#1086;&#1088;&#1080;&#1103;&#1084;&#1080; &#1077;&#1097;&#1105; &#1076;&#1086;&#1083;&#1075;&#1080;&#1077; &#1075;&#1086;&#1076;&#1099;. &#1069;&#1090;&#1086; &#1089;&#1077;&#1088;&#1100;&#1105;&#1079;&#1085;&#1072;&#1103; &#1080;&#1075;&#1088;&#1072; &#1074; &#1083;&#1091;&#1095;&#1096;&#1077;&#1084; &#1077;&#1105; &#1087;&#1088;&#1086;&#1103;&#1074;&#1083;&#1077;&#1085;&#1080;&#1080;.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTION DIVIDER
+     ================================================================ -->
+<div class="section-divider" id="divider3"></div>
+
+<!-- ================================================================
+     HOW IT WORKS
+     ================================================================ -->
+<section class="section steps">
+  <div class="section-inner fade-in">
+    <!-- EN -->
+    <div data-lang="en">
+      <p class="section-label">How It Works</p>
+      <h2 class="section-title">Four Steps, One Day, Four Years</h2>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>You receive a role</h3>
+            <p>A world leader, a military commander, an intelligence chief. Your character has goals, resources, dilemmas, and secrets. Everything you need to play is provided &mdash; no preparation required.</p>
+            <!-- ROLE BRIEF ARTIFACT -->
+            <div class="role-brief-artifact">
+              <div class="role-brief-stripe"></div>
+              <div class="role-brief-body">
+                <div class="role-brief-classified">CLASSIFIED &mdash; COLUMBIA EYES ONLY</div>
+                <div class="role-brief-emblem" id="roleBriefEmblem"></div>
+                <div class="role-brief-role">DEALER</div>
+                <div class="role-brief-subtitle">President of Columbia</div>
+                <div class="role-brief-bio">You are the most powerful leader on Earth &mdash; and the most constrained. Your economy still dominates, but the gap is closing. Your allies expect protection, your rivals sense opportunity...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>You play 8 rounds</h3>
+            <p>Each round represents 6 months of world time. You negotiate, form alliances, make economic decisions, deploy military forces, and manage crises &mdash; all under time pressure.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>The world responds</h3>
+            <p>A sophisticated AI-powered world model calculates the consequences of everyone's actions. Oil prices shift. Economies grow or contract. Stability rises or falls. The Trap tightens &mdash; or loosens.</p>
+            <!-- WORLD UPDATE ARTIFACT -->
+            <div class="world-update-artifact">
+              <div class="world-update-header">Round 3 &mdash; World Update</div>
+              <div class="world-update-body">
+                <div class="world-update-metrics">
+                  <div class="wu-metric">
+                    <div class="wu-metric-label">Oil</div>
+                    <div class="wu-metric-value" style="color: var(--accent);">$163</div>
+                  </div>
+                  <div class="wu-metric">
+                    <div class="wu-metric-label">Gap</div>
+                    <div class="wu-metric-value" style="color: var(--danger);">0.78</div>
+                  </div>
+                  <div class="wu-metric">
+                    <div class="wu-metric-label">Wars</div>
+                    <div class="wu-metric-value" style="color: var(--danger);">2</div>
+                  </div>
+                </div>
+                <div class="wu-events">
+                  <div class="wu-event military">Gulf Gate blockade partially breached by Western Treaty naval forces</div>
+                  <div class="wu-event diplomatic">Cathay naval exercises near Formosa Strait &mdash; Formosa requests emergency consultations</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>You reflect and learn</h3>
+            <p>After the simulation, you receive a personal leadership report analyzing your decisions, communication patterns, and strategic thinking. What you discover about yourself is the most valuable outcome.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <p class="section-label">&#928;&#974;&#962; &#955;&#949;&#953;&#964;&#959;&#965;&#961;&#947;&#949;&#943;</p>
+      <h2 class="section-title">&#932;&#941;&#963;&#963;&#949;&#961;&#945; &#946;&#942;&#956;&#945;&#964;&#945;, &#956;&#943;&#945; &#956;&#941;&#961;&#945;, &#964;&#941;&#963;&#963;&#949;&#961;&#945; &#967;&#961;&#972;&#957;&#953;&#945;</h2>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>&#923;&#945;&#956;&#946;&#940;&#957;&#949;&#964;&#949; &#941;&#957;&#945;&#957; &#961;&#972;&#955;&#959;</h3>
+            <p>&#904;&#957;&#945;&#962; &#960;&#945;&#947;&#954;&#972;&#963;&#956;&#953;&#959;&#962; &#951;&#947;&#941;&#964;&#951;&#962;, &#941;&#957;&#945;&#962; &#963;&#964;&#961;&#945;&#964;&#953;&#969;&#964;&#953;&#954;&#972;&#962; &#948;&#953;&#959;&#953;&#954;&#951;&#964;&#942;&#962;, &#941;&#957;&#945;&#962; &#945;&#961;&#967;&#951;&#947;&#972;&#962; &#960;&#955;&#951;&#961;&#959;&#966;&#959;&#961;&#953;&#974;&#957;. &#927; &#967;&#945;&#961;&#945;&#954;&#964;&#942;&#961;&#945;&#962; &#963;&#945;&#962; &#941;&#967;&#949;&#953; &#963;&#964;&#972;&#967;&#959;&#965;&#962;, &#960;&#972;&#961;&#959;&#965;&#962;, &#948;&#953;&#955;&#942;&#956;&#956;&#945;&#964;&#945; &#954;&#945;&#953; &#956;&#965;&#963;&#964;&#953;&#954;&#940;. &#908;&#955;&#945; &#972;&#963;&#945; &#967;&#961;&#949;&#953;&#940;&#950;&#949;&#963;&#964;&#949; &#960;&#945;&#961;&#941;&#967;&#959;&#957;&#964;&#945;&#953; &mdash; &#948;&#949;&#957; &#945;&#960;&#945;&#953;&#964;&#949;&#943;&#964;&#945;&#953; &#960;&#961;&#959;&#949;&#964;&#959;&#953;&#956;&#945;&#963;&#943;&#945;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>&#928;&#945;&#943;&#950;&#949;&#964;&#949; 8 &#947;&#973;&#961;&#959;&#965;&#962;</h3>
+            <p>&#922;&#940;&#952;&#949; &#947;&#973;&#961;&#959;&#962; &#945;&#957;&#964;&#953;&#960;&#961;&#959;&#963;&#969;&#960;&#949;&#973;&#949;&#953; 6 &#956;&#942;&#957;&#949;&#962; &#960;&#945;&#947;&#954;&#972;&#963;&#956;&#953;&#959;&#965; &#967;&#961;&#972;&#957;&#959;&#965;. &#916;&#953;&#945;&#960;&#961;&#945;&#947;&#956;&#945;&#964;&#949;&#973;&#949;&#963;&#964;&#949;, &#963;&#967;&#951;&#956;&#945;&#964;&#943;&#950;&#949;&#964;&#949; &#963;&#965;&#956;&#956;&#945;&#967;&#943;&#949;&#962;, &#960;&#945;&#943;&#961;&#957;&#949;&#964;&#949; &#959;&#953;&#954;&#959;&#957;&#959;&#956;&#953;&#954;&#941;&#962; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#953;&#962;, &#945;&#957;&#945;&#960;&#964;&#973;&#963;&#963;&#949;&#964;&#949; &#963;&#964;&#961;&#945;&#964;&#953;&#969;&#964;&#953;&#954;&#941;&#962; &#948;&#965;&#957;&#940;&#956;&#949;&#953;&#962; &#954;&#945;&#953; &#948;&#953;&#945;&#967;&#949;&#953;&#961;&#943;&#950;&#949;&#963;&#964;&#949; &#954;&#961;&#943;&#963;&#949;&#953;&#962; &mdash; &#972;&#955;&#945; &#965;&#960;&#972; &#967;&#961;&#959;&#957;&#953;&#954;&#942; &#960;&#943;&#949;&#963;&#951;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>&#927; &#954;&#972;&#963;&#956;&#959;&#962; &#945;&#957;&#964;&#945;&#960;&#959;&#954;&#961;&#943;&#957;&#949;&#964;&#945;&#953;</h3>
+            <p>&#904;&#957;&#945; &#949;&#958;&#949;&#955;&#953;&#947;&#956;&#941;&#957;&#959; &#956;&#959;&#957;&#964;&#941;&#955;&#959; &#954;&#972;&#963;&#956;&#959;&#965; &#956;&#949; AI &#965;&#960;&#959;&#955;&#959;&#947;&#943;&#950;&#949;&#953; &#964;&#953;&#962; &#963;&#965;&#957;&#941;&#960;&#949;&#953;&#949;&#962; &#964;&#969;&#957; &#960;&#961;&#940;&#958;&#949;&#969;&#957; &#972;&#955;&#969;&#957;. &#927;&#953; &#964;&#953;&#956;&#941;&#962; &#960;&#949;&#964;&#961;&#949;&#955;&#945;&#943;&#959;&#965; &#956;&#949;&#964;&#945;&#964;&#959;&#960;&#943;&#950;&#959;&#957;&#964;&#945;&#953;. &#927;&#953; &#959;&#953;&#954;&#959;&#957;&#959;&#956;&#943;&#949;&#962; &#945;&#957;&#945;&#960;&#964;&#973;&#963;&#963;&#959;&#957;&#964;&#945;&#953; &#942; &#963;&#965;&#961;&#961;&#953;&#954;&#957;&#974;&#957;&#959;&#957;&#964;&#945;&#953;. &#919; &#963;&#964;&#945;&#952;&#949;&#961;&#972;&#964;&#951;&#964;&#945; &#945;&#965;&#958;&#940;&#957;&#949;&#964;&#945;&#953; &#942; &#956;&#949;&#953;&#974;&#957;&#949;&#964;&#945;&#953;. &#919; &#928;&#945;&#947;&#943;&#948;&#945; &#963;&#966;&#943;&#947;&#947;&#949;&#953; &mdash; &#942; &#967;&#945;&#955;&#945;&#961;&#974;&#957;&#949;&#953;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>&#913;&#957;&#945;&#963;&#964;&#959;&#967;&#940;&#950;&#949;&#963;&#964;&#949; &#954;&#945;&#953; &#956;&#945;&#952;&#945;&#943;&#957;&#949;&#964;&#949;</h3>
+            <p>&#924;&#949;&#964;&#940; &#964;&#951;&#957; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#943;&#969;&#963;&#951;, &#955;&#945;&#956;&#946;&#940;&#957;&#949;&#964;&#949; &#960;&#961;&#959;&#963;&#969;&#960;&#953;&#954;&#942; &#945;&#957;&#945;&#966;&#959;&#961;&#940; &#951;&#947;&#949;&#963;&#943;&#945;&#962; &#960;&#959;&#965; &#945;&#957;&#945;&#955;&#973;&#949;&#953; &#964;&#953;&#962; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#953;&#962; &#963;&#945;&#962;, &#964;&#945; &#949;&#960;&#953;&#954;&#959;&#953;&#957;&#969;&#957;&#953;&#945;&#954;&#940; &#963;&#945;&#962; &#960;&#961;&#972;&#964;&#965;&#960;&#945; &#954;&#945;&#953; &#964;&#951; &#963;&#964;&#961;&#945;&#964;&#951;&#947;&#953;&#954;&#942; &#963;&#945;&#962; &#963;&#954;&#941;&#968;&#951;. &#913;&#965;&#964;&#972; &#960;&#959;&#965; &#945;&#957;&#945;&#954;&#945;&#955;&#973;&#960;&#964;&#949;&#964;&#949; &#947;&#953;&#945; &#964;&#959;&#957; &#949;&#945;&#965;&#964;&#972; &#963;&#945;&#962; &#949;&#943;&#957;&#945;&#953; &#964;&#959; &#960;&#953;&#959; &#960;&#959;&#955;&#973;&#964;&#953;&#956;&#959; &#945;&#960;&#959;&#964;&#941;&#955;&#949;&#963;&#956;&#945;.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <p class="section-label">&#1050;&#1072;&#1082; &#1101;&#1090;&#1086; &#1088;&#1072;&#1073;&#1086;&#1090;&#1072;&#1077;&#1090;</p>
+      <h2 class="section-title">&#1063;&#1077;&#1090;&#1099;&#1088;&#1077; &#1096;&#1072;&#1075;&#1072;, &#1086;&#1076;&#1080;&#1085; &#1076;&#1077;&#1085;&#1100;, &#1095;&#1077;&#1090;&#1099;&#1088;&#1077; &#1075;&#1086;&#1076;&#1072;</h2>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>&#1042;&#1099; &#1087;&#1086;&#1083;&#1091;&#1095;&#1072;&#1077;&#1090;&#1077; &#1088;&#1086;&#1083;&#1100;</h3>
+            <p>&#1052;&#1080;&#1088;&#1086;&#1074;&#1086;&#1081; &#1083;&#1080;&#1076;&#1077;&#1088;, &#1074;&#1086;&#1077;&#1085;&#1085;&#1099;&#1081; &#1082;&#1086;&#1084;&#1072;&#1085;&#1076;&#1080;&#1088;, &#1075;&#1083;&#1072;&#1074;&#1072; &#1088;&#1072;&#1079;&#1074;&#1077;&#1076;&#1082;&#1080;. &#1059; &#1074;&#1072;&#1096;&#1077;&#1075;&#1086; &#1087;&#1077;&#1088;&#1089;&#1086;&#1085;&#1072;&#1078;&#1072; &#1077;&#1089;&#1090;&#1100; &#1094;&#1077;&#1083;&#1080;, &#1088;&#1077;&#1089;&#1091;&#1088;&#1089;&#1099;, &#1076;&#1080;&#1083;&#1077;&#1084;&#1084;&#1099; &#1080; &#1090;&#1072;&#1081;&#1085;&#1099;. &#1042;&#1089;&#1105; &#1085;&#1077;&#1086;&#1073;&#1093;&#1086;&#1076;&#1080;&#1084;&#1086;&#1077; &#1073;&#1091;&#1076;&#1077;&#1090; &#1087;&#1088;&#1077;&#1076;&#1086;&#1089;&#1090;&#1072;&#1074;&#1083;&#1077;&#1085;&#1086; &mdash; &#1087;&#1086;&#1076;&#1075;&#1086;&#1090;&#1086;&#1074;&#1082;&#1072; &#1085;&#1077; &#1090;&#1088;&#1077;&#1073;&#1091;&#1077;&#1090;&#1089;&#1103;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>&#1042;&#1099; &#1080;&#1075;&#1088;&#1072;&#1077;&#1090;&#1077; 8 &#1088;&#1072;&#1091;&#1085;&#1076;&#1086;&#1074;</h3>
+            <p>&#1050;&#1072;&#1078;&#1076;&#1099;&#1081; &#1088;&#1072;&#1091;&#1085;&#1076; &mdash; &#1101;&#1090;&#1086; 6 &#1084;&#1077;&#1089;&#1103;&#1094;&#1077;&#1074; &#1084;&#1080;&#1088;&#1086;&#1074;&#1086;&#1075;&#1086; &#1074;&#1088;&#1077;&#1084;&#1077;&#1085;&#1080;. &#1042;&#1099; &#1074;&#1077;&#1076;&#1105;&#1090;&#1077; &#1087;&#1077;&#1088;&#1077;&#1075;&#1086;&#1074;&#1086;&#1088;&#1099;, &#1092;&#1086;&#1088;&#1084;&#1080;&#1088;&#1091;&#1077;&#1090;&#1077; &#1072;&#1083;&#1100;&#1103;&#1085;&#1089;&#1099;, &#1087;&#1088;&#1080;&#1085;&#1080;&#1084;&#1072;&#1077;&#1090;&#1077; &#1101;&#1082;&#1086;&#1085;&#1086;&#1084;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1077; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1103;, &#1088;&#1072;&#1079;&#1074;&#1105;&#1088;&#1090;&#1099;&#1074;&#1072;&#1077;&#1090;&#1077; &#1074;&#1086;&#1077;&#1085;&#1085;&#1099;&#1077; &#1089;&#1080;&#1083;&#1099; &#1080; &#1091;&#1087;&#1088;&#1072;&#1074;&#1083;&#1103;&#1077;&#1090;&#1077; &#1082;&#1088;&#1080;&#1079;&#1080;&#1089;&#1072;&#1084;&#1080; &mdash; &#1074;&#1089;&#1105; &#1087;&#1086;&#1076; &#1076;&#1072;&#1074;&#1083;&#1077;&#1085;&#1080;&#1077;&#1084; &#1074;&#1088;&#1077;&#1084;&#1077;&#1085;&#1080;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>&#1052;&#1080;&#1088; &#1088;&#1077;&#1072;&#1075;&#1080;&#1088;&#1091;&#1077;&#1090;</h3>
+            <p>&#1057;&#1083;&#1086;&#1078;&#1085;&#1072;&#1103; &#1084;&#1086;&#1076;&#1077;&#1083;&#1100; &#1084;&#1080;&#1088;&#1072; &#1085;&#1072; &#1073;&#1072;&#1079;&#1077; &#1048;&#1048; &#1088;&#1072;&#1089;&#1089;&#1095;&#1080;&#1090;&#1099;&#1074;&#1072;&#1077;&#1090; &#1087;&#1086;&#1089;&#1083;&#1077;&#1076;&#1089;&#1090;&#1074;&#1080;&#1103; &#1076;&#1077;&#1081;&#1089;&#1090;&#1074;&#1080;&#1081; &#1074;&#1089;&#1077;&#1093; &#1091;&#1095;&#1072;&#1089;&#1090;&#1085;&#1080;&#1082;&#1086;&#1074;. &#1062;&#1077;&#1085;&#1099; &#1085;&#1072; &#1085;&#1077;&#1092;&#1090;&#1100; &#1084;&#1077;&#1085;&#1103;&#1102;&#1090;&#1089;&#1103;. &#1069;&#1082;&#1086;&#1085;&#1086;&#1084;&#1080;&#1082;&#1080; &#1088;&#1072;&#1089;&#1090;&#1091;&#1090; &#1080;&#1083;&#1080; &#1089;&#1086;&#1082;&#1088;&#1072;&#1097;&#1072;&#1102;&#1090;&#1089;&#1103;. &#1057;&#1090;&#1072;&#1073;&#1080;&#1083;&#1100;&#1085;&#1086;&#1089;&#1090;&#1100; &#1088;&#1072;&#1089;&#1090;&#1105;&#1090; &#1080;&#1083;&#1080; &#1087;&#1072;&#1076;&#1072;&#1077;&#1090;. &#1051;&#1086;&#1074;&#1091;&#1096;&#1082;&#1072; &#1089;&#1078;&#1080;&#1084;&#1072;&#1077;&#1090;&#1089;&#1103; &mdash; &#1080;&#1083;&#1080; &#1086;&#1089;&#1083;&#1072;&#1073;&#1077;&#1074;&#1072;&#1077;&#1090;.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>&#1042;&#1099; &#1088;&#1077;&#1092;&#1083;&#1077;&#1082;&#1089;&#1080;&#1088;&#1091;&#1077;&#1090;&#1077; &#1080; &#1091;&#1095;&#1080;&#1090;&#1077;&#1089;&#1100;</h3>
+            <p>&#1055;&#1086;&#1089;&#1083;&#1077; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1080; &#1074;&#1099; &#1087;&#1086;&#1083;&#1091;&#1095;&#1072;&#1077;&#1090;&#1077; &#1087;&#1077;&#1088;&#1089;&#1086;&#1085;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1086;&#1090;&#1095;&#1105;&#1090; &#1086; &#1083;&#1080;&#1076;&#1077;&#1088;&#1089;&#1090;&#1074;&#1077;, &#1072;&#1085;&#1072;&#1083;&#1080;&#1079;&#1080;&#1088;&#1091;&#1102;&#1097;&#1080;&#1081; &#1074;&#1072;&#1096;&#1080; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1103;, &#1082;&#1086;&#1084;&#1084;&#1091;&#1085;&#1080;&#1082;&#1072;&#1094;&#1080;&#1086;&#1085;&#1085;&#1099;&#1077; &#1087;&#1072;&#1090;&#1090;&#1077;&#1088;&#1085;&#1099; &#1080; &#1089;&#1090;&#1088;&#1072;&#1090;&#1077;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1077; &#1084;&#1099;&#1096;&#1083;&#1077;&#1085;&#1080;&#1077;. &#1058;&#1086;, &#1095;&#1090;&#1086; &#1074;&#1099; &#1086;&#1090;&#1082;&#1088;&#1086;&#1077;&#1090;&#1077; &#1086; &#1089;&#1077;&#1073;&#1077; &mdash; &#1089;&#1072;&#1084;&#1099;&#1081; &#1094;&#1077;&#1085;&#1085;&#1099;&#1081; &#1088;&#1077;&#1079;&#1091;&#1083;&#1100;&#1090;&#1072;&#1090;.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTION DIVIDER
+     ================================================================ -->
+<div class="section-divider" id="divider4"></div>
+
+<!-- ================================================================
+     PRACTICAL INFORMATION
+     ================================================================ -->
+<section class="section">
+  <div class="section-inner fade-in">
+    <!-- EN -->
+    <div data-lang="en">
+      <p class="section-label">Practical Information</p>
+      <h2 class="section-title">Details</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>When</h3>
+          <ul>
+            <li>May 26&ndash;27, 2026</li>
+            <li>Day 1: 10:00 &ndash; 19:00 (main simulation)</li>
+            <li>Day 2: 10:00 &ndash; 14:00 (final rounds + debrief)</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Where</h3>
+          <ul>
+            <li>Limassol, Cyprus</li>
+            <li>Venue to be confirmed</li>
+            <li style="color:var(--text-muted); font-style:italic;">Address and map will follow</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Who</h3>
+          <ul>
+            <li>25&ndash;30 participants</li>
+            <li>CEOs, founders, senior executives, academics, thought leaders</li>
+            <li>By invitation only</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Language</h3>
+          <ul>
+            <li>English (primary)</li>
+            <li>Facilitator support in Greek and Russian available</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>What to Bring</h3>
+          <ul>
+            <li>Laptop or tablet (charged)</li>
+            <li>Curiosity and strategic ambition</li>
+            <li>No preparation required &mdash; everything is provided</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>Format</h3>
+          <ul>
+            <li>Full-day immersive simulation</li>
+            <li>8 rounds of play</li>
+            <li>Personal leadership debrief</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <p class="section-label">&#928;&#961;&#945;&#954;&#964;&#953;&#954;&#941;&#962; &#960;&#955;&#951;&#961;&#959;&#966;&#959;&#961;&#943;&#949;&#962;</p>
+      <h2 class="section-title">&#923;&#949;&#960;&#964;&#959;&#956;&#941;&#961;&#949;&#953;&#949;&#962;</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>&#928;&#972;&#964;&#949;</h3>
+          <ul>
+            <li>26&ndash;27 &#924;&#945;&#912;&#959;&#965; 2026</li>
+            <li>&#919;&#956;&#941;&#961;&#945; 1: 10:00 &ndash; 19:00 (&#954;&#973;&#961;&#953;&#945; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#943;&#969;&#963;&#951;)</li>
+            <li>&#919;&#956;&#941;&#961;&#945; 2: 10:00 &ndash; 14:00 (&#964;&#949;&#955;&#953;&#954;&#959;&#943; &#947;&#973;&#961;&#959;&#953; + &#945;&#957;&#945;&#963;&#954;&#972;&#960;&#951;&#963;&#951;)</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#928;&#959;&#973;</h3>
+          <ul>
+            <li>&#923;&#949;&#956;&#949;&#963;&#972;&#962;, &#922;&#973;&#960;&#961;&#959;&#962;</li>
+            <li>&#935;&#974;&#961;&#959;&#962; &#960;&#961;&#959;&#962; &#949;&#960;&#953;&#946;&#949;&#946;&#945;&#943;&#969;&#963;&#951;</li>
+            <li style="color:var(--text-muted); font-style:italic;">&#916;&#953;&#949;&#973;&#952;&#965;&#957;&#963;&#951; &#954;&#945;&#953; &#967;&#940;&#961;&#964;&#951;&#962; &#952;&#945; &#945;&#954;&#959;&#955;&#959;&#965;&#952;&#942;&#963;&#959;&#965;&#957;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#928;&#959;&#953;&#959;&#953;</h3>
+          <ul>
+            <li>25&ndash;30 &#963;&#965;&#956;&#956;&#949;&#964;&#941;&#967;&#959;&#957;&#964;&#949;&#962;</li>
+            <li>CEO, &#953;&#948;&#961;&#965;&#964;&#941;&#962;, &#945;&#957;&#974;&#964;&#949;&#961;&#945; &#963;&#964;&#949;&#955;&#941;&#967;&#951;, &#945;&#954;&#945;&#948;&#951;&#956;&#945;&#970;&#954;&#959;&#943;, &#951;&#947;&#941;&#964;&#949;&#962; &#963;&#954;&#941;&#968;&#951;&#962;</li>
+            <li>&#924;&#972;&#957;&#959; &#956;&#949; &#960;&#961;&#972;&#963;&#954;&#955;&#951;&#963;&#951;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#915;&#955;&#974;&#963;&#963;&#945;</h3>
+          <ul>
+            <li>&#913;&#947;&#947;&#955;&#953;&#954;&#940; (&#954;&#973;&#961;&#953;&#945; &#947;&#955;&#974;&#963;&#963;&#945;)</li>
+            <li>&#933;&#960;&#959;&#963;&#964;&#942;&#961;&#953;&#958;&#951; &#963;&#964;&#945; &#917;&#955;&#955;&#951;&#957;&#953;&#954;&#940; &#954;&#945;&#953; &#929;&#969;&#963;&#953;&#954;&#940; &#948;&#953;&#945;&#952;&#941;&#963;&#953;&#956;&#951;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#932;&#953; &#957;&#945; &#966;&#941;&#961;&#949;&#964;&#949;</h3>
+          <ul>
+            <li>Laptop &#942; tablet (&#966;&#959;&#961;&#964;&#953;&#963;&#956;&#941;&#957;&#959;)</li>
+            <li>&#928;&#949;&#961;&#953;&#941;&#961;&#947;&#949;&#953;&#945; &#954;&#945;&#953; &#963;&#964;&#961;&#945;&#964;&#951;&#947;&#953;&#954;&#942; &#966;&#953;&#955;&#959;&#948;&#959;&#958;&#943;&#945;</li>
+            <li>&#916;&#949;&#957; &#945;&#960;&#945;&#953;&#964;&#949;&#943;&#964;&#945;&#953; &#960;&#961;&#959;&#949;&#964;&#959;&#953;&#956;&#945;&#963;&#943;&#945; &mdash; &#972;&#955;&#945; &#960;&#945;&#961;&#941;&#967;&#959;&#957;&#964;&#945;&#953;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#934;&#959;&#961;&#956;&#940;&#964;</h3>
+          <ul>
+            <li>&#927;&#955;&#959;&#942;&#956;&#949;&#961;&#951; &#946;&#953;&#969;&#956;&#945;&#964;&#953;&#954;&#942; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#943;&#969;&#963;&#951;</li>
+            <li>8 &#947;&#973;&#961;&#959;&#953; &#960;&#945;&#953;&#967;&#957;&#953;&#948;&#953;&#959;&#973;</li>
+            <li>&#928;&#961;&#959;&#963;&#969;&#960;&#953;&#954;&#942; &#945;&#957;&#945;&#963;&#954;&#972;&#960;&#951;&#963;&#951; &#951;&#947;&#949;&#963;&#943;&#945;&#962;</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <p class="section-label">&#1055;&#1088;&#1072;&#1082;&#1090;&#1080;&#1095;&#1077;&#1089;&#1082;&#1072;&#1103; &#1080;&#1085;&#1092;&#1086;&#1088;&#1084;&#1072;&#1094;&#1080;&#1103;</p>
+      <h2 class="section-title">&#1044;&#1077;&#1090;&#1072;&#1083;&#1080;</h2>
+      <div class="info-grid">
+        <div class="info-card">
+          <h3>&#1050;&#1086;&#1075;&#1076;&#1072;</h3>
+          <ul>
+            <li>26&ndash;27 &#1084;&#1072;&#1103; 2026</li>
+            <li>&#1044;&#1077;&#1085;&#1100; 1: 10:00 &ndash; 19:00 (&#1086;&#1089;&#1085;&#1086;&#1074;&#1085;&#1072;&#1103; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1103;)</li>
+            <li>&#1044;&#1077;&#1085;&#1100; 2: 10:00 &ndash; 14:00 (&#1092;&#1080;&#1085;&#1072;&#1083;&#1100;&#1085;&#1099;&#1077; &#1088;&#1072;&#1091;&#1085;&#1076;&#1099; + &#1076;&#1077;&#1073;&#1088;&#1080;&#1092;&#1080;&#1085;&#1075;)</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#1043;&#1076;&#1077;</h3>
+          <ul>
+            <li>&#1051;&#1080;&#1084;&#1072;&#1089;&#1089;&#1086;&#1083;, &#1050;&#1080;&#1087;&#1088;</li>
+            <li>&#1055;&#1083;&#1086;&#1097;&#1072;&#1076;&#1082;&#1072; &#1073;&#1091;&#1076;&#1077;&#1090; &#1087;&#1086;&#1076;&#1090;&#1074;&#1077;&#1088;&#1078;&#1076;&#1077;&#1085;&#1072;</li>
+            <li style="color:var(--text-muted); font-style:italic;">&#1040;&#1076;&#1088;&#1077;&#1089; &#1080; &#1082;&#1072;&#1088;&#1090;&#1072; &#1073;&#1091;&#1076;&#1091;&#1090; &#1087;&#1088;&#1077;&#1076;&#1086;&#1089;&#1090;&#1072;&#1074;&#1083;&#1077;&#1085;&#1099;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#1050;&#1090;&#1086;</h3>
+          <ul>
+            <li>25&ndash;30 &#1091;&#1095;&#1072;&#1089;&#1090;&#1085;&#1080;&#1082;&#1086;&#1074;</li>
+            <li>CEO, &#1086;&#1089;&#1085;&#1086;&#1074;&#1072;&#1090;&#1077;&#1083;&#1080;, &#1090;&#1086;&#1087;-&#1084;&#1077;&#1085;&#1077;&#1076;&#1078;&#1077;&#1088;&#1099;, &#1091;&#1095;&#1105;&#1085;&#1099;&#1077;, &#1083;&#1080;&#1076;&#1077;&#1088;&#1099; &#1084;&#1085;&#1077;&#1085;&#1080;&#1081;</li>
+            <li>&#1058;&#1086;&#1083;&#1100;&#1082;&#1086; &#1087;&#1086; &#1087;&#1088;&#1080;&#1075;&#1083;&#1072;&#1096;&#1077;&#1085;&#1080;&#1102;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#1071;&#1079;&#1099;&#1082;</h3>
+          <ul>
+            <li>&#1040;&#1085;&#1075;&#1083;&#1080;&#1081;&#1089;&#1082;&#1080;&#1081; (&#1086;&#1089;&#1085;&#1086;&#1074;&#1085;&#1086;&#1081;)</li>
+            <li>&#1055;&#1086;&#1076;&#1076;&#1077;&#1088;&#1078;&#1082;&#1072; &#1085;&#1072; &#1075;&#1088;&#1077;&#1095;&#1077;&#1089;&#1082;&#1086;&#1084; &#1080; &#1088;&#1091;&#1089;&#1089;&#1082;&#1086;&#1084; &#1103;&#1079;&#1099;&#1082;&#1072;&#1093; &#1076;&#1086;&#1089;&#1090;&#1091;&#1087;&#1085;&#1072;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#1063;&#1090;&#1086; &#1074;&#1079;&#1103;&#1090;&#1100;</h3>
+          <ul>
+            <li>&#1053;&#1086;&#1091;&#1090;&#1073;&#1091;&#1082; &#1080;&#1083;&#1080; &#1087;&#1083;&#1072;&#1085;&#1096;&#1077;&#1090; (&#1079;&#1072;&#1088;&#1103;&#1078;&#1077;&#1085;&#1085;&#1099;&#1081;)</li>
+            <li>&#1051;&#1102;&#1073;&#1086;&#1087;&#1099;&#1090;&#1089;&#1090;&#1074;&#1086; &#1080; &#1089;&#1090;&#1088;&#1072;&#1090;&#1077;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1080;&#1077; &#1072;&#1084;&#1073;&#1080;&#1094;&#1080;&#1080;</li>
+            <li>&#1055;&#1086;&#1076;&#1075;&#1086;&#1090;&#1086;&#1074;&#1082;&#1072; &#1085;&#1077; &#1090;&#1088;&#1077;&#1073;&#1091;&#1077;&#1090;&#1089;&#1103; &mdash; &#1074;&#1089;&#1105; &#1073;&#1091;&#1076;&#1077;&#1090; &#1087;&#1088;&#1077;&#1076;&#1086;&#1089;&#1090;&#1072;&#1074;&#1083;&#1077;&#1085;&#1086;</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h3>&#1060;&#1086;&#1088;&#1084;&#1072;&#1090;</h3>
+          <ul>
+            <li>&#1055;&#1086;&#1083;&#1085;&#1086;&#1076;&#1085;&#1077;&#1074;&#1085;&#1072;&#1103; &#1080;&#1084;&#1084;&#1077;&#1088;&#1089;&#1080;&#1074;&#1085;&#1072;&#1103; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1103;</li>
+            <li>8 &#1088;&#1072;&#1091;&#1085;&#1076;&#1086;&#1074; &#1080;&#1075;&#1088;&#1099;</li>
+            <li>&#1055;&#1077;&#1088;&#1089;&#1086;&#1085;&#1072;&#1083;&#1100;&#1085;&#1099;&#1081; &#1083;&#1080;&#1076;&#1077;&#1088;&#1089;&#1082;&#1080;&#1081; &#1076;&#1077;&#1073;&#1088;&#1080;&#1092;&#1080;&#1085;&#1075;</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     THE EXPERIENCE (Testimonials placeholder)
+     ================================================================ -->
+<!-- Replace with real testimonials after first SIM -->
+<section class="experience fade-in">
+  <div class="experience-inner">
+    <p class="section-label" style="text-align:center;">What Participants Say</p>
+    <h2 class="section-title" style="text-align:center;">The Experience</h2>
+    <div class="experience-grid">
+      <div class="quote-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="quote-text">The most intense strategic thinking exercise I've ever participated in.</div>
+        <div class="quote-author">&mdash; [Future participant]</div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="quote-text">I understood more about global dynamics in one day than in years of reading.</div>
+        <div class="quote-author">&mdash; [Future participant]</div>
+      </div>
+      <div class="quote-card">
+        <div class="quote-mark">&ldquo;</div>
+        <div class="quote-text">The AI participants were genuinely surprising. I couldn't tell who was human.</div>
+        <div class="quote-author">&mdash; [Future participant]</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     SECTION DIVIDER
+     ================================================================ -->
+<div class="section-divider" id="divider5"></div>
+
+<!-- ================================================================
+     ABOUT METAGAMES
+     ================================================================ -->
+<section class="section about">
+  <div class="section-inner fade-in">
+    <img src="assets/logo-metagames.png" alt="MetaGames" class="about-logo">
+    <!-- EN -->
+    <div data-lang="en">
+      <p class="section-label">About</p>
+      <h2 class="section-title">MetaGames</h2>
+      <p class="section-text">MetaGames designs immersive leadership simulations that develop strategic thinking, communication, and decision-making. Our simulations combine complex scenario design, autonomous AI participants, and behavioral analytics to create experiences that transform how leaders think.</p>
+      <a href="https://metagames.academy" target="_blank" class="about-link">metagames.academy</a>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <p class="section-label">&#931;&#967;&#949;&#964;&#953;&#954;&#940;</p>
+      <h2 class="section-title">MetaGames</h2>
+      <p class="section-text">&#919; MetaGames &#963;&#967;&#949;&#948;&#953;&#940;&#950;&#949;&#953; &#946;&#953;&#969;&#956;&#945;&#964;&#953;&#954;&#941;&#962; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#953;&#974;&#963;&#949;&#953;&#962; &#951;&#947;&#949;&#963;&#943;&#945;&#962; &#960;&#959;&#965; &#945;&#957;&#945;&#960;&#964;&#973;&#963;&#963;&#959;&#965;&#957; &#963;&#964;&#961;&#945;&#964;&#951;&#947;&#953;&#954;&#942; &#963;&#954;&#941;&#968;&#951;, &#949;&#960;&#953;&#954;&#959;&#953;&#957;&#969;&#957;&#943;&#945; &#954;&#945;&#953; &#955;&#942;&#968;&#951; &#945;&#960;&#959;&#966;&#940;&#963;&#949;&#969;&#957;. &#927;&#953; &#960;&#961;&#959;&#963;&#959;&#956;&#959;&#953;&#974;&#963;&#949;&#953;&#962; &#956;&#945;&#962; &#963;&#965;&#957;&#948;&#965;&#940;&#950;&#959;&#965;&#957; &#960;&#959;&#955;&#973;&#960;&#955;&#959;&#954;&#959; &#963;&#967;&#949;&#948;&#953;&#945;&#963;&#956;&#972; &#963;&#949;&#957;&#945;&#961;&#943;&#969;&#957;, &#945;&#965;&#964;&#972;&#957;&#959;&#956;&#959;&#965;&#962; &#963;&#965;&#956;&#956;&#949;&#964;&#941;&#967;&#959;&#957;&#964;&#949;&#962; &#956;&#949; AI &#954;&#945;&#953; &#945;&#957;&#945;&#955;&#965;&#964;&#953;&#954;&#940; &#963;&#965;&#956;&#960;&#949;&#961;&#953;&#966;&#959;&#961;&#940;&#962; &#947;&#953;&#945; &#957;&#945; &#948;&#951;&#956;&#953;&#959;&#965;&#961;&#947;&#942;&#963;&#959;&#965;&#957; &#949;&#956;&#960;&#949;&#953;&#961;&#943;&#949;&#962; &#960;&#959;&#965; &#956;&#949;&#964;&#945;&#963;&#967;&#951;&#956;&#945;&#964;&#943;&#950;&#959;&#965;&#957; &#964;&#959;&#957; &#964;&#961;&#972;&#960;&#959; &#960;&#959;&#965; &#963;&#954;&#941;&#966;&#964;&#959;&#957;&#964;&#945;&#953; &#959;&#953; &#951;&#947;&#941;&#964;&#949;&#962;.</p>
+      <a href="https://metagames.academy" target="_blank" class="about-link">metagames.academy</a>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <p class="section-label">&#1054; &#1085;&#1072;&#1089;</p>
+      <h2 class="section-title">MetaGames</h2>
+      <p class="section-text">MetaGames &#1089;&#1086;&#1079;&#1076;&#1072;&#1105;&#1090; &#1080;&#1084;&#1084;&#1077;&#1088;&#1089;&#1080;&#1074;&#1085;&#1099;&#1077; &#1083;&#1080;&#1076;&#1077;&#1088;&#1089;&#1082;&#1080;&#1077; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1080;, &#1088;&#1072;&#1079;&#1074;&#1080;&#1074;&#1072;&#1102;&#1097;&#1080;&#1077; &#1089;&#1090;&#1088;&#1072;&#1090;&#1077;&#1075;&#1080;&#1095;&#1077;&#1089;&#1082;&#1086;&#1077; &#1084;&#1099;&#1096;&#1083;&#1077;&#1085;&#1080;&#1077;, &#1082;&#1086;&#1084;&#1084;&#1091;&#1085;&#1080;&#1082;&#1072;&#1094;&#1080;&#1102; &#1080; &#1087;&#1088;&#1080;&#1085;&#1103;&#1090;&#1080;&#1077; &#1088;&#1077;&#1096;&#1077;&#1085;&#1080;&#1081;. &#1053;&#1072;&#1096;&#1080; &#1089;&#1080;&#1084;&#1091;&#1083;&#1103;&#1094;&#1080;&#1080; &#1086;&#1073;&#1098;&#1077;&#1076;&#1080;&#1085;&#1103;&#1102;&#1090; &#1089;&#1083;&#1086;&#1078;&#1085;&#1099;&#1081; &#1089;&#1094;&#1077;&#1085;&#1072;&#1088;&#1085;&#1099;&#1081; &#1076;&#1080;&#1079;&#1072;&#1081;&#1085;, &#1072;&#1074;&#1090;&#1086;&#1085;&#1086;&#1084;&#1085;&#1099;&#1093; &#1048;&#1048;-&#1091;&#1095;&#1072;&#1089;&#1090;&#1085;&#1080;&#1082;&#1086;&#1074; &#1080; &#1087;&#1086;&#1074;&#1077;&#1076;&#1077;&#1085;&#1095;&#1077;&#1089;&#1082;&#1091;&#1102; &#1072;&#1085;&#1072;&#1083;&#1080;&#1090;&#1080;&#1082;&#1091; &#1076;&#1083;&#1103; &#1089;&#1086;&#1079;&#1076;&#1072;&#1085;&#1080;&#1103; &#1086;&#1087;&#1099;&#1090;&#1072;, &#1090;&#1088;&#1072;&#1085;&#1089;&#1092;&#1086;&#1088;&#1084;&#1080;&#1088;&#1091;&#1102;&#1097;&#1077;&#1075;&#1086; &#1084;&#1099;&#1096;&#1083;&#1077;&#1085;&#1080;&#1077; &#1083;&#1080;&#1076;&#1077;&#1088;&#1086;&#1074;.</p>
+      <a href="https://metagames.academy" target="_blank" class="about-link">metagames.academy</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     REGISTRATION CTA
+     ================================================================ -->
+<section class="section cta">
+  <div class="section-inner fade-in">
+    <!-- EN -->
+    <div data-lang="en">
+      <h2 class="section-title" style="margin-bottom:40px;">Secure Your Place</h2>
+      <a href="#register" class="cta-button">Register Now</a>
+      <p class="cta-note">Places are limited to 30 participants. Early registration recommended.</p>
+      <p class="cta-contact">Questions? <a href="mailto:marat@metagames.org">marat@metagames.org</a></p>
+    </div>
+    <!-- EL -->
+    <div data-lang="el">
+      <h2 class="section-title" style="margin-bottom:40px;">&#917;&#958;&#945;&#963;&#966;&#945;&#955;&#943;&#963;&#964;&#949; &#964;&#951; &#920;&#941;&#963;&#951; &#963;&#945;&#962;</h2>
+      <a href="#register" class="cta-button">&#917;&#947;&#947;&#961;&#945;&#966;&#949;&#943;&#964;&#949; &#932;&#974;&#961;&#945;</a>
+      <p class="cta-note">&#927;&#953; &#952;&#941;&#963;&#949;&#953;&#962; &#960;&#949;&#961;&#953;&#959;&#961;&#943;&#950;&#959;&#957;&#964;&#945;&#953; &#963;&#949; 30 &#963;&#965;&#956;&#956;&#949;&#964;&#941;&#967;&#959;&#957;&#964;&#949;&#962;. &#931;&#965;&#957;&#953;&#963;&#964;&#940;&#964;&#945;&#953; &#941;&#947;&#954;&#945;&#953;&#961;&#951; &#949;&#947;&#947;&#961;&#945;&#966;&#942;.</p>
+      <p class="cta-contact">&#917;&#961;&#969;&#964;&#942;&#963;&#949;&#953;&#962;; <a href="mailto:marat@metagames.org">marat@metagames.org</a></p>
+    </div>
+    <!-- RU -->
+    <div data-lang="ru">
+      <h2 class="section-title" style="margin-bottom:40px;">&#1047;&#1072;&#1073;&#1088;&#1086;&#1085;&#1080;&#1088;&#1091;&#1081;&#1090;&#1077; &#1084;&#1077;&#1089;&#1090;&#1086;</h2>
+      <a href="#register" class="cta-button">&#1047;&#1072;&#1088;&#1077;&#1075;&#1080;&#1089;&#1090;&#1088;&#1080;&#1088;&#1086;&#1074;&#1072;&#1090;&#1100;&#1089;&#1103;</a>
+      <p class="cta-note">&#1050;&#1086;&#1083;&#1080;&#1095;&#1077;&#1089;&#1090;&#1074;&#1086; &#1084;&#1077;&#1089;&#1090; &#1086;&#1075;&#1088;&#1072;&#1085;&#1080;&#1095;&#1077;&#1085;&#1086; 30 &#1091;&#1095;&#1072;&#1089;&#1090;&#1085;&#1080;&#1082;&#1072;&#1084;&#1080;. &#1056;&#1077;&#1082;&#1086;&#1084;&#1077;&#1085;&#1076;&#1091;&#1077;&#1090;&#1089;&#1103; &#1088;&#1072;&#1085;&#1085;&#1103;&#1103; &#1088;&#1077;&#1075;&#1080;&#1089;&#1090;&#1088;&#1072;&#1094;&#1080;&#1103;.</p>
+      <p class="cta-contact">&#1042;&#1086;&#1087;&#1088;&#1086;&#1089;&#1099;? <a href="mailto:marat@metagames.org">marat@metagames.org</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================
+     FOOTER
+     ================================================================ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <img src="assets/logo-metagames.png" alt="MetaGames">
+      <span>MetaGames 2026</span>
+    </div>
+    <p>The Thucydides Trap is a MetaGames simulation</p>
+    <div class="footer-links">
+      <a href="https://metagames.academy" target="_blank">metagames.academy</a>
+      <a href="mailto:marat@metagames.org">Contact</a>
+    </div>
+    <p class="footer-privacy">Your registration data will be used solely for event organization and communication. We do not share personal information with third parties.</p>
+  </div>
+</footer>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+// ================================================================
+// COUNTRY DATA (from UX Style Demo)
+// ================================================================
+const countries = [
+  { id:'columbia',  name:'Columbia',  color:'#3A6B9F', mapColor:'#9AB5D0' },
+  { id:'cathay',    name:'Cathay',    color:'#C4A030', mapColor:'#E8D5A3' },
+  { id:'nordostan', name:'Nordostan', color:'#A06060', mapColor:'#D4A5A5' },
+  { id:'heartland', name:'Heartland', color:'#5A9A5A', mapColor:'#A5C8A5' },
+  { id:'persia',    name:'Persia',    color:'#9A7040', mapColor:'#C8A57A' },
+  { id:'gallia',    name:'Gallia',    color:'#4A6FA0', mapColor:'#A5B8D4' },
+  { id:'teutonia',  name:'Teutonia',  color:'#3A8A7A', mapColor:'#8AB5AA' },
+  { id:'thule',     name:'Thule',     color:'#3A8A7A', mapColor:'#8AB5AA' },
+  { id:'albion',    name:'Albion',    color:'#4A7A8F', mapColor:'#8AA5B5' },
+  { id:'freeland',  name:'Freeland',  color:'#5A80A0', mapColor:'#A0B8C8' },
+  { id:'ponte',     name:'Ponte',     color:'#6A9A8A', mapColor:'#A5C8B8' },
+  { id:'bharata',   name:'Bharata',   color:'#B87850', mapColor:'#D4B5A5' },
+  { id:'formosa',   name:'Formosa',   color:'#B89048', mapColor:'#DCC5A0' },
+  { id:'yamato',    name:'Yamato',    color:'#5A7A9B', mapColor:'#A5B5C8' },
+  { id:'hanguk',    name:'Hanguk',    color:'#4A8FA8', mapColor:'#A5C8D4' },
+  { id:'phrygia',   name:'Phrygia',   color:'#8A6A48', mapColor:'#B5A08A' },
+  { id:'solaria',   name:'Solaria',   color:'#A89030', mapColor:'#C8B896' },
+  { id:'mirage',    name:'Mirage',    color:'#A88050', mapColor:'#D4BFA5' },
+  { id:'levantia',  name:'Levantia',  color:'#9A9A40', mapColor:'#D4D4A5' },
+  { id:'choson',    name:'Choson',    color:'#5A5A5A', mapColor:'#8A8A8A' },
+  { id:'caribe',    name:'Caribe',    color:'#3A7AAA', mapColor:'#8AACCC' },
+  { id:'sogdiana',  name:'Sogdiana',  color:'#8A8A60', mapColor:'#C8C8A5' },
+];
+const cMap = {};
+countries.forEach(c => cMap[c.id] = c);
+
+// ================================================================
+// GEOMETRIC EMBLEM SVG GENERATOR (from UX Style Demo)
+// ================================================================
+function geometricSVG(id, color, size) {
+  const s = size, sw = Math.max(1.2, size*2/48);
+  const half = s/2, q = s/4, tq = s*3/4;
+  const paths = {
+    columbia: `<polygon points="${half},${s*0.1} ${s*0.87},${s*0.42} ${s*0.73},${s*0.9} ${s*0.27},${s*0.9} ${s*0.13},${s*0.42}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    cathay: `<polygon points="${half},${s*0.08} ${s*0.82},${q} ${s*0.82},${tq} ${half},${s*0.92} ${s*0.18},${tq} ${s*0.18},${q}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.68},${s*0.36} ${s*0.68},${s*0.64} ${half},${s*0.75} ${s*0.32},${s*0.64} ${s*0.32},${s*0.36}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    nordostan: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
+    heartland: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    persia: `<path d="M${s*0.15},${s*0.65} A${s*0.4},${s*0.4} 0 0,1 ${s*0.85},${s*0.65}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${half}" y1="${s*0.2}" x2="${half}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    gallia: `<rect x="${s*0.38}" y="${s*0.1}" width="${s*0.24}" height="${s*0.8}" rx="${s*0.02}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.28}" y1="${s*0.2}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    bharata: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,60,120,180,240,300].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.35*Math.cos(rad)}" y2="${half+s*0.35*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
+    formosa: `<rect x="${s*0.2}" y="${s*0.2}" width="${s*0.6}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.4}" y1="${s*0.2}" x2="${s*0.4}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.6}" y1="${s*0.2}" x2="${s*0.6}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}"/>`,
+    yamato: `<rect x="${s*0.15}" y="${s*0.6}" width="${s*0.12}" height="${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.33}" y="${s*0.45}" width="${s*0.12}" height="${s*0.45}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.51}" y="${s*0.3}" width="${s*0.12}" height="${s*0.6}" fill="none" stroke="${color}" stroke-width="${sw}"/><rect x="${s*0.69}" y="${s*0.12}" width="${s*0.12}" height="${s*0.78}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    albion: `<polygon points="${half},${s*0.1} ${s*0.85},${s*0.85} ${s*0.15},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    teutonia: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    hanguk: `<circle cx="${s*0.25}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${s*0.75}" cy="${half}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.25}" r="${s*0.06}" fill="${color}"/><circle cx="${half}" cy="${s*0.75}" r="${s*0.06}" fill="${color}"/>`,
+    phrygia: `<path d="M${s*0.1},${s*0.75} Q${s*0.1},${s*0.25} ${half},${s*0.25} Q${s*0.9},${s*0.25} ${s*0.9},${s*0.75}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.1}" y1="${s*0.75}" x2="${s*0.9}" y2="${s*0.75}" stroke="${color}" stroke-width="${sw}"/>`,
+    solaria: `${[0,30,60,90,120,150,180,210,240,270,300,330].map(a=>{const rad=a*Math.PI/180,r1=s*0.12,r2=s*0.4;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}<circle cx="${half}" cy="${half}" r="${s*0.1}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    freeland: `<rect x="${s*0.15}" y="${s*0.15}" width="${s*0.7}" height="${s*0.7}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    ponte: `<path d="M${s*0.15},${s*0.8} Q${s*0.15},${s*0.2} ${half},${s*0.2} Q${s*0.85},${s*0.2} ${s*0.85},${s*0.8}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    mirage: `<polygon points="${half},${s*0.08} ${s*0.75},${half} ${half},${s*0.92} ${s*0.25},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    levantia: `<polygon points="${half},${s*0.08} ${s*0.86},${s*0.3} ${s*0.86},${s*0.7} ${half},${s*0.92} ${s*0.14},${s*0.7} ${s*0.14},${s*0.3}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    choson: `${[0,45,90,135,180,225,270,315].map(a=>{const rad=a*Math.PI/180;return`<line x1="${half}" y1="${half}" x2="${half+s*0.4*Math.cos(rad)}" y2="${half+s*0.4*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`}).join('')}`,
+    caribe: `<circle cx="${half}" cy="${half}" r="${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.28}" fill="none" stroke="${color}" stroke-width="${sw}"/><circle cx="${half}" cy="${half}" r="${s*0.4}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+    sogdiana: `<line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.45}" y2="${s*0.15}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.15}" y1="${s*0.15}" x2="${s*0.15}" y2="${s*0.45}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.55}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.55}" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.85}" y1="${s*0.55}" x2="${s*0.85}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}"/>`,
+    thule: `<polygon points="${half},${s*0.1} ${s*0.75},${s*0.35} ${s*0.75},${s*0.7} ${half},${s*0.9} ${s*0.25},${s*0.7} ${s*0.25},${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><circle cx="${half}" cy="${half}" r="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}"/>`,
+  };
+  return `<svg width="${s}" height="${s}" viewBox="0 0 ${s} ${s}" xmlns="http://www.w3.org/2000/svg">${paths[id]||''}</svg>`;
+}
+
+// ================================================================
+// HERO HEX MAP — 10x20 grid with country colors
+// ================================================================
+(function buildHeroMap() {
+  const hexData = [
+    {r:2,c:10,o:'freeland'},{r:2,c:11,o:'nordostan'},{r:2,c:12,o:'nordostan'},{r:2,c:16,o:'nordostan'},
+    {r:3,c:3,o:'columbia'},{r:3,c:6,o:'thule'},{r:3,c:8,o:'albion'},{r:3,c:10,o:'freeland'},
+    {r:3,c:11,o:'heartland'},{r:3,c:12,o:'nordostan'},{r:3,c:13,o:'nordostan'},{r:3,c:14,o:'nordostan'},
+    {r:3,c:15,o:'nordostan'},{r:3,c:16,o:'nordostan'},{r:3,c:18,o:'choson'},
+    {r:4,c:2,o:'columbia'},{r:4,c:3,o:'columbia'},{r:4,c:7,o:'albion'},{r:4,c:9,o:'teutonia'},
+    {r:4,c:10,o:'teutonia'},{r:4,c:11,o:'heartland'},{r:4,c:12,o:'nordostan'},{r:4,c:13,o:'nordostan'},
+    {r:4,c:14,o:'nordostan'},{r:4,c:16,o:'nordostan'},{r:4,c:17,o:'hanguk'},{r:4,c:19,o:'yamato'},
+    {r:5,c:3,o:'columbia'},{r:5,c:4,o:'columbia'},{r:5,c:5,o:'columbia'},{r:5,c:9,o:'gallia'},
+    {r:5,c:10,o:'gallia'},{r:5,c:11,o:'phrygia'},{r:5,c:14,o:'sogdiana'},{r:5,c:15,o:'cathay'},
+    {r:5,c:16,o:'cathay'},{r:5,c:17,o:'cathay'},{r:5,c:19,o:'yamato'},
+    {r:6,c:3,o:'columbia'},{r:6,c:4,o:'columbia'},{r:6,c:8,o:'ponte'},{r:6,c:10,o:'levantia'},
+    {r:6,c:11,o:'phrygia'},{r:6,c:12,o:'persia'},{r:6,c:13,o:'sogdiana'},{r:6,c:14,o:'sogdiana'},
+    {r:6,c:15,o:'cathay'},{r:6,c:16,o:'cathay'},
+    {r:7,c:4,o:'columbia'},{r:7,c:9,o:'ponte'},{r:7,c:11,o:'solaria'},{r:7,c:13,o:'persia'},
+    {r:7,c:14,o:'bharata'},{r:7,c:15,o:'bharata'},{r:7,c:16,o:'cathay'},{r:7,c:18,o:'formosa'},
+    {r:8,c:10,o:'solaria'},{r:8,c:11,o:'mirage'},{r:8,c:13,o:'persia'},{r:8,c:14,o:'bharata'},
+    {r:8,c:15,o:'bharata'},
+    {r:9,c:5,o:'caribe'},{r:9,c:10,o:'horn'},{r:9,c:15,o:'bharata'},
+  ];
+
+  // Chokepoints
+  const chokepoints = [{r:7,c:17,name:'Formosa\nStrait'},{r:8,c:12,name:'Gulf\nGate'},{r:8,c:4,name:'Caribe\nPassage'}];
+
+  const cols = 20, rows = 10;
+  const hexW = 56, hexH = 48;
+  const svgW = (cols + 0.5) * hexW * 0.75 + hexW * 0.25;
+  const svgH = rows * hexH + hexH * 0.5;
+
+  function hexCenter(row, col) {
+    const x = col * hexW * 0.75 + hexW / 2;
+    const y = row * hexH + (col % 2 === 1 ? hexH / 2 : 0) + hexH / 2;
+    return { x, y };
+  }
+
+  function hexPoints(cx, cy, r) {
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = Math.PI / 180 * (60 * i - 30);
+      pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+    }
+    return pts.join(' ');
+  }
+
+  let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" xmlns="http://www.w3.org/2000/svg">`;
+
+  // Water background hexes (very subtle)
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const { x, y } = hexCenter(r, c);
+      svg += `<polygon points="${hexPoints(x, y, hexW * 0.48)}" fill="#152535" stroke="#1B2A3E" stroke-width="0.5" opacity="0.4"/>`;
+    }
+  }
+
+  // Land hexes with country colors
+  hexData.forEach(h => {
+    const { x, y } = hexCenter(h.r, h.c);
+    const country = cMap[h.o];
+    const fillColor = country ? country.mapColor : '#556B80';
+    svg += `<polygon points="${hexPoints(x, y, hexW * 0.48)}" fill="${fillColor}" stroke="${fillColor}" stroke-width="0.5" opacity="0.5"/>`;
+    // Country name at very low opacity
+    if (country) {
+      svg += `<text x="${x}" y="${y + 2}" font-family="DM Sans, sans-serif" font-size="5" fill="${country.color}" text-anchor="middle" opacity="0.06">${country.name.toUpperCase()}</text>`;
+    }
+  });
+
+  // Chokepoint glows
+  chokepoints.forEach((cp, i) => {
+    const { x, y } = hexCenter(cp.r, cp.c);
+    const cls = i === 0 ? 'chokepoint-glow' : i === 1 ? 'chokepoint-glow-2' : 'chokepoint-glow-3';
+    svg += `<circle cx="${x}" cy="${y}" r="12" fill="#E8B84D" opacity="0.15" class="${cls}"/>`;
+  });
+
+  // Confirmed unit icon SVG paths (from UNIT_ICONS_CONFIRMED.svg)
+  // Naval: warship side profile
+  const navalPath = 'M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z';
+  // Ground: tank V4 facing right
+  const tankTurret = 'M10 8 L18 8 L22 10 L22 11 L10 11 Z';
+  const tankHull = 'M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z';
+  const tankTracks = 'M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z';
+
+  // Military unit icons at very low opacity using real confirmed SVG paths
+  const units = [
+    { r: 5, c: 1, type: 'naval' },   // Columbia fleet, Atlantic
+    { r: 7, c: 17, type: 'naval' },  // Near Formosa Strait
+    { r: 6, c: 18, type: 'naval' },  // Cathay fleet
+    { r: 8, c: 6, type: 'naval' },   // South Atlantic
+    { r: 5, c: 12, type: 'tank' },   // Central corridor
+    { r: 3, c: 14, type: 'tank' },   // Nordostan
+  ];
+  units.forEach(u => {
+    const { x, y } = hexCenter(u.r, u.c);
+    const sc = 0.7; // scale factor
+    if (u.type === 'naval') {
+      svg += `<g transform="translate(${x - 12*sc},${y - 12*sc}) scale(${sc})" class="hero-unit"><path d="${navalPath}" fill="#7A8FA3"/></g>`;
+    } else {
+      svg += `<g transform="translate(${x - 12*sc},${y - 12*sc}) scale(${sc})" class="hero-unit"><path d="${tankTurret}" fill="#7A8FA3"/><path d="${tankHull}" fill="#7A8FA3"/><path d="${tankTracks}" fill="#7A8FA3"/></g>`;
+    }
+  });
+
+  svg += '</svg>';
+  document.getElementById('heroMap').innerHTML = svg;
+})();
+
+// ================================================================
+// CARD 1 ACCENT — mini hex map fragment (5x3 hexes)
+// ================================================================
+(function buildCard1Accent() {
+  const el = document.getElementById('card1Accent');
+  if (!el) return;
+  const hexW = 22, hexH = 19;
+  const fragment = [
+    {r:0,c:0,o:'columbia'},{r:0,c:1,o:'columbia'},{r:0,c:2,o:'cathay'},
+    {r:1,c:0,o:'columbia'},{r:1,c:1,o:'heartland'},{r:1,c:2,o:'cathay'},
+    {r:1,c:3,o:'cathay'},{r:2,c:1,o:'heartland'},{r:2,c:2,o:'nordostan'},
+  ];
+  let svg = '<svg width="110" height="70" viewBox="0 0 110 70" xmlns="http://www.w3.org/2000/svg">';
+  fragment.forEach(h => {
+    const x = h.c * hexW * 0.75 + hexW / 2;
+    const y = h.r * hexH + (h.c % 2 === 1 ? hexH / 2 : 0) + hexH / 2;
+    const pts = [];
+    for (let i = 0; i < 6; i++) {
+      const angle = Math.PI / 180 * (60 * i - 30);
+      pts.push(`${x + hexW * 0.45 * Math.cos(angle)},${y + hexW * 0.45 * Math.sin(angle)}`);
+    }
+    const country = cMap[h.o];
+    svg += `<polygon points="${pts.join(' ')}" fill="${country ? country.mapColor : '#556B80'}" stroke="${country ? country.color : '#556B80'}" stroke-width="0.5" opacity="0.7"/>`;
+  });
+  svg += '</svg>';
+  el.innerHTML = svg;
+})();
+
+// ================================================================
+// CARD 4 — country emblem grid (6 emblems)
+// ================================================================
+(function buildCard4Emblems() {
+  const el = document.getElementById('card4Emblems');
+  if (!el) return;
+  const featured = ['columbia','cathay','nordostan','heartland','persia','bharata'];
+  featured.forEach(id => {
+    const c = cMap[id];
+    if (c) el.innerHTML += geometricSVG(id, c.color, 28);
+  });
+})();
+
+// ================================================================
+// ROLE BRIEF EMBLEM
+// ================================================================
+(function buildRoleBriefEmblem() {
+  const el = document.getElementById('roleBriefEmblem');
+  if (!el) return;
+  el.innerHTML = geometricSVG('columbia', '#3A6B9F', 48);
+})();
+
+// ================================================================
+// SECTION DIVIDERS — 5 country emblems each
+// ================================================================
+(function buildDividers() {
+  const dividerSets = [
+    ['columbia','cathay','heartland','persia','bharata'],
+    ['gallia','teutonia','albion','yamato','formosa'],
+    ['nordostan','phrygia','solaria','levantia','caribe'],
+    ['columbia','cathay','heartland','bharata','yamato'],
+    ['gallia','persia','formosa','nordostan','teutonia'],
+  ];
+  for (let i = 1; i <= 5; i++) {
+    const el = document.getElementById('divider' + i);
+    if (!el) continue;
+    const set = dividerSets[i - 1] || dividerSets[0];
+    // Insert line before, emblems, line after (lines handled by CSS)
+    let html = '';
+    set.forEach(id => {
+      const c = cMap[id];
+      if (c) html += geometricSVG(id, c.color, 12);
+    });
+    // Wrap in the before/after pseudo structure — just put the SVGs directly
+    el.innerHTML = html;
+  }
+})();
+
+// ================================================================
+// LANGUAGE SWITCHER
+// ================================================================
+function setLang(lang) {
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    el.style.display = 'none';
+  });
+  document.querySelectorAll('[data-lang="' + lang + '"]').forEach(el => {
+    const tag = el.tagName.toLowerCase();
+    if (tag === 'span' || tag === 'a') {
+      el.style.display = 'inline';
+    } else {
+      el.style.display = 'block';
+    }
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.currentTarget.classList.add('active');
+  document.documentElement.lang = lang === 'el' ? 'el' : lang === 'ru' ? 'ru' : 'en';
+}
+
+// ================================================================
+// SCROLL FADE-IN ANIMATION
+// ================================================================
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+});
+
+document.querySelectorAll('.fade-in').forEach(el => {
+  observer.observe(el);
+});
+
+// ================================================================
+// SUBTLE PARALLAX ON HERO MAP
+// ================================================================
+let ticking = false;
+window.addEventListener('scroll', function() {
+  if (!ticking) {
+    window.requestAnimationFrame(function() {
+      const heroMap = document.getElementById('heroMap');
+      if (heroMap) {
+        const scrollY = window.scrollY;
+        heroMap.style.transform = 'translateY(' + (scrollY * 0.15) + 'px)';
+      }
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
+</script>
+
+</body>
+</html>

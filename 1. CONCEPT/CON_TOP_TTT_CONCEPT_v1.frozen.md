@@ -40,8 +40,8 @@ The simulation uses fictional country names with transparent real-world parallel
 | **Columbia** | USA | 7-9 | Declining hegemon with democratic dysfunction — president, opposition, and swing voters pulling in different directions while managing global commitments |
 | **Cathay** | China | 5 | Rising challenger presenting unified facade while five internal factions disagree on timing, method, and acceptable risk |
 | **Europe** (Gallia, Teutonia, Freeland, Ponte, Albion) | France, Germany, Poland, Italy, UK | 5-6 | Collective action failure between sovereign nations — strategic autonomy vs. Atlantic loyalty vs. China trade dependency |
-| **Nordostan** | Russia | 3-4 | Paranoid autocracy where the war must produce "victory" but three internal camps disagree on what that means |
-| **Heartland** | Ukraine | 3 | Nation at war facing an impossible choice — peace may cost the presidency, continued war may cost the nation |
+| **Sarmatia** | Russia | 3-4 | Paranoid autocracy where the war must produce "victory" but three internal camps disagree on what that means |
+| **Ruthenia** | Ukraine | 3 | Nation at war facing an impossible choice — peace may cost the presidency, continued war may cost the nation |
 | **Persia** | Iran | 3 | Three-way split at nuclear threshold — pursue the bomb, maintain ambiguity, or trade the program for opening |
 
 ### Solo Countries (1 human or AI each)
@@ -71,7 +71,7 @@ Each round, participants:
 
 ### The Key Scheduled Events
 - **Round 2:** Columbia mid-term elections (one contested parliamentary seat — if opposition wins, the president loses legislative majority)
-- **Round 3-4:** Heartland wartime election (AI-judged based on actual SIM events), UNGA vote forcing public alliance declarations
+- **Round 3-4:** Ruthenia wartime election (AI-judged based on actual SIM events), UNGA vote forcing public alliance declarations
 - **Round 5:** Columbia presidential election — THE climactic event of the simulation. Weighted votes from team members + 50% AI-generated popular vote reflecting SIM events.
 - **Overnight (2-day format):** The SIM stays "on." Secret deals, coup conspiracies, back-channel negotiations continue between days.
 
@@ -99,9 +99,9 @@ Participants operate across four interconnected domains. The simulation's power 
 
 **A world model that combines calculation with judgment.** The engine uses deterministic formulas for what can be calculated (budgets, production, trade), probabilistic models for what involves chance (combat, covert ops, elections), and AI-assisted assessment for what requires qualitative judgment (second-order economic effects, narrative generation, political sentiment). The moderator reviews and can adjust before results publish.
 
-**Personal stakes inside structural dynamics.** Roles are designed with three layers: position/resources, interests/needs, and norms/values/identity. Several key roles have personal wealth that can conflict with national interest. The Columbia president faces re-election. The Cathay chairman has no successor. The Nordostan president has no safe exit. Personal survival calculations diverge from strategic rationality — and that's where the learning happens.
+**Personal stakes inside structural dynamics.** Roles are designed with three layers: position/resources, interests/needs, and norms/values/identity. Several key roles have personal wealth that can conflict with national interest. The Columbia president faces re-election. The Cathay chairman has no successor. The Sarmatia president has no safe exit. Personal survival calculations diverge from strategic rationality — and that's where the learning happens.
 
-**No scripted outcomes.** Five focal attractors exist (Taiwan crisis, Columbia election, Heartland resolution, financial architecture fracture, AI breakthrough) but none is guaranteed. The simulation creates structural pressure and lets human decisions determine what actually happens. Different groups playing the same scenario produce radically different outcomes.
+**No scripted outcomes.** Five focal attractors exist (Taiwan crisis, Columbia election, Ruthenia resolution, financial architecture fracture, AI breakthrough) but none is guaranteed. The simulation creates structural pressure and lets human decisions determine what actually happens. Different groups playing the same scenario produce radically different outcomes.
 
 **A Navigator AI assistant** for every participant — a personal mentor across three phases (before, during, after the SIM) that helps players set learning goals, understand their situation, think strategically, and reflect on what happened. Not a gameplay advantage tool — a development companion.
 
@@ -145,7 +145,7 @@ The simulation immerses CEOs, founders, and senior leaders in the dynamics that 
 | Gameplay duration | 1 day (~8h) | 1.5 days (~10h) | 2 days (~12h) |
 | Moderators needed | 1 + assistant | 1 + assistant | 2 + assistant |
 
-The simulation scales by activating optional roles within team countries (Columbia expands from 7 to 9, Nordostan from 3 to 4, Europe adds a 5th EU vote) and by assigning solo countries to humans versus AI.
+The simulation scales by activating optional roles within team countries (Columbia expands from 7 to 9, Sarmatia from 3 to 4, Europe adds a 5th EU vote) and by assigning solo countries to humans versus AI.
 
 ---
 

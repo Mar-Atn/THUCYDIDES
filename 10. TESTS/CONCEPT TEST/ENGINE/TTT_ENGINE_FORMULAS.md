@@ -290,7 +290,7 @@ oil_price = clamp(oil_price, 20, 300)
 | Member | Share |
 |--------|:-----:|
 | Solaria | 35% |
-| Nordostan | 30% |
+| Sarmatia | 30% |
 | Persia | 15% |
 | Mirage | 15% |
 | Caribe | 5% |
@@ -509,7 +509,7 @@ incumbent_wins = (final_incumbent_pct >= 50)
 |----------|:-----:|---------------|
 | Columbia Midterms | 2 | 1 congressional seat. Team votes + 50% AI popular vote |
 | Columbia Presidential | 5 | Nominations R4. Speeches + debate. Weighted votes + 50% AI |
-| Heartland Wartime | 3-4 | AI judges based on war performance, economy, Western support |
+| Ruthenia Wartime | 3-4 | AI judges based on war performance, economy, Western support |
 
 ---
 

@@ -20,7 +20,7 @@
 | Yamato | 43 | 2 | L3 (0.30) | 0.55 | 20 | 8.0 |
 | Hanguk | 18 | 0 | L2 (0.50) | 0.40 | 22 | 6.0 |
 
-**Active wars at start:** Nordostan-Heartland (Eastern Ereb), Columbia-Persia (Mashriq).
+**Active wars at start:** Sarmatia-Ruthenia (Eastern Ereb), Columbia-Persia (Mashriq).
 **Gulf Gate:** Blocked (Persia ground forces). Oil starts elevated.
 
 **Agent behavioral assumptions:**
@@ -39,7 +39,7 @@
 - **Cathay:** Helmsman orders accelerated naval production. 10 coins allocated to naval (tier: accelerated). Cost = 4 * 2.0 = 8 coins/unit. Cap = 1 * 2 = 2 units. Produces +2 naval. Cathay naval: 7 -> 9.
 - **Cathay:** Sets rare earth restriction L1 on Columbia (signaling).
 - **Columbia:** Focused on Persia theater. Allocates 5 coins to naval (normal tier). Produces +1 naval. Columbia naval: 11 -> 12.
-- **Columbia:** Maintains L2 sanctions on Nordostan. L1 tariffs on Cathay.
+- **Columbia:** Maintains L2 sanctions on Sarmatia. L1 tariffs on Cathay.
 - **Formosa:** Requests emergency defense package from Columbia.
 
 **Engine Calculations:**
@@ -210,7 +210,7 @@ Cathay STILL GROWING despite its own blockade. The asymmetry is stark: Columbia 
 | Yamato | 40.6 | -4.44% | 2 | 0.5 | 7.50 | normal | -0.85 |
 | Hanguk | 17.0 | -4.42% | 0 | 0.5 | 5.40 | normal | -1.00 |
 
-**Heartland election fires this round** (scheduled R3). Not directly affected by Formosa crisis — see Test 4 for details.
+**Ruthenia election fires this round** (scheduled R3). Not directly affected by Formosa crisis — see Test 4 for details.
 
 ---
 

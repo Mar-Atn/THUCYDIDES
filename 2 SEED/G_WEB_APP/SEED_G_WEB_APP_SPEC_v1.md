@@ -83,7 +83,7 @@ ACTIONS (what you CAN do — filtered by role powers + current state)
 │   ├── #22 Assassination (1 card per game, probability-based)
 │   ├── #23 Coup attempt (2 roles conspire, betrayal possible)
 │   ├── #24 Protest (automatic + stimulated card option)
-│   └── #25 Impeachment (Columbia/Heartland only, parliament votes)
+│   └── #25 Impeachment (Columbia/Ruthenia only, parliament votes)
 ├── Transactions (anytime, bilateral, irreversible)
 │   ├── #26 Trade (coins, units, tech, basing rights — country or personal)
 │   ├── #27 Agreement (armistice, peace, alliance, custom — free text)
@@ -342,7 +342,7 @@ Each entry: round + timestamp + attribution + one-line summary.
 Example display:
 ```
 R3 — UNGA Vote .............. YOU ARE A MEMBER
-R3 — Heartland Election ..... Observer
+R3 — Ruthenia Election ..... Observer
 R5 — Columbia Presidential ... YOU ARE A CANDIDATE
 ```
 
@@ -440,7 +440,7 @@ Engine accepts per-sector input with sector weights.
 | Level | None / Partial / Full |
 | **Authorization** | Head of State |
 
-**Finite depletable pool.** Each country has a fixed mobilization pool that NEVER recovers. Partial = half remaining pool. Full = all remaining pool. Heartland and Nordostan start partially mobilized.
+**Finite depletable pool.** Each country has a fixed mobilization pool that NEVER recovers. Partial = half remaining pool. Full = all remaining pool. Ruthenia and Sarmatia start partially mobilized.
 
 **Stability cost varies by context:**
 
@@ -490,7 +490,7 @@ All combat actions require moderator present. Both commanders available real-tim
 | Air support | +1 defender | Binary yes/no (defender has air in zone) |
 | Fatherland appeal | +1 one-time | 60% success, delayed risk 2 rounds later |
 
-**Ships:** Carry 1 ground unit + up to 5 air units. Transport between rounds. Can attack adjacent land from ship (amphibious -1 applies).
+**Ships:** Carry 1 ground unit + up to 2 air units. Strategic missiles cannot embark. Naval cannot deploy into active blockades. Transport between rounds. Can attack adjacent land from ship (amphibious -1 applies).
 
 #### #8. Blockade
 
@@ -548,7 +548,7 @@ Full system per D8 Part 6C.
 | Columbia | Dealer + Shield + Anchor (3-person) |
 | Cathay | Helmsman + Rampart + Sage (3-person) |
 | Europe | HoS + AI gate |
-| Nordostan | Pathfinder + Ironhand (2-person) |
+| Sarmatia | Pathfinder + Ironhand (2-person) |
 | Choson / Persia / Levantia | HoS alone |
 
 **Procedure:**
@@ -569,7 +569,7 @@ Available during Phase B. Production runs FIRST (instant), so new units are imme
 |-------|-------|
 | Unit to move | Select from available units (produced, mobilized, arrived) |
 | Destination | Select zone on map |
-| **Rules** | Ships: any unblocked sea zone globally. Ground: own territory or allied territory (military alliance = default permission; otherwise basing rights needed). Transit to foreign theater = 1 round delay. |
+| **Rules** | Ships: any unblocked sea zone globally. Ground: own territory or allied territory (military alliance = default permission; otherwise basing rights needed). Deployment is instant. No transit delay. Attack requires adjacency, so newly deployed units fight next round. |
 | **Authorization** | Military Chief or Head of State |
 
 No combat during deployment. Movements finalize when the window closes.
@@ -688,7 +688,7 @@ Attribution hidden unless discovered through intelligence or leak.
 | Domestic | 60% |
 | International (default) | 20% |
 | International (Levantia) | 50% |
-| International (Nordostan) | 30% |
+| International (Sarmatia) | 30% |
 
 Hit = 50/50 kill or survive (injured + martyr effect). No AI or intel modifiers — raw probability. International: higher chance of being revealed if failed.
 
@@ -716,12 +716,12 @@ Trust mechanic IS the game.
 
 #### #25. Impeachment
 
-**Available to:** Columbia and Heartland only.
+**Available to:** Columbia and Ruthenia only.
 
 | Country | Procedure |
 |---------|-----------|
 | Columbia | Any parliament member initiates → parliament votes (real participants) |
-| Heartland | Any team member initiates → 2 real votes needed + AI emulates remaining (loyal to president by default) |
+| Ruthenia | Any team member initiates → 2 real votes needed + AI emulates remaining (loyal to president by default) |
 
 Both sides submit positions. Takes 1 round. Removed leader stays in play, loses executive powers.
 
@@ -807,7 +807,7 @@ Org = communication channel + meeting structure, not independent power.
 | Element | Detail |
 |---------|--------|
 | Timing | 10 minutes before election. Triggered by moderator. |
-| Focus | Columbia presidential, some Heartland elections |
+| Focus | Columbia presidential, some Ruthenia elections |
 | **Authorization** | Eligible role per election rules |
 
 ---
@@ -864,10 +864,10 @@ Actions that don't fit the generic templates above. These are the powers that de
 | Action | Available to | Input | Effect |
 |--------|-------------|-------|--------|
 | **Endorse successor** | Head of State (Columbia Dealer) | Select candidate (Volt or Anchor) | Public endorsement. Affects R5 election AI scoring. Reversible (can switch endorsement). |
-| **Call or delay elections** | Head of State (Heartland Beacon) | Call now / Delay 1 round | Triggers or postpones wartime election. Delay costs stability (-0.5) and support (-3%). Maximum 1 delay. |
+| **Call or delay elections** | Head of State (Ruthenia Beacon) | Call now / Delay 1 round | Triggers or postpones wartime election. Delay costs stability (-0.5) and support (-3%). Maximum 1 delay. |
 | **Declare emergency / martial law** | Head of State (any) | Activate | Suspends parliament (where applicable). Enables total mobilization. Massive stability cost. Facilitator notified. |
 | **Set military posture** | Head of State or Military Chief | Defensive / Balanced / Offensive | Affects AI expert panel assessment of military trajectory. Signals intent to allies and adversaries. |
-| **Nominate candidate** | Eligible roles per election rules | Select candidate role | Registers for upcoming election (Columbia presidential, Heartland wartime). |
+| **Nominate candidate** | Eligible roles per election rules | Select candidate role | Registers for upcoming election (Columbia presidential, Ruthenia wartime). |
 
 #### Strategic / Economic Specials
 
@@ -1166,8 +1166,8 @@ If a Head of State is killed or incapacitated (health event, assassination, arre
 |---------|-----------|-------|
 | Columbia | **Volt** (VP) | Constitutional succession. Same participant, expanded powers. |
 | Cathay | **Sage** (Party Elder) | Acting Chairman. Collective leadership asserts. |
-| Nordostan | **Ironhand** (General) | Military succession. Acting President. |
-| Heartland | **Bulwark** (if active) or **Broker** | Next most senior active leader. |
+| Sarmatia | **Ironhand** (General) | Military succession. Acting President. |
+| Ruthenia | **Bulwark** (if active) or **Broker** | Next most senior active leader. |
 | Persia | **Anvil selects** | Kingmaker mechanic — Anvil chooses new Supreme Leader (could be Dawn or an NPC). Creates political event. |
 | Solo countries | Facilitator decision | Country goes to AI control, or facilitator assigns new human. |
 
@@ -1177,7 +1177,7 @@ The successor inherits Head of State powers. The original participant keeps thei
 
 Election procedures are fully specified in `SEED_D_ELECTION_PROCEDURE.md`. Key points for the web app:
 - **R2 Columbia mid-terms:** 50/50 AI score + player vote. If incumbent loses, Parliament flips to 3-2 opposition. Dealer loses budget/treaty ratification control.
-- **R3-4 Heartland wartime election:** If Beacon loses, Bulwark becomes president. Same participant, new powers.
+- **R3-4 Ruthenia wartime election:** If Beacon loses, Bulwark becomes president. Same participant, new powers.
 - **R5 Columbia presidential:** Full leadership transition if opposition wins.
 
 The app must: display election status, collect player votes (where applicable), show results with narrative.

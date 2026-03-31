@@ -52,7 +52,7 @@ Real-time actions (transactions, combat, covert ops) can execute ANYTIME during 
 **World Model Engine** processes all inputs from the round: submitted settings, combat outcomes, transaction records, covert ops results, domestic action consequences. Calculates new economic state (GDP, inflation, oil price, financial indexes), political state (stability, support, Dem/Rep split), revenue and military production, tech advancement. Generates narratives. Moderator reviews and approves. New state of the world announced. **5-12 minutes** depending on how much happened. Richer updates at key moments (mid-term results, theater activations, tech breakthroughs).
 
 ### Phase C — Deployment window (5 minutes)
-After world update, participants with military authority (military chief / head of state) deploy newly available units: newly produced, newly mobilized, units arrived from previous round's transit. Domestic deployment = immediate. Long-distance redeployment to foreign theaters = 1 round transit (submitted now, arrives after next round's processing).
+After world update, participants with military authority (military chief / head of state) deploy newly available units: newly produced, newly mobilized, units arrived from previous round's transit. Domestic deployment = immediate. All deployment is instant. No transit delay. Deploy in Phase B → available for combat in next round's Phase A.
 
 **After deployment window: next round begins.**
 
@@ -270,3 +270,6 @@ The moderator decides the final round count based on:
 
 - **v1.1 (2026-03-21):** Aligned with E1 Engine Architecture v0.7. Phase A: two real-time engines (Market + Live Action) operate during negotiation; real-time actions anytime, only routine submissions have deadline. Phase B: references World Model Engine. Phase C added: 5-minute deployment window. Mid-round AI events resolved as NO.
 - **v1.0 (2026-03-19):** Initial time structure. 6-8 rounds × half-year, variable length. Two-day (recommended) and single-day (compressed) formats. Three-act dramatic arc with presidential election as climax. Overnight mechanics for two-day format. Scheduled events mapped to scenario timeline. Round count decision framework.
+
+
+<!-- CM-006: Deployment rules updated 2026-03-30. Transit delay removed (instant deployment). Ship capacity formalized (1 ground + 2 air). Naval blockade restriction added. Approved by Marat. -->

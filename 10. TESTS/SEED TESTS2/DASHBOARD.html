@@ -17,8 +17,8 @@
   --text-muted: #6e7681;
   --columbia: #4493f8;
   --cathay: #f85149;
-  --nordostan: #6e7681;
-  --heartland: #e3b341;
+  --sarmatia: #6e7681;
+  --ruthenia: #e3b341;
   --persia: #3fb950;
   --formosa: #bc8cff;
   --accent: #58a6ff;
@@ -206,7 +206,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="card">
       <h4>Test 5: Stability Calibration</h4>
       <span class="verdict verdict-conditional">CONDITIONAL</span>
-      <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Heartland 5.0-2.31 (realistic). Nordostan collapses faster -- wrong. 3 formula fixes needed.</p>
+      <p style="font-size:13px;color:var(--text-secondary);margin-top:8px;">Ruthenia 5.0-2.31 (realistic). Sarmatia collapses faster -- wrong. 3 formula fixes needed.</p>
     </div>
     <div class="card">
       <h4>Test 6: Tech Race</h4>
@@ -232,7 +232,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <li class="bug-critical"><div class="bug-label" style="color:var(--fail);">BUG 1 - CRITICAL</div><strong>Tech R&D Formula Too Slow</strong> -- Columbia gains ~1.7%/round toward AI L4. The 40-point gap requires ~24 rounds. Fix: Start Columbia AI at 0.80, increase multiplier 0.5-0.8.</li>
     <li class="bug-critical"><div class="bug-label" style="color:var(--fail);">BUG 2 - CRITICAL</div><strong>Cathay AI Starting Data</strong> -- Cathay starts at 0.70 progress with 0.60 threshold. Auto-promotes to L3 on R1. Fix: Set progress to 0.10 (already L3).</li>
     <li class="bug-critical"><div class="bug-label" style="color:var(--fail);">BUG 3 - HIGH</div><strong>Inflation Stability Penalty</strong> -- Applied to absolute level, not change from start. Countries with 50%+ inflation would collapse R1. Fix: Apply to delta from baseline.</li>
-    <li class="bug-calibration"><div class="bug-label" style="color:var(--warn);">FIX 1</div><strong>Nordostan Stability Too Fast</strong> -- Hits 1.0 by R8 (faster than Heartland at 2.31). Autocracies should be MORE resilient. Add "siege resilience" +0.10/round.</li>
+    <li class="bug-calibration"><div class="bug-label" style="color:var(--warn);">FIX 1</div><strong>Sarmatia Stability Too Fast</strong> -- Hits 1.0 by R8 (faster than Ruthenia at 2.31). Autocracies should be MORE resilient. Add "siege resilience" +0.10/round.</li>
     <li class="bug-calibration"><div class="bug-label" style="color:var(--warn);">FIX 2</div><strong>Persia GDP Contraction</strong> -- -3.0% growth creates -0.90 stability/round. Cap at -0.30/round.</li>
     <li class="bug-calibration"><div class="bug-label" style="color:var(--warn);">FIX 3</div><strong>Oil Price Starting Level</strong> -- Formula produces $198-237 vs expected $140+. May be realistic; reduce speculation multiplier if needed.</li>
     <li class="bug-calibration"><div class="bug-label" style="color:var(--warn);">FIX 4</div><strong>Columbia Resource Sector</strong> -- 5% may understate oil producer parallel. Consider 10-15%.</li>
@@ -249,7 +249,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
         <tr><td>3</td><td>Inflation stability penalty (change from baseline, not absolute)</td><td style="color:var(--fail);">Must Fix</td><td>Open</td></tr>
         <tr><td>4</td><td>Ceasefire breach mechanic (add check_agreement_compliance)</td><td style="color:var(--fail);">Must Fix</td><td>Open</td></tr>
         <tr><td>5</td><td>Ceasefire territory freeze (store ceasefire_line)</td><td style="color:var(--fail);">Must Fix</td><td>Open</td></tr>
-        <tr><td>6</td><td>Nordostan siege resilience (+0.10/round for sanctioned autocracies)</td><td style="color:var(--warn);">Should Fix</td><td>Open</td></tr>
+        <tr><td>6</td><td>Sarmatia siege resilience (+0.10/round for sanctioned autocracies)</td><td style="color:var(--warn);">Should Fix</td><td>Open</td></tr>
         <tr><td>7</td><td>Persia GDP contraction cap (-0.30/round max)</td><td style="color:var(--warn);">Should Fix</td><td>Open</td></tr>
         <tr><td>8</td><td>Soft oil cap (asymptotic to $250)</td><td style="color:var(--warn);">Should Fix</td><td>Open</td></tr>
         <tr><td>9</td><td>Columbia naval production floor (built ZERO in 8 rounds)</td><td style="color:var(--warn);">Should Fix</td><td>Open</td></tr>
@@ -265,7 +265,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="section-title" style="margin:0;">Test 1: Generic Baseline</div>
     <span class="verdict verdict-pass">PASS</span>
   </div>
-  <p class="test-description">Full 8-round generic simulation. All parameters at baseline. Tests the complete SIM arc: wars, elections, blockades, ceasefires, economic cycles. Starting oil: $237 (pre-R1). Cathay blockades Formosa R4 (after purge lifts + L3 nuclear). Persia ceasefire R4. Heartland ceasefire R7.</p>
+  <p class="test-description">Full 8-round generic simulation. All parameters at baseline. Tests the complete SIM arc: wars, elections, blockades, ceasefires, economic cycles. Starting oil: $237 (pre-R1). Cathay blockades Formosa R4 (after purge lifts + L3 nuclear). Persia ceasefire R4. Ruthenia ceasefire R7.</p>
 
   <div class="grid-2">
     <div class="card">
@@ -291,11 +291,11 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="timeline">
       <div class="timeline-item event-war"><span class="timeline-round">R1</span><span class="timeline-text"> Gulf Gate partial breach. Oil $198. Choson ICBM launch. 2 wars active.</span></div>
       <div class="timeline-item event-election"><span class="timeline-round">R2</span><span class="timeline-text"> Columbia midterms -- incumbent barely survives (52.6%). Cathay naval 8.</span></div>
-      <div class="timeline-item event-election"><span class="timeline-round">R3</span><span class="timeline-text"> Heartland election -- Beacon survives (54.6%). Cathay reaches nuclear L3 + naval parity (9:9). Purge lifts.</span></div>
+      <div class="timeline-item event-election"><span class="timeline-round">R3</span><span class="timeline-text"> Ruthenia election -- Beacon survives (54.6%). Cathay reaches nuclear L3 + naval parity (9:9). Purge lifts.</span></div>
       <div class="timeline-item event-crisis"><span class="timeline-round">R4</span><span class="timeline-text"> CATHAY BLOCKADES FORMOSA. Semiconductor disruption fires. Persia ceasefire. Oil spikes to $180.</span></div>
       <div class="timeline-item event-election"><span class="timeline-round">R5</span><span class="timeline-text"> Columbia presidential -- Anchor wins (52.0%). Cathay AI reaches L3. Formosa blockade month 6.</span></div>
       <div class="timeline-item event-peace"><span class="timeline-round">R6</span><span class="timeline-text"> Anchor takes office. Pacific pivot. Formosa negotiations begin. Oil drops to $110.</span></div>
-      <div class="timeline-item event-peace"><span class="timeline-round">R7</span><span class="timeline-text"> FORMOSA DEAL (TSMC JV). HEARTLAND CEASEFIRE (Riyadh Framework). Columbia AI L4. Oil $88.</span></div>
+      <div class="timeline-item event-peace"><span class="timeline-round">R7</span><span class="timeline-text"> FORMOSA DEAL (TSMC JV). RUTHENIA CEASEFIRE (Riyadh Framework). Columbia AI L4. Oil $88.</span></div>
       <div class="timeline-item event-peace"><span class="timeline-round">R8</span><span class="timeline-text"> Post-ceasefire stabilization. Oil $82 (normalized). Gap ratio 0.802. Naval 14:9 Cathay.</span></div>
     </div>
   </div>
@@ -304,15 +304,15 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <h3>Round-by-Round Summary</h3>
     <div style="overflow-x:auto;">
     <table>
-      <thead><tr><th>Round</th><th>Oil $</th><th>Columbia GDP</th><th>Cathay GDP</th><th>Gap Ratio</th><th>Naval C:Co</th><th>Heartland Stab</th><th>Nordostan Stab</th><th>Key Event</th></tr></thead>
+      <thead><tr><th>Round</th><th>Oil $</th><th>Columbia GDP</th><th>Cathay GDP</th><th>Gap Ratio</th><th>Naval C:Co</th><th>Ruthenia Stab</th><th>Sarmatia Stab</th><th>Key Event</th></tr></thead>
       <tbody>
         <tr><td>R1</td><td>198</td><td>285.1</td><td>197.5</td><td>0.693</td><td>7:9</td><td>4.62</td><td>4.90</td><td>Gulf Gate breach, 2 wars begin</td></tr>
         <tr><td>R2</td><td>170</td><td>290.2</td><td>205.3</td><td>0.707</td><td>8:9</td><td>4.44</td><td>4.80</td><td>Columbia midterms (52.6%)</td></tr>
-        <tr><td>R3</td><td>156</td><td>295.5</td><td>213.3</td><td>0.722</td><td>9:9</td><td>4.07</td><td>4.59</td><td>Heartland election, Naval parity</td></tr>
+        <tr><td>R3</td><td>156</td><td>295.5</td><td>213.3</td><td>0.722</td><td>9:9</td><td>4.07</td><td>4.59</td><td>Ruthenia election, Naval parity</td></tr>
         <tr><td>R4</td><td>180</td><td>300.3</td><td>221.3</td><td>0.737</td><td>10:9</td><td>4.14</td><td>4.51</td><td>Formosa blockade, Persia ceasefire</td></tr>
         <tr><td>R5</td><td>150</td><td>305.2</td><td>229.9</td><td>0.753</td><td>11:9</td><td>4.26</td><td>4.44</td><td>Presidential election (Anchor wins)</td></tr>
         <tr><td>R6</td><td>110</td><td>311.1</td><td>239.0</td><td>0.768</td><td>12:9</td><td>4.38</td><td>4.40</td><td>Anchor presidency, de-escalation</td></tr>
-        <tr><td>R7</td><td>88</td><td>317.6</td><td>249.0</td><td>0.784</td><td>13:9</td><td>4.73</td><td>4.55</td><td>Formosa deal + Heartland ceasefire</td></tr>
+        <tr><td>R7</td><td>88</td><td>317.6</td><td>249.0</td><td>0.784</td><td>13:9</td><td>4.73</td><td>4.55</td><td>Formosa deal + Ruthenia ceasefire</td></tr>
         <tr><td>R8</td><td>82</td><td>324.3</td><td>260.0</td><td>0.802</td><td>14:9</td><td>4.98</td><td>4.63</td><td>Post-ceasefire stabilization</td></tr>
       </tbody>
     </table>
@@ -411,7 +411,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <h3>Round-by-Round Summary</h3>
     <div style="overflow-x:auto;">
     <table>
-      <thead><tr><th>Round</th><th>Oil $</th><th>Columbia GDP</th><th>Cathay GDP</th><th>Gap Ratio</th><th>Nordostan Oil Rev</th><th>Persia Stab</th><th>Key Event</th></tr></thead>
+      <thead><tr><th>Round</th><th>Oil $</th><th>Columbia GDP</th><th>Cathay GDP</th><th>Gap Ratio</th><th>Sarmatia Oil Rev</th><th>Persia Stab</th><th>Key Event</th></tr></thead>
       <tbody>
         <tr><td>R1</td><td>221</td><td>284.6</td><td>197.1</td><td>0.693</td><td>4.22</td><td>3.90</td><td>Gulf Gate assault FAILS. Full blockade holds</td></tr>
         <tr><td>R2</td><td>194</td><td>289.0</td><td>204.4</td><td>0.707</td><td>3.47</td><td>3.75</td><td>OPEC floods market. Midterms lost</td></tr>
@@ -420,7 +420,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
         <tr><td>R5</td><td>174</td><td>301.6</td><td>227.1</td><td>0.753</td><td>~3.5</td><td>~3.2</td><td>Persia ceasefire. Gulf Gate PARTIAL</td></tr>
         <tr><td>R6</td><td>153</td><td>305.0</td><td>235.2</td><td>0.771</td><td>~2.5</td><td>~3.0</td><td>Gulf Gate BROKEN. Oil dropping</td></tr>
         <tr><td>R7</td><td>155</td><td>309.5</td><td>243.6</td><td>0.787</td><td>~2.0</td><td>~3.0</td><td>Persia reconstituting, brief spike</td></tr>
-        <tr><td>R8</td><td>117</td><td>314.2</td><td>252.3</td><td>0.803</td><td>~1.5</td><td>~3.0</td><td>Normalization. Nordostan revenue collapses</td></tr>
+        <tr><td>R8</td><td>117</td><td>314.2</td><td>252.3</td><td>0.803</td><td>~1.5</td><td>~3.0</td><td>Normalization. Sarmatia revenue collapses</td></tr>
       </tbody>
     </table>
     </div>
@@ -433,7 +433,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="section-title" style="margin:0;">Test 4: Peace Negotiation</div>
     <span class="verdict verdict-conditional">PASS (gaps)</span>
   </div>
-  <p class="test-description">Ceasefire mechanic test. Nordostan Compass back-channel active, Dealer pushing hard for deal, Dawn given more room. 7-round negotiation arc producing "Riyadh Framework." 9 design holes found, 3 Priority 1 (breach, territory freeze, ally coverage).</p>
+  <p class="test-description">Ceasefire mechanic test. Sarmatia Compass back-channel active, Dealer pushing hard for deal, Dawn given more room. 7-round negotiation arc producing "Riyadh Framework." 9 design holes found, 3 Priority 1 (breach, territory freeze, ally coverage).</p>
 
   <div class="grid-2">
     <div class="card">
@@ -441,7 +441,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
       <div class="chart-container"><canvas id="t4-oil"></canvas></div>
     </div>
     <div class="card">
-      <h3>Stability: Nordostan vs Heartland</h3>
+      <h3>Stability: Sarmatia vs Ruthenia</h3>
       <div class="chart-container"><canvas id="t4-stability"></canvas></div>
     </div>
     <div class="card">
@@ -459,12 +459,12 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="timeline">
       <div class="timeline-item"><span class="timeline-round">R1</span><span class="timeline-text"> Opening positions. Pathfinder demands sovereignty. Beacon demands NATO. Gap: enormous.</span></div>
       <div class="timeline-item event-election"><span class="timeline-round">R2</span><span class="timeline-text"> Dealer-Pathfinder "Columbia Peace Framework." Beacon furious (excluded). Midterms: incumbent wins (57.4%).</span></div>
-      <div class="timeline-item event-election"><span class="timeline-round">R3</span><span class="timeline-text"> Framework v2 circulated. Heartland election: Beacon loses R1 (43.4%). Persia Dawn-Lumiere talks.</span></div>
-      <div class="timeline-item event-election"><span class="timeline-round">R4</span><span class="timeline-text"> Heartland runoff: BULWARK WINS (Beacon 39.0%). Persia Geneva Protocol. First Heartland territorial recovery.</span></div>
+      <div class="timeline-item event-election"><span class="timeline-round">R3</span><span class="timeline-text"> Framework v2 circulated. Ruthenia election: Beacon loses R1 (43.4%). Persia Dawn-Lumiere talks.</span></div>
+      <div class="timeline-item event-election"><span class="timeline-round">R4</span><span class="timeline-text"> Ruthenia runoff: BULWARK WINS (Beacon 39.0%). Persia Geneva Protocol. First Ruthenia territorial recovery.</span></div>
       <div class="timeline-item event-peace"><span class="timeline-round">R5</span><span class="timeline-text"> Bulwark counter-proposal. Persia CEASEFIRE (Geneva Accord). Oil drops to $138. Volt wins Columbia election.</span></div>
       <div class="timeline-item"><span class="timeline-round">R6</span><span class="timeline-text"> "Riyadh Framework" summit. Lumiere's two-document formula. Stalemate on 3 issues.</span></div>
       <div class="timeline-item event-peace"><span class="timeline-round">R7</span><span class="timeline-text"> CEASEFIRE SIGNED. "Riyadh Framework for Peace." EU candidacy parallel declaration. Stability bounces: Nord +0.85, Heart +0.70.</span></div>
-      <div class="timeline-item event-peace"><span class="timeline-round">R8</span><span class="timeline-text"> Post-ceasefire compliance. Monitors deploy. Nordostan building permanent infrastructure (frozen conflict emerging).</span></div>
+      <div class="timeline-item event-peace"><span class="timeline-round">R8</span><span class="timeline-text"> Post-ceasefire compliance. Monitors deploy. Sarmatia building permanent infrastructure (frozen conflict emerging).</span></div>
     </div>
   </div>
 
@@ -472,11 +472,11 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <h3>Round-by-Round Summary</h3>
     <div style="overflow-x:auto;">
     <table>
-      <thead><tr><th>Round</th><th>Oil $</th><th>Nordostan Stab</th><th>Heartland Stab</th><th>Nord Support</th><th>Heart Support</th><th>Key Event</th></tr></thead>
+      <thead><tr><th>Round</th><th>Oil $</th><th>Sarmatia Stab</th><th>Ruthenia Stab</th><th>Nord Support</th><th>Heart Support</th><th>Key Event</th></tr></thead>
       <tbody>
         <tr><td>R1</td><td>198</td><td>4.90</td><td>4.62</td><td>54%</td><td>50%</td><td>Opening positions, back-channels open</td></tr>
         <tr><td>R2</td><td>189</td><td>4.80</td><td>4.45</td><td>53%</td><td>48%</td><td>Framework v1. Beacon excluded</td></tr>
-        <tr><td>R3</td><td>175</td><td>4.65</td><td>4.20</td><td>51%</td><td>43%</td><td>Heartland election R1: Beacon loses</td></tr>
+        <tr><td>R3</td><td>175</td><td>4.65</td><td>4.20</td><td>51%</td><td>43%</td><td>Ruthenia election R1: Beacon loses</td></tr>
         <tr><td>R4</td><td>162</td><td>4.50</td><td>4.35</td><td>49%</td><td>55%</td><td>Bulwark wins. First counterattack succeeds</td></tr>
         <tr><td>R5</td><td>138</td><td>4.35</td><td>4.50</td><td>47%</td><td>58%</td><td>Persia ceasefire. Bulwark counter-proposal</td></tr>
         <tr><td>R6</td><td>125</td><td>4.25</td><td>4.60</td><td>45%</td><td>60%</td><td>Riyadh summit. Two-document formula</td></tr>
@@ -494,7 +494,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <div class="section-title" style="margin:0;">Test 5: Stability Calibration</div>
     <span class="verdict verdict-conditional">CONDITIONAL</span>
   </div>
-  <p class="test-description">Validates v4 stability formula. Previous tests had Heartland hitting 1.0 by R3 (unrealistic). New formula targets: Heartland ~2.5-3.0 by R8. Nordostan should decline slower than Heartland. Finding: Nordostan collapses FASTER (hits 1.0 R8) -- wrong. Inflation penalty applied to absolute level is a bug.</p>
+  <p class="test-description">Validates v4 stability formula. Previous tests had Ruthenia hitting 1.0 by R3 (unrealistic). New formula targets: Ruthenia ~2.5-3.0 by R8. Sarmatia should decline slower than Ruthenia. Finding: Sarmatia collapses FASTER (hits 1.0 R8) -- wrong. Inflation penalty applied to absolute level is a bug.</p>
 
   <div class="grid-2">
     <div class="card">
@@ -513,8 +513,8 @@ tr:hover td { background: rgba(88,166,255,0.04); }
     <table>
       <thead><tr><th>Country</th><th>Start</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R5</th><th>R6</th><th>R7</th><th>R8</th><th>Verdict</th></tr></thead>
       <tbody>
-        <tr style="color:var(--heartland)"><td>Heartland</td><td>5.00</td><td>4.40</td><td>4.19</td><td>3.55</td><td>3.30</td><td>3.20</td><td>2.35</td><td>2.33</td><td>2.31</td><td style="color:var(--pass)">Realistic</td></tr>
-        <tr style="color:var(--nordostan)"><td>Nordostan</td><td>5.00</td><td>4.60</td><td>4.08</td><td>3.60</td><td>3.00</td><td>2.10</td><td>1.61</td><td>1.15</td><td>1.00</td><td style="color:var(--fail)">TOO FAST</td></tr>
+        <tr style="color:var(--ruthenia)"><td>Ruthenia</td><td>5.00</td><td>4.40</td><td>4.19</td><td>3.55</td><td>3.30</td><td>3.20</td><td>2.35</td><td>2.33</td><td>2.31</td><td style="color:var(--pass)">Realistic</td></tr>
+        <tr style="color:var(--sarmatia)"><td>Sarmatia</td><td>5.00</td><td>4.60</td><td>4.08</td><td>3.60</td><td>3.00</td><td>2.10</td><td>1.61</td><td>1.15</td><td>1.00</td><td style="color:var(--fail)">TOO FAST</td></tr>
         <tr style="color:var(--columbia)"><td>Columbia</td><td>7.00</td><td>6.81</td><td>6.77</td><td>6.72</td><td>6.67</td><td>6.72</td><td>6.77</td><td>6.84</td><td>6.91</td><td style="color:var(--pass)">Realistic</td></tr>
         <tr style="color:var(--persia)"><td>Persia</td><td>4.00</td><td>3.46</td><td>2.91</td><td>1.45</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td>1.00</td><td style="color:var(--fail)">TOO FAST</td></tr>
         <tr style="color:var(--cathay)"><td>Cathay</td><td>8.00</td><td>8.25</td><td>8.50</td><td>8.75</td><td>9.00</td><td>9.00</td><td>9.00</td><td>9.00</td><td>9.00</td><td style="color:var(--pass)">Cap hit R4</td></tr>
@@ -592,8 +592,8 @@ tr:hover td { background: rgba(88,166,255,0.04); }
       <div class="chart-container-lg"><canvas id="cx-gap"></canvas></div>
     </div>
     <div class="card">
-      <h3>Heartland Stability Across Tests</h3>
-      <div class="chart-container-lg"><canvas id="cx-heartland"></canvas></div>
+      <h3>Ruthenia Stability Across Tests</h3>
+      <div class="chart-container-lg"><canvas id="cx-ruthenia"></canvas></div>
     </div>
     <div class="card">
       <h3>Oil Price Final vs Start</h3>
@@ -608,12 +608,12 @@ tr:hover td { background: rgba(88,166,255,0.04); }
       <thead><tr><th>Event</th><th>T1</th><th>T2</th><th>T3</th><th>T4</th><th>T5</th><th>T6</th></tr></thead>
       <tbody>
         <tr><td>R2 Midterms</td><td style="color:var(--pass)">Yes (52.6%)</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes (57.4%)</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes</td></tr>
-        <tr><td>R3 Heartland Election</td><td style="color:var(--pass)">Beacon (54.6%)</td><td style="color:var(--fail)">Beacon loses</td><td style="color:var(--pass)">Beacon (46%)</td><td style="color:var(--fail)">Beacon loses R1</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes</td></tr>
+        <tr><td>R3 Ruthenia Election</td><td style="color:var(--pass)">Beacon (54.6%)</td><td style="color:var(--fail)">Beacon loses</td><td style="color:var(--pass)">Beacon (46%)</td><td style="color:var(--fail)">Beacon loses R1</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes</td></tr>
         <tr><td>R5 Presidential</td><td style="color:var(--pass)">Anchor (52%)</td><td style="color:var(--fail)">Opposition wins</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Volt (59.5%)</td><td style="color:var(--pass)">Yes</td><td style="color:var(--pass)">Yes</td></tr>
         <tr><td>Formosa Blockade</td><td style="color:var(--warn)">R4</td><td style="color:var(--fail)">R3 (early!)</td><td style="color:var(--warn)">R4 (brief)</td><td>No</td><td>No</td><td>No</td></tr>
         <tr><td>Semiconductor Disruption</td><td style="color:var(--warn)">R4-R7</td><td style="color:var(--fail)">R3-R8</td><td style="color:var(--warn)">R4 (brief)</td><td>No</td><td>No</td><td>No</td></tr>
         <tr><td>Persia Ceasefire</td><td style="color:var(--pass)">R4</td><td>No</td><td style="color:var(--pass)">R5</td><td style="color:var(--pass)">R5</td><td>No</td><td>No</td></tr>
-        <tr><td>Heartland Ceasefire</td><td style="color:var(--pass)">R7</td><td>No</td><td>No</td><td style="color:var(--pass)">R7</td><td>No</td><td>No</td></tr>
+        <tr><td>Ruthenia Ceasefire</td><td style="color:var(--pass)">R7</td><td>No</td><td>No</td><td style="color:var(--pass)">R7</td><td>No</td><td>No</td></tr>
         <tr><td>Nuclear Use</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
       </tbody>
     </table>
@@ -628,7 +628,7 @@ tr:hover td { background: rgba(88,166,255,0.04); }
       <tbody>
         <tr><td>Oil Price</td><td>$237</td><td>$82</td><td>$191</td><td>$117</td><td>$98</td><td>~$130</td><td>~$160</td></tr>
         <tr><td>Gap Ratio</td><td>0.679</td><td>0.802</td><td>0.798</td><td>0.803</td><td>0.714</td><td>~0.80</td><td>0.819</td></tr>
-        <tr><td>Heartland Stab</td><td>5.00</td><td>4.98</td><td>3.80</td><td>~3.5</td><td>5.55</td><td>2.31</td><td>~4.5</td></tr>
+        <tr><td>Ruthenia Stab</td><td>5.00</td><td>4.98</td><td>3.80</td><td>~3.5</td><td>5.55</td><td>2.31</td><td>~4.5</td></tr>
         <tr><td>Cathay Stab</td><td>8.00</td><td>8.40</td><td>7.70</td><td>~8.0</td><td>8.10</td><td>9.00</td><td>~8.2</td></tr>
       </tbody>
     </table>
@@ -658,8 +658,8 @@ Chart.defaults.font.size = 12;
 const COLORS = {
   columbia: '#4493f8',
   cathay: '#f85149',
-  nordostan: '#6e7681',
-  heartland: '#e3b341',
+  sarmatia: '#6e7681',
+  ruthenia: '#e3b341',
   persia: '#3fb950',
   formosa: '#bc8cff',
   solaria: '#f0883e',
@@ -706,8 +706,8 @@ mkLine(document.getElementById('t1-gdp'), [
 mkLine(document.getElementById('t1-stability'), [
   ds('Columbia', [6.95,6.85,6.80,6.60,6.35,6.40,6.65,6.80], COLORS.columbia),
   ds('Cathay', [8.05,8.10,8.15,8.10,8.10,8.15,8.30,8.40], COLORS.cathay),
-  ds('Heartland', [4.62,4.44,4.07,4.14,4.26,4.38,4.73,4.98], COLORS.heartland),
-  ds('Nordostan', [4.90,4.80,4.59,4.51,4.44,4.40,4.55,4.63], COLORS.nordostan),
+  ds('Ruthenia', [4.62,4.44,4.07,4.14,4.26,4.38,4.73,4.98], COLORS.ruthenia),
+  ds('Sarmatia', [4.90,4.80,4.59,4.51,4.44,4.40,4.55,4.63], COLORS.sarmatia),
   ds('Persia', [3.90,3.75,3.45,3.55,3.80,4.05,4.05,4.10], COLORS.persia)
 ], rounds, {yScale:{min:1,max:9,title:{display:true,text:'Stability (1-9)'}}});
 
@@ -776,7 +776,7 @@ new Chart(document.getElementById('t3-opec'), {
   data: {
     labels: rounds,
     datasets: [
-      { label: 'Nordostan Oil Rev', data: [4.22,3.47,3.19,5.22,3.5,2.5,2.0,1.5], backgroundColor: COLORS.nordostan+'cc' },
+      { label: 'Sarmatia Oil Rev', data: [4.22,3.47,3.19,5.22,3.5,2.5,2.0,1.5], backgroundColor: COLORS.sarmatia+'cc' },
       { label: 'Solaria Oil Rev', data: [2.61,2.59,2.48,4.07,3.0,2.2,2.0,1.3], backgroundColor: COLORS.solaria+'cc' },
     ]
   },
@@ -799,34 +799,34 @@ mkLine(document.getElementById('t4-oil'), [
 ], rounds, {yScale:{min:50,max:220,title:{display:true,text:'$/barrel'}}});
 
 mkLine(document.getElementById('t4-stability'), [
-  ds('Nordostan', [4.90,4.80,4.65,4.50,4.35,4.25,5.10,5.30], COLORS.nordostan),
-  ds('Heartland', [4.62,4.45,4.20,4.35,4.50,4.60,5.30,5.55], COLORS.heartland)
+  ds('Sarmatia', [4.90,4.80,4.65,4.50,4.35,4.25,5.10,5.30], COLORS.sarmatia),
+  ds('Ruthenia', [4.62,4.45,4.20,4.35,4.50,4.60,5.30,5.55], COLORS.ruthenia)
 ], rounds, {yScale:{min:3,max:6,title:{display:true,text:'Stability'}}});
 
 mkLine(document.getElementById('t4-support'), [
-  ds('Nordostan', [54,53,51,49,47,45,52,54], COLORS.nordostan),
-  ds('Heartland', [50,48,43,55,58,60,63,61], COLORS.heartland)
+  ds('Sarmatia', [54,53,51,49,47,45,52,54], COLORS.sarmatia),
+  ds('Ruthenia', [50,48,43,55,58,60,63,61], COLORS.ruthenia)
 ], rounds, {yScale:{min:30,max:70,title:{display:true,text:'Support %'}}});
 
 mkLine(document.getElementById('t4-gdp'), [
   ds('Columbia', [285,290,293,296,295.5,298,300,302], COLORS.columbia),
-  ds('Nordostan', [20.15,20.3,20.4,20.2,20.0,19.8,20.5,21.5], COLORS.nordostan),
-  ds('Heartland', [2.25,2.30,2.35,2.40,2.50,2.55,2.65,2.80], COLORS.heartland)
+  ds('Sarmatia', [20.15,20.3,20.4,20.2,20.0,19.8,20.5,21.5], COLORS.sarmatia),
+  ds('Ruthenia', [2.25,2.30,2.35,2.40,2.50,2.55,2.65,2.80], COLORS.ruthenia)
 ], rounds, {yScale:{title:{display:true,text:'GDP Index'}}});
 
 // ============ TEST 5 CHARTS ============
 mkLine(document.getElementById('t5-stability'), [
-  ds('Heartland', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.heartland),
-  ds('Nordostan', [4.60,4.08,3.60,3.00,2.10,1.61,1.15,1.00], COLORS.nordostan),
+  ds('Ruthenia', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.ruthenia),
+  ds('Sarmatia', [4.60,4.08,3.60,3.00,2.10,1.61,1.15,1.00], COLORS.sarmatia),
   ds('Columbia', [6.81,6.77,6.72,6.67,6.72,6.77,6.84,6.91], COLORS.columbia),
   ds('Cathay', [8.25,8.50,8.75,9.00,9.00,9.00,9.00,9.00], COLORS.cathay),
   ds('Persia', [3.46,2.91,1.45,1.00,1.00,1.00,1.00,1.00], COLORS.persia)
 ], rounds, {yScale:{min:0.5,max:9.5,title:{display:true,text:'Stability (1-9)'}}});
 
 mkLine(document.getElementById('t5-warzone'), [
-  ds('Heartland', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.heartland, {borderWidth:3}),
-  ds('Nordostan', [4.60,4.08,3.60,3.00,2.10,1.61,1.15,1.00], COLORS.nordostan, {borderWidth:3}),
-  ds('Heartland (old formula)', [4.0,2.5,1.0,1.0,1.0,1.0,1.0,1.0], COLORS.heartland, {borderDash:[5,5],borderWidth:1,pointRadius:1})
+  ds('Ruthenia', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.ruthenia, {borderWidth:3}),
+  ds('Sarmatia', [4.60,4.08,3.60,3.00,2.10,1.61,1.15,1.00], COLORS.sarmatia, {borderWidth:3}),
+  ds('Ruthenia (old formula)', [4.0,2.5,1.0,1.0,1.0,1.0,1.0,1.0], COLORS.ruthenia, {borderDash:[5,5],borderWidth:1,pointRadius:1})
 ], rounds, {yScale:{min:0.5,max:5.5,title:{display:true,text:'Stability'}},
   plugins:{title:{display:true,text:'War Zone: New v4 vs Old Formula',color:'#e6edf3'}}});
 
@@ -856,23 +856,23 @@ mkLine(document.getElementById('t6-gdp'), [
 mkLine(document.getElementById('cx-oil'), [
   ds('T1: Baseline', [198,170,156,180,150,110,88,82], COLORS.columbia),
   ds('T2: Formosa', [198,207,239,250,250,250,250,191], COLORS.cathay),
-  ds('T3: Gulf Gate', [221,194,186,250,174,153,155,117], COLORS.heartland),
+  ds('T3: Gulf Gate', [221,194,186,250,174,153,155,117], COLORS.ruthenia),
   ds('T4: Peace', [198,189,175,162,138,125,108,98], COLORS.persia),
-  ds('T5: Stability', [198,190,185,175,170,160,145,130], COLORS.nordostan, {borderDash:[4,3]}),
+  ds('T5: Stability', [198,190,185,175,170,160,145,130], COLORS.sarmatia, {borderDash:[4,3]}),
   ds('T6: Tech Race', [198,192,188,185,180,175,168,160], COLORS.formosa, {borderDash:[4,3]})
 ], rounds, {yScale:{min:50,max:280,title:{display:true,text:'$/barrel'}}});
 
 mkLine(document.getElementById('cx-gap'), [
   ds('T1: Baseline', [0.693,0.707,0.722,0.737,0.753,0.768,0.784,0.802], COLORS.columbia),
   ds('T2: Formosa', [0.693,0.708,0.723,0.739,0.755,0.771,0.785,0.798], COLORS.cathay),
-  ds('T3: Gulf Gate', [0.693,0.707,0.722,0.738,0.753,0.771,0.787,0.803], COLORS.heartland),
+  ds('T3: Gulf Gate', [0.693,0.707,0.722,0.738,0.753,0.771,0.787,0.803], COLORS.ruthenia),
   ds('T6: Tech Race', [0.695,0.711,0.728,0.745,0.763,0.781,0.800,0.819], COLORS.formosa)
 ], rounds, {yScale:{min:0.65,max:0.85,title:{display:true,text:'Cathay/Columbia GDP'}}});
 
-mkLine(document.getElementById('cx-heartland'), [
+mkLine(document.getElementById('cx-ruthenia'), [
   ds('T1: Baseline', [4.62,4.44,4.07,4.14,4.26,4.38,4.73,4.98], COLORS.columbia),
   ds('T4: Peace', [4.62,4.45,4.20,4.35,4.50,4.60,5.30,5.55], COLORS.persia),
-  ds('T5: Stability', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.heartland),
+  ds('T5: Stability', [4.40,4.19,3.55,3.30,3.20,2.35,2.33,2.31], COLORS.ruthenia),
   ds('Old Formula', [4.0,2.5,1.0,1.0,1.0,1.0,1.0,1.0], '#6e7681', {borderDash:[5,5],borderWidth:1,pointRadius:1})
 ], rounds, {yScale:{min:0.5,max:6,title:{display:true,text:'Stability'}}});
 

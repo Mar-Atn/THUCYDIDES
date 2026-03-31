@@ -20,7 +20,7 @@
 | New: Crisis states | None | normal/stressed/crisis/collapse | Economic escalation ladder |
 | New: Momentum | None | -5 to +5 confidence | Growth acceleration/deceleration |
 | New: Semiconductor ramp | Binary | 0.3→0.5→0.7→0.9→1.0/round | Stockpile depletion |
-| New: Siege resilience | None | +0.10 for sanctioned autocracies | Nordostan collapsing too fast |
+| New: Siege resilience | None | +0.10 for sanctioned autocracies | Sarmatia collapsing too fast |
 | New: Contagion | None | Major economy crisis → trade partners | Systemic risk |
 | New: R&D multiplier | 0.5 | 0.8 | Tech race too slow |
 | New: Election crisis mods | None | Stressed -5, Crisis -15, Collapse -25 | Election realism |
@@ -48,8 +48,8 @@
 |--------|---------------|-------------------|---------------|
 | Oil R1 | $198 (too high, instant) | $130-150 (with inertia) | Gradual climb, not spike |
 | Oil R8 | $82-250 (varies) | $80-160 (varies) | Responsive but dampened |
-| Heartland stability R8 | 2.31 (slightly low) | 2.5-3.5 | Within target band |
-| Nordostan stability R8 | 1.0 (too low) | 3.0-4.5 | Siege resilience working |
+| Ruthenia stability R8 | 2.31 (slightly low) | 2.5-3.5 | Within target band |
+| Sarmatia stability R8 | 1.0 (too low) | 3.0-4.5 | Siege resilience working |
 | Columbia AI L4 | Unreachable | Reachable R5-R7 unrestricted | R&D multiplier fix validated |
 | Cathay AI | Auto-promoted R1 (bugged) | Starts at L3 correctly | Data fix validated |
 | Tech factor on GDP | +15% multiplicative (doubling) | +1.5pp additive | No GDP runaway |

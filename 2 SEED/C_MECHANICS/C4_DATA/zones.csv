@@ -16,16 +16,16 @@ freeland,Freeland,land_home,freeland,ereb,false,false
 gallia_1,Gallia West,land_home,gallia,ereb,false,false
 gallia_2,Gallia East,land_home,gallia,ereb,false,false
 ponte,Ponte,land_home,ponte,ereb,false,false
-heartland_1,Heartland West,land_home,heartland,ereb,false,false
-heartland_2,Heartland East,land_contested,heartland,ereb,false,true
-nord_n1,Nordostan Arctic,land_home,nordostan,ereb,false,false
-nord_w1,Nordostan West,land_home,nordostan,ereb,false,false
-nord_w2,Nordostan Southwest,land_home,nordostan,ereb,false,false
-nord_c1,Nordostan Central,land_home,nordostan,ereb,false,false
-nord_c2,Nordostan South Central,land_home,nordostan,ereb,false,false
-nord_e1,Nordostan East,land_home,nordostan,ereb,false,false
-nord_e2,Nordostan Far East,land_home,nordostan,ereb,false,false
-nord_e3,Nordostan Pacific,land_home,nordostan,ereb,false,false
+ruthenia_1,Ruthenia West,land_home,ruthenia,ereb,false,false
+ruthenia_2,Ruthenia East,land_contested,ruthenia,ereb,false,true
+nord_n1,Sarmatia Arctic,land_home,sarmatia,ereb,false,false
+nord_w1,Sarmatia West,land_home,sarmatia,ereb,false,false
+nord_w2,Sarmatia Southwest,land_home,sarmatia,ereb,false,false
+nord_c1,Sarmatia Central,land_home,sarmatia,ereb,false,false
+nord_c2,Sarmatia South Central,land_home,sarmatia,ereb,false,false
+nord_e1,Sarmatia East,land_home,sarmatia,ereb,false,false
+nord_e2,Sarmatia Far East,land_home,sarmatia,ereb,false,false
+nord_e3,Sarmatia Pacific,land_home,sarmatia,ereb,false,false
 sogdiana_1,Sogdiana North,land_contested,none,mashriq,false,false
 sogdiana_2,Sogdiana South,land_contested,none,mashriq,false,false
 sogdiana_3,Sogdiana East,land_contested,none,mashriq,false,false

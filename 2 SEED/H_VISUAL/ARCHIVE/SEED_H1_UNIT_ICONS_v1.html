@@ -17,8 +17,8 @@
     --accent: #C9A84C;
     --columbia: #4A90D9;
     --cathay: #D94A4A;
-    --nordostan: #808080;
-    --heartland: #D4A843;
+    --sarmatia: #808080;
+    --ruthenia: #D4A843;
     --persia: #4AD97A;
     --albion: #3B6E8F;
     --water: #D4E4F0;
@@ -503,8 +503,8 @@ const bestPicks = {
 const countries = [
   { name: 'Columbia', color: '#4A90D9' },
   { name: 'Cathay', color: '#D94A4A' },
-  { name: 'Nordostan', color: '#808080' },
-  { name: 'Heartland', color: '#D4A843' },
+  { name: 'Sarmatia', color: '#808080' },
+  { name: 'Ruthenia', color: '#D4A843' },
   { name: 'Persia', color: '#4AD97A' },
   { name: 'Albion', color: '#3B6E8F' },
 ];
@@ -620,10 +620,10 @@ const waterBg = '#D4E4F0';
 const landBg = '#C8D8C0';
 const cathayBg = '#E8C8C8';
 const columbiaBg = '#C8D8E8';
-const heartlandBg = '#E8DCC0';
+const rutheniaBg = '#E8DCC0';
 const cathayColor = '#D94A4A';
 const columbiaColor = '#4A90D9';
-const heartlandColor = '#D4A843';
+const rutheniaColor = '#D4A843';
 
 const gridRows = [
   // Row 0 (5 cells)
@@ -639,7 +639,7 @@ const gridRows = [
     empty(landBg),
     empty(waterBg),
     { bg: waterBg, units: [{id:'naval-a',color:cathayColor}] },
-    { bg: heartlandBg, units: [{id:'ground-a',color:heartlandColor},{id:'ad-a',color:heartlandColor}] },
+    { bg: rutheniaBg, units: [{id:'ground-a',color:rutheniaColor},{id:'ad-a',color:rutheniaColor}] },
     empty(landBg),
   ]},
   // Row 2 (5 cells)
@@ -692,12 +692,12 @@ const mapLegend = document.getElementById('map-legend');
 mapLegend.innerHTML = `
   <span><span class="legend-dot" style="background:${cathayBg}"></span> Cathay territory</span>
   <span><span class="legend-dot" style="background:${columbiaBg}"></span> Columbia territory</span>
-  <span><span class="legend-dot" style="background:${heartlandBg}"></span> Heartland territory</span>
+  <span><span class="legend-dot" style="background:${rutheniaBg}"></span> Ruthenia territory</span>
   <span><span class="legend-dot" style="background:${waterBg}"></span> Water</span>
   <span><span class="legend-dot" style="background:${landBg}"></span> Neutral land</span>
   <span>${iconSVG('naval-a',12,cathayColor)} Cathay units</span>
   <span>${iconSVG('naval-a',12,columbiaColor)} Columbia units</span>
-  <span>${iconSVG('ground-a',12,heartlandColor)} Heartland units</span>
+  <span>${iconSVG('ground-a',12,rutheniaColor)} Ruthenia units</span>
 `;
 </script>
 

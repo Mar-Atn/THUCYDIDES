@@ -41,7 +41,7 @@ Some actions require a second (or third) role to confirm before executing. The i
 ### Arms transfer — Anytime
 **Who:** Head of State initiates. Defense Minister confirms (units leave their forces).
 **What:** Sell or gift military units to another country.
-**Consequences:** Transfer is automatically public (intelligence satellites detect major movements). Seller is depleted. Buyer absorbs at reduced effectiveness for 1 round. May violate sanctions. Creates dependency — advanced systems need ongoing maintenance from the manufacturer. One of the SIM's most consequential bilateral actions (Patriot-to-Heartland equivalent).
+**Consequences:** Transfer is automatically public (intelligence satellites detect major movements). Seller is depleted. Buyer absorbs at reduced effectiveness for 1 round. May violate sanctions. Creates dependency — advanced systems need ongoing maintenance from the manufacturer. One of the SIM's most consequential bilateral actions (Patriot-to-Ruthenia equivalent).
 
 ### Mobilization — Anytime (escalatory)
 **Who:** Head of State. Unilateral.
@@ -113,7 +113,7 @@ Some actions require a second (or third) role to confirm before executing. The i
 **Consequences:** Immediate and irreversible. Covers: foreign aid, arms payments, bribes, loans (write terms in a treaty), humanitarian assistance, personal deals. Can be public (announced) or private (but intelligence may detect large transfers). The universal economic transaction.
 
 ### Set OPEC+ production level — Routine (oil producers only)
-**Who:** Head of State / PM of oil-producing countries (Solaria, Nordostan, Persia, Mirage).
+**Who:** Head of State / PM of oil-producing countries (Solaria, Sarmatia, Persia, Mirage).
 **What:** Low / normal / high production.
 **Consequences:** AI calculates global oil price from all producers' decisions combined. Classic prisoner's dilemma: cooperate (restrict, price high) or defect (overproduce, grab market share). High prices benefit producers, hurt importers (Cathay, Teutonia, Bharata — social score impact). Coordination is voluntary — no enforcement.
 
@@ -129,7 +129,7 @@ Some actions require a second (or third) role to confirm before executing. The i
 ### Technology transfer — Anytime (spot transaction)
 **Who:** Head of State of the providing country. Recipient agrees.
 **What:** Share technology capability — nuclear technology (advances recipient's nuclear level) or AI/semiconductor technology (advances recipient's tech level). For coins, political concessions, or alliance commitments.
-**Consequences:** Recipient advances one level in the transferred domain. Massive diplomatic consequences — proliferation concerns, alliance reactions. The "Nordostan shares nuclear tech with Persia" or "Columbia shares AI capability with Yamato" scenarios. Legitimate transfers are routine; controversial transfers trigger crises.
+**Consequences:** Recipient advances one level in the transferred domain. Massive diplomatic consequences — proliferation concerns, alliance reactions. The "Sarmatia shares nuclear tech with Persia" or "Columbia shares AI capability with Yamato" scenarios. Legitimate transfers are routine; controversial transfers trigger crises.
 
 ---
 
@@ -178,7 +178,7 @@ If the target is a human player: survival determined by dice (1/6 death probabil
 ### Call elections — Anytime (democracies)
 **Who:** Head of State (voluntary) or Parliament/Congress (forced, when political support drops below threshold).
 **What:** Trigger a presidential or parliamentary election.
-**Consequences:** In Columbia: political support score determines whether the incumbent survives. Below 40% = likely loss. 40-60% = contested (dice element). Above 60% = comfortable win. If lost, a new president takes over (possibly the VP, possibly an opposition figure). In Heartland: three human candidates compete, AI judges based on gameplay outcomes (territory, economy, casualties, support). In other democracies: AI generates election outcome based on conditions. Elections reset the mandate — a fresh start or a devastating rejection.
+**Consequences:** In Columbia: political support score determines whether the incumbent survives. Below 40% = likely loss. 40-60% = contested (dice element). Above 60% = comfortable win. If lost, a new president takes over (possibly the VP, possibly an opposition figure). In Ruthenia: three human candidates compete, AI judges based on gameplay outcomes (territory, economy, casualties, support). In other democracies: AI generates election outcome based on conditions. Elections reset the mandate — a fresh start or a devastating rejection.
 
 ---
 
@@ -201,7 +201,7 @@ If the target is a human player: survival determined by dice (1/6 death probabil
 ### Public speech — Anytime or Scheduled
 **Who:** Any head of state or designated speaker. 2-3 minutes.
 **What:** Address the room — all participants hear. Can be a policy declaration, a threat, a peace offer, a campaign speech, a eulogy, an accusation. The press is always present.
-**Consequences:** Creates public commitments that constrain future action ("I will never abandon Heartland" — now the press holds you to it). Affects political support: a well-received speech boosts support; a badly received one damages it. Campaign speeches before elections directly affect the outcome. One of the SIM's highest-engagement mechanics — the room goes silent when a leader speaks.
+**Consequences:** Creates public commitments that constrain future action ("I will never abandon Ruthenia" — now the press holds you to it). Affects political support: a well-received speech boosts support; a badly received one damages it. Campaign speeches before elections directly affect the outcome. One of the SIM's highest-engagement mechanics — the room goes silent when a leader speaks.
 
 ### Sign treaty / agreement — Anytime (spot transaction)
 **Who:** Any two (or more) heads of state or authorized representatives.
@@ -209,7 +209,7 @@ If the target is a human player: survival determined by dice (1/6 death probabil
 **Consequences:** Immediate and binding between signatories. Breach has reputational consequences (loss of credibility, reduced trust in future negotiations) but no automatic mechanical penalty — there is no court that enforces treaties. Agreements can be public (announced to all) or secret (known only to signatories — but intelligence may discover them, and the press may publish them). The universal bilateral action.
 
 ### Call UNSC emergency session — Anytime
-**Who:** Any P5 member (Columbia, Cathay, Nordostan, Gallia, Albion).
+**Who:** Any P5 member (Columbia, Cathay, Sarmatia, Gallia, Albion).
 **What:** Convene the UN Security Council to address a crisis.
 **Consequences:** All P5 members must attend (brief interruption of whatever they're doing — the UNSC summons are mandatory). Resolutions can be proposed and voted. Any P5 member vetoes. The act of calling a session IS a political move — it signals crisis, forces public confrontation, and puts every P5 member on record. Even a vetoed resolution reveals who stands where.
 
@@ -233,9 +233,9 @@ If the target is a human player: survival determined by dice (1/6 death probabil
 
 **A country in economic warfare (e.g., Columbia vs. Cathay):** 5-8 actions. Budget. Tariffs. Sanctions. Export restrictions. Transfer coins (aid to allies). Sign treaty. Speech. Maybe a covert cyber operation.
 
-**A country at war (e.g., Nordostan):** 8-12 actions. Budget. Production at maximum. Deploy units. Attack. Mobilization. Propaganda. Sanctions response. Diplomacy (treaty with Cathay, UNSC session). Possibly: assassination, covert ops against Heartland.
+**A country at war (e.g., Sarmatia):** 8-12 actions. Budget. Production at maximum. Deploy units. Attack. Mobilization. Propaganda. Sanctions response. Diplomacy (treaty with Cathay, UNSC session). Possibly: assassination, covert ops against Ruthenia.
 
-**A country in crisis (e.g., Heartland):** 6-10 actions. Budget under pressure. Arms transfers received. Election campaign. Public speeches. Military deployment. Peace negotiations (treaty). Covert ops (intelligence gathering).
+**A country in crisis (e.g., Ruthenia):** 6-10 actions. Budget under pressure. Arms transfers received. Election campaign. Public speeches. Military deployment. Peace negotiations (treaty). Covert ops (intelligence gathering).
 
 ---
 

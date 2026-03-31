@@ -15,9 +15,9 @@ The Thucydides Trap dynamics ARE emerging: Cathay closes the GDP gap from ~0.68 
 ## Test Question 1: Are Economic Dynamics Plausible?
 
 ### What Works
-- **GDP trajectories are directionally correct:** Columbia grows slowly (2-4%), Cathay grows faster (5-9%), Nordostan contracts under sanctions, Bharata grows strongly as non-aligned beneficiary
+- **GDP trajectories are directionally correct:** Columbia grows slowly (2-4%), Cathay grows faster (5-9%), Sarmatia contracts under sanctions, Bharata grows strongly as non-aligned beneficiary
 - **Cathay closes the gap:** Gap ratio moves from 0.68 → 0.83-0.88 over 6 rounds. At this pace, Cathay reaches parity around round 8-10 — plausible for a 3-4 year timeframe
-- **Sanctions hurt Nordostan:** GDP declines or stagnates while war drains treasury
+- **Sanctions hurt Sarmatia:** GDP declines or stagnates while war drains treasury
 - **Tariff effects visible:** Cathay growth dampened from 4.5% base to ~5% effective (Columbia tariffs bite but don't cripple)
 
 ### What Needs Fixing
@@ -37,14 +37,14 @@ The Thucydides Trap dynamics ARE emerging: Cathay closes the GDP gap from ~0.68 
 ## Test Question 2: Does Military Balance Shift at Right Pace?
 
 ### What Works
-- **Eastern Europe grinds correctly:** Both Nordostan and Heartland lose units each round. Territory changes are incremental (1-2 zones per run). Neither side achieves decisive breakthrough — matches reality.
+- **Eastern Europe grinds correctly:** Both Sarmatia and Ruthenia lose units each round. Territory changes are incremental (1-2 zones per run). Neither side achieves decisive breakthrough — matches reality.
 - **Deterrence holds:** No nuclear weapons used in any run. The 3-confirmation requirement and AI refusal mechanism work as intended.
-- **Combat dice produce variance:** Different seeds produce different tactical outcomes (run_3 had a Heartland zone capture, others didn't). RISK model works.
+- **Combat dice produce variance:** Different seeds produce different tactical outcomes (run_3 had a Ruthenia zone capture, others didn't). RISK model works.
 
 ### What Needs Fixing
-- **Not enough military variety:** The only active combat is Nordostan-Heartland. Cathay never moves on Formosa, Levantia never strikes Persia, Choson never provokes. The AI agents may be too conservative — their military decision logic needs more assertive threshold triggers.
+- **Not enough military variety:** The only active combat is Sarmatia-Ruthenia. Cathay never moves on Formosa, Levantia never strikes Persia, Choson never provokes. The AI agents may be too conservative — their military decision logic needs more assertive threshold triggers.
 - **No theater activation beyond Eastern Europe:** The Middle East, Taiwan, Caribbean theaters never activate. This means the "number of active theaters" metric stays at 1 (Eastern Europe) for all runs. The AI needs more reasons to open new theaters.
-- **Nordostan doesn't escalate when desperate:** At stability 1.0, Nordostan should be doing something dramatic (nuclear threats, cease-fire proposals, full mobilization). Instead it just keeps grinding with weakening forces.
+- **Sarmatia doesn't escalate when desperate:** At stability 1.0, Sarmatia should be doing something dramatic (nuclear threats, cease-fire proposals, full mobilization). Instead it just keeps grinding with weakening forces.
 
 ### Calibration Needed
 | Parameter | Current | Recommended | Reason |
@@ -52,7 +52,7 @@ The Thucydides Trap dynamics ARE emerging: Cathay closes the GDP gap from ~0.68 
 | Cathay Formosa trigger | Never fires | Fire at round 4+ if AI level reaches L3 AND gap ratio > 0.8 | Create the Taiwan crisis |
 | Levantia preemptive strike | Threshold 80% | Threshold 60% (Persia starts at 60%) | Make ME theater activation likely |
 | Choson provocation frequency | ~10% per round | ~25% per round | Nuclear provocations should be regular |
-| Nordostan desperation escalation | Not implemented | At stability <2, Nordostan proposes ceasefire OR threatens nuclear | Create dramatic moments |
+| Sarmatia desperation escalation | Not implemented | At stability <2, Sarmatia proposes ceasefire OR threatens nuclear | Create dramatic moments |
 
 ---
 
@@ -60,7 +60,7 @@ The Thucydides Trap dynamics ARE emerging: Cathay closes the GDP gap from ~0.68 
 
 ### What Works
 - **Cathay capability clock ticks:** GDP gap narrows visibly each round. By round 5-6, participants would feel the power shift.
-- **Nordostan resource clock ticks:** Economy declines, war tiredness mounts, stability collapses. The "produce victory or face collapse" dynamic is present.
+- **Sarmatia resource clock ticks:** Economy declines, war tiredness mounts, stability collapses. The "produce victory or face collapse" dynamic is present.
 - **Columbia election provides structure:** Round 2 midterms and Round 5 presidential create natural checkpoints.
 
 ### What Doesn't Work (The Big Problem)
@@ -118,8 +118,8 @@ sanctions_pain_capped = min(sanctions_pain_impact, 1.0)  # cap sanctions stabili
 
 ### Expected Effect:
 - Peaceful, growing countries (Gallia, Bharata, Yamato) stay at 6-8 stability
-- Countries at war (Nordostan, Heartland) decline to 2-4 by round 4-6
-- Sanctioned countries (Nordostan) decline faster
+- Countries at war (Sarmatia, Ruthenia) decline to 2-4 by round 4-6
+- Sanctioned countries (Sarmatia) decline faster
 - Countries in multiple crises (Persia if struck, Caribe if invaded) hit crisis
 - Creates the **contrast** needed for dramatic arc: stable world watching a few crisis zones
 
@@ -128,7 +128,7 @@ sanctions_pain_capped = min(sanctions_pain_impact, 1.0)  # cap sanctions stabili
 ## Other Fixes Needed
 
 ### Fix 2: AI Military Assertiveness
-The AI agents are too passive militarily. In 4 runs x 6 rounds = 24 rounds of gameplay, the only combat is the ongoing Nordostan-Heartland war. No new conflicts emerge. Fix:
+The AI agents are too passive militarily. In 4 runs x 6 rounds = 24 rounds of gameplay, the only combat is the ongoing Sarmatia-Ruthenia war. No new conflicts emerge. Fix:
 - Cathay should attempt Formosa blockade in round 4-5 if conditions are favorable
 - Levantia should strike Persia nuclear sites if progress > 70%
 - Choson should provocate 1-2 times per game
@@ -149,8 +149,8 @@ The Columbia elections fire but their impact isn't dramatic enough. The winner s
 | Columbia final GDP | 317 | 321 | 314 | 314 |
 | Cathay final GDP | 277 | 280 | 260 | 276 |
 | Gap ratio | 0.873 | 0.873 | 0.828 | 0.881 |
-| Nordostan stability | 1.0 | 1.0 | 1.0 | 1.0 |
-| Heartland stability | 1.0 | 1.0 | 1.0 | 1.0 |
+| Sarmatia stability | 1.0 | 1.0 | 1.0 | 1.0 |
+| Ruthenia stability | 1.0 | 1.0 | 1.0 | 1.0 |
 | Nuclear use | None | None | None | None |
 | New theaters opened | 0 | 0 | 0 | 0 |
 | Hormuz blocked | No | No | Yes | Yes |

@@ -23,10 +23,10 @@
     },
     "tariffs": {
       "cathay": 2,
-      "nordostan": 2
+      "sarmatia": 2
     },
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 3
     },
     "military_ops": [
@@ -93,7 +93,7 @@
       "nuclear": 6.503399999999999
     }
   },
-  "nordostan": {
+  "sarmatia": {
     "budget": {
       "social_spending": 4.03524,
       "social_pct": 0.2,
@@ -120,10 +120,10 @@
     "military_ops": [
       {
         "type": "attack",
-        "target": "heartland",
-        "target_zone": "heartland_2",
+        "target": "ruthenia",
+        "target_zone": "ruthenia_2",
         "units": 4,
-        "origin_zone": "nordostan_1"
+        "origin_zone": "sarmatia_1"
       }
     ],
     "opec_production": "high",
@@ -135,12 +135,12 @@
     "covert_ops": [
       {
         "type": "cyber",
-        "target": "heartland",
+        "target": "ruthenia",
         "objective": "military_disruption"
       }
     ]
   },
-  "heartland": {
+  "ruthenia": {
     "budget": {
       "social_spending": 0.341925,
       "social_pct": 0.15,
@@ -233,7 +233,7 @@
     },
     "tariffs": {},
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2
     },
     "military_ops": [],
@@ -267,7 +267,7 @@
     },
     "tariffs": {},
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2
     },
     "military_ops": [],
@@ -301,7 +301,7 @@
     },
     "tariffs": {},
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2
     },
     "military_ops": [],
@@ -335,7 +335,7 @@
     },
     "tariffs": {},
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2
     },
     "military_ops": [],
@@ -369,7 +369,7 @@
     },
     "tariffs": {},
     "sanctions": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2
     },
     "military_ops": [],

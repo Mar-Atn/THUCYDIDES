@@ -107,8 +107,8 @@ def get_role_briefs(country_name: str) -> List[dict]:
     filename_map = {
         "columbia": "COLUMBIA_ROLES.md",
         "cathay": "CATHAY_ROLES.md",
-        "nordostan": "NORDOSTAN_ROLES.md",
-        "heartland": "HEARTLAND_ROLES.md",
+        "sarmatia": "SARMATIA_ROLES.md",
+        "ruthenia": "RUTHENIA_ROLES.md",
         "persia": "PERSIA_ROLES.md",
         "europe": "EUROPE_ROLES.md",
     }
@@ -416,7 +416,7 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
     heritage_assessment = {
         "persia": "active_war" if persia_war.get("attacker") else "no_war",
         "caribe": "target" if round_num <= 4 else "deferred",
-        "heartland_deal": "negotiable" if ee_war.get("stalemate") else "premature",
+        "ruthenia_deal": "negotiable" if ee_war.get("stalemate") else "premature",
         "thule": "aspirational",
         "cathay_containment": "ongoing" if gap["gap_closing"] else "stable",
     }
@@ -441,7 +441,7 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
     cathay_naval_trend = gap["cathay_naval"]
     reasoning["role_positions"]["shadow"] = {
         "cathay_assessment": f"Naval buildup at {cathay_naval_trend}. Formosa window analysis: {'dangerous' if gap['naval_parity_near'] else 'not imminent'}.",
-        "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain." if ws.countries.get("nordostan", {}).get("political", {}).get("stability", 5) < 5 else "Holding together.",
+        "sarmatia_assessment": "Internally strained but stable. Ironhand loyalty uncertain." if ws.countries.get("sarmatia", {}).get("political", {}).get("stability", 5) < 5 else "Holding together.",
         "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence.",
     }
 
@@ -514,12 +514,12 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
     if gap["gap_closing"] or round_num >= 2:
         tariff_actions["cathay"] = min(3, 1 + round_num // 3)
     if eco["health"] != "crisis":
-        tariff_actions["nordostan"] = 2
+        tariff_actions["sarmatia"] = 2
     actions["tariffs"] = tariff_actions
 
     # Sanctions: coordinated with allies
     sanction_actions = {}
-    sanction_actions["nordostan"] = 3  # max sanctions
+    sanction_actions["sarmatia"] = 3  # max sanctions
     if persia_war.get("attacker"):
         sanction_actions["persia"] = 3
     actions["sanctions"] = sanction_actions
@@ -559,14 +559,14 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
     }
 
     # Negotiations
-    # 1. Heartland arms transfer (Anchor pushes, Shield approves limited)
-    if ws.get_country_at_war("heartland"):
+    # 1. Ruthenia arms transfer (Anchor pushes, Shield approves limited)
+    if ws.get_country_at_war("ruthenia"):
         arms_amount = 2 if overstretch_level != "critical" else 1
         if mil["ground"] > 20:
             negotiations.append({
                 "type": "arms_transfer",
                 "from": "columbia",
-                "to": "heartland",
+                "to": "ruthenia",
                 "terms": {"unit_type": "ground", "count": arms_amount},
                 "likelihood": 0.8,
             })
@@ -574,17 +574,17 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
             negotiations.append({
                 "type": "coin_transfer",
                 "from": "columbia",
-                "to": "heartland",
+                "to": "ruthenia",
                 "terms": {"amount": min(2, eco["treasury"] * 0.2)},
                 "likelihood": 0.9,
             })
 
-    # 2. Nordostan deal (Dealer's initiative, round 3+)
+    # 2. Sarmatia deal (Dealer's initiative, round 3+)
     if round_num >= 3 and ee_war.get("stalemate"):
         negotiations.append({
             "type": "peace_framework",
             "from": "columbia",
-            "to": "nordostan",
+            "to": "sarmatia",
             "terms": {
                 "proposal": "ceasefire_and_negotiations",
                 "columbia_offer": "sanctions_partial_relief",
@@ -607,7 +607,7 @@ def deliberate_columbia(ws: WorldState, round_num: int, rng: random.Random) -> T
         f"Round {round_num}: Dealer prioritizes {'legacy deals' if round_num >= 4 else 'military operations'}. "
         f"Budget: {social_pct:.0%} social, {mil_pct:.0%} military, {tech_pct:.0%} tech. "
         f"{'Naval acceleration due to Cathay parity threat.' if gap['naval_parity_near'] else ''} "
-        f"{'Heartland arms transfer approved.' if ws.get_country_at_war('heartland') else ''}"
+        f"{'Ruthenia arms transfer approved.' if ws.get_country_at_war('ruthenia') else ''}"
     )
 
     return actions, negotiations, reasoning
@@ -765,12 +765,12 @@ def deliberate_cathay(ws: WorldState, round_num: int, rng: random.Random) -> Tup
     }
 
     # Negotiations
-    # 1. Nordostan support (maintain partnership)
+    # 1. Sarmatia support (maintain partnership)
     if eco["treasury"] > 3:
         negotiations.append({
             "type": "coin_transfer",
             "from": "cathay",
-            "to": "nordostan",
+            "to": "sarmatia",
             "terms": {"amount": min(2, eco["treasury"] * 0.1)},
             "likelihood": 0.7,
         })
@@ -804,16 +804,16 @@ def deliberate_cathay(ws: WorldState, round_num: int, rng: random.Random) -> Tup
     return actions, negotiations, reasoning
 
 
-def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> Tuple[dict, list, dict]:
-    """Nordostan: Pathfinder (HoS), Ironhand (military), Compass (oligarch)."""
-    briefs = get_role_briefs("nordostan")
-    c = ws.countries["nordostan"]
-    mil = assess_military_balance(ws, "nordostan")
-    eco = assess_economic_health(ws, "nordostan")
-    pol = assess_political_situation(ws, "nordostan")
+def deliberate_sarmatia(ws: WorldState, round_num: int, rng: random.Random) -> Tuple[dict, list, dict]:
+    """Sarmatia: Pathfinder (HoS), Ironhand (military), Compass (oligarch)."""
+    briefs = get_role_briefs("sarmatia")
+    c = ws.countries["sarmatia"]
+    mil = assess_military_balance(ws, "sarmatia")
+    eco = assess_economic_health(ws, "sarmatia")
+    pol = assess_political_situation(ws, "sarmatia")
     ee_war = assess_war_status(ws, "eastern_ereb")
 
-    reasoning = {"team": "nordostan", "round": round_num, "role_positions": {}, "internal_dynamics": "", "final_decision": ""}
+    reasoning = {"team": "sarmatia", "round": round_num, "role_positions": {}, "internal_dynamics": "", "final_decision": ""}
 
     actions = {}
     negotiations = []
@@ -878,22 +878,22 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
         # Offensive push
         actions["military_ops"].append({
             "type": "attack",
-            "target": "heartland",
-            "target_zone": "heartland_2",
+            "target": "ruthenia",
+            "target_zone": "ruthenia_2",
             "units": min(4, mil["ground"] // 3),
-            "origin_zone": "nordostan_1",
+            "origin_zone": "sarmatia_1",
         })
     elif mil["ground"] > 5:
         # Limited probing attack
         actions["military_ops"].append({
             "type": "attack",
-            "target": "heartland",
-            "target_zone": "heartland_2",
+            "target": "ruthenia",
+            "target_zone": "ruthenia_2",
             "units": min(2, mil["ground"] // 4),
-            "origin_zone": "nordostan_1",
+            "origin_zone": "sarmatia_1",
         })
 
-    # OPEC production: Nordostan needs revenue
+    # OPEC production: Sarmatia needs revenue
     actions["opec_production"] = "high"  # pump for revenue despite cartel pressure
 
     # Nuclear posture
@@ -912,7 +912,7 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
     if round_num >= 2:
         actions["covert_ops"].append({
             "type": "cyber",
-            "target": "heartland",
+            "target": "ruthenia",
             "objective": "military_disruption",
         })
 
@@ -921,7 +921,7 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
     if deal_window_open and round_num >= 2:
         negotiations.append({
             "type": "peace_framework",
-            "from": "nordostan",
+            "from": "sarmatia",
             "to": "columbia",
             "terms": {
                 "proposal": "grand_bargain",
@@ -934,7 +934,7 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
     # 2. Cathay support request (Compass channels)
     negotiations.append({
         "type": "coin_transfer",
-        "from": "nordostan",
+        "from": "sarmatia",
         "to": "cathay",
         "terms": {"request": True, "amount": 2},
         "likelihood": 0.6,
@@ -944,7 +944,7 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
     if eco["sanctions_on_me"] > 2:
         negotiations.append({
             "type": "oil_deal",
-            "from": "nordostan",
+            "from": "sarmatia",
             "to": "mirage",
             "terms": {"sanctions_routing": True, "discount": 0.15},
             "likelihood": 0.5,
@@ -959,16 +959,16 @@ def deliberate_nordostan(ws: WorldState, round_num: int, rng: random.Random) -> 
     return actions, negotiations, reasoning
 
 
-def deliberate_heartland(ws: WorldState, round_num: int, rng: random.Random) -> Tuple[dict, list, dict]:
-    """Heartland: Beacon (HoS), Bulwark (military), Broker (negotiator)."""
-    briefs = get_role_briefs("heartland")
-    c = ws.countries["heartland"]
-    mil = assess_military_balance(ws, "heartland")
-    eco = assess_economic_health(ws, "heartland")
-    pol = assess_political_situation(ws, "heartland")
+def deliberate_ruthenia(ws: WorldState, round_num: int, rng: random.Random) -> Tuple[dict, list, dict]:
+    """Ruthenia: Beacon (HoS), Bulwark (military), Broker (negotiator)."""
+    briefs = get_role_briefs("ruthenia")
+    c = ws.countries["ruthenia"]
+    mil = assess_military_balance(ws, "ruthenia")
+    eco = assess_economic_health(ws, "ruthenia")
+    pol = assess_political_situation(ws, "ruthenia")
     ee_war = assess_war_status(ws, "eastern_ereb")
 
-    reasoning = {"team": "heartland", "round": round_num, "role_positions": {}, "internal_dynamics": "", "final_decision": ""}
+    reasoning = {"team": "ruthenia", "round": round_num, "role_positions": {}, "internal_dynamics": "", "final_decision": ""}
 
     actions = {}
     negotiations = []
@@ -994,7 +994,7 @@ def deliberate_heartland(ws: WorldState, round_num: int, rng: random.Random) -> 
     # --- BROKER: Pragmatic Deal ---
     reasoning["role_positions"]["broker"] = {
         "position": "EU membership path is the real prize. Temporary ceasefire preserving future claims is acceptable.",
-        "back_channel": "active with Compass (Nordostan)" if round_num >= 3 else "preparing",
+        "back_channel": "active with Compass (Sarmatia)" if round_num >= 3 else "preparing",
     }
 
     # Internal dynamics
@@ -1032,8 +1032,8 @@ def deliberate_heartland(ws: WorldState, round_num: int, rng: random.Random) -> 
     if can_counterattack and rng.random() < 0.3 + round_num * 0.05:
         actions["military_ops"].append({
             "type": "counterattack",
-            "target": "nordostan",
-            "target_zone": "heartland_2",
+            "target": "sarmatia",
+            "target_zone": "ruthenia_2",
             "units": min(3, mil["ground"] // 3),
         })
 
@@ -1050,14 +1050,14 @@ def deliberate_heartland(ws: WorldState, round_num: int, rng: random.Random) -> 
     # 1. Request Western arms (critical)
     negotiations.append({
         "type": "arms_request",
-        "from": "heartland",
+        "from": "ruthenia",
         "to": "columbia",
         "terms": {"request": "ground_units", "amount": 3, "urgency": "critical"},
         "likelihood": 0.9,
     })
     negotiations.append({
         "type": "coin_request",
-        "from": "heartland",
+        "from": "ruthenia",
         "to": "columbia",
         "terms": {"amount": 2},
         "likelihood": 0.8,
@@ -1066,18 +1066,18 @@ def deliberate_heartland(ws: WorldState, round_num: int, rng: random.Random) -> 
     # 2. EU support (Broker channels)
     negotiations.append({
         "type": "aid_request",
-        "from": "heartland",
+        "from": "ruthenia",
         "to": "teutonia",
         "terms": {"economic_aid": 1, "eu_membership_progress": True},
         "likelihood": 0.7,
     })
 
-    # 3. If desperate, Broker back-channel to Nordostan
+    # 3. If desperate, Broker back-channel to Sarmatia
     if support < 40 and round_num >= 4:
         negotiations.append({
             "type": "peace_exploration",
-            "from": "heartland",
-            "to": "nordostan",
+            "from": "ruthenia",
+            "to": "sarmatia",
             "terms": {"ceasefire_exploration": True, "no_formal_recognition": True},
             "likelihood": 0.3,
         })
@@ -1217,12 +1217,12 @@ def deliberate_persia(ws: WorldState, round_num: int, rng: random.Random) -> Tup
         "likelihood": 0.6,
     })
 
-    # 3. Nordostan solidarity
+    # 3. Sarmatia solidarity
     if round_num >= 2:
         negotiations.append({
             "type": "intelligence_sharing",
             "from": "persia",
-            "to": "nordostan",
+            "to": "sarmatia",
             "terms": {"shared_interest": "counter_western_pressure"},
             "likelihood": 0.5,
         })
@@ -1272,18 +1272,18 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
             reasoning["role_positions"]["lumiere"] = {
                 "position": "European strategic autonomy. French nuclear umbrella. Independent Persia policy.",
                 "defense_spending_push": "increase to 3%",
-                "heartland_support": "strong",
+                "ruthenia_support": "strong",
             }
         elif cid == "teutonia":
             reasoning["role_positions"]["forge"] = {
                 "position": "Economic stability first. Cathay trade essential. Reluctant rearmament.",
                 "cathay_trade_protection": "high priority",
-                "heartland_support": "strong but budget-constrained",
+                "ruthenia_support": "strong but budget-constrained",
             }
         elif cid == "freeland":
             reasoning["role_positions"]["sentinel"] = {
-                "position": "Maximum Nordostan containment. NATO Article 5 sacred. Defense spending to 4%.",
-                "heartland_support": "maximum possible",
+                "position": "Maximum Sarmatia containment. NATO Article 5 sacred. Defense spending to 4%.",
+                "ruthenia_support": "maximum possible",
                 "threat_level": "existential",
             }
         elif cid == "ponte":
@@ -1330,7 +1330,7 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
                 },
             },
             "tariffs": {},
-            "sanctions": {"nordostan": 3, "persia": 2},
+            "sanctions": {"sarmatia": 3, "persia": 2},
             "military_ops": [],
             "tech_rd": {"ai": eco["gdp"] * tech_pct * 0.7, "nuclear": 0},
             "covert_ops": [],
@@ -1341,17 +1341,17 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
     # EU collective decisions
     eu_decisions = []
 
-    # 1. Nordostan sanctions: unanimous (Ponte may block tightening)
+    # 1. Sarmatia sanctions: unanimous (Ponte may block tightening)
     ponte_blocks = rng.random() < 0.3  # Ponte blocks ~30% of the time
     eu_decisions.append({
-        "issue": "nordostan_sanctions_tightening",
+        "issue": "sarmatia_sanctions_tightening",
         "result": "blocked_by_ponte" if ponte_blocks else "approved",
         "level": 3 if not ponte_blocks else 2,
     })
 
-    # 2. Heartland support package
+    # 2. Ruthenia support package
     eu_decisions.append({
-        "issue": "heartland_aid_package",
+        "issue": "ruthenia_aid_package",
         "result": "approved_reduced" if ponte_blocks else "approved_full",
         "amount": 1 if ponte_blocks else 2,
     })
@@ -1370,7 +1370,7 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
         negotiations.append({
             "type": "coin_transfer",
             "from": "teutonia",
-            "to": "heartland",
+            "to": "ruthenia",
             "terms": {"amount": 1, "eu_package": True},
             "likelihood": 0.8,
         })
@@ -1380,7 +1380,7 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
         negotiations.append({
             "type": "security_guarantee",
             "from": "gallia",
-            "to": "heartland",
+            "to": "ruthenia",
             "terms": {"nuclear_umbrella_extension": True},
             "likelihood": 0.4,
         })
@@ -1395,8 +1395,8 @@ def deliberate_europe(ws: WorldState, round_num: int, rng: random.Random) -> Tup
     })
 
     reasoning["final_decision"] = (
-        f"Round {round_num}: EU {'divided (Ponte blocking)' if ponte_blocks else 'united on Nordostan sanctions'}. "
-        f"Heartland aid: {'reduced' if ponte_blocks else 'full'}. Defense spending gradual increase."
+        f"Round {round_num}: EU {'divided (Ponte blocking)' if ponte_blocks else 'united on Sarmatia sanctions'}. "
+        f"Ruthenia aid: {'reduced' if ponte_blocks else 'full'}. Defense spending gradual increase."
     )
 
     return all_actions, negotiations, reasoning
@@ -1549,7 +1549,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
         negotiations.append({
             "type": "leverage_play",
             "from": country_id,
-            "to": "nordostan",
+            "to": "sarmatia",
             "terms": {"bosphorus_access": True, "price": "sanctions_relief_support"},
             "likelihood": 0.5,
         })
@@ -1560,7 +1560,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
             "terms": {"infrastructure_investment": True},
             "likelihood": 0.6,
         })
-        reasoning["decisions"].append("Maximize Bosphorus leverage. Play NATO vs Nordostan for concessions.")
+        reasoning["decisions"].append("Maximize Bosphorus leverage. Play NATO vs Sarmatia for concessions.")
 
     elif strategy == "remilitarization":
         # Yamato
@@ -1616,7 +1616,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
             negotiations.append({
                 "type": "patron_request",
                 "from": country_id,
-                "to": "nordostan",
+                "to": "sarmatia",
                 "terms": {"military_presence": True},
                 "likelihood": 0.3,
             })
@@ -1628,7 +1628,7 @@ def deliberate_solo(ws: WorldState, country_id: str, round_num: int, rng: random
         negotiations.append({
             "type": "financial_services",
             "from": country_id,
-            "to": "nordostan",
+            "to": "sarmatia",
             "terms": {"sanctions_routing": True, "commission": 0.05},
             "likelihood": 0.6,
         })

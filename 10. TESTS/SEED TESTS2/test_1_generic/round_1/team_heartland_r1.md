@@ -1,4 +1,4 @@
-# HEARTLAND TEAM — ROUND 1 DECISIONS (H1 2026)
+# RUTHENIA TEAM — ROUND 1 DECISIONS (H1 2026)
 
 ---
 
@@ -25,22 +25,22 @@
 ## TEAM DECISIONS (binding, from BEACON as Head of State)
 
 ### Budget
-Heartland is at fiscal zero. Treasury 1 coin + Aid ~2 coins = ~3 coins. All consumed by maintenance (~2.1), war costs (1.0), debt (0.3), social (0.1). No surplus for production or R&D.
+Ruthenia is at fiscal zero. Treasury 1 coin + Aid ~2 coins = ~3 coins. All consumed by maintenance (~2.1), war costs (1.0), debt (0.3), social (0.1). No surplus for production or R&D.
 
 ### Tariffs
 None imposed. Economy too small and aid-dependent.
 
 ### Sanctions
-Maintain alignment with Western sanctions on Nordostan (L3). Public call for expanded enforcement targeting Cathay-to-Nordostan dual-use tech transfers.
+Maintain alignment with Western sanctions on Sarmatia (L3). Public call for expanded enforcement targeting Cathay-to-Sarmatia dual-use tech transfers.
 
 ### Military Actions (Defensive)
 - **Hold defensive posture** at front: 7 ground + 2 tac air. No withdrawal, no major offensive.
-- **Intensify drone strikes on Nordostan logistics** — target 4 primary rail corridors. Defensive attrition, not escalation.
+- **Intensify drone strikes on Sarmatia logistics** — target 4 primary rail corridors. Defensive attrition, not escalation.
 - **Air defense repositioning** to prioritize energy infrastructure ahead of summer.
 - **No offensive operations** — Beacon overrules Bulwark's push for counteroffensive.
 
 ### Diplomatic Proposals
-1. **To Columbia (Dealer):** Meeting request. "Heartland is prepared to discuss security architecture for durable peace — but floor includes EU membership, Western security forces on soil, no sovereignty concessions."
+1. **To Columbia (Dealer):** Meeting request. "Ruthenia is prepared to discuss security architecture for durable peace — but floor includes EU membership, Western security forces on soil, no sovereignty concessions."
 2. **To Gallia (Lumiere):** Accept military hubs proposal in principle. Request formal talks on French/UK military training and logistics hubs.
 3. **To Teutonia (Forge):** Request increased financial assistance and EU accession acceleration.
 4. **To Freeland (Sentinel):** Reaffirm closest-ally status, coordination on logistics and NATO advocacy.
@@ -52,7 +52,7 @@ Maintain alignment with Western sanctions on Nordostan (L3). Public call for exp
 - Storm Shadow / SCALP replenishment from Albion / Gallia
 
 ### Public Statements
-**BEACON (Presidential Address):** "Heartland stands. Four years into a war of extinction, we stand... We are ready to discuss the architecture of a durable peace. But a durable peace requires that no aggressor profits from aggression. It requires EU membership for Heartland... We remember Budapest. We will not sign another Budapest."
+**BEACON (Presidential Address):** "Ruthenia stands. Four years into a war of extinction, we stand... We are ready to discuss the architecture of a durable peace. But a durable peace requires that no aggressor profits from aggression. It requires EU membership for Ruthenia... We remember Budapest. We will not sign another Budapest."
 
 ---
 
@@ -62,18 +62,18 @@ Maintain alignment with Western sanctions on Nordostan (L3). Public call for exp
 - Convene National Security Council to formalize logistics disruption campaign
 - Direct call to Lumiere on military hubs — personal diplomacy
 - Quietly instruct intelligence to monitor Bulwark's and Broker's foreign contacts
-- Prepare narrative: "Heartland offered peace on honorable terms"
+- Prepare narrative: "Ruthenia offered peace on honorable terms"
 
 ### BULWARK
 - Accept meeting with Shield (Columbia SecDef) through mil-to-mil channels. Share real front-line assessment: "Line holds 3-4 rounds. With 2 air defense units + ammo, counteroffensive options open."
-- One calibrated public interview: "I support the president. Heartland can achieve more than stalemate if properly resourced."
+- One calibrated public interview: "I support the president. Ruthenia can achieve more than stalemate if properly resourced."
 - Private reply to soldiers' petition: "When the country asks, I will be ready."
 - Open quiet conversation with Broker — explore policy synthesis
 
 ### BROKER
-- Contact Forge (Teutonia) privately: "If I lead Heartland, I bring a peace framework Europe can support. Need tangible EU accession signal."
+- Contact Forge (Teutonia) privately: "If I lead Ruthenia, I bring a peace framework Europe can support. Need tangible EU accession signal."
 - Contact Pillar privately: "What is Ponte's real price? Debt relief? Energy? Migration?"
-- Publish op-ed in European newspaper: "Heartland Deserves More Than Promises — It Deserves Membership"
+- Publish op-ed in European newspaper: "Ruthenia Deserves More Than Promises — It Deserves Membership"
 - Accept Bulwark's meeting — listen carefully, don't commit yet
 
 ---
@@ -96,7 +96,7 @@ Maintain alignment with Western sanctions on Nordostan (L3). Public call for exp
 
 1. **R1 is about buying time.** No money, no reserves, no margin. Sustain + create conditions for later.
 2. **Logistics disruption is the one worthwhile offensive.** Low-cost drone strikes on rail corridors — defensible, high-disruption.
-3. **Gallia military hubs is the most important diplomatic opportunity.** Western troops on Heartland soil transforms the security equation.
+3. **Gallia military hubs is the most important diplomatic opportunity.** Western troops on Ruthenia soil transforms the security equation.
 4. **All three leaders are working the EU track in parallel — without coordinating.** Strength (multiple pathways) and vulnerability (Europeans can play factions).
 5. **Beacon is managing, not leading.** His core problem. If hubs and logistics don't deliver by R2, his 52% becomes 48%.
 6. **Bulwark's restraint IS his strategy.** Visible competence + Western military trust + soldier loyalty. Time works for him.

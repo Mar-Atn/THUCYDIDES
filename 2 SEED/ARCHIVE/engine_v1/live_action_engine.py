@@ -45,7 +45,7 @@ COVERT_DETECTION_BASE = {
 }
 
 # Countries with enhanced covert capabilities
-INTELLIGENCE_POWERS = {"columbia", "cathay", "levantia", "albion", "nordostan"}
+INTELLIGENCE_POWERS = {"columbia", "cathay", "levantia", "albion", "sarmatia"}
 
 # Max covert ops per round
 MAX_COVERT_OPS_PER_ROUND = {

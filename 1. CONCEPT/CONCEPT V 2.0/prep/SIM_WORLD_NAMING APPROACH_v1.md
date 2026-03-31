@@ -47,7 +47,7 @@ No single naming system forced. Pick the best name for each country from any sou
 1. **Historical/classical names** — real alternative names once used for the country. Strongest category: real, known, respectful, historically weighted. (e.g., Persia, Cathay, Albion, Formosa)
 2. **Countries' own names** — names the country uses for itself in its own language. Deeply respectful. (e.g., Bharata for India)
 3. **Geographic derivations** — names from real geographic features. (e.g., Amazonia from the Amazon)
-4. **Proven SIM4 names** — already tested with live participants. (Nordostan, Heartland, Freeland, Phrygia)
+4. **Proven SIM4 names** — already tested with live participants. (Sarmatia, Ruthenia, Freeland, Phrygia)
 5. **Evocative inventions** — new names that feel like they could be real. Last resort, only where no better option exists.
 
 ---
@@ -62,8 +62,8 @@ No single naming system forced. Pick the best name for each country from any sou
 |---|---|---|---|
 | USA | Columbia | Historical allegorical name for America | Dignified, unmistakable. Possible Colombia confusion — resolved by map context. Alternatives: Vinland, Novatera |
 | China | Cathay | Medieval European name (Cathay Pacific) | Elegant, one word, zero confusion |
-| Russia | Nordostan | Proven SIM4 | "Northern land." Slavic/Turkic blend. Proven with participants |
-| Ukraine | Heartland | Proven SIM4 | Geopolitical resonance (Mackinder). Emotional. Proven |
+| Russia | Sarmatia | Proven SIM4 | "Northern land." Slavic/Turkic blend. Proven with participants |
+| Ukraine | Ruthenia | Proven SIM4 | Geopolitical resonance (Mackinder). Emotional. Proven |
 | UK | Albion | Ancient name for Britain | "Perfidious Albion." Widely known. Two syllables. Perfect |
 | Germany | Teutonia | Classical root ("Teutonic") | Clear Germanic association. Atlas-style dignity |
 | France | Gallia | Classical (Caesar's "Gaul") | Elegant, two syllables, widely known |
@@ -108,7 +108,7 @@ Use **fictional country names** but consider keeping **real or near-real organiz
 |---|---|---|
 | NATO | NATO | Western Treaty Alliance (SIM4 precedent) |
 | UN | United Nations | League of Nations (SIM4 precedent) |
-| EU | European Union | Western Hansa / Continental Union |
+| EU | Ereb Union | Western Hansa / Continental Union |
 | BRICS+ | BRICS+ | The N.E.T. (SIM4 precedent) or new name |
 | OPEC+ | OPEC+ | Energy Cartel / Oil Compact |
 | G7 | G7 | Council of Seven / Western Forum |
@@ -125,7 +125,7 @@ Decision deferred. Both options viable. Option A minimizes learning burden. Opti
 A full world map with invented geography: **recognizable but rearranged**. The Conflict SIM's fantasy-cartography style (terrain textures, stylized seas, artistic borders) sets the quality bar.
 
 - **Recognizable continental shapes** — participants orient within seconds
-- **Correct relative positions** — Columbia across an ocean, Cathay in the east, Nordostan vast and northern, Formosa an island off Cathay's coast, Persia in the middle
+- **Correct relative positions** — Columbia across an ocean, Cathay in the east, Sarmatia vast and northern, Formosa an island off Cathay's coast, Persia in the middle
 - **Only SIM actors labeled** — other areas are hinterland, keeping the map clean
 - **Maritime chokepoints preserved** — strait near Formosa, gulf near Persia/Solaria, straits near Phrygia, canal connecting seas
 - **Centered on the contested middle** — not Atlantic-centered, not Pacific-centered. The Middle East / Central Asia / Indian Ocean in the center, two great powers on opposite edges

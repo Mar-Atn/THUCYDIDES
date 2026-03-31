@@ -364,7 +364,7 @@ class WorldModelEngine:
             supply += (multiplier - 1.0) * 0.20  # scale contribution per member
 
         # Sanctions on oil producers reduce supply
-        for producer in ("nordostan", "persia"):
+        for producer in ("sarmatia", "persia"):
             sanc_level = self._get_sanctions_on(producer)
             if sanc_level >= 2:
                 supply -= 0.08
@@ -1118,7 +1118,7 @@ class WorldModelEngine:
 
         Keeps: democratic resilience, siege resilience, society adaptation
         Adds: crisis state penalty, inflation delta (not absolute), GDP cap
-        Fixes: Nordostan siege resilience for sanctioned autocracies
+        Fixes: Sarmatia siege resilience for sanctioned autocracies
         """
         c = self.ws.countries[country_id]
         pol = c["political"]
@@ -1290,7 +1290,7 @@ class WorldModelEngine:
                     delta -= 1.0
                 elif round_num == 4:
                     delta -= 2.0
-            elif country_id == "heartland":
+            elif country_id == "ruthenia":
                 if round_num in (2, 3):
                     delta -= 1.5
 
@@ -1404,12 +1404,12 @@ class WorldModelEngine:
                 result["parliament_change"] = "status_quo"
                 result["note"] = "Midterms: President's camp retains majority."
 
-        # Heartland wartime election
-        elif election_type in ("heartland_wartime", "heartland_wartime_runoff"):
+        # Ruthenia wartime election
+        elif election_type in ("ruthenia_wartime", "ruthenia_wartime_runoff"):
             war_tiredness = pol.get("war_tiredness", 0)
             territory_factor = 0
             for w in self.ws.wars:
-                if w.get("defender") == "heartland":
+                if w.get("defender") == "ruthenia":
                     territory_factor -= len(w.get("occupied_zones", [])) * 3
             ai_score_adjusted = clamp(
                 ai_score + territory_factor - war_tiredness * 2, 0, 100)
@@ -1419,9 +1419,9 @@ class WorldModelEngine:
             result["final_incumbent_pct"] = round(final_incumbent, 2)
             result["incumbent_wins"] = incumbent_wins
             if not incumbent_wins:
-                result["note"] = "Heartland election: Beacon loses. Bulwark becomes president."
+                result["note"] = "Ruthenia election: Beacon loses. Bulwark becomes president."
             else:
-                result["note"] = "Heartland election: Beacon survives."
+                result["note"] = "Ruthenia election: Beacon survives."
 
         # Columbia presidential
         elif election_type == "columbia_presidential":
@@ -1918,7 +1918,7 @@ class WorldModelEngine:
                 for dep in getattr(self.ws, 'deployments', []):
                     if dep.get('country') == cid:
                         zone = dep.get('zone', '')
-                        if 'heartland' in zone or zone.startswith('ee_'):
+                        if 'ruthenia' in zone or zone.startswith('ee_'):
                             theaters.add('ereb')
                         if 'persia' in zone or 'gulf' in zone:
                             theaters.add('mashriq')
@@ -2042,7 +2042,7 @@ class WorldModelEngine:
             elections_soon = False
             if cid == 'columbia' and round_num in (1, 4):  # before R2 midterms, before R5 presidential
                 elections_soon = True
-            if cid == 'heartland' and round_num in (2, 3):  # before R3-4 wartime election
+            if cid == 'ruthenia' and round_num in (2, 3):  # before R3-4 wartime election
                 elections_soon = True
 
             # TRAJECTORY CHECK: Support declining toward election — amplified anxiety
@@ -3084,7 +3084,7 @@ class WorldModelEngine:
         ELDERLY_LEADERS = {
             'columbia': {'role': 'dealer', 'age': 80, 'medical_quality': 0.9},  # best care
             'cathay': {'role': 'helmsman', 'age': 73, 'medical_quality': 0.7},
-            'nordostan': {'role': 'pathfinder', 'age': 73, 'medical_quality': 0.6},
+            'sarmatia': {'role': 'pathfinder', 'age': 73, 'medical_quality': 0.6},
         }
 
         if country_id not in ELDERLY_LEADERS:
@@ -3097,7 +3097,7 @@ class WorldModelEngine:
         prob = base_prob * (1 - leader['medical_quality'] * 0.5)
         # Columbia (80, 0.9 medical): 0.13 * 0.55 = 7.15%
         # Cathay (73, 0.7 medical): 0.06 * 0.65 = 3.9%
-        # Nordostan (73, 0.6 medical): 0.06 * 0.70 = 4.2%
+        # Sarmatia (73, 0.6 medical): 0.06 * 0.70 = 4.2%
 
         roll = random.random()
         if roll < prob:

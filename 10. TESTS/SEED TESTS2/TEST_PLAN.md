@@ -7,11 +7,11 @@
 
 | # | Name | Objective | Key Watch Items |
 |---|------|-----------|-----------------|
-| 1 | **GENERIC BASELINE** | Full system integration. 37 independent AI agents. | Oil ~$140+ R1, Heartland stability >2.5 by R8, elections firing, ceasefire possible |
+| 1 | **GENERIC BASELINE** | Full system integration. 37 independent AI agents. | Oil ~$140+ R1, Ruthenia stability >2.5 by R8, elections firing, ceasefire possible |
 | 2 | FORMOSA CRISIS | Cathay naval window, semiconductor disruption | Naval crossover, Columbia overstretch, semiconductor GDP hit |
 | 3 | GULF GATE ECONOMICS | Oil price under sustained blockade | Producer revenue, importer pain, blockade breaking incentive |
 | 4 | PEACE NEGOTIATION | Ceasefire mechanic validation | Terms emergence, engine handling, war status update |
-| 5 | STABILITY CALIBRATION | War country stability fix | Heartland ~2.5-3.0 R8, Nordostan ~3.5-4.5, peaceful 6-8 |
+| 5 | STABILITY CALIBRATION | War country stability fix | Ruthenia ~2.5-3.0 R8, Sarmatia ~3.5-4.5, peaceful 6-8 |
 | 6 | RARE EARTH + TECH RACE | Technology competition dynamics | R&D slowdown, breakthroughs, GDP multipliers |
 
 ---
@@ -29,10 +29,10 @@ HELMSMAN (Chairman), RAMPART (Marshal), ABACUS (Premier), CIRCUIT (Tech), SAGE (
 **Europe Team (6):**
 LUMIERE (Gallia), FORGE (Teutonia), SENTINEL (Freeland), PONTE (Ponte), MARINER (Albion), PILLAR (EU)
 
-**Nordostan Team (3):**
+**Sarmatia Team (3):**
 PATHFINDER (President), IRONHAND (Marshal), COMPASS (Oligarch)
 
-**Heartland Team (3):**
+**Ruthenia Team (3):**
 BEACON (President), BULWARK (General), BROKER (Politician)
 
 **Persia Team (3):**
@@ -108,11 +108,11 @@ This gives us true independence (each country has its own Claude instance with o
   "tariffs": {"cathay": 3, ...},
   "sanctions": {"persia": 3, ...},
   "military_actions": [{"type": "attack", "target": "persia_1", ...}],
-  "diplomatic_proposals": [{"to": "nordostan", "type": "ceasefire", ...}],
-  "meeting_requests": ["NATO", "bilateral_with_heartland"],
-  "transactions": [{"type": "coin_transfer", "to": "heartland", "amount": 5}],
+  "diplomatic_proposals": [{"to": "sarmatia", "type": "ceasefire", ...}],
+  "meeting_requests": ["NATO", "bilateral_with_ruthenia"],
+  "transactions": [{"type": "coin_transfer", "to": "ruthenia", "amount": 5}],
   "covert_ops": [{"type": "espionage", "target": "cathay"}],
-  "public_statements": ["Columbia stands with Heartland..."],
+  "public_statements": ["Columbia stands with Ruthenia..."],
   "internal_notes": "Shield warns overstretch. Shadow flags Cathay naval buildup.",
   "reasoning": "..."
 }
@@ -129,7 +129,7 @@ This gives us true independence (each country has its own Claude instance with o
 - **Stability decay**: Defenders -0.10/R, democratic resilience +0.15/R
 - **Semiconductor**: formosa_dependency × severity → GDP hit (floor 50%)
 - **Rare earth**: restriction_level × 0.15 → R&D slowdown (floor 40%)
-- **Elections**: R2 Columbia midterms, R3-4 Heartland, R5 Columbia presidential
+- **Elections**: R2 Columbia midterms, R3-4 Ruthenia, R5 Columbia presidential
 
 ---
 
@@ -162,9 +162,9 @@ SEED TESTS2/
 |--------|---------------|----------|
 | Oil price R1 | $130-160 | <$100 (blockade not working) |
 | Oil price R8 | $90-180 (depends on blockade status) | Static 68-72 (old bug) |
-| Heartland stability R3 | >3.0 | ≤1.0 (old decay bug) |
-| Heartland stability R8 | 2.0-4.0 | <1.5 (still too fast) |
-| Nordostan stability R8 | 3.0-5.0 | <2.0 (autocracy resilience failing) |
+| Ruthenia stability R3 | >3.0 | ≤1.0 (old decay bug) |
+| Ruthenia stability R8 | 2.0-4.0 | <1.5 (still too fast) |
+| Sarmatia stability R8 | 3.0-5.0 | <2.0 (autocracy resilience failing) |
 | Columbia stability R8 | 5.0-7.5 | <4.0 (peaceful country shouldn't decay) |
 | Cathay GDP growth | 3.0-5.0% | >6% (ceiling not working) |
 | Gap ratio R8 | 0.80-1.00 | >1.10 (Cathay runaway) or <0.75 (no convergence) |

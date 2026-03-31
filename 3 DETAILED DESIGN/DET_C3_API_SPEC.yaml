@@ -1,0 +1,1788 @@
+openapi: 3.0.3
+info:
+  title: Thucydides Trap SIM API
+  description: |
+    Complete API specification for the Thucydides Trap (TTT) geopolitical simulation.
+
+    Sources: SEED F4 (API Contracts), F2 (Data Architecture), F3 (Data Flows), G (Web App Spec).
+
+    All endpoints accept and return JSON. All timestamps are ISO 8601 UTC.
+    All IDs are lowercase snake_case strings. Pagination is cursor-based.
+    All state-modifying endpoints are idempotent when given the same idempotency key.
+  version: "1.1.0"
+  contact:
+    name: MetaGames
+    email: marat@metagames.org
+
+servers:
+  - url: https://api.ttt.metagames.org/api/v1
+    description: Production
+  - url: http://localhost:3000/api/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Authentication and role assignment
+  - name: State
+    description: Read game state (country, map, role, briefing)
+  - name: Events
+    description: Event log queries
+  - name: Actions
+    description: Submit player actions
+  - name: Transactions
+    description: Bilateral transactions (propose, confirm, reject)
+  - name: Deployment
+    description: Military unit deployment (Phase B)
+  - name: Facilitator
+    description: Moderator-only endpoints
+  - name: AI
+    description: AI participant and Argus interfaces
+
+# --------------------------------------------------------------------------
+# Security
+# --------------------------------------------------------------------------
+security:
+  - supabaseJWT: []
+
+components:
+  securitySchemes:
+    supabaseJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Supabase JWT token. Claims include (per DET_NAMING_CONVENTIONS 1.7):
+        - sub: user_id
+        - sim_run_id: SIM instance (canonical name, not sim_id)
+        - role_id: assigned role
+        - country_id: derived from role
+        - access_level: participant | moderator | spectator | admin
+        - permissions: list of allowed action types (derived from role powers)
+
+  # -----------------------------------------------------------------------
+  # Shared schemas
+  # -----------------------------------------------------------------------
+  schemas:
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code (e.g., AUTH_INVALID_TOKEN, RESOURCE_INSUFFICIENT_TREASURY)
+            message:
+              type: string
+              description: Human-readable error description
+            details:
+              type: object
+              additionalProperties: true
+            timestamp:
+              type: string
+              format: date-time
+            request_id:
+              type: string
+
+    EconomicState:
+      type: object
+      properties:
+        gdp:
+          type: number
+          format: double
+        treasury:
+          type: number
+          format: double
+        inflation:
+          type: number
+          format: double
+        debt_burden:
+          type: number
+          format: double
+        economic_state:
+          type: string
+          enum: [normal, stressed, crisis, collapse]
+        momentum:
+          type: number
+          format: double
+        market_index:
+          type: integer
+          minimum: 0
+          maximum: 100
+        revenue_last_round:
+          type: number
+          format: double
+        budget_last_round:
+          type: object
+          properties:
+            social:
+              type: number
+            military:
+              type: number
+            technology:
+              type: number
+            maintenance:
+              type: number
+
+    MilitaryState:
+      type: object
+      properties:
+        ground:
+          type: integer
+        naval:
+          type: integer
+        tactical_air:
+          type: integer
+        strategic_missiles:
+          type: integer
+        air_defense:
+          type: integer
+        total:
+          type: integer
+        production_capacity:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              max:
+                type: integer
+              cost:
+                type: number
+
+    PoliticalState:
+      type: object
+      properties:
+        stability:
+          type: number
+          format: double
+        political_support:
+          type: number
+          format: double
+        war_tiredness:
+          type: number
+          format: double
+        regime_status:
+          type: string
+          enum: [stable, unstable, collapsed]
+        protest_risk:
+          type: boolean
+        coup_risk:
+          type: boolean
+
+    TechnologyState:
+      type: object
+      properties:
+        nuclear_level:
+          type: integer
+          minimum: 0
+          maximum: 3
+        nuclear_rd_progress:
+          type: number
+          format: double
+        ai_level:
+          type: integer
+          minimum: 0
+          maximum: 4
+        ai_rd_progress:
+          type: number
+          format: double
+
+    CountryState:
+      type: object
+      required: [round_num, country_id, economic, military, political, technology]
+      properties:
+        round_num:
+          type: integer
+        country_id:
+          type: string
+        economic:
+          $ref: '#/components/schemas/EconomicState'
+        military:
+          $ref: '#/components/schemas/MilitaryState'
+        political:
+          $ref: '#/components/schemas/PoliticalState'
+        technology:
+          $ref: '#/components/schemas/TechnologyState'
+
+    Zone:
+      type: object
+      properties:
+        id:
+          type: string
+        display_name:
+          type: string
+        type:
+          type: string
+          enum: [land_home, land_contested, sea, chokepoint]
+        owner:
+          type: string
+        theater:
+          type: string
+        visible_forces:
+          type: object
+          description: Forces visible to the requesting participant
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: integer
+        status:
+          type: string
+          enum: [normal, contested, occupied, destroyed]
+
+    MapState:
+      type: object
+      required: [round_num, zones, chokepoint_status, active_wars, oil_price]
+      properties:
+        round_num:
+          type: integer
+        zones:
+          type: array
+          items:
+            $ref: '#/components/schemas/Zone'
+        chokepoint_status:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [open, blocked, partial]
+        active_wars:
+          type: array
+          items:
+            type: object
+            properties:
+              attacker:
+                type: string
+              defender:
+                type: string
+              theater:
+                type: string
+        oil_price:
+          type: number
+          format: double
+        oil_price_trend:
+          type: array
+          items:
+            type: number
+
+    Event:
+      type: object
+      required: [id, round_num, phase, timestamp, actor, action_type, visibility]
+      properties:
+        id:
+          type: string
+        round_num:
+          type: integer
+        phase:
+          type: string
+          enum: [A, B, PRE, POST]
+        timestamp:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        action_type:
+          type: string
+        target:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+        result:
+          type: object
+          additionalProperties: true
+        visibility:
+          type: string
+          enum: [PUBLIC, COUNTRY, ROLE, MODERATOR]
+
+    Pagination:
+      type: object
+      properties:
+        cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
+        total_visible:
+          type: integer
+
+    RoleData:
+      type: object
+      properties:
+        role_id:
+          type: string
+        character_name:
+          type: string
+        country_id:
+          type: string
+        title:
+          type: string
+        status:
+          type: string
+          enum: [active, fired, arrested, incapacitated, dead]
+        personal_coins:
+          type: number
+          format: double
+        powers:
+          type: array
+          items:
+            type: string
+        objectives:
+          type: array
+          items:
+            type: string
+        ticking_clock:
+          type: string
+        artefacts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              title:
+                type: string
+              classification:
+                type: string
+
+    Briefing:
+      type: object
+      properties:
+        round_num:
+          type: integer
+        public_narrative:
+          type: string
+        country_briefing:
+          type: string
+        key_events:
+          type: array
+          items:
+            type: object
+            properties:
+              description:
+                type: string
+              impact:
+                type: string
+        warnings:
+          type: array
+          items:
+            type: string
+
+    StateChange:
+      type: object
+      properties:
+        path:
+          type: string
+          description: Dot-separated path into world state (e.g., countries.columbia.economic.treasury)
+        old:
+          description: Previous value
+        new:
+          description: New value
+
+    BudgetAction:
+      type: object
+      properties:
+        social_allocation:
+          type: number
+          format: double
+        military_allocation:
+          type: number
+          format: double
+        technology_allocation:
+          type: number
+          format: double
+        military_production:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              coins:
+                type: number
+              tier:
+                type: string
+                enum: [normal, accelerated, maximum]
+        tech_rd:
+          type: object
+          properties:
+            nuclear:
+              type: number
+            ai:
+              type: number
+
+    ActionSubmission:
+      type: object
+      required: [idempotency_key, actions]
+      properties:
+        idempotency_key:
+          type: string
+        actions:
+          type: object
+          properties:
+            budget:
+              $ref: '#/components/schemas/BudgetAction'
+            tariffs:
+              type: array
+              items:
+                type: object
+                required: [target, new_level]
+                properties:
+                  target:
+                    type: string
+                  new_level:
+                    type: integer
+                    minimum: 0
+                    maximum: 3
+            sanctions:
+              type: array
+              items:
+                type: object
+                required: [target, new_level]
+                properties:
+                  target:
+                    type: string
+                  new_level:
+                    type: integer
+                    minimum: 0
+                    maximum: 3
+            military:
+              type: array
+              items:
+                type: object
+                required: [action_type]
+                properties:
+                  action_type:
+                    type: string
+                    enum: [attack, blockade, naval_combat, naval_bombardment, air_strike, strategic_missile, nuclear_strike]
+                  target_zone:
+                    type: string
+                  from_zone:
+                    type: string
+                  units:
+                    type: object
+                    additionalProperties:
+                      type: integer
+            political:
+              type: array
+              description: Political actions (impeachment, propaganda, arrest, fire_role, coup_attempt, assassination)
+              items:
+                type: object
+                required: [action_type]
+                properties:
+                  action_type:
+                    type: string
+                    enum: [impeachment, propaganda, arrest, fire_role, coup_attempt, assassination]
+                  target_role_id:
+                    type: string
+                  coins_spent:
+                    type: number
+                  conspirators:
+                    type: array
+                    items:
+                      type: string
+            covert:
+              type: array
+              description: Covert actions (intelligence_request, sabotage, cyber_attack, disinformation, election_meddling)
+              items:
+                type: object
+                required: [action_type]
+                properties:
+                  action_type:
+                    type: string
+                    enum: [intelligence_request, sabotage, cyber_attack, disinformation, election_meddling]
+                  target_country_id:
+                    type: string
+                  target_type:
+                    type: string
+                  question:
+                    type: string
+            diplomatic:
+              type: array
+              items:
+                type: object
+                properties:
+                  action_type:
+                    type: string
+                    enum: [public_statement, meeting_call, election_nominate]
+                  content:
+                    type: string
+
+    DeploymentOrder:
+      type: object
+      required: [unit_type, count, from_zone, to_zone]
+      properties:
+        unit_type:
+          type: string
+          enum: [ground, naval, tactical_air, strategic_missile, air_defense]
+        count:
+          type: integer
+          minimum: 1
+        from_zone:
+          type: string
+        to_zone:
+          type: string
+
+    TransactionProposal:
+      type: object
+      required: [idempotency_key, transaction_type, proposer, counterparty, details]
+      properties:
+        idempotency_key:
+          type: string
+        transaction_type:
+          type: string
+          enum: [coin_transfer, arms_transfer, tech_transfer, basing_rights, treaty, agreement, org_creation, personal_investment, bribe]
+          description: Canonical transaction types per DET_NAMING_CONVENTIONS 1.2
+        proposer:
+          type: string
+          description: Proposer role_id
+        counterparty:
+          type: string
+          description: Counterparty role_id
+        details:
+          type: object
+          properties:
+            from_country:
+              type: string
+            to_country:
+              type: string
+            amount:
+              type: number
+              format: double
+            units:
+              type: object
+              additionalProperties:
+                type: integer
+            tech_transfer:
+              type: object
+              properties:
+                domain:
+                  type: string
+                level:
+                  type: integer
+            basing_zone:
+              type: string
+            conditions:
+              type: string
+            public:
+              type: boolean
+              default: true
+            duration_rounds:
+              type: integer
+              nullable: true
+
+    TransactionConfirmation:
+      type: object
+      required: [confirmation_token, accepted]
+      properties:
+        confirmation_token:
+          type: string
+        accepted:
+          type: boolean
+
+    ModeratorOverride:
+      type: object
+      required: [idempotency_key, overrides]
+      properties:
+        idempotency_key:
+          type: string
+        overrides:
+          type: array
+          items:
+            type: object
+            required: [path, new_value, reason]
+            properties:
+              path:
+                type: string
+              new_value: {}
+              reason:
+                type: string
+
+    ExpertPanel:
+      type: object
+      properties:
+        round_num:
+          type: integer
+        panel:
+          type: object
+          properties:
+            keynes:
+              type: array
+              items:
+                type: object
+                properties:
+                  country:
+                    type: string
+                  assessment:
+                    type: string
+                  adjustment:
+                    type: object
+                  confidence:
+                    type: number
+            clausewitz:
+              type: array
+              items:
+                type: object
+                properties:
+                  country:
+                    type: string
+                  assessment:
+                    type: string
+                  adjustment:
+                    type: object
+                  confidence:
+                    type: number
+            machiavelli:
+              type: array
+              items:
+                type: object
+                properties:
+                  country:
+                    type: string
+                  assessment:
+                    type: string
+                  adjustment:
+                    type: object
+                  confidence:
+                    type: number
+            synthesis:
+              type: object
+              properties:
+                applied:
+                  type: array
+                  items:
+                    type: object
+                rejected:
+                  type: array
+                  items:
+                    type: object
+            flags:
+              type: array
+              items:
+                type: object
+                properties:
+                  severity:
+                    type: string
+                    enum: [HIGH, MEDIUM, LOW]
+                  description:
+                    type: string
+                  auto_fixed:
+                    type: boolean
+
+    AIAgentInput:
+      type: object
+      description: Full context provided to an AI participant agent
+      properties:
+        role_id:
+          type: string
+        role_brief:
+          type: string
+        visible_state:
+          type: object
+          description: State filtered by role visibility level
+        available_actions:
+          type: array
+          items:
+            type: object
+        round_num_context:
+          type: object
+          properties:
+            round_num:
+              type: integer
+            phase:
+              type: string
+            time_remaining_seconds:
+              type: integer
+            recent_events:
+              type: array
+              items:
+                type: object
+        objectives:
+          type: array
+          items:
+            type: string
+        ticking_clock:
+          type: string
+
+    AIAgentOutput:
+      type: object
+      description: AI participant decision output
+      properties:
+        actions:
+          type: array
+          items:
+            type: object
+            properties:
+              action_type:
+                type: string
+              params:
+                type: object
+              priority:
+                type: integer
+              reasoning:
+                type: string
+        negotiations:
+          type: array
+          items:
+            type: object
+            properties:
+              target_role_id:
+                type: string
+              proposal:
+                type: string
+              reasoning:
+                type: string
+        statements:
+          type: array
+          items:
+            type: object
+            properties:
+              audience:
+                type: string
+              content:
+                type: string
+        internal_reasoning:
+          type: string
+          description: MODERATOR-ONLY visibility
+
+  # -----------------------------------------------------------------------
+  # Shared parameters
+  # -----------------------------------------------------------------------
+  parameters:
+    round_numParam:
+      name: round_num
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 8
+      description: Round number
+
+    countryIdParam:
+      name: country_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Country ID (lowercase snake_case)
+
+    roleIdParam:
+      name: role_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Role ID (lowercase snake_case)
+
+    cursorParam:
+      name: cursor
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Pagination cursor (event ID of last item in previous page)
+
+    limitParam:
+      name: limit
+      in: query
+      required: false
+      schema:
+        type: integer
+        default: 50
+        minimum: 1
+        maximum: 200
+      description: Items per page
+
+  # -----------------------------------------------------------------------
+  # Common responses
+  # -----------------------------------------------------------------------
+  responses:
+    Unauthorized:
+      description: Not authenticated
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Authenticated but not authorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Entity not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Conflict:
+      description: State conflict (round_num frozen, action already submitted)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnprocessableEntity:
+      description: Valid request but unprocessable (insufficient resources, invalid game state)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    RateLimited:
+      description: Rate limited
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ServerError:
+      description: Server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+# --------------------------------------------------------------------------
+# PATHS
+# --------------------------------------------------------------------------
+paths:
+
+  # ========================================================================
+  # STATE ENDPOINTS (Read)
+  # ========================================================================
+
+  /state/{round_num}/{country_id}:
+    get:
+      operationId: getCountryState
+      tags: [State]
+      summary: Get country state for a round_num
+      description: |
+        Returns country state filtered by requesting user's visibility level.
+        Participants see own country (exact values). Moderators see any country.
+        Other countries return public tier approximations only.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+        - $ref: '#/components/parameters/countryIdParam'
+      responses:
+        '200':
+          description: Country state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountryState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /map/{round_num}:
+    get:
+      operationId: getMapState
+      tags: [State]
+      summary: Get public map state for a round_num
+      description: |
+        Returns zone data, chokepoint status, active wars, oil price.
+        Forces are filtered by visibility: own forces + adjacent/shared zones.
+        Moderator sees all forces. Distant zone forces omitted unless revealed by intelligence.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+      responses:
+        '200':
+          description: Map state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MapState'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /events/{round_num}:
+    get:
+      operationId: getEvents
+      tags: [Events]
+      summary: Get events for a round_num
+      description: |
+        Returns events filtered by requesting role's visibility level.
+        Cursor-based pagination. Events sorted by timestamp ascending.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+        - $ref: '#/components/parameters/cursorParam'
+        - $ref: '#/components/parameters/limitParam'
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by event action_type
+        - name: actor
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by actor role_id
+        - name: country
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter by country context
+      responses:
+        '200':
+          description: Paginated event list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  round_num:
+                    type: integer
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /briefing/{round_num}:
+    get:
+      operationId: getRoundBriefing
+      tags: [State]
+      summary: Get round_num briefing narrative
+      description: |
+        Returns public narrative (same for all) and country-specific briefing.
+        Warnings are country-specific.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+      responses:
+        '200':
+          description: Round briefing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Briefing'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /role/{role_id}:
+    get:
+      operationId: getRoleData
+      tags: [State]
+      summary: Get role data
+      description: |
+        Returns role details including personal coins, powers, objectives, artefacts.
+        Own role only, or moderator for any role.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/roleIdParam'
+      responses:
+        '200':
+          description: Role data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleData'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ========================================================================
+  # ACTION ENDPOINTS (Write)
+  # ========================================================================
+
+  /actions/{round_num}/{country_id}:
+    post:
+      operationId: submitCountryActions
+      tags: [Actions]
+      summary: Submit country actions for a round_num
+      description: |
+        Submits budget, tariffs, sanctions, military actions, and diplomatic actions.
+        Requires participant access with appropriate powers for each action type.
+        Idempotent when same idempotency_key is provided.
+
+        If not submitted by Phase A deadline, previous round_num's settings continue.
+
+        Rate limit: 10 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+        - $ref: '#/components/parameters/countryIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActionSubmission'
+      responses:
+        '201':
+          description: Actions accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [accepted]
+                  round_num:
+                    type: integer
+                  country_id:
+                    type: string
+                  validation:
+                    type: object
+                    properties:
+                      budget_valid:
+                        type: boolean
+                      actions_valid:
+                        type: boolean
+                      warnings:
+                        type: array
+                        items:
+                          type: string
+                  events_created:
+                    type: integer
+                  idempotency_key:
+                    type: string
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ========================================================================
+  # DEPLOYMENT ENDPOINT
+  # ========================================================================
+
+  /deploy/{round_num}/{country_id}:
+    post:
+      operationId: submitDeploymentOrders
+      tags: [Deployment]
+      summary: Submit deployment orders (Phase B)
+      description: |
+        Deploys military units between zones. Available during Phase B deployment window.
+        Domestic deployment is immediate. Long-distance redeployment to foreign theater takes 1 round_num transit.
+
+        Rate limit: 10 requests/minute per role.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+        - $ref: '#/components/parameters/countryIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [idempotency_key, deployments]
+              properties:
+                idempotency_key:
+                  type: string
+                deployments:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DeploymentOrder'
+      responses:
+        '201':
+          description: Deployments accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [accepted]
+                  deployments_applied:
+                    type: integer
+                  events_created:
+                    type: integer
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ========================================================================
+  # TRANSACTION ENDPOINTS
+  # ========================================================================
+
+  /transactions:
+    post:
+      operationId: proposeTransaction
+      tags: [Transactions]
+      summary: Propose a bilateral transaction
+      description: |
+        Creates a transaction proposal. Requires counterparty confirmation to execute.
+        Proposals expire after a configurable timeout (default: end of current Phase A).
+
+        Rate limit: 20 requests/minute per role.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionProposal'
+      responses:
+        '201':
+          description: Transaction proposal created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [pending_confirmation]
+                  transaction_id:
+                    type: string
+                  confirmation_token:
+                    type: string
+                  expires_at:
+                    type: string
+                    format: date-time
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /transactions/{transaction_id}/confirm:
+    post:
+      operationId: confirmTransaction
+      tags: [Transactions]
+      summary: Confirm or reject a transaction
+      description: |
+        Counterparty confirms (accepted: true) or rejects (accepted: false) a pending transaction.
+        Confirmed transactions execute immediately and are irreversible.
+
+        Rate limit: 20 requests/minute per role.
+      parameters:
+        - name: transaction_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionConfirmation'
+      responses:
+        '200':
+          description: Transaction confirmed or rejected
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [executed, rejected]
+                  transaction_id:
+                    type: string
+                  state_changes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StateChange'
+                  events_created:
+                    type: integer
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  # ========================================================================
+  # FACILITATOR ENDPOINTS
+  # ========================================================================
+
+  /moderator/state/{round_num}:
+    get:
+      operationId: getFullWorldState
+      tags: [Facilitator]
+      summary: Get full unfiltered world state
+      description: |
+        Returns complete world state with all countries, all variables, exact values.
+        No visibility filtering. Moderator only.
+
+        Rate limit: 120 requests/minute.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+      responses:
+        '200':
+          description: Full world state
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  round_num:
+                    type: integer
+                  countries:
+                    type: object
+                    additionalProperties: true
+                  zones:
+                    type: object
+                    additionalProperties: true
+                  wars:
+                    type: array
+                    items:
+                      type: object
+                  bilateral:
+                    type: object
+                  oil_price:
+                    type: number
+                  global_trade_volume_index:
+                    type: number
+                  nuclear_used_this_sim:
+                    type: boolean
+                  dollar_credibility:
+                    type: number
+                  expert_panel_last_round:
+                    type: object
+                  coherence_flags:
+                    type: array
+                    items:
+                      type: object
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /moderator/override:
+    post:
+      operationId: moderatorOverride
+      tags: [Facilitator]
+      summary: Apply moderator state overrides
+      description: |
+        Directly modifies world state values. Every override creates a MODERATOR-visibility event.
+        Overrides apply immediately to the current round. Do not retroactively change past snapshots.
+
+        Rate limit: 120 requests/minute.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModeratorOverride'
+      responses:
+        '200':
+          description: Overrides applied
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [applied]
+                  overrides_applied:
+                    type: integer
+                  events_created:
+                    type: integer
+                  warnings:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /moderator/expert-panel/{round_num}:
+    get:
+      operationId: getExpertPanel
+      tags: [Facilitator]
+      summary: Get expert panel results for a round_num
+      description: |
+        Returns AI expert panel assessments (Keynes, Clausewitz, Machiavelli),
+        synthesis of applied/rejected adjustments, and coherence flags.
+        Moderator only.
+
+        Rate limit: 120 requests/minute.
+      parameters:
+        - $ref: '#/components/parameters/round_numParam'
+      responses:
+        '200':
+          description: Expert panel results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExpertPanel'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /moderator/round_num/advance:
+    post:
+      operationId: advanceRound
+      tags: [Facilitator]
+      summary: Advance to next round_num or phase
+      description: |
+        Triggers phase transitions and round_num advancement.
+        Actions: start_phase_a, end_phase_a, start_phase_b, end_phase_b, freeze_round, extend_phase.
+        Moderator only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [action]
+              properties:
+                action:
+                  type: string
+                  enum: [start_phase_a, end_phase_a, start_phase_b, end_phase_b, freeze_round, extend_phase]
+                extension_minutes:
+                  type: integer
+                  description: Minutes to extend (only for extend_phase action)
+      responses:
+        '200':
+          description: Round/phase advanced
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  round_num:
+                    type: integer
+                  phase:
+                    type: string
+                  message:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /moderator/engine/trigger:
+    post:
+      operationId: triggerEngine
+      tags: [Facilitator]
+      summary: Trigger world model engine processing
+      description: |
+        Manually triggers the World Model Engine for the current round.
+        Normally triggered automatically at Phase B start.
+        Returns processing results for moderator review before publication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                round_num:
+                  type: integer
+                auto_publish:
+                  type: boolean
+                  default: false
+                  description: If true, publish results immediately without moderator review
+      responses:
+        '200':
+          description: Engine processing complete
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [complete, review_required]
+                  round_num:
+                    type: integer
+                  processing_time_ms:
+                    type: integer
+                  coherence_flags:
+                    type: array
+                    items:
+                      type: object
+                  narrative:
+                    type: string
+                  published:
+                    type: boolean
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  /moderator/engine/publish:
+    post:
+      operationId: publishEngineResults
+      tags: [Facilitator]
+      summary: Publish engine results to participants
+      description: |
+        After moderator reviews engine output, this endpoint publishes
+        the results to all participants via real-time channels.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                round_num:
+                  type: integer
+                adjustments:
+                  type: array
+                  description: Optional moderator adjustments to apply before publishing
+                  items:
+                    type: object
+                    properties:
+                      path:
+                        type: string
+                      new_value: {}
+                      reason:
+                        type: string
+      responses:
+        '200':
+          description: Results published
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [published]
+                  round_num:
+                    type: integer
+                  events_pushed:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ========================================================================
+  # AI ENDPOINTS
+  # ========================================================================
+
+  /ai/context/{role_id}:
+    get:
+      operationId: getAIContext
+      tags: [AI]
+      summary: Get AI agent context for decision-making
+      description: |
+        Returns the full context package for an AI participant agent,
+        including visible state, available actions, round_num context, objectives.
+        Used by the AI orchestrator to prepare agent prompts.
+
+        Internal endpoint -- not exposed to participant clients.
+      parameters:
+        - $ref: '#/components/parameters/roleIdParam'
+      responses:
+        '200':
+          description: AI agent context
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIAgentInput'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /ai/decision/{role_id}:
+    post:
+      operationId: submitAIDecision
+      tags: [AI]
+      summary: Submit AI agent decision
+      description: |
+        Receives the AI agent's decisions and routes them through the same
+        validation pipeline as human actions. Actions that pass validation
+        are executed; failures are logged.
+
+        Internal endpoint -- not exposed to participant clients.
+      parameters:
+        - $ref: '#/components/parameters/roleIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIAgentOutput'
+      responses:
+        '201':
+          description: AI decisions processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [processed]
+                  actions_accepted:
+                    type: integer
+                  actions_rejected:
+                    type: integer
+                  rejection_reasons:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action_type:
+                          type: string
+                        reason:
+                          type: string
+                  events_created:
+                    type: integer
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+  /ai/argus:
+    post:
+      operationId: argusConversation
+      tags: [AI]
+      summary: Argus AI assistant conversation
+      description: |
+        Handles participant conversation with Argus. Accepts text input,
+        returns text response and optional voice audio URL.
+
+        Argus phases: INTRO (goal-setting), MID (advisory), OUTRO (reflection).
+        Memory persists across all conversations within the SIM run.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [question]
+              properties:
+                question:
+                  type: string
+                  description: Participant's message (text or transcribed voice)
+                voice_response:
+                  type: boolean
+                  default: false
+                  description: Whether to generate voice audio in addition to text
+      responses:
+        '200':
+          description: Argus response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  response_text:
+                    type: string
+                  voice_audio_url:
+                    type: string
+                    nullable: true
+                  voice_duration_seconds:
+                    type: number
+                    nullable: true
+                  suggested_actions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        action_type:
+                          type: string
+                        rationale:
+                          type: string
+                        priority:
+                          type: string
+                          enum: [consider, recommended, urgent]
+                  reflection_prompt:
+                    type: string
+                    nullable: true
+                    description: Only in OUTRO phase
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/ServerError'
+
+  # ========================================================================
+  # COMMUNICATION ENDPOINTS
+  # ========================================================================
+
+  /messages/{channel_id}:
+    get:
+      operationId: getMessages
+      tags: [State]
+      summary: Get messages for a channel
+      description: |
+        Returns messages from a chat channel. Cursor-based pagination.
+        User must be a member of the channel.
+
+        Rate limit: 60 requests/minute per role.
+      parameters:
+        - name: channel_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: '#/components/parameters/cursorParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  channel_id:
+                    type: string
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        message_id:
+                          type: string
+                        sender_role_id:
+                          type: string
+                        content:
+                          type: string
+                        timestamp:
+                          type: string
+                          format: date-time
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+    post:
+      operationId: sendMessage
+      tags: [Actions]
+      summary: Send a message to a channel
+      description: |
+        Sends a message to a team or meeting channel.
+        User must be a member of the channel.
+
+        Rate limit: 30 messages/minute per role.
+      parameters:
+        - name: channel_id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [content]
+              properties:
+                content:
+                  type: string
+                  maxLength: 2000
+      responses:
+        '201':
+          description: Message sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message_id:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+# ==========================================================================
+# CHANGELOG (v1.1, 2026-03-30)
+# ==========================================================================
+# Fixes applied per DET_VALIDATION_LEVEL1 + DET_VALIDATION_LEVEL3 findings:
+#
+# [HIGH] Transaction type enum: Replaced (transfer_coins, trade_deal,
+#        basing_rights, aid_package, personal_invest, bribe) with canonical
+#        engine names (coin_transfer, arms_transfer, tech_transfer,
+#        basing_rights, treaty, agreement, org_creation, personal_investment,
+#        bribe). Per DET_NAMING_CONVENTIONS 1.2.
+#
+# [HIGH] Added political and covert action types to ActionSubmission schema:
+#        political: impeachment, propaganda, arrest, fire_role, coup_attempt,
+#        assassination. covert: intelligence_request, sabotage, cyber_attack,
+#        disinformation, election_meddling.
+#
+# [MEDIUM] JWT claims: sim_id -> sim_run_id (canonical name).
+#
+# [MEDIUM] Edge Function spec: See DET_EDGE_FUNCTIONS.md for the middleware
+#          layer between C3 endpoints and F5 engine routes.
+#
+# [LOW] Version bumped to 1.1.0.
+# ==========================================================================

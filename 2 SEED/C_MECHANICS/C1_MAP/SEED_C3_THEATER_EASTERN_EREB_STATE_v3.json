@@ -15,12 +15,12 @@
       "name": "Cathay",
       "color": "#E8D5A3"
     },
-    "nordostan": {
-      "name": "Nordostan",
+    "sarmatia": {
+      "name": "Sarmatia",
       "color": "#D4A5A5"
     },
-    "heartland": {
-      "name": "Heartland",
+    "ruthenia": {
+      "name": "Ruthenia",
       "color": "#A5C8A5"
     },
     "gallia": {
@@ -103,370 +103,326 @@
   "grid": [
     [
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      }
-    ],
-    [
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,3"
-      },
-      {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       }
     ],
     [
       {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,3"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
         "global_link": "12,3"
       }
     ],
     [
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       }
     ],
     [
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
-        "occupied_by": "nordostan",
+        "owner": "sarmatia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      }
-    ],
-    [
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       }
     ],
     [
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       },
       {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "nordostan",
+        "owner": "sarmatia",
         "global_link": "12,4"
       }
     ],
     [
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
         "owner": "sea"
       },
       {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "sea"
-      },
-      {
-        "owner": "sea"
-      },
-      {
-        "owner": "sea"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "nordostan",
-        "global_link": "12,4"
-      }
-    ],
-    [
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "heartland",
-        "global_link": "11,4"
-      },
-      {
-        "owner": "sea"
-      },
-      {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
-        "global_link": "12,4"
-      },
-      {
-        "owner": "heartland",
-        "occupied_by": "nordostan",
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
         "global_link": "12,4"
       },
       {
@@ -479,16 +435,60 @@
         "owner": "sea"
       },
       {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
         "owner": "sea"
       }
     ],
     [
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {
-        "owner": "heartland",
+        "owner": "ruthenia",
         "global_link": "11,4"
       },
       {

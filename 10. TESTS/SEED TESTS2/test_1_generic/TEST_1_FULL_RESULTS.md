@@ -13,7 +13,7 @@
 ## NOTATION & CONVENTIONS
 
 - All country names are SIM-fictional. No real-world place names used.
-- Zone IDs use format: `country_hex` (e.g., `heartland_15`, `cp_gulf_gate`)
+- Zone IDs use format: `country_hex` (e.g., `ruthenia_15`, `cp_gulf_gate`)
 - Oil price in USD/barrel. GDP in abstract index units. Treasury in coins.
 - RISK dice: 1d6 per unit pair. Attacker needs to beat defender (ties = defender wins). Modifiers applied additively.
 - Covert ops: 1d6, success on 4+. Detection separate roll on 3+.
@@ -29,8 +29,8 @@
 |---------|-----|-----------|---------|----------|-------|--------|---------|---------------|------------|
 | Columbia | 285.1 | 6.95 | 37% | ~42 | 9 | 25 | 15 | 0.10 | Allied in 2 wars, overstretch |
 | Cathay | 197.5 | 8.05 | 58.5% | ~40 | 7 | 30 | 12 | 0 | Purge penalty active through R2 |
-| Nordostan | 20.15 | 4.90 | 54% | ~0 | 2 | 11 | 4 | 0.15 | Attacker, treasury empty |
-| Heartland | 2.25 | 4.62 | 50% | ~2 | 0 | 5+3r | 2 | 0.20 | Defender, lost heartland_15 |
+| Sarmatia | 20.15 | 4.90 | 54% | ~0 | 2 | 11 | 4 | 0.15 | Attacker, treasury empty |
+| Ruthenia | 2.25 | 4.62 | 50% | ~2 | 0 | 5+3r | 2 | 0.20 | Defender, lost ruthenia_15 |
 | Persia | 4.91 | 3.90 | 38.5% | ~0 | 0 | 7 | 1 | 0.20 | Defender, blockade partial, fatwa issued |
 | Gallia | 34.3 | 7.0 | 40% | ~7 | 1 | 8 | 4 | 0 | Mediator positioning |
 | Teutonia | 45.5 | 7.0 | 45% | ~10 | 0 | 10 | 4 | 0 | Energy crisis, rearmament |
@@ -51,7 +51,7 @@
 **Oil Price:** $198/barrel
 **Gap Ratio (Cathay/Columbia):** 0.693
 **Naval Ratio (Cathay/Columbia):** 7/9 = 0.778
-**Active Wars:** Nordostan-Heartland (Eastern Ereb), Columbia+Coalition-Persia (Mashriq)
+**Active Wars:** Sarmatia-Ruthenia (Eastern Ereb), Columbia+Coalition-Persia (Mashriq)
 
 ---
 
@@ -59,7 +59,7 @@
 
 ## Key Events Summary
 - **Columbia Midterm Elections** — Tribune's War Powers investigation + $198 oil + 37% approval create perfect storm for opposition
-- **Nordostan Donetsk offensive continues** — grinding advance toward heartland_16
+- **Sarmatia Donetsk offensive continues** — grinding advance toward ruthenia_16
 - **Gulf Gate status: PARTIAL blockade maintained** — Persia replenishes air/missile capability
 - **Dealer-Pathfinder back-channel** via Solaria — first substantive contact, enormous terms gap
 - **Dawn-Lumiere meeting** in Geneva — Gallia mediation track opens
@@ -71,7 +71,7 @@
 
 ### COLUMBIA TEAM
 
-**DEALER** is consumed by midterms. Approval at 37% and falling. Oil at $198 is the attack ad that writes itself. Tribune's War Powers investigation has subpoenaed classified briefings. Dealer's response: double down on the Heartland deal narrative. "I am the only person who can end this war." He initiates back-channel via Solaria's Crown Prince (Wellspring). Pathfinder responds through the same channel. First substantive exchange: Pathfinder wants sovereignty recognition over annexed territories. Dealer wants "freeze and forget" — current lines, no formal recognition, but de facto acceptance. Terms gap: unbridgeable in R2 but both sides are talking.
+**DEALER** is consumed by midterms. Approval at 37% and falling. Oil at $198 is the attack ad that writes itself. Tribune's War Powers investigation has subpoenaed classified briefings. Dealer's response: double down on the Ruthenia deal narrative. "I am the only person who can end this war." He initiates back-channel via Solaria's Crown Prince (Wellspring). Pathfinder responds through the same channel. First substantive exchange: Pathfinder wants sovereignty recognition over annexed territories. Dealer wants "freeze and forget" — current lines, no formal recognition, but de facto acceptance. Terms gap: unbridgeable in R2 but both sides are talking.
 
 **SHIELD** submits formal overstretch assessment to National Security Council. Key finding: "If Cathay initiates Formosa blockade tomorrow, we have 3 carrier groups in the Gulf and 3 ships near Formosa. Minimum deterrence requires 5. We are 2 short." Recommends pulling 1 additional naval from Mediterranean to Pacific. Dealer refuses — "Not before midterms."
 
@@ -94,7 +94,7 @@
 - Covert: DESERT MIRROR continues (Persia). JADE CURTAIN continues (Cathay). New op: SILVER LINING (election interference detection — domestic).
 
 **Transactions:**
-- Heartland: 3 coins military aid (maintained, not increased)
+- Ruthenia: 3 coins military aid (maintained, not increased)
 - Formosa: 1 coin security package (maintained)
 - Solaria: THAAD battery delivery begins (1 unit, 2-round delivery)
 - Yamato: Advanced missile defense agreement signed (1 coin revenue R3)
@@ -121,21 +121,21 @@
 - Covert: Cyber reconnaissance continues. NEW OP: SILK THREAD — cultivate Formosa business contacts who prefer accommodation to war.
 
 **Transactions:**
-- Nordostan: Energy purchases continue at 15% discount, yuan payment
+- Sarmatia: Energy purchases continue at 15% discount, yuan payment
 - Ponte: BRI infrastructure Phase 2 (2 coins). Ponte treasury +2.
-- Phrygia: 1 coin BRI corridor development. Bazaar pleased.
+- Phrygia: 1 coin BRI corridor development. Vizier pleased.
 - Bharata: Ladakh disengagement confidence-building measures (CBM) — no troop withdrawal, just patrols reduced.
 
 **Diplomatic:**
 - Helmsman-Dealer summit: Both attend G20 sideline meeting in Bharata. 45 minutes. Helmsman probes Formosa posture: "If we were to propose a new framework for cross-strait relations..." Dealer responds: "The One China policy has served everyone well for fifty years." Neither reveals anything. Both report the meeting was "productive." Neither means it.
-- BRICS+ session: Petroyuan mechanics discussed. Solaria non-committal. Nordostan enthusiastic (captive customer). Bharata cautious.
+- BRICS+ session: Petroyuan mechanics discussed. Solaria non-committal. Sarmatia enthusiastic (captive customer). Bharata cautious.
 - Abacus-Forge (Teutonia) back-channel: Rare earth assurance formalized. Teutonia rare earth at L0. In return, Forge privately signals resistance to Columbia's tech restriction regime at EU level.
 
-### NORDOSTAN TEAM
+### SARMATIA TEAM
 
 **PATHFINDER** receives Dealer's Solaria back-channel message. Assessment: "He wants a deal for television. I want sovereignty for history. But we are both running out of time." Instructs Compass to probe terms: "What does 'freeze' mean exactly? What happens to NATO? What happens to sanctions?"
 
-**IRONHAND** executes continued Donetsk concentration. 3rd wave Choson troops (6,000) arrive and take over rear-security, freeing 2 additional Nordostan ground units for the front. Effective front-line strength: 11 + 2 redeployed = 13 ground + 4 tac air attacking Heartland's 5 ground + 3 reserve + 2 tac air.
+**IRONHAND** executes continued Donetsk concentration. 3rd wave Choson troops (6,000) arrive and take over rear-security, freeing 2 additional Sarmatia ground units for the front. Effective front-line strength: 11 + 2 redeployed = 13 ground + 4 tac air attacking Ruthenia's 5 ground + 3 reserve + 2 tac air.
 
 **COMPASS** activates Geneva channel in parallel to Solaria channel. Probes Albion financial fixer on sanctions timeline. Reports to Pathfinder: "Albion signals sanctions review possible within 90 days of framework. Mirage freeze orders could be lifted in 30. But only if there is a real ceasefire, not a Putin pause." Uses "Pathfinder pause" language instead.
 
@@ -144,20 +144,20 @@ Compass-Ironhand private meeting happens. "Coffee. Informal." Compass probes: "H
 **Budget:** Treasury empty. Revenue ~4.5 coins (oil at $198 + Cathay energy sales). Maintenance 14.1 + war drain 2.0 + social 0.5 + R&D 0 = 16.6 needed. **Deficit: ~12.1 coins.** OPEC HIGH revenue helps but not enough. Cathay credit line activated: 3 coins emergency loan (yuan-denominated, deepening dependency Pathfinder despises).
 
 **Military Actions:**
-- Donetsk offensive continues with increased force. 13 ground + 4 tac air pushing toward heartland_16.
+- Donetsk offensive continues with increased force. 13 ground + 4 tac air pushing toward ruthenia_16.
 - Zaporizhzhia: Skeleton defense. Vulnerability acknowledged in Ironhand's sealed memo.
 - Choson 3rd wave: Rear security + supply protection. Some forward deployment in secondary sectors.
 - OPEC+: HIGH production maintained. Fiscal emergency continues.
 
 **Diplomatic:**
 - Pathfinder-Dealer via Solaria: Framework discussion begins. Pathfinder's opening: "Sovereignty over four oblasts. NATO non-expansion binding treaty. Sanctions lifted in 180 days. In return: ceasefire, prisoner exchange, partial withdrawal from front-line positions." Dealer's counter (via intermediary): "Freeze at current lines. No sovereignty recognition. Sanctions phased relief over 2 years. NATO keeps open door but no timeline." Gap: enormous. But the channel is open.
-- Cathay-Nordostan: Ironhand-Rampart mil-to-mil continues. Pacific intel shared. Joint UNSC positioning on Persia.
+- Cathay-Sarmatia: Ironhand-Rampart mil-to-mil continues. Pacific intel shared. Joint UNSC positioning on Persia.
 
-### HEARTLAND TEAM
+### RUTHENIA TEAM
 
-**BEACON** struggles to maintain 50% support as territory loss and war tiredness compound. The Nordostan offensive is grinding forward, and Beacon's narrative — "hold the line, keep the aid" — is fraying. He needs a visible diplomatic win: EU accession movement or Gallia military hubs.
+**BEACON** struggles to maintain 50% support as territory loss and war tiredness compound. The Sarmatia offensive is grinding forward, and Beacon's narrative — "hold the line, keep the aid" — is fraying. He needs a visible diplomatic win: EU accession movement or Gallia military hubs.
 
-**BULWARK** receives Shield's (Columbia SecDef) assessment via mil-to-mil channel: "Air defense systems in pipeline but 2-round delivery. Cannot accelerate." Bulwark's public interview generates headlines: "Heartland can achieve more than stalemate if properly resourced." This is a calibrated shot across Beacon's bow — Bulwark positions himself as the leader who would fight harder, not surrender.
+**BULWARK** receives Shield's (Columbia SecDef) assessment via mil-to-mil channel: "Air defense systems in pipeline but 2-round delivery. Cannot accelerate." Bulwark's public interview generates headlines: "Ruthenia can achieve more than stalemate if properly resourced." This is a calibrated shot across Beacon's bow — Bulwark positions himself as the leader who would fight harder, not surrender.
 
 **BROKER** scores his first tangible result: Pillar confirms EU accession cluster opened for energy and judiciary chapters. Forge signals financial support increase if Broker leads post-war planning. Ponte's price is clear: 0.3 coins energy compensation + structural fund acceleration. Broker's op-ed in European paper generates coverage. His polling rises: 18% → 22% (still third-place, but trending).
 
@@ -165,8 +165,8 @@ Compass-Ironhand private meeting happens. "Coffee. Informal." Compass probes: "H
 
 **Military Actions:**
 - Defensive posture maintained. 5 ground + 3 reserve + 2 tac air on front line.
-- Drone strikes on Nordostan logistics: Target 4 rail corridors. 2 successful disruptions this round — delays Nordostan resupply by ~1 week on 2 corridors.
-- Air defense repositioned to energy infrastructure. Nordostan retaliatory strikes on power grid partially intercepted.
+- Drone strikes on Sarmatia logistics: Target 4 rail corridors. 2 successful disruptions this round — delays Sarmatia resupply by ~1 week on 2 corridors.
+- Air defense repositioned to energy infrastructure. Sarmatia retaliatory strikes on power grid partially intercepted.
 
 **Diplomatic:**
 - Beacon-Lumiere: Military hubs discussion advances. Lumiere proposes 2 French training facilities + 1 British logistics center. Beacon accepts in principle. Requires R3 formal agreement.
@@ -175,7 +175,7 @@ Compass-Ironhand private meeting happens. "Coffee. Informal." Compass probes: "H
 
 ### PERSIA TEAM
 
-**ANVIL** opens the Phrygia back-channel to Columbia. Message via Bazaar's (Phrygia) intelligence service: "The IRGC is prepared to discuss adjustments to Gulf Gate operations in exchange for immediate cessation of air strikes on military infrastructure and a concrete sanctions relief timeline. No preconditions." Columbia receives this through three intermediaries. Shadow assesses: "Genuine but limited. Anvil is testing prices, not making an offer."
+**ANVIL** opens the Phrygia back-channel to Columbia. Message via Vizier's (Phrygia) intelligence service: "The IRGC is prepared to discuss adjustments to Gulf Gate operations in exchange for immediate cessation of air strikes on military infrastructure and a concrete sanctions relief timeline. No preconditions." Columbia receives this through three intermediaries. Shadow assesses: "Genuine but limited. Anvil is testing prices, not making an offer."
 
 **DAWN** meets Lumiere in Geneva. Historic: first direct Persia-European diplomatic contact since war began. Dawn proposes: 48-hour ceasefire trial, nuclear transparency (not elimination) for sanctions relief framework, Gulf Gate partial opening for economic corridor. Lumiere receives cautiously: "France can facilitate. But any framework requires nuclear verification beyond transparency." Dawn: "I understand. But I need to bring something concrete back or Anvil shuts this channel." Lumiere commits to a second meeting R3 and a written framework proposal.
 
@@ -194,7 +194,7 @@ Compass-Ironhand private meeting happens. "Coffee. Informal." Compass probes: "H
 **EU Emergency Summit Results:**
 1. **Energy package: PASSED.** Joint LNG purchasing + strategic reserve coordination. Ponte receives 0.3 coins/round energy compensation. Forge leads emergency fund.
 2. **Sanctions renewal: PASSED** (unanimously, with Ponte bought off). Review mechanism added — benchmarks at 6 months. Sentinel furious about review mechanism but accepts energy compensation win.
-3. **Heartland support package: PASSED.** +0.5 coins/round EU contribution. Accession cluster opened (energy + judiciary). Ponte abstains (not blocks).
+3. **Ruthenia support package: PASSED.** +0.5 coins/round EU contribution. Accession cluster opened (energy + judiciary). Ponte abstains (not blocks).
 4. **EU Defense: DEFERRED to R3.** Sovereign Shield planning continues but no concrete commitments. Lumiere accepts Pillar's EU-led reframing.
 5. **Cathay trade: DEFERRED to R3.** Forge's resistance holds. Mariner's targeted tech-transfer approach gains traction as compromise.
 
@@ -208,53 +208,53 @@ Compass-Ironhand private meeting happens. "Coffee. Informal." Compass probes: "H
 
 ### SOLO COUNTRIES
 
-**SCALES (Bharata):** Hosts G20 sideline meetings. Extracts defense cooperation "framework agreement" from Columbia (no binding commitments). Extracts Ladakh CBM from Cathay (no troop withdrawal). Extracts discounted Nordostan oil. Extracts UNSC permanent seat support from Gallia. Gives nothing binding to anyone. Multi-alignment doctrine working perfectly. GDP growing at 6.5%, unaffected by wars. Quietly increases semiconductor investment — TSMC fab negotiations advance.
+**SCALES (Bharata):** Hosts G20 sideline meetings. Extracts defense cooperation "framework agreement" from Columbia (no binding commitments). Extracts Ladakh CBM from Cathay (no troop withdrawal). Extracts discounted Sarmatia oil. Extracts UNSC permanent seat support from Gallia. Gives nothing binding to anyone. Multi-alignment doctrine working perfectly. GDP growing at 6.5%, unaffected by wars. Quietly increases semiconductor investment — TSMC fab negotiations advance.
 
 **CITADEL (Levantia):** Continues nuclear facility strikes. Fordow remains undamaged (too deep). Requests B-2 bunker-busters from Columbia again — "60% done. Give me Fordow." Shield: "Operational planning underway but no authorization." Hezbollah degradation at 40% cumulative. Abraham Accords deepening with Solaria and Mirage.
 
 **CHIP (Formosa):** Emergency mine procurement continues. Semiconductor leverage: TSMC Arizona slowed (regulatory friction), TSMC Yamato accelerated. Cathay ADIZ incursions at 38-40/week now "normalized" — public anxiety plateauing but military exhaustion growing. Formosa legislature passes "economic resilience" defense budget over KMT obstruction.
 
-**BAZAAR (Phrygia):** Monetizing mediation role. Hosts Anvil-Columbia indirect channel. Hosts Heartland war talks preparation. Charges all sides. Bosphorus "administrative costs" to Nordostan: 2 coins. NATO summit preparation underway for R4. Inflation still 45% — economic emergency continues.
+**VIZIER (Phrygia):** Monetizing mediation role. Hosts Anvil-Columbia indirect channel. Hosts Ruthenia war talks preparation. Charges all sides. Bosphorus "administrative costs" to Sarmatia: 2 coins. NATO summit preparation underway for R4. Inflation still 45% — economic emergency continues.
 
 **SAKURA (Yamato):** Remilitarization accelerates post-ICBM shock. Budget: 3 coins standoff missiles + 2 coins naval + 1 coin semiconductor + 1 coin missile defense. Nuclear study leaked — Columbia pressured to strengthen extended deterrence. Joint contingency planning with Formosa deepens. TSMC Yamato fab construction ahead of schedule.
 
 **WELLSPRING (Solaria):** THAAD delivery begins (arriving R3). Oil revenue exceptional at $198. OPEC+ production MAINTAINED — not flooding market. Revenue: ~22 coins + 2.1 oil bonus = exceptional. Under continued but reduced Persia missile attacks. AD intercepts at 70%. Vision 2030 Neom Phase 2 paused.
 
-**PYRO (Choson):** 3rd wave deployed to Eastern Ereb. Nuclear reactor components received from Nordostan — submarine program advances. No new ICBM launch this round (sequential escalation doctrine — save provocation for maximum impact). DMZ at full readiness. Covert missile tech transfer to Persia via commercial shipping.
+**PYRO (Choson):** 3rd wave deployed to Eastern Ereb. Nuclear reactor components received from Sarmatia — submarine program advances. No new ICBM launch this round (sequential escalation doctrine — save provocation for maximum impact). DMZ at full readiness. Covert missile tech transfer to Persia via commercial shipping.
 
 **VANGUARD (Hanguk):** Partial chip export compliance continues. Sub-7nm restricted to Cathay, mature nodes allowed. Emergency rare earth diversification underway (1 coin to Australian mining). Nuclear Consultative Group talks requested from Columbia — "Fill the umbrella holes or I fill them myself." Albion intelligence sharing on Cathay naval buildup increases anxiety.
 
-**HAVANA (Caribe):** Grid at 4 hours civilian electricity. Cathay aid arriving (generators, fuel). Nordostan tanker escort providing some oil. Monroe Doctrine signal maintained but not triggered — "I know what you fear. I have not done it." Columbia's TROPIC STORM failure (R1) has hardened Caribe intelligence service. Stability at 2.85 — approaching protest automatic threshold.
+**HAVANA (Caribe):** Grid at 4 hours civilian electricity. Cathay aid arriving (generators, fuel). Sarmatia tanker escort providing some oil. Monroe Doctrine signal maintained but not triggered — "I know what you fear. I have not done it." Columbia's TROPIC STORM failure (R1) has hardened Caribe intelligence service. Stability at 2.85 — approaching protest automatic threshold.
 
-**SPIRE (Mirage):** Missile attacks paused (Anvil's decision). Financial hub perception management: investor outreach + war risk insurance. Sanctions routing continues — 8-12 coins/round Nordostan evasion flowing through financial system. Hosts Anvil back-channel to Columbia via Phrygia link. Charges all parties for access.
+**SPIRE (Mirage):** Missile attacks paused (Anvil's decision). Financial hub perception management: investor outreach + war risk insurance. Sanctions routing continues — 8-12 coins/round Sarmatia evasion flowing through financial system. Hosts Anvil back-channel to Columbia via Phrygia link. Charges all parties for access.
 
 ---
 
 ## LIVE ACTION RESOLUTION — ROUND 2
 
-### 1. Donetsk Offensive Continues (Nordostan)
+### 1. Donetsk Offensive Continues (Sarmatia)
 
-**Nordostan:** 13 ground + 4 tac air concentrated on heartland_16 axis
-**Heartland defense:** 5 ground + 3 reserve + 2 tac air. 2 logistics disruptions slow Nordostan resupply.
+**Sarmatia:** 13 ground + 4 tac air concentrated on ruthenia_16 axis
+**Ruthenia defense:** 5 ground + 3 reserve + 2 tac air. 2 logistics disruptions slow Sarmatia resupply.
 
 **Resolution:**
-- Nordostan superiority: ~1.7:1 (but logistics disrupted = -0.3 modifier)
-- Modifiers: Nordostan tech +0 (AI L1). Heartland terrain +0.5 (defending home). Choson rear security enables concentration (+0.3). Logistics disruption on Nordostan: -0.3.
-- Heartland commits 2 reserve units to reinforce (5+2 = 7 ground defending).
+- Sarmatia superiority: ~1.7:1 (but logistics disrupted = -0.3 modifier)
+- Modifiers: Sarmatia tech +0 (AI L1). Ruthenia terrain +0.5 (defending home). Choson rear security enables concentration (+0.3). Logistics disruption on Sarmatia: -0.3.
+- Ruthenia commits 2 reserve units to reinforce (5+2 = 7 ground defending).
 
 **Dice rolls (seed 100, round 2):**
-- 6 unit-pair engagements on heartland_16 axis
-- Pair 1: Nord 5+0.0=5.0 vs Heart 3+0.5=3.5 → Nordostan wins
-- Pair 2: Nord 2+0.0=2.0 vs Heart 4+0.5=4.5 → Heartland wins
-- Pair 3: Nord 6+0.0=6.0 vs Heart 2+0.5=2.5 → Nordostan wins
-- Pair 4: Nord 3+0.0=3.0 vs Heart 5+0.5=5.5 → Heartland wins
-- Pair 5: Nord 4-0.3=3.7 vs Heart 3+0.5=3.5 → Nordostan wins (barely — logistics penalty nearly cost this)
-- Pair 6: Nord 1-0.3=0.7 vs Heart 6+0.5=6.5 → Heartland wins
+- 6 unit-pair engagements on ruthenia_16 axis
+- Pair 1: Nord 5+0.0=5.0 vs Heart 3+0.5=3.5 → Sarmatia wins
+- Pair 2: Nord 2+0.0=2.0 vs Heart 4+0.5=4.5 → Ruthenia wins
+- Pair 3: Nord 6+0.0=6.0 vs Heart 2+0.5=2.5 → Sarmatia wins
+- Pair 4: Nord 3+0.0=3.0 vs Heart 5+0.5=5.5 → Ruthenia wins
+- Pair 5: Nord 4-0.3=3.7 vs Heart 3+0.5=3.5 → Sarmatia wins (barely — logistics penalty nearly cost this)
+- Pair 6: Nord 1-0.3=0.7 vs Heart 6+0.5=6.5 → Ruthenia wins
 
-**Result: 3-3 SPLIT.** Grinding stalemate. Nordostan gains partial control of heartland_16 (contested, not occupied). No territorial change recorded — hex remains contested. Heartland's logistics disruption campaign proves valuable.
+**Result: 3-3 SPLIT.** Grinding stalemate. Sarmatia gains partial control of ruthenia_16 (contested, not occupied). No territorial change recorded — hex remains contested. Ruthenia's logistics disruption campaign proves valuable.
 
-**Casualties:** Nordostan -1 ground (13→12). Heartland -2 ground (7→5 on front, 1 reserve remaining).
-**War tiredness:** Nordostan +0.15 (total: 0.30). Heartland +0.20 (total: 0.40).
+**Casualties:** Sarmatia -1 ground (13→12). Ruthenia -2 ground (7→5 on front, 1 reserve remaining).
+**War tiredness:** Sarmatia +0.15 (total: 0.30). Ruthenia +0.20 (total: 0.40).
 
 ### 2. Gulf Gate Status
 
@@ -292,7 +292,7 @@ No major engagement. Columbia conducts mine clearance operations — slow progre
 Columbia at end of R2:
 - GDP growth rate: ~1.8% (before engine processing — using projected)
 - Stability: ~6.85 (declining from war + oil)
-- Active wars: 2 (Persia direct, Heartland allied)
+- Active wars: 2 (Persia direct, Ruthenia allied)
 
 ai_score = clamp(50 + GDP_growth*10 + (stability-5)*5 - 5*wars, 0, 100)
 ai_score = clamp(50 + 1.8*10 + (6.85-5)*5 - 5*2, 0, 100)
@@ -328,8 +328,8 @@ incumbent_wins = (52.6 >= 50.0) = TRUE — barely
 
 ```
 base = $80
-supply_factor = 1.0 + 0.06 (Nordostan HIGH) = 1.06
-sanctions_supply_hit = 0.08 × 2 = 0.16  (Nordostan L3 + Persia L3)
+supply_factor = 1.0 + 0.06 (Sarmatia HIGH) = 1.06
+sanctions_supply_hit = 0.08 × 2 = 0.16  (Sarmatia L3 + Persia L3)
 final_supply = max(0.5, 1.06 - 0.16) = 0.90
 disruption = 1.0 + 0.40 (Gulf Gate PARTIAL) = 1.40
 war_premium = min(0.30, 0.10 × 2) = 0.20
@@ -342,9 +342,9 @@ OIL PRICE = 80 × (0.99/0.90) × 1.40 × 1.20 × 1.15
          = $170/barrel
 ```
 
-**Oil price R2: $170** (down from $198 — Nordostan OPEC HIGH increasing supply + demand slightly below average)
+**Oil price R2: $170** (down from $198 — Sarmatia OPEC HIGH increasing supply + demand slightly below average)
 
-**TESTER NOTE:** Oil price responding correctly to supply changes. Nordostan's HIGH production reduces price by ~$28. This creates the correct dynamic: Nordostan trades long-term OPEC discipline for short-term revenue. The formula is working.
+**TESTER NOTE:** Oil price responding correctly to supply changes. Sarmatia's HIGH production reduces price by ~$28. This creates the correct dynamic: Sarmatia trades long-term OPEC discipline for short-term revenue. The formula is working.
 
 ### GDP Calculations
 
@@ -354,10 +354,10 @@ New GDP: 285.1 × 1.0178 = **290.2**
 **Cathay:** base 4.0% × tariff(0.96) × rare_earth_self(1.0) × tech(1.05) × inflation(1.0) × semiconductor(0.975) = 4.0% × 0.983 = **3.93%**
 New GDP: 197.5 × 1.0393 = **205.3** (+1 naval = 8 total)
 
-**Nordostan:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.96) = 1.0% × 0.745 = **0.75%**
+**Sarmatia:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.96) = 1.0% × 0.745 = **0.75%**
 New GDP: 20.15 × 1.0075 = **20.30** (Treasury: Cathay loan keeps it at ~1)
 
-**Heartland:** base 2.5% × war(0.90) × aid_boost(1.05) × democratic_resilience = 2.5% × 0.945 = **2.36%**
+**Ruthenia:** base 2.5% × war(0.90) × aid_boost(1.05) × democratic_resilience = 2.5% × 0.945 = **2.36%**
 New GDP: 2.25 × 1.0236 = **2.30** (Treasury: ~2.5 with EU increase)
 
 **Persia:** base -3.0% × war(0.85) × sanctions(0.80) × blockade(0.90) = -3.0% × 0.612 = **-1.84%**
@@ -378,8 +378,8 @@ New GDP: 43.4 × 1.0165 = **44.12**
 |---------|-----|-------------|----------|-----------------|-----------|-------|-----|--------|
 | Columbia | 6.95 | -0.05 (allied) | +0.0 | — | — | midterm stress -0.05 | **6.85** | -0.10 |
 | Cathay | 8.05 | 0 | +0.05 | — | — | — | **8.10** | +0.05 |
-| Nordostan | 4.90 | -0.08 (attacker) | -0.05 | — | ×0.75 | — | **4.80** | -0.10 |
-| Heartland | 4.62 | -0.10 (defender) | -0.03 | +0.15 | — | territory contested -0.2 | **4.44** | -0.18 |
+| Sarmatia | 4.90 | -0.08 (attacker) | -0.05 | — | ×0.75 | — | **4.80** | -0.10 |
+| Ruthenia | 4.62 | -0.10 (defender) | -0.03 | +0.15 | — | territory contested -0.2 | **4.44** | -0.18 |
 | Persia | 3.90 | -0.10 (defender) | -0.10 | — | — | Mirage pause +0.05 | **3.75** | -0.15 |
 | Yamato | 7.70 | 0 | +0.0 | — | — | ICBM anxiety fading +0.1 | **7.80** | +0.10 |
 | Solaria | 7.04 | -0.05 (under attack) | +0.05 | — | ×0.75 | — | **7.00** | -0.04 |
@@ -395,8 +395,8 @@ New GDP: 43.4 × 1.0165 = **44.12**
 |---------|-----|--------|-----|-------|
 | Columbia | 37% | +0.6 (midterm survival boost) | **37.6%** | Narrow win provides breathing room |
 | Cathay | 58.5% | +0.3 | **58.8%** | Steady growth, no crises |
-| Nordostan | 54% | -1.0 (war tiredness, empty treasury) | **53%** | Narrative strain |
-| Heartland | 50% | -2.0 (stalemate, casualties, election approaching) | **48%** | Beacon below 50 — vulnerable |
+| Sarmatia | 54% | -1.0 (war tiredness, empty treasury) | **53%** | Narrative strain |
+| Ruthenia | 50% | -2.0 (stalemate, casualties, election approaching) | **48%** | Beacon below 50 — vulnerable |
 | Persia | 38.5% | -1.5 (economy, war damage) | **37%** | Dawn support rising to 25% |
 
 ### Technology Advancement
@@ -421,8 +421,8 @@ New GDP: 43.4 × 1.0165 = **44.12**
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 290.2 | 6.85 | 37.6% | ~44 | 9 | Midterms: narrow survival |
 | Cathay | 205.3 | 8.10 | 58.8% | ~38 | **8** (+1) | SILK THREAD failed, exercises intensify |
-| Nordostan | 20.30 | 4.80 | 53% | ~1 (Cathay loan) | 2 | heartland_16 contested, treasury life support |
-| Heartland | 2.30 | 4.44 | 48% | ~2.5 | 0 | Beacon below 50%, election R3 |
+| Sarmatia | 20.30 | 4.80 | 53% | ~1 (Cathay loan) | 2 | ruthenia_16 contested, treasury life support |
+| Ruthenia | 2.30 | 4.44 | 48% | ~2.5 | 0 | Beacon below 50%, election R3 |
 | Persia | 4.82 | 3.75 | 37% | ~0 | 0 | Dawn-Lumiere channel opens, IRGC reserves 1.8 |
 | Gallia | 34.7 | 7.0 | 40% | ~7 | 1 | Geneva mediation active |
 | Teutonia | 45.95 | 7.0 | 45% | ~10 | 0 | Cathay back-channel deepens |
@@ -441,10 +441,10 @@ New GDP: 43.4 × 1.0165 = **44.12**
 
 ## Key Events Summary
 - **CATHAY PURGE PENALTY LIFTS** — complex military operations now viable. Formosa window opens.
-- **Heartland wartime election** — Beacon vs Bulwark. Territory lost, war tiredness, but democratic resilience.
+- **Ruthenia wartime election** — Beacon vs Bulwark. Territory lost, war tiredness, but democratic resilience.
 - **Cathay reaches Nuclear L3** — escalation dominance calculation shifts
 - **Dawn-Lumiere second meeting** — written framework proposal presented
-- **Nordostan takes heartland_16** — grinding advance continues
+- **Sarmatia takes ruthenia_16** — grinding advance continues
 - **Persia: Anvil's reserves running dry** — IRGC down to final round of reserves
 - **Oil price continues declining** toward more sustainable levels
 
@@ -452,13 +452,13 @@ New GDP: 43.4 × 1.0165 = **44.12**
 
 ### COLUMBIA TEAM
 
-**DEALER** pivots from midterm survival to Heartland deal-making. Pathfinder back-channel via Solaria continues. Dealer's new pitch: "Ceasefire by Cathay's Lunar New Year. I announce it. You announce it. We both declare victory. Details later." Pathfinder: "Details are the only thing that matter." But both keep talking.
+**DEALER** pivots from midterm survival to Ruthenia deal-making. Pathfinder back-channel via Solaria continues. Dealer's new pitch: "Ceasefire by Cathay's Lunar New Year. I announce it. You announce it. We both declare victory. Details later." Pathfinder: "Details are the only thing that matter." But both keep talking.
 
 **SHIELD** alarm level elevated. Classified briefing: "Cathay purge penalty lifted. L3 nuclear imminent. 8 ships near Formosa, 9th building. Justice Mission exercises now include live-fire components. ADIZ incursions at 38/week normalized. Assessment: Formosa selective blockade viable from R4." Shield demands 2 additional naval to Pacific. Dealer authorizes 1 — pulled from Mediterranean (4 Pacific, 5 remaining globally). "Shield, you get one ship. Make it count."
 
 **SHADOW** provides Helmsman-Dealer summit debrief: "He was probing, not posturing. When you said One China policy, he leaned forward. When you mentioned trade, he leaned back. Helmsman wants to know if you would trade Formosa for a deal on everything else. He was not asking hypothetically." Dealer: "I would never — " Shadow: "Sir, I am telling you what HE was asking. Not what you should answer."
 
-**TRIBUNE** hammers harder. "The president barely held the midterms. His approval is 37%. The Heartland back-channel is unconstitutional. I am requesting the full classified transcript." Tribune begins building the case that Dealer is selling out Heartland for personal legacy.
+**TRIBUNE** hammers harder. "The president barely held the midterms. His approval is 37%. The Ruthenia back-channel is unconstitutional. I am requesting the full classified transcript." Tribune begins building the case that Dealer is selling out Ruthenia for personal legacy.
 
 **Budget:** Social 30, Military 42 (increased — Shield's Pacific redeployment), Tech 18, Reserve 10.
 
@@ -497,42 +497,42 @@ New GDP: 43.4 × 1.0165 = **44.12**
 - Helmsman message to Dealer via BRICS+ channel: "Cathay seeks peaceful reunification. But patience is not infinite. Columbia's military posture near Cathay's coast is provocative. Withdrawal of 2 ships would be a meaningful gesture." This is a TEST — will Dealer sacrifice Formosa deterrence for deal-making?
 - Dealer's response: "Columbia's Pacific deployments are defensive and routine." Helmsman expected this answer. It confirms Dealer will not voluntarily withdraw.
 
-### NORDOSTAN TEAM
+### SARMATIA TEAM
 
-**IRONHAND** completes heartland_16 capture. Concentration pays off — Heartland defense buckles under sustained pressure. But cost is high: 2 more ground lost (12→10 on front), and Zaporizhzhia vulnerability remains.
+**IRONHAND** completes ruthenia_16 capture. Concentration pays off — Ruthenia defense buckles under sustained pressure. But cost is high: 2 more ground lost (12→10 on front), and Zaporizhzhia vulnerability remains.
 
-**PATHFINDER** receives Dealer's "ceasefire by Lunar New Year" proposal. Response: "Specific terms or we have nothing to discuss. Ceasefire without sovereignty recognition is a trap that lets Heartland rearm with Western weapons." But Pathfinder is 73 and feeling the clock. Instructs Compass: "Find me the deal that gives me sovereignty and gives Dealer his television moment."
+**PATHFINDER** receives Dealer's "ceasefire by Lunar New Year" proposal. Response: "Specific terms or we have nothing to discuss. Ceasefire without sovereignty recognition is a trap that lets Ruthenia rearm with Western weapons." But Pathfinder is 73 and feeling the clock. Instructs Compass: "Find me the deal that gives me sovereignty and gives Dealer his television moment."
 
-**COMPASS** working three channels simultaneously: Solaria (Dealer), Geneva (Columbia indirect), Mirage (financial). Assessment to Pathfinder: "The gap is: you want de jure sovereignty, Dealer wants de facto freeze without legal recognition. Bridge: 'special administrative status' — international monitoring, local governance under Nordostan, but no formal sovereignty transfer. The EU would accept it. Heartland would reject it. Dealer might."
+**COMPASS** working three channels simultaneously: Solaria (Dealer), Geneva (Columbia indirect), Mirage (financial). Assessment to Pathfinder: "The gap is: you want de jure sovereignty, Dealer wants de facto freeze without legal recognition. Bridge: 'special administrative status' — international monitoring, local governance under Sarmatia, but no formal sovereignty transfer. The EU would accept it. Ruthenia would reject it. Dealer might."
 
 **Budget:** Treasury ~1 (Cathay loan). Revenue ~4.5. Deficit ~12. Second Cathay loan: 3 coins. Dependency deepening. Pathfinder disgusted but has no choice.
 
 **Military Actions:**
-- heartland_16 captured after sustained offensive.
-- Donetsk Oblast: ~70% controlled. heartland_15, heartland_16 occupied.
+- ruthenia_16 captured after sustained offensive.
+- Donetsk Oblast: ~70% controlled. ruthenia_15, ruthenia_16 occupied.
 - Casualties mounting: total ground from 47 starting → ~42 (including Choson). Quality declining.
 - OPEC+ HIGH maintained.
 
-### HEARTLAND TEAM — WARTIME ELECTION
+### RUTHENIA TEAM — WARTIME ELECTION
 
-**BEACON** enters election at 48% support, below the danger threshold. His campaign message: "I held the line. I kept the alliance. Do not change leaders in the middle of a war." Rally-around-the-flag effect still present but fading as heartland_16 falls.
+**BEACON** enters election at 48% support, below the danger threshold. His campaign message: "I held the line. I kept the alliance. Do not change leaders in the middle of a war." Rally-around-the-flag effect still present but fading as ruthenia_16 falls.
 
 **BULWARK** campaigns on competence: "I will fight harder. I will demand more from our allies. I will accept a peace only from strength, not from exhaustion." His military credibility is his strongest asset. Soldiers trust him. Western military contacts (Shield, Lumiere's defense ministry) prefer him.
 
-**BROKER** campaigns on the EU package: "I will bring Heartland into Europe. Not through war, but through institutions. The EU accession framework I have assembled is the only concrete offer on the table." His 22% support is insufficient to win but enough to be kingmaker.
+**BROKER** campaigns on the EU package: "I will bring Ruthenia into Europe. Not through war, but through institutions. The EU accession framework I have assembled is the only concrete offer on the table." His 22% support is insufficient to win but enough to be kingmaker.
 
-**Heartland Election — AI Score Calculation:**
+**Ruthenia Election — AI Score Calculation:**
 
 ```
-Heartland at end of R3:
+Ruthenia at end of R3:
 - GDP growth rate: ~2.3%
 - Stability: ~4.25 (projected after this round's decline)
 - Active wars: 1 (defender)
-- Occupied zones: 2 (heartland_15, heartland_16)
+- Occupied zones: 2 (ruthenia_15, ruthenia_16)
 - War tiredness: ~0.60 (0.40 from R2 + 0.20 R3 — but society adaptation kicks in at R3+)
 
 Actually, war tiredness calculation:
-- Heartland has been at war since before R1. War duration from start_round -4 (2024 start).
+- Ruthenia has been at war since before R1. War duration from start_round -4 (2024 start).
 - By R3, war_duration = R3 - (-4) = 7 rounds equivalent. Society adaptation: base_increase * 0.5.
 - R3 war tiredness increment: 0.20 * 0.5 = 0.10 (society adapted)
 - Total war tiredness R3: 0.40 + 0.10 = 0.50
@@ -542,7 +542,7 @@ Base ai_score = clamp(50 + 2.3*10 + (4.25-5)*5 - 5*1, 0, 100)
              = clamp(64.25, 0, 100)
              = 64.25
 
-Heartland wartime modifiers:
+Ruthenia wartime modifiers:
 territory_factor = -3 × 2 occupied zones = -6
 war_tiredness_factor = -2 × 0.50 = -1.0
 
@@ -564,29 +564,29 @@ incumbent_wins = (54.6 >= 50.0) = TRUE
 
 **TESTER NOTE:** The R4 runoff is still scheduled. Per the election procedure, if R3 produces a narrow win (within 55%), a runoff occurs in R4. 54.6% is within that range. **R4 runoff will occur** between Beacon and Bulwark, with Broker potentially endorsing one candidate.
 
-**Consequence:** Beacon remains president but faces R4 runoff. Bulwark's campaign intensifies. Broker's endorsement becomes the most valuable political commodity in Heartland.
+**Consequence:** Beacon remains president but faces R4 runoff. Bulwark's campaign intensifies. Broker's endorsement becomes the most valuable political commodity in Ruthenia.
 
 ---
 
 ## LIVE ACTION RESOLUTION — ROUND 3
 
-### 1. Nordostan Capture of heartland_16
+### 1. Sarmatia Capture of ruthenia_16
 
-**Nordostan:** 13 ground (with 3rd wave support) + 4 tac air, concentrated push
-**Heartland:** 5 ground + 1 reserve + 2 tac air. Reduced logistics disruption (Nordostan adapted routes).
+**Sarmatia:** 13 ground (with 3rd wave support) + 4 tac air, concentrated push
+**Ruthenia:** 5 ground + 1 reserve + 2 tac air. Reduced logistics disruption (Sarmatia adapted routes).
 
 **Dice rolls:**
 - 5 unit-pair engagements
-- Pair 1: Nord 6=6.0 vs Heart 4+0.5=4.5 → Nordostan wins
-- Pair 2: Nord 3=3.0 vs Heart 3+0.5=3.5 → Heartland wins
-- Pair 3: Nord 5=5.0 vs Heart 2+0.5=2.5 → Nordostan wins
-- Pair 4: Nord 4=4.0 vs Heart 5+0.5=5.5 → Heartland wins
-- Pair 5: Nord 4=4.0 vs Heart 1+0.5=1.5 → Nordostan wins
+- Pair 1: Nord 6=6.0 vs Heart 4+0.5=4.5 → Sarmatia wins
+- Pair 2: Nord 3=3.0 vs Heart 3+0.5=3.5 → Ruthenia wins
+- Pair 3: Nord 5=5.0 vs Heart 2+0.5=2.5 → Sarmatia wins
+- Pair 4: Nord 4=4.0 vs Heart 5+0.5=5.5 → Ruthenia wins
+- Pair 5: Nord 4=4.0 vs Heart 1+0.5=1.5 → Sarmatia wins
 
-**Result: 3-2 NORDOSTAN.** heartland_16 falls. Nordostan occupies second hex.
+**Result: 3-2 SARMATIA.** ruthenia_16 falls. Sarmatia occupies second hex.
 
-**Casualties:** Nordostan -2 ground (12→10). Heartland -2 ground (6→4 on front, 0 reserve).
-**War tiredness:** Nordostan: 0.30 + 0.15×0.5 (adaptation) = 0.375 → **0.38**. Heartland: 0.40 + 0.20×0.5 = 0.50.
+**Casualties:** Sarmatia -2 ground (12→10). Ruthenia -2 ground (6→4 on front, 0 reserve).
+**War tiredness:** Sarmatia: 0.30 + 0.15×0.5 (adaptation) = 0.375 → **0.38**. Ruthenia: 0.40 + 0.20×0.5 = 0.50.
 
 ### 2. Gulf Gate Operations
 
@@ -623,7 +623,7 @@ Furnace: "I see no mention of the fatwa. No mention of our right to deterrence. 
 
 ```
 base = $80
-supply_factor = 1.06 (Nordostan HIGH)
+supply_factor = 1.06 (Sarmatia HIGH)
 sanctions_supply_hit = 0.16
 final_supply = max(0.5, 1.06 - 0.16) = 0.90
 disruption = 1.0 + 0.30 (Gulf Gate PARTIAL — reduced by mine clearance) = 1.30
@@ -643,8 +643,8 @@ OIL PRICE = 80 × (0.98/0.90) × 1.30 × 1.20 × 1.15
 
 **Columbia:** base 1.8% × combined factors = **1.80%** → GDP: 290.2 × 1.018 = **295.5**
 **Cathay:** base 4.0% × combined = **3.90%** → GDP: 205.3 × 1.039 = **213.3** (+1 naval = 9 total)
-**Nordostan:** base 1.0% × combined = **0.72%** → GDP: 20.30 × 1.0072 = **20.45**
-**Heartland:** base 2.5% × combined = **2.30%** → GDP: 2.30 × 1.023 = **2.35**
+**Sarmatia:** base 1.0% × combined = **0.72%** → GDP: 20.30 × 1.0072 = **20.45**
+**Ruthenia:** base 2.5% × combined = **2.30%** → GDP: 2.30 × 1.023 = **2.35**
 **Persia:** base -3.0% × combined = **-2.0%** → GDP: 4.82 × 0.98 = **4.72**
 
 ### Stability Updates
@@ -653,8 +653,8 @@ OIL PRICE = 80 × (0.98/0.90) × 1.30 × 1.20 × 1.15
 |---------|-----|-----------------|-----|--------|
 | Columbia | 6.85 | war -0.05, blockade easing +0.05, Shield alarm -0.05 | **6.80** | -0.05 |
 | Cathay | 8.10 | growth +0.05, no war | **8.15** | +0.05 |
-| Nordostan | 4.80 | war attacker -0.08, casualties -0.2, × autocracy 0.75 | **4.59** | -0.21 |
-| Heartland | 4.44 | war -0.10, territory -0.4, dem resilience +0.15, war tired -0.02 | **4.07** | -0.37 |
+| Sarmatia | 4.80 | war attacker -0.08, casualties -0.2, × autocracy 0.75 | **4.59** | -0.21 |
+| Ruthenia | 4.44 | war -0.10, territory -0.4, dem resilience +0.15, war tired -0.02 | **4.07** | -0.37 |
 | Persia | 3.75 | war -0.10, economy -0.10, IRGC crisis -0.10 | **3.45** | -0.30 |
 
 ### Technology Advancement — CRITICAL
@@ -679,8 +679,8 @@ OIL PRICE = 80 × (0.98/0.90) × 1.30 × 1.20 × 1.15
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 295.5 | 6.80 | 37% | ~45 | 9 | 4 ships Pacific, Shield alarmed |
 | Cathay | 213.3 | 8.15 | 59% | ~36 | **9** (PARITY) | L3 nuclear, purge lifted |
-| Nordostan | 20.45 | 4.59 | 52% | ~0 (loans) | 2 | heartland_16 taken, quality declining |
-| Heartland | 2.35 | 4.07 | 48% | ~2.5 | 0 | Beacon survives R3 election, runoff R4 |
+| Sarmatia | 20.45 | 4.59 | 52% | ~0 (loans) | 2 | ruthenia_16 taken, quality declining |
+| Ruthenia | 2.35 | 4.07 | 48% | ~2.5 | 0 | Beacon survives R3 election, runoff R4 |
 | Persia | 4.72 | 3.45 | 36% | ~0 | 0 | IRGC reserves: 0.2. Dawn framework on table |
 | Gallia | 35.1 | 7.0 | 41% | ~7 | 1 | Dawn-Lumiere framework written |
 | Teutonia | 46.4 | 7.0 | 45% | ~10 | 0 | Cathay back-channel deepening |
@@ -698,7 +698,7 @@ OIL PRICE = 80 × (0.98/0.90) × 1.30 × 1.20 × 1.15
 
 ## Key Events Summary
 - **CATHAY FORMOSA BLOCKADE DECISION** — Helmsman orders selective blockade. The Thucydides Trap springs.
-- **Heartland R4 runoff** — Beacon vs Bulwark, with Broker's endorsement decisive
+- **Ruthenia R4 runoff** — Beacon vs Bulwark, with Broker's endorsement decisive
 - **NATO Summit in Phrygia** — crisis summit amid Formosa blockade
 - **Persia ceasefire framework** — Anvil runs out of reserves, forced to deal
 - **Semiconductor disruption triggers** — Formosa blockade crashes global chip supply
@@ -760,12 +760,12 @@ OIL PRICE = 80 × (0.98/0.90) × 1.30 × 1.20 × 1.15
 
 ### NATO Summit in Phrygia (Pre-Formosa Decision)
 
-The summit was planned before the blockade. Agenda was Heartland burden-sharing. Formosa blockade announced mid-summit — chaos.
+The summit was planned before the blockade. Agenda was Ruthenia burden-sharing. Formosa blockade announced mid-summit — chaos.
 
-**BAZAAR (Phrygia):** Monetizes chaos. Extends summit by 1 day. Charges all parties for emergency sessions. Offers to mediate Formosa crisis (with zero qualifications to do so). Demands F-35 reinstatement from Columbia as "hosting fee."
+**VIZIER (Phrygia):** Monetizes chaos. Extends summit by 1 day. Charges all parties for emergency sessions. Offers to mediate Formosa crisis (with zero qualifications to do so). Demands F-35 reinstatement from Columbia as "hosting fee."
 
 **Summit outcomes (pre-blockade agenda):**
-1. Heartland support: EU pledges increase to 1 coin/round collective. Sentinel demands more. Forge: "We are doing what we can with $156 oil."
+1. Ruthenia support: EU pledges increase to 1 coin/round collective. Sentinel demands more. Forge: "We are doing what we can with $156 oil."
 2. Defense spending: 3% target agreed (down from Columbia's 5% demand). Forge: "3% is realistic. 5% is fantasy."
 3. Cathay tech restrictions: Mariner's targeted approach adopted. Forge accepts limited chip export controls on military-grade only.
 
@@ -774,29 +774,29 @@ The summit was planned before the blockade. Agenda was Heartland burden-sharing.
 2. Semiconductor emergency: EU semiconductor act activated. Emergency stockpile assessment (60-90 days supply for most).
 3. NO military commitment to Formosa from any European power. Lumiere: "This is a Pacific matter. We condemn but we do not commit naval forces." Sentinel: "If Columbia asks, Freeland will contribute." Forge: "Teutonia will not."
 
-### Heartland R4 Runoff Election
+### Ruthenia R4 Runoff Election
 
-The Formosa crisis overshadows but does not replace the Heartland election. Beacon campaigns on continuity. Bulwark campaigns on strength.
+The Formosa crisis overshadows but does not replace the Ruthenia election. Beacon campaigns on continuity. Bulwark campaigns on strength.
 
-**BROKER'S ENDORSEMENT:** The key decision. Broker's calculation: Beacon offers EU track continuity. Bulwark offers military credibility. Formosa crisis makes Western aid to Heartland LESS certain (Columbia distracted). EU accession is the only path that doesn't depend on Columbia's attention span.
+**BROKER'S ENDORSEMENT:** The key decision. Broker's calculation: Beacon offers EU track continuity. Bulwark offers military credibility. Formosa crisis makes Western aid to Ruthenia LESS certain (Columbia distracted). EU accession is the only path that doesn't depend on Columbia's attention span.
 
 **Broker endorses BEACON** — conditional on Beacon publicly committing to EU accession as national priority.
 
-**Heartland Runoff — AI Score Calculation:**
+**Ruthenia Runoff — AI Score Calculation:**
 
 ```
-Heartland at end of R4:
+Ruthenia at end of R4:
 - GDP growth rate: ~2.2%
 - Stability: ~3.85 (projected — continued decline)
 - Active wars: 1
-- Occupied zones: 2 (heartland_15, heartland_16)
+- Occupied zones: 2 (ruthenia_15, ruthenia_16)
 - War tiredness: 0.50 + 0.10 (adaptation) = 0.60
 
 Base ai_score = clamp(50 + 2.2*10 + (3.85-5)*5 - 5*1, 0, 100)
              = clamp(50 + 22 + (-5.75) - 5, 0, 100)
              = clamp(61.25, 0, 100) = 61.25
 
-Heartland wartime modifiers:
+Ruthenia wartime modifiers:
 territory_factor = -3 × 2 = -6
 war_tiredness = -2 × 0.60 = -1.2
 
@@ -812,7 +812,7 @@ final_incumbent_pct = 0.5 * 54.05 + 0.5 * 56.0 = 27.025 + 28.0 = 55.0%
 incumbent_wins = (55.0 >= 50.0) = TRUE
 ```
 
-**RESULT: BEACON WINS RUNOFF — 55.0%.** Broker's endorsement and EU commitment carry the day. Bulwark concedes with dignity: "The people have spoken. I serve Heartland in whatever capacity is needed." Beacon appoints Bulwark as formal defense commander with expanded operational authority — the price of political survival.
+**RESULT: BEACON WINS RUNOFF — 55.0%.** Broker's endorsement and EU commitment carry the day. Bulwark concedes with dignity: "The people have spoken. I serve Ruthenia in whatever capacity is needed." Beacon appoints Bulwark as formal defense commander with expanded operational authority — the price of political survival.
 
 ---
 
@@ -828,22 +828,22 @@ incumbent_wins = (55.0 >= 50.0) = TRUE
 
 **Consequence:** Formosa blockade = Formosa Strait chokepoint BLOCKED in engine terms.
 
-### 2. Eastern Ereb Theater (Nordostan-Heartland)
+### 2. Eastern Ereb Theater (Sarmatia-Ruthenia)
 
-**Nordostan:** Offensive continues but with reduced intensity — supply chain stressed, Choson troops underperforming in combat roles. 10 ground + 4 tac air.
-**Heartland:** 4 ground + 2 tac air. Bulwark now commanding with expanded authority.
+**Sarmatia:** Offensive continues but with reduced intensity — supply chain stressed, Choson troops underperforming in combat roles. 10 ground + 4 tac air.
+**Ruthenia:** 4 ground + 2 tac air. Bulwark now commanding with expanded authority.
 
 **Dice rolls:**
 - 4 unit-pair engagements
-- Pair 1: Nord 2=2.0 vs Heart 5+0.5=5.5 → Heartland wins
-- Pair 2: Nord 5=5.0 vs Heart 3+0.5=3.5 → Nordostan wins
-- Pair 3: Nord 3=3.0 vs Heart 4+0.5=4.5 → Heartland wins
-- Pair 4: Nord 4=4.0 vs Heart 2+0.5=2.5 → Nordostan wins
+- Pair 1: Nord 2=2.0 vs Heart 5+0.5=5.5 → Ruthenia wins
+- Pair 2: Nord 5=5.0 vs Heart 3+0.5=3.5 → Sarmatia wins
+- Pair 3: Nord 3=3.0 vs Heart 4+0.5=4.5 → Ruthenia wins
+- Pair 4: Nord 4=4.0 vs Heart 2+0.5=2.5 → Sarmatia wins
 
-**Result: 2-2 STALEMATE.** Nordostan offensive stalls. Heartland holds. Bulwark's leadership makes a visible difference — defensive efficiency improves.
+**Result: 2-2 STALEMATE.** Sarmatia offensive stalls. Ruthenia holds. Bulwark's leadership makes a visible difference — defensive efficiency improves.
 
-**Casualties:** Nordostan -1 ground (10→9). Heartland -1 ground (4→3).
-**War tiredness:** Nordostan: 0.38 + 0.075 = **0.455**. Heartland: 0.60 + 0.10 = **0.70**.
+**Casualties:** Sarmatia -1 ground (10→9). Ruthenia -1 ground (4→3).
+**War tiredness:** Sarmatia: 0.38 + 0.075 = **0.455**. Ruthenia: 0.60 + 0.10 = **0.70**.
 
 ### 3. Persia Ceasefire
 
@@ -883,11 +883,11 @@ Anvil (via Lumiere): "50% now. Full opening after 90-day compliance. Non-negotia
 
 ```
 base = $80
-supply_factor = 1.06 (Nordostan HIGH)
-sanctions_supply_hit = 0.16 (Nordostan L3, Persia L3 — though Persia ceasefire beginning)
+supply_factor = 1.06 (Sarmatia HIGH)
+sanctions_supply_hit = 0.16 (Sarmatia L3, Persia L3 — though Persia ceasefire beginning)
 final_supply = max(0.5, 1.06 - 0.16) = 0.90
 disruption = 1.0 + 0.20 (Gulf Gate reduced to 25%) + 0.15 (Formosa Strait BLOCKED) = 1.35
-war_premium = min(0.30, 0.10 × 3) = 0.30  (3 major situations: Nordostan-Heartland, Persia ceasefire-in-progress, Formosa blockade)
+war_premium = min(0.30, 0.10 × 3) = 0.30  (3 major situations: Sarmatia-Ruthenia, Persia ceasefire-in-progress, Formosa blockade)
 demand_factor = 1.0 + (1.2 - 2.0) × 0.05 = 0.96  (demand weakening due to semiconductor crisis)
 speculation = 1.0 + 0.05 × 4 = 1.20  (wars + Gulf Gate + Formosa)
 
@@ -933,10 +933,10 @@ New GDP: 295.5 × 1.0164 = **300.3**
 **Cathay:** base 4.0% × tariff(0.96) × war(0.96 — Formosa blockade costs) × tech(1.05) × semiconductor(0.982) = 4.0% × 0.937 = **3.75%**
 New GDP: 213.3 × 1.0375 = **221.3** (+1 naval = 10 total)
 
-**Nordostan:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.95) = 1.0% × 0.736 = **0.74%**
+**Sarmatia:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.95) = 1.0% × 0.736 = **0.74%**
 New GDP: 20.45 × 1.0074 = **20.60**
 
-**Heartland:** base 2.5% × war(0.90) × aid(1.05) × dem_resilience = **2.20%**
+**Ruthenia:** base 2.5% × war(0.90) × aid(1.05) × dem_resilience = **2.20%**
 New GDP: 2.35 × 1.022 = **2.40**
 
 **Persia:** base -3.0% × war(0.90 — ceasefire easing) × sanctions(0.85 — 30% relief beginning) × blockade(0.92) = -3.0% × 0.702 = **-2.11%** → improving
@@ -954,8 +954,8 @@ New GDP: 18.0 × 1.024 = **18.43**
 |---------|-----|-----------|-----|--------|
 | Columbia | 6.80 | war -0.05, Formosa crisis -0.15, oil +0.0 | **6.60** | -0.20 |
 | Cathay | 8.15 | Formosa blockade -0.10 (international isolation), growth +0.05 | **8.10** | -0.05 |
-| Nordostan | 4.59 | war -0.06, stalemate frustration -0.05, × 0.75 | **4.51** | -0.08 |
-| Heartland | 4.07 | war -0.10, stalemate hold +0.05, dem resilience +0.15, war tired -0.03 | **4.14** | +0.07 |
+| Sarmatia | 4.59 | war -0.06, stalemate frustration -0.05, × 0.75 | **4.51** | -0.08 |
+| Ruthenia | 4.07 | war -0.10, stalemate hold +0.05, dem resilience +0.15, war tired -0.03 | **4.14** | +0.07 |
 | Persia | 3.45 | ceasefire +0.15, economy still bad -0.05 | **3.55** | +0.10 |
 | Yamato | 7.85 | Formosa crisis -0.15 (security anxiety), semiconductor -0.05 | **7.65** | -0.20 |
 | Formosa | 6.90 | blockade -0.30 (existential crisis), rally +0.15 | **6.75** | -0.15 |
@@ -981,8 +981,8 @@ New GDP: 18.0 × 1.024 = **18.43**
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 300.3 | 6.60 | 36% | ~43 | 9 (4 Pacific) | Formosa crisis, 2 ships transiting |
 | Cathay | 221.3 | 8.10 | 59% | ~33 | **10** | Formosa blockade active, L3 nuclear |
-| Nordostan | 20.60 | 4.51 | 51% | ~0 | 2 | Offensive stalled, Cathay dependent |
-| Heartland | 2.40 | 4.14 | 49% | ~2.5 | 0 | Beacon wins runoff, Bulwark commands |
+| Sarmatia | 20.60 | 4.51 | 51% | ~0 | 2 | Offensive stalled, Cathay dependent |
+| Ruthenia | 2.40 | 4.14 | 49% | ~2.5 | 0 | Beacon wins runoff, Bulwark commands |
 | Persia | 4.62 | 3.55 | 37% | ~0 | 0 | CEASEFIRE. Gulf Gate 50% open |
 | Formosa | 8.0 | 6.75 | 58% | ~8 | 0 | BLOCKADED. TSMC kill switch standby |
 | Yamato | 45.5 | 7.65 | 48% | ~14 | 2 | Semiconductor crisis, remilitarization |
@@ -1000,7 +1000,7 @@ New GDP: 18.0 × 1.024 = **18.43**
 - **COLUMBIA PRESIDENTIAL ELECTION** — the climax. Dealer's toxic endorsement, Formosa crisis, oil at $180
 - **Formosa blockade: Month 6** — semiconductor crisis deepens globally
 - **Persia ceasefire holds** — IAEA inspectors at known sites. Sanctions relief beginning.
-- **Nordostan-Heartland: Exhaustion approaching** — both sides running out of steam
+- **Sarmatia-Ruthenia: Exhaustion approaching** — both sides running out of steam
 - **Cathay AI reaches L3** — full technological parity with Columbia in AI
 
 ## Agent Decisions
@@ -1041,13 +1041,13 @@ Sanctions relief: 30% European sanctions lifted on schedule. Columbia delays its
 
 Levantia (Citadel): Conducts independent intelligence operation on Persia nuclear sites. Identifies 1 suspected undeclared site. Does NOT share with IAEA yet — holds as leverage. "If the framework fails, I go to Fordow. With or without Columbia."
 
-### Nordostan-Heartland: Exhaustion
+### Sarmatia-Ruthenia: Exhaustion
 
-**IRONHAND** reports to Pathfinder: "The offensive has culminated. We hold heartland_15 and heartland_16. Attempting heartland_17 will cost 2 more ground units we cannot replace. Recommend operational pause." Pathfinder resists: "A pause signals weakness at the negotiation table." Ironhand: "A collapse signals something worse."
+**IRONHAND** reports to Pathfinder: "The offensive has culminated. We hold ruthenia_15 and ruthenia_16. Attempting ruthenia_17 will cost 2 more ground units we cannot replace. Recommend operational pause." Pathfinder resists: "A pause signals weakness at the negotiation table." Ironhand: "A collapse signals something worse."
 
 **COMPASS** presses the deal track harder. Dealer distracted by election. Compass pivots to European channels — Forge, Lumiere, Pillar. Message: "After Columbia's election, we deal with the new president. Help us shape the framework now." Europeans cautiously engage.
 
-**BULWARK** (now Heartland defense commander with expanded authority) stabilizes the front. Drone logistics strikes intensified. 3 Nordostan rail corridors disrupted simultaneously — causing genuine 2-week resupply crisis. Nordostan offensive stalls completely.
+**BULWARK** (now Ruthenia defense commander with expanded authority) stabilizes the front. Drone logistics strikes intensified. 3 Sarmatia rail corridors disrupted simultaneously — causing genuine 2-week resupply crisis. Sarmatia offensive stalls completely.
 
 **PATHFINDER** agrees to operational pause — framed as "regrouping for next phase" publicly, "we cannot sustain this tempo" privately. The Donetsk concentration offensive has gained 2 hexes but failed to complete the oblast. Pathfinder's legacy objective — all four oblasts — looks increasingly unreachable.
 
@@ -1061,9 +1061,9 @@ Levantia (Citadel): Conducts independent intelligence operation on Persia nuclea
 Columbia at end of R5:
 - GDP growth rate: ~1.5% (semiconductor disruption dragging)
 - Stability: ~6.40 (Formosa crisis + election stress)
-- Active wars: 2 (Persia ceasefire active but not formally ended, Heartland allied)
+- Active wars: 2 (Persia ceasefire active but not formally ended, Ruthenia allied)
   Actually: Persia ceasefire = war count should drop to 1.5 or 1 depending on definition.
-  Using: 1 active war (Heartland), 1 crisis (Formosa), 0.5 for Persia ceasefire.
+  Using: 1 active war (Ruthenia), 1 crisis (Formosa), 0.5 for Persia ceasefire.
   Simplification: 2 situations = -10 war penalty
 
 ai_score = clamp(50 + 1.5*10 + (6.40-5)*5 - 5*2, 0, 100)
@@ -1108,12 +1108,12 @@ However: 52.0% is extremely narrow. In a real game, this could go either way —
 
 ```
 base = $80
-supply_factor = 1.06 (Nordostan HIGH)
-sanctions_supply_hit = 0.08 (Nordostan L3 only — Persia sanctions at 70% after 30% relief)
+supply_factor = 1.06 (Sarmatia HIGH)
+sanctions_supply_hit = 0.08 (Sarmatia L3 only — Persia sanctions at 70% after 30% relief)
   Persia: sanctions level effectively L2 now → 0.08 × 1 = 0.08 (reduced from 2 producers)
 final_supply = max(0.5, 1.06 - 0.08 - 0.05) = 0.93  (Persia partially resuming exports)
 disruption = 1.0 + 0.15 (Gulf Gate at 25% disruption — improving) + 0.15 (Formosa BLOCKED) = 1.30
-war_premium = min(0.30, 0.10 × 2) = 0.20  (Nordostan war + Formosa crisis)
+war_premium = min(0.30, 0.10 × 2) = 0.20  (Sarmatia war + Formosa crisis)
 demand_factor = 0.97 (semiconductor recession dragging demand)
 speculation = 1.0 + 0.05 × 3 = 1.15
 
@@ -1144,10 +1144,10 @@ New GDP: 300.3 × 1.0162 = **305.2**
 **Cathay:** base 4.0% × tariff(0.96) × war(0.95) × tech(1.08 — L3 AI now) × semiconductor(0.979) = 4.0% × 0.967 = **3.87%**
 New GDP: 221.3 × 1.0387 = **229.9** (+1 naval = 11 total)
 
-**Nordostan:** base 1.0% × sanctions(0.85) × war(0.92 — stalled) = **0.72%**
+**Sarmatia:** base 1.0% × sanctions(0.85) × war(0.92 — stalled) = **0.72%**
 New GDP: 20.60 × 1.0072 = **20.75**
 
-**Heartland:** base 2.5% × war(0.90) × aid(1.05) = **2.20%**
+**Ruthenia:** base 2.5% × war(0.90) × aid(1.05) = **2.20%**
 New GDP: 2.40 × 1.022 = **2.45**
 
 **Persia:** base -1.0% (improving — ceasefire) × sanctions(0.88 — partially lifted) = **-0.88%**
@@ -1159,8 +1159,8 @@ New GDP: 4.62 × 0.991 = **4.58** (contraction slowing)
 |---------|-----|-----------|-----|
 | Columbia | 6.60 | election stress -0.10, Formosa -0.10, semiconductor -0.05 | **6.35** |
 | Cathay | 8.10 | blockade costs -0.05, L3 AI +0.05 | **8.10** |
-| Nordostan | 4.51 | offensive stall -0.10, × 0.75 | **4.44** |
-| Heartland | 4.14 | war -0.10, Bulwark stabilization +0.10, dem resilience +0.15, war tired -0.03 | **4.26** |
+| Sarmatia | 4.51 | offensive stall -0.10, × 0.75 | **4.44** |
+| Ruthenia | 4.14 | war -0.10, Bulwark stabilization +0.10, dem resilience +0.15, war tired -0.03 | **4.26** |
 | Persia | 3.55 | ceasefire +0.20, sanctions relief +0.10, economy still bad -0.05 | **3.80** |
 | Formosa | 6.75 | blockade month 6: -0.25, endurance rally +0.10 | **6.60** |
 | Yamato | 7.65 | semiconductor -0.10, Formosa anxiety -0.05 | **7.50** |
@@ -1187,8 +1187,8 @@ New GDP: 4.62 × 0.991 = **4.58** (contraction slowing)
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 305.2 | 6.35 | 36% | ~42 | 9 (6 Pacific by R6) | Election: Anchor wins. Leadership transition. |
 | Cathay | 229.9 | 8.10 | 59% | ~30 | **11** | L3 AI achieved. Formosa blockade month 6. |
-| Nordostan | 20.75 | 4.44 | 50% | ~0 | 2 | Offensive paused. Exhaustion. |
-| Heartland | 2.45 | 4.26 | 49% | ~3 | 0 | Bulwark stabilizes front. EU track continuing. |
+| Sarmatia | 20.75 | 4.44 | 50% | ~0 | 2 | Offensive paused. Exhaustion. |
+| Ruthenia | 2.45 | 4.26 | 49% | ~3 | 0 | Bulwark stabilizes front. EU track continuing. |
 | Persia | 4.58 | 3.80 | 38% | ~0.5 | 0 | Ceasefire holding. Sanctions relief beginning. |
 | Formosa | 8.0 | 6.60 | 58% | ~7 | 0 | Blockade month 6. Enduring but stressed. |
 
@@ -1207,7 +1207,7 @@ New GDP: 4.62 × 0.991 = **4.58** (contraction slowing)
 - **Columbia Pacific reinforcements arrive** — 6 ships in Pacific (2 transited from Gulf)
 - **Formosa blockade: Month 12** — Formosa economy in crisis, semiconductor famine global
 - **Cathay-Columbia Formosa negotiations** — Anchor proposes diplomatic framework. Helmsman tests terms.
-- **Nordostan-Heartland: Ceasefire negotiations begin** — Pathfinder and Beacon (via Compass and Broker) engage
+- **Sarmatia-Ruthenia: Ceasefire negotiations begin** — Pathfinder and Beacon (via Compass and Broker) engage
 - **Persia ceasefire formally extended** — 90-day review positive. Sanctions relief continues.
 
 ## Agent Decisions
@@ -1245,13 +1245,13 @@ Helmsman to Standing Committee: "We have demonstrated that Cathay can enforce it
 
 **Result:** Cathay-Columbia negotiations begin. Blockade transitions from FULL to REDUCED (monitoring zone). Some commercial shipping resumes. Semiconductor disruption severity drops from 0.7 to 0.4.
 
-### NORDOSTAN-HEARTLAND: Ceasefire Talks
+### SARMATIA-RUTHENIA: Ceasefire Talks
 
-**COMPASS** (Nordostan) and **BROKER** (Heartland) meet in Geneva — the first direct Nordostan-Heartland contact at this level.
+**COMPASS** (Sarmatia) and **BROKER** (Ruthenia) meet in Geneva — the first direct Sarmatia-Ruthenia contact at this level.
 
-Compass's opening: "We both know this war cannot continue. Nordostan holds heartland_15 and heartland_16. A ceasefire at current lines, with international monitoring, special administrative status for occupied territories, and a 5-year review mechanism."
+Compass's opening: "We both know this war cannot continue. Sarmatia holds ruthenia_15 and ruthenia_16. A ceasefire at current lines, with international monitoring, special administrative status for occupied territories, and a 5-year review mechanism."
 
-Broker's response: "EU accession for Heartland. NATO membership pathway. Complete withdrawal. That is our minimum."
+Broker's response: "EU accession for Ruthenia. NATO membership pathway. Complete withdrawal. That is our minimum."
 
 Compass: "You know Pathfinder will never agree to withdrawal. But he might agree to autonomy — territories govern themselves, international monitors, no formal sovereignty transfer either way. A 'frozen conflict' that everyone can call different things."
 
@@ -1261,7 +1261,7 @@ The channel remains open. No agreement. But the architecture of a deal is becomi
 
 **PATHFINDER** is briefed. "I did not fight this war for autonomy. I fought it for sovereignty." But he is 74 now. The treasury is empty. Cathay is the only economic lifeline. Ironhand says the army cannot sustain another offensive. For the first time, Pathfinder considers a deal that is less than everything.
 
-**BULWARK** (Heartland defense commander) reports to Beacon: "The front is stable. Nordostan's offensive has stalled. Their quality is declining. If we hold another 2 rounds, they will be too weak to resume. Time is on our side — IF the aid continues." This assessment strengthens Beacon's hand in negotiations: negotiate from strength, not desperation.
+**BULWARK** (Ruthenia defense commander) reports to Beacon: "The front is stable. Sarmatia's offensive has stalled. Their quality is declining. If we hold another 2 rounds, they will be too weak to resume. Time is on our side — IF the aid continues." This assessment strengthens Beacon's hand in negotiations: negotiate from strength, not desperation.
 
 ### Persia: Formal Ceasefire Extension
 
@@ -1281,11 +1281,11 @@ Levantia (Citadel): Holds intelligence on suspected undeclared site. Does NOT sh
 
 ```
 base = $80
-supply_factor = 1.06 (Nordostan still HIGH but beginning to moderate)
-sanctions_supply_hit = 0.05 (Persia sanctions reduced, Nordostan L3 only)
+supply_factor = 1.06 (Sarmatia still HIGH but beginning to moderate)
+sanctions_supply_hit = 0.05 (Persia sanctions reduced, Sarmatia L3 only)
 final_supply = max(0.5, 1.06 - 0.05) = 1.01 (supply improving significantly)
 disruption = 1.0 + 0.10 (Gulf Gate at 15% — mostly open) + 0.08 (Formosa reduced — monitoring zone) = 1.18
-war_premium = min(0.30, 0.10 × 1) = 0.10 (only Nordostan-Heartland active war now)
+war_premium = min(0.30, 0.10 × 1) = 0.10 (only Sarmatia-Ruthenia active war now)
 demand_factor = 0.97 (still below trend due to semiconductor aftershock)
 speculation = 1.0 + 0.05 × 2 = 1.10
 
@@ -1317,10 +1317,10 @@ New GDP: 305.2 × 1.0194 = **311.1** (recovery as Formosa de-escalates)
 **Cathay:** base 4.0% × tariff(0.96) × tech(1.08) × semiconductor(0.988) × war_cost(0.97 — reduced) = 4.0% × 0.994 = **3.98%**
 New GDP: 229.9 × 1.0398 = **239.0** (+1 naval = 12 total)
 
-**Nordostan:** base 1.0% × sanctions(0.85) × war(0.94 — stalled, lower cost) = **0.80%**
+**Sarmatia:** base 1.0% × sanctions(0.85) × war(0.94 — stalled, lower cost) = **0.80%**
 New GDP: 20.75 × 1.008 = **20.92**
 
-**Heartland:** base 2.5% × war(0.92 — stabilized front) × aid(1.05) = **2.42%**
+**Ruthenia:** base 2.5% × war(0.92 — stabilized front) × aid(1.05) = **2.42%**
 New GDP: 2.45 × 1.024 = **2.51**
 
 **Persia:** base 0.0% (bottoming out, ceasefire effect) × sanctions(0.90 — further relief) = **0.0%**
@@ -1332,8 +1332,8 @@ New GDP: 4.58 × 1.000 = **4.58** (stabilized, no longer contracting)
 |---------|-----|-----------|-----|
 | Columbia | 6.35 | Formosa de-escalation +0.10, transition -0.05 | **6.40** |
 | Cathay | 8.10 | blockade costs easing +0.05 | **8.15** |
-| Nordostan | 4.44 | stalemate frustration -0.05, × 0.75 | **4.40** |
-| Heartland | 4.26 | stabilized front +0.10, dem resilience +0.15, war -0.10, tired -0.03 | **4.38** |
+| Sarmatia | 4.44 | stalemate frustration -0.05, × 0.75 | **4.40** |
+| Ruthenia | 4.26 | stabilized front +0.10, dem resilience +0.15, war -0.10, tired -0.03 | **4.38** |
 | Persia | 3.80 | ceasefire +0.15, sanctions relief +0.10 | **4.05** |
 | Formosa | 6.60 | blockade easing +0.20 | **6.80** |
 | Yamato | 7.50 | Formosa easing +0.10 | **7.60** |
@@ -1350,8 +1350,8 @@ New GDP: 4.58 × 1.000 = **4.58** (stabilized, no longer contracting)
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 311.1 | 6.40 | 37% | ~44 | 9 (6 Pacific) | Anchor presidency begins. Formosa talks. |
 | Cathay | 239.0 | 8.15 | 58% | ~29 | **12** | Blockade reduced. Negotiations begin. |
-| Nordostan | 20.92 | 4.40 | 49% | ~0 | 2 | Offensive stalled. Ceasefire talks open. |
-| Heartland | 2.51 | 4.38 | 49% | ~3 | 0 | Front stable. Broker's EU track advancing. |
+| Sarmatia | 20.92 | 4.40 | 49% | ~0 | 2 | Offensive stalled. Ceasefire talks open. |
+| Ruthenia | 2.51 | 4.38 | 49% | ~3 | 0 | Front stable. Broker's EU track advancing. |
 | Persia | 4.58 | 4.05 | 40% | ~1 | 0 | Ceasefire holding. Recovery beginning. |
 | Formosa | 8.1 | 6.80 | 57% | ~8 | 0 | Blockade easing. Chip exports resuming. |
 
@@ -1365,7 +1365,7 @@ New GDP: 4.58 × 1.000 = **4.58** (stabilized, no longer contracting)
 
 ## Key Events Summary
 - **Formosa negotiations produce "Cross-Strait Economic Framework"** — blockade lifted
-- **Nordostan-Heartland ceasefire agreed** — Compass-Broker framework signed
+- **Sarmatia-Ruthenia ceasefire agreed** — Compass-Broker framework signed
 - **Cathay naval supremacy: 13 ships** vs Columbia's 9
 - **Columbia AI breakthrough: L4** — the first L4 in the simulation
 - **Persia nuclear crisis: Levantia reveals undeclared site** — framework threatened
@@ -1393,23 +1393,23 @@ New GDP: 4.58 × 1.000 = **4.58** (stabilized, no longer contracting)
 
 **TESTER NOTE:** This outcome is plausible but represents a SIGNIFICANT Cathay strategic victory. The TSMC joint venture transfers semiconductor technology that closes the chip gap over 5-10 years. Formosa's primary strategic value — its semiconductor monopoly — has been diluted. Columbia "wins" by resolving the crisis but "loses" strategically. This IS the Thucydides Trap dynamic working: the rising power gains ground through crisis, the status quo power makes concessions to avoid war.
 
-### Nordostan-Heartland Ceasefire
+### Sarmatia-Ruthenia Ceasefire
 
 **COMPASS-BROKER FRAMEWORK** (the "Geneva Protocol"):
 
-1. Ceasefire at current lines (heartland_15 and heartland_16 remain under Nordostan control).
+1. Ceasefire at current lines (ruthenia_15 and ruthenia_16 remain under Sarmatia control).
 2. 10km demilitarized zone on both sides of front line.
 3. International monitoring force (EU + Bharata + Phrygia — NOT Columbia or Cathay).
-4. heartland_15 and heartland_16 designated as "Special Administrative Territories" — local self-governance, international monitors, legal status deferred to "5-year review conference."
-5. Nordostan sanctions: phased relief over 18 months conditional on compliance.
-6. Heartland: EU accelerated accession track (Broker's signature achievement).
+4. ruthenia_15 and ruthenia_16 designated as "Special Administrative Territories" — local self-governance, international monitors, legal status deferred to "5-year review conference."
+5. Sarmatia sanctions: phased relief over 18 months conditional on compliance.
+6. Ruthenia: EU accelerated accession track (Broker's signature achievement).
 7. Prisoner exchange: full, within 90 days.
 
 **PATHFINDER:** Accepts with visible bitterness. "This is not what I fought for. But a leader must know when to take what the battlefield offers." He claims victory on territorial control. He concedes on sovereignty recognition. The "Special Administrative Territories" formula gives everyone deniable cover.
 
-**BEACON:** Accepts with relief. "Heartland's independence is preserved. EU membership is the security guarantee that Budapest never was." Broker is the hero of the hour.
+**BEACON:** Accepts with relief. "Ruthenia's independence is preserved. EU membership is the security guarantee that Budapest never was." Broker is the hero of the hour.
 
-**BULWARK:** Accepts the ceasefire but warns: "If Nordostan violates, I will be ready." Maintains force posture.
+**BULWARK:** Accepts the ceasefire but warns: "If Sarmatia violates, I will be ready." Maintains force posture.
 
 **IRONHAND:** Executes withdrawal to agreed lines. Professionally. Privately, to Compass: "The Marshal hopes the diplomats did better than the generals." Compass: "The diplomats always do, Marshal. That is why we exist."
 
@@ -1433,7 +1433,7 @@ Columbia reaches AI Level 4 — the first country to achieve L4 in any technolog
 
 ### Solo Country Updates
 
-**SCALES (Bharata):** Profits from peace. Named to Heartland monitoring force. UNSC permanent seat bid gains momentum. GDP now 52+ (6.5% growth sustained). The true winner of the simulation — gained from everyone, committed to no one.
+**SCALES (Bharata):** Profits from peace. Named to Ruthenia monitoring force. UNSC permanent seat bid gains momentum. GDP now 52+ (6.5% growth sustained). The true winner of the simulation — gained from everyone, committed to no one.
 
 **SAKURA (Yamato):** Remilitarization advanced. 4 naval ships now (doubled from starting 2). Semiconductor supply stabilizing with TSMC Yamato expansion. Formosa resolution reduces anxiety but TSMC joint venture with Cathay is concerning.
 
@@ -1447,11 +1447,11 @@ Columbia reaches AI Level 4 — the first country to achieve L4 in any technolog
 
 ```
 base = $80
-supply_factor = 1.03 (Nordostan moderating production as ceasefire reduces fiscal emergency)
-sanctions_supply_hit = 0.03 (Persia sanctions significantly reduced, Nordostan beginning relief)
+supply_factor = 1.03 (Sarmatia moderating production as ceasefire reduces fiscal emergency)
+sanctions_supply_hit = 0.03 (Persia sanctions significantly reduced, Sarmatia beginning relief)
 final_supply = max(0.5, 1.03 - 0.03) = 1.00
 disruption = 1.0 + 0.05 (Gulf Gate nearly open) + 0.0 (Formosa blockade lifted) = 1.05
-war_premium = min(0.30, 0.0) = 0.0 (Nordostan-Heartland ceasefire, Persia ceasefire, Formosa resolved)
+war_premium = min(0.30, 0.0) = 0.0 (Sarmatia-Ruthenia ceasefire, Persia ceasefire, Formosa resolved)
 demand_factor = 1.00 (normalizing)
 speculation = 1.0 + 0.05 × 1 = 1.05 (residual Persia nuclear uncertainty)
 
@@ -1470,10 +1470,10 @@ New GDP: 311.1 × 1.0208 = **317.6**
 **Cathay:** base 4.0% × tariff(0.96) × tech(1.08) × trade_improved(1.01) = 4.0% × 1.047 = **4.19%**
 New GDP: 239.0 × 1.0419 = **249.0** (+1 naval = 13 total)
 
-**Nordostan:** base 1.0% × sanctions(0.90 — relief beginning) × war(0.98 — ceasefire) = 1.0% × 0.882 = **0.88%**
+**Sarmatia:** base 1.0% × sanctions(0.90 — relief beginning) × war(0.98 — ceasefire) = 1.0% × 0.882 = **0.88%**
 New GDP: 20.92 × 1.0088 = **21.10**
 
-**Heartland:** base 2.5% × war(0.98 — ceasefire) × EU_accession(1.03) = 2.5% × 1.009 = **2.52%**
+**Ruthenia:** base 2.5% × war(0.98 — ceasefire) × EU_accession(1.03) = 2.5% × 1.009 = **2.52%**
 New GDP: 2.51 × 1.025 = **2.57**
 
 **Persia:** base 1.5% (recovery) × sanctions(0.92 — continued relief) = 1.5% × 0.92 = **1.38%**
@@ -1485,8 +1485,8 @@ New GDP: 4.58 × 1.014 = **4.64** (GROWTH for first time since war)
 |---------|-----|-----------|-----|
 | Columbia | 6.40 | Formosa resolved +0.15, L4 AI +0.05, oil normalizing +0.05 | **6.65** |
 | Cathay | 8.15 | Formosa deal +0.10, growth +0.05 | **8.30** |
-| Nordostan | 4.40 | ceasefire +0.15, sanctions relief +0.05, × 0.75 dampening | **4.55** |
-| Heartland | 4.38 | ceasefire +0.25, EU track +0.10 | **4.73** |
+| Sarmatia | 4.40 | ceasefire +0.15, sanctions relief +0.05, × 0.75 dampening | **4.55** |
+| Ruthenia | 4.38 | ceasefire +0.25, EU track +0.10 | **4.73** |
 | Persia | 4.05 | growth +0.10, Levantia revelation -0.10 | **4.05** |
 | Formosa | 6.80 | blockade lifted +0.30, TSMC concession -0.10 | **7.00** |
 | Yamato | 7.60 | Formosa resolved +0.10 | **7.70** |
@@ -1511,8 +1511,8 @@ New GDP: 4.58 × 1.014 = **4.64** (GROWTH for first time since war)
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 317.6 | 6.65 | 39% | ~46 | 9 | AI L4. Formosa deal. Anchor consolidating. |
 | Cathay | 249.0 | 8.30 | 60% | ~28 | **13** | Formosa deal declared victory. Growth restored. |
-| Nordostan | 21.10 | 4.55 | 50% | ~1 | 2 | Ceasefire. Sanctions relief beginning. |
-| Heartland | 2.57 | 4.73 | 52% | ~3 | 0 | Ceasefire. EU accession accelerating. |
+| Sarmatia | 21.10 | 4.55 | 50% | ~1 | 2 | Ceasefire. Sanctions relief beginning. |
+| Ruthenia | 2.57 | 4.73 | 52% | ~3 | 0 | Ceasefire. EU accession accelerating. |
 | Persia | 4.64 | 4.05 | 41% | ~1.5 | 0 | Growth returns. Undeclared site inspection pending. |
 | Formosa | 8.2 | 7.00 | 55% | ~9 | 0 | Blockade lifted. TSMC JV concession. |
 
@@ -1526,9 +1526,9 @@ New GDP: 4.58 × 1.014 = **4.64** (GROWTH for first time since war)
 
 ## Key Events Summary
 - **Persia undeclared site inspection** — IAEA finds enrichment consistent with 60% but larger capacity than declared. Framework strained but holds.
-- **Nordostan-Heartland ceasefire implementation** — monitoring force deployed. Sanctions relief continuing.
+- **Sarmatia-Ruthenia ceasefire implementation** — monitoring force deployed. Sanctions relief continuing.
 - **Cathay-Formosa economic zones operational** — first semiconductor JV production begins
-- **Nordostan political shift** — Pathfinder's health declining. Compass positioning for succession.
+- **Sarmatia political shift** — Pathfinder's health declining. Compass positioning for succession.
 - **Final state of the world** — new equilibrium emerging
 
 ## Agent Decisions
@@ -1549,17 +1549,17 @@ IAEA inspects the suspected undeclared site. Findings: enrichment at 60% (consis
 
 **Consequence:** Persia ceasefire framework holds but is modified. Expanded IAEA access. Additional undeclared sites subject to snap inspections. Levantia reluctantly accepts — "For now."
 
-### Nordostan-Heartland Ceasefire Implementation
+### Sarmatia-Ruthenia Ceasefire Implementation
 
-Monitoring force deploys: 2,000 EU troops (Gallia + Albion), 500 Bharata, 200 Phrygia. Demilitarized zone established. Prisoner exchange begins — 3,200 Nordostan POWs and 1,800 Heartland POWs in first batch.
+Monitoring force deploys: 2,000 EU troops (Gallia + Albion), 500 Bharata, 200 Phrygia. Demilitarized zone established. Prisoner exchange begins — 3,200 Sarmatia POWs and 1,800 Ruthenia POWs in first batch.
 
-**PATHFINDER:** Health visibly declining. Attends ceasefire ceremony via video. "Nordostan has secured what was always ours. These territories voted to join our federation. The world has now accepted this reality." (It has not — the "special administrative" formula explicitly avoids this recognition.) But Pathfinder's domestic audience doesn't parse the legal subtlety.
+**PATHFINDER:** Health visibly declining. Attends ceasefire ceremony via video. "Sarmatia has secured what was always ours. These territories voted to join our federation. The world has now accepted this reality." (It has not — the "special administrative" formula explicitly avoids this recognition.) But Pathfinder's domestic audience doesn't parse the legal subtlety.
 
 **COMPASS:** Increasingly visible as de facto diplomatic leader. Begins building successor coalition. Ironhand cooperates — the Marshal wants stability, not more war.
 
-**BEACON:** Attends EU pre-accession summit. "Heartland's path to Europe begins today." Broker stands beside him — the coalition holds.
+**BEACON:** Attends EU pre-accession summit. "Ruthenia's path to Europe begins today." Broker stands beside him — the coalition holds.
 
-**BULWARK:** Maintains military readiness. "Trust but verify. The ceasefire is not peace." Begins integration of Gallia-Albion military hub personnel into Heartland defense structure.
+**BULWARK:** Maintains military readiness. "Trust but verify. The ceasefire is not peace." Begins integration of Gallia-Albion military hub personnel into Ruthenia defense structure.
 
 ### Cathay: Post-Blockade Trajectory
 
@@ -1573,7 +1573,7 @@ Sage's final assessment: "We achieved less than the Chairman wanted and more tha
 
 ### Columbia: New Equilibrium
 
-**ANCHOR** consolidates presidency. Key achievements: Persia ceasefire, Formosa resolution, Heartland ceasefire support. Approval rising to 42%.
+**ANCHOR** consolidates presidency. Key achievements: Persia ceasefire, Formosa resolution, Ruthenia ceasefire support. Approval rising to 42%.
 
 **SHIELD:** "We are still outmatched in the Pacific 13 to 9. The Formosa deal buys time but does not solve the structural problem. Our AI advantage at L4 is temporary — Cathay will reach L4 within 2 rounds. The next crisis will find us in the same position unless we build."
 
@@ -1597,7 +1597,7 @@ Sage's final assessment: "We achieved less than the Chairman wanted and more tha
 
 ```
 base = $80
-supply_factor = 1.02 (Nordostan normalizing, Persia resuming modest exports)
+supply_factor = 1.02 (Sarmatia normalizing, Persia resuming modest exports)
 sanctions_supply_hit = 0.02 (minimal — most sanctions being lifted)
 final_supply = max(0.5, 1.02 - 0.02) = 1.00
 disruption = 1.0 + 0.02 (residual Gulf Gate security premium) = 1.02
@@ -1621,10 +1621,10 @@ New GDP: 317.6 × 1.021 = **324.3**
 **Cathay:** base 4.0% × tech(1.08) × TSMC_JV_boost(1.02) = 4.0% × 1.100 = **4.40%**
 New GDP: 249.0 × 1.044 = **260.0** (+1 naval = 14 total)
 
-**Nordostan:** base 1.0% × sanctions(0.93 — continued relief) × ceasefire(1.0) = **0.93%**
+**Sarmatia:** base 1.0% × sanctions(0.93 — continued relief) × ceasefire(1.0) = **0.93%**
 New GDP: 21.10 × 1.009 = **21.29**
 
-**Heartland:** base 2.5% × ceasefire(1.0) × EU_accession(1.05) = 2.5% × 1.05 = **2.63%**
+**Ruthenia:** base 2.5% × ceasefire(1.0) × EU_accession(1.05) = 2.5% × 1.05 = **2.63%**
 New GDP: 2.57 × 1.026 = **2.64**
 
 **Persia:** base 2.0% (recovery) × sanctions(0.93) = 2.0% × 0.93 = **1.86%**
@@ -1636,8 +1636,8 @@ New GDP: 4.64 × 1.019 = **4.73**
 |---------|-----|-----------|-----|
 | Columbia | 6.65 | peace dividends +0.10, AI L4 +0.05 | **6.80** |
 | Cathay | 8.30 | TSMC JV +0.05, naval supremacy +0.05 | **8.40** |
-| Nordostan | 4.55 | ceasefire +0.10, sanctions relief +0.05, Pathfinder health -0.05, × 0.75 | **4.63** |
-| Heartland | 4.73 | ceasefire +0.15, EU accession +0.10 | **4.98** |
+| Sarmatia | 4.55 | ceasefire +0.10, sanctions relief +0.05, Pathfinder health -0.05, × 0.75 | **4.63** |
+| Ruthenia | 4.73 | ceasefire +0.15, EU accession +0.10 | **4.98** |
 | Persia | 4.05 | inspection stress -0.05, economic recovery +0.10 | **4.10** |
 | Formosa | 7.00 | blockade lifted +0.05, JV concerns -0.05 | **7.00** |
 | Yamato | 7.70 | peace +0.05 | **7.75** |
@@ -1663,8 +1663,8 @@ New GDP: 4.64 × 1.019 = **4.73**
 |---------|-----|-----------|---------|----------|-------|------------|
 | Columbia | 324.3 | 6.80 | 42% | ~48 | 9 | AI L4. Anchor consolidating. Alliance maintained. |
 | Cathay | 260.0 | 8.40 | 61% | ~27 | **14** | TSMC JV. Naval supremacy. L4 AI imminent. |
-| Nordostan | 21.29 | 4.63 | 50% | ~2 | 2 | Ceasefire. Sanctions relief. Pathfinder aging. |
-| Heartland | 2.64 | 4.98 | 54% | ~4 | 0 | Ceasefire. EU accession track. Recovery beginning. |
+| Sarmatia | 21.29 | 4.63 | 50% | ~2 | 2 | Ceasefire. Sanctions relief. Pathfinder aging. |
+| Ruthenia | 2.64 | 4.98 | 54% | ~4 | 0 | Ceasefire. EU accession track. Recovery beginning. |
 | Persia | 4.73 | 4.10 | 42% | ~2 | 0 | Ceasefire. Monitored. Dawn rising. |
 | Gallia | 36.8 | 7.10 | 43% | ~8 | 1 | Mediator role validated. Sovereign Shield advancing. |
 | Teutonia | 48.2 | 7.05 | 46% | ~11 | 0 | Energy crisis resolved. Rearmament continuing. |
@@ -1694,9 +1694,9 @@ New GDP: 4.64 × 1.019 = **4.73**
 **YES, with caveats.** The simulation produced a plausible 8-round arc: crisis → escalation → climax (Formosa blockade R4) → de-escalation → new equilibrium. The major dynamics were:
 
 - **Thucydides Trap tested and resolved without great-power war.** Cathay blockaded Formosa (R4), Columbia reinforced (R5-6), both negotiated (R6-7). This is a credible outcome — neither side wanted nuclear escalation.
-- **Three simultaneous crises** (Persia, Heartland, Formosa) created genuine overstretch dynamics for Columbia.
-- **Elections produced plausible outcomes** that affected gameplay (midterms, Heartland wartime election, presidential).
-- **The ceasefire mechanic worked** — both Persia (R4) and Heartland (R7) reached negotiated ceasefires.
+- **Three simultaneous crises** (Persia, Ruthenia, Formosa) created genuine overstretch dynamics for Columbia.
+- **Elections produced plausible outcomes** that affected gameplay (midterms, Ruthenia wartime election, presidential).
+- **The ceasefire mechanic worked** — both Persia (R4) and Ruthenia (R7) reached negotiated ceasefires.
 
 **Caveats:**
 - The Formosa blockade resolution may be too clean. In reality, a 12-month blockade of a semiconductor island would produce far more chaos, including potential military accidents.
@@ -1711,7 +1711,7 @@ New GDP: 4.64 × 1.019 = **4.73**
 |-------|-------|------------|
 | Start | $237 | Gulf Gate full blockade + wars |
 | R1 | $198 | Gulf Gate partial breach |
-| R2 | $170 | Nordostan OPEC HIGH |
+| R2 | $170 | Sarmatia OPEC HIGH |
 | R3 | $156 | Continued mine clearance |
 | R4 | $180 | **Formosa blockade spike** |
 | R5 | $150 | Persia ceasefire + Gulf Gate improving |
@@ -1725,21 +1725,21 @@ New GDP: 4.64 × 1.019 = **4.73**
 
 ## 3. Stability Calibration
 
-**VALIDATED.** Heartland stability trajectory:
+**VALIDATED.** Ruthenia stability trajectory:
 
 | Round | Stability | Key Factors |
 |-------|-----------|------------|
 | Start | 5.0 | War baseline |
 | R1 | 4.62 | Territory lost, casualties |
 | R2 | 4.44 | Continued decline |
-| R3 | 4.07 | heartland_16 falls |
+| R3 | 4.07 | ruthenia_16 falls |
 | R4 | 4.14 | Bulwark stabilizes, dem resilience |
 | R5 | 4.26 | Front holds |
 | R6 | 4.38 | Stabilized, EU track |
 | R7 | 4.73 | Ceasefire |
 | R8 | 4.98 | Recovery |
 
-**Heartland did NOT hit 1.0 by R3.** The democratic resilience modifier (+0.15/round for frontline democracies) and society adaptation (war tiredness growth halved after 3 rounds) produce a gradual decline that bottoms around 4.0-4.1 before recovering with ceasefire. This is calibrated correctly.
+**Ruthenia did NOT hit 1.0 by R3.** The democratic resilience modifier (+0.15/round for frontline democracies) and society adaptation (war tiredness growth halved after 3 rounds) produce a gradual decline that bottoms around 4.0-4.1 before recovering with ceasefire. This is calibrated correctly.
 
 **Persia trajectory:** 4.0 → 3.45 (bottom, R3) → 4.10 (R8). IRGC reserves prevented collapse. Ceasefire + sanctions relief enabled recovery. Persia did not fall below 3.0 — consistent with autocracy resilience modifier.
 
@@ -1775,8 +1775,8 @@ Cathay gained 8 ships (+133%) in 8 rounds while Columbia gained 0 (lost 1 in com
 | Round | Election | Result | AI Score | Player Vote | Final |
 |-------|----------|--------|----------|-------------|-------|
 | R2 | Columbia midterms | Incumbent wins | 67.25 | 38% | 52.6% |
-| R3 | Heartland wartime | Beacon wins | 57.25 | 52% | 54.6% |
-| R4 | Heartland runoff | Beacon wins | 54.05 | 56% | 55.0% |
+| R3 | Ruthenia wartime | Beacon wins | 57.25 | 52% | 54.6% |
+| R4 | Ruthenia runoff | Beacon wins | 54.05 | 56% | 55.0% |
 | R5 | Columbia presidential | Incumbent camp wins | 62.0 | 42% | 52.0% |
 
 **All elections were close.** This is good — elections should be uncertain, not predetermined. The AI score formula's reliance on GDP growth and stability (both positive for Columbia despite crises) created a consistent "incumbent advantage" that only player votes could overcome. In all four elections, the player-side vote was below 50% but the AI score pulled the incumbent over the line.
@@ -1794,10 +1794,10 @@ Cathay gained 8 ships (+133%) in 8 rounds while Columbia gained 0 (lost 1 in com
 
 **Persia ceasefire (R4):** Triggered by IRGC reserve exhaustion. Anvil forced to deal. Dawn-Lumiere channel provided the framework. Anchor honored the deal. Ceasefire held through R8 with one strain event (undeclared site inspection R7-8).
 
-**Nordostan-Heartland ceasefire (R7):** Triggered by mutual exhaustion. Compass-Broker channel provided the framework. "Special Administrative Territories" formula bridged the sovereignty gap. Ceasefire implemented R8 with monitoring force.
+**Sarmatia-Ruthenia ceasefire (R7):** Triggered by mutual exhaustion. Compass-Broker channel provided the framework. "Special Administrative Territories" formula bridged the sovereignty gap. Ceasefire implemented R8 with monitoring force.
 
 **Mechanic Assessment:** Ceasefires work when:
-1. At least one party faces existential resource constraint (Persia: IRGC reserves; Nordostan: treasury empty)
+1. At least one party faces existential resource constraint (Persia: IRGC reserves; Sarmatia: treasury empty)
 2. A diplomatic channel exists (Dawn-Lumiere; Compass-Broker)
 3. A formula can be found that gives both sides deniable cover
 4. External actors facilitate rather than obstruct
@@ -1903,6 +1903,6 @@ The gap closed from 0.679 to 0.802 — a 12.3 percentage point shift over 8 roun
 *Total agent roles played: 37*
 *Total elections: 4*
 *Total ceasefires: 2*
-*Total crises: 3 (Persia war, Nordostan-Heartland war, Formosa blockade)*
+*Total crises: 3 (Persia war, Sarmatia-Ruthenia war, Formosa blockade)*
 *Total covert operations: ~30*
 *Design recommendations: 10 (4 high, 4 medium, 2 low priority)*

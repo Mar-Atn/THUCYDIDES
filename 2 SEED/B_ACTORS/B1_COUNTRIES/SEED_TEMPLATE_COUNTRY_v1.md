@@ -38,7 +38,7 @@ This template defines the standard structure for every country in the SIM. Each 
 | Country | Relationship | Key Dynamic |
 |---------|:------------:|------------|
 | Cathay | Strategic rival | Power transition — the Trap itself. Economic interdependence + military competition. |
-| Nordostan | Adversary | Sanctions + proxy conflict via Heartland. Nuclear peer. |
+| Sarmatia | Adversary | Sanctions + proxy conflict via Ruthenia. Nuclear peer. |
 | Gallia | Ally (with friction) | NATO but EU strategic autonomy aspirations create tension. |
 | Bharata | Courtship | Need India on sanctions coalition. India plays both sides. |
 | Formosa | Protectorate | Defend if attacked — but strategic ambiguity is the policy. |
@@ -102,7 +102,7 @@ Narrative description (300-500 words) covering:
 | Maintenance cost (per unit/round) | | |
 | Bases hosted | (e.g., Columbia base in Teutonia) | Foreign forces on your soil |
 | Bases abroad | (e.g., Columbia bases in Yamato, Teutonia, Gulf) | Your forces on foreign soil |
-| War status | (e.g., At war with Heartland) | Active conflicts |
+| War status | (e.g., At war with Ruthenia) | Active conflicts |
 
 ---
 

@@ -265,7 +265,7 @@
 
   <!-- Sample B: Dashboard Badge Row -->
   <h2 style="margin-top:32px;">Sample B: Dashboard Country Badge Row</h2>
-  <p style="margin-bottom:16px;color:var(--text-secondary);">Horizontal badge strips for Columbia, Cathay, Nordostan, Heartland, Persia.</p>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">Horizontal badge strips for Columbia, Cathay, Sarmatia, Ruthenia, Persia.</p>
   <div id="badge-rows"></div>
 
   <!-- Sample C: Status Table -->
@@ -332,8 +332,8 @@
   </div>
   <div class="doc-sample" style="padding:24px;margin-bottom:32px;" id="map-strategic"></div>
 
-  <h2>Crisis View — Eastern Ereb Theater (Heartland–Nordostan)</h2>
-  <p style="margin-bottom:16px;color:var(--text-secondary);">10×10 theater hex map. Nordostan territory (dusty rose), Heartland territory (soft green), occupied zones (striped). Die Hard position marked. Front line visible.</p>
+  <h2>Crisis View — Eastern Ereb Theater (Ruthenia–Sarmatia)</h2>
+  <p style="margin-bottom:16px;color:var(--text-secondary);">10×10 theater hex map. Sarmatia territory (dusty rose), Ruthenia territory (soft green), occupied zones (striped). Die Hard position marked. Front line visible.</p>
   <div class="map-toggle-bar">
     <span style="font-size:12px;color:var(--text-secondary);font-weight:600;">Map Theme:</span>
     <button class="map-toggle-btn active" onclick="setMapTheme('light',this)" data-map="theater">Light</button>
@@ -354,8 +354,8 @@
 const countries = [
   { id:'columbia',   name:'Columbia',   color:'#3A6B9F', mapColor:'#9AB5D0', light:'#E8EFF6', bloc:'Western Treaty' },
   { id:'cathay',     name:'Cathay',     color:'#C4A030', mapColor:'#E8D5A3', light:'#F8F2E5', bloc:'League' },
-  { id:'nordostan',  name:'Nordostan',  color:'#A06060', mapColor:'#D4A5A5', light:'#F5EAEA', bloc:'League' },
-  { id:'heartland',  name:'Heartland',  color:'#5A9A5A', mapColor:'#A5C8A5', light:'#EBF3EB', bloc:'At war' },
+  { id:'sarmatia',  name:'Sarmatia',  color:'#A06060', mapColor:'#D4A5A5', light:'#F5EAEA', bloc:'League' },
+  { id:'ruthenia',  name:'Ruthenia',  color:'#5A9A5A', mapColor:'#A5C8A5', light:'#EBF3EB', bloc:'At war' },
   { id:'persia',     name:'Persia',     color:'#9A7040', mapColor:'#C8A57A', light:'#F2EBE0', bloc:'League' },
   { id:'gallia',     name:'Gallia',     color:'#4A6FA0', mapColor:'#A5B8D4', light:'#EBF0F6', bloc:'Western Treaty' },
   { id:'teutonia',   name:'Teutonia',   color:'#3A8A7A', mapColor:'#8AB5AA', light:'#E8F2EF', bloc:'Western Treaty' },
@@ -376,15 +376,15 @@ const countries = [
   { id:'sogdiana',   name:'Sogdiana',   color:'#8A8A60', mapColor:'#C8C8A5', light:'#F0F0E8', bloc:'Contested' },
 ];
 
-const keyCountries = ['columbia','cathay','nordostan','heartland','persia','bharata'];
-const badgeCountries = ['columbia','cathay','nordostan','heartland','persia'];
+const keyCountries = ['columbia','cathay','sarmatia','ruthenia','persia','bharata'];
+const badgeCountries = ['columbia','cathay','sarmatia','ruthenia','persia'];
 
 // Table data for status tables
 const tableData = [
   { id:'columbia',  gdp:'28.4T', stability:'82', state:'Active' },
   { id:'cathay',    gdp:'22.1T', stability:'78', state:'Active' },
-  { id:'nordostan', gdp:'2.8T',  stability:'55', state:'Mobilized' },
-  { id:'heartland', gdp:'0.9T',  stability:'31', state:'At War' },
+  { id:'sarmatia', gdp:'2.8T',  stability:'55', state:'Mobilized' },
+  { id:'ruthenia', gdp:'0.9T',  stability:'31', state:'At War' },
   { id:'persia',    gdp:'1.2T',  stability:'48', state:'Sanctioned' },
 ];
 
@@ -398,8 +398,8 @@ function geometricSVG(id, color, size=48) {
   const paths = {
     columbia: `<polygon points="${half},${s*0.1} ${s*0.87},${s*0.42} ${s*0.73},${s*0.9} ${s*0.27},${s*0.9} ${s*0.13},${s*0.42}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
     cathay: `<polygon points="${half},${s*0.08} ${s*0.82},${q} ${s*0.82},${tq} ${half},${s*0.92} ${s*0.18},${tq} ${s*0.18},${q}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/><polygon points="${half},${s*0.25} ${s*0.68},${s*0.36} ${s*0.68},${s*0.64} ${half},${s*0.75} ${s*0.32},${s*0.64} ${s*0.32},${s*0.36}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
-    nordostan: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
-    heartland: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
+    sarmatia: `<polygon points="${half},${s*0.1} ${s*0.9},${half} ${half},${s*0.9} ${s*0.1},${half}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="miter"/>`,
+    ruthenia: `<path d="M${half},${s*0.12} L${s*0.85},${s*0.4} L${s*0.85},${s*0.75} L${half},${s*0.92} L${s*0.15},${s*0.75} L${s*0.15},${s*0.4} Z" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linejoin="round"/>`,
     persia: `<path d="M${s*0.15},${s*0.65} A${s*0.4},${s*0.4} 0 0,1 ${s*0.85},${s*0.65}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${half}" y1="${s*0.2}" x2="${half}" y2="${s*0.8}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     gallia: `<rect x="${s*0.38}" y="${s*0.1}" width="${s*0.24}" height="${s*0.8}" rx="${s*0.02}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.28}" y1="${s*0.2}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     teutonia: `<circle cx="${half}" cy="${half}" r="${s*0.35}" fill="none" stroke="${color}" stroke-width="${sw}"/>${[0,45,90,135,180,225,270,315].map(a=>{const r1=s*0.25,r2=s*0.42,rad=a*Math.PI/180;return`<line x1="${half+r1*Math.cos(rad)}" y1="${half+r1*Math.sin(rad)}" x2="${half+r2*Math.cos(rad)}" y2="${half+r2*Math.sin(rad)}" stroke="${color}" stroke-width="${sw}"/>`}).join('')}`,
@@ -432,9 +432,9 @@ function phoenicianSVG(id, color, size=48) {
     // Beth — house: rectangular with triangular roof
     cathay: `<polyline points="${s*0.2},${s*0.85} ${s*0.2},${s*0.35} ${s*0.5},${s*0.15} ${s*0.8},${s*0.35} ${s*0.8},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.2}" y1="${s*0.85}" x2="${s*0.8}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     // Gimel — camel: angular step shape
-    nordostan: `<polyline points="${s*0.25},${s*0.2} ${s*0.6},${s*0.2} ${s*0.6},${s*0.5} ${s*0.75},${s*0.5} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    sarmatia: `<polyline points="${s*0.25},${s*0.2} ${s*0.6},${s*0.2} ${s*0.6},${s*0.5} ${s*0.75},${s*0.5} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
     // Daleth — door: right angle like a reversed L
-    heartland: `<polyline points="${s*0.25},${s*0.2} ${s*0.75},${s*0.2} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
+    ruthenia: `<polyline points="${s*0.25},${s*0.2} ${s*0.75},${s*0.2} ${s*0.75},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/>`,
     // He — window: figure like a stick person, vertical with arms
     persia: `<line x1="${s*0.5}" y1="${s*0.15}" x2="${s*0.5}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.35}" x2="${s*0.5}" y2="${s*0.35}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.25}" y1="${s*0.6}" x2="${s*0.5}" y2="${s*0.6}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     // Waw — hook: vertical line with hook at top
@@ -481,9 +481,9 @@ function linearbSVG(id, color, size=48) {
     // Ram — curved horns, stocky body
     cathay: `<ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.3}" ry="${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}"/><path d="M${s*0.7},${s*0.45} Q${s*0.85},${s*0.25} ${s*0.7},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.7},${s*0.45} Q${s*0.9},${s*0.3} ${s*0.82},${s*0.15}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.3}" y1="${s*0.7}" x2="${s*0.3}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.7}" x2="${s*0.6}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     // Stag — tall antlers, slender body
-    nordostan: `<line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.5}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.3}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.7}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.22}" x2="${s*0.25}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.22}" x2="${s*0.75}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.22}" ry="${s*0.13}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.35}" y1="${s*0.65}" x2="${s*0.35}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.65}" x2="${s*0.65}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    sarmatia: `<line x1="${s*0.5}" y1="${s*0.45}" x2="${s*0.5}" y2="${s*0.25}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.3}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.5}" y1="${s*0.3}" x2="${s*0.7}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.35}" y1="${s*0.22}" x2="${s*0.25}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.22}" x2="${s*0.75}" y2="${s*0.12}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.5}" cy="${s*0.55}" rx="${s*0.22}" ry="${s*0.13}" fill="none" stroke="${color}" stroke-width="${sw}"/><line x1="${s*0.35}" y1="${s*0.65}" x2="${s*0.35}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.65}" y1="${s*0.65}" x2="${s*0.65}" y2="${s*0.88}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     // Donkey — smaller, blockier than horse
-    heartland: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.7},${s*0.5} L${s*0.7},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.5}" x2="${s*0.6}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.65},${s*0.5} L${s*0.75},${s*0.35} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.78}" y1="${s*0.3}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
+    ruthenia: `<path d="M${s*0.2},${s*0.85} L${s*0.2},${s*0.5} L${s*0.7},${s*0.5} L${s*0.7},${s*0.85}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.3}" y1="${s*0.5}" x2="${s*0.3}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><line x1="${s*0.6}" y1="${s*0.5}" x2="${s*0.6}" y2="${s*0.85}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><path d="M${s*0.65},${s*0.5} L${s*0.75},${s*0.35} L${s*0.85},${s*0.25}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round"/><line x1="${s*0.78}" y1="${s*0.3}" x2="${s*0.72}" y2="${s*0.2}" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/>`,
     // Olive — branch with leaves
     persia: `<path d="M${s*0.25},${s*0.8} Q${s*0.5},${s*0.3} ${s*0.75},${s*0.2}" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round"/><ellipse cx="${s*0.42}" cy="${s*0.48}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.42},${s*0.48})"/><ellipse cx="${s*0.58}" cy="${s*0.35}" rx="${s*0.08}" ry="${s*0.12}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.58},${s*0.35})"/><ellipse cx="${s*0.72}" cy="${s*0.25}" rx="${s*0.06}" ry="${s*0.09}" fill="none" stroke="${color}" stroke-width="${sw}" transform="rotate(-30,${s*0.72},${s*0.25})"/>`,
     // Wine vessel — cup/goblet shape
@@ -832,12 +832,12 @@ function renderSlideSamples() {
             <div style="font-size:11px;color:#D0D8E0;line-height:2;">
               <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#9A7040;margin-right:6px;vertical-align:middle;"></span>Gulf Gate partially breached</div>
               <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#C4A030;margin-right:6px;vertical-align:middle;"></span>Cathay: 7 ships near Formosa</div>
-              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#A06060;margin-right:6px;vertical-align:middle;"></span>Nordostan treasury depleted</div>
+              <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#A06060;margin-right:6px;vertical-align:middle;"></span>Sarmatia treasury depleted</div>
               <div><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#B08840;margin-right:6px;vertical-align:middle;"></span>Columbia midterms approaching</div>
             </div>
             <!-- Country emblems row -->
             <div style="display:flex;gap:6px;margin-top:16px;align-items:center;">
-              ${['columbia','cathay','nordostan','heartland','persia'].map(cid => {
+              ${['columbia','cathay','sarmatia','ruthenia','persia'].map(cid => {
                 const cc = `getCountry('${cid}')`;
                 return `<span id="_slide_${style.name}_${cid}"></span>`;
               }).join('')}
@@ -855,7 +855,7 @@ function renderSlideSamples() {
 
   // Fill in the dynamic emblems on slides
   fns.forEach(style => {
-    ['columbia','cathay','nordostan','heartland','persia'].forEach(cid => {
+    ['columbia','cathay','sarmatia','ruthenia','persia'].forEach(cid => {
       const cc = getCountry(cid);
       const span = document.getElementById(`_slide_${style.name}_${cid}`);
       if (span && cc) {
@@ -886,15 +886,15 @@ renderSlideSamples();
 const hexData = [
   // row, col, country (null = water)
   // Row 1
-  {r:1,c:9,country:'freeland'},{r:1,c:10,country:'nordostan'},{r:1,c:11,country:'nordostan'},{r:1,c:15,country:'nordostan'},
+  {r:1,c:9,country:'freeland'},{r:1,c:10,country:'sarmatia'},{r:1,c:11,country:'sarmatia'},{r:1,c:15,country:'sarmatia'},
   // Row 2
   {r:2,c:2,country:'columbia'},{r:2,c:5,country:'thule'},{r:2,c:7,country:'albion'},{r:2,c:9,country:'freeland'},
-  {r:2,c:10,country:'heartland'},{r:2,c:11,country:'nordostan'},{r:2,c:12,country:'nordostan'},{r:2,c:13,country:'nordostan'},
-  {r:2,c:14,country:'nordostan'},{r:2,c:15,country:'nordostan'},{r:2,c:17,country:'choson'},
+  {r:2,c:10,country:'ruthenia'},{r:2,c:11,country:'sarmatia'},{r:2,c:12,country:'sarmatia'},{r:2,c:13,country:'sarmatia'},
+  {r:2,c:14,country:'sarmatia'},{r:2,c:15,country:'sarmatia'},{r:2,c:17,country:'choson'},
   // Row 3
   {r:3,c:1,country:'columbia'},{r:3,c:2,country:'columbia'},{r:3,c:6,country:'albion'},{r:3,c:8,country:'teutonia'},
-  {r:3,c:9,country:'teutonia'},{r:3,c:10,country:'heartland',occupied:true},{r:3,c:11,country:'nordostan'},
-  {r:3,c:12,country:'nordostan'},{r:3,c:13,country:'nordostan'},{r:3,c:15,country:'nordostan'},
+  {r:3,c:9,country:'teutonia'},{r:3,c:10,country:'ruthenia',occupied:true},{r:3,c:11,country:'sarmatia'},
+  {r:3,c:12,country:'sarmatia'},{r:3,c:13,country:'sarmatia'},{r:3,c:15,country:'sarmatia'},
   {r:3,c:16,country:'hanguk'},{r:3,c:18,country:'yamato'},
   // Row 4
   {r:4,c:2,country:'columbia'},{r:4,c:3,country:'columbia'},{r:4,c:4,country:'columbia'},
@@ -918,7 +918,7 @@ const hexData = [
 
 // Capital hexes (for emblem placement) — pick representative hex per country
 const capitals = {
-  columbia:{r:4,c:3}, cathay:{r:5,c:14}, nordostan:{r:2,c:13}, heartland:{r:2,c:10},
+  columbia:{r:4,c:3}, cathay:{r:5,c:14}, sarmatia:{r:2,c:13}, ruthenia:{r:2,c:10},
   persia:{r:6,c:12}, gallia:{r:4,c:8}, teutonia:{r:3,c:8}, albion:{r:2,c:7},
   freeland:{r:1,c:9}, ponte:{r:5,c:7}, bharata:{r:7,c:13}, formosa:{r:6,c:17},
   yamato:{r:4,c:18}, hanguk:{r:3,c:16}, phrygia:{r:5,c:10}, solaria:{r:6,c:10},
@@ -928,7 +928,7 @@ const capitals = {
 
 // Country label positions (for largest cluster labels)
 const countryLabels = {
-  columbia:{r:3.5,c:2.5}, cathay:{r:5,c:15.5}, nordostan:{r:1.5,c:12.5}, heartland:{r:2.5,c:10},
+  columbia:{r:3.5,c:2.5}, cathay:{r:5,c:15.5}, sarmatia:{r:1.5,c:12.5}, ruthenia:{r:2.5,c:10},
   persia:{r:6.5,c:12}, gallia:{r:4.5,c:8.5}, teutonia:{r:3.5,c:8.5}, albion:{r:2.8,c:6.5},
   freeland:{r:1.5,c:9}, ponte:{r:5.5,c:7.5}, bharata:{r:7.5,c:13.5}, formosa:{r:6.5,c:17.5},
   yamato:{r:3.5,c:18.5}, hanguk:{r:3.5,c:16.5}, phrygia:{r:5.5,c:10}, solaria:{r:7.5,c:9},
@@ -1051,14 +1051,14 @@ function renderWarMap(containerId, crisisMode) {
     if (!c) return;
     let filter = '';
     if (crisisMode) {
-      // Heartland front
-      if (hd.country === 'heartland' || hd.occupied) filter = ' filter="url(#glow-red)"';
+      // Ruthenia front
+      if (hd.country === 'ruthenia' || hd.occupied) filter = ' filter="url(#glow-red)"';
       // Formosa area
       if (hd.r === 6 && hd.c >= 16 && hd.c <= 17) filter = ' filter="url(#glow-yellow)"';
       if (hd.country === 'formosa') filter = ' filter="url(#glow-yellow)"';
     }
     svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="${c.mapColor||c.color}" fill-opacity="0.55" stroke="#D8DCE5" stroke-width="1"${filter}/>`;
-    // Striped overlay for occupied Heartland
+    // Striped overlay for occupied Ruthenia
     if (hd.occupied) {
       svg += `<polygon points="${hexPoints(x, y, hexSize)}" fill="url(#stripes)" stroke="#C0392B" stroke-width="1.5"/>`;
     }
@@ -1127,7 +1127,7 @@ function renderWarMap(containerId, crisisMode) {
     {r:3,c:9,country:'columbia',count:2},          // columbia troops in teutonia area
     {r:5,c:14,country:'cathay',count:5},           // cathay_3 central
     {r:4,c:16,country:'cathay',count:4},           // cathay_6 SE
-    {r:2,c:13,country:'nordostan',count:5},        // nord_c1
+    {r:2,c:13,country:'sarmatia',count:5},        // nord_c1
     {r:7,c:13,country:'bharata',count:10},         // bharata_2
     {r:1,c:9,country:'freeland',count:5},          // freeland
     {r:3,c:8,country:'teutonia',count:6},          // teutonia_1
@@ -1217,7 +1217,7 @@ function renderMapLegend() {
   const el = document.getElementById('unit-icon-gallery');
   const colors = [
     {name:'Columbia', c:'#B08840'}, {name:'Cathay', c:'#C4A030'},
-    {name:'Nordostan', c:'#A06060'}, {name:'Heartland', c:'#5A9A5A'},
+    {name:'Sarmatia', c:'#A06060'}, {name:'Ruthenia', c:'#5A9A5A'},
     {name:'Persia', c:'#9A7040'}, {name:'Albion', c:'#4A7A8F'}
   ];
   const sizes = [32, 20, 14];
@@ -1277,7 +1277,7 @@ function renderMapLegend() {
     html += '</div></div>';
   });
 
-  html += '<p style="font-size:11px;color:#4A5568;margin-top:12px;">Colors: Columbia sand, Cathay gold, Nordostan rose, Heartland green, Persia bronze, Albion steel. Enemy tanks face each other on theater maps.</p>';
+  html += '<p style="font-size:11px;color:#4A5568;margin-top:12px;">Colors: Columbia sand, Cathay gold, Sarmatia rose, Ruthenia green, Persia bronze, Albion steel. Enemy tanks face each other on theater maps.</p>';
   el.innerHTML = html;
 })();
 
@@ -1287,40 +1287,40 @@ renderMapLegend();
 // ===================== EASTERN EREB THEATER MAP =====================
 
 const theaterData = [
-  // Row 0: all Nordostan (rear)
-  {r:0,c:0,o:'nordostan'},{r:0,c:1,o:'nordostan'},{r:0,c:2,o:'nordostan'},{r:0,c:3,o:'nordostan'},{r:0,c:4,o:'nordostan'},
-  {r:0,c:5,o:'nordostan'},{r:0,c:6,o:'nordostan'},{r:0,c:7,o:'nordostan'},{r:0,c:8,o:'nordostan'},{r:0,c:9,o:'nordostan'},
-  // Row 1: all Nordostan (rear)
-  {r:1,c:0,o:'nordostan'},{r:1,c:1,o:'nordostan'},{r:1,c:2,o:'nordostan'},{r:1,c:3,o:'nordostan'},{r:1,c:4,o:'nordostan'},
-  {r:1,c:5,o:'nordostan'},{r:1,c:6,o:'nordostan'},{r:1,c:7,o:'nordostan'},{r:1,c:8,o:'nordostan'},{r:1,c:9,o:'nordostan'},
-  // Row 2: Heartland west + Nordostan east
-  {r:2,c:0,o:'heartland'},{r:2,c:1,o:'heartland'},{r:2,c:2,o:'heartland'},
-  {r:2,c:3,o:'nordostan'},{r:2,c:4,o:'nordostan'},{r:2,c:5,o:'nordostan'},{r:2,c:6,o:'nordostan'},{r:2,c:7,o:'nordostan'},{r:2,c:8,o:'nordostan'},{r:2,c:9,o:'nordostan'},
-  // Row 3: Heartland west, OCCUPIED center, Nordostan east
-  {r:3,c:0,o:'heartland'},{r:3,c:1,o:'heartland'},{r:3,c:2,o:'heartland'},{r:3,c:3,o:'heartland'},
-  {r:3,c:4,o:'heartland',occ:'nordostan'},{r:3,c:5,o:'heartland',occ:'nordostan'},
-  {r:3,c:6,o:'nordostan'},{r:3,c:7,o:'nordostan'},{r:3,c:8,o:'nordostan'},{r:3,c:9,o:'nordostan'},
-  // Row 4: Heartland west, OCCUPIED center, Nordostan east
-  {r:4,c:0,o:'heartland'},{r:4,c:1,o:'heartland'},{r:4,c:2,o:'heartland'},{r:4,c:3,o:'heartland'},{r:4,c:4,o:'heartland'},
-  {r:4,c:5,o:'heartland',occ:'nordostan'},{r:4,c:6,o:'heartland',occ:'nordostan'},
-  {r:4,c:7,o:'nordostan'},{r:4,c:8,o:'nordostan'},{r:4,c:9,o:'nordostan'},
-  // Row 5: Heartland dominant, occupied east side
-  {r:5,c:0,o:'heartland'},{r:5,c:1,o:'heartland'},{r:5,c:2,o:'heartland'},{r:5,c:3,o:'heartland'},{r:5,c:4,o:'heartland'},{r:5,c:5,o:'heartland'},
-  {r:5,c:6,o:'heartland',occ:'nordostan'},
-  {r:5,c:7,o:'nordostan'},{r:5,c:8,o:'nordostan'},{r:5,c:9,o:'nordostan'},
-  // Row 6: Heartland west, occupied east
-  {r:6,c:0,o:'heartland'},{r:6,c:1,o:'heartland'},{r:6,c:2,o:'heartland'},{r:6,c:3,o:'heartland'},{r:6,c:4,o:'heartland'},
-  {r:6,c:5,o:'heartland',occ:'nordostan'},{r:6,c:6,o:'heartland',occ:'nordostan'},{r:6,c:7,o:'heartland',occ:'nordostan'},
-  {r:6,c:8,o:'nordostan'},{r:6,c:9,o:'nordostan'},
-  // Row 7: Heartland west, gaps in center, occupied pockets
-  {r:7,c:0,o:'heartland'},{r:7,c:1,o:'heartland'},{r:7,c:2,o:'heartland'},
-  {r:7,c:4,o:'heartland',occ:'nordostan'},
-  {r:7,c:8,o:'nordostan'},{r:7,c:9,o:'nordostan'},
-  // Row 8: Heartland west, occupied pockets
-  {r:8,c:0,o:'heartland'},{r:8,c:1,o:'heartland'},{r:8,c:2,o:'heartland'},
-  {r:8,c:4,o:'heartland',occ:'nordostan'},{r:8,c:5,o:'heartland',occ:'nordostan'},
-  // Row 9: Heartland south (rear)
-  {r:9,c:0,o:'heartland'},{r:9,c:1,o:'heartland'},
+  // Row 0: all Sarmatia (rear)
+  {r:0,c:0,o:'sarmatia'},{r:0,c:1,o:'sarmatia'},{r:0,c:2,o:'sarmatia'},{r:0,c:3,o:'sarmatia'},{r:0,c:4,o:'sarmatia'},
+  {r:0,c:5,o:'sarmatia'},{r:0,c:6,o:'sarmatia'},{r:0,c:7,o:'sarmatia'},{r:0,c:8,o:'sarmatia'},{r:0,c:9,o:'sarmatia'},
+  // Row 1: all Sarmatia (rear)
+  {r:1,c:0,o:'sarmatia'},{r:1,c:1,o:'sarmatia'},{r:1,c:2,o:'sarmatia'},{r:1,c:3,o:'sarmatia'},{r:1,c:4,o:'sarmatia'},
+  {r:1,c:5,o:'sarmatia'},{r:1,c:6,o:'sarmatia'},{r:1,c:7,o:'sarmatia'},{r:1,c:8,o:'sarmatia'},{r:1,c:9,o:'sarmatia'},
+  // Row 2: Ruthenia west + Sarmatia east
+  {r:2,c:0,o:'ruthenia'},{r:2,c:1,o:'ruthenia'},{r:2,c:2,o:'ruthenia'},
+  {r:2,c:3,o:'sarmatia'},{r:2,c:4,o:'sarmatia'},{r:2,c:5,o:'sarmatia'},{r:2,c:6,o:'sarmatia'},{r:2,c:7,o:'sarmatia'},{r:2,c:8,o:'sarmatia'},{r:2,c:9,o:'sarmatia'},
+  // Row 3: Ruthenia west, OCCUPIED center, Sarmatia east
+  {r:3,c:0,o:'ruthenia'},{r:3,c:1,o:'ruthenia'},{r:3,c:2,o:'ruthenia'},{r:3,c:3,o:'ruthenia'},
+  {r:3,c:4,o:'ruthenia',occ:'sarmatia'},{r:3,c:5,o:'ruthenia',occ:'sarmatia'},
+  {r:3,c:6,o:'sarmatia'},{r:3,c:7,o:'sarmatia'},{r:3,c:8,o:'sarmatia'},{r:3,c:9,o:'sarmatia'},
+  // Row 4: Ruthenia west, OCCUPIED center, Sarmatia east
+  {r:4,c:0,o:'ruthenia'},{r:4,c:1,o:'ruthenia'},{r:4,c:2,o:'ruthenia'},{r:4,c:3,o:'ruthenia'},{r:4,c:4,o:'ruthenia'},
+  {r:4,c:5,o:'ruthenia',occ:'sarmatia'},{r:4,c:6,o:'ruthenia',occ:'sarmatia'},
+  {r:4,c:7,o:'sarmatia'},{r:4,c:8,o:'sarmatia'},{r:4,c:9,o:'sarmatia'},
+  // Row 5: Ruthenia dominant, occupied east side
+  {r:5,c:0,o:'ruthenia'},{r:5,c:1,o:'ruthenia'},{r:5,c:2,o:'ruthenia'},{r:5,c:3,o:'ruthenia'},{r:5,c:4,o:'ruthenia'},{r:5,c:5,o:'ruthenia'},
+  {r:5,c:6,o:'ruthenia',occ:'sarmatia'},
+  {r:5,c:7,o:'sarmatia'},{r:5,c:8,o:'sarmatia'},{r:5,c:9,o:'sarmatia'},
+  // Row 6: Ruthenia west, occupied east
+  {r:6,c:0,o:'ruthenia'},{r:6,c:1,o:'ruthenia'},{r:6,c:2,o:'ruthenia'},{r:6,c:3,o:'ruthenia'},{r:6,c:4,o:'ruthenia'},
+  {r:6,c:5,o:'ruthenia',occ:'sarmatia'},{r:6,c:6,o:'ruthenia',occ:'sarmatia'},{r:6,c:7,o:'ruthenia',occ:'sarmatia'},
+  {r:6,c:8,o:'sarmatia'},{r:6,c:9,o:'sarmatia'},
+  // Row 7: Ruthenia west, gaps in center, occupied pockets
+  {r:7,c:0,o:'ruthenia'},{r:7,c:1,o:'ruthenia'},{r:7,c:2,o:'ruthenia'},
+  {r:7,c:4,o:'ruthenia',occ:'sarmatia'},
+  {r:7,c:8,o:'sarmatia'},{r:7,c:9,o:'sarmatia'},
+  // Row 8: Ruthenia west, occupied pockets
+  {r:8,c:0,o:'ruthenia'},{r:8,c:1,o:'ruthenia'},{r:8,c:2,o:'ruthenia'},
+  {r:8,c:4,o:'ruthenia',occ:'sarmatia'},{r:8,c:5,o:'ruthenia',occ:'sarmatia'},
+  // Row 9: Ruthenia south (rear)
+  {r:9,c:0,o:'ruthenia'},{r:9,c:1,o:'ruthenia'},
 ];
 
 // Die Hard marker
@@ -1388,7 +1388,7 @@ function renderTheaterMap(containerId) {
   // Land hexes
   theaterData.forEach(d => {
     const {x, y} = tCenter(d.r, d.c);
-    const baseColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const baseColor = d.o === 'sarmatia' ? nordColor : heartColor;
     const isOccupied = !!d.occ;
     const isFrontLine = isOccupied; // occupied hexes are the front
 
@@ -1400,7 +1400,7 @@ function renderTheaterMap(containerId) {
 
     // Watermark emblem on each hex
     const embSize = hexSize * 0.7;
-    const embColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const embColor = d.o === 'sarmatia' ? nordColor : heartColor;
     svg += `<g opacity="0.10" transform="translate(${x - embSize/2}, ${y - embSize/2})">${geometricSVG(d.o, embColor, embSize)}</g>`;
   });
 
@@ -1409,10 +1409,10 @@ function renderTheaterMap(containerId) {
   svg += `<circle cx="${dh.x}" cy="${dh.y}" r="${hexSize * 0.35}" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-dasharray="3 2"/>`;
   svg += `<text x="${dh.x}" y="${dh.y + 3}" text-anchor="middle" font-size="7" font-weight="700" fill="#C0392B" font-family="'DM Sans',sans-serif">DIE HARD</text>`;
 
-  // Front line — draw a thick dashed line between occupied and free Heartland hexes
+  // Front line — draw a thick dashed line between occupied and free Ruthenia hexes
   // Approximate front line path
   // Country labels at centroid of each country's hexes
-  const theaterCountryHexes = {nordostan: [], heartland: []};
+  const theaterCountryHexes = {sarmatia: [], ruthenia: []};
   theaterData.forEach(d => {
     const {x, y} = tCenter(d.r, d.c);
     // Use the OWNER (not occupier) for label positioning
@@ -1422,14 +1422,14 @@ function renderTheaterMap(containerId) {
     if (hexes.length === 0) return;
     const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
     const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
-    const color = cid === 'nordostan' ? nordUI : heartUI;
-    const name = cid === 'nordostan' ? 'NORDOSTAN' : 'HEARTLAND';
+    const color = cid === 'sarmatia' ? nordUI : heartUI;
+    const name = cid === 'sarmatia' ? 'SARMATIA' : 'RUTHENIA';
     svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}" font-family="'Playfair Display',serif" opacity="0.5" letter-spacing="1" style="pointer-events:none;">${name}</text>`;
   });
 
   // Military deployment indicators — proper SVG unit icons at 20-22px
-  // Tank facing: Nordostan faces LEFT (toward Heartland), Heartland faces RIGHT (toward Nordostan)
-  // Choson faces LEFT (alongside Nordostan)
+  // Tank facing: Sarmatia faces LEFT (toward Ruthenia), Ruthenia faces RIGHT (toward Sarmatia)
+  // Choson faces LEFT (alongside Sarmatia)
   const tIconSz = 20; // theater icon size
 
   // SVG icon generators for theater map
@@ -1472,27 +1472,27 @@ function renderTheaterMap(containerId) {
 
   // Deployment data with side info
   const theaterDeployments = [
-    // Nordostan front line forces (8 ground + 4 tac air + 1 AD)
+    // Sarmatia front line forces (8 ground + 4 tac air + 1 AD)
     {r:3,c:7,type:'ground',count:3,color:nordUI,side:'nord'},
     {r:4,c:8,type:'ground',count:3,color:nordUI,side:'nord'},
     {r:5,c:8,type:'ground',count:2,color:nordUI,side:'nord'},
     {r:3,c:8,type:'air',count:2,color:nordUI,side:'nord'},
     {r:4,c:9,type:'air',count:2,color:nordUI,side:'nord'},
     {r:4,c:7,type:'ad',count:1,color:nordUI,side:'nord'},
-    // Nordostan occupation forces (5 ground)
+    // Sarmatia occupation forces (5 ground)
     {r:3,c:5,type:'ground',count:2,color:nordUI,side:'nord'},
     {r:5,c:6,type:'ground',count:2,color:nordUI,side:'nord'},
     {r:6,c:6,type:'ground',count:1,color:nordUI,side:'nord'},
-    // Choson support (2 ground alongside Nordostan)
+    // Choson support (2 ground alongside Sarmatia)
     {r:5,c:7,type:'ground',count:2,color:'#5A5A5A',side:'choson'},
-    // Heartland front line (7 ground + 2 tac air)
+    // Ruthenia front line (7 ground + 2 tac air)
     {r:3,c:2,type:'ground',count:2,color:heartUI,side:'heart'},
     {r:4,c:3,type:'ground',count:2,color:heartUI,side:'heart'},
     {r:5,c:4,type:'ground',count:2,color:heartUI,side:'heart'},
     {r:6,c:3,type:'ground',count:1,color:heartUI,side:'heart'},
     {r:4,c:2,type:'air',count:1,color:heartUI,side:'heart'},
     {r:5,c:3,type:'air',count:1,color:heartUI,side:'heart'},
-    // Heartland reserve (3 ground + 1 air + 1 AD)
+    // Ruthenia reserve (3 ground + 1 air + 1 AD)
     {r:8,c:1,type:'ground',count:2,color:heartUI,side:'heart'},
     {r:9,c:0,type:'ground',count:1,color:heartUI,side:'heart'},
     {r:8,c:0,type:'air',count:1,color:heartUI,side:'heart'},
@@ -1657,7 +1657,7 @@ renderWarMap = function(containerId, crisisMode, mapTheme) {
     if (!c) return;
     let filter = '';
     if (crisisMode) {
-      if (hd.country === 'heartland' || hd.occupied) filter = ' filter="url(#glow-red)"';
+      if (hd.country === 'ruthenia' || hd.occupied) filter = ' filter="url(#glow-red)"';
       if (hd.r === 6 && hd.c >= 16 && hd.c <= 17) filter = ' filter="url(#glow-yellow)"';
       if (hd.country === 'formosa') filter = ' filter="url(#glow-yellow)"';
     }
@@ -1736,7 +1736,7 @@ renderWarMap = function(containerId, crisisMode, mapTheme) {
     {r:3,c:9,country:'columbia',count:2},
     {r:5,c:14,country:'cathay',count:5},
     {r:4,c:16,country:'cathay',count:4},
-    {r:2,c:13,country:'nordostan',count:5},
+    {r:2,c:13,country:'sarmatia',count:5},
     {r:7,c:13,country:'bharata',count:10},
     {r:1,c:9,country:'freeland',count:5},
     {r:3,c:8,country:'teutonia',count:6},
@@ -1856,7 +1856,7 @@ renderTheaterMap = function(containerId, mapTheme) {
   // Land hexes
   theaterData.forEach(d => {
     const pos = tCenter(d.r, d.c);
-    const baseColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const baseColor = d.o === 'sarmatia' ? nordColor : heartColor;
     const isOccupied = !!d.occ;
     const isFrontLine = isOccupied;
     svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="${baseColor}" fill-opacity="${isOccupied ? (isDark ? 0.4 : 0.35) : (isDark ? 0.7 : 0.55)}" stroke="${isOccupied ? occColor : borderColor}" stroke-width="${isOccupied ? 1.5 : 0.8}"${isFrontLine ? ' filter="url(#t-glow)"' : ''}/>`;
@@ -1864,7 +1864,7 @@ renderTheaterMap = function(containerId, mapTheme) {
       svg += `<polygon points="${hexPoints(pos.x, pos.y, hexSize)}" fill="url(#t-stripes)"/>`;
     }
     const embSize = hexSize * 0.7;
-    const embColor = d.o === 'nordostan' ? nordColor : heartColor;
+    const embColor = d.o === 'sarmatia' ? nordColor : heartColor;
     svg += `<g opacity="0.10" transform="translate(${pos.x - embSize/2}, ${pos.y - embSize/2})">${geometricSVG(d.o, embColor, embSize)}</g>`;
   });
 
@@ -1874,7 +1874,7 @@ renderTheaterMap = function(containerId, mapTheme) {
   svg += `<text x="${dh.x}" y="${dh.y + 3}" text-anchor="middle" font-size="7" font-weight="700" fill="#C0392B" font-family="'DM Sans',sans-serif">DIE HARD</text>`;
 
   // Country labels
-  const theaterCountryHexes2 = {nordostan: [], heartland: []};
+  const theaterCountryHexes2 = {sarmatia: [], ruthenia: []};
   theaterData.forEach(d => {
     const pos = tCenter(d.r, d.c);
     if (theaterCountryHexes2[d.o]) theaterCountryHexes2[d.o].push(pos);
@@ -1883,8 +1883,8 @@ renderTheaterMap = function(containerId, mapTheme) {
     if (hexes.length === 0) return;
     const cx = hexes.reduce((s, h) => s + h.x, 0) / hexes.length;
     const cy = hexes.reduce((s, h) => s + h.y, 0) / hexes.length;
-    const color = cid === 'nordostan' ? nordUI : heartUI;
-    const name = cid === 'nordostan' ? 'NORDOSTAN' : 'HEARTLAND';
+    const color = cid === 'sarmatia' ? nordUI : heartUI;
+    const name = cid === 'sarmatia' ? 'SARMATIA' : 'RUTHENIA';
     svg += `<text x="${cx}" y="${cy + 2}" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="${color}" font-family="'Playfair Display',serif" opacity="${isDark ? 0.6 : 0.5}" letter-spacing="1" style="pointer-events:none;">${name}</text>`;
   });
 
@@ -2095,7 +2095,7 @@ function renderCompareSection() {
         <div style="font-size:9px;color:${slideText};line-height:1.8;flex:1;">
           <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#9A7040;margin-right:4px;vertical-align:middle;"></span>Gulf Gate breached</div>
           <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#C4A030;margin-right:4px;vertical-align:middle;"></span>Cathay: 7 ships near Formosa</div>
-          <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#A06060;margin-right:4px;vertical-align:middle;"></span>Nordostan treasury depleted</div>
+          <div><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#A06060;margin-right:4px;vertical-align:middle;"></span>Sarmatia treasury depleted</div>
         </div>
         <div style="display:flex;justify-content:space-between;align-items:center;padding-top:8px;">
           <span style="font-family:'Playfair Display',serif;font-size:9px;color:${slideSubtext};font-weight:600;">MetaGames</span>

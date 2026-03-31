@@ -62,14 +62,14 @@
   <td>Gold ≠ Red. Completely different.</td>
 </tr>
 <tr>
-  <td><strong>Nordostan</strong></td><td class="bloc">League</td>
+  <td><strong>Sarmatia</strong></td><td class="bloc">League</td>
   <td><span class="swatch" style="background:#D4A5A5"></span><span class="hex">#D4A5A5 dusty pink</span></td>
   <td><span class="swatch" style="background:#808080"></span><span class="hex">#808080 neutral gray</span></td>
   <td><span class="issue">NO</span></td>
   <td>Pink ≠ Gray.</td>
 </tr>
 <tr>
-  <td><strong>Heartland</strong></td><td class="bloc">At war</td>
+  <td><strong>Ruthenia</strong></td><td class="bloc">At war</td>
   <td><span class="swatch" style="background:#A5C8A5"></span><span class="hex">#A5C8A5 sage green</span></td>
   <td><span class="swatch" style="background:#D4A843"></span><span class="hex">#D4A843 warm gold</span></td>
   <td><span class="issue">NO</span></td>
@@ -238,7 +238,7 @@ const countries = [
   // League bloc — warm reds, earth tones
   {id:'cathay', name:'Cathay', bloc:'League', hue:'Warm Red',
    map:'#D4A5A5', ui:'#C05050', light:'#F5EAEA'},
-  {id:'nordostan', name:'Nordostan', bloc:'League', hue:'Dusty Mauve',
+  {id:'sarmatia', name:'Sarmatia', bloc:'League', hue:'Dusty Mauve',
    map:'#C8A0A0', ui:'#996060', light:'#F2EAEA'},
   {id:'persia', name:'Persia', bloc:'League', hue:'Warm Tan',
    map:'#C8A57A', ui:'#A07040', light:'#F2EBE0'},
@@ -258,7 +258,7 @@ const countries = [
    map:'#C8B896', ui:'#A89030', light:'#F3F0E5'},
   {id:'mirage', name:'Mirage', bloc:'Swing', hue:'Warm Copper',
    map:'#D4BFA5', ui:'#B08050', light:'#F5EEE5'},
-  {id:'heartland', name:'Heartland', bloc:'At war', hue:'Sage Green',
+  {id:'ruthenia', name:'Ruthenia', bloc:'At war', hue:'Sage Green',
    map:'#A5C8A5', ui:'#5A9A5A', light:'#EBF3EB'},
   {id:'caribe', name:'Caribe', bloc:'—', hue:'Leaf Green',
    map:'#A5C8A0', ui:'#5A9A50', light:'#EBF3EA'},
@@ -313,8 +313,8 @@ countries.forEach(c => {
 <ol style="font-size:13px;line-height:2;">
   <li><strong>Columbia:</strong> Map was warm beige — now steel blue (muted). This is a big shift. Blue = western/NATO feel. Or keep the warm beige map and use blue only for UI?</li>
   <li><strong>Cathay:</strong> Map was pale gold — now dusty red (map) with vivid red (UI). Red = traditional Cathay color. The gold map was pleasant but didn't say "Cathay."</li>
-  <li><strong>Heartland vs Caribe:</strong> Both are green in this proposal. Need differentiation — make Caribe more yellow-green or Heartland more blue-green?</li>
-  <li><strong>Nordostan:</strong> Dusty pink/mauve is unusual. Gray would be more "neutral." But gray is boring on the map. Keep the slight warm tone?</li>
+  <li><strong>Ruthenia vs Caribe:</strong> Both are green in this proposal. Need differentiation — make Caribe more yellow-green or Ruthenia more blue-green?</li>
+  <li><strong>Sarmatia:</strong> Dusty pink/mauve is unusual. Gray would be more "neutral." But gray is boring on the map. Keep the slight warm tone?</li>
   <li><strong>Western Treaty countries:</strong> Should they share a color FAMILY (blues/teals) to signal alliance, or be maximally distinct for readability?</li>
   <li><strong>Phrygia, Mirage, Solaria:</strong> All warm brown/copper/gold. Close to each other. Need more separation?</li>
 </ol>
@@ -343,7 +343,7 @@ countries.forEach(c => {
 });
 
 // Chart lines
-const keyCountries = countries.filter(c => ['columbia','cathay','nordostan','heartland','persia','bharata','yamato','gallia'].includes(c.id));
+const keyCountries = countries.filter(c => ['columbia','cathay','sarmatia','ruthenia','persia','bharata','yamato','gallia'].includes(c.id));
 let chartSVG = '';
 keyCountries.forEach((c, i) => {
   const y1 = 15 + i * 12;

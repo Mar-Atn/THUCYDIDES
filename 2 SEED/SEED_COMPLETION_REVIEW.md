@@ -69,7 +69,7 @@
 | Four quadrants (freedom/vulnerability/fragile grip/collapse) | C1 §3 | — | ⚠️ Implicit | Not explicitly labeled, but the combination of stability + support drives behavior equivalently |
 | Elections — Columbia midterms (Round 2) | C1 §3, C2 §4 | world_model_engine.py L1344–1351 | ✅ Implemented | AI + player votes, parliament flip mechanic |
 | Elections — Columbia presidential (Round 5) | C1 §3, C2 §4 | world_model_engine.py L1373–1377 | ✅ Implemented | Basic incumbent/opposition resolution |
-| Elections — Heartland wartime (Round 3-4) | C1 §3, C2 §4 | world_model_engine.py L1354–1370 | ✅ Implemented | Territory + war tiredness adjusted AI scoring |
+| Elections — Ruthenia wartime (Round 3-4) | C1 §3, C2 §4 | world_model_engine.py L1354–1370 | ✅ Implemented | Territory + war tiredness adjusted AI scoring |
 | Coup mechanics (multi-step) | C1 §3, C2 §4.5 | live_action_engine.py L757–848 | ✅ Implemented | Military plotter requirement, probability from stability/support/conspirators, success/failure consequences |
 | Propaganda (diminishing returns) | C1 §3, C2 §4.3 | live_action_engine.py L633–685 | ✅ Implemented | Log-based diminishing returns, AI L3+ boost, overuse penalty |
 | Arrest mechanic | C1 §3, C2 §4.1 | live_action_engine.py L583–627 | ✅ Implemented | Own soil only, role status → arrested, support/stability cost |
@@ -130,7 +130,7 @@
 | 4.3 | Propaganda | live_action_engine.py L633–685 | ✅ Implemented | Diminishing returns, AI boost |
 | 4.4 | Assassination | live_action_engine.py L691–751 | ✅ Implemented | Full mechanic |
 | 4.5 | Coup attempt | live_action_engine.py L757–848 | ✅ Implemented | Multi-step resolution |
-| — | Elections (3 types) | world_model_engine.py L1285–1391 | ✅ Implemented | Columbia midterms, presidential, Heartland wartime |
+| — | Elections (3 types) | world_model_engine.py L1285–1391 | ✅ Implemented | Columbia midterms, presidential, Ruthenia wartime |
 | **Covert Ops (5)** | | | | |
 | 5.1 | Intelligence/espionage | live_action_engine.py L463–577 | ✅ Implemented | Probabilistic, noisy intel |
 | 5.2 | Sabotage | live_action_engine.py L529–531 | ✅ Implemented | |
@@ -172,7 +172,7 @@ These are core mechanics that, if absent, would produce an incomplete or mislead
 7. **Third-country trade rerouting** — Tariffs and sanctions partially lose effectiveness as trade reroutes through neutral countries. Currently no rerouting model exists. This matters for realism (sanctions without coalition = performative).
    - *Effort:* Medium (4-6 hours). Needs trade flow model tracking bilateral volumes.
 
-8. **Frozen assets mechanic** — Nordostan assets held in EU/US. Important for sanctions realism and for the "asset seizure" diplomatic lever.
+8. **Frozen assets mechanic** — Sarmatia assets held in EU/US. Important for sanctions realism and for the "asset seizure" diplomatic lever.
    - *Effort:* Medium (3-4 hours). Track frozen asset values per country, seizure action.
 
 9. **Succession anxiety clock (autocracies)** — Design specifies: <30% support for 3 consecutive rounds triggers forced leadership challenge. This is a key mechanic for autocratic regime dynamics.

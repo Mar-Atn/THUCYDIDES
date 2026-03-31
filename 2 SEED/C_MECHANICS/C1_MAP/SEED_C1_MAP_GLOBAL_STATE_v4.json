@@ -9,39 +9,39 @@
     },
     "columbia": {
       "name": "Columbia",
-      "color": "#D4B896"
+      "color": "#9AB5D0"
     },
     "cathay": {
       "name": "Cathay",
       "color": "#E8D5A3"
     },
-    "nordostan": {
-      "name": "Nordostan",
+    "sarmatia": {
+      "name": "Sarmatia",
       "color": "#D4A5A5"
     },
-    "heartland": {
-      "name": "Heartland",
+    "ruthenia": {
+      "name": "Ruthenia",
       "color": "#A5C8A5"
     },
     "gallia": {
       "name": "Gallia",
-      "color": "#B5A5C8"
+      "color": "#A5B8D4"
     },
     "teutonia": {
       "name": "Teutonia",
-      "color": "#8FB59A"
+      "color": "#8AB5AA"
     },
     "thule": {
       "name": "Thule",
-      "color": "#8FB59A"
+      "color": "#8AB5AA"
     },
     "freeland": {
       "name": "Freeland",
-      "color": "#D4B58A"
+      "color": "#A0B8C8"
     },
     "ponte": {
       "name": "Ponte",
-      "color": "#D4A5B5"
+      "color": "#A5C8B8"
     },
     "albion": {
       "name": "Albion",
@@ -77,7 +77,7 @@
     },
     "formosa": {
       "name": "Formosa",
-      "color": "#8AC8B5"
+      "color": "#DCC5A0"
     },
     "hanguk": {
       "name": "Hanguk",
@@ -195,13 +195,10 @@
         "owner": "freeland"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
-      },
-      {
-        "owner": "sea"
+        "owner": "sarmatia"
       },
       {
         "owner": "sea"
@@ -210,7 +207,10 @@
         "owner": "sea"
       },
       {
-        "owner": "nordostan"
+        "owner": "sea"
+      },
+      {
+        "owner": "sarmatia"
       },
       {
         "owner": "sea"
@@ -257,22 +257,22 @@
         "owner": "freeland"
       },
       {
-        "owner": "heartland"
+        "owner": "ruthenia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
         "owner": "sea"
@@ -319,22 +319,22 @@
         "owner": "teutonia"
       },
       {
-        "owner": "heartland"
+        "owner": "ruthenia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
         "owner": "sea"
       },
       {
-        "owner": "nordostan"
+        "owner": "sarmatia"
       },
       {
         "owner": "hanguk"

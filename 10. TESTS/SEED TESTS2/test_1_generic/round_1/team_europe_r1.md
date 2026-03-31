@@ -6,9 +6,9 @@
 
 Six European leaders with deep structural disagreements across five axes:
 
-**Heartland Support:** Sentinel + Mariner demand maximum. Lumiere supports but wants European-led framework. Forge supports but privately needs the war to end ($237 oil is killing Teutonia). Ponte will support if someone else pays. Pillar wants institutional EU process.
+**Ruthenia Support:** Sentinel + Mariner demand maximum. Lumiere supports but wants European-led framework. Forge supports but privately needs the war to end ($237 oil is killing Teutonia). Ponte will support if someone else pays. Pillar wants institutional EU process.
 
-**Nordostan Sanctions:** Sentinel + Mariner: L3, no easing. Forge: maintain but aware of 0.8 coins/round cost. Ponte: conditional — needs compensation. Pillar: must go through EU process.
+**Sarmatia Sanctions:** Sentinel + Mariner: L3, no easing. Forge: maintain but aware of 0.8 coins/round cost. Ponte: conditional — needs compensation. Pillar: must go through EU process.
 
 **Cathay Trade:** Forge absolutely refuses decoupling (~$350B bilateral). Ponte curious about deeper engagement. Lumiere more willing to confront but not at Columbia's command. Sentinel follows Columbia. Mariner wants targeted tech restrictions only.
 
@@ -27,10 +27,10 @@ Six European leaders with deep structural disagreements across five axes:
 - TABLE at EU: "Sovereign Shield Phase 1" — 60,000-troop European Rapid Reaction Force planning. Framed as complementary to NATO.
 - TABLE at UNSC: Gulf Gate ceasefire resolution. Position France as independent peace broker.
 - Propose Franco-British nuclear coordination framework to Mariner.
-- Reaffirm military hub proposal to Heartland (Beacon). French commitment not conditional on Columbia.
+- Reaffirm military hub proposal to Ruthenia (Beacon). French commitment not conditional on Columbia.
 
 ### TEUTONIA (Forge)
-**Budget:** 3 coins defense rearmament, 2 coins energy mitigation, 1 coin Heartland financial support, 2 coins economic stabilization, 4 coins reserve.
+**Budget:** 3 coins defense rearmament, 2 coins energy mitigation, 1 coin Ruthenia financial support, 2 coins economic stabilization, 4 coins reserve.
 **Military:** Continue rearmament. Participate in French nuclear exercises (not accepting French command). Support NATO forward presence in Freeland. No deployments outside Teutonia.
 **Diplomatic:**
 - EU: Propose emergency energy coordination (joint LNG purchasing, strategic reserves, emergency fiscal mechanism for Ponte).
@@ -41,9 +41,9 @@ Six European leaders with deep structural disagreements across five axes:
 
 ### FREELAND (Sentinel)
 **Budget:** 2 coins military buildup (K2 tanks, F-35s, border fortification), 1 coin POLLOGHUB logistics expansion.
-**Military:** 5 ground on eastern border. Request enhanced NATO forward presence + Columbia ground unit. Accelerate Heartland aid throughput.
+**Military:** 5 ground on eastern border. Request enhanced NATO forward presence + Columbia ground unit. Accelerate Ruthenia aid throughput.
 **Diplomatic:**
-- EU: Demand maximum Heartland support. "If we don't support Heartland now, we defend our own border next."
+- EU: Demand maximum Ruthenia support. "If we don't support Ruthenia now, we defend our own border next."
 - EU: OPPOSE sanctions easing. No review mechanism. No hope of relief without full withdrawal.
 - NATO: Binding Article 5 readiness, pre-positioned equipment, contingency planning.
 - Columbia: Demonstrate maximum value as ally. Offer additional forward deployments.
@@ -53,7 +53,7 @@ Six European leaders with deep structural disagreements across five axes:
 **Budget:** 0.5 coins minimum NATO defense, 0.5 coins Mediterranean patrol, 3 coins fiscal survival reserve.
 **Military:** Minimal posture. Offer Mediterranean access as diplomatic currency.
 **Diplomatic:**
-- EU: BLOCK new Heartland financial commitment without compensation. Price: energy cost compensation (0.3 coins) + structural fund acceleration + defense spending flexibility.
+- EU: BLOCK new Ruthenia financial commitment without compensation. Price: energy cost compensation (0.3 coins) + structural fund acceleration + defense spending flexibility.
 - EU: CONDITIONAL sanctions renewal — only with energy compensation mechanism.
 - EU: SUPPORT defense bonds (SAFE instrument) — debt mutualisation is top priority.
 - Columbia: Bridge position. Will support Columbia's priorities IF Columbia supports Ponte's fiscal needs.
@@ -61,15 +61,15 @@ Six European leaders with deep structural disagreements across five axes:
 - EU: Propose emergency fiscal mechanism for energy crisis.
 
 ### ALBION (Mariner)
-**Budget:** 2 coins defense modernization (Trident), 2 coins Heartland support, 1 coin naval operations, 3 coins reserve.
-**Military:** Maintain global naval deployment. Offer 2,000-troop Heartland ceasefire monitoring commitment.
+**Budget:** 2 coins defense modernization (Trident), 2 coins Ruthenia support, 1 coin naval operations, 3 coins reserve.
+**Military:** Maintain global naval deployment. Offer 2,000-troop Ruthenia ceasefire monitoring commitment.
 **Intelligence Sharing (most consequential quiet decision):**
-- To Sentinel: Nordostan military sustainability data (quality declining). Reinforces hawk position.
-- To Forge: Cathay-Nordostan coordination intel (joint exercises, crisis planning). Stiffens spine on Cathay.
+- To Sentinel: Sarmatia military sustainability data (quality declining). Reinforces hawk position.
+- To Forge: Cathay-Sarmatia coordination intel (joint exercises, crisis planning). Stiffens spine on Cathay.
 - To Lumiere: Persia internal dynamics (Anvil as real decision-maker, Dawn's overtures). Enables French mediation.
 - Withheld from Ponte: sanctions evasion details. Too high leakage risk through Salvini.
 **Diplomatic:**
-- Propose Franco-British Heartland peace framework: joint security guarantee backed by two nuclear deterrents.
+- Propose Franco-British Ruthenia peace framework: joint security guarantee backed by two nuclear deterrents.
 - Propose targeted Cathay tech-transfer restrictions (evidence-based, not broad trade war). Position Forge could accept.
 - Maintain Special Relationship with Columbia. Urge prioritization of European theater.
 
@@ -77,7 +77,7 @@ Six European leaders with deep structural disagreements across five axes:
 **Agenda for EU Emergency Summit:**
 1. Energy Response (unifying, costs little, builds momentum)
 2. Sanctions Renewal with energy compensation for Ponte (0.3 coins buys the vote)
-3. Heartland Support Package with fiscal neutrality for Ponte
+3. Ruthenia Support Package with fiscal neutrality for Ponte
 4. EU Defense Coordination (reframe Sovereign Shield as EU-led, not French-led)
 5. Cathay Trade Policy — DEFER to R2 (too divisive, Forge will veto)
 
@@ -85,7 +85,7 @@ Six European leaders with deep structural disagreements across five axes:
 - Energy compensation: 0.3 coins/round
 - Structural fund acceleration: 0.5 coins
 - Defense spending phased timeline
-- In exchange: sanctions vote, Heartland non-obstruction, defense coordination participation
+- In exchange: sanctions vote, Ruthenia non-obstruction, defense coordination participation
 - Total cost: ~1 coin. Value: preserves EU consensus.
 
 ---
@@ -94,13 +94,13 @@ Six European leaders with deep structural disagreements across five axes:
 
 | Meeting | Participants | Purpose |
 |---------|-------------|---------|
-| EU Emergency Summit | All 4 EU + Albion observer | Energy, sanctions, Heartland |
+| EU Emergency Summit | All 4 EU + Albion observer | Energy, sanctions, Ruthenia |
 | Franco-German bilateral | Lumiere + Forge | Nuclear cooperation, defense, Cathay alignment |
-| Franco-British bilateral | Lumiere + Mariner | Nuclear coordination, Heartland framework |
+| Franco-British bilateral | Lumiere + Mariner | Nuclear coordination, Ruthenia framework |
 | Eastern Security bilateral | Sentinel + Mariner | Intel sharing, Article 5, POLLOGHUB |
 | Ponte deal | Pillar + Ponte | Energy compensation for sanctions vote |
 | NATO consultation | Europe + Columbia (Dealer) | Burden-sharing, Thule, defense spending |
-| Heartland meeting | Lumiere + Beacon | Military hubs, security guarantee |
+| Ruthenia meeting | Lumiere + Beacon | Military hubs, security guarantee |
 | Special Relationship | Mariner + Dealer | Five Eyes, Persia assessment, European theater |
 
 ---

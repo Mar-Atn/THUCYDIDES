@@ -23,7 +23,7 @@ Actions are **role-specific features in the web app**. Each player sees only the
 ### 1.1 Deploy / redeploy units
 **Timing:** After World Model processing, 5-minute deployment window before next round starts.
 **Initiator:** Military chief or head of state.
-Assign newly available units (produced, mobilized, arrived from transit) to zones on the map. Domestic deployment = immediate. Long-distance redeployment to foreign theaters = 1 round transit. Must leave at least 1 ground unit in any controlled zone.
+Assign newly available units (produced, mobilized, arrived from transit) to zones on the map. Deployment is instant to any allowed location (own territory, controlled territory, allied territory with basing agreement). Units deployed this round can attack adjacent zones starting next round — creating an effective 1-round delay for force projection. Ships carry 1 ground unit + 2 air units (own country only). Strategic missiles cannot embark. Naval cannot deploy into active blockades. Must leave at least 1 ground unit in any controlled zone.
 
 ### 1.2 Arms transfer
 **Timing:** Real-time (Transaction (Market) Engine).
@@ -112,7 +112,7 @@ Bilateral. Both parties confirm. Immediate. Irreversible (except basing rights).
 > (ceasefire, peace treaty, territorial settlement, alliance, trade deal). The other side
 > can amend, reject, accept, or counter-propose. No special mechanics — just the standard
 > agreement transaction with:
-> - Agreement name (e.g., "Heartland-Nordostan Ceasefire")
+> - Agreement name (e.g., "Ruthenia-Sarmatia Ceasefire")
 > - Free text terms
 > - Required signatories (both HoS must confirm)
 > - When both HoS sign a ceasefire: engine updates war_status, combat pauses between
@@ -137,7 +137,7 @@ Bilateral. Both parties confirm. Immediate. Irreversible (except basing rights).
 **Elections** (scheduled, processed by World Model Engine):
 - Columbia mid-terms (Round 2): team votes + AI popular vote (50%)
 - Columbia presidential (Round 5): nominations R4, speeches + debate, weighted votes + AI (50%)
-- Heartland wartime (Round 3-4): AI judges on gameplay outcomes
+- Ruthenia wartime (Round 3-4): AI judges on gameplay outcomes
 
 ---
 
@@ -189,7 +189,7 @@ Suggest time and venue. UNSC, EU, NATO, Parliament, BRICS+, OPEC+, player-create
 | Pioneer (Columbia Envoy) | Tech/business channel to Cathay. Thule portfolio. Media manipulation. Independent tech investment. Semi-unaccountable — personal business empire creates conflicts of interest. |
 | Circuit (Cathay Tech) | Rare earth restrictions. Cyber ops. Independent contacts. |
 | Sage (Cathay Elder) | Legitimize transitions. Grows powerful as Helmsman weakens. |
-| Compass (Nordostan Oligarch) | Personal transactions. Independent back-channels. |
+| Compass (Sarmatia Oligarch) | Personal transactions. Independent back-channels. |
 | Anvil (Persia IRGC) | Military + economy control. Kingmaker. |
 | Dawn (Persia Reformist) | Represents the street. Power in crisis. |
 | Veritas (Press) | Publish. Investigate. Public information monopoly. |
@@ -214,3 +214,6 @@ Suggest time and venue. UNSC, EU, NATO, Parliament, BRICS+, OPEC+, player-create
 - **v3.0 (2026-03-21):** Full alignment with E1 Engine Architecture v0.7. Restructured by processing system. Military production absorbed into budget. Five unit types with unified strategic missiles (warhead unknown). Asset seizure parked. Print money in budget deficit rules. Respond to crisis removed. Covert ops AI-mediated with election meddling. Territorial claim → Public statement. Council session → Call any org meeting. Deployment post-processing window.
 - **v2.0 (2026-03-20):** Revision for concept documents A1-C4. 31 actions.
 - **v1.0 (2026-03-19):** Initial. 28 actions.
+
+
+<!-- CM-006: Deployment rules updated 2026-03-30. Transit delay removed (instant deployment). Ship capacity formalized (1 ground + 2 air). Naval blockade restriction added. Approved by Marat. -->

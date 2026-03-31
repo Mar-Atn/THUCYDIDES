@@ -30,7 +30,7 @@
 | R7 | | | | | | |
 | R8 | | | | | | |
 
-### Heartland Stability (Critical Calibration)
+### Ruthenia Stability (Critical Calibration)
 | Round | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Old Formula |
 |-------|--------|--------|--------|--------|--------|-------------|
 | R1 | 4.62 | | | | | ~4.0 |
@@ -59,7 +59,7 @@
 | Event | Test 1 | Test 2 | Test 3 | Test 4 | Test 5 | Test 6 |
 |-------|--------|--------|--------|--------|--------|--------|
 | R2 Midterms | | | | | | |
-| R3 Heartland Election | | | | | | |
+| R3 Ruthenia Election | | | | | | |
 | R5 Presidential | | | | | | |
 | Ceasefire (any) | | | | | | |
 | Formosa Blockade | | | | | | |

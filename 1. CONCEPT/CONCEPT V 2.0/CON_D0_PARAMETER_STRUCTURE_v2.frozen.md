@@ -163,12 +163,12 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 1.2.1 | Starting ground units | K | A | Number of ground units per country at game start |
 | 1.2.2 | Starting naval units | K | A | Number of naval units per country |
 | 1.2.3 | Starting tactical air/missile units | K | A | Number of tactical units per country |
-| 1.2.4 | Starting strategic missiles | K | A | Fixed allocation per country (Columbia ~10, Nordostan ~10, Cathay ~3+, Gallia ~2, Albion ~2) |
+| 1.2.4 | Starting strategic missiles | K | A | Fixed allocation per country (Columbia ~10, Sarmatia ~10, Cathay ~3+, Gallia ~2, Albion ~2) |
 | 1.2.5 | Starting air defense units | K | A | Fixed allocation per country (non-producible, scarce) |
 | 1.2.6 | Starting unit deployment | K×Z | A | Which units deployed in which zones at game start |
 | 1.2.7 | Columbia base network | Z | A | Location of Columbia's 4-5 global bases (Pacific/Yamato, Ereb/Teutonia, Mashriq/Gulf, Indian Ocean, Mediterranean?) |
 | 1.2.8 | Starting basing rights | K×K | A | Which countries host which countries' forces at start |
-| 1.2.9 | Starting war status | K×K | A | Which countries are at war at game start (Nordostan vs. Heartland, potentially Persia-related) |
+| 1.2.9 | Starting war status | K×K | A | Which countries are at war at game start (Sarmatia vs. Ruthenia, potentially Persia-related) |
 
 ### 1.3 — Production & Maintenance (source: C1, E1)
 
@@ -227,7 +227,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 2.1.5 | Starting treasury (reserves) | K | A | Coins in state treasury at game start |
 | 2.1.6 | Starting inflation rate | K | A | Inflation level at game start per country |
 | 2.1.7 | Starting trade balance | K | A | Net trade position per country |
-| 2.1.8 | Oil producer status | K | A | Which countries are oil/resource producers (Solaria, Nordostan, Persia, Mirage, Caribe) |
+| 2.1.8 | Oil producer status | K | A | Which countries are oil/resource producers (Solaria, Sarmatia, Persia, Mirage, Caribe) |
 | 2.1.9 | Formosa semiconductor dependency | K | A | Per country: degree of dependency on Formosa chip imports (% of tech sector) |
 
 ### 2.2 — Budget Mechanics (source: C1, E1)
@@ -257,7 +257,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 2.3.7 | EU collective tariff rule | W | A | EU tariffs require member consensus |
 | 2.3.8 | Starting tariff levels | K×K×sector | A | Initial tariff positions for all country pairs × 4 sectors |
 | 2.3.9 | Starting sanctions levels | K×K×type | A | Initial sanctions positions for all country pairs × 4 types |
-| 2.3.10 | Frozen assets (starting) | K | A | Specific frozen asset amounts (e.g., Nordostan assets held in Columbia/EU) |
+| 2.3.10 | Frozen assets (starting) | K | A | Specific frozen asset amounts (e.g., Sarmatia assets held in Columbia/EU) |
 | 2.3.11 | Export restriction mechanics | W | A | How restricting strategic goods (semiconductors, rare earths) affects target and imposer |
 
 ### 2.4 — Oil / Resource Pricing (source: C1)
@@ -298,7 +298,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 3.1.1 | Starting stability index | K | A | Stability (1–10) per country at game start |
 | 3.1.2 | Starting political support | K | A | Political support (0–100%) per country at game start |
 | 3.1.3 | Starting Dem/Rep split (Columbia) | K | A | Democrat/Republican popular opinion split (e.g., 48/52) |
-| 3.1.4 | Starting war tiredness | K | A | Cumulative war fatigue level per country (non-zero for Nordostan, Heartland) |
+| 3.1.4 | Starting war tiredness | K | A | Cumulative war fatigue level per country (non-zero for Sarmatia, Ruthenia) |
 | 3.1.5 | Regime type | K | A | Autocracy vs. democracy — determines how political support works |
 | 3.1.6 | Starting troop morale modifier | K | A | Derived from stability at game start |
 
@@ -338,8 +338,8 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 3.4.2 | Columbia mid-terms formula | W | A | Team votes + AI popular vote (50% weight); factors: economic conditions, presidential approval, Dem/Rep split |
 | 3.4.3 | Columbia presidential timing | W | A | Nominations Round 4, election Round 5 (H1 2028) |
 | 3.4.4 | Columbia presidential formula | W | A | Team votes (weighted: Fixer/Pioneer = 2, others = 1) + AI popular vote (50%); campaign speeches + debate factored |
-| 3.4.5 | Heartland wartime election timing | W | A | Round 3–4 |
-| 3.4.6 | Heartland election AI factors | W | A | Territory held, economy, casualties, Western support, campaign quality |
+| 3.4.5 | Ruthenia wartime election timing | W | A | Round 3–4 |
+| 3.4.6 | Ruthenia election AI factors | W | A | Territory held, economy, casualties, Western support, campaign quality |
 | 3.4.7 | Other democracy election triggers | W | A | Stability below threshold triggers government fall / snap election |
 
 ### 3.5 — Coups & Revolutions (source: C1, E1)
@@ -351,7 +351,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | 3.5.3 | Coup probability factors | W | A | Stability, political support, military control, conspirator count, regime type |
 | 3.5.4 | Mass protest thresholds | W | A | Probable below stability 5, automatic below 3 |
 | 3.5.5 | Revolution conditions | W | A | Stability 1–2 AND political support below 20% |
-| 3.5.6 | Coup attempt minimum team sizes | K | A | Columbia 3+, Cathay 2+, Nordostan 2+, Persia 2+ |
+| 3.5.6 | Coup attempt minimum team sizes | K | A | Columbia 3+, Cathay 2+, Sarmatia 2+, Persia 2+ |
 
 ---
 
@@ -362,7 +362,7 @@ These define the game's skeleton — what exists, how time works, what the rules
 | # | Parameter | Granularity | Block | Description |
 |---|-----------|:-----------:|:-----:|-------------|
 | 4.1.1 | Nuclear level definitions (L0–L3) | W | A | Capabilities at each level (L1: basic weapons; L2: reliable arsenal; L3: full strategic, MAD-capable) |
-| 4.1.2 | Starting nuclear levels | K | A | Per country (L3: Columbia, Nordostan. L2: Cathay, Albion, Gallia. L1: Choson, Bharata, Levantia. L0: Persia, all others) |
+| 4.1.2 | Starting nuclear levels | K | A | Per country (L3: Columbia, Sarmatia. L2: Cathay, Albion, Gallia. L1: Choson, Bharata, Levantia. L0: Persia, all others) |
 | 4.1.3 | Nuclear R&D progress (starting) | K | A | % toward next level (e.g., Cathay at 80% toward L3, Persia at 60% toward L1) |
 | 4.1.4 | Nuclear advancement threshold | per-level | A | Cumulative R&D investment needed to reach next level |
 | 4.1.5 | Nuclear test success probability | K | A | Probability of successful nuclear test by tech level and investment |

@@ -75,7 +75,7 @@ The gradual decline from $162 -> $122 -> $106 -> $99 over R6-R8 is far more real
 - Growth = (0.04 - 0.015 + 0.015) * 1.0 = 0.04 = +4.0%
 - new_gdp = 190 * 1.04 = **~197.6**. Within corridor 190-198.
 
-**Nordostan (oil producer):**
+**Sarmatia (oil producer):**
 - At $137: oil_revenue = 137 * 0.35 * 20 * 0.01 = ~0.96. Within corridor 0.8-1.4.
 - GDP growth: base 1.0% + oil_benefit(+0.01*(137-80)/50 = +0.011) = ~2.1%.
 - new_gdp = 20 * 1.021 = ~20.4. Within corridor 20-22.
@@ -87,8 +87,8 @@ The gradual decline from $162 -> $122 -> $106 -> $99 over R6-R8 is far more real
 | Oil price ($) | 160-185 | ~137 (inertia) | ~175 | PASS (intentionally damped by Cal-1; reaches corridor by R2-R3) |
 | Columbia GDP | 272-278 | ~285 | ~319 | PASS (was OVERCORRECTED in v2; now realistic) |
 | Cathay GDP | 190-198 | ~198 | ~220 | PASS (was OVERCORRECTED in v2; now in corridor) |
-| Nordostan GDP | 20-22 | ~20.4 | ~20.6 | PASS |
-| Nordostan oil_revenue | 0.8-1.4 | ~0.96 | ~1.40 | PASS |
+| Sarmatia GDP | 20-22 | ~20.4 | ~20.6 | PASS |
+| Sarmatia oil_revenue | 0.8-1.4 | ~0.96 | ~1.40 | PASS |
 | R6 oil price | 95-125 | ~122 | ~84 (instant crash) | PASS (gradual decline from inertia) |
 | R8 oil price | 80-110 | ~99 | ~84 | PASS |
 
@@ -116,7 +116,7 @@ Oil inertia produces realistic price dynamics. Tech boost no longer dominates GD
 - formula_price = 80 * 1.0 * 1.0 * 1.10 = $88.
 - previous = $80. price = 80 * 0.4 + 88 * 0.6 = **$84.8**. Slight inertia damping.
 
-**R1 Nordostan GDP (Cal-2 sanctions fix):**
+**R1 Sarmatia GDP (Cal-2 sanctions fix):**
 - Base: 1.0% = 0.01
 - Oil shock: producer, price $85 > $80: +0.01 * (85-80)/50 = +0.001
 - Sanctions hit (Cal-2): L3 from 5 countries. damage ~0.10-0.12. sanctions_hit = -0.12 * **1.5** (was 2.0) = **-0.18** (was -0.24)
@@ -161,7 +161,7 @@ This is within corridor 4.5-5.0 (close to lower bound). The Cal-4 cap prevents i
 - Effective sanctions_hit: -0.18 * 0.60 = **-0.108** (was -0.18 pre-adaptation, was -0.24*0.70 = -0.168 in v2).
 - GDP decline slows: sanctions erosion reduces from ~20%/round to ~11%/round by R5.
 
-**R5 Nordostan GDP trajectory:**
+**R5 Sarmatia GDP trajectory:**
 - R1: 20 -> 16.0 (-20%)
 - R2: 16.0 -> ~13.3 (-17%, compounding with debt growth)
 - R3: 13.3 -> ~11.4 (-14%)
@@ -175,11 +175,11 @@ This trajectory (20 -> ~9 over 8 rounds = -55%) is within the scenario corridor 
 
 | Variable | R1 Expected | R1 v3 Actual | v2 Actual | Verdict |
 |----------|------------|-------------|-----------|---------|
-| Nordostan GDP | 17-20 | ~16.0 | ~15.2 | PASS (was CALIBRATE; closer to corridor) |
-| Nordostan inflation | 10-30 | ~44.0 | ~45.8 | CALIBRATE (still above corridor, but Cal-4 prevents stability collapse) |
-| Nordostan treasury | 0-2 | 0 | 0 | PASS |
-| Nordostan debt_burden | 1.5-4.0 | ~2.57 | ~2.56 | PASS |
-| Nordostan stability | 4.5-5.0 | ~4.07 | ~3.0 | PASS (was FAIL; Cal-4 cap is critical) |
+| Sarmatia GDP | 17-20 | ~16.0 | ~15.2 | PASS (was CALIBRATE; closer to corridor) |
+| Sarmatia inflation | 10-30 | ~44.0 | ~45.8 | CALIBRATE (still above corridor, but Cal-4 prevents stability collapse) |
+| Sarmatia treasury | 0-2 | 0 | 0 | PASS |
+| Sarmatia debt_burden | 1.5-4.0 | ~2.57 | ~2.56 | PASS |
+| Sarmatia stability | 4.5-5.0 | ~4.07 | ~3.0 | PASS (was FAIL; Cal-4 cap is critical) |
 | R5 sanctions_hit | 2-6% | ~10.8% | ~16.8% | CALIBRATE (improved direction, still strong) |
 
 ### Analysis

@@ -106,7 +106,7 @@ The terrifying proximity of Seoul to the DMZ makes this theater unique — milli
 
 ## Map Style
 
-**Fictional geography with transparent parallels** (like the Conflict SIM). Advantages: psychological safety, creative freedom, avoids political sensitivities with real-world participants, allows geographic simplification. The Conflict SIM's maps proved this works beautifully — everyone knows who "Nordostan" is, but the fictional layer allows players to make choices they might not with real country names.
+**Fictional geography with transparent parallels** (like the Conflict SIM). Advantages: psychological safety, creative freedom, avoids political sensitivities with real-world participants, allows geographic simplification. The Conflict SIM's maps proved this works beautifully — everyone knows who "Sarmatia" is, but the fictional layer allows players to make choices they might not with real country names.
 
 The map should be **beautifully produced** — the Conflict SIM's fantasy-cartography style (terrain details, sea textures, stylized borders) set a high bar. The map is a physical artifact that draws people in and makes the simulation world feel real. 
 

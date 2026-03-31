@@ -33,7 +33,7 @@
 |---------|:------------:|------------|
 | **Columbia** | Courtship (transactional) | Signed landmark trade deal Feb 2026 — tariffs on Bharata cut to 18%. Columbia needs Bharata in sanctions coalition and as Cathay counterweight. Bharata extracts concessions without committing. Quad partner. Defense cooperation deepening. |
 | **Cathay** | Tense (competitive coexistence) | Border dispute (Ladakh). Demographic rivals — Bharata surpassed Cathay as most populous nation. Trade imbalance in Cathay's favor. Both in BRICS+ but compete for Global South leadership. Some border disengagement achieved but structural rivalry permanent. |
-| **Nordostan** | Friendly (legacy partner) | Buys Nordostan weapons (S-400, submarines). Discounted oil. Historical non-alignment partnership. But relationship increasingly awkward as Nordostan becomes Cathay's junior partner — Bharata's two biggest concerns now aligned against it. |
+| **Sarmatia** | Friendly (legacy partner) | Buys Sarmatia weapons (S-400, submarines). Discounted oil. Historical non-alignment partnership. But relationship increasingly awkward as Sarmatia becomes Cathay's junior partner — Bharata's two biggest concerns now aligned against it. |
 | **Persia** | Friendly (strained by war) | Traditional energy supplier. Iran war forces Bharata to navigate between oil needs and Columbia pressure. BRICS+ solidarity tested. Chabahar port project (alternate route to Central Asia bypassing regional rivals) at risk. |
 | **Levantia** | Friendly (warming) | Defense technology buyer. Intelligence cooperation deepening. Modi-Netanyahu personal relationship. But Bharata's Muslim population (200M+) constrains public alignment. |
 | **Formosa** | Neutral (semiconductor interest) | Bharata courting TSMC for domestic fab investment. Semiconductor dependency 35%. Wants to position as alternative chip manufacturing hub to reduce global Formosa concentration. |
@@ -46,7 +46,7 @@
 
 Bharata enters the SIM as the world's most courted uncommitted power. With 1.45 billion people, the world's fastest-growing major economy at 7.6% GDP growth, and a median age of 28 versus Cathay's 38, Bharata possesses the demographic and economic trajectory that every bloc wants on its side — and the strategic discipline to avoid choosing.
 
-Prime Minister Modi's "multi-alignment" doctrine has become the defining foreign policy innovation of the 2020s. Bharata is simultaneously a Quad member with Columbia, Yamato, and Australia; a BRICS+ host alongside Cathay and Nordostan; a buyer of Nordostan weapons and Columbia technology; a participant in Western sanctions consultations and an importer of sanctioned Nordostan oil. Every apparent contradiction is deliberate. Bharata extracts concessions from all directions — the February 2026 trade deal with Columbia (tariffs slashed to 18%) came alongside accelerated free trade agreements with the EU, Albion, and Oman.
+Prime Minister Modi's "multi-alignment" doctrine has become the defining foreign policy innovation of the 2020s. Bharata is simultaneously a Quad member with Columbia, Yamato, and Australia; a BRICS+ host alongside Cathay and Sarmatia; a buyer of Sarmatia weapons and Columbia technology; a participant in Western sanctions consultations and an importer of sanctioned Sarmatia oil. Every apparent contradiction is deliberate. Bharata extracts concessions from all directions — the February 2026 trade deal with Columbia (tariffs slashed to 18%) came alongside accelerated free trade agreements with the EU, Albion, and Oman.
 
 The Iran war has tested this balance. As BRICS+ host, Bharata faces pressure to steer the bloc toward a position on the conflict. It has refused. Columbia pushes Bharata to join the sanctions coalition; Bharata buys discounted Persia oil through intermediaries. The result satisfies nobody fully but costs Bharata nothing it cannot afford.
 
@@ -67,7 +67,7 @@ What makes Bharata interesting to play: you are the person everyone needs and no
 | Starting treasury (coins) | 12 | Moderate reserves. $650B+ foreign exchange reserves in reality. |
 | Inflation rate (%) | 5.0% | Manageable. Food price volatility the main risk. RBI maintaining credibility. |
 | Trade balance (coins) | -3 | Chronic deficit. Oil imports the main driver. Remittances from Gulf partially offset. |
-| Oil producer? | No — net importer | Imports ~85% of oil needs. Major buyer from Nordostan, Solaria, Persia. Oil price spikes from Iran war directly hurt. |
+| Oil producer? | No — net importer | Imports ~85% of oil needs. Major buyer from Sarmatia, Solaria, Persia. Oil price spikes from Iran war directly hurt. |
 | Formosa semiconductor dependency | 0.35 | Moderate. Courting TSMC for domestic fabs. Wants to become alternative manufacturing hub. |
 | Debt burden (coins/round) | 3 | Government debt ~82% of GDP but mostly domestic-currency denominated. Manageable. |
 | Social spending baseline (%) | 20% | Lower than Western democracies. Welfare programs expanding (food subsidies, rural employment). Political pressure to increase. |
@@ -80,9 +80,9 @@ What makes Bharata interesting to play: you are the person everyone needs and no
 |-----------|:-----:|----------------------|-------|
 | Ground forces | 12 | `g_bharata` (10 — bulk on Cathay border and internal), `g_bharata_islands` (2 — Indian Ocean) | Third-largest ground force in SIM. Heavily oriented toward Cathay border (Ladakh, Arunachal Pradesh). |
 | Naval forces | 3 | `g_bharata` (1 — Western Fleet), `w(13,9)` (2) | Growing blue-water capability. Aircraft carrier INS Vikrant operational. Indian Ocean dominance aspiration. |
-| Tactical air/missiles | 4 | `g_bharata` (4) | Mix of Nordostan (Su-30MKI, Rafale from Gallia) and domestically produced (Tejas). Modernizing. |
+| Tactical air/missiles | 4 | `g_bharata` (4) | Mix of Sarmatia (Su-30MKI, Rafale from Gallia) and domestically produced (Tejas). Modernizing. |
 | Strategic missiles | 0 | — | Nuclear delivery via Agni series ballistic missiles abstracted into Nuclear L1. No strategic missile game units. |
-| Air defense | 2 | `g_bharata` (2) | S-400 from Nordostan (purchased despite Columbia objections). Domestic systems in development. |
+| Air defense | 2 | `g_bharata` (2) | S-400 from Sarmatia (purchased despite Columbia objections). Domestic systems in development. |
 
 | Military Parameter | Value | Notes |
 |-------------------|-------|-------|
@@ -128,7 +128,7 @@ What makes Bharata interesting to play: you are the person everyone needs and no
 
 Bharata is the genuine third pole — the country that can tip any global alignment but refuses to choose. Playing Scales means:
 
-- **Everyone comes to you.** Columbia needs you in the sanctions coalition. Cathay needs you to legitimize BRICS+ alternatives. Nordostan needs you to keep buying weapons and oil. Persia needs BRICS solidarity. Solaria needs energy partnership. You say "yes, but..." to everyone.
+- **Everyone comes to you.** Columbia needs you in the sanctions coalition. Cathay needs you to legitimize BRICS+ alternatives. Sarmatia needs you to keep buying weapons and oil. Persia needs BRICS solidarity. Solaria needs energy partnership. You say "yes, but..." to everyone.
 - **Your leverage is your ambiguity.** The moment you commit to one side, you lose half your value. The game is extracting maximum concessions from all directions while maintaining the fiction of equidistance.
 - **The Cathay border is your constraint.** If Cathay moves on Formosa or escalates at Ladakh, non-alignment collapses. You become Columbia's ally by necessity, not choice — and lose everything you built with the other side.
 - **The Iran war is your test.** BRICS+ host, pressured to take a stand, buying oil from both sides of the conflict. How long can you stay neutral in a war that involves your two biggest courtiers?

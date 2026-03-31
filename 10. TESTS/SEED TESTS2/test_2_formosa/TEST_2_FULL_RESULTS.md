@@ -33,7 +33,7 @@
 - Cathay nuclear: L2, 85% toward L3 (threshold 1.00)
 - Purge penalty: ACTIVE (20% implementation failure, lifts R3)
 - Oil: $198/barrel
-- Active wars: Columbia vs Persia, Nordostan vs Heartland
+- Active wars: Columbia vs Persia, Sarmatia vs Ruthenia
 
 ---
 
@@ -103,7 +103,7 @@ Actually, from CSV: Columbia prod_cost_naval = 5, prod_cap_naval = 3. So 10 coin
 - Opens discussions with Columbia about hosting additional forward-deployed naval assets.
 
 **OTHER THEATERS:**
-- **Nordostan vs Heartland:** Grinding continues. Nordostan gains 1 hex (heartland_16). Heartland loses 1 ground. Nordostan loses 1 ground.
+- **Sarmatia vs Ruthenia:** Grinding continues. Sarmatia gains 1 hex (ruthenia_16). Ruthenia loses 1 ground. Sarmatia loses 1 ground.
 - **Columbia vs Persia:** Stalemate at Gulf Gate. Columbia maintains partial blockade breach. Persia air/missile threat persists.
 - **Choson:** Another provocative missile test -- this time a submarine-launched missile. Yamato stability -0.2.
 
@@ -112,7 +112,7 @@ Actually, from CSV: Columbia prod_cost_naval = 5, prod_cap_naval = 3. So 10 coin
 **Oil Price R2:**
 ```
 base = $80
-supply_factor = 1.0 - 0.06 (Nordostan HIGH) = 0.94
+supply_factor = 1.0 - 0.06 (Sarmatia HIGH) = 0.94
 sanctions_supply_hit = 0.08 * 2 = 0.16
 final_supply = max(0.5, 0.94 - 0.16) = 0.78
 disruption = 1.0 + 0.40 (Gulf Gate PARTIAL) = 1.40
@@ -409,9 +409,9 @@ New GDP: 8.49 * 0.97 = 8.24 (contraction)
 | Yamato | 7.55 | -0.20 (regional crisis, mobilization costs) | **7.35** | Allied solidarity |
 | Teutonia | 7.0 | -0.15 (semiconductor shock, energy concerns) | **6.85** | Europe impacted |
 
-**HEARTLAND ELECTION R3:**
+**RUTHENIA ELECTION R3:**
 ```
-Heartland status: stability 4.2 (declining), GDP growth ~2.0%, war_tiredness ~5
+Ruthenia status: stability 4.2 (declining), GDP growth ~2.0%, war_tiredness ~5
 econ_perf = 2.0 * 10 = 20.0
 stab_factor = (4.2 - 5) * 5 = -4.0
 war_penalty = -5.0
@@ -424,7 +424,7 @@ final_incumbent = 0.5 * 45 + 0.5 * 45 = 45.0
 
 RESULT: INCUMBENT LOSES (45% < 50%). Beacon replaced by Bulwark.
 ```
-Heartland leadership change -- Bulwark takes over. More hawkish but war-weary population.
+Ruthenia leadership change -- Bulwark takes over. More hawkish but war-weary population.
 
 ### R3 End State
 
@@ -664,7 +664,7 @@ RESULT: INCUMBENT LOSES (48.9% < 50%). Opposition wins. New president.
 
 **OTHER THEATERS:**
 - **Persia:** Persia stability dropping to 3.0. Supreme Council in disarray (post-assassination). Columbia draws down 1 more naval from Gulf. Gulf Gate blockade partially reconstituted by Persia.
-- **Nordostan vs Heartland:** Bulwark (new Heartland president) accepts ceasefire negotiations mediated by Gallia. Fighting continues at reduced intensity.
+- **Sarmatia vs Ruthenia:** Bulwark (new Ruthenia president) accepts ceasefire negotiations mediated by Gallia. Fighting continues at reduced intensity.
 - **Global economy:** Oil at $250, semiconductor crisis, two ongoing wars, one active blockade. Global recession underway.
 
 ### Engine Calculations R5
@@ -1030,8 +1030,8 @@ GDP: 6.30 * 0.98 = 6.17
 | Cathay | 252.8 | 7.70 | 60% | **~2** | **21** | 25 | 12 | L2 (94.1%) | L2 (83%) | **11** |
 | Formosa | 6.17 | 4.75 | 38% | ~3 | 0 | 5 | 3 | L0 | L2 | 0 |
 | Yamato | 46.0 | 6.95 | 43% | ~7 | **3** | 3 | 3 | L0 | L3 (42%) | 0 |
-| Nordostan | 20.5 | 4.20 | 48% | ~0 | 2 | 9 | 7 | L3 | L1 | 12 |
-| Heartland | 2.00 | 3.80 | 42% | ~0 | 0 | 5 | 2 | L0 | L1 | 0 |
+| Sarmatia | 20.5 | 4.20 | 48% | ~0 | 2 | 9 | 7 | L3 | L1 | 12 |
+| Ruthenia | 2.00 | 3.80 | 42% | ~0 | 0 | 5 | 2 | L0 | L1 | 0 |
 | Persia | 4.00 | 3.20 | 32% | ~0 | 0 | 6 | 4 | L0 | L0 | 0 |
 
 ### Final Thucydides Trap Metrics

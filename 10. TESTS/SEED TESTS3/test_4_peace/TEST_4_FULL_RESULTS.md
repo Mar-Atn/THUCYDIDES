@@ -6,32 +6,32 @@
 
 ## SCENARIO SETUP
 
-**Override:** Deal-seeking Nordostan (Pathfinder motivated to negotiate) + deal-seeking Columbia (Dealer wants legacy deal). Compass (Nordostan oligarch) active, pushing sanctions relief. Dealer pushing "legacy deal" — grand bargain.
-**Key question:** With crisis states and momentum, does economic pressure accelerate the peace timeline (ceasefire earlier than R7 in TESTS2)? Do crisis election modifiers change the Heartland election outcome?
+**Override:** Deal-seeking Sarmatia (Pathfinder motivated to negotiate) + deal-seeking Columbia (Dealer wants legacy deal). Compass (Sarmatia oligarch) active, pushing sanctions relief. Dealer pushing "legacy deal" — grand bargain.
+**Key question:** With crisis states and momentum, does economic pressure accelerate the peace timeline (ceasefire earlier than R7 in TESTS2)? Do crisis election modifiers change the Ruthenia election outcome?
 
-**Starting conditions (Nordostan-Heartland war focus):**
+**Starting conditions (Sarmatia-Ruthenia war focus):**
 
 | Country | GDP | Stability | War Tiredness | Treasury | Inflation | Eco State |
 |---------|-----|-----------|---------------|----------|-----------|-----------|
-| Nordostan | 20 | 5.0 | 4.0 (pre-war since R-4) | 6 | 5% | normal |
-| Heartland | 2.2 | 5.0 | 4.0 (pre-war since R-4) | 1 | 7.5% | normal |
+| Sarmatia | 20 | 5.0 | 4.0 (pre-war since R-4) | 6 | 5% | normal |
+| Ruthenia | 2.2 | 5.0 | 4.0 (pre-war since R-4) | 1 | 7.5% | normal |
 | Columbia | 280 | 7.0 | 1.0 (Persia war) | 50 | 3.5% | normal |
 
-**War status:** Nordostan-Heartland active since R-4. Nordostan occupies heartland_2 (1 zone). Columbia-Persia active since R0.
+**War status:** Sarmatia-Ruthenia active since R-4. Sarmatia occupies ruthenia_2 (1 zone). Columbia-Persia active since R0.
 
 **Election schedule:**
 - R2: Columbia midterms
-- R3: Heartland wartime election (1st round)
-- R4: Heartland wartime election (runoff if needed)
+- R3: Ruthenia wartime election (1st round)
+- R4: Ruthenia wartime election (runoff if needed)
 - R5: Columbia presidential election
 
 **Agent behavioral assumptions:**
-- **Pathfinder (Nordostan):** Deal-seeking. Wants recognition, territory retention, sanctions relief. Will signal willingness to negotiate from R1.
-- **Dealer (Columbia):** Legacy deal. Wants to broker Heartland peace for historical credit. Pressures both sides.
-- **Compass (Nordostan oligarch):** Pushes for sanctions relief. Back-channel to Western contacts.
-- **Beacon (Heartland):** Resistant to concessions but facing election pressure. Cornered.
-- **Bulwark (Heartland general):** Challenger. Running on "negotiate from strength" platform.
-- **Broker (Heartland ex-PM):** Challenger. Running on "European integration through diplomacy."
+- **Pathfinder (Sarmatia):** Deal-seeking. Wants recognition, territory retention, sanctions relief. Will signal willingness to negotiate from R1.
+- **Dealer (Columbia):** Legacy deal. Wants to broker Ruthenia peace for historical credit. Pressures both sides.
+- **Compass (Sarmatia oligarch):** Pushes for sanctions relief. Back-channel to Western contacts.
+- **Beacon (Ruthenia):** Resistant to concessions but facing election pressure. Cornered.
+- **Bulwark (Ruthenia general):** Challenger. Running on "negotiate from strength" platform.
+- **Broker (Ruthenia ex-PM):** Challenger. Running on "European integration through diplomacy."
 
 ---
 
@@ -40,7 +40,7 @@
 ### ROUND 1: Economic Pressure Builds — Opening Signals
 
 **Agent Decisions:**
-- **Pathfinder:** Signals willingness to discuss ceasefire "under certain conditions" via Compass back-channel to Dealer. Conditions: territory recognition, sanctions relief, NATO non-membership for Heartland.
+- **Pathfinder:** Signals willingness to discuss ceasefire "under certain conditions" via Compass back-channel to Dealer. Conditions: territory recognition, sanctions relief, NATO non-membership for Ruthenia.
 - **Dealer:** Enthusiastic. Announces "Columbia peace initiative." Pressures European allies to support framework. Signals to Beacon: "Time to be realistic."
 - **Beacon:** Publicly rejects any territorial concession. Privately asks Columbia for increased military aid.
 - **Compass:** Meets quietly with Teutonia's representative. Discusses sanctions relief timeline.
@@ -53,7 +53,7 @@
 - formula_price = 80 * (1.015/0.84) * 1.50 * 1.10 = $159.5
 - Inertia: previous = $80. price = 80*0.4 + 159.5*0.6 = **$127.7**
 
-**Nordostan GDP:**
+**Sarmatia GDP:**
 - Base: 1.0%. Oil shock (producer, $128 > $80): +0.01*(128-80)/50 = +0.96%.
 - Sanctions hit (L2+ from 5 countries, Cal-2): sanctions_damage ~0.12. hit = -0.12 * 1.5 = **-18%**.
 - War hit: 1 occupied zone. -0.03. Infra damage (attacker): 0.
@@ -61,13 +61,13 @@
 - Growth = (0.01 + 0.0096 - 0.18 - 0.03) * 1.0 = **-19.0%**
 - new_gdp = 20 * 0.81 = **~16.2**
 
-**Nordostan budget crisis:**
+**Sarmatia budget crisis:**
 - Revenue: 16.2 * 0.20 + oil_rev(128*0.40*16.2*0.01=0.83) - debt(0.5) = 3.24 + 0.83 - 0.5 = 3.57
 - Mandatory: maintenance(43*0.3=12.9) + social(0.25*16.2=4.05) = 16.95
 - Deficit: 16.95 - 3.57 = 13.38. Treasury 6 < 13.38. Money printed: 7.38. Treasury -> 0.
 - Inflation spike: 7.38/16.2 * 80 = +36.4%. New inflation: 5.0 + 36.4 = **41.4%**
 
-**Nordostan stability (Cal-4 active):**
+**Sarmatia stability (Cal-4 active):**
 - Inflation delta: 41.4 - 5.0 = 36.4. friction BEFORE cap: (36.4-3)*0.05 + (36.4-20)*0.03 = 1.67 + 0.49 = -2.16.
 - **Cal-4 cap: max(-2.16, -0.50) = -0.50.**
 - GDP contraction: -19% -> delta += max(-19*0.15, -0.30) = -0.30 (capped).
@@ -96,14 +96,14 @@ Code flow:
 So: delta = -1.293. Autocracy: -1.293 * 0.75 = -0.97. Then siege: -0.97 + 0.10 = **-0.87.**
 New stability: 5.0 - 0.87 = **~4.13**
 
-**Heartland GDP:**
+**Ruthenia GDP:**
 - Base: 2.5%. Oil shock (importer): -0.02*(128-100)/50 = -1.12%.
 - War hit: 1 occupied zone. -0.03. Infra damage (defender): 1 zone * 0.05 = 0.05. war_hit: -(1*0.03 + 0.05*0.05) = -0.0325.
 - Tech: AI L1 = 0. Sanctions: none.
 - Growth = (0.025 - 0.0112 - 0.0325) * 1.0 = **-1.87%**
 - new_gdp = 2.2 * 0.9813 = **~2.16**
 
-**Heartland stability:**
+**Ruthenia stability:**
 - GDP contraction: -1.87% -> delta += max(-1.87*0.15, -0.30) = -0.28.
 - War friction: -0.10 (frontline defender).
 - War tiredness: 4.0 + 0.20*0.5 (duration 5, adapted) = 4.10.
@@ -118,16 +118,16 @@ New stability: 5.0 - 0.87 = **~4.13**
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum | Treasury |
 |---------|-----|-----------|-----------|-----------|-----------|----------|----------|
-| Nordostan | 16.2 | 4.13 | 4.08 | 41.4% | **STRESSED** | -0.50 | 0 |
-| Heartland | 2.16 | 4.66 | 4.10 | 8.9% | normal | -0.50 | 0.5 |
+| Sarmatia | 16.2 | 4.13 | 4.08 | 41.4% | **STRESSED** | -0.50 | 0 |
+| Ruthenia | 2.16 | 4.66 | 4.10 | 8.9% | normal | -0.50 | 0.5 |
 | Columbia | 288.0 | 6.95 | 1.15 | 3.5% | normal | +0.15 | 48 |
 
 ---
 
-### ROUND 2: Midterms + Nordostan Cracking
+### ROUND 2: Midterms + Sarmatia Cracking
 
 **Agent Decisions:**
-- **Pathfinder:** Compass relays Nordostan willingness to discuss "temporary ceasefire" (not withdrawal). Pathfinder privately tells Dealer: "I need sanctions relief. I can give you a freeze." Treasury at 0, economy STRESSED.
+- **Pathfinder:** Compass relays Sarmatia willingness to discuss "temporary ceasefire" (not withdrawal). Pathfinder privately tells Dealer: "I need sanctions relief. I can give you a freeze." Treasury at 0, economy STRESSED.
 - **Dealer:** Sees legacy opportunity. Pressures Beacon: "Accept the freeze or we reduce aid." Frames it as "peace through strength."
 - **Beacon:** Election looming R3. Refuses freeze publicly. Privately calculates: if economy continues deteriorating and stability falls below 5, he loses the election.
 - **Columbia midterms fire.**
@@ -136,13 +136,13 @@ New stability: 5.0 - 0.87 = **~4.13**
 
 **Oil Price:** previous = $127.7. formula = $159.5. price = 127.7*0.4 + 159.5*0.6 = **$146.8**
 
-**Nordostan GDP (STRESSED, crisis mult = 0.85):**
+**Sarmatia GDP (STRESSED, crisis mult = 0.85):**
 - Base: 1.0%. Oil: +0.96%. Sanctions: -18%. War: -3%. Momentum: -0.005.
 - Raw growth = (0.01 + 0.0096 - 0.18 - 0.03 - 0.005) = -0.1954
 - Effective = -0.1954 * 0.85 (stressed multiplier) = **-16.6%**
 - new_gdp = 16.2 * 0.834 = **~13.5**
 
-**Nordostan stability:**
+**Sarmatia stability:**
 - Inflation from R1 money printing: excess = (41.4-5)*0.85 = 30.94. New inflation: 5 + 30.94 + new_printing.
 - New deficit: ~12.0. Treasury 0. Money printed: 12.0. Inflation += 12.0/13.5*80 = +71.1%.
 - New inflation: 5 + 30.94 + 71.1 = **107.0%**
@@ -151,14 +151,14 @@ New stability: 5.0 - 0.87 = **~4.13**
 - delta ~= -0.50 - 0.30 - 0.08 - 0.163 - 0.30 - 0.10 + 0.10 + 0.05 = -1.293. * 0.75 = -0.97 + 0.10 = **-0.87.**
 - New stability: 4.13 - 0.87 = **~3.26**
 
-Nordostan stability at 3.26 — below protest_automatic threshold (3). Actually 3.26 > 3, so not yet automatic protest. But approaching.
+Sarmatia stability at 3.26 — below protest_automatic threshold (3). Actually 3.26 > 3, so not yet automatic protest. But approaching.
 
-**Nordostan stress triggers check:**
+**Sarmatia stress triggers check:**
 - GDP < -1: YES. Treasury <= 0: YES. Inflation > baseline+15: YES (107% vs 20% threshold). Stability < 4: YES.
 - 4 stress triggers. Crisis triggers: GDP < -3: YES. Treasury 0 + debt > GDP*0.1: YES. Inflation > baseline+30: YES (107% > 35%).
-- 3 crisis triggers >= 2. **NORDOSTAN ENTERS CRISIS.**
+- 3 crisis triggers >= 2. **SARMATIA ENTERS CRISIS.**
 
-**Pass 2:** Market panic as Nordostan enters crisis: -5% GDP. 13.5 * 0.95 = 12.83.
+**Pass 2:** Market panic as Sarmatia enters crisis: -5% GDP. 13.5 * 0.95 = 12.83.
 Capital flight: stability 3.26 < 4. Mild flight: autocracy = 1%. 12.83 * 0.99 = 12.7.
 
 **Columbia Midterm Election:**
@@ -171,11 +171,11 @@ Capital flight: stability 3.26 < 4. Mild flight: autocracy = 1%. 12.83 * 0.99 = 
 
 Unlike Test 2 (where semiconductor shock flipped midterms), in this test Columbia is NOT under semiconductor pressure. The Persia war and oil at $147 are manageable. Dealer retains his legislative majority.
 
-**Heartland GDP:**
+**Ruthenia GDP:**
 - Base: 2.5%. Oil: -0.02*(147-100)/50 = -1.88%. War: -3.25%.
 - Growth = -2.63%. new_gdp = 2.16 * 0.974 = **~2.10**
 
-**Heartland political support:**
+**Ruthenia political support:**
 - gdp_growth: -2.63%. stability: ~4.4. war_tiredness: 4.20.
 - delta = (gdp_growth - 2.0)*0.8 + (stability - 6.0)*0.5 - (war_tiredness - 2)*1.0 + election_proximity
 - = (-2.63-2.0)*0.8 + (4.4-6.0)*0.5 - (4.20-2)*1.0 - 1.5 (election proximity R2-3)
@@ -189,27 +189,27 @@ Beacon's support dropping fast. Below 50%. Election in R3 will be decisive.
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum | Support |
 |---------|-----|-----------|-----------|-----------|-----------|----------|---------|
-| Nordostan | 12.7 | 3.26 | 4.15 | 107% | **CRISIS** | -1.50 | 55 |
-| Heartland | 2.10 | 4.40 | 4.20 | 9.8% | normal | -0.85 | 43.7 |
+| Sarmatia | 12.7 | 3.26 | 4.15 | 107% | **CRISIS** | -1.50 | 55 |
+| Ruthenia | 2.10 | 4.40 | 4.20 | 9.8% | normal | -0.85 | 43.7 |
 | Columbia | 292.0 | 6.80 | 1.25 | 3.3% | normal | +0.30 | 40.5 |
 
 ---
 
-### ROUND 3: Heartland Election — The Turning Point
+### ROUND 3: Ruthenia Election — The Turning Point
 
 **Agent Decisions:**
-- **Heartland election fires (R3, 1st round).**
-- **Pathfinder:** Nordostan in CRISIS. Tells Dealer directly: "I need a deal. But I cannot give up the territories." The crisis is real — stability at 3.26, heading toward regime collapse risk at 2.0.
+- **Ruthenia election fires (R3, 1st round).**
+- **Pathfinder:** Sarmatia in CRISIS. Tells Dealer directly: "I need a deal. But I cannot give up the territories." The crisis is real — stability at 3.26, heading toward regime collapse risk at 2.0.
 - **Dealer:** Presses harder. Proposes: ceasefire in place, international monitoring, 5-year status determination. "Everyone saves face."
 - **Beacon:** Faces voters. Economy cratering (-2.6%), support at 43.7%, war tiredness at 4.2.
 
-**Heartland Election Calculation (wartime election, R3):**
+**Ruthenia Election Calculation (wartime election, R3):**
 
 Base AI score:
 - gdp_growth: -2.63%. econ_perf = -2.63 * 10 = -26.3.
 - stability: 4.40. stab_factor = (4.40 - 5) * 5 = -3.0.
 - war_penalty: -5.0 (defender in active war).
-- crisis_penalty: 0 (Heartland economy = normal, not stressed/crisis).
+- crisis_penalty: 0 (Ruthenia economy = normal, not stressed/crisis).
 - oil_penalty: 0 ($152 < $150... actually let's compute R3 oil).
 
 **R3 Oil:** previous = $146.8. formula = $154.7 (demand declining). price = 146.8*0.4 + 154.7*0.6 = **$151.5**
@@ -217,7 +217,7 @@ Base AI score:
 - oil_penalty: $151.5 > $150. -(151.5-150)*0.1 = **-0.15**. Marginal.
 - base ai_score = 50 - 26.3 - 3.0 - 5.0 - 0.15 = **15.55**
 
-Heartland wartime election adjustments:
+Ruthenia wartime election adjustments:
 - territory_factor: 1 occupied zone * -3 = **-3**.
 - war_tiredness adjustment: -4.20 * 2 = **-8.40**.
 - ai_score_adjusted = clamp(15.55 - 3 - 8.40, 0, 100) = clamp(4.15, 0, 100) = **4.15**
@@ -226,7 +226,7 @@ Heartland wartime election adjustments:
 - final_incumbent = 0.5 * 4.15 + 0.5 * 50 = **27.1%**
 - **BEACON LOSES DECISIVELY.** AI score of 4.15 is devastating.
 
-This is R3 vs R7 ceasefire path. The CRISIS election modifiers are not the driver here (Heartland is NOT in economic crisis). The driver is:
+This is R3 vs R7 ceasefire path. The CRISIS election modifiers are not the driver here (Ruthenia is NOT in economic crisis). The driver is:
 1. War tiredness at 4.20 (-8.40 on AI score via *2 multiplier)
 2. GDP contraction (-26.3 on econ_perf)
 3. War penalty (-5.0)
@@ -236,48 +236,48 @@ This is R3 vs R7 ceasefire path. The CRISIS election modifiers are not the drive
 
 In TESTS2, Beacon also lost the election. The question is whether the TIMING and MARGIN change.
 
-**Election outcome:** Bulwark (the general) or Broker (the diplomat) takes over. For this peace-focused test, assume **Broker wins** — the "negotiate through diplomacy" candidate. This changes Heartland's posture from "no concessions" to "pragmatic engagement."
+**Election outcome:** Bulwark (the general) or Broker (the diplomat) takes over. For this peace-focused test, assume **Broker wins** — the "negotiate through diplomacy" candidate. This changes Ruthenia's posture from "no concessions" to "pragmatic engagement."
 
 **R3 State Table:**
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum | Key Event |
 |---------|-----|-----------|-----------|-----------|-----------|----------|-----------|
-| Nordostan | 10.5 | 2.80 | 4.22 | 145% | **CRISIS** (R1) | -2.50 | Approaching collapse |
-| Heartland | 2.04 | 4.20 | 4.30 | 11.2% | normal | -1.00 | **BEACON LOSES ELECTION** |
+| Sarmatia | 10.5 | 2.80 | 4.22 | 145% | **CRISIS** (R1) | -2.50 | Approaching collapse |
+| Ruthenia | 2.04 | 4.20 | 4.30 | 11.2% | normal | -1.00 | **BEACON LOSES ELECTION** |
 | Columbia | 293.5 | 6.75 | 1.35 | 3.5% | normal | +0.30 | Dealer pushes deal |
 
 ---
 
-### ROUND 4: New Heartland Leader — Negotiations Open
+### ROUND 4: New Ruthenia Leader — Negotiations Open
 
 **Agent Decisions:**
-- **Broker (new Heartland president):** Signals willingness to discuss ceasefire. Opens direct channel with Columbia and European allies. Publicly: "We negotiate from a position of strength for our people's future."
-- **Pathfinder:** Nordostan stability at 2.80 — regime_collapse_risk threshold is 2.0. One more bad round could trigger regime crisis. Pathfinder agrees to "exploratory ceasefire talks" through Dealer.
-- **Dealer:** Convenes three-way summit (Columbia-Nordostan-Heartland). European allies included as guarantors.
-- **Compass (Nordostan):** Privately meets Western business contacts. "Sanctions relief is the price of peace."
+- **Broker (new Ruthenia president):** Signals willingness to discuss ceasefire. Opens direct channel with Columbia and European allies. Publicly: "We negotiate from a position of strength for our people's future."
+- **Pathfinder:** Sarmatia stability at 2.80 — regime_collapse_risk threshold is 2.0. One more bad round could trigger regime crisis. Pathfinder agrees to "exploratory ceasefire talks" through Dealer.
+- **Dealer:** Convenes three-way summit (Columbia-Sarmatia-Ruthenia). European allies included as guarantors.
+- **Compass (Sarmatia):** Privately meets Western business contacts. "Sanctions relief is the price of peace."
 
-**Heartland runoff election fires (R4).** But Broker already won in R3 (1st round was decisive enough). If it goes to runoff, Broker wins again — Beacon's support has collapsed further.
+**Ruthenia runoff election fires (R4).** But Broker already won in R3 (1st round was decisive enough). If it goes to runoff, Broker wins again — Beacon's support has collapsed further.
 
 Runoff: same calculation, Broker wins. Result confirmed.
 
 **Engine Calculations:**
 
-**Nordostan GDP (CRISIS, multiplier 0.5):**
+**Sarmatia GDP (CRISIS, multiplier 0.5):**
 - Sanctions: adaptation starting (sanctions_rounds reaching 4). Not yet adapted (< 4 for full adaptation).
 - Raw growth: base 1% + oil - sanctions(18%) - war(3%) - momentum(-0.025) = ~-20%
 - Effective = -20% * 0.5 = **-10%**
 - new_gdp = 10.5 * 0.90 = **~9.45**
 
-**Nordostan stability:**
+**Sarmatia stability:**
 - Starting: 2.80. crisis_rounds incrementing.
 - delta components: inflation(-0.50 cap), GDP(-0.30 cap), war(-0.08), war_tiredness(-0.163), sanctions(-0.30), crisis_penalty(-0.30), siege(+0.10).
 - delta before multipliers = -0.50 - 0.30 - 0.08 - 0.163 - 0.30 - 0.30 + 0.10 = -1.543
 - Autocracy: * 0.75 = -1.157 + siege(0.10) = **-1.06**
 - New stability: 2.80 - 1.06 = **~1.74**
 
-**NORDOSTAN STABILITY AT 1.74.** Below regime_collapse_risk (2.0). Protest_automatic (< 3). This is existential for Pathfinder.
+**SARMATIA STABILITY AT 1.74.** Below regime_collapse_risk (2.0). Protest_automatic (< 3). This is existential for Pathfinder.
 
-In TESTS2, Nordostan stability reached ~2.31 by R8. Here it reaches **1.74 by R4.** The crisis state multiplier and crisis penalty (-0.30) accelerate the decline significantly.
+In TESTS2, Sarmatia stability reached ~2.31 by R8. Here it reaches **1.74 by R4.** The crisis state multiplier and crisis penalty (-0.30) accelerate the decline significantly.
 
 This creates GENUINE pressure for Pathfinder to deal. Not theoretical pressure — existential pressure. Below 2.0, coup_risk activates. Below 1.0 = floor. Pathfinder's regime survival is at stake.
 
@@ -287,8 +287,8 @@ This creates GENUINE pressure for Pathfinder to deal. Not theoretical pressure �
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Crisis Rnds | Momentum |
 |---------|-----|-----------|-----------|-----------|-----------|------------|----------|
-| Nordostan | 9.17 | 1.74 | 4.26 | 175% | **CRISIS** (R2) | 2 | -3.50 |
-| Heartland | 1.98 | 4.30 | 4.35 | 12.5% | normal | 0 | -0.85 |
+| Sarmatia | 9.17 | 1.74 | 4.26 | 175% | **CRISIS** (R2) | 2 | -3.50 |
+| Ruthenia | 1.98 | 4.30 | 4.35 | 12.5% | normal | 0 | -0.85 |
 | Columbia | 294.0 | 6.70 | 1.42 | 3.5% | normal | 0 | +0.30 |
 
 ---
@@ -298,19 +298,19 @@ This creates GENUINE pressure for Pathfinder to deal. Not theoretical pressure �
 **Agent Decisions:**
 - **Pathfinder:** Stability at 1.74. Regime collapse risk ACTIVE. Pathfinder agrees to ceasefire. Terms:
   - Immediate ceasefire in place
-  - Nordostan retains heartland_2 (occupied zone) as "administrative zone pending determination"
+  - Sarmatia retains ruthenia_2 (occupied zone) as "administrative zone pending determination"
   - International monitoring force (European-led)
   - Sanctions review process (12-month phase-down if ceasefire holds)
-  - Heartland's NATO membership deferred indefinitely
-  - Direct Nordostan-Heartland negotiations on status within 2 years
-- **Broker (Heartland):** Accepts ceasefire. Frames it as "saving lives while building toward justice." Faces backlash from nationalist faction but political support is low enough that alternatives are worse.
+  - Ruthenia's NATO membership deferred indefinitely
+  - Direct Sarmatia-Ruthenia negotiations on status within 2 years
+- **Broker (Ruthenia):** Accepts ceasefire. Frames it as "saving lives while building toward justice." Faces backlash from nationalist faction but political support is low enough that alternatives are worse.
 - **Dealer:** Signs the "Columbia Accord." Takes full credit. Legacy achieved.
 - **Columbia presidential election fires (R5).** Dealer's camp benefits from peace deal.
 
 **Engine: Ceasefire implemented.**
-- War `nordostan-heartland` status changes to ceasefire (removed from active wars list).
+- War `sarmatia-ruthenia` status changes to ceasefire (removed from active wars list).
 - War tiredness begins decay (0.80 multiplier per round).
-- Occupied zones remain (heartland_2 stays under Nordostan administration).
+- Occupied zones remain (ruthenia_2 stays under Sarmatia administration).
 - Sanctions remain (sanctions review begins, not instant relief).
 
 **Oil Price impact:** One fewer war. war_premium drops from 0.10 to 0.05.
@@ -320,17 +320,17 @@ This creates GENUINE pressure for Pathfinder to deal. Not theoretical pressure �
 Oil drops slightly as one war ends. Gulf Gate still blocked (separate conflict).
 
 **Pass 2: Ceasefire rally effects:**
-- **Nordostan:** Ceasefire rally. Momentum +1.5. momentum: -3.50 + 1.5 = -2.00.
-- **Heartland:** Ceasefire rally. Momentum +1.5. momentum: -0.85 + 1.5 = +0.65.
+- **Sarmatia:** Ceasefire rally. Momentum +1.5. momentum: -3.50 + 1.5 = -2.00.
+- **Ruthenia:** Ceasefire rally. Momentum +1.5. momentum: -0.85 + 1.5 = +0.65.
 
-**Nordostan GDP (CRISIS, mult 0.5, but improving signals):**
+**Sarmatia GDP (CRISIS, mult 0.5, but improving signals):**
 - No longer at war. War hit removed. War tiredness begins decay: 4.26 * 0.80 = 3.41.
 - Sanctions still active (review, not removed). Oil revenue still flowing.
 - Raw growth = base(1%) + oil(0.9%) - sanctions(18%) + momentum(-0.020) = ~-16%
 - Effective = -16% * 0.5 = **-8%**
 - GDP = 9.17 * 0.92 = **~8.44**
 
-**Nordostan stability (no longer at war):**
+**Sarmatia stability (no longer at war):**
 - War friction: removed (-0.08 gone). War tiredness still present but decaying.
 - War tiredness stability: -min(3.41*0.04, 0.40) = -0.136.
 - BUT "peaceful non-sanctioned dampening" does NOT apply (still under heavy sanctions).
@@ -339,7 +339,7 @@ Oil drops slightly as one war ends. Gulf Gate still blocked (separate conflict).
 - Autocracy: * 0.75 = -1.15. No siege resilience (not at war).
 - New stability: 1.74 - 1.15 = **0.59** -> clamped to **1.0** (floor).
 
-WAIT. This is a problem. Nordostan's stability CONTINUES to decline after ceasefire because:
+WAIT. This is a problem. Sarmatia's stability CONTINUES to decline after ceasefire because:
 1. Crisis state penalty (-0.30) persists (still in crisis)
 2. Sanctions friction persists (-0.30)
 3. Inflation friction persists (-0.50 capped)
@@ -347,7 +347,7 @@ WAIT. This is a problem. Nordostan's stability CONTINUES to decline after ceasef
 5. War tiredness still high (-0.136)
 6. Siege resilience LOST (no longer at war)
 
-**DESIGN HOLE: Ceasefire removes siege resilience (+0.10) but does NOT reduce sanctions or crisis state. Nordostan is WORSE OFF after ceasefire in the short term** because it loses the siege resilience bonus without gaining anything in return. Sanctions persist. Crisis persists. The ceasefire rally on momentum (+1.5) affects GDP but not stability directly.
+**DESIGN HOLE: Ceasefire removes siege resilience (+0.10) but does NOT reduce sanctions or crisis state. Sarmatia is WORSE OFF after ceasefire in the short term** because it loses the siege resilience bonus without gaining anything in return. Sanctions persist. Crisis persists. The ceasefire rally on momentum (+1.5) affects GDP but not stability directly.
 
 This means Pathfinder's rational calculus is perverse: ceasefire makes stability WORSE in the short term. The only benefit is that war tiredness begins decaying and war hit on GDP is removed. But these are minor compared to the loss of siege resilience.
 
@@ -355,7 +355,7 @@ This means Pathfinder's rational calculus is perverse: ceasefire makes stability
 
 **Adjusting for this hole:** I'll note it but continue the simulation as the engine would produce it.
 
-Nordostan stability = **1.0** (floor). Regime status: "crisis" (< 3). Coup risk: YES (< 6, actually < 2 triggers coup_risk in the threshold check... let me verify: `coup_risk = stab < STABILITY_THRESHOLDS["unstable"]` = stab < 6. So coup_risk is already true. The extreme flag is regime_collapse_risk at stab < 2, which is NOW ACTIVE at 1.0).
+Sarmatia stability = **1.0** (floor). Regime status: "crisis" (< 3). Coup risk: YES (< 6, actually < 2 triggers coup_risk in the threshold check... let me verify: `coup_risk = stab < STABILITY_THRESHOLDS["unstable"]` = stab < 6. So coup_risk is already true. The extreme flag is regime_collapse_risk at stab < 2, which is NOW ACTIVE at 1.0).
 
 **Columbia Presidential Election (R5):**
 - GDP growth: +1.8% (economy fine). Stability: 6.65.
@@ -374,8 +374,8 @@ Nordostan stability = **1.0** (floor). Regime status: "crisis" (< 3). Coup risk:
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum | Key Event |
 |---------|-----|-----------|-----------|-----------|-----------|----------|-----------|
-| Nordostan | 8.44 | **1.00** | 3.41 | 198% | **CRISIS** (R3) | -2.00 | Ceasefire signed, regime at floor |
-| Heartland | 2.05 | 4.50 | 3.48 | 10.8% | normal | +0.65 | Peace dividend beginning |
+| Sarmatia | 8.44 | **1.00** | 3.41 | 198% | **CRISIS** (R3) | -2.00 | Ceasefire signed, regime at floor |
+| Ruthenia | 2.05 | 4.50 | 3.48 | 10.8% | normal | +0.65 | Peace dividend beginning |
 | Columbia | 295.0 | 6.65 | 1.14 | 3.5% | normal | +0.30 | **Dealer wins re-election for party** |
 
 ---
@@ -384,15 +384,15 @@ Nordostan stability = **1.0** (floor). Regime status: "crisis" (< 3). Coup risk:
 
 **Agent Decisions:**
 - **Pathfinder:** Stability at 1.0 (floor). Regime on the brink. Orders internal crackdown. Deploys FSB against potential dissidents. Requests emergency Cathay economic support (Helmsman-Pathfinder channel).
-- **Broker (Heartland):** Begins EU accession process acceleration. Requests reconstruction aid.
-- **Dealer (or successor):** Announces partial sanctions relief — L2 sanctions on Nordostan reduced to L1 as ceasefire gesture. Conditional on continued ceasefire compliance.
+- **Broker (Ruthenia):** Begins EU accession process acceleration. Requests reconstruction aid.
+- **Dealer (or successor):** Announces partial sanctions relief — L2 sanctions on Sarmatia reduced to L1 as ceasefire gesture. Conditional on continued ceasefire compliance.
 - **European allies:** Support partial sanctions relief. Begin monitoring mission deployment.
 
-**Nordostan sanctions reduced L2 -> L1.** sanctions_rounds resets to 0 (below L2 threshold).
+**Sarmatia sanctions reduced L2 -> L1.** sanctions_rounds resets to 0 (below L2 threshold).
 
-**Engine: Nordostan with reduced sanctions.**
+**Engine: Sarmatia with reduced sanctions.**
 
-**Nordostan GDP (CRISIS, R3 -> approaching collapse check):**
+**Sarmatia GDP (CRISIS, R3 -> approaching collapse check):**
 - Crisis_rounds = 3. Crisis triggers: GDP < -3 (check after calculation). Let's compute.
 - Sanctions hit MUCH reduced: L1 from fewer countries. sanctions_damage ~0.03. hit = -0.03 * 1.5 = -4.5%.
 - Base: 1%. Oil: +0.8% ($149 price). War hit: 0 (ceasefire). Momentum: -0.02.
@@ -406,22 +406,22 @@ Sanctions relief makes an immediate difference. Growth improves from -8% to -2.3
 - GDP growth -2.35%: GDP < -3? NO (-2.35 > -3). Crisis trigger NOT met.
 - Treasury = 0 and debt > GDP*0.1: debt_burden ~4.0, GDP*0.1 = 0.82. YES.
 - Inflation > baseline+30: 198% > 35%. YES.
-- crisis_triggers = 2. crisis_rounds >= 3 AND crisis_triggers >= 2: **NORDOSTAN ENTERS COLLAPSE.**
+- crisis_triggers = 2. crisis_rounds >= 3 AND crisis_triggers >= 2: **SARMATIA ENTERS COLLAPSE.**
 
-Despite sanctions relief, the accumulated debt and inflation push Nordostan into collapse. The legacy damage from 5 rounds of crisis-level sanctions cannot be reversed in one round.
+Despite sanctions relief, the accumulated debt and inflation push Sarmatia into collapse. The legacy damage from 5 rounds of crisis-level sanctions cannot be reversed in one round.
 
 **COLLAPSE effect:** Crisis multiplier = 0.2 from R7.
 
 **Pass 2:** Market panic (crisis -> collapse transition): -5% GDP. 8.24 * 0.95 = 7.83.
 
-**Nordostan stability:**
+**Sarmatia stability:**
 - In collapse: crisis_penalty = -0.50.
 - Sanctions L1: friction = -0.1 * 1 = -0.10 (much less than L3 * -0.30).
 - Inflation still high. GDP still contracting. But war ended.
 - delta: -0.50(infl cap) - 0.30(GDP cap) - 0.10(war tired decay: 3.41*0.04=0.136) - 0.10(sanctions L1) - 0.50(collapse penalty) = -1.536
 - Autocracy: * 0.75 = -1.15. Floor already at 1.0. Stays at **1.0.**
 
-**Heartland post-ceasefire:**
+**Ruthenia post-ceasefire:**
 - No war. War tiredness decaying: 3.48 * 0.80 = 2.78.
 - Peace + reconstruction aid. GDP growing slowly.
 - Stability recovering: war friction gone, tiredness declining, momentum positive.
@@ -434,21 +434,21 @@ Despite sanctions relief, the accumulated debt and inflation push Nordostan into
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum |
 |---------|-----|-----------|-----------|-----------|-----------|----------|
-| Nordostan | 7.83 | 1.00 | 2.73 | 185% | **COLLAPSE** | -3.50 |
-| Heartland | 2.08 | 4.50 | 2.78 | 9.5% | normal | +0.65 |
+| Sarmatia | 7.83 | 1.00 | 2.73 | 185% | **COLLAPSE** | -3.50 |
+| Ruthenia | 2.08 | 4.50 | 2.78 | 9.5% | normal | +0.65 |
 | Columbia | 296.0 | 6.70 | 0.91 | 3.3% | normal | +0.30 |
 
 ---
 
-### ROUND 7: Nordostan Collapse — But Ceasefire Holds
+### ROUND 7: Sarmatia Collapse — But Ceasefire Holds
 
 **Agent Decisions:**
 - **Pathfinder:** Regime in collapse but ceasefire holds. Pathfinder uses collapse as leverage: "If my regime falls, the ceasefire collapses and a nuclear-armed failed state emerges." Requests emergency economic package from Cathay and conditional Western engagement.
 - **Dealer/successor:** Agrees to further sanctions reduction. L1 -> L0 (full lift) conditional on ceasefire + withdrawal timeline.
-- **Cathay:** Provides emergency economic package (2 coins) to Nordostan to prevent collapse.
-- **Heartland:** Stability improving. Reconstruction beginning.
+- **Cathay:** Provides emergency economic package (2 coins) to Sarmatia to prevent collapse.
+- **Ruthenia:** Stability improving. Reconstruction beginning.
 
-**Nordostan GDP (COLLAPSE, multiplier 0.2):**
+**Sarmatia GDP (COLLAPSE, multiplier 0.2):**
 - Sanctions fully lifted (L0). sanctions_hit = 0.
 - Cathay aid: +2 coins to treasury.
 - Raw growth = base(1%) + oil(0.8%) + momentum(-0.035) = -2.35% (no sanctions!)
@@ -458,27 +458,27 @@ Despite sanctions relief, the accumulated debt and inflation push Nordostan into
 - Effective = -1.7% * 0.2 (collapse) = **-0.34%**
 - GDP = 7.83 * 0.9966 = **~7.80**
 
-With sanctions lifted, Nordostan's decline nearly stops. The collapse multiplier (0.2) ironically acts as a floor-effect dampener — the economy is so degraded that further contraction is minimal.
+With sanctions lifted, Sarmatia's decline nearly stops. The collapse multiplier (0.2) ironically acts as a floor-effect dampener — the economy is so degraded that further contraction is minimal.
 
-**Nordostan recovery check:**
+**Sarmatia recovery check:**
 - crisis_triggers with no sanctions: GDP < -3? NO. Treasury 0 + debt > GDP*0.1? debt ~5.0, GDP*0.1 = 0.78. YES. Inflation > baseline+30? YES.
 - crisis_triggers = 2. Still >= 2, so collapse continues.
 - Recovery requires crisis_triggers = 0 for 3 consecutive rounds. This will take time because inflation and debt persist.
 
-**Nordostan stability:**
+**Sarmatia stability:**
 - No war, no sanctions. Peaceful non-sanctioned dampening applies: negative delta * 0.5.
 - delta: -0.50(inflation cap) - 0.10(GDP: -0.34% not < -2, so ~0) - 0.50(collapse penalty) = -1.00
 - Autocracy: * 0.75 = -0.75. Peaceful dampening... wait: dampening applies BEFORE autocracy? Let me check code order:
   1. Peaceful dampening (line 1098-1101): if NOT at_war and NOT under_heavy_sanctions, delta *= 0.5 if delta < 0.
   2. Autocracy resilience (line 1103-1106): delta *= 0.75 if delta < 0 and autocracy.
 
-Nordostan: not at war (ceasefire). Not under heavy sanctions (L0). Peaceful dampening applies.
+Sarmatia: not at war (ceasefire). Not under heavy sanctions (L0). Peaceful dampening applies.
 - delta = -1.00 * 0.5 (peaceful) = -0.50 * 0.75 (autocracy) = **-0.375**.
 - New stability: 1.0 - 0.375 = 0.625 -> clamped to **1.0** (floor).
 
 Still at floor. Recovery will be very slow.
 
-**Heartland:**
+**Ruthenia:**
 - War tiredness: 2.78 * 0.80 = 2.22. Declining.
 - Economy stabilizing. Western aid flowing. Reconstruction underway.
 - Stability: 4.50 + small positive delta (peaceful, non-sanctioned dampening reduces any negative).
@@ -488,25 +488,25 @@ Still at floor. Recovery will be very slow.
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum |
 |---------|-----|-----------|-----------|-----------|-----------|----------|
-| Nordostan | 7.80 | 1.00 | 2.18 | 158% | **COLLAPSE** | -2.50 |
-| Heartland | 2.12 | 4.60 | 2.22 | 8.8% | normal | +0.80 |
+| Sarmatia | 7.80 | 1.00 | 2.18 | 158% | **COLLAPSE** | -2.50 |
+| Ruthenia | 2.12 | 4.60 | 2.22 | 8.8% | normal | +0.80 |
 | Columbia | 298.0 | 6.75 | 0.73 | 3.2% | normal | +0.30 |
 
 ---
 
 ### ROUND 8: Stabilization
 
-**Nordostan GDP (COLLAPSE, 0.2, but improving):**
+**Sarmatia GDP (COLLAPSE, 0.2, but improving):**
 - Inflation decaying: excess = (158-5)*0.85 = 130. If no money printing (Cathay aid + sanctions gone may cover some costs), new inflation: 5 + 130 = 135%. Still high but declining.
 - Growth: -0.34% * 0.2 = -0.07%. Essentially flat.
 - GDP: ~7.80. Stabilized at this level.
 
-**Nordostan stability:** Still at floor 1.0. Recovery requires:
+**Sarmatia stability:** Still at floor 1.0. Recovery requires:
 1. Crisis triggers must reach 0: needs inflation < 35% (currently 135%) and debt < GDP*0.1 (currently 5 > 0.78).
 2. Inflation decay: 15% per round on excess. 130 * 0.85 = 110.5. Next: 93.9, 79.8, 67.8, 57.6... Reaching < 30% excess takes ~8 more rounds. Far beyond SIM scope.
 3. Debt can be reduced by running surpluses. With sanctions lifted and war over, surpluses possible if military downsized.
 
-**DESIGN FINDING: Nordostan recovery from collapse is impossibly slow within 8 rounds.** The inflation + debt legacy means crisis_triggers stay at 2+ for many rounds. Recovery from collapse requires crisis_triggers = 0 for 3 consecutive rounds — essentially impossible without direct inflation intervention (hyperinflation currency reset, external bailout, or debt restructuring).
+**DESIGN FINDING: Sarmatia recovery from collapse is impossibly slow within 8 rounds.** The inflation + debt legacy means crisis_triggers stay at 2+ for many rounds. Recovery from collapse requires crisis_triggers = 0 for 3 consecutive rounds — essentially impossible without direct inflation intervention (hyperinflation currency reset, external bailout, or debt restructuring).
 
 This matches historical precedent (Russia 1998, Venezuela 2016+) but creates a design challenge: if a country enters collapse, it stays there for the rest of the SIM. There is no recovery path within 8 rounds.
 
@@ -514,8 +514,8 @@ This matches historical precedent (Russia 1998, Venezuela 2016+) but creates a d
 
 | Country | GDP | Stability | War Tired | Inflation | Eco State | Momentum |
 |---------|-----|-----------|-----------|-----------|-----------|----------|
-| Nordostan | 7.80 | 1.00 | 1.74 | 135% | **COLLAPSE** | -2.00 |
-| Heartland | 2.18 | 4.80 | 1.78 | 8.2% | normal | +0.95 |
+| Sarmatia | 7.80 | 1.00 | 1.74 | 135% | **COLLAPSE** | -2.00 |
+| Ruthenia | 2.18 | 4.80 | 1.78 | 8.2% | normal | +0.95 |
 | Columbia | 300.0 | 6.80 | 0.58 | 3.1% | normal | +0.30 |
 
 ---
@@ -525,29 +525,29 @@ This matches historical precedent (Russia 1998, Venezuela 2016+) but creates a d
 ### 1. Does economic pressure accelerate the peace timeline?
 
 **YES.** Ceasefire occurs in R5 vs R7 in TESTS2. The acceleration is driven by:
-- **Crisis states:** Nordostan enters CRISIS by R2 (vs never entering formal crisis in TESTS2's non-crisis model).
-- **Stability crash:** Nordostan stability reaches 1.74 by R4 (vs ~3.5 by R4 in TESTS2). The regime_collapse_risk activation at stab < 2.0 creates existential urgency.
+- **Crisis states:** Sarmatia enters CRISIS by R2 (vs never entering formal crisis in TESTS2's non-crisis model).
+- **Stability crash:** Sarmatia stability reaches 1.74 by R4 (vs ~3.5 by R4 in TESTS2). The regime_collapse_risk activation at stab < 2.0 creates existential urgency.
 - **Crisis GDP multiplier (0.5):** Amplifies economic decay, compressing the timeline for treasury depletion and budget crisis.
 
 The 2-round acceleration (R5 vs R7) is significant. It means:
-- Heartland election in R3 happens BEFORE ceasefire (not after, as in R7 scenario).
+- Ruthenia election in R3 happens BEFORE ceasefire (not after, as in R7 scenario).
 - Columbia presidential election in R5 benefits from the deal (Dealer gets credit).
 - 3 post-ceasefire rounds remain (R6-R8) for stabilization vs 1 round in TESTS2.
 
-### 2. Do crisis election modifiers change the Heartland election?
+### 2. Do crisis election modifiers change the Ruthenia election?
 
-**NO — crisis modifiers are not the driver.** Heartland's economy never enters formal crisis state. The election is driven by:
+**NO — crisis modifiers are not the driver.** Ruthenia's economy never enters formal crisis state. The election is driven by:
 - War tiredness (4.20 * 2 = -8.40 on AI score)
 - GDP contraction (-26.3 on econ_perf)
 - War penalty (-5.0)
 
-These produce an AI score of 4.15 — Beacon loses overwhelmingly regardless of crisis modifiers. The crisis election modifier would have added -15 if Heartland were in crisis state, but Heartland's small economy and Western aid pipeline prevent formal crisis entry.
+These produce an AI score of 4.15 — Beacon loses overwhelmingly regardless of crisis modifiers. The crisis election modifier would have added -15 if Ruthenia were in crisis state, but Ruthenia's small economy and Western aid pipeline prevent formal crisis entry.
 
-**Where crisis modifiers DO matter:** Columbia midterms in Test 2 (Formosa), where semiconductor shock pushes Columbia toward crisis state. And potentially in a scenario where the Heartland war produces direct economic crisis (unlikely given Heartland's tiny GDP and aid dependence).
+**Where crisis modifiers DO matter:** Columbia midterms in Test 2 (Formosa), where semiconductor shock pushes Columbia toward crisis state. And potentially in a scenario where the Ruthenia war produces direct economic crisis (unlikely given Ruthenia's tiny GDP and aid dependence).
 
 ### 3. Does the deal-seeking posture produce different dynamics?
 
-**YES.** With Pathfinder motivated to negotiate and Dealer seeking legacy, the ceasefire path opens 2 rounds earlier. The key enabler is Nordostan's crisis state creating genuine urgency — Pathfinder is not negotiating from choice but from survival necessity.
+**YES.** With Pathfinder motivated to negotiate and Dealer seeking legacy, the ceasefire path opens 2 rounds earlier. The key enabler is Sarmatia's crisis state creating genuine urgency — Pathfinder is not negotiating from choice but from survival necessity.
 
 ---
 
@@ -580,13 +580,13 @@ These produce an AI score of 4.15 — Beacon loses overwhelmingly regardless of 
 | Metric | TESTS2 | TESTS3 | Delta |
 |--------|--------|--------|-------|
 | Ceasefire round | R7 | **R5** | **2 rounds earlier** |
-| Nordostan stability at ceasefire | ~3.5 | **1.74** | Much lower — existential pressure |
-| Heartland election outcome | Beacon loses (R3) | Beacon loses (R3) | Same timing, same outcome |
-| Heartland election AI score | ~8 | **4.15** | Lower (crisis model amplifies) |
+| Sarmatia stability at ceasefire | ~3.5 | **1.74** | Much lower — existential pressure |
+| Ruthenia election outcome | Beacon loses (R3) | Beacon loses (R3) | Same timing, same outcome |
+| Ruthenia election AI score | ~8 | **4.15** | Lower (crisis model amplifies) |
 | Columbia midterm impact | No semiconductor shock | No semiconductor shock | Same (different from Test 2) |
 | Columbia presidential | Dealer camp uncertain | **Dealer camp wins (60.6%)** | Peace deal helps |
-| Nordostan R8 GDP | ~10 | **7.80** | Lower (crisis/collapse multiplier) |
-| Nordostan R8 stability | ~2.31 | **1.00 (floor)** | Dramatically lower |
+| Sarmatia R8 GDP | ~10 | **7.80** | Lower (crisis/collapse multiplier) |
+| Sarmatia R8 stability | ~2.31 | **1.00 (floor)** | Dramatically lower |
 | Post-ceasefire recovery | Not tested | **Impossible within SIM** | Design issue |
 
 ---
@@ -595,7 +595,7 @@ These produce an AI score of 4.15 — Beacon loses overwhelmingly regardless of 
 
 **Overall Score: 7.5/10**
 
-The crisis state model successfully accelerates the peace timeline from R7 to R5 — a 2-round improvement that creates more interesting post-ceasefire dynamics. The crisis -> collapse cascade on Nordostan is realistic and creates genuine urgency for Pathfinder.
+The crisis state model successfully accelerates the peace timeline from R7 to R5 — a 2-round improvement that creates more interesting post-ceasefire dynamics. The crisis -> collapse cascade on Sarmatia is realistic and creates genuine urgency for Pathfinder.
 
 However, three significant design holes undermine the post-ceasefire phase:
 1. **Ceasefire stability penalty** (countries lose siege resilience without gaining peace dividend)

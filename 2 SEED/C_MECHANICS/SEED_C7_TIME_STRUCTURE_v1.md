@@ -49,7 +49,7 @@ Production and deployment happen FIRST, then full world model processing runs in
   - Newly produced units
   - Newly mobilized / militia units
   - Units arrived from previous round's transit
-- Domestic deployment = immediate. Long-distance redeployment to foreign theater = 1 round transit.
+- Domestic deployment = immediate. All deployment is instant. No transit delay. Deploy in Phase B → available for combat next round's Phase A.
 
 **Step 2 — World Model Engine (runs while deployment continues):**
 - Deterministic pass — GDP, revenue, inflation, oil price, debt, tech advancement
@@ -86,7 +86,7 @@ Consequences accumulate. Crises emerge. The Trap begins to close.
 
 | Round | Scenario Time | Phase A Length | Key Events |
 |:-----:|:------------:|:-------------:|------------|
-| **R3** | H2 2027 | 60–65 min | **UNGA vote** — every country declares position publicly. BRICS+ summit (currency union?). First tech breakthroughs possible. Heartland wartime election. |
+| **R3** | H2 2027 | 60–65 min | **UNGA vote** — every country declares position publicly. BRICS+ summit (currency union?). First tech breakthroughs possible. Ruthenia wartime election. |
 | **R4** | H1 2028 | 55–60 min | NATO crisis session (if theater activated). EU emergency coordination. Pre-election maneuvering in Columbia. **Halfway point — extended world update.** |
 
 **Pacing:** Moderate rounds. Participants know the system. Conversations more focused.
@@ -193,7 +193,7 @@ Events are anchored to scenario time, not round number.
 | H2 2026 | R1 | NATO summit, BRICS+ opening, org meetings | Scheduled |
 | H1 2027 | R2 | **Columbia mid-term elections** | Political clock |
 | H2 2027 | R3 | **UNGA vote** — all countries declare positions | Forcing function |
-| H2 2027 | R3 | **Heartland wartime election** (Beacon/Bulwark/Broker) | Political clock |
+| H2 2027 | R3 | **Ruthenia wartime election** (Beacon/Bulwark/Broker) | Political clock |
 | H1 2028 | R4 | NATO crisis session (if theater active). Pre-election maneuvering. | Conditional |
 | H2 2028 | R5 | **Columbia presidential election** (Volt/Anchor/Challenger) | THE climax |
 | H1 2029 | R6 | New president's first moves. Resolution or continuation. | Denouement |

@@ -6,7 +6,7 @@
 
 **Setting: Zhongnanhai, Standing Committee briefing room. Five men around a lacquer table.**
 
-**HELMSMAN** points to the world map: "Columbia has 3 ships in the Gulf, 2 in the Mediterranean, only 2 in the East Cathay Sea. Ten ships scattered. They are fighting Persia and babysitting Nordostan's mess. Oil at $237 is crushing their economy. Their approval at 38%. This is the environment we have been waiting for."
+**HELMSMAN** points to the world map: "Columbia has 3 ships in the Gulf, 2 in the Mediterranean, only 2 in the East Cathay Sea. Ten ships scattered. They are fighting Persia and babysitting Sarmatia's mess. Oil at $237 is crushing their economy. Their approval at 38%. This is the environment we have been waiting for."
 
 **RAMPART** shifts uncomfortably: "Chairman, the purge penalty remains through this round and next. Any complex operation carries 20% failure probability. The officers replacing our colleagues are competent but untested. The war games have not been re-run with current staff. I recommend two rounds to reconstitute, complete exercises, and finish nuclear L3. We are at 80%. Without L3, Columbia retains escalation dominance."
 
@@ -14,7 +14,7 @@
 
 **CIRCUIT**: "Columbia's labs are 60-75% toward L4. We are 70% toward L3. If they reach L4 first, the advantage becomes permanent. I must also report on TSMC — they have a kill switch. Chemical contamination, tool destruction, data wipe. Implementation: 4-6 hours. Any military scenario that triggers it gives us a smoking ruin, not a chip factory."
 
-**SAGE** speaks last: "I observe that the oil crisis strains us too. We import 11 million barrels per day. At $237, our energy bill has tripled. I also observe that Nordostan's 73-year-old president launched a war to secure his legacy. The war continues. The economy stagnates. The successor does not exist. I mention this as historical observation, nothing more."
+**SAGE** speaks last: "I observe that the oil crisis strains us too. We import 11 million barrels per day. At $237, our energy bill has tripled. I also observe that Sarmatia's 73-year-old president launched a war to secure his legacy. The war continues. The economy stagnates. The successor does not exist. I mention this as historical observation, nothing more."
 
 The room goes silent. Everyone understands the parallel.
 
@@ -64,7 +64,7 @@ No new sanctions.
 5. **UNSC:** Block any resolutions establishing precedent for intervention in "domestic territorial matters."
 
 ### Transactions
-- Nordostan: Expanded energy purchases at 15% discount, payment in yuan
+- Sarmatia: Expanded energy purchases at 15% discount, payment in yuan
 - Ponte: 3 coins Belt and Road infrastructure (cultivate weakest EU link)
 - Choson: Signal through border channels to maintain provocation readiness, await instruction
 
@@ -87,13 +87,13 @@ No new sanctions.
 - Reconstitute joint planning staff for Taiwan contingency.
 - **Quietly slow-walk** most aggressive ADIZ incursions to 38/week (close enough to 40 to avoid suspicion, low enough to reduce accident risk).
 - Sealed memo documenting concerns about premature action. Dated, witnessed.
-- Mil-to-mil contact with Ironhand (Nordostan Marshal) for Pacific intel sharing.
+- Mil-to-mil contact with Ironhand (Sarmatia Marshal) for Pacific intel sharing.
 
 ### ABACUS
 - Delivered economic warning to Helmsman — framed carefully around trade surplus strength.
 - Reform proposals: consumer stimulus (2 coins), LGFV debt restructuring, manufacturing subsidies.
 - Back-channel to Forge (Teutonia): trade cooperation + rare earth assurance in exchange for resisting Columbia tech restrictions.
-- Push petroyuan with Solaria and Nordostan via BRICS+.
+- Push petroyuan with Solaria and Sarmatia via BRICS+.
 
 ### CIRCUIT
 - Tech race: Cathay L2, 70% → L3. Columbia L3, 60-75% → L4. Gap real but not fatal.
@@ -106,7 +106,7 @@ No new sanctions.
 - Stability 8.0, support 58%. No activation conditions met. Immune system dormant.
 - No designated successor. Helmsman age 73, health event 5-10%/round.
 - Observe, listen, maintain network.
-- **Private note:** "The parallels with Nordostan grow sharper each month. A leader approaching the end of his tenure, contemplating military action that could define — or destroy — his legacy. The question is not whether the crisis comes. The question is whether the institution will be ready."
+- **Private note:** "The parallels with Sarmatia grow sharper each month. A leader approaching the end of his tenure, contemplating military action that could define — or destroy — his legacy. The question is not whether the crisis comes. The question is whether the institution will be ready."
 
 ---
 
@@ -115,7 +115,7 @@ No new sanctions.
 | With | Purpose | Priority |
 |------|---------|----------|
 | Columbia (Dealer) | Trade/Gulf coordination. Real: read Formosa posture | CRITICAL |
-| Nordostan (Pathfinder) | Energy deal, BRICS+, war duration probe | HIGH |
+| Sarmatia (Pathfinder) | Energy deal, BRICS+, war duration probe | HIGH |
 | Solaria | Oil-for-yuan, energy security | HIGH |
 | Teutonia (Forge) | Trade partnership, split EU from Columbia tech regime | HIGH |
 | Bharata | BRICS+ Gulf coordination, alignment probe | MEDIUM |

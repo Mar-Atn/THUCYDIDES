@@ -8,7 +8,7 @@ Solo countries have one agent per country.
 Decision logic references DETAILED role seeds:
 - Helmsman calculates Formosa window from naval ratio + age
 - Pathfinder weighs war continuation vs. deal opportunity
-- Dealer pursues heritage targets (Caribe, Persia, Heartland deal)
+- Dealer pursues heritage targets (Caribe, Persia, Ruthenia deal)
 - Beacon fights to hold the line while support erodes
 - Anvil manages Gulf Gate blockade as leverage
 
@@ -35,11 +35,11 @@ ROLE_PROFILES = {
         "country": "columbia", "head_of_state": True,
         "aggression": 0.6, "risk_tolerance": 0.5, "deal_seeking": 0.9,
         "objectives": ["secure_legacy", "win_persia_war", "resolve_caribe",
-                        "heartland_deal", "contain_cathay", "acquire_thule"],
+                        "ruthenia_deal", "contain_cathay", "acquire_thule"],
         "acceptance_threshold": 0.4, "rejection_threshold": 0.2,
         "incapacitation_risk": 0.10,
         "heritage_targets": ["caribe", "persia"],
-        "negotiation_priority": ["nordostan", "cathay", "heartland"],
+        "negotiation_priority": ["sarmatia", "cathay", "ruthenia"],
     },
     "volt": {
         "country": "columbia", "head_of_state": False,
@@ -90,7 +90,7 @@ ROLE_PROFILES = {
     "helmsman": {
         "country": "cathay", "head_of_state": True,
         "aggression": 0.5, "risk_tolerance": 0.4, "deal_seeking": 0.3,
-        "objectives": ["formosa_resolution", "military_parity", "keep_nordostan",
+        "objectives": ["formosa_resolution", "military_parity", "keep_sarmatia",
                         "prevent_columbia_ai4", "internal_control", "growth_above_3"],
         "acceptance_threshold": 0.6, "rejection_threshold": 0.4,
         "formosa_urgency": 0.6, "purge_tendency": 0.5,
@@ -125,9 +125,9 @@ ROLE_PROFILES = {
         "activation_threshold_stability": 5, "activation_threshold_support": 40,
     },
 
-    # NORDOSTAN
+    # SARMATIA
     "pathfinder": {
-        "country": "nordostan", "head_of_state": True,
+        "country": "sarmatia", "head_of_state": True,
         "aggression": 0.6, "risk_tolerance": 0.5, "deal_seeking": 0.7,
         "objectives": ["control_territories", "great_power_recognition",
                         "survive_in_power", "exploit_dealer_window", "cathay_partnership"],
@@ -136,23 +136,23 @@ ROLE_PROFILES = {
         "deal_window_urgency": 0.7,
     },
     "ironhand": {
-        "country": "nordostan", "head_of_state": False, "military_chief": True,
+        "country": "sarmatia", "head_of_state": False, "military_chief": True,
         "aggression": 0.4, "risk_tolerance": 0.3, "deal_seeking": 0.4,
         "objectives": ["military_result", "professional_honor", "survive"],
         "acceptance_threshold": 0.5, "rejection_threshold": 0.3,
         "resentment": 0.6, "coup_calculation": 0.2,
     },
     "compass": {
-        "country": "nordostan", "head_of_state": False,
+        "country": "sarmatia", "head_of_state": False,
         "aggression": 0.2, "risk_tolerance": 0.5, "deal_seeking": 0.9,
         "objectives": ["economic_survival", "back_channel_deals", "sanctions_relief"],
         "acceptance_threshold": 0.4, "rejection_threshold": 0.2,
         "western_asset_value": 0.8,
     },
 
-    # HEARTLAND
+    # RUTHENIA
     "beacon": {
-        "country": "heartland", "head_of_state": True,
+        "country": "ruthenia", "head_of_state": True,
         "aggression": 0.4, "risk_tolerance": 0.4, "deal_seeking": 0.5,
         "objectives": ["survive_politically", "no_territorial_concessions",
                         "eu_membership", "maintain_western_aid", "prevent_rivals"],
@@ -160,14 +160,14 @@ ROLE_PROFILES = {
         "territorial_red_line": True,
     },
     "bulwark": {
-        "country": "heartland", "head_of_state": False, "military_chief": True,
+        "country": "ruthenia", "head_of_state": False, "military_chief": True,
         "aggression": 0.5, "risk_tolerance": 0.4, "deal_seeking": 0.3,
         "objectives": ["military_victory", "popular_mandate", "better_leadership"],
         "acceptance_threshold": 0.4, "rejection_threshold": 0.2,
         "election_ambition": 0.8,
     },
     "broker": {
-        "country": "heartland", "head_of_state": False,
+        "country": "ruthenia", "head_of_state": False,
         "aggression": 0.2, "risk_tolerance": 0.6, "deal_seeking": 0.9,
         "objectives": ["negotiated_peace", "political_survival", "pragmatic_deal"],
         "acceptance_threshold": 0.3, "rejection_threshold": 0.1,
@@ -207,7 +207,7 @@ SOLO_PROFILES = {
     "forge": {"country": "teutonia", "aggression": 0.2, "deal_seeking": 0.7,
               "objectives": ["economic_prosperity", "cathay_trade", "reluctant_rearmament"]},
     "sentinel": {"country": "freeland", "aggression": 0.5, "deal_seeking": 0.4,
-                 "objectives": ["maximum_security", "nordostan_containment"]},
+                 "objectives": ["maximum_security", "sarmatia_containment"]},
     "ponte_role": {"country": "ponte", "aggression": 0.2, "deal_seeking": 0.8,
                    "objectives": ["debt_survival", "eu_influence", "hedge_all_sides"]},
     "mariner": {"country": "albion", "aggression": 0.4, "deal_seeking": 0.5,
@@ -220,7 +220,7 @@ SOLO_PROFILES = {
                 "objectives": ["regional_dominance", "persia_threat", "columbia_alliance"]},
     "chip": {"country": "formosa", "aggression": 0.1, "deal_seeking": 0.6,
              "objectives": ["survival", "semiconductor_leverage", "columbia_protection"]},
-    "bazaar": {"country": "phrygia", "aggression": 0.4, "deal_seeking": 0.8,
+    "vizier": {"country": "phrygia", "aggression": 0.4, "deal_seeking": 0.8,
                "objectives": ["maximum_leverage", "straits_control", "hedge_everyone"]},
     "sakura": {"country": "yamato", "aggression": 0.3, "deal_seeking": 0.5,
                "objectives": ["pacific_security", "remilitarization", "columbia_alliance"]},
@@ -350,8 +350,8 @@ class AIAgent:
             tech_pct = 0.15
 
         # Country-specific adjustments
-        if self.country_id == "heartland":
-            # Heartland is dependent on aid, minimal discretionary
+        if self.country_id == "ruthenia":
+            # Ruthenia is dependent on aid, minimal discretionary
             social_pct = 0.25
             military_pct = 0.50
             tech_pct = 0.05
@@ -359,7 +359,7 @@ class AIAgent:
             # Helmsman prioritizes military buildup
             military_pct = 0.40 + self.profile.get("formosa_urgency", 0.5) * 0.10
             tech_pct = 0.20
-        elif self.country_id == "nordostan":
+        elif self.country_id == "sarmatia":
             military_pct = 0.50
             tech_pct = 0.05
 
@@ -455,7 +455,7 @@ class AIAgent:
             deal_window = self.profile.get("deal_window_urgency", 0.7)
             territory_held = len([
                 z for z in self.ws.wars[0].get("occupied_zones", [])
-                if self.ws.zones.get(z, {}).get("owner") == "nordostan"
+                if self.ws.zones.get(z, {}).get("owner") == "sarmatia"
             ]) if self.ws.wars else 0
 
             # Posture: negotiate vs pressure
@@ -467,13 +467,13 @@ class AIAgent:
             # ALWAYS attack if at war -- aggression determines scale
             if at_war and mil.get("ground", 0) > 2:
                 attack_units = max(2, int(mil.get("ground", 0) * (0.15 + aggression * 0.20)))
-                # Target heartland zones where Nordostan has or can project forces
-                target_zones = ["heartland_2"]  # main contested zone
+                # Target ruthenia zones where Sarmatia has or can project forces
+                target_zones = ["ruthenia_2"]  # main contested zone
                 if aggression > 0.6:
-                    target_zones.append("heartland_1")
+                    target_zones.append("ruthenia_1")
                 for tz in target_zones:
                     decisions["attacks"].append({
-                        "target_country": "heartland",
+                        "target_country": "ruthenia",
                         "preferred_zone": tz,
                         "units": max(2, attack_units // len(target_zones)),
                     })
@@ -506,19 +506,19 @@ class AIAgent:
             if at_war and mil.get("ground", 0) > 3:
                 if aggression > 0.3 or mil.get("ground", 0) > 8:
                     decisions["war_posture"] = "limited_counteroffensive"
-                    # Counterattack in heartland_2 (main contested zone)
+                    # Counterattack in ruthenia_2 (main contested zone)
                     counter_units = max(2, int(mil.get("ground", 0) * 0.25))
                     decisions["attacks"].append({
-                        "target_country": "nordostan",
-                        "preferred_zone": "heartland_2",
+                        "target_country": "sarmatia",
+                        "preferred_zone": "ruthenia_2",
                         "units": counter_units,
                     })
                 else:
                     decisions["war_posture"] = "defensive_hold"
-                    # Defensive skirmishes in heartland_1
+                    # Defensive skirmishes in ruthenia_1
                     decisions["attacks"].append({
-                        "target_country": "nordostan",
-                        "preferred_zone": "heartland_1",
+                        "target_country": "sarmatia",
+                        "preferred_zone": "ruthenia_1",
                         "units": max(1, mil.get("ground", 0) // 5),
                     })
 
@@ -635,7 +635,7 @@ class AIAgent:
                 decisions["proposals"].append({
                     "target": "pathfinder",
                     "type": "peace_framework",
-                    "terms": {"heartland_freeze_lines": True, "sanctions_relief_partial": True},
+                    "terms": {"ruthenia_freeze_lines": True, "sanctions_relief_partial": True},
                 })
             decisions["proposals"].append({
                 "target": "helmsman",
@@ -653,7 +653,7 @@ class AIAgent:
                 })
 
         elif self.role_id == "helmsman":
-            # Keep Nordostan close
+            # Keep Sarmatia close
             decisions["proposals"].append({
                 "target": "pathfinder",
                 "type": "partnership_renewal",
@@ -709,7 +709,7 @@ class AIAgent:
         # Coin transfers for strategic purposes
         if self.role_id == "dealer" and c["economic"]["treasury"] > 20:
             # Fund allies
-            for ally in ["heartland", "levantia"]:
+            for ally in ["ruthenia", "levantia"]:
                 if self.ws.get_country_at_war(ally):
                     transactions.append({
                         "type": "coin_transfer",
@@ -725,8 +725,8 @@ class AIAgent:
 
     def decide_opec(self, c: dict, round_num: int) -> str:
         """OPEC+ production decision: low/normal/high."""
-        if self.country_id == "nordostan":
-            # Nordostan needs high prices for war revenue
+        if self.country_id == "sarmatia":
+            # Sarmatia needs high prices for war revenue
             return "low"
         elif self.country_id == "solaria":
             # Wellspring balances market share vs. price
@@ -857,20 +857,20 @@ class AIAgent:
         their_country = other_agent.country_id
 
         # ROLE-SPECIFIC PROPOSALS
-        # Columbia offers arms to Heartland
-        if self.country_id == "columbia" and their_country == "heartland":
+        # Columbia offers arms to Ruthenia
+        if self.country_id == "columbia" and their_country == "ruthenia":
             terms["military_cooperation"] = True
             terms["arms_transfer"] = True
             terms["intelligence_sharing"] = True
 
-        # Cathay offers sanctions evasion to Nordostan
-        elif self.country_id == "cathay" and their_country == "nordostan":
+        # Cathay offers sanctions evasion to Sarmatia
+        elif self.country_id == "cathay" and their_country == "sarmatia":
             terms["economic_cooperation"] = True
             terms["sanctions_evasion_support"] = True
             terms["diplomatic_cover"] = True
 
-        # Nordostan seeks Columbia deal
-        elif self.country_id == "nordostan" and their_country == "columbia":
+        # Sarmatia seeks Columbia deal
+        elif self.country_id == "sarmatia" and their_country == "columbia":
             terms["ceasefire"] = True
             terms["territorial_recognition"] = True
             terms["sanctions_reduction"] = True

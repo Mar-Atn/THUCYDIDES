@@ -48,7 +48,7 @@
       "arms_transfers": [
         {
           "from": "columbia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 3,
           "type": "military_aid"
         }
@@ -107,7 +107,7 @@
       "ai": 3.04
     }
   },
-  "nordostan": {
+  "sarmatia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -149,7 +149,7 @@
       "ai": 0.0
     }
   },
-  "heartland": {
+  "ruthenia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -179,8 +179,8 @@
     "military": {
       "combat": [
         {
-          "attacker": "heartland",
-          "defender": "nordostan",
+          "attacker": "ruthenia",
+          "defender": "sarmatia",
           "zone": "ee_east_front_central",
           "units": 6
         }
@@ -292,7 +292,7 @@
       "arms_transfers": [
         {
           "from": "gallia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.5,
           "type": "military_aid"
         }
@@ -344,7 +344,7 @@
       "arms_transfers": [
         {
           "from": "teutonia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.7,
           "type": "military_aid"
         }
@@ -484,7 +484,7 @@
       "arms_transfers": [
         {
           "from": "albion",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.4,
           "type": "military_aid"
         }
@@ -673,7 +673,7 @@
       "solaria": 2
     },
     "sanctions": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "caribe": 2
     },
     "military": {

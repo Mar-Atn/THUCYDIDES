@@ -23,7 +23,7 @@ At SEED stage, we write the complete seed. At Package stage, CRAFT turns it into
 | **Gender** | As per real-world parallel |
 | **Title** | Formal position (e.g., President of Columbia, Chairman of the Central Committee) |
 | **Country** | SIM country name |
-| **Team** | Which team (Columbia, Cathay, Europe, Nordostan, Heartland, Persia, Solo) |
+| **Team** | Which team (Columbia, Cathay, Europe, Sarmatia, Ruthenia, Persia, Solo) |
 | **Faction/Camp** | Internal alignment if applicable (e.g., "President's camp", "Opposition", "Swing") |
 
 ---
@@ -85,7 +85,7 @@ Prioritized list of 3-6 main objectives. Mix of public/shareable and private/hid
 | 1 | (e.g., Win re-election at Round 5) | Private | Every decision filtered through "does this help me win?" |
 | 2 | (e.g., Maintain alliance cohesion) | Public | Allies splitting = strategic catastrophe |
 | 3 | (e.g., Prevent Cathay tech breakthrough) | Public | AI L4 = permanent disadvantage |
-| 4 | (e.g., Resolve Heartland war on favorable terms) | Public | But "favorable" means different things to different people |
+| 4 | (e.g., Resolve Ruthenia war on favorable terms) | Public | But "favorable" means different things to different people |
 
 Include important rational considerations — what a smart person in this position would be weighing. The analytical framing that makes the objectives feel like genuine dilemmas, not a shopping list.
 
@@ -131,7 +131,7 @@ What this role receives at game start that others don't. Creates information asy
 | Artefact | Format | Classification | Content Summary |
 |----------|--------|:--------------:|----------------|
 | (e.g., CIA Intelligence Assessment: Cathay Military Buildup) | Memo (1 page) | Role-specific | Analysis of Cathay's naval expansion timeline and Formosa invasion capability window |
-| (e.g., Economic Forecast: Sanctions Impact on Nordostan) | Briefing (half page) | Team-shared | Treasury assessment of how long Nordostan economy can sustain current war |
+| (e.g., Economic Forecast: Sanctions Impact on Sarmatia) | Briefing (half page) | Team-shared | Treasury assessment of how long Sarmatia economy can sustain current war |
 | (e.g., Intercepted communication: Cathay-Persia back-channel) | Leaked document | Role-specific | Evidence of secret technology transfer negotiations |
 
 *Reference: ACONA Deep START role packs — in-character memos from subordinates/institutions providing strategic intelligence and recommendations.*

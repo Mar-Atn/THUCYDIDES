@@ -2,7 +2,7 @@
   {
     "type": "arms_transfer",
     "from": "columbia",
-    "to": "heartland",
+    "to": "ruthenia",
     "terms": {
       "unit_type": "ground",
       "count": 2
@@ -15,7 +15,7 @@
   {
     "type": "coin_transfer",
     "from": "columbia",
-    "to": "heartland",
+    "to": "ruthenia",
     "terms": {
       "amount": 2
     },
@@ -38,7 +38,7 @@
   {
     "type": "coin_transfer",
     "from": "cathay",
-    "to": "nordostan",
+    "to": "sarmatia",
     "terms": {
       "amount": 2
     },
@@ -72,7 +72,7 @@
   },
   {
     "type": "coin_transfer",
-    "from": "nordostan",
+    "from": "sarmatia",
     "to": "cathay",
     "terms": {
       "request": true,
@@ -83,7 +83,7 @@
   },
   {
     "type": "oil_deal",
-    "from": "nordostan",
+    "from": "sarmatia",
     "to": "mirage",
     "terms": {
       "sanctions_routing": true,
@@ -94,7 +94,7 @@
   },
   {
     "type": "arms_request",
-    "from": "heartland",
+    "from": "ruthenia",
     "to": "columbia",
     "terms": {
       "request": "ground_units",
@@ -107,7 +107,7 @@
   },
   {
     "type": "coin_request",
-    "from": "heartland",
+    "from": "ruthenia",
     "to": "columbia",
     "terms": {
       "amount": 2
@@ -118,7 +118,7 @@
   },
   {
     "type": "aid_request",
-    "from": "heartland",
+    "from": "ruthenia",
     "to": "teutonia",
     "terms": {
       "economic_aid": 1,
@@ -130,8 +130,8 @@
   },
   {
     "type": "peace_exploration",
-    "from": "heartland",
-    "to": "nordostan",
+    "from": "ruthenia",
+    "to": "sarmatia",
     "terms": {
       "ceasefire_exploration": true,
       "no_formal_recognition": true
@@ -167,7 +167,7 @@
   {
     "type": "intelligence_sharing",
     "from": "persia",
-    "to": "nordostan",
+    "to": "sarmatia",
     "terms": {
       "shared_interest": "counter_western_pressure"
     },
@@ -178,7 +178,7 @@
   {
     "type": "security_guarantee",
     "from": "gallia",
-    "to": "heartland",
+    "to": "ruthenia",
     "terms": {
       "nuclear_umbrella_extension": true
     },
@@ -234,7 +234,7 @@
   {
     "type": "leverage_play",
     "from": "phrygia",
-    "to": "nordostan",
+    "to": "sarmatia",
     "terms": {
       "bosphorus_access": true,
       "price": "sanctions_relief_support"
@@ -291,7 +291,7 @@
   {
     "type": "financial_services",
     "from": "mirage",
-    "to": "nordostan",
+    "to": "sarmatia",
     "terms": {
       "sanctions_routing": true,
       "commission": 0.05

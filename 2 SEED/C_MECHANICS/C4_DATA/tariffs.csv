@@ -1,30 +1,30 @@
 imposer,target,level,notes
 columbia,cathay,3,~47.5% average tariffs. Legal authority in chaos after Supreme Court ruling. Section 301 investigations replacing IEEPA.
-columbia,nordostan,2,Sanctions-related trade restrictions
+columbia,sarmatia,2,Sanctions-related trade restrictions
 columbia,caribe,3,Full energy blockade. Executive Order 14380 declaring national emergency.
 columbia,persia,3,Wartime maximum trade restrictions
 cathay,columbia,2,Retaliatory tariffs ~30% average. Rare earth export controls.
 cathay,yamato,1,Export controls on dual-use items Jan 2026
 cathay,hanguk,1,Rare earth restrictions affecting semiconductor supply chain
-nordostan,columbia,2,Counter-sanctions
-nordostan,albion,2,Counter-sanctions
-nordostan,gallia,2,Counter-sanctions
-nordostan,teutonia,2,Counter-sanctions
-nordostan,freeland,2,Counter-sanctions
-nordostan,ponte,1,Limited counter-sanctions
+sarmatia,columbia,2,Counter-sanctions
+sarmatia,albion,2,Counter-sanctions
+sarmatia,gallia,2,Counter-sanctions
+sarmatia,teutonia,2,Counter-sanctions
+sarmatia,freeland,2,Counter-sanctions
+sarmatia,ponte,1,Limited counter-sanctions
 gallia,cathay,1,EU de-risking trade measures
-gallia,nordostan,1,EU sanctions-aligned trade restrictions
+gallia,sarmatia,1,EU sanctions-aligned trade restrictions
 teutonia,cathay,1,EU de-risking but drags feet - auto industry dependency
-teutonia,nordostan,1,EU sanctions-aligned
+teutonia,sarmatia,1,EU sanctions-aligned
 freeland,cathay,1,EU aligned
-freeland,nordostan,2,Maximum enforcement
-ponte,nordostan,1,EU aligned but weakest enforcement
+freeland,sarmatia,2,Maximum enforcement
+ponte,sarmatia,1,EU aligned but weakest enforcement
 albion,cathay,1,Post-Brexit independent restrictions
-albion,nordostan,1,Sanctions-aligned trade controls
+albion,sarmatia,1,Sanctions-aligned trade controls
 bharata,cathay,1,Border dispute related restrictions
 levantia,persia,3,Wartime total trade embargo
 yamato,cathay,1,Export controls aligned with Columbia
 caribe,columbia,1,Counter-sanctions (largely symbolic)
-heartland,nordostan,3,Wartime total trade embargo
+ruthenia,sarmatia,3,Wartime total trade embargo
 persia,columbia,2,Counter-sanctions
 persia,levantia,3,Wartime total trade embargo

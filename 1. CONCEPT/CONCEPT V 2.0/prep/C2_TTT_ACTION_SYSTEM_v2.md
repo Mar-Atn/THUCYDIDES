@@ -71,7 +71,7 @@ In Columbia specifically: budget submitted by Shield/economic officials, must pa
 **Initiator:** Head of state or PM. Unilateral.
 Rate 0-3 per economic sector per target country. 0 = free trade, 3 = near-prohibitive. AI calculates: revenue, import cost inflation, GDP impact, third-country rerouting. Can be announced dramatically mid-round. Retaliation likely.
 
-In The Union (EU): trade tariffs are collective — EU members must agree on external tariff position through consensus.
+In The Ereb Union (EU): trade tariffs are collective — EU members must agree on external tariff position through consensus.
 
 ### 2.3 Set sanctions position — Routine
 **Initiator:** Head of state.
@@ -92,7 +92,7 @@ Create coins from nothing. AI tracks cumulative inflation. Tempting short-term, 
 Transfer to any other actor. Immediate, irreversible. Covers: aid, payments, bribes, loans (write terms in a treaty). Can be public or private (intelligence may detect large transfers).
 
 ### 2.7 Set OPEC+ production level — Routine (Cartel members only)
-**Initiator:** Head of state / PM of Solaria, Nordostan, Persia, Mirage.
+**Initiator:** Head of state / PM of Solaria, Sarmatia, Persia, Mirage.
 Low / normal / high. AI calculates global oil price from all producers combined. Prisoner's dilemma: cooperate or defect.
 
 ---
@@ -113,7 +113,7 @@ Share nuclear or AI/semiconductor technology for coins or concessions. Recipient
 
 ### 4.1 Arrest — Anytime
 **Initiator:** Head of state or security authority. Unilateral on own soil.
-Detain any person physically present in your country. Target player restricted until released. If foreign national: international crisis. The defining autocratic power. Available to all countries but primarily relevant for Nordostan (Pathfinder), Cathay (Helmsman), Persia (Furnace/Anvil).
+Detain any person physically present in your country. Target player restricted until released. If foreign national: international crisis. The defining autocratic power. Available to all countries but primarily relevant for Sarmatia (Pathfinder), Cathay (Helmsman), Persia (Furnace/Anvil).
 
 ### 4.2 Fire / reassign — Anytime
 **Initiator:** Head of state. Unilateral.
@@ -135,7 +135,7 @@ Cost: coins + possible political support hit even if undetected. Crossing a mora
 
 ### 4.5 Coup attempt — Escalatory
 **Initiator:** Any internal actor with military/security access. Requires co-conspirator.
-Probability = f(stability index, political support, co-conspirators, military units under plotters' control, dice). Head of state retains powers UNTIL coup acknowledged — can arrest suspects beforehand. Applicable: Nordostan (Ironhand + Compass vs. Pathfinder), Cathay (Rampart + others vs. Helmsman — legitimized by Sage), Persia (Anvil as kingmaker).
+Probability = f(stability index, political support, co-conspirators, military units under plotters' control, dice). Head of state retains powers UNTIL coup acknowledged — can arrest suspects beforehand. Applicable: Sarmatia (Ironhand + Compass vs. Pathfinder), Cathay (Rampart + others vs. Helmsman — legitimized by Sage), Persia (Anvil as kingmaker).
 
 ### 4.6 Call elections — Anytime (democracies)
 **Initiator:** Head of state (voluntary) or parliament/congress (forced when support drops below threshold).
@@ -144,7 +144,7 @@ Probability = f(stability index, political support, co-conspirators, military un
 
 **Columbia presidential election (Round 5):** Nominations in Round 4 (candidates declare, brief speeches). General election at start of Round 5: campaign speeches (3 min each), brief debate, then votes (team members vote with weights: Fixer and Pioneer = 2 votes each, others = 1) + AI popular vote (50%). If Challenger wins: full power transfer. Former president stays as opposition.
 
-**Heartland wartime election (Round 3-4):** Three candidates (Beacon, Bulwark, Broker). AI judges based on territory, economy, casualties, Western support, campaign quality. Winner becomes president.
+**Ruthenia wartime election (Round 3-4):** Three candidates (Beacon, Bulwark, Broker). AI judges based on territory, economy, casualties, Western support, campaign quality. Winner becomes president.
 
 **Other democracies:** Triggered when stability drops below threshold. AI generates outcome.
 
@@ -181,7 +181,7 @@ All covert ops are probabilistic. AI determines success/failure and detection/at
 **Initiator:** Any head of state or designated speaker. 2-3 minutes.
 Address the room. Creates public commitments. Affects political support. Press amplifies.
 
-Scheduled speech moments: Assembly (UNGA) addresses, campaign speeches before elections, emergency declarations. Campaign debates at Columbia and Heartland elections.
+Scheduled speech moments: Assembly (UNGA) addresses, campaign speeches before elections, emergency declarations. Campaign debates at Columbia and Ruthenia elections.
 
 ### 6.2 Sign treaty / agreement — Anytime (agreement - Any text signed by two or more sides)
 **Initiator:** Any two+ heads of state or authorized representatives.
@@ -193,7 +193,7 @@ In Columbia: major treaties require parliamentary ratification (3 of 5 seats).
 Transactions: basing rights, military units of any type, loans, direct economic subsidies, nuclear weapons, technologies. Immediate and binding. Breach = reputational cost (no automatic penalty — no international court). The universal bilateral action.
 
 ### 6.4 Call Council emergency session — Anytime
-**Initiator:** Any P5 member (Columbia, Cathay, Nordostan, Gallia, Albion).
+**Initiator:** Any P5 member (Columbia, Cathay, Sarmatia, Gallia, Albion).
 All P5 must attend. Resolutions proposed and voted. Any P5 vetoes. The act of calling it IS a political signal.
 
 ### 6.5 Create organization — Anytime
@@ -215,7 +215,7 @@ Beyond the standard actions, certain roles have capabilities nobody else possess
 | Pioneer (Columbia Envoy) | Independent tech/business channel to Cathay. Thule portfolio. | Maintains contacts official policy has severed. |
 | Circuit (Cathay Tech) | Rare earth export restrictions. Independent international tech contacts. Cyber operations execution. | Controls Cathay's tech counter-weapons. Has external channels Helmsman may not know about. |
 | Sage (Cathay Elder) | Legitimize leadership transition. No formal power — but can distinguish "course correction" from "coup." | The succession question personified. Grows powerful only as Helmsman weakens. |
-| Compass (Nordostan Oligarch) | Personal coin transactions. Independent back-channels. Bribe foreign actors. | Operates entirely through personal channels. Can explore deals government can't officially pursue. |
+| Compass (Sarmatia Oligarch) | Personal coin transactions. Independent back-channels. Bribe foreign actors. | Operates entirely through personal channels. Can explore deals government can't officially pursue. |
 | Anvil (Persia IRGC) | Controls IRGC military AND 30-40% of economy. Can support or undermine either Furnace or Dawn. | The kingmaker. Military + economic power in one role. |
 | Dawn (Persia Reformist) | Represents the street — gains influence when protests erupt. International credibility with Western reformers. | No power in stability. Enormous power in crisis. The population's voice. |
 | Veritas (Press) | Publish stories. Investigate secrets. Monopoly on public information channel. | The only actor who makes private actions public. |
@@ -242,9 +242,9 @@ Beyond the standard actions, certain roles have capabilities nobody else possess
 
 **Country in economic war (e.g., Columbia vs. Cathay):** 5-8 actions. Budget, tariffs, sanctions, export restrictions, transfers, treaty, speech, possibly covert cyber.
 
-**Country at war (e.g., Nordostan):** 8-12 actions. Budget, production at max, deploy, attack, mobilization, propaganda, sanctions response, diplomacy (treaty with Cathay, Council session), possibly assassination or covert ops.
+**Country at war (e.g., Sarmatia):** 8-12 actions. Budget, production at max, deploy, attack, mobilization, propaganda, sanctions response, diplomacy (treaty with Cathay, Council session), possibly assassination or covert ops.
 
-**Country in crisis (e.g., Heartland):** 6-10 actions. Budget under pressure, arms received, election campaign, speeches, deployment, peace negotiations, respond to crisis.
+**Country in crisis (e.g., Ruthenia):** 6-10 actions. Budget under pressure, arms received, election campaign, speeches, deployment, peace negotiations, respond to crisis.
 
 **Country at nuclear threshold (e.g., Persia):** 4-8 actions. Nuclear program investment (budget), sanctions response, diplomatic engagement (Dawn), proxy operations (Furnace), IRGC business management (Anvil), possibly nuclear test if threshold reached.
 
@@ -252,5 +252,5 @@ Beyond the standard actions, certain roles have capabilities nobody else possess
 
 ## Changelog
 
-- **v2.0 (2026-03-20):** Full revision for consistency with concept documents A1-C4. Added: Respond to crisis (4.7), Create organization (6.4), Territorial claim (6.5). Expanded: elections mechanic (4.6) to detail Columbia mid-terms, presidential election with parliamentary votes and weights, Heartland wartime election. Updated all organization references to SIM names (Western Treaty, The Union, The Council, The Cartel, The Seven, Columbia Parliament). Added Persia-specific mechanics. Role-specific exclusive actions table updated for all 6 teams including Sage, Anvil, Dawn, Fixer, Pioneer. 31 total actions (up from 28 — added 3 diplomatic/domestic actions, net of prior consolidations).
+- **v2.0 (2026-03-20):** Full revision for consistency with concept documents A1-C4. Added: Respond to crisis (4.7), Create organization (6.4), Territorial claim (6.5). Expanded: elections mechanic (4.6) to detail Columbia mid-terms, presidential election with parliamentary votes and weights, Ruthenia wartime election. Updated all organization references to SIM names (Western Treaty, The Ereb Union, The Council, The Cartel, The Seven, Columbia Parliament). Added Persia-specific mechanics. Role-specific exclusive actions table updated for all 6 teams including Sage, Anvil, Dawn, Fixer, Pioneer. 31 total actions (up from 28 — added 3 diplomatic/domestic actions, net of prior consolidations).
 - **v1.0 (2026-03-19):** Initial action system. 28 actions across 6 categories.

@@ -25,7 +25,7 @@
       "heritage_targets": {
         "persia": "active_war",
         "caribe": "target",
-        "heartland_deal": "premature",
+        "ruthenia_deal": "premature",
         "thule": "aspirational",
         "cathay_containment": "stable"
       },
@@ -39,7 +39,7 @@
     },
     "shadow": {
       "cathay_assessment": "Naval buildup at 9. Formosa window analysis: not imminent.",
-      "nordostan_assessment": "Holding together.",
+      "sarmatia_assessment": "Holding together.",
       "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
     },
     "anchor": {
@@ -56,5 +56,5 @@
     }
   },
   "internal_dynamics": "Early rounds: Dealer consolidating. Volt and Anchor competing for successor position. Shield reluctantly executing. Tribune building case.",
-  "final_decision": "Round 1: Dealer prioritizes military operations. Budget: 27% social, 40% military, 12% tech.  Heartland arms transfer approved."
+  "final_decision": "Round 1: Dealer prioritizes military operations. Budget: 27% social, 40% military, 12% tech.  Ruthenia arms transfer approved."
 }

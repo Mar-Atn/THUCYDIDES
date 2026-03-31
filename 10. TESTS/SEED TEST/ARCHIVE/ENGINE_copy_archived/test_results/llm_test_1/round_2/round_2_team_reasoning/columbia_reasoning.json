@@ -25,7 +25,7 @@
       "heritage_targets": {
         "persia": "active_war",
         "caribe": "target",
-        "heartland_deal": "premature",
+        "ruthenia_deal": "premature",
         "thule": "aspirational",
         "cathay_containment": "ongoing"
       },
@@ -39,7 +39,7 @@
     },
     "shadow": {
       "cathay_assessment": "Naval buildup at 14. Formosa window analysis: dangerous.",
-      "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
+      "sarmatia_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
       "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
     },
     "anchor": {
@@ -56,5 +56,5 @@
     }
   },
   "internal_dynamics": "Early rounds: Dealer consolidating. Volt and Anchor competing for successor position. Shield reluctantly executing. Tribune building case.",
-  "final_decision": "Round 2: Dealer prioritizes military operations. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Heartland arms transfer approved."
+  "final_decision": "Round 2: Dealer prioritizes military operations. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Ruthenia arms transfer approved."
 }

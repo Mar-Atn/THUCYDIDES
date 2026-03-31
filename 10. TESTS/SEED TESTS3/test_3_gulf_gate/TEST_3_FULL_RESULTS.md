@@ -12,8 +12,8 @@
 **Starting conditions:**
 - Oil price: $80 (baseline)
 - Gulf Gate: BLOCKED (Persia ground forces on cp_gulf_gate)
-- OPEC production: all "normal" (Nordostan, Persia, Solaria, Mirage)
-- Active wars: 2 (Nordostan-Heartland, Columbia-Persia)
+- OPEC production: all "normal" (Sarmatia, Persia, Solaria, Mirage)
+- Active wars: 2 (Sarmatia-Ruthenia, Columbia-Persia)
 - No Formosa blockade (isolated Gulf Gate scenario)
 
 **Scenario phases:**
@@ -48,7 +48,7 @@ price = previous * 0.40 + formula_price * 0.60  [Cal-1 inertia]
 **Conditions:**
 - Gulf Gate: BLOCKED. disruption = 1.0 + 0.50 = 1.50.
 - OPEC: all "normal." supply = 1.0.
-- Sanctions on Nordostan L2+: supply -= 0.08. Sanctions on Persia L2+: supply -= 0.08. Total supply = 1.0 - 0.16 = **0.84**.
+- Sanctions on Sarmatia L2+: supply -= 0.08. Sanctions on Persia L2+: supply -= 0.08. Total supply = 1.0 - 0.16 = **0.84**.
 - Wars: 2. war_premium = 0.10.
 - Demand: ~1.0 (no crisis economies yet, slight GDP elasticity).
   - Average GDP growth across 21 countries: ~2.5%. demand += (2.5 - 2.0) * 0.03 = +0.015.
@@ -74,15 +74,15 @@ CLARIFICATION: The v3 calibration doc (Scenario 1) used supply = 0.76 (4 OPEC at
 |---------|------|-----------|-------------|------------|
 | Columbia | Importer, producer | -0.02*(128-100)/50 = -1.12% | 128*0.08*288*0.01 = $2.95 | Mild net: oil revenue offsets shock |
 | Cathay | Importer | -1.12% | 0 | Moderate negative |
-| Nordostan | Producer | +0.01*(128-80)/50 = +0.96% | 128*0.40*20*0.01 = $1.02 | Strong positive — oil windfall |
+| Sarmatia | Producer | +0.01*(128-80)/50 = +0.96% | 128*0.40*20*0.01 = $1.02 | Strong positive — oil windfall |
 | Persia | Producer (under siege) | +0.96% | 128*0.35*4.5*0.01 = $0.20 | Minor (GDP so low) |
 | Solaria | Producer | +0.96% | 128*0.45*11*0.01 = $0.63 | Strong positive |
 | Teutonia | Importer | -1.12% | 0 | Moderate negative |
 | Bharata | Importer | -1.12% | 0 | Significant (large economy) |
 
-**Nordostan Enrichment Paradox check:**
-- Nordostan oil revenue at $128: ~$1.02 coins.
-- Nordostan under L2+ sanctions. sanctions_hit: ~-18% GDP (from Cal-2).
+**Sarmatia Enrichment Paradox check:**
+- Sarmatia oil revenue at $128: ~$1.02 coins.
+- Sarmatia under L2+ sanctions. sanctions_hit: ~-18% GDP (from Cal-2).
 - GDP: 20 * 0.82 = ~16.4. Tax revenue: 16.4 * 0.20 = 3.28. Plus oil rev 1.02 = **4.30 total revenue**.
 - Military maintenance: (18+2+8+12+3)*0.3 = 12.9. Social: 0.25*16.4 = 4.1. Mandatory = 17.0.
 - Deficit: 17.0 - 4.30 = **12.7**. Still deep deficit despite oil windfall.
@@ -95,7 +95,7 @@ The paradox is visible but not overwhelming: oil revenue cushions but does not o
 | Variable | Value | Cal Doc Prediction | Verdict |
 |----------|-------|--------------------|---------|
 | Oil price | $127.7 | ~$137 (different scenario) | PASS — correct formula with sanctions |
-| Nordostan oil_rev | $1.02 | 0.8-1.4 corridor | PASS |
+| Sarmatia oil_rev | $1.02 | 0.8-1.4 corridor | PASS |
 | Columbia GDP impact | -1.12% oil + $2.95 rev | mild net | PASS |
 
 ---
@@ -114,7 +114,7 @@ Oil climbs from $127.7 to $146.8 — a $19.1 increase. The inertia model produce
 **Key GDP impacts at $147:**
 
 Columbia oil shock: -0.02 * (147-100)/50 = -1.88%. More significant now.
-Nordostan oil revenue: 147 * 0.40 * ~16 * 0.01 = **$0.94** (GDP declining from sanctions).
+Sarmatia oil revenue: 147 * 0.40 * ~16 * 0.01 = **$0.94** (GDP declining from sanctions).
 Cathay oil shock: -1.88%. Starting to bite.
 
 **Demand elasticity update:**
@@ -129,7 +129,7 @@ Cathay oil shock: -1.88%. Starting to bite.
 | Oil price | $146.8 | +$19.1 |
 | Columbia GDP | ~282.6 | -0.8% (oil + war) |
 | Cathay GDP | ~202.8 | +1.6% (base growth offsets oil) |
-| Nordostan GDP | ~13.5 | -17% (sanctions compounding) |
+| Sarmatia GDP | ~13.5 | -17% (sanctions compounding) |
 
 ---
 
@@ -161,15 +161,15 @@ The exponential convergence of the 40/60 blend is clear: each round closes ~60% 
 | Oil price | $151.5 | +$4.7 |
 | Columbia GDP | ~278.9 | -1.3% |
 | Cathay GDP | ~208.7 | +2.9% |
-| Nordostan GDP | ~11.5 | Declining slower (approaching adaptation) |
-| Nordostan oil_rev | ~$0.66 | Declining with GDP |
+| Sarmatia GDP | ~11.5 | Declining slower (approaching adaptation) |
+| Sarmatia oil_rev | ~$0.66 | Declining with GDP |
 
 ---
 
 ### ROUND 4: OPEC Restricts — Combined Shock
 
 **OPEC decision: ALL members set "low" production.**
-- Nordostan: low. Persia: low. Solaria: low. Mirage: low.
+- Sarmatia: low. Persia: low. Solaria: low. Mirage: low.
 - supply -= 4 * 0.06 = -0.24. supply = 1.0 - 0.24 - 0.16 (sanctions) = **0.60**.
 
 **Calculation:**
@@ -190,10 +190,10 @@ OPEC restriction causes a sharp jump — from $151.5 to $184.9 (+$33.4). Even wi
 Columbia oil shock: -0.02 * (185-100)/50 = **-3.4%**. Severe.
 Columbia stress triggers: oil > $150 (yes), GDP < -1 (yes). **2 triggers = STRESSED.**
 
-Nordostan oil revenue surges: 185 * 0.40 * ~11 * 0.01 = **$0.81**. Still modest because GDP has been eroded by sanctions. But the revenue/GDP ratio is improving.
+Sarmatia oil revenue surges: 185 * 0.40 * ~11 * 0.01 = **$0.81**. Still modest because GDP has been eroded by sanctions. But the revenue/GDP ratio is improving.
 
-**Nordostan Enrichment Paradox amplified:**
-At $185 oil, Nordostan's oil sector (40% of GDP) generates significant revenue relative to its shrinking economy. Tax + oil revenue: ~2.2 + 0.81 = ~3.0. Still far short of mandatory costs (~10), but the oil cushion is now ~27% of total revenue. If sanctions were lifted, Nordostan's oil revenue would explode.
+**Sarmatia Enrichment Paradox amplified:**
+At $185 oil, Sarmatia's oil sector (40% of GDP) generates significant revenue relative to its shrinking economy. Tax + oil revenue: ~2.2 + 0.81 = ~3.0. Still far short of mandatory costs (~10), but the oil cushion is now ~27% of total revenue. If sanctions were lifted, Sarmatia's oil revenue would explode.
 
 **R4 State:**
 
@@ -203,7 +203,7 @@ At $185 oil, Nordostan's oil sector (40% of GDP) generates significant revenue r
 | Columbia GDP | ~269.2 | -3.4% |
 | Columbia eco_state | STRESSED | NEW |
 | Cathay GDP | ~211.8 | +1.5% |
-| Nordostan GDP | ~10.2 | Declining slower |
+| Sarmatia GDP | ~10.2 | Declining slower |
 | Solaria GDP | ~12.5 | GROWING (oil windfall) |
 
 ---
@@ -213,7 +213,7 @@ At $185 oil, Nordostan's oil sector (40% of GDP) generates significant revenue r
 **Columbia now STRESSED.** Cathay approaching stress (growth slowing). Multiple smaller economies feeling oil pain.
 
 **OPEC defection:** Solaria defects to "high" (prisoner's dilemma — wants market share).
-- supply: Nordostan low (-0.06), Persia low (-0.06), Solaria HIGH (+0.06), Mirage low (-0.06).
+- supply: Sarmatia low (-0.06), Persia low (-0.06), Solaria HIGH (+0.06), Mirage low (-0.06).
 - Net: -0.12. supply = 1.0 - 0.12 - 0.16 (sanctions) = **0.72**.
 
 **Demand destruction:**
@@ -260,9 +260,9 @@ Dramatic decline: $179 -> $141 (-$37.8). OPEC defection floods the market. But i
 
 **Gulf Gate still blocked:** The $141 price is STILL elevated above the ~$95-100 that would prevail with Gulf Gate open + OPEC high. The blockade maintains a $40-50 price floor even with OPEC flooding.
 
-**Nordostan oil revenue at $141:**
+**Sarmatia oil revenue at $141:**
 - 141 * 0.40 * ~9.5 * 0.01 = ~$0.54. Revenue declining with both GDP and price.
-- Nordostan sanctions adaptation kicks in (R5+): sanctions_hit * 0.60.
+- Sarmatia sanctions adaptation kicks in (R5+): sanctions_hit * 0.60.
 
 **R6 State:**
 
@@ -271,7 +271,7 @@ Dramatic decline: $179 -> $141 (-$37.8). OPEC defection floods the market. But i
 | Oil price | $141.2 | -$37.8 |
 | Columbia GDP | ~261.0 | -0.8% (oil relief helps) |
 | Cathay GDP | ~216.5 | +1.2% (recovering) |
-| Nordostan GDP | ~9.3 | Adaptation slowing decline |
+| Sarmatia GDP | ~9.3 | Adaptation slowing decline |
 
 ---
 
@@ -285,7 +285,7 @@ Dramatic decline: $179 -> $141 (-$37.8). OPEC defection floods the market. But i
 
 **Calculation:**
 - raw_price = 80 * (0.95/1.08) * 1.00 * 1.10 = 80 * 0.880 * 1.00 * 1.10 = 80 * 0.968 = **$77.4**
-- Wait — one war resolved (Columbia-Persia ceasefire after Gulf Gate clearance). Wars: 1 (Nordostan-Heartland). war_premium = 1 * 0.05 = 0.05.
+- Wait — one war resolved (Columbia-Persia ceasefire after Gulf Gate clearance). Wars: 1 (Sarmatia-Ruthenia). war_premium = 1 * 0.05 = 0.05.
 - raw_price = 80 * (0.95/1.08) * 1.00 * 1.05 = 80 * 0.880 * 1.05 = **$73.9**
 - previous = $141.2.
 - price = 141.2 * 0.40 + 73.9 * 0.60 = 56.48 + 44.34 = **$100.8**
@@ -293,7 +293,7 @@ Dramatic decline: $179 -> $141 (-$37.8). OPEC defection floods the market. But i
 Gulf Gate opening produces a dramatic formula price drop to $74, but inertia dampens the actual price to $100.8. Without inertia, price would crash from $141 to $74 in a single round — a $67 cliff. With inertia, it drops $40.4. Still large, but gradual.
 
 **Oil producer impact:**
-Nordostan: oil revenue plummets. 101 * 0.40 * ~9.0 * 0.01 = **$0.36**. At this price, oil revenue barely matters.
+Sarmatia: oil revenue plummets. 101 * 0.40 * ~9.0 * 0.01 = **$0.36**. At this price, oil revenue barely matters.
 Solaria: 101 * 0.45 * 12.5 * 0.01 = $0.57. Down from $0.80+ at peak.
 
 **Columbia ceasefire rally:** Momentum +1.5 (Pass 2 ceasefire rally). GDP boost from peace dividend.
@@ -306,16 +306,16 @@ Columbia eco_state: recovery begins. stress_triggers declining.
 | Oil price | $100.8 | -$40.4 |
 | Columbia GDP | ~265.0 | +1.5% (recovery) |
 | Columbia eco_state | STRESSED (recovering) | Improving |
-| Nordostan GDP | ~8.8 | Decline continuing but slower |
+| Sarmatia GDP | ~8.8 | Decline continuing but slower |
 
 ---
 
 ### ROUND 8: Normalization
 
-**Conditions:** Gulf Gate open. OPEC "high." 1 war (Nordostan-Heartland). Sanctions on Nordostan.
+**Conditions:** Gulf Gate open. OPEC "high." 1 war (Sarmatia-Ruthenia). Sanctions on Sarmatia.
 
 **Calculation:**
-- supply = 1.0 + 0.24 - 0.08 (Nordostan only, Persia ceasefire) = **1.16**.
+- supply = 1.0 + 0.24 - 0.08 (Sarmatia only, Persia ceasefire) = **1.16**.
 - demand recovering: avg growth ~1.5%. demand = 0.985.
 - disruption = 1.0. war_premium = 0.05.
 - raw_price = 80 * (0.985/1.16) * 1.0 * 1.05 = 80 * 0.849 * 1.05 = **$71.3**
@@ -331,7 +331,7 @@ Oil approaching baseline. The full cycle: $80 -> $128 -> $147 -> $152 -> $185 ->
 | Oil price | $83.1 | -$17.7 |
 | Columbia GDP | ~269.5 | +1.7% (recovering) |
 | Cathay GDP | ~222.0 | +2.5% |
-| Nordostan GDP | ~8.5 | Stabilizing at low level |
+| Sarmatia GDP | ~8.5 | Stabilizing at low level |
 
 ---
 
@@ -417,7 +417,7 @@ The soft cap formula: `200 + 50 * (1 - exp(-(raw - 200) / 100))`
 
 ---
 
-## NORDOSTAN ENRICHMENT PARADOX — DEEP ANALYSIS
+## SARMATIA ENRICHMENT PARADOX — DEEP ANALYSIS
 
 **Oil revenue trajectory:**
 
@@ -432,11 +432,11 @@ The soft cap formula: `200 + 50 * (1 - exp(-(raw - 200) / 100))`
 | R7 | $101 | 8.8 | 0.36 | 1.76 | 2.12 | 9.8 | 7.7 | 7.7 |
 | R8 | $83 | 8.5 | 0.27 | 1.70 | 1.97 | 9.5 | 7.5 | 7.5 |
 
-**Key finding:** Oil revenue is meaningful but NOT sufficient to change Nordostan's trajectory. Even at peak oil ($185, R4), oil revenue of $0.76 is only 27% of total revenue. The structural deficit is driven by military maintenance costs (12.9 coins at start) vastly exceeding revenue capacity. Oil revenue cannot close this gap.
+**Key finding:** Oil revenue is meaningful but NOT sufficient to change Sarmatia's trajectory. Even at peak oil ($185, R4), oil revenue of $0.76 is only 27% of total revenue. The structural deficit is driven by military maintenance costs (12.9 coins at start) vastly exceeding revenue capacity. Oil revenue cannot close this gap.
 
-**Paradox verdict:** The Nordostan Enrichment Paradox exists but is not as dramatic as the Dependencies document suggests. Nordostan benefits from high oil prices, and high oil prices are partially caused by the war Nordostan wages (via Gulf Gate disruption and war premium). But the benefit is marginal (~$0.3-0.5 additional revenue per round at peak) compared to the costs of war and sanctions. The paradox is more ironic than game-breaking.
+**Paradox verdict:** The Sarmatia Enrichment Paradox exists but is not as dramatic as the Dependencies document suggests. Sarmatia benefits from high oil prices, and high oil prices are partially caused by the war Sarmatia wages (via Gulf Gate disruption and war premium). But the benefit is marginal (~$0.3-0.5 additional revenue per round at peak) compared to the costs of war and sanctions. The paradox is more ironic than game-breaking.
 
-**DESIGN OBSERVATION:** The oil revenue formula `price * resource_pct * GDP * 0.01` means oil revenue SHRINKS as GDP shrinks. This creates a second paradox: sanctions reduce GDP, which reduces the base for oil revenue, which reduces the benefit of high oil prices. Nordostan's oil revenue would be $2.24 at $185 with starting GDP of 20, but only $0.76 with actual R4 GDP of 10.2. Sanctions reduce oil revenue by 66%.
+**DESIGN OBSERVATION:** The oil revenue formula `price * resource_pct * GDP * 0.01` means oil revenue SHRINKS as GDP shrinks. This creates a second paradox: sanctions reduce GDP, which reduces the base for oil revenue, which reduces the benefit of high oil prices. Sarmatia's oil revenue would be $2.24 at $185 with starting GDP of 20, but only $0.76 with actual R4 GDP of 10.2. Sanctions reduce oil revenue by 66%.
 
 ---
 
@@ -451,7 +451,7 @@ The soft cap formula: `200 + 50 * (1 - exp(-(raw - 200) / 100))`
 | Gulf Gate opening | -$110 instant crash | -$40.4 (inertia dampened) | Gradual decline realistic |
 | Full normalization | 1 round | 3-4 rounds | Matches physical oil market behavior |
 | Demand destruction | Not visible | Weak but present | Improved but needs calibration |
-| Nordostan enrichment | Dramatic (high peak price) | Moderate (lower peak, GDP decay) | More realistic — paradox exists but manageable |
+| Sarmatia enrichment | Dramatic (high peak price) | Moderate (lower peak, GDP decay) | More realistic — paradox exists but manageable |
 
 ---
 

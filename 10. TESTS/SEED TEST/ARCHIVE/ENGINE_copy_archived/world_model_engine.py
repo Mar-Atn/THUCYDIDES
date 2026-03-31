@@ -10,7 +10,7 @@ Uses ALL formulas from concept test engine, IMPROVED:
 - Stability: positive inertia, war-gated, autocracy resilience (v2)
 - Oil: responsive to crises, producers benefit (Gulf Gate blockade = +60%)
 - GDP: multiplicative, bilateral trade weighted
-- Elections: Columbia midterms R2, Heartland wartime R3-4, Columbia presidential R5
+- Elections: Columbia midterms R2, Ruthenia wartime R3-4, Columbia presidential R5
 
 Author: ATLAS (World Model Engineer)
 Version: 2.0 (SEED)
@@ -581,7 +581,7 @@ class WorldModelEngine:
                     delta -= 1.0  # midterms approaching
                 elif round_num == 4:
                     delta -= 2.0  # presidential approaching
-            elif country_id == "heartland":
+            elif country_id == "ruthenia":
                 if round_num in (2, 3):
                     delta -= 1.5  # election pressure
 
@@ -722,7 +722,7 @@ class WorldModelEngine:
         """Process scheduled elections.
 
         Columbia midterms R2: team votes + AI popular vote (50/50)
-        Heartland wartime R3-4: AI judges on gameplay outcomes
+        Ruthenia wartime R3-4: AI judges on gameplay outcomes
         Columbia presidential R5: nominations R4, speeches, votes + AI (50/50)
         """
         c = self.ws.countries[country_id]
@@ -769,13 +769,13 @@ class WorldModelEngine:
                 result["parliament_change"] = "status_quo"
                 result["note"] = "Midterms: President's camp retains majority."
 
-        # Heartland wartime election
-        elif election_type in ("heartland_wartime", "heartland_wartime_runoff"):
+        # Ruthenia wartime election
+        elif election_type in ("ruthenia_wartime", "ruthenia_wartime_runoff"):
             war_tiredness = pol.get("war_tiredness", 0)
             # Adjust AI score for war-specific factors
             territory_factor = 0
             for w in self.ws.wars:
-                if w.get("defender") == "heartland":
+                if w.get("defender") == "ruthenia":
                     territory_factor -= len(w.get("occupied_zones", [])) * 3
             ai_score_adjusted = clamp(
                 ai_score + territory_factor - war_tiredness * 2, 0, 100)
@@ -785,9 +785,9 @@ class WorldModelEngine:
             result["final_incumbent_pct"] = round(final_incumbent, 2)
             result["incumbent_wins"] = incumbent_wins
             if not incumbent_wins:
-                result["note"] = "Heartland election: Beacon loses. Bulwark becomes president."
+                result["note"] = "Ruthenia election: Beacon loses. Bulwark becomes president."
             else:
-                result["note"] = "Heartland election: Beacon survives."
+                result["note"] = "Ruthenia election: Beacon survives."
 
         # Columbia presidential
         elif election_type == "columbia_presidential":

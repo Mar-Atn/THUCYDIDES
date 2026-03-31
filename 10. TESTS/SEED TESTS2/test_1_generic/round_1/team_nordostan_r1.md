@@ -1,4 +1,4 @@
-# NORDOSTAN TEAM — ROUND 1 DECISIONS (H1 2026)
+# SARMATIA TEAM — ROUND 1 DECISIONS (H1 2026)
 
 ---
 
@@ -45,7 +45,7 @@ Revenue emergency overrides market management. $237/barrel even with Chinese dis
 - Buy: Artillery ammunition from Choson (continuing arrangement)
 
 ### Public Statements
-**PATHFINDER:** "Nordostan's forces continue to liberate the territories that have chosen to join our federation. We remain open to negotiations on the basis of reality — the reality on the ground, not the fantasies of those who wish to return to a world that no longer exists."
+**PATHFINDER:** "Sarmatia's forces continue to liberate the territories that have chosen to join our federation. We remain open to negotiations on the basis of reality — the reality on the ground, not the fantasies of those who wish to return to a world that no longer exists."
 
 ---
 
@@ -53,12 +53,12 @@ Revenue emergency overrides market management. $237/barrel even with Chinese dis
 
 ### PATHFINDER
 - FSB surveillance on Compass's communications. Transcripts of every non-state channel call.
-- Personal message to Dealer via Solaria: "I respect a man who makes deals. I am ready to make one. But I need something real — not a ceasefire that lets Heartland rearm."
+- Personal message to Dealer via Solaria: "I respect a man who makes deals. I am ready to make one. But I need something real — not a ceasefire that lets Ruthenia rearm."
 - Loyalty test for Ironhand: personal briefing on offensive plan. Watch for hesitation.
 
 ### IRONHAND
 - Execute Donetsk concentration. Concentrated armor + artillery on Pokrovsk axis, glide bombs, Shahed swarms.
-- **Private:** Redeployment from Zaporizhzhia creates vulnerability. If Heartland counterattacks there, we lose ground. Sealed memo documenting concerns — dated, witnessed.
+- **Private:** Redeployment from Zaporizhzhia creates vulnerability. If Ruthenia counterattacks there, we lose ground. Sealed memo documenting concerns — dated, witnessed.
 - Mil-to-mil contact with Rampart (Cathay): Pacific intel exchange.
 - Move Choson units to secondary sectors.
 
@@ -78,7 +78,7 @@ Revenue emergency overrides market management. $237/barrel even with Chinese dis
 | Dealer (Columbia) via Solaria | Pathfinder | Comprehensive framework discussion |
 | Helmsman (Cathay) | Pathfinder | Partnership recalibration, tech, energy |
 | Spire (Mirage) | Compass | Sanctions evasion, meeting logistics |
-| Bazaar (Phrygia) | Compass | Parallel import corridor, gas pricing |
+| Vizier (Phrygia) | Compass | Parallel import corridor, gas pricing |
 | Ironhand (internal) | Compass | "Post-offensive planning" |
 | Rampart (Cathay Marshal) | Ironhand | Intel sharing, Pacific assessment |
 
@@ -92,4 +92,4 @@ Revenue emergency overrides market management. $237/barrel even with Chinese dis
 
 **Internal game:** Pathfinder monitors Compass. Compass maneuvers toward deal while feeding optimistic economic data. Ironhand executes offensive while documenting reservations. Compass approaches Ironhand for "coffee" — either prudent coordination or first move toward something else. Coup at 10% probability (support 55%, well above threshold). Nobody plotting. Everyone positioning.
 
-**OPEC+ at HIGH:** Counter-intuitive but fiscal emergency overrides. Solaria can afford patience (treasury 20). Nordostan cannot.
+**OPEC+ at HIGH:** Counter-intuitive but fiscal emergency overrides. Solaria can afford patience (treasury 20). Sarmatia cannot.

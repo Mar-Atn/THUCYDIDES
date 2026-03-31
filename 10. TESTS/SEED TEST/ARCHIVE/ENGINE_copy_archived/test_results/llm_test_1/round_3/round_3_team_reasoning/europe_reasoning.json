@@ -5,16 +5,16 @@
     "lumiere": {
       "position": "European strategic autonomy. French nuclear umbrella. Independent Persia policy.",
       "defense_spending_push": "increase to 3%",
-      "heartland_support": "strong"
+      "ruthenia_support": "strong"
     },
     "forge": {
       "position": "Economic stability first. Cathay trade essential. Reluctant rearmament.",
       "cathay_trade_protection": "high priority",
-      "heartland_support": "strong but budget-constrained"
+      "ruthenia_support": "strong but budget-constrained"
     },
     "sentinel": {
-      "position": "Maximum Nordostan containment. NATO Article 5 sacred. Defense spending to 4%.",
-      "heartland_support": "maximum possible",
+      "position": "Maximum Sarmatia containment. NATO Article 5 sacred. Defense spending to 4%.",
+      "ruthenia_support": "maximum possible",
       "threat_level": "existential"
     },
     "ponte": {
@@ -29,12 +29,12 @@
   },
   "eu_decisions": [
     {
-      "issue": "nordostan_sanctions_tightening",
+      "issue": "sarmatia_sanctions_tightening",
       "result": "blocked_by_ponte",
       "level": 2
     },
     {
-      "issue": "heartland_aid_package",
+      "issue": "ruthenia_aid_package",
       "result": "approved_reduced",
       "amount": 1
     },
@@ -44,5 +44,5 @@
       "binding": false
     }
   ],
-  "final_decision": "Round 3: EU divided (Ponte blocking). Heartland aid: reduced. Defense spending gradual increase."
+  "final_decision": "Round 3: EU divided (Ponte blocking). Ruthenia aid: reduced. Defense spending gradual increase."
 }

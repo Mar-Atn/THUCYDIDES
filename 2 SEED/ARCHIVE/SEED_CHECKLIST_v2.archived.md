@@ -149,7 +149,7 @@ Concept status: **architecture complete** (15 modules, tech stack). SEED adds sc
 | I1 | **Test Harness Design** | Concept test runner (basic) | Full test system using ACTUAL engine components, map, roles, starting data. Supports: generic runs, focused scenarios, mechanic stress tests, balance tests, regression. | `SEED_TEST_ARCHITECTURE.md` + `test_harness.py` |
 | I2 | **Negotiation Emulation** | — (missing from concept test) | AI-to-AI conversation layer. Countries propose, counter, agree/reject. Captures the negotiation dynamics that are 90% of real SIM activity. | Integrated in test harness |
 | I3 | **Generic Test Battery** | 8 runs from concept test | Fresh battery with refined components. 4-8 runs, 8 rounds each. | Test outputs + analysis |
-| I4 | **Focused Test Suite** | — (new) | Targeted tests: aggressive actors, oil cartel balance, US internal tensions, Formosa crisis, Nordostan endgame, economic model stress | Test configs + results |
+| I4 | **Focused Test Suite** | — (new) | Targeted tests: aggressive actors, oil cartel balance, US internal tensions, Formosa crisis, Sarmatia endgame, economic model stress | Test configs + results |
 | I5 | **Calibration & Iteration** | 2 iterations in concept test | Systematic: run → analyze → adjust → re-run. Until dynamics are credible across all focused scenarios. | Updated engine + data + reports |
 
 ---

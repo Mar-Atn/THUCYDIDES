@@ -17,10 +17,10 @@
     },
     "eastern_europe_war": {
       "status": "COLLAPSE_IMMINENT",
-      "nordostan_stability": 1.0,
-      "heartland_stability": 1.0,
-      "nordostan_war_tiredness": 7.5912911484375,
-      "heartland_war_tiredness": 10.2714824296875,
+      "sarmatia_stability": 1.0,
+      "ruthenia_stability": 1.0,
+      "sarmatia_war_tiredness": 7.5912911484375,
+      "ruthenia_war_tiredness": 10.2714824296875,
       "occupied_zones": [
         "ee_east_front_central",
         "ee_east_front_south",
@@ -64,7 +64,7 @@
       "nuclear_level": 2,
       "ai_level": 3
     },
-    "nordostan": {
+    "sarmatia": {
       "gdp": 17.538733951783136,
       "growth": 0.5533404373981212,
       "treasury": 0,
@@ -81,7 +81,7 @@
       "nuclear_level": 3,
       "ai_level": 1
     },
-    "heartland": {
+    "ruthenia": {
       "gdp": 1.2867496317622313,
       "growth": -0.9702062706227003,
       "treasury": 0,

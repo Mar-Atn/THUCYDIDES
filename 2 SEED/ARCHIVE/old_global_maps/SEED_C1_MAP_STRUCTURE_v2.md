@@ -8,32 +8,32 @@
 
 | hex_id | owner | row | col |
 |--------|-------|-----|-----|
-| nordostan_1 | nordostan | 2 | 10 |
+| sarmatia_1 | sarmatia | 2 | 10 |
 | freeland_1 | freeland | 3 | 9 |
-| nordostan_2 | nordostan | 3 | 10 |
-| nordostan_3 | nordostan | 3 | 11 |
-| nordostan_4 | nordostan | 3 | 15 |
+| sarmatia_2 | sarmatia | 3 | 10 |
+| sarmatia_3 | sarmatia | 3 | 11 |
+| sarmatia_4 | sarmatia | 3 | 15 |
 | columbia_1 | columbia | 4 | 2 |
 | teutonia_1 | teutonia | 4 | 5 |
 | albion_1 | albion | 4 | 7 |
 | freeland_2 | freeland | 4 | 9 |
-| heartland_1 | heartland | 4 | 10 |
-| nordostan_5 | nordostan | 4 | 11 |
-| nordostan_6 | nordostan | 4 | 12 |
-| nordostan_7 | nordostan | 4 | 13 |
-| nordostan_8 | nordostan | 4 | 14 |
-| nordostan_9 | nordostan | 4 | 15 |
+| ruthenia_1 | ruthenia | 4 | 10 |
+| sarmatia_5 | sarmatia | 4 | 11 |
+| sarmatia_6 | sarmatia | 4 | 12 |
+| sarmatia_7 | sarmatia | 4 | 13 |
+| sarmatia_8 | sarmatia | 4 | 14 |
+| sarmatia_9 | sarmatia | 4 | 15 |
 | choson_1 | choson | 4 | 17 |
 | columbia_2 | columbia | 5 | 1 |
 | columbia_3 | columbia | 5 | 2 |
 | albion_2 | albion | 5 | 6 |
 | teutonia_2 | teutonia | 5 | 8 |
 | teutonia_3 | teutonia | 5 | 9 |
-| heartland_2 | heartland | 5 | 10 |
-| nordostan_10 | nordostan | 5 | 11 |
-| nordostan_11 | nordostan | 5 | 12 |
-| nordostan_12 | nordostan | 5 | 13 |
-| nordostan_13 | nordostan | 5 | 15 |
+| ruthenia_2 | ruthenia | 5 | 10 |
+| sarmatia_10 | sarmatia | 5 | 11 |
+| sarmatia_11 | sarmatia | 5 | 12 |
+| sarmatia_12 | sarmatia | 5 | 13 |
+| sarmatia_13 | sarmatia | 5 | 15 |
 | hanguk_1 | hanguk | 5 | 16 |
 | yamato_1 | yamato | 5 | 18 |
 | columbia_4 | columbia | 6 | 2 |
@@ -87,44 +87,44 @@
 Land-to-land adjacencies (computed from grid positions):
 
 ```
-nordostan_1: freeland_1, nordostan_2
-freeland_1: nordostan_1, nordostan_2, freeland_2, heartland_1
-nordostan_2: nordostan_1, freeland_1, nordostan_3, heartland_1, nordostan_5
-nordostan_3: nordostan_2, nordostan_5, nordostan_6
-nordostan_4: nordostan_9
+sarmatia_1: freeland_1, sarmatia_2
+freeland_1: sarmatia_1, sarmatia_2, freeland_2, ruthenia_1
+sarmatia_2: sarmatia_1, freeland_1, sarmatia_3, ruthenia_1, sarmatia_5
+sarmatia_3: sarmatia_2, sarmatia_5, sarmatia_6
+sarmatia_4: sarmatia_9
 columbia_1: columbia_2, columbia_3
 teutonia_1: (island, no land adjacency)
 albion_1: albion_2
-freeland_2: freeland_1, heartland_1, teutonia_2, teutonia_3
-heartland_1: freeland_1, nordostan_2, freeland_2, nordostan_5, teutonia_3, heartland_2
-nordostan_5: nordostan_2, nordostan_3, heartland_1, nordostan_6, heartland_2, nordostan_10
-nordostan_6: nordostan_3, nordostan_5, nordostan_7, nordostan_10, nordostan_11
-nordostan_7: nordostan_6, nordostan_8, nordostan_11, nordostan_12
-nordostan_8: nordostan_7, nordostan_9, nordostan_12
-nordostan_9: nordostan_4, nordostan_8, nordostan_13
+freeland_2: freeland_1, ruthenia_1, teutonia_2, teutonia_3
+ruthenia_1: freeland_1, sarmatia_2, freeland_2, sarmatia_5, teutonia_3, ruthenia_2
+sarmatia_5: sarmatia_2, sarmatia_3, ruthenia_1, sarmatia_6, ruthenia_2, sarmatia_10
+sarmatia_6: sarmatia_3, sarmatia_5, sarmatia_7, sarmatia_10, sarmatia_11
+sarmatia_7: sarmatia_6, sarmatia_8, sarmatia_11, sarmatia_12
+sarmatia_8: sarmatia_7, sarmatia_9, sarmatia_12
+sarmatia_9: sarmatia_4, sarmatia_8, sarmatia_13
 choson_1: hanguk_1
 columbia_2: columbia_1, columbia_3, columbia_4
 columbia_3: columbia_1, columbia_2, columbia_4, columbia_5
 albion_2: albion_1
 teutonia_2: freeland_2, teutonia_3, gallia_1, gallia_2
-teutonia_3: freeland_2, heartland_1, teutonia_2, heartland_2, gallia_2, phrygia_1
-heartland_2: heartland_1, nordostan_5, teutonia_3, nordostan_10, phrygia_1
-nordostan_10: nordostan_5, nordostan_6, heartland_2, nordostan_11
-nordostan_11: nordostan_6, nordostan_7, nordostan_10, nordostan_12, sogdiana_1
-nordostan_12: nordostan_7, nordostan_8, nordostan_11, sogdiana_1, cathay_1
-nordostan_13: nordostan_9, hanguk_1, cathay_2, cathay_3
-hanguk_1: choson_1, nordostan_13, cathay_3
+teutonia_3: freeland_2, ruthenia_1, teutonia_2, ruthenia_2, gallia_2, phrygia_1
+ruthenia_2: ruthenia_1, sarmatia_5, teutonia_3, sarmatia_10, phrygia_1
+sarmatia_10: sarmatia_5, sarmatia_6, ruthenia_2, sarmatia_11
+sarmatia_11: sarmatia_6, sarmatia_7, sarmatia_10, sarmatia_12, sogdiana_1
+sarmatia_12: sarmatia_7, sarmatia_8, sarmatia_11, sogdiana_1, cathay_1
+sarmatia_13: sarmatia_9, hanguk_1, cathay_2, cathay_3
+hanguk_1: choson_1, sarmatia_13, cathay_3
 yamato_1: yamato_2
 columbia_4: columbia_2, columbia_3, columbia_5, columbia_7
 columbia_5: columbia_3, columbia_4, columbia_6, columbia_7, columbia_8
 columbia_6: columbia_5, columbia_8
 gallia_1: teutonia_2, gallia_2, ponte_1
 gallia_2: teutonia_2, teutonia_3, gallia_1, phrygia_1, levantia_1
-phrygia_1: teutonia_3, heartland_2, gallia_2, levantia_1, phrygia_2
-sogdiana_1: nordostan_11, nordostan_12, cathay_1, sogdiana_2, sogdiana_3
-cathay_1: nordostan_12, sogdiana_1, cathay_2, sogdiana_3, cathay_4
-cathay_2: nordostan_13, cathay_1, cathay_3, cathay_4, cathay_5
-cathay_3: nordostan_13, hanguk_1, cathay_2, cathay_5
+phrygia_1: teutonia_3, ruthenia_2, gallia_2, levantia_1, phrygia_2
+sogdiana_1: sarmatia_11, sarmatia_12, cathay_1, sogdiana_2, sogdiana_3
+cathay_1: sarmatia_12, sogdiana_1, cathay_2, sogdiana_3, cathay_4
+cathay_2: sarmatia_13, cathay_1, cathay_3, cathay_4, cathay_5
+cathay_3: sarmatia_13, hanguk_1, cathay_2, cathay_5
 yamato_2: yamato_1
 columbia_7: columbia_4, columbia_5, columbia_8, columbia_9
 columbia_8: columbia_5, columbia_6, columbia_7, columbia_9

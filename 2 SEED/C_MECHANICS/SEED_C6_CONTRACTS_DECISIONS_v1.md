@@ -94,10 +94,10 @@ These exist at game start with established membership:
 |-------------|---------|:------------:|-------|
 | **NATO** | Columbia + European allies | Consensus | Collective defense commitment |
 | **EU** | European member states | Qualified majority | Economic coordination |
-| **BRICS+** | Cathay, Nordostan, Persia, others | Consensus | Economic/political counterweight |
+| **BRICS+** | Cathay, Sarmatia, Persia, others | Consensus | Economic/political counterweight |
 | **OPEC+** | Oil producers (Persia, Wellspring, others) | Consensus (production quotas) | Oil production coordination |
 | **UNSC** | All (5 permanent with veto + rotating) | Veto (P5) | Symbolic — resolutions are non-binding in SIM |
-| **SCO** | Cathay, Nordostan, Central Asian states | Consensus | Security cooperation |
+| **SCO** | Cathay, Sarmatia, Central Asian states | Consensus | Security cooperation |
 | **G7** | Columbia + major Western economies | Consensus | Economic policy coordination |
 
 Exact membership lists are in `countries.csv` (org_memberships column) and `relationships.csv`.
@@ -117,7 +117,7 @@ There is NO engine mechanic for organizational voting. Organizations work like t
 5. **Adoption = each member individually commits to the action**
 
 **Example — NATO Article 5:**
-- Heartland is attacked
+- Ruthenia is attacked
 - NATO member calls emergency session
 - Members discuss response
 - Each NATO member individually decides what military/economic support to provide

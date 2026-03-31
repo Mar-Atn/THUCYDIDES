@@ -131,9 +131,9 @@
         "ai_rd_progress": 0.05245367710976577
       }
     },
-    "nordostan": {
-      "id": "nordostan",
-      "sim_name": "Nordostan",
+    "sarmatia": {
+      "id": "sarmatia",
+      "sim_name": "Sarmatia",
       "parallel": "Russia",
       "regime_type": "autocracy",
       "organizations": [
@@ -195,9 +195,9 @@
         "ai_rd_progress": 0.2
       }
     },
-    "heartland": {
-      "id": "heartland",
-      "sim_name": "Heartland",
+    "ruthenia": {
+      "id": "ruthenia",
+      "sim_name": "Ruthenia",
       "parallel": "Ukraine",
       "regime_type": "democracy",
       "organizations": [],
@@ -1337,7 +1337,7 @@
         "columbia": {
           "naval": 4
         },
-        "nordostan": {
+        "sarmatia": {
           "naval": 2
         },
         "yamato": {
@@ -1465,7 +1465,7 @@
     },
     "g_nor_western": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2,
           "tactical_air": 1,
           "strategic_missiles": 4,
@@ -1475,7 +1475,7 @@
     },
     "g_nor_central": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2,
           "tactical_air": 1,
           "strategic_missiles": 6,
@@ -1485,7 +1485,7 @@
     },
     "g_nor_eastern": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 1,
           "strategic_missiles": 2
         }
@@ -1493,14 +1493,14 @@
     },
     "ee_belarus": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2
         }
       }
     },
     "ee_nord_border": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2,
           "tactical_air": 2
         }
@@ -1508,28 +1508,28 @@
     },
     "ee_east_front_central": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 3
         }
       }
     },
     "ee_east_front_south": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 1
         }
       }
     },
     "ee_occupied_south": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2
         }
       }
     },
     "ee_crimea_naval": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 1,
           "tactical_air": 1
         }
@@ -1537,7 +1537,7 @@
     },
     "g_sea_black": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "naval": 2
         },
         "phrygia": {
@@ -1547,7 +1547,7 @@
     },
     "g_sea_baltic": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "naval": 1
         },
         "teutonia": {
@@ -1560,21 +1560,21 @@
     },
     "g_sea_arctic": {
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "naval": 1
         }
       }
     },
     "ee_west_ukr": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 2
         }
       }
     },
     "ee_east_front_north": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 3,
           "tactical_air": 2
         }
@@ -1582,7 +1582,7 @@
     },
     "ee_capital": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 0,
           "tactical_air": 1,
           "air_defense": 1
@@ -1591,14 +1591,14 @@
     },
     "ee_central_ukr": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 1
         }
       }
     },
     "ee_south_ukr": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 2,
           "tactical_air": 1
         }
@@ -1606,7 +1606,7 @@
     },
     "ee_dnipro_line": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 2,
           "tactical_air": 1
         }
@@ -1614,14 +1614,14 @@
     },
     "ee_kherson": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 1
         }
       }
     },
     "ee_southwest": {
       "forces": {
-        "heartland": {
+        "ruthenia": {
           "ground": 1
         }
       }
@@ -2083,223 +2083,223 @@
       "zone": "g_cat_southern"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 2,
       "zone": "g_nor_western"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 2,
       "zone": "g_nor_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 1,
       "zone": "g_nor_eastern"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_belarus"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_nord_border"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 3,
       "zone": "ee_east_front_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 3,
       "zone": "ee_east_front_south"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_occupied_south"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "ground",
       "count": 1,
       "zone": "ee_crimea_naval"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "naval",
       "count": 2,
       "zone": "g_sea_black"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "naval",
       "count": 1,
       "zone": "g_sea_baltic"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "naval",
       "count": 2,
       "zone": "g_sea_north_pacific"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "naval",
       "count": 1,
       "zone": "g_sea_arctic"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "g_nor_western"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "g_nor_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "tactical_air",
       "count": 3,
       "zone": "ee_east_front_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "tactical_air",
       "count": 2,
       "zone": "ee_nord_border"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "ee_crimea_naval"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "strategic_missiles",
       "count": 6,
       "zone": "g_nor_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "strategic_missiles",
       "count": 4,
       "zone": "g_nor_western"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "strategic_missiles",
       "count": 2,
       "zone": "g_nor_eastern"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "air_defense",
       "count": 1,
       "zone": "g_nor_western"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "air_defense",
       "count": 1,
       "zone": "g_nor_central"
     },
     {
-      "country": "nordostan",
+      "country": "sarmatia",
       "unit_type": "air_defense",
       "count": 1,
       "zone": "ee_east_front_central"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_west_ukr"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 3,
       "zone": "ee_east_front_north"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_capital"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_central_ukr"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_south_ukr"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 2,
       "zone": "ee_dnipro_line"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 1,
       "zone": "ee_kherson"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "ground",
       "count": 1,
       "zone": "ee_southwest"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "tactical_air",
       "count": 2,
       "zone": "ee_east_front_north"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "ee_capital"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "ee_south_ukr"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "tactical_air",
       "count": 1,
       "zone": "ee_dnipro_line"
     },
     {
-      "country": "heartland",
+      "country": "ruthenia",
       "unit_type": "air_defense",
       "count": 1,
       "zone": "ee_capital"
@@ -2820,7 +2820,7 @@
     "tariffs": {
       "columbia": {
         "cathay": 3,
-        "nordostan": 2,
+        "sarmatia": 2,
         "caribe": 2,
         "persia": 2,
         "choson": 2
@@ -2830,37 +2830,37 @@
         "yamato": 2,
         "hanguk": 1
       },
-      "nordostan": {
+      "sarmatia": {
         "columbia": 2,
         "albion": 2,
         "gallia": 2,
         "teutonia": 2,
         "freeland": 2,
         "ponte": 1,
-        "heartland": 3
+        "ruthenia": 3
       },
       "gallia": {
         "cathay": 1,
-        "nordostan": 2,
+        "sarmatia": 2,
         "columbia": 2,
         "albion": 2
       },
       "teutonia": {
         "cathay": 1,
-        "nordostan": 2
+        "sarmatia": 2
       },
       "freeland": {
         "cathay": 1,
-        "nordostan": 2
+        "sarmatia": 2
       },
       "ponte": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "gallia": 2,
         "cathay": 1
       },
       "albion": {
         "cathay": 1,
-        "nordostan": 2,
+        "sarmatia": 2,
         "gallia": 2
       },
       "bharata": {
@@ -2899,8 +2899,8 @@
         "columbia": 1
       },
       "mirage": {},
-      "heartland": {
-        "nordostan": 2,
+      "ruthenia": {
+        "sarmatia": 2,
         "cathay": 2
       },
       "persia": {
@@ -2913,44 +2913,44 @@
     "sanctions": {
       "_description": "Sanctions imposed BY row ON column. Negative values = evasion/support for target.",
       "columbia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 3,
         "caribe": 2
       },
       "cathay": {
-        "nordostan": -1
+        "sarmatia": -1
       },
-      "nordostan": {
+      "sarmatia": {
         "columbia": 1,
-        "heartland": 3
+        "ruthenia": 3
       },
       "gallia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 3,
         "caribe": 2
       },
       "teutonia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 3,
         "caribe": 2
       },
       "freeland": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 3,
         "caribe": 2
       },
       "ponte": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "choson": 2,
         "persia": 2,
         "caribe": 1
       },
       "albion": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 3,
         "caribe": 2
@@ -2958,19 +2958,19 @@
       "bharata": {},
       "levantia": {
         "persia": 3,
-        "nordostan": 1
+        "sarmatia": 1
       },
       "formosa": {
-        "nordostan": 1
+        "sarmatia": 1
       },
       "phrygia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "caribe": 2,
         "persia": 2,
         "choson": 3
       },
       "yamato": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "choson": 3
       },
       "solaria": {},
@@ -2980,15 +2980,15 @@
         "yamato": 1
       },
       "hanguk": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "choson": 3
       },
       "caribe": {
         "columbia": 1
       },
       "mirage": {},
-      "heartland": {
-        "nordostan": 3
+      "ruthenia": {
+        "sarmatia": 3
       },
       "persia": {
         "columbia": 1,
@@ -3035,7 +3035,7 @@
       "permanent_members": [
         "columbia",
         "cathay",
-        "nordostan",
+        "sarmatia",
         "gallia",
         "albion"
       ],
@@ -3050,7 +3050,7 @@
       "type": "coordination",
       "members": [
         "cathay",
-        "nordostan",
+        "sarmatia",
         "bharata",
         "solaria",
         "persia",
@@ -3067,7 +3067,7 @@
       "type": "economic",
       "members": [
         "solaria",
-        "nordostan",
+        "sarmatia",
         "persia",
         "mirage"
       ],
@@ -3090,8 +3090,8 @@
   ],
   "wars": [
     {
-      "attacker": "nordostan",
-      "defender": "heartland",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
       "theater": "eastern_europe",
       "status": "active",
       "start_round": -8,
@@ -3111,7 +3111,7 @@
   "oil_price_index": 117.0625,
   "opec_production": {
     "solaria": "normal",
-    "nordostan": "high",
+    "sarmatia": "high",
     "persia": "high",
     "mirage": "normal"
   },
@@ -3129,19 +3129,19 @@
   "round_log": [
     "=== ROUND 8 PROCESSING BEGINS ===",
     "--- PASS 1: DETERMINISTIC ---",
-    "  Tariff: heartland -> cathay set to 2",
+    "  Tariff: ruthenia -> cathay set to 2",
     "  Tariff: gallia -> cathay set to 1",
     "  Tariff: teutonia -> cathay set to 1",
     "  Tariff: phrygia -> cathay set to 1",
     "  Tariff: hanguk -> cathay set to 1",
     "  Tariff: caribe -> columbia set to 1",
     "  Sanctions: phrygia -> choson set to 3",
-    "  OPEC: nordostan production set to high",
+    "  OPEC: sarmatia production set to high",
     "  OPEC: persia production set to high",
     "  OPEC: solaria production set to normal",
     "  OPEC: mirage production set to normal",
-    "  Combat ee_east_front_south: heartland(3) vs nordostan(1) -> attacker_losses=1, defender_losses=0",
-    "  Missile strike (conventional) nordostan->ee_capital",
+    "  Combat ee_east_front_south: ruthenia(3) vs sarmatia(1) -> attacker_losses=1, defender_losses=0",
+    "  Missile strike (conventional) sarmatia->ee_capital",
     "  Covert cyber by cathay on formosa: FAILED, DETECTED",
     "  Covert espionage by albion on gallia: SUCCESS, DETECTED",
     "  Covert sabotage by levantia on persia: SUCCESS, undetected",
@@ -3168,29 +3168,29 @@
     "  Production cathay: {'ground': 1, 'naval': 1, 'tactical_air': 1}",
     "  Stability cathay: 8.4 -> 8.8 (delta=+0.38)",
     "  Support cathay (autocracy): 79.1 -> 84.3 (delta=+5.21)",
-    "  Sanctions on nordostan: damage=0.0060, coalition_coverage=0.259, effectiveness=weak",
-    "  Tariffs nordostan: imposer_cost=0.152, revenue=0.504, target_cost=0.368, net_cost=0.016",
-    "  Inflation nordostan: 2.7% -> 2.3%",
-    "  GDP nordostan: 20.55 -> 20.64 (growth +0.42%, factors: tariff=0.999 sanc=0.994 war=0.920 tech=1.000 infl=1.000 block=0.958)",
-    "  Debt nordostan: 2.00 -> 2.00 (deficit=0.00)",
-    "  Revenue nordostan: 2.76 (base=4.54 oil=0.42 sanc_cost=0.21 infl_erosion=0.00 war=0.00 debt=2.00)",
-    "  CRISIS: nordostan reserves exhausted!",
-    "  Budget nordostan: rev=2.76 maint=11.70 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
-    "  Production nordostan: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
-    "  Stability nordostan: 2.3 -> 1.9 (delta=-0.41)",
-    "  Support nordostan (autocracy): 45.1 -> 40.4 (delta=-4.71)",
-    "  Sanctions on heartland: damage=0.0000, coalition_coverage=0.001, effectiveness=weak",
-    "  Tariffs heartland: imposer_cost=0.007, revenue=0.025, target_cost=0.001, net_cost=0.000",
-    "  Inflation heartland: 3.8% -> 3.3%",
-    "  GDP heartland: 1.36 -> 1.35 (growth -0.59%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=1.000 block=0.860)",
-    "  Debt heartland: 3.00 -> 3.00 (deficit=0.00)",
-    "  Revenue heartland: 0.00 (base=0.30 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.01 debt=3.00)",
-    "  CRISIS: heartland reserves exhausted!",
-    "  Budget heartland: rev=0.00 maint=11.40 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
-    "  Production heartland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
-    "  Stability heartland: 1.0 -> 1.0 (delta=-1.08)",
-    "  Support heartland (democracy): 6.8 -> 0.0 (delta=-8.73)",
-    "  FINANCIAL CRISIS heartland: market_index=25.4, capital_flight=0.02",
+    "  Sanctions on sarmatia: damage=0.0060, coalition_coverage=0.259, effectiveness=weak",
+    "  Tariffs sarmatia: imposer_cost=0.152, revenue=0.504, target_cost=0.368, net_cost=0.016",
+    "  Inflation sarmatia: 2.7% -> 2.3%",
+    "  GDP sarmatia: 20.55 -> 20.64 (growth +0.42%, factors: tariff=0.999 sanc=0.994 war=0.920 tech=1.000 infl=1.000 block=0.958)",
+    "  Debt sarmatia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue sarmatia: 2.76 (base=4.54 oil=0.42 sanc_cost=0.21 infl_erosion=0.00 war=0.00 debt=2.00)",
+    "  CRISIS: sarmatia reserves exhausted!",
+    "  Budget sarmatia: rev=2.76 maint=11.70 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production sarmatia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability sarmatia: 2.3 -> 1.9 (delta=-0.41)",
+    "  Support sarmatia (autocracy): 45.1 -> 40.4 (delta=-4.71)",
+    "  Sanctions on ruthenia: damage=0.0000, coalition_coverage=0.001, effectiveness=weak",
+    "  Tariffs ruthenia: imposer_cost=0.007, revenue=0.025, target_cost=0.001, net_cost=0.000",
+    "  Inflation ruthenia: 3.8% -> 3.3%",
+    "  GDP ruthenia: 1.36 -> 1.35 (growth -0.59%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=1.000 block=0.860)",
+    "  Debt ruthenia: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue ruthenia: 0.00 (base=0.30 oil=0.00 sanc_cost=0.00 infl_erosion=0.00 war=0.01 debt=3.00)",
+    "  CRISIS: ruthenia reserves exhausted!",
+    "  Budget ruthenia: rev=0.00 maint=11.40 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production ruthenia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability ruthenia: 1.0 -> 1.0 (delta=-1.08)",
+    "  Support ruthenia (democracy): 6.8 -> 0.0 (delta=-8.73)",
+    "  FINANCIAL CRISIS ruthenia: market_index=25.4, capital_flight=0.02",
     "  Sanctions on persia: damage=0.0006, coalition_coverage=0.032, effectiveness=weak",
     "  Tariffs persia: imposer_cost=0.023, revenue=0.076, target_cost=0.054, net_cost=0.001",
     "  Inflation persia: 8.0% -> 6.8%",
@@ -3366,10 +3366,10 @@
     "  Stability mirage: 9.8 -> 10.0 (delta=+0.20)",
     "  Support mirage (autocracy): 100.0 -> 100.0 (delta=+6.00)",
     "--- PASS 2: AI CONTEXTUAL ADJUSTMENT ---",
-    "  AI ADJ nordostan: war_fatigue_acceleration \u2014 Prolonged war (16 rounds) accelerates public fatigue.",
-    "  AI ADJ nordostan: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
-    "  AI ADJ heartland: war_fatigue_acceleration \u2014 Prolonged war (16 rounds) accelerates public fatigue.",
-    "  AI ADJ heartland: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ sarmatia: war_fatigue_acceleration \u2014 Prolonged war (16 rounds) accelerates public fatigue.",
+    "  AI ADJ sarmatia: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
+    "  AI ADJ ruthenia: war_fatigue_acceleration \u2014 Prolonged war (16 rounds) accelerates public fatigue.",
+    "  AI ADJ ruthenia: capital_flight \u2014 Low stability triggers capital exodus.",
     "  AI ADJ persia: capital_flight \u2014 Low stability triggers capital exodus.",
     "  AI ADJ choson: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
     "  AI ADJ caribe: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",

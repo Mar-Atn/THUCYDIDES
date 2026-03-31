@@ -43,7 +43,7 @@
       "arms_transfers": [
         {
           "from": "columbia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 3,
           "type": "military_aid"
         }
@@ -99,7 +99,7 @@
       "ai": 2.56
     }
   },
-  "nordostan": {
+  "sarmatia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -123,7 +123,7 @@
       }
     },
     "tariffs": {
-      "heartland": 3
+      "ruthenia": 3
     },
     "sanctions": {},
     "military": {
@@ -131,7 +131,7 @@
       "blockades": [],
       "missile_strikes": [
         {
-          "country": "nordostan",
+          "country": "sarmatia",
           "target_zone": "ee_central_ukr",
           "warhead": "conventional"
         }
@@ -149,7 +149,7 @@
       "ai": 0.0
     }
   },
-  "heartland": {
+  "ruthenia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -174,14 +174,14 @@
     },
     "tariffs": {
       "cathay": 1,
-      "nordostan": 2
+      "sarmatia": 2
     },
     "sanctions": {},
     "military": {
       "combat": [
         {
-          "attacker": "heartland",
-          "defender": "nordostan",
+          "attacker": "ruthenia",
+          "defender": "sarmatia",
           "zone": "ee_east_front_central",
           "units": 6
         }
@@ -271,7 +271,7 @@
     "tariffs": {
       "columbia": 1,
       "cathay": 0,
-      "nordostan": 2,
+      "sarmatia": 2,
       "albion": 1
     },
     "sanctions": {
@@ -289,7 +289,7 @@
       "arms_transfers": [
         {
           "from": "gallia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.5,
           "type": "military_aid"
         }
@@ -326,7 +326,7 @@
     },
     "tariffs": {
       "cathay": 0,
-      "nordostan": 2
+      "sarmatia": 2
     },
     "sanctions": {
       "persia": 2,
@@ -343,7 +343,7 @@
       "arms_transfers": [
         {
           "from": "teutonia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.8,
           "type": "military_aid"
         }
@@ -423,7 +423,7 @@
       }
     },
     "tariffs": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "gallia": 1
     },
     "sanctions": {
@@ -469,7 +469,7 @@
       }
     },
     "tariffs": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "gallia": 1
     },
     "sanctions": {},
@@ -484,7 +484,7 @@
       "arms_transfers": [
         {
           "from": "albion",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.5,
           "type": "military_aid"
         }
@@ -662,7 +662,7 @@
       "solaria": 1
     },
     "sanctions": {
-      "nordostan": 1,
+      "sarmatia": 1,
       "persia": 1,
       "caribe": 1
     },

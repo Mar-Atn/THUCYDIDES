@@ -37,7 +37,7 @@
 | **Solaria** | Close ally | Fellow Gulf monarchy, OPEC+ partner, shared Persia threat. Both under missile attack. Coordinate defense, energy policy, and regional diplomacy. Abu Dhabi-Riyadh axis is the Gulf's strategic center. Some rivalry (Dubai vs. Riyadh as financial hub) but existential threat aligns them. |
 | **Levantia** | Warming (Abraham Accords partner) | Abraham Accords (2020) normalized relations. Defense cooperation growing — joint exercises, intelligence sharing, defense technology. Levantia-UAE security axis is the Abraham Accords' operational reality. But the partnership that was meant to deter Iran has instead made Mirage a target. |
 | **Bharata** | Friendly (corridor partner) | India-Middle East-Europe Economic Corridor (IMEC) runs through Mirage. Large Indian expatriate population. Growing trade and investment ties. Bharata sees Mirage as gateway to Middle East markets. |
-| **Nordostan** | Tense (complicated) | Mirage maintains quiet commercial relationships with Nordostan despite Western sanctions. Financial flows through Dubai facilitate sanctions evasion — Mirage looks the other way when it suits commercial interests. Columbia pressures Mirage to crack down; Mirage complies selectively. |
+| **Sarmatia** | Tense (complicated) | Mirage maintains quiet commercial relationships with Sarmatia despite Western sanctions. Financial flows through Dubai facilitate sanctions evasion — Mirage looks the other way when it suits commercial interests. Columbia pressures Mirage to crack down; Mirage complies selectively. |
 
 ---
 
@@ -150,11 +150,11 @@ What makes Mirage essential to the SIM: the financial intermediary. Every sancti
 Mirage is the **financial intermediary** — the small country whose connectivity makes it indispensable to everyone's strategy. Not powerful enough to shape events directly, but positioned to facilitate, enable, or obstruct every major transaction.
 
 **Key strategic choices:**
-- **Sanctions enforcement vs. evasion:** For each sanctions regime (Nordostan, Cathay tech, Persia), Mirage decides whether to enforce or enable. Enforcement earns Columbia's trust; enabling earns commercial profit and debtor loyalty. The choice can be made per-sanction, per-round.
+- **Sanctions enforcement vs. evasion:** For each sanctions regime (Sarmatia, Cathay tech, Persia), Mirage decides whether to enforce or enable. Enforcement earns Columbia's trust; enabling earns commercial profit and debtor loyalty. The choice can be made per-sanction, per-round.
 - **War posture:** Remain a passive target absorbing Persian missiles, or formally enter the war alongside Columbia and Levantia? Escalation risks more damage; passivity risks looking weak and inviting more attacks.
 - **Financial hub defense:** How to maintain Dubai's status as a global safe haven while missiles fall nearby? The perception game — investor confidence, tourism, talent retention — may matter more than the military game.
 - **Arms diversification:** Continue buying from everyone (Columbia, Gallia, Cathay, Levantia) or align procurement with a single patron for deeper security guarantees?
-- **Back-channel broker:** Offer to host negotiations between adversaries — Columbia-Persia, Nordostan-Heartland, Cathay-Columbia. Each mediation attempt provides intelligence and diplomatic capital. But failed mediation burns credibility.
+- **Back-channel broker:** Offer to host negotiations between adversaries — Columbia-Persia, Sarmatia-Ruthenia, Cathay-Columbia. Each mediation attempt provides intelligence and diplomatic capital. But failed mediation burns credibility.
 - **BRICS+ financial architecture:** Support cryptocurrency/digital currency alternatives to the dollar (mBridge, AED coin), or preserve the dollar peg that underpins the financial hub?
 
 **Spire's personality:** Sleek, connected, pragmatic. Sees every relationship as a portfolio to be optimized. Never commits more than necessary. The ultimate networker — knows everyone, trusts no one, trades everything. Allergic to ideology. The most rational actor in the SIM, which is both strength (never makes emotional mistakes) and weakness (has no cause worth fighting for beyond prosperity).

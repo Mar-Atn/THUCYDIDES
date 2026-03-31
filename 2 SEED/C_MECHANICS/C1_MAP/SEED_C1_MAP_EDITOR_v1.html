@@ -178,8 +178,8 @@ let countries = [
   { id: 'sea',       name: 'SEA',       color: '#B5CCE0' },
   { id: 'columbia',  name: 'Columbia',   color: '#D4B896' },
   { id: 'cathay',    name: 'Cathay',     color: '#E8D5A3' },
-  { id: 'nordostan', name: 'Nordostan',  color: '#D4A5A5' },
-  { id: 'heartland', name: 'Heartland',  color: '#A5C8A5' },
+  { id: 'sarmatia', name: 'Sarmatia',  color: '#D4A5A5' },
+  { id: 'ruthenia', name: 'Ruthenia',  color: '#A5C8A5' },
   { id: 'gallia',    name: 'Gallia',     color: '#B5A5C8' },
   { id: 'teutonia',  name: 'Teutonia',   color: '#8FB59A' },
   { id: 'thule',     name: 'Thule',      color: '#7FA58A' },
@@ -286,28 +286,28 @@ function loadCurrentMap() {
   chokepoints = { formosa_strait: null, gulf_gate: null, caribe_passage: null };
   dieHards = { die_hard_1: null };
 
-  grid[2][11] = { owner: 'nordostan' };
+  grid[2][11] = { owner: 'sarmatia' };
   grid[3][5]  = { owner: 'thule' };
-  grid[3][11] = { owner: 'nordostan' };
-  grid[3][13] = { owner: 'nordostan' };
-  grid[3][14] = { owner: 'nordostan' };
-  grid[3][15] = { owner: 'nordostan' };
+  grid[3][11] = { owner: 'sarmatia' };
+  grid[3][13] = { owner: 'sarmatia' };
+  grid[3][14] = { owner: 'sarmatia' };
+  grid[3][15] = { owner: 'sarmatia' };
   grid[3][17] = { owner: 'choson' };
   grid[4][9]  = { owner: 'freeland' };
-  grid[4][10] = { owner: 'heartland' };
-  grid[4][11] = { owner: 'nordostan' };
+  grid[4][10] = { owner: 'ruthenia' };
+  grid[4][11] = { owner: 'sarmatia' };
   grid[4][13] = { owner: 'sogdiana' };
   grid[4][14] = { owner: 'sogdiana' };
-  grid[4][15] = { owner: 'nordostan' };
-  grid[4][16] = { owner: 'nordostan' };
+  grid[4][15] = { owner: 'sarmatia' };
+  grid[4][16] = { owner: 'sarmatia' };
   grid[4][17] = { owner: 'hanguk' };
   grid[4][20] = { owner: 'yamato' };
   grid[5][1]  = { owner: 'columbia' };
   grid[5][6]  = { owner: 'albion' };
   grid[5][8]  = { owner: 'teutonia' };
   grid[5][9]  = { owner: 'teutonia' };
-  grid[5][10] = { owner: 'heartland' };
-  grid[5][11] = { owner: 'nordostan' };
+  grid[5][10] = { owner: 'ruthenia' };
+  grid[5][11] = { owner: 'sarmatia' };
   grid[5][14] = { owner: 'sogdiana' };
   grid[5][15] = { owner: 'cathay' };
   grid[5][16] = { owner: 'cathay' };
@@ -765,10 +765,10 @@ function buildPalette() {
   const swatchCanvas = document.createElement('canvas');
   swatchCanvas.width = 22; swatchCanvas.height = 22;
   const sctx = swatchCanvas.getContext('2d');
-  sctx.fillStyle = '#A5C8A5'; // heartland green as example base
+  sctx.fillStyle = '#A5C8A5'; // ruthenia green as example base
   sctx.fillRect(0, 0, 22, 22);
   sctx.globalAlpha = 0.5;
-  sctx.strokeStyle = '#D4A5A5'; // nordostan rose
+  sctx.strokeStyle = '#D4A5A5'; // sarmatia rose
   sctx.lineWidth = 3;
   for (let i = -22; i < 44; i += 6) {
     sctx.beginPath();
@@ -1196,7 +1196,7 @@ canvas.addEventListener('click', (e) => {
         if (cell.occupied_by) {
           delete cell.occupied_by;
         } else {
-          cell.occupied_by = 'nordostan';
+          cell.occupied_by = 'sarmatia';
         }
         draw();
       }

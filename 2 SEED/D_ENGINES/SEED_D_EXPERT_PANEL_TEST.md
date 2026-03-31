@@ -27,7 +27,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 
 ### State at R4 (from TEST_3_FULL_RESULTS.md):
 
-| Variable | Columbia | Cathay | Nordostan | Solaria | Teutonia |
+| Variable | Columbia | Cathay | Sarmatia | Solaria | Teutonia |
 |----------|----------|--------|-----------|---------|----------|
 | GDP | 269.2 | 211.8 | 10.2 | 12.5 | ~42 |
 | Growth | -3.4% | +1.5% | ~-11% | +4% | ~-1.5% |
@@ -39,7 +39,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 | Inflation | ~5% | ~1% | ~85% | ~2.5% | ~4% |
 | War Tired | 1.6 | 0 | 4.2 | 0 | 0 |
 
-**History (R1-R3):** Gulf Gate blocked since R0. Oil climbed $80 -> $128 -> $147 -> $152. R4 is when OPEC restricts (all "low"), pushing oil to $185. Columbia hit by oil shock + Persia war. Nordostan declining under sanctions + war but oil revenue cushioning slightly. Solaria booming on oil windfall.
+**History (R1-R3):** Gulf Gate blocked since R0. Oil climbed $80 -> $128 -> $147 -> $152. R4 is when OPEC restricts (all "low"), pushing oil to $185. Columbia hit by oil shock + Persia war. Sarmatia declining under sanctions + war but oil revenue cushioning slightly. Solaria booming on oil windfall.
 
 ---
 
@@ -47,13 +47,13 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 
 **Check: GDP trajectory declining 3+ rounds (growth > -1)?**
 - Columbia: GDP declined R1-R3 (280 -> 282.6 -> 278.9 -> 269.2). rounds_declining = 2 (R2-R3). Does NOT fire (needs 3+). NO TRIGGER.
-- Nordostan: GDP declined R1-R3 (16.4 -> 13.5 -> 11.5 -> 10.2). rounds_declining = 3. growth = -11% (not > -1). Does NOT fire (growth already below -1). NO TRIGGER.
+- Sarmatia: GDP declined R1-R3 (16.4 -> 13.5 -> 11.5 -> 10.2). rounds_declining = 3. growth = -11% (not > -1). Does NOT fire (growth already below -1). NO TRIGGER.
 
 **Check: Stability declining 3+ rounds?**
 - No country has stability declining for 3 consecutive rounds yet by R4. NO TRIGGER.
 
 **Check 1: GDP growing during crisis/collapse?**
-- Nordostan in crisis with growth -11%. NOT growing. NO TRIGGER.
+- Sarmatia in crisis with growth -11%. NOT growing. NO TRIGGER.
 - No country in crisis with positive growth. NO TRIGGER.
 
 **Check 2: Oil importer growing >2% with oil >$150?**
@@ -64,39 +64,39 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - **FINDING: At $185 oil, no importer is growing >2%, so this check catches nothing. It has already been priced in by Pass 1.**
 
 **Check 3: Oil producer NOT benefiting (oil >$120, resource_pct >20%, growth <1%)?**
-- Nordostan: oil_producer = True. Oil = $185 > $120. resource_pct = 0.40 (> 0.20). growth = -11% (< 1%). FIRES.
+- Sarmatia: oil_producer = True. Oil = $185 > $120. resource_pct = 0.40 (> 0.20). growth = -11% (< 1%). FIRES.
   - boost = min(2.0, 0.40 * 3) = min(2.0, 1.2) = **+1.2 to gdp_growth_rate**
-  - Reason: "KEYNES: Nordostan is a major oil producer (40% resources) with oil at $185 -- should be benefiting."
+  - Reason: "KEYNES: Sarmatia is a major oil producer (40% resources) with oil at $185 -- should be benefiting."
   - Confidence: medium
 - Solaria: oil_producer = True. growth = +4% (NOT < 1%). NO TRIGGER.
 - Persia: oil_producer = True. resource_pct = 0.35. growth likely very negative. FIRES.
   - boost = min(2.0, 0.35 * 3) = min(2.0, 1.05) = **+1.05 to gdp_growth_rate**
 
 **Check 4: Inflation spiral (delta >20) without GDP consequence (growth >0)?**
-- Nordostan: inflation delta = 85 - 5 = 80 (> 20). But growth = -11% (NOT > 0). NO TRIGGER.
+- Sarmatia: inflation delta = 85 - 5 = 80 (> 20). But growth = -11% (NOT > 0). NO TRIGGER.
 - No country has both high inflation AND positive growth. NO TRIGGER.
 
 **Check 5: Major trading partner in crisis (weight >10%)?**
-- Nordostan is in crisis. Partners with weight > 0.10: likely Cathay, possibly Teutonia.
+- Sarmatia is in crisis. Partners with weight > 0.10: likely Cathay, possibly Teutonia.
   - Cathay: momentum = +0.3 (> -1). FIRES. adjustment: momentum -0.5 for Cathay.
   - Teutonia: if weight > 0.10, FIRES. momentum -0.5 for Teutonia.
 
 **Check 6: Printing money without sufficient inflation?**
-- Nordostan: printed ~8 coins, inf_delta = 80. Is 80 < 8*2=16? No (80 > 16). NO TRIGGER.
+- Sarmatia: printed ~8 coins, inf_delta = 80. Is 80 < 8*2=16? No (80 > 16). NO TRIGGER.
 - Columbia: minimal printing at this stage. NO TRIGGER.
 
 **Legacy: Market panic on crisis entry?**
-- Nordostan entered crisis in an earlier round, not this round. prev_state = crisis, current = crisis. NO TRIGGER (not a new transition).
+- Sarmatia entered crisis in an earlier round, not this round. prev_state = crisis, current = crisis. NO TRIGGER (not a new transition).
 
 **Legacy: Capital flight (stability < 3)?**
-- Nordostan: stability ~3.0. Is stability < 3? Borderline. If exactly 3.0, condition `< 3` = False. NO TRIGGER.
+- Sarmatia: stability ~3.0. Is stability < 3? Borderline. If exactly 3.0, condition `< 3` = False. NO TRIGGER.
 - If stability = 2.9 (plausible): flight = 10.2 * 0.01 (autocracy) = **-0.102 GDP**. FIRES.
 
 **Legacy: Capital outflow (stability < 4)?**
-- Nordostan: stability ~3.0, < 4. And not < 3 (if exactly 3.0). flight = 10.2 * 0.01 = **-0.102 GDP**. FIRES (medium confidence).
+- Sarmatia: stability ~3.0, < 4. And not < 3 (if exactly 3.0). flight = 10.2 * 0.01 = **-0.102 GDP**. FIRES (medium confidence).
 
 **Legacy: Sanctions adaptation (>4 rounds)?**
-- Nordostan: sanctions_rounds by R4 = 4. Needs > 4. NO TRIGGER (exactly 4, not >4).
+- Sarmatia: sanctions_rounds by R4 = 4. Needs > 4. NO TRIGGER (exactly 4, not >4).
 
 **Legacy: Tech breakthrough?**
 - No country leveled up AI or nuclear this round. NO TRIGGER.
@@ -104,29 +104,29 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 #### KEYNES R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Nordostan | gdp_growth_rate | +1.2 | Oil producer should benefit at $185 |
+| Sarmatia | gdp_growth_rate | +1.2 | Oil producer should benefit at $185 |
 | Persia | gdp_growth_rate | +1.05 | Oil producer should benefit at $185 |
-| Cathay | momentum | -0.5 | Nordostan crisis contagion |
-| Teutonia | momentum | -0.5 | Nordostan crisis contagion (if weight >10%) |
-| Nordostan | gdp | -0.102 | Capital outflows (stability ~3.0) |
+| Cathay | momentum | -0.5 | Sarmatia crisis contagion |
+| Teutonia | momentum | -0.5 | Sarmatia crisis contagion (if weight >10%) |
+| Sarmatia | gdp | -0.102 | Capital outflows (stability ~3.0) |
 
 ---
 
 ### CLAUSEWITZ Assessment:
 
 **Check: Military trajectory declining 2+ rounds while at war?**
-- Nordostan: mil_traj data needed. If Nordostan has been losing units, FIRES. Assuming no explicit losses in Gulf Gate test (that test focuses on oil, not combat): likely NO TRIGGER.
+- Sarmatia: mil_traj data needed. If Sarmatia has been losing units, FIRES. Assuming no explicit losses in Gulf Gate test (that test focuses on oil, not combat): likely NO TRIGGER.
 - Columbia: at war (Persia). No unit losses in oil scenario. NO TRIGGER.
 
 **Check 1: At war with war_tiredness >3 but stability >6?**
-- Nordostan: war_tired = 4.2, stability = 3.0. Stability NOT > 6. NO TRIGGER.
+- Sarmatia: war_tired = 4.2, stability = 3.0. Stability NOT > 6. NO TRIGGER.
 - Columbia: war_tired = 1.6, NOT > 3. NO TRIGGER.
 
 **Check 2: Columbia overstretch (3+ theaters)?**
 - Columbia in Gulf Gate scenario: Persia theater only (1 theater). NO TRIGGER.
 
 **Check 3: Country in crisis producing military?**
-- Nordostan: in crisis. FIRES.
+- Sarmatia: in crisis. FIRES.
   - adjustment: military_production_efficiency = **-0.3** (crisis penalty)
   - Confidence: high
 
@@ -140,13 +140,13 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - No ceasefire this round. NO TRIGGER.
 
 **Legacy: Brain drain (democracy in crisis)?**
-- Nordostan: autocracy, not democracy. NO TRIGGER.
+- Sarmatia: autocracy, not democracy. NO TRIGGER.
 - No democracy is in crisis. NO TRIGGER.
 
 #### CLAUSEWITZ R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Nordostan | military_production_efficiency | -0.3 | In crisis, production degraded |
+| Sarmatia | military_production_efficiency | -0.3 | In crisis, production degraded |
 
 ---
 
@@ -167,7 +167,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - No ceasefire. NO TRIGGER.
 
 **Check 3: Autocracy under pressure (stability <3, support >50)?**
-- Nordostan: stability ~3.0, support ~50%. If stability = 2.9 and support = 51: FIRES.
+- Sarmatia: stability ~3.0, support ~50%. If stability = 2.9 and support = 51: FIRES.
   - adjustment: political_support **-5.0**
   - Borderline -- depends on exact values.
 
@@ -175,21 +175,21 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - No democracy is in crisis at R4. NO TRIGGER.
 
 **Check 5: War for 4+ rounds with no progress (war_tiredness >3, support >40)?**
-- Nordostan: war_tired = 4.2 (> 3), support ~50 (> 40). FIRES.
+- Sarmatia: war_tired = 4.2 (> 3), support ~50 (> 40). FIRES.
   - adjustment: political_support **-2.0**
-  - Reason: "MACHIAVELLI: nordostan war fatigue at 4.2 -- when does this end?"
+  - Reason: "MACHIAVELLI: sarmatia war fatigue at 4.2 -- when does this end?"
 
 **Legacy: Rally around the flag?**
 - Columbia at war with Persia. war_duration = R4 - R0 = 4. rally = max(10 - 4*3, 0) = max(-2, 0) = 0. NO RALLY.
-- Nordostan at war. war_duration = R4 + 4 (pre-sim) = 8. rally = max(10 - 8*3, 0) = 0. NO RALLY.
+- Sarmatia at war. war_duration = R4 + 4 (pre-sim) = 8. rally = max(10 - 8*3, 0) = 0. NO RALLY.
 
 #### MACHIAVELLI R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
 | Columbia | political_support | -0.5 | Support declining into election |
 | Columbia | political_support | -3.0 | Negative GDP + elections |
-| Nordostan | political_support | -5.0 | Autocracy cracking (borderline) |
-| Nordostan | political_support | -2.0 | War fatigue at 4.2 |
+| Sarmatia | political_support | -5.0 | Autocracy cracking (borderline) |
+| Sarmatia | political_support | -2.0 | War fatigue at 4.2 |
 
 ---
 
@@ -199,13 +199,13 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - Combined Machiavelli opinion on columbia.political_support: two entries from same expert, grouped as one variable target. Total opinions = 2, both from MACHIAVELLI (counted as one expert). Since only one expert touches this variable: **single expert rule, x0.5**.
 - Net: (-3.5) * 0.5 = **-1.75 to political_support**
 
-**Nordostan gdp_growth_rate:** Only KEYNES adjusts (+1.2). Single expert -> applied at 50%.
+**Sarmatia gdp_growth_rate:** Only KEYNES adjusts (+1.2). Single expert -> applied at 50%.
 - Net: +1.2 * 0.5 = **+0.6 to gdp_growth_rate**
 
-**Nordostan political_support:** Only MACHIAVELLI adjusts (-5.0, -2.0). Single expert -> x0.5.
+**Sarmatia political_support:** Only MACHIAVELLI adjusts (-5.0, -2.0). Single expert -> x0.5.
 - Net: (-7.0) * 0.5 = **-3.5 to political_support** (bounded at 30% of current ~50 = max -15, so -3.5 is within bounds)
 
-**Nordostan military_production_efficiency:** Only CLAUSEWITZ adjusts (-0.3). Single expert -> x0.5.
+**Sarmatia military_production_efficiency:** Only CLAUSEWITZ adjusts (-0.3). Single expert -> x0.5.
 - Net: -0.3 * 0.5 = **-0.15**
 
 **Cathay momentum:** Only KEYNES adjusts (-0.5). Single expert -> x0.5.
@@ -218,16 +218,16 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 | Variable | Before Panel | After Panel | Change | Expert(s) |
 |----------|-------------|-------------|--------|-----------|
 | Columbia support | 35.0% | 33.25% | -1.75 | MACHIAVELLI (solo x0.5) |
-| Nordostan growth | -11.0% | -10.4% | +0.6 | KEYNES (solo x0.5) |
-| Nordostan support | 50% | 46.5% | -3.5 | MACHIAVELLI (solo x0.5) |
-| Nordostan mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ (solo x0.5) |
+| Sarmatia growth | -11.0% | -10.4% | +0.6 | KEYNES (solo x0.5) |
+| Sarmatia support | 50% | 46.5% | -3.5 | MACHIAVELLI (solo x0.5) |
+| Sarmatia mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ (solo x0.5) |
 | Cathay momentum | +0.30 | +0.05 | -0.25 | KEYNES (solo x0.5) |
 
 ### VERDICT: Moderate Value
 
-- **Pass 1 would have been somewhat unrealistic** for Nordostan: an oil producer at $185 oil shrinking at -11% without any GDP offset is harsh. The +0.6% Keynes boost is justified but modest.
-- **Panel correctly identifies** Columbia pre-election vulnerability (Machiavelli) and Nordostan military production degradation (Clausewitz).
-- **Gap identified:** No expert catches the Nordostan Enrichment Paradox directly. Keynes gives a generic oil-producer boost, but does not reason about the specific paradox that Nordostan's own war is driving the oil price that benefits it.
+- **Pass 1 would have been somewhat unrealistic** for Sarmatia: an oil producer at $185 oil shrinking at -11% without any GDP offset is harsh. The +0.6% Keynes boost is justified but modest.
+- **Panel correctly identifies** Columbia pre-election vulnerability (Machiavelli) and Sarmatia military production degradation (Clausewitz).
+- **Gap identified:** No expert catches the Sarmatia Enrichment Paradox directly. Keynes gives a generic oil-producer boost, but does not reason about the specific paradox that Sarmatia's own war is driving the oil price that benefits it.
 - **No overcorrection.** All adjustments are sensible and small (thanks to single-expert 0.5x rule).
 - **Missing:** No expert adjusts Solaria (booming on oil windfall) or flags the oil-dependent economy asymmetry.
 
@@ -272,7 +272,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - Oil = $138.9. NOT > $150. NO TRIGGER for any country.
 
 **Check 3: Oil producer NOT benefiting?**
-- Oil = $138.9 > $120. Nordostan: resource_pct = 0.40 (>0.20), growth likely negative (<1%). FIRES: +1.2.
+- Oil = $138.9 > $120. Sarmatia: resource_pct = 0.40 (>0.20), growth likely negative (<1%). FIRES: +1.2.
 - Columbia: IS oil_producer with resource_pct = 0.08. resource_pct NOT > 0.20. NO TRIGGER.
 
 **Check 4: Inflation spiral without GDP consequence?**
@@ -297,7 +297,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - Hanguk stability = 4.90. NOT < 4. NO TRIGGER.
 
 **Legacy: Sanctions adaptation?**
-- Nordostan: sanctions_rounds ~4. NOT > 4. NO TRIGGER.
+- Sarmatia: sanctions_rounds ~4. NOT > 4. NO TRIGGER.
 
 #### KEYNES R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
@@ -305,7 +305,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 | Columbia | momentum | -0.5 | Stability declining 4 rounds |
 | Cathay | momentum | -0.5 | Columbia crisis contagion |
 | Teutonia | momentum | -0.5 | Columbia crisis contagion |
-| Nordostan | gdp_growth_rate | +1.2 | Oil producer benefit at $139 |
+| Sarmatia | gdp_growth_rate | +1.2 | Oil producer benefit at $139 |
 
 ---
 
@@ -316,11 +316,11 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 
 **Check 1: War tiredness >3, stability >6?**
 - Columbia: war_tired = 1.6, NOT > 3. NO TRIGGER.
-- Nordostan: war_tired = 4.2+, stability ~3.0, NOT > 6. NO TRIGGER.
+- Sarmatia: war_tired = 4.2+, stability ~3.0, NOT > 6. NO TRIGGER.
 
 **Check 2: Columbia overstretch (3+ theaters)?**
 - Columbia in Persia + Pacific (Formosa response). 2 theaters. NOT >= 3. NO TRIGGER.
-- BUT if Columbia also has forces near Heartland (aid/staging), could be 3. Borderline.
+- BUT if Columbia also has forces near Ruthenia (aid/staging), could be 3. Borderline.
 
 **Check 3: Crisis military production?**
 - Columbia in CRISIS. FIRES: **military_production_efficiency -0.3** (high confidence).
@@ -364,7 +364,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 - (If support were above 45 somehow, this would fire strongly.)
 
 **Check 5: War fatigue (war_tired >3, support >40)?**
-- Nordostan: war_tired > 3, support ~50 (> 40). FIRES: **political_support -2.0** for Nordostan.
+- Sarmatia: war_tired > 3, support ~50 (> 40). FIRES: **political_support -2.0** for Sarmatia.
 - Columbia: war_tired = 1.6, NOT > 3. NO TRIGGER.
 
 **Legacy: Rally?**
@@ -375,7 +375,7 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 |---------|----------|--------|--------|
 | Columbia | political_support | -1.5 | Support declining into election |
 | Columbia | political_support | -3.0 | Negative GDP + elections |
-| Nordostan | political_support | -2.0 | War fatigue at 4.2 |
+| Sarmatia | political_support | -2.0 | War fatigue at 4.2 |
 
 ---
 
@@ -393,9 +393,9 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 
 **Cathay stability:** CLAUSEWITZ (-0.2) solo. -> **-0.10** applied.
 
-**Nordostan gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied.
+**Sarmatia gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied.
 
-**Nordostan political_support:** MACHIAVELLI (-2.0) solo. -> **-1.0** applied.
+**Sarmatia political_support:** MACHIAVELLI (-2.0) solo. -> **-1.0** applied.
 
 **No 2+ expert agreements on any variable.** All single-expert adjustments at 0.5x.
 
@@ -409,8 +409,8 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 | Columbia ai_rd_progress | 0.80 | 0.79 | -0.01 | CLAUSEWITZ solo |
 | Cathay momentum | +0.30 | +0.05 | -0.25 | KEYNES solo |
 | Cathay stability | 8.0 | 7.90 | -0.10 | CLAUSEWITZ solo |
-| Nordostan growth | ~-11% | ~-10.4% | +0.6 | KEYNES solo |
-| Nordostan support | ~50% | ~49% | -1.0 | MACHIAVELLI solo |
+| Sarmatia growth | ~-11% | ~-10.4% | +0.6 | KEYNES solo |
+| Sarmatia support | ~50% | ~49% | -1.0 | MACHIAVELLI solo |
 
 ### VERDICT: Good Value — Panel Catches What Formulas Miss
 
@@ -422,11 +422,11 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 
 ---
 
-## SCENARIO 3: STABILITY R4 — War Countries Declining, Nordostan vs Heartland Asymmetry
+## SCENARIO 3: STABILITY R4 — War Countries Declining, Sarmatia vs Ruthenia Asymmetry
 
 ### State at R4 (from TEST_5_FULL_RESULTS.md):
 
-| Variable | Heartland | Nordostan | Persia | Columbia | Cathay |
+| Variable | Ruthenia | Sarmatia | Persia | Columbia | Cathay |
 |----------|-----------|-----------|--------|----------|--------|
 | GDP | ~1.6 | ~9.5 | ~2.5 | ~278 | ~210 |
 | Growth | ~-8% | ~-15% | ~-12% | ~+1.5% | ~+3.5% |
@@ -435,24 +435,24 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
 | Eco State | crisis | crisis | collapse | normal | normal |
 | Momentum | -2.0 | -3.0 | -3.0 | +0.15 | +0.30 |
 | Oil Price | $151 (global) | — | — | — | — |
-| War Tired | 4.4 (Heartland) | 4.2 | 1.4 | 1.6 | 0 |
+| War Tired | 4.4 (Ruthenia) | 4.2 | 1.4 | 1.6 | 0 |
 
-**History (R1-R3):** Pure formula validation. Heartland collapse driven by military costs 8x revenue. Nordostan collapse driven by sanctions + deficit. Persia collapsed by R3 (defender under L3 sanctions). Both Heartland and Nordostan at stability floor approaching. Cal-4 cap holds but cannot prevent structural death spiral.
+**History (R1-R3):** Pure formula validation. Ruthenia collapse driven by military costs 8x revenue. Sarmatia collapse driven by sanctions + deficit. Persia collapsed by R3 (defender under L3 sanctions). Both Ruthenia and Sarmatia at stability floor approaching. Cal-4 cap holds but cannot prevent structural death spiral.
 
 ---
 
 ### KEYNES Assessment:
 
 **Trajectory: GDP declining 3+ rounds?**
-- Heartland: GDP declining every round (2.2 -> 2.16 -> 2.12 -> 2.0 -> 1.6). rounds_declining = 4. growth = -8% (not > -1). NO TRIGGER (already severely negative).
-- Nordostan: Same pattern, growth -15%. NO TRIGGER.
+- Ruthenia: GDP declining every round (2.2 -> 2.16 -> 2.12 -> 2.0 -> 1.6). rounds_declining = 4. growth = -8% (not > -1). NO TRIGGER (already severely negative).
+- Sarmatia: Same pattern, growth -15%. NO TRIGGER.
 - Persia: Same. NO TRIGGER.
 
 **Trajectory: Stability declining 3+ rounds?**
-- Heartland: stab 5.0 -> 4.47 -> 3.53 -> 2.39. rounds_declining = 3, trend = 'falling'. FIRES.
-  - momentum: **-0.5** for Heartland.
-- Nordostan: stab 5.0 -> 4.14 -> 3.20 -> 2.11. rounds_declining = 3, trend = 'falling'. FIRES.
-  - momentum: **-0.5** for Nordostan.
+- Ruthenia: stab 5.0 -> 4.47 -> 3.53 -> 2.39. rounds_declining = 3, trend = 'falling'. FIRES.
+  - momentum: **-0.5** for Ruthenia.
+- Sarmatia: stab 5.0 -> 4.14 -> 3.20 -> 2.11. rounds_declining = 3, trend = 'falling'. FIRES.
+  - momentum: **-0.5** for Sarmatia.
 
 **Check 1: GDP growing during crisis/collapse?**
 - No crisis/collapse country has positive growth. NO TRIGGER.
@@ -464,67 +464,67 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
   - This is the FIRST time this check fires across all scenarios. Significant.
 
 **Check 3: Oil producer NOT benefiting?**
-- Nordostan: producer, resource_pct = 0.40, growth = -15% (<1%). FIRES: +1.2.
+- Sarmatia: producer, resource_pct = 0.40, growth = -15% (<1%). FIRES: +1.2.
 - Persia: producer, resource_pct = 0.35, growth = -12% (<1%). FIRES: +1.05.
 - Solaria: growth likely positive. NO TRIGGER.
 
 **Check 4: Inflation spiral without growth?**
-- Heartland: inflation delta very high (>>20), growth -8% (not > 0). NO TRIGGER.
-- Nordostan: same pattern. NO TRIGGER.
+- Ruthenia: inflation delta very high (>>20), growth -8% (not > 0). NO TRIGGER.
+- Sarmatia: same pattern. NO TRIGGER.
 
 **Check 5: Major partner in crisis?**
-- Nordostan is in crisis. Cathay trade weight > 10%? Probably yes. FIRES: momentum -0.5 for Cathay.
-- Heartland is in crisis (GDP ~1.6, NOT > 30, so NOT a major economy). NO contagion trigger (below MAJOR_ECONOMY_THRESHOLD of 30).
+- Sarmatia is in crisis. Cathay trade weight > 10%? Probably yes. FIRES: momentum -0.5 for Cathay.
+- Ruthenia is in crisis (GDP ~1.6, NOT > 30, so NOT a major economy). NO contagion trigger (below MAJOR_ECONOMY_THRESHOLD of 30).
 
 **Legacy: Capital flight (stability <3)?**
-- Heartland: stability 2.39 < 3, democracy, eco_state = crisis (not collapse). FIRES.
+- Ruthenia: stability 2.39 < 3, democracy, eco_state = crisis (not collapse). FIRES.
   - flight = 1.6 * 0.08 = **-0.128 GDP** (democracy rate)
-- Nordostan: stability 2.11 < 3, autocracy. FIRES.
+- Sarmatia: stability 2.11 < 3, autocracy. FIRES.
   - flight = 9.5 * 0.03 = **-0.285 GDP** (autocracy rate)
 - Persia: stability 1.0, collapse (eco_state = collapse). Condition: `stability < 3 AND state != 'collapse'`. state IS collapse. NO TRIGGER.
 
 **Legacy: Sanctions adaptation >4 rounds?**
-- Nordostan: sanctions_rounds = 4 (not > 4). NO TRIGGER.
+- Sarmatia: sanctions_rounds = 4 (not > 4). NO TRIGGER.
 
 #### KEYNES R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Heartland | momentum | -0.5 | Stability declining 3 rounds |
-| Nordostan | momentum | -0.5 | Stability declining 3 rounds |
+| Ruthenia | momentum | -0.5 | Stability declining 3 rounds |
+| Sarmatia | momentum | -0.5 | Stability declining 3 rounds |
 | Cathay | gdp_growth_rate | -3.0 | Growing 3.5% at $151 oil (importer) |
-| Cathay | momentum | -0.5 | Nordostan crisis contagion |
-| Nordostan | gdp_growth_rate | +1.2 | Oil producer should benefit |
+| Cathay | momentum | -0.5 | Sarmatia crisis contagion |
+| Sarmatia | gdp_growth_rate | +1.2 | Oil producer should benefit |
 | Persia | gdp_growth_rate | +1.05 | Oil producer should benefit |
-| Heartland | gdp | -0.128 | Capital flight (democracy, stab 2.39) |
-| Nordostan | gdp | -0.285 | Capital flight (autocracy, stab 2.11) |
+| Ruthenia | gdp | -0.128 | Capital flight (democracy, stab 2.39) |
+| Sarmatia | gdp | -0.285 | Capital flight (autocracy, stab 2.11) |
 
 ---
 
 ### CLAUSEWITZ Assessment:
 
 **Military declining 2+ rounds while at war?**
-- If either Heartland or Nordostan lost units: likely NO explicit losses in stability test (pure formula run, no combat). NO TRIGGER.
+- If either Ruthenia or Sarmatia lost units: likely NO explicit losses in stability test (pure formula run, no combat). NO TRIGGER.
 
 **Check 1: War tired >3, stability >6?**
-- Heartland: war_tired = 4.4 (> 3), stability = 2.39, NOT > 6. NO TRIGGER.
-- Nordostan: war_tired = 4.2 (> 3), stability = 2.11, NOT > 6. NO TRIGGER.
+- Ruthenia: war_tired = 4.4 (> 3), stability = 2.39, NOT > 6. NO TRIGGER.
+- Sarmatia: war_tired = 4.2 (> 3), stability = 2.11, NOT > 6. NO TRIGGER.
 - **FINDING: This check is useless for countries deep in crisis.** By the time war tiredness is high enough, stability has already crashed below 6. The check only catches countries that are "strangely stable despite long wars" -- a narrow and unlikely scenario.
 
 **Check 3: Crisis military production?**
-- Heartland: in crisis. FIRES: **mil_prod_eff -0.3** (high confidence).
-- Nordostan: in crisis. FIRES: **mil_prod_eff -0.3** (high confidence).
+- Ruthenia: in crisis. FIRES: **mil_prod_eff -0.3** (high confidence).
+- Sarmatia: in crisis. FIRES: **mil_prod_eff -0.3** (high confidence).
 - Persia: in collapse. FIRES: **mil_prod_eff -0.5** (high confidence).
 
 **Legacy: Brain drain?**
-- Heartland: democracy + crisis. FIRES: **ai_rd_progress -0.02**.
+- Ruthenia: democracy + crisis. FIRES: **ai_rd_progress -0.02**.
 
 #### CLAUSEWITZ R4 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Heartland | mil_prod_eff | -0.3 | In crisis |
-| Nordostan | mil_prod_eff | -0.3 | In crisis |
+| Ruthenia | mil_prod_eff | -0.3 | In crisis |
+| Sarmatia | mil_prod_eff | -0.3 | In crisis |
 | Persia | mil_prod_eff | -0.5 | In collapse |
-| Heartland | ai_rd_progress | -0.02 | Brain drain |
+| Ruthenia | ai_rd_progress | -0.02 | Brain drain |
 
 ---
 
@@ -537,14 +537,14 @@ The expert panel operates on **soft variables only**: `gdp_growth_rate`, `stabil
   - Support trajectory: if stable/rising, no panic trigger.
 
 **Check 3: Autocracy under pressure (stability <3, support >50)?**
-- Nordostan: stability 2.11 < 3, support ~40%. NOT > 50. NO TRIGGER.
+- Sarmatia: stability 2.11 < 3, support ~40%. NOT > 50. NO TRIGGER.
 
 **Check 4: Democracy in crisis with support >45?**
-- Heartland: democracy + crisis + support ~35%. NOT > 45. NO TRIGGER.
+- Ruthenia: democracy + crisis + support ~35%. NOT > 45. NO TRIGGER.
 
 **Check 5: War fatigue (war_tired >3, support >40)?**
-- Heartland: war_tired 4.4 > 3, support ~35%. NOT > 40. NO TRIGGER.
-- Nordostan: war_tired 4.2 > 3, support ~40%. BORDERLINE. If exactly 40: `> 40` = False. NO TRIGGER.
+- Ruthenia: war_tired 4.4 > 3, support ~35%. NOT > 40. NO TRIGGER.
+- Sarmatia: war_tired 4.2 > 3, support ~40%. BORDERLINE. If exactly 40: `> 40` = False. NO TRIGGER.
 - **FINDING: By the time countries are deeply in crisis, their support has already dropped below 40, making this check irrelevant. War fatigue check only fires for countries not yet deeply damaged.**
 
 **Legacy: Rally?**
@@ -564,23 +564,23 @@ Actually: bounded at 30% of current value. Current growth_rate = 3.5%. max_delta
 
 **Cathay momentum:** KEYNES (-0.5) solo. -> **-0.25** applied.
 
-**Heartland momentum:** KEYNES (-0.5) solo. -> **-0.25** applied.
+**Ruthenia momentum:** KEYNES (-0.5) solo. -> **-0.25** applied.
 
-**Nordostan momentum:** KEYNES (-0.5) solo. -> **-0.25** applied.
+**Sarmatia momentum:** KEYNES (-0.5) solo. -> **-0.25** applied.
 
-**Nordostan gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied. But bounded: 30% of |-15%| = 4.5. +0.6 within bounds. OK.
+**Sarmatia gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied. But bounded: 30% of |-15%| = 4.5. +0.6 within bounds. OK.
 
-**Heartland mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
+**Ruthenia mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
 
-**Nordostan mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
+**Sarmatia mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
 
 **Persia mil_prod_eff:** CLAUSEWITZ (-0.5) solo. -> **-0.25** applied.
 
-**Heartland ai_rd_progress:** CLAUSEWITZ (-0.02) solo. -> **-0.01** applied.
+**Ruthenia ai_rd_progress:** CLAUSEWITZ (-0.02) solo. -> **-0.01** applied.
 
-**Heartland gdp:** KEYNES (-0.128) solo -> **-0.064** applied. BUT: GDP is a HARD VARIABLE. The apply_bounded_adjustment function checks `if variable in self.HARD_VARIABLES` and rejects it. **REJECTED.**
+**Ruthenia gdp:** KEYNES (-0.128) solo -> **-0.064** applied. BUT: GDP is a HARD VARIABLE. The apply_bounded_adjustment function checks `if variable in self.HARD_VARIABLES` and rejects it. **REJECTED.**
 
-**Nordostan gdp:** Same -- HARD VARIABLE. **REJECTED.**
+**Sarmatia gdp:** Same -- HARD VARIABLE. **REJECTED.**
 
 Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED by the engine because GDP is a hard variable. This is a **design inconsistency**: the legacy capital flight code generates adjustments targeting 'gdp', but the soft/hard variable filter blocks them. The capital flight effect is therefore **non-functional** in the current code.
 
@@ -590,14 +590,14 @@ Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED b
 |----------|-------------|-------------|--------|-----------|
 | Cathay growth_rate | +3.5% | +2.45% | -1.05 | KEYNES solo (bounded) |
 | Cathay momentum | +0.30 | +0.05 | -0.25 | KEYNES solo |
-| Heartland momentum | -2.0 | -2.25 | -0.25 | KEYNES solo |
-| Nordostan momentum | -3.0 | -3.25 | -0.25 | KEYNES solo |
-| Nordostan growth | -15% | -14.4% | +0.6 | KEYNES solo |
-| Heartland mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
-| Nordostan mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
+| Ruthenia momentum | -2.0 | -2.25 | -0.25 | KEYNES solo |
+| Sarmatia momentum | -3.0 | -3.25 | -0.25 | KEYNES solo |
+| Sarmatia growth | -15% | -14.4% | +0.6 | KEYNES solo |
+| Ruthenia mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
+| Sarmatia mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
 | Persia mil_prod_eff | 1.0 | 0.75 | -0.25 | CLAUSEWITZ solo |
-| Heartland gdp | 1.6 | 1.6 | 0 | REJECTED (hard var) |
-| Nordostan gdp | 9.5 | 9.5 | 0 | REJECTED (hard var) |
+| Ruthenia gdp | 1.6 | 1.6 | 0 | REJECTED (hard var) |
+| Sarmatia gdp | 9.5 | 9.5 | 0 | REJECTED (hard var) |
 
 ### VERDICT: Mixed Value — Key Bug Found
 
@@ -605,7 +605,7 @@ Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED b
 - **Military production degradation** for crisis countries is logical and well-calibrated.
 - **CRITICAL BUG: Capital flight adjustments target 'gdp' (hard variable) and are silently rejected.** The legacy capital flight logic produces adjustments that the soft/hard filter blocks. This means capital flight NEVER actually applies in the current code. This is a significant gap.
 - **Machiavelli produces ZERO adjustments** when countries are deeply in crisis. All thresholds (support >45 for democracy crisis, support >40 for war fatigue) are already blown past. The expert is blind to countries in extremis.
-- **Overcorrection concern:** Reducing Heartland momentum from -2.0 to -2.25 when the country is already at stability 2.39 is piling on. The formula is already producing collapse; the panel accelerates it slightly without adding insight.
+- **Overcorrection concern:** Reducing Ruthenia momentum from -2.0 to -2.25 when the country is already at stability 2.39 is piling on. The formula is already producing collapse; the panel accelerates it slightly without adding insight.
 
 ---
 
@@ -649,7 +649,7 @@ Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED b
 
 **Check 3: Oil producer NOT benefiting?**
 - Oil = $126.7 > $120. Columbia: resource_pct = 0.08, NOT > 0.20. NO TRIGGER.
-- Nordostan/Persia/Solaria: would fire separately but not the focus here.
+- Sarmatia/Persia/Solaria: would fire separately but not the focus here.
 
 **Check 4: Inflation spiral without GDP consequence?**
 - Columbia: inf_delta = 57.95 - 3.5 = 54.45 (> 20). growth = -1.07% (NOT > 0). NO TRIGGER.
@@ -769,7 +769,7 @@ Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED b
 
 ### State at R5 (from TEST_4_FULL_RESULTS.md):
 
-| Variable | Nordostan | Heartland | Columbia |
+| Variable | Sarmatia | Ruthenia | Columbia |
 |----------|-----------|-----------|----------|
 | GDP | 8.44 | 2.05 | 295.0 |
 | Growth | -8% | ~+0.5% | +1.8% |
@@ -781,7 +781,7 @@ Note: The capital flight adjustments targeting 'gdp' directly will be REJECTED b
 | Inflation | 198% | 10.8% | 3.5% |
 | War Tired | 3.41 (decaying from 4.26) | 3.48 (decaying from 4.35) | 1.14 |
 
-**History (R1-R4):** Nordostan crisis accelerated by sanctions + deficit + war. Stability collapsed to 1.74 by R4 (regime collapse risk active). Heartland election R3: Beacon lost, Broker took power. Ceasefire agreed R5 -- Nordostan retains occupied zone, sanctions review begins. Ceasefire rally: momentum +1.5 for both sides.
+**History (R1-R4):** Sarmatia crisis accelerated by sanctions + deficit + war. Stability collapsed to 1.74 by R4 (regime collapse risk active). Ruthenia election R3: Beacon lost, Broker took power. Ceasefire agreed R5 -- Sarmatia retains occupied zone, sanctions review begins. Ceasefire rally: momentum +1.5 for both sides.
 
 The ceasefire was JUST signed. This tests the panel's response to peace.
 
@@ -790,39 +790,39 @@ The ceasefire was JUST signed. This tests the panel's response to peace.
 ### KEYNES Assessment:
 
 **Trajectory: GDP declining 3+ rounds?**
-- Nordostan: GDP declining all rounds. rounds_declining = 4+. growth = -8% (not > -1). NO TRIGGER.
-- Heartland: GDP declining R1-R4 but now +0.5%. rounds_declining broken (growth turned positive). NO TRIGGER.
+- Sarmatia: GDP declining all rounds. rounds_declining = 4+. growth = -8% (not > -1). NO TRIGGER.
+- Ruthenia: GDP declining R1-R4 but now +0.5%. rounds_declining broken (growth turned positive). NO TRIGGER.
 
 **Trajectory: Stability declining 3+ rounds?**
-- Nordostan: stab declined every round to 1.0. rounds_declining = 4+. trend = 'falling'. FIRES.
+- Sarmatia: stab declined every round to 1.0. rounds_declining = 4+. trend = 'falling'. FIRES.
   - momentum: **-0.5**
-  - **This is a problem:** Nordostan just signed a ceasefire, received a +1.5 momentum boost, and is at stability floor. Keynes is ADDING -0.5 momentum, partially canceling the ceasefire rally. This is mechanical -- the trajectory check doesn't know about the ceasefire.
+  - **This is a problem:** Sarmatia just signed a ceasefire, received a +1.5 momentum boost, and is at stability floor. Keynes is ADDING -0.5 momentum, partially canceling the ceasefire rally. This is mechanical -- the trajectory check doesn't know about the ceasefire.
 
 **Check 1: GDP growing during crisis?**
-- Nordostan: crisis, growth -8%. NO TRIGGER.
+- Sarmatia: crisis, growth -8%. NO TRIGGER.
 
 **Check 2: Oil importer growing >2% with oil >$150?**
 - Oil = $149.3, NOT > $150. NO TRIGGER.
 
 **Check 3: Oil producer NOT benefiting?**
-- Oil = $149.3 > $120. Nordostan: resource_pct = 0.40, growth = -8% (< 1%). FIRES: +1.2.
-- But Nordostan just signed ceasefire and sanctions are under review. Oil boost makes some sense.
+- Oil = $149.3 > $120. Sarmatia: resource_pct = 0.40, growth = -8% (< 1%). FIRES: +1.2.
+- But Sarmatia just signed ceasefire and sanctions are under review. Oil boost makes some sense.
 
 **Check 4: Inflation spiral without growth?**
-- Nordostan: inf_delta = 193 (>> 20), growth = -8% (not > 0). NO TRIGGER.
+- Sarmatia: inf_delta = 193 (>> 20), growth = -8% (not > 0). NO TRIGGER.
 
 **Check 5: Major partner in crisis?**
-- Nordostan is in crisis but GDP = 8.44 (< 30, NOT major economy). Does NOT trigger contagion on partners.
+- Sarmatia is in crisis but GDP = 8.44 (< 30, NOT major economy). Does NOT trigger contagion on partners.
 
 **Check 6: Money printing without inflation?**
-- Nordostan: printed ~5 coins, inf_delta = 193. Is 193 < 5*2 = 10? No. NO TRIGGER.
+- Sarmatia: printed ~5 coins, inf_delta = 193. Is 193 < 5*2 = 10? No. NO TRIGGER.
 
 **Legacy: Capital flight (stability <3)?**
-- Nordostan: stability = 1.0 < 3, autocracy, eco_state = crisis (not collapse). FIRES.
+- Sarmatia: stability = 1.0 < 3, autocracy, eco_state = crisis (not collapse). FIRES.
   - gdp adjustment: 8.44 * 0.03 = **-0.253 GDP**. But GDP is HARD VARIABLE -> **REJECTED**.
 
 **Legacy: Sanctions adaptation (>4 rounds)?**
-- Nordostan: sanctions_rounds = 4 at R4, now R5. If sanctions_rounds = 5: > 4. FIRES.
+- Sarmatia: sanctions_rounds = 4 at R4, now R5. If sanctions_rounds = 5: > 4. FIRES.
   - adaptation: 8.44 * 0.02 = **+0.169 GDP**. But GDP is HARD VARIABLE -> **REJECTED**.
 
 **Legacy: Tech breakthrough?**
@@ -831,53 +831,53 @@ The ceasefire was JUST signed. This tests the panel's response to peace.
 #### KEYNES R5 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Nordostan | momentum | -0.5 | Stability declining 4+ rounds (COUNTERPRODUCTIVE) |
-| Nordostan | gdp_growth_rate | +1.2 | Oil producer benefit |
-| Nordostan | gdp | -0.253 | Capital flight (REJECTED - hard var) |
-| Nordostan | gdp | +0.169 | Sanctions adaptation (REJECTED - hard var) |
+| Sarmatia | momentum | -0.5 | Stability declining 4+ rounds (COUNTERPRODUCTIVE) |
+| Sarmatia | gdp_growth_rate | +1.2 | Oil producer benefit |
+| Sarmatia | gdp | -0.253 | Capital flight (REJECTED - hard var) |
+| Sarmatia | gdp | +0.169 | Sanctions adaptation (REJECTED - hard var) |
 
 ---
 
 ### CLAUSEWITZ Assessment:
 
 **Legacy: Ceasefire rally (was at war, now not)?**
-- Nordostan: was_at_war = True (R4), at_war_now = False (R5 ceasefire). FIRES.
+- Sarmatia: was_at_war = True (R4), at_war_now = False (R5 ceasefire). FIRES.
   - momentum: **+1.5**
-  - Reason: "CLAUSEWITZ: Peace dividend -- markets rally on Nordostan ceasefire."
+  - Reason: "CLAUSEWITZ: Peace dividend -- markets rally on Sarmatia ceasefire."
   - **BUT WAIT: This ceasefire rally was already applied in the test results** (test shows momentum went from -3.50 to -2.00, a +1.5 boost). Is it double-counted?
   - Answer: The test results were traced manually including Pass 2. If this is the mechanism that produced the +1.5, then it is the same adjustment, not double-counted. We are tracing what the panel WOULD produce, which matches.
 
-- Heartland: was_at_war = True, at_war_now = False. FIRES.
+- Ruthenia: was_at_war = True, at_war_now = False. FIRES.
   - momentum: **+1.5**
 
 **Check 3: Crisis military production?**
-- Nordostan: in crisis. FIRES: **mil_prod_eff -0.3**.
+- Sarmatia: in crisis. FIRES: **mil_prod_eff -0.3**.
 
 **Legacy: Brain drain?**
-- Nordostan: autocracy, not democracy. NO TRIGGER.
-- Heartland: democracy, but NOT in crisis (eco_state = normal). NO TRIGGER.
+- Sarmatia: autocracy, not democracy. NO TRIGGER.
+- Ruthenia: democracy, but NOT in crisis (eco_state = normal). NO TRIGGER.
 
 #### CLAUSEWITZ R5 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Nordostan | momentum | +1.5 | Ceasefire peace dividend |
-| Heartland | momentum | +1.5 | Ceasefire peace dividend |
-| Nordostan | mil_prod_eff | -0.3 | In crisis |
+| Sarmatia | momentum | +1.5 | Ceasefire peace dividend |
+| Ruthenia | momentum | +1.5 | Ceasefire peace dividend |
+| Sarmatia | mil_prod_eff | -0.3 | In crisis |
 
 ---
 
 ### MACHIAVELLI Assessment:
 
 **Check 2: Ceasefire achieved (was_at_war, not now, support <60)?**
-- Nordostan: ceasefire, support ~40% (< 60). FIRES: **political_support +5.0**
-- Heartland: ceasefire, support ~45% (< 60). FIRES: **political_support +5.0**
+- Sarmatia: ceasefire, support ~40% (< 60). FIRES: **political_support +5.0**
+- Ruthenia: ceasefire, support ~45% (< 60). FIRES: **political_support +5.0**
 
 **Check 3: Autocracy under pressure (stability <3, support >50)?**
-- Nordostan: stability 1.0 < 3, support ~40%. NOT > 50. NO TRIGGER.
+- Sarmatia: stability 1.0 < 3, support ~40%. NOT > 50. NO TRIGGER.
 
 **Check 5: War fatigue (war_tired >3, support >40)?**
-- Nordostan: war_tired = 3.41 > 3, support = 40. `> 40` = False. BORDERLINE NO TRIGGER.
-- Heartland: war_tired = 3.48 > 3, support = 45 > 40. FIRES: **political_support -2.0**
+- Sarmatia: war_tired = 3.41 > 3, support = 40. `> 40` = False. BORDERLINE NO TRIGGER.
+- Ruthenia: war_tired = 3.48 > 3, support = 45 > 40. FIRES: **political_support -2.0**
   - **This fires AFTER ceasefire.** The war is over but war tiredness hasn't fully decayed. The -2.0 partially cancels the +5.0 ceasefire bonus. This is debatable -- war fatigue should start declining after ceasefire, not continue penalizing.
 
 **Legacy: Rally?**
@@ -886,45 +886,45 @@ The ceasefire was JUST signed. This tests the panel's response to peace.
 #### MACHIAVELLI R5 Adjustments Summary:
 | Country | Variable | Amount | Reason |
 |---------|----------|--------|--------|
-| Nordostan | political_support | +5.0 | Ceasefire relief |
-| Heartland | political_support | +5.0 | Ceasefire relief |
-| Heartland | political_support | -2.0 | War fatigue at 3.48 (after ceasefire!) |
+| Sarmatia | political_support | +5.0 | Ceasefire relief |
+| Ruthenia | political_support | +5.0 | Ceasefire relief |
+| Ruthenia | political_support | -2.0 | War fatigue at 3.48 (after ceasefire!) |
 
 ---
 
 ### SYNTHESIS:
 
-**Nordostan momentum:** KEYNES (-0.5) + CLAUSEWITZ (+1.5). Two experts, DISAGREE on direction. -> **FLAGGED for moderator.**
+**Sarmatia momentum:** KEYNES (-0.5) + CLAUSEWITZ (+1.5). Two experts, DISAGREE on direction. -> **FLAGGED for moderator.**
 - This is the correct outcome. Keynes sees declining trajectory; Clausewitz sees ceasefire rally. They genuinely disagree. The moderator must decide.
 - If only Clausewitz adjustment were applied: +1.5 (the ceasefire was just signed, this should dominate).
 - FLAGGING is the right call.
 
-**Heartland momentum:** CLAUSEWITZ (+1.5) solo. -> **+0.75** applied.
+**Ruthenia momentum:** CLAUSEWITZ (+1.5) solo. -> **+0.75** applied.
 
-**Nordostan gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied.
+**Sarmatia gdp_growth_rate:** KEYNES (+1.2) solo. -> **+0.6** applied.
 
-**Nordostan mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
+**Sarmatia mil_prod_eff:** CLAUSEWITZ (-0.3) solo. -> **-0.15** applied.
 
-**Nordostan political_support:** MACHIAVELLI (+5.0) solo. -> **+2.5** applied. Bounded: 30% of 40 = 12. +2.5 within bounds.
+**Sarmatia political_support:** MACHIAVELLI (+5.0) solo. -> **+2.5** applied. Bounded: 30% of 40 = 12. +2.5 within bounds.
 
-**Heartland political_support:** MACHIAVELLI (+5.0, -2.0). Same expert, two adjustments. Grouped as one variable target: both from MACHIAVELLI. Single expert with net +3.0. -> **+1.5** applied (x0.5).
+**Ruthenia political_support:** MACHIAVELLI (+5.0, -2.0). Same expert, two adjustments. Grouped as one variable target: both from MACHIAVELLI. Single expert with net +3.0. -> **+1.5** applied (x0.5).
 
 ### Net Effect:
 
 | Variable | Before Panel | After Panel | Change | Expert(s) |
 |----------|-------------|-------------|--------|-----------|
-| Nordostan momentum | -2.00 | -2.00 | 0 (FLAGGED) | KEYNES vs CLAUSEWITZ |
-| Heartland momentum | +0.65 | +1.40 | +0.75 | CLAUSEWITZ solo |
-| Nordostan growth | -8% | -7.4% | +0.6 | KEYNES solo |
-| Nordostan mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
-| Nordostan support | 40% | 42.5% | +2.5 | MACHIAVELLI solo |
-| Heartland support | 45% | 46.5% | +1.5 | MACHIAVELLI solo |
+| Sarmatia momentum | -2.00 | -2.00 | 0 (FLAGGED) | KEYNES vs CLAUSEWITZ |
+| Ruthenia momentum | +0.65 | +1.40 | +0.75 | CLAUSEWITZ solo |
+| Sarmatia growth | -8% | -7.4% | +0.6 | KEYNES solo |
+| Sarmatia mil_prod_eff | 1.0 | 0.85 | -0.15 | CLAUSEWITZ solo |
+| Sarmatia support | 40% | 42.5% | +2.5 | MACHIAVELLI solo |
+| Ruthenia support | 45% | 46.5% | +1.5 | MACHIAVELLI solo |
 
 ### VERDICT: Good Value — Ceasefire Mechanics Work
 
 - **Clausewitz ceasefire rally (+1.5 momentum)** is the most valuable adjustment in the peace scenario. This is the primary peace dividend mechanism.
 - **Machiavelli ceasefire support boost (+5.0 raw, +2.5 applied)** correctly models public relief.
-- **The KEYNES vs CLAUSEWITZ disagreement on Nordostan momentum is correctly flagged.** This is exactly what the moderator system is for -- the trajectory says "declining" but the event says "ceasefire." A human should resolve this in favor of the ceasefire signal.
+- **The KEYNES vs CLAUSEWITZ disagreement on Sarmatia momentum is correctly flagged.** This is exactly what the moderator system is for -- the trajectory says "declining" but the event says "ceasefire." A human should resolve this in favor of the ceasefire signal.
 - **War fatigue penalty AFTER ceasefire (Machiavelli)** is a design issue. The check fires based on war_tiredness > 3, but war_tiredness takes several rounds to decay. The penalty should be suppressed in the round ceasefire is signed.
 - **Capital flight and sanctions adaptation both target GDP (hard variable) and are REJECTED.** Same bug as Scenario 3.
 
@@ -959,11 +959,11 @@ All of Machiavelli's checks have thresholds that are already blown past by the t
 - Democracy crisis check requires support > 45% (but support drops below 45 before crisis)
 - War fatigue check requires support > 40% (same problem)
 - Autocracy cracking requires support > 50% (same)
-The only check that fires reliably is the election proximity check, which only applies to Columbia/Heartland at specific rounds.
+The only check that fires reliably is the election proximity check, which only applies to Columbia/Ruthenia at specific rounds.
 - **Fix:** Add a "deep crisis political disintegration" check that fires when eco_state = crisis/collapse regardless of support level, applying additional stability and support penalties.
 
 **GAP 4: No Expert Reasons About Strategic Asymmetry (MEDIUM)**
-None of the experts can identify situations like: "Cathay's blockade hurts Columbia more than Cathay" or "Nordostan's war drives oil prices that benefit Nordostan." These are the most interesting strategic dynamics in the simulation, and the panel misses them entirely.
+None of the experts can identify situations like: "Cathay's blockade hurts Columbia more than Cathay" or "Sarmatia's war drives oil prices that benefit Sarmatia." These are the most interesting strategic dynamics in the simulation, and the panel misses them entirely.
 - **Fix:** Add a strategic analysis check that compares growth rates of adversary pairs and flags asymmetries.
 
 **GAP 5: Trajectory Checks Fight Event-Driven Changes (LOW)**
@@ -981,14 +981,14 @@ Clausewitz Check 1 (war_tired > 3 AND stability > 6) and Check 2 (overstretch AN
 | Keynes Check 6 (printing/inflation) | Overstretch | Fires at 58% inflation, adds more | HIGH |
 | Keynes trajectory (stability) | Peace | Fights ceasefire momentum boost | MEDIUM |
 | Machiavelli war fatigue | Peace | Fires after ceasefire signed | LOW |
-| Keynes oil producer boost | All | Gives Nordostan GDP boost despite sanctions (-18% hit) | LOW (correct in isolation, misleading in context) |
+| Keynes oil producer boost | All | Gives Sarmatia GDP boost despite sanctions (-18% hit) | LOW (correct in isolation, misleading in context) |
 
 ### Summary Statistics Across All 5 Scenarios
 
 - **Total adjustments generated by experts:** ~45
 - **Adjustments that survived synthesis:** ~30 (single-expert x0.5 or majority)
 - **Adjustments REJECTED (hard variable):** ~6 (all capital flight / sanctions adaptation)
-- **Flagged for moderator:** 1 (Nordostan momentum in peace scenario)
+- **Flagged for moderator:** 1 (Sarmatia momentum in peace scenario)
 - **Two-expert agreements (majority rule):** 0 across ALL 5 scenarios
 - **False positives (harmful adjustments):** 2 (inflation pile-on, trajectory vs ceasefire)
 

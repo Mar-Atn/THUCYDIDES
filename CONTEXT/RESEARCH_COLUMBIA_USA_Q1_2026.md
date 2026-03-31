@@ -325,7 +325,7 @@ Based on real-world dynamics, here are the character archetypes for Columbia's f
 | Defense spending | $1.01T / ~3.4% GDP | High | Highest in world |
 | Stability index | Polarized, 36% approval, active war | 5-6 / 10 | Functional democracy under stress |
 | Political support | 36-38% approval | 35-40% | Low but not crisis |
-| Nuclear level | ~3,700 warheads, full triad | L3 (max) | Peer with Nordostan |
+| Nuclear level | ~3,700 warheads, full triad | L3 (max) | Peer with Sarmatia |
 | AI/Semiconductor level | World leader (narrowing) | L4 or L3 (high) | Lead over Cathay narrowing |
 | Formosa chip dependency | Significant | 0.6-0.7 | High but reducing |
 | Military units | 1.3M active, global deployments | Largest conventional force | Spread across multiple theaters |

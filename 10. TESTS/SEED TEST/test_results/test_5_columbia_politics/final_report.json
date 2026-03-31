@@ -23,7 +23,7 @@
       "nuclear_level": 2,
       "ai_level": 3
     },
-    "nordostan": {
+    "sarmatia": {
       "gdp": 19.8,
       "stability": 1.0,
       "support": 30.5,
@@ -32,7 +32,7 @@
       "nuclear_level": 3,
       "ai_level": 1
     },
-    "heartland": {
+    "ruthenia": {
       "gdp": 2.2,
       "stability": 1,
       "support": 5.0,
@@ -225,33 +225,33 @@
     },
     {
       "type": "election",
-      "subtype": "heartland_wartime",
-      "country": "heartland",
+      "subtype": "ruthenia_wartime",
+      "country": "ruthenia",
       "incumbent_wins": false,
       "result": {
-        "election_type": "heartland_wartime",
-        "country": "heartland",
+        "election_type": "ruthenia_wartime",
+        "country": "ruthenia",
         "ai_score": 30.7,
         "player_score": 50.0,
         "final_incumbent_pct": 40.35,
         "incumbent_wins": false,
-        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+        "note": "Ruthenia election: Beacon loses. Bulwark becomes president."
       },
       "round": 3
     },
     {
       "type": "election",
-      "subtype": "heartland_wartime_runoff",
-      "country": "heartland",
+      "subtype": "ruthenia_wartime_runoff",
+      "country": "ruthenia",
       "incumbent_wins": false,
       "result": {
-        "election_type": "heartland_wartime_runoff",
-        "country": "heartland",
+        "election_type": "ruthenia_wartime_runoff",
+        "country": "ruthenia",
         "ai_score": 29.09,
         "player_score": 50.0,
         "final_incumbent_pct": 39.55,
         "incumbent_wins": false,
-        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+        "note": "Ruthenia election: Beacon loses. Bulwark becomes president."
       },
       "round": 4
     },

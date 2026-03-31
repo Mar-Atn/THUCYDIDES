@@ -311,8 +311,8 @@ class TestOrchestrator:
                 print(f"  ** ELECTION: {event['subtype']} in {event['country']} **")
                 if event["subtype"] == "columbia_midterms":
                     self._run_columbia_midterms(round_num)
-                elif event["subtype"] in ("heartland_wartime", "heartland_wartime_runoff"):
-                    self._run_heartland_election(round_num)
+                elif event["subtype"] in ("ruthenia_wartime", "ruthenia_wartime_runoff"):
+                    self._run_ruthenia_election(round_num)
                 elif event["subtype"] == "columbia_presidential":
                     self._run_columbia_presidential(round_num)
 
@@ -346,9 +346,9 @@ class TestOrchestrator:
             "player_incumbent_pct": player_incumbent_pct,
         })
 
-    def _run_heartland_election(self, round_num: int) -> None:
-        """Heartland wartime election Round 3-4: AI judges on gameplay outcomes."""
-        c = self.world_state.countries.get("heartland", {})
+    def _run_ruthenia_election(self, round_num: int) -> None:
+        """Ruthenia wartime election Round 3-4: AI judges on gameplay outcomes."""
+        c = self.world_state.countries.get("ruthenia", {})
         pol = c.get("political", {})
 
         # Beacon vs Bulwark: Bulwark has military credibility advantage
@@ -364,7 +364,7 @@ class TestOrchestrator:
         self.simulation_log.append({
             "round": round_num,
             "phase": "election",
-            "type": "heartland_wartime",
+            "type": "ruthenia_wartime",
             "beacon_score": beacon_final,
             "bulwark_score": bulwark_final,
             "beacon_wins": beacon_wins,
@@ -383,9 +383,9 @@ class TestOrchestrator:
                 self.agents["bulwark"].profile["head_of_state"] = True
             if "beacon" in self.agents:
                 self.agents["beacon"].profile["head_of_state"] = False
-            print("  >> Heartland election: BULWARK wins, becomes president")
+            print("  >> Ruthenia election: BULWARK wins, becomes president")
         else:
-            print("  >> Heartland election: BEACON retains presidency")
+            print("  >> Ruthenia election: BEACON retains presidency")
 
     def _run_columbia_presidential(self, round_num: int) -> None:
         """Columbia presidential election Round 5."""
@@ -603,7 +603,7 @@ class TestOrchestrator:
         }
 
         # Final country state summary
-        major_countries = ["columbia", "cathay", "nordostan", "heartland", "persia",
+        major_countries = ["columbia", "cathay", "sarmatia", "ruthenia", "persia",
                            "gallia", "teutonia", "albion", "bharata", "levantia", "formosa"]
         for cid in major_countries:
             c = self.world_state.countries.get(cid, {})
@@ -671,7 +671,7 @@ class TestOrchestrator:
 
         # All major countries collapsed (stability 1 = failed state)
         collapsed = sum(
-            1 for cid in ["columbia", "cathay", "nordostan"]
+            1 for cid in ["columbia", "cathay", "sarmatia"]
             if self.world_state.countries.get(cid, {}).get(
                 "political", {}).get("stability", 5) <= 1.0
         )

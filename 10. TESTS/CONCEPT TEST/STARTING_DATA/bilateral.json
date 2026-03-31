@@ -9,7 +9,7 @@
   "tariffs": {
     "columbia": {
       "cathay": 3,
-      "nordostan": 2,
+      "sarmatia": 2,
       "caribe": 2,
       "persia": 2
     },
@@ -18,7 +18,7 @@
       "yamato": 1,
       "hanguk": 1
     },
-    "nordostan": {
+    "sarmatia": {
       "columbia": 2,
       "albion": 2,
       "gallia": 2,
@@ -28,22 +28,22 @@
     },
     "gallia": {
       "cathay": 1,
-      "nordostan": 1
+      "sarmatia": 1
     },
     "teutonia": {
       "cathay": 1,
-      "nordostan": 1
+      "sarmatia": 1
     },
     "freeland": {
       "cathay": 1,
-      "nordostan": 2
+      "sarmatia": 2
     },
     "ponte": {
-      "nordostan": 1
+      "sarmatia": 1
     },
     "albion": {
       "cathay": 1,
-      "nordostan": 1
+      "sarmatia": 1
     },
     "bharata": {
       "cathay": 1
@@ -63,8 +63,8 @@
       "columbia": 1
     },
     "mirage": {},
-    "heartland": {
-      "nordostan": 3
+    "ruthenia": {
+      "sarmatia": 3
     },
     "persia": {
       "columbia": 2,
@@ -74,55 +74,55 @@
   "sanctions": {
     "_description": "Sanctions imposed BY row ON column. Negative values = evasion/support for target.",
     "columbia": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2,
       "choson": 3,
       "caribe": 2
     },
     "cathay": {
-      "nordostan": -1
+      "sarmatia": -1
     },
-    "nordostan": {
+    "sarmatia": {
       "columbia": 1,
-      "heartland": 3
+      "ruthenia": 3
     },
     "gallia": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 1,
       "choson": 2
     },
     "teutonia": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 1,
       "choson": 2
     },
     "freeland": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 1,
       "choson": 2
     },
     "ponte": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "choson": 1
     },
     "albion": {
-      "nordostan": 3,
+      "sarmatia": 3,
       "persia": 2,
       "choson": 2
     },
     "bharata": {},
     "levantia": {
       "persia": 3,
-      "nordostan": 1
+      "sarmatia": 1
     },
     "formosa": {
-      "nordostan": 1
+      "sarmatia": 1
     },
     "phrygia": {
-      "nordostan": 0
+      "sarmatia": 0
     },
     "yamato": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "choson": 3
     },
     "solaria": {},
@@ -132,15 +132,15 @@
       "yamato": 1
     },
     "hanguk": {
-      "nordostan": 2,
+      "sarmatia": 2,
       "choson": 3
     },
     "caribe": {
       "columbia": 1
     },
     "mirage": {},
-    "heartland": {
-      "nordostan": 3
+    "ruthenia": {
+      "sarmatia": 3
     },
     "persia": {
       "columbia": 1,

@@ -74,7 +74,7 @@ Each country has THREE color values from the SAME hue family:
 | Country | UI Vivid | Map Muted | Light BG |
 |---------|----------|-----------|----------|
 | Cathay | #C4A030 | #E8D5A3 | #F8F2E5 |
-| Nordostan | #A06060 | #D4A5A5 | #F5EAEA |
+| Sarmatia | #A06060 | #D4A5A5 | #F5EAEA |
 | Persia | #9A7040 | #C8A57A | #F2EBE0 |
 | Choson | #5A5A5A | #8A8A8A | #EFEFEF |
 
@@ -91,7 +91,7 @@ Each country has THREE color values from the SAME hue family:
 ### War / Special
 | Country | UI Vivid | Map Muted | Light BG |
 |---------|----------|-----------|----------|
-| Heartland | #5A9A5A | #A5C8A5 | #EBF3EB |
+| Ruthenia | #5A9A5A | #A5C8A5 | #EBF3EB |
 | Caribe | #3A7AAA | #8AACCC | #E8F0F6 |
 
 ### Contested
@@ -176,7 +176,7 @@ See `SEED_H1_UX_STYLE_DEMO_FINAL.html` Section 3 for full inventory.
 
 ### Theater Map (Eastern Ereb)
 - 10×10 hex grid, 1-indexed
-- Nordostan tanks face LEFT, Heartland tanks face RIGHT
+- Sarmatia tanks face LEFT, Ruthenia tanks face RIGHT
 - Occupied zones: striped pattern (owner color + occupier stripes)
 - Die Hard position marked with dashed circle
 - 70% max-width container (proportional to global map)
@@ -266,8 +266,8 @@ module.exports = {
         country: {
           columbia: { DEFAULT: '#3A6B9F', map: '#9AB5D0', light: '#E8EFF6' },
           cathay: { DEFAULT: '#C4A030', map: '#E8D5A3', light: '#F8F2E5' },
-          nordostan: { DEFAULT: '#A06060', map: '#D4A5A5', light: '#F5EAEA' },
-          heartland: { DEFAULT: '#5A9A5A', map: '#A5C8A5', light: '#EBF3EB' },
+          sarmatia: { DEFAULT: '#A06060', map: '#D4A5A5', light: '#F5EAEA' },
+          ruthenia: { DEFAULT: '#5A9A5A', map: '#A5C8A5', light: '#EBF3EB' },
           persia: { DEFAULT: '#9A7040', map: '#C8A57A', light: '#F2EBE0' },
           gallia: { DEFAULT: '#4A6FA0', map: '#A5B8D4', light: '#EBF0F6' },
           teutonia: { DEFAULT: '#3A8A7A', map: '#8AB5AA', light: '#E8F2EF' },

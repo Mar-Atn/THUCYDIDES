@@ -445,7 +445,7 @@ DB (complete round state) → READ
 │ • Structural clocks status:                  │
 │   - Power balance trajectory                 │
 │   - Cathay military capability curve         │
-│   - Nordostan economic reserves countdown    │
+│   - Sarmatia economic reserves countdown    │
 │   - Columbia election countdown              │
 │   - Persia nuclear program progress          │
 │                                              │
@@ -548,7 +548,7 @@ All outputs organized by level. No visibility/interface logic — just data.
 | Active theaters count | Number | From Live Action Engine | **SEED DECISION (2026-03-27):** Only Eastern Ereb has a detailed theater map. Other theaters resolved at global hex level. |
 | Chokepoint status (per chokepoint: open/contested/blocked) | Enum | From Live Action Engine |
 | Power balance indicators (aggregate military, economic, tech comparisons) | Composite index | 2,4,5 |
-| Structural clock positions (Formosa capability, Columbia election, Nordostan reserves, Persia nuclear) | Progress bars | 2,3,4,5 |
+| Structural clock positions (Formosa capability, Columbia election, Sarmatia reserves, Persia nuclear) | Progress bars | 2,3,4,5 |
 | World narrative text | Text | 6 |
 | Risk flags | List | 6 |
 
@@ -666,7 +666,7 @@ Each of the following needs detailed specification. We should work through them 
 
 **E1.8** — Narrative generation: what context the AI receives, what it produces, quality controls, moderator interface
 
-**E1.9** — Election mechanics: Columbia mid-terms, Columbia presidential, Heartland wartime — vote calculation, AI popular vote formula, campaign mechanics
+**E1.9** — Election mechanics: Columbia mid-terms, Columbia presidential, Ruthenia wartime — vote calculation, AI popular vote formula, campaign mechanics
 
 **E1.10** — Transaction (Market) Engine: validation rules, authorization chains, conflict resolution, rollback capability
 
@@ -679,3 +679,6 @@ Each of the following needs detailed specification. We should work through them 
 - **v0.3 (2026-03-21):** Renamed three systems: Transaction (Market) Engine, Live Action Engine, World Model Engine. Live Action Engine now explicitly covers combat + covert ops + domestic actions (all unilateral, all requiring calculation). Covert ops rules (limits per round, moderator-adjustable delay, detection probability escalation) added to Live Action Engine. Authorization chains detailed per action type. All references updated throughout.
 - **v0.2 (2026-03-21):** Major restructure. Three separate systems + persistent DB. Removed AI country decisions from engine (AI participants use same mechanics as humans). Removed visibility/interface concerns from engine scope. Budget restructured to include military production by unit type. All combat actions moved to real-time. Covert ops moved to real-time with moderator-adjustable delay. Mobilization: submitted anytime, executed in batch. Deployment window added after batch processing. Processing sequence reduced to 8 steps. Output structured as World/Country/Individual levels to DB. 10 detailed design elements identified for element-by-element discussion.
 - **v0.1 (2026-03-21):** First draft with 13-step processing and 4-layer output model.
+
+
+<!-- CM-006: Deployment rules updated 2026-03-30. Transit delay removed (instant deployment). Ship capacity formalized (1 ground + 2 air). Naval blockade restriction added. Approved by Marat. -->

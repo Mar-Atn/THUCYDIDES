@@ -37,14 +37,14 @@
 
 ### Prescribed Events
 - Dealer incapacitated (10% chance triggered). Volt becomes Acting President.
-- Volt announces "Columbia First" agenda: Persia drawdown proposal, reduce Heartland aid, pivot to Cathay competition.
+- Volt announces "Columbia First" agenda: Persia drawdown proposal, reduce Ruthenia aid, pivot to Cathay competition.
 
 ### Agent Decisions
 
 **Volt (Acting President):**
 - Announces "Columbia First Doctrine": prioritize Cathay containment over Middle East
 - Proposes Persia drawdown timeline (6-round phased withdrawal)
-- Reduces Heartland military aid by 50% (saves ~2 coins/round)
+- Reduces Ruthenia military aid by 50% (saves ~2 coins/round)
 - Initiates direct communication with Helmsman (business-friendly overture)
 - Budget: No new military production (conserve funds). Maintain tariffs on Cathay.
 - Tech R&D: Allocate 8 coins to AI (push toward L4)
@@ -189,7 +189,7 @@ However, Persia war start_round = 0. So at R1, duration = 1. Rally effect = max(
 
 **Volt (still Acting President -- Dealer remains incapacitated through R2):**
 - Orders continued Persia air campaign at reduced tempo (cost reduction)
-- Announces Heartland aid cut: from 4 coins/round to 2 coins/round
+- Announces Ruthenia aid cut: from 4 coins/round to 2 coins/round
 - Budget: Attempt to cut social spending to 28% (from 30%) -- politically toxic
 - Tech: Still wants AI R&D but has no budget
 
@@ -315,7 +315,7 @@ War tiredness: 1.0 + 0.15 (R1) + 0.15 (R2) = 1.30.
 ### Agent Decisions
 
 **Dealer (returned):**
-- Furious at Volt's "Columbia First" agenda. Reverses Heartland aid cut. Orders continued Persia campaign.
+- Furious at Volt's "Columbia First" agenda. Reverses Ruthenia aid cut. Orders continued Persia campaign.
 - Deploys 1 tactical air from Hawaii to Yamato (Choson deterrence) -- redeployment, not production.
 - Cannot produce new units: no budget and Tribune blocking.
 - No tech R&D spending (no discretionary budget).
@@ -548,7 +548,7 @@ The intended behavior is that crisis causes GDP to contract faster. The current 
 
 **Challenger:**
 - Campaigns on economic recovery: "This administration printed $200 billion in 4 rounds and inflation is 58%."
-- Promises Persia ceasefire, Heartland peace deal, technology investment.
+- Promises Persia ceasefire, Ruthenia peace deal, technology investment.
 
 ### Engine Calculations — Round 5
 
@@ -633,7 +633,7 @@ Revenue has collapsed to 15 coins. Mandatory costs are ~108. **Deficit: 92.71.**
 **Decisions:**
 - Challenger announces immediate Persia ceasefire. Withdraws 2 carrier groups (4-round redeployment).
 - Proposes emergency austerity: cut social spending to 25%. Cut military maintenance by decommissioning 10 units (old ground forces).
-- Initiates Heartland peace conference.
+- Initiates Ruthenia peace conference.
 - Re-engages Cathay diplomatically (tariff reduction offer).
 - R&D: Still cannot fund (deficit too large).
 
@@ -686,10 +686,10 @@ Revenue has collapsed to 15 coins. Mandatory costs are ~108. **Deficit: 92.71.**
 - R5: With Columbia in crisis and new president, Cathay has strategic window. But Sage's counsel + economic data favor patience.
 - R6-8: Cathay builds to 13-15 naval. Naval superiority achieved. Formosa window WIDE open.
 
-### Heartland
-- Heartland aid reduced R2-R3 under Volt. Restored by Dealer but then cut again during crisis.
-- Heartland election R3-4: Beacon survives narrowly (frontline democracy bonus).
-- Frontline remains static. Nordostan does not advance (own economic constraints).
+### Ruthenia
+- Ruthenia aid reduced R2-R3 under Volt. Restored by Dealer but then cut again during crisis.
+- Ruthenia election R3-4: Beacon survives narrowly (frontline democracy bonus).
+- Frontline remains static. Sarmatia does not advance (own economic constraints).
 
 ### Persia
 - Gulf Gate blockade persists. Persia's ground forces hold the strait.
@@ -765,7 +765,7 @@ Columbia cannot invest in AI R&D when in deficit. Over 8 rounds, zero progress t
 
 ### DESIGN FINDING: Volt's Agenda Mechanically Irrelevant (SEVERITY: MEDIUM)
 
-Volt's "Columbia First" doctrine (pivot to Cathay, reduce Heartland aid) has no mechanical impact because the fiscal crisis overrides all discretionary decisions. The interesting political choice is swamped by the fiscal reality. This reduces the value of the Dealer incapacitation event -- the most interesting political moment in the test produces no interesting mechanical outcomes.
+Volt's "Columbia First" doctrine (pivot to Cathay, reduce Ruthenia aid) has no mechanical impact because the fiscal crisis overrides all discretionary decisions. The interesting political choice is swamped by the fiscal reality. This reduces the value of the Dealer incapacitation event -- the most interesting political moment in the test produces no interesting mechanical outcomes.
 
 **Recommendation:** Create specific "policy stance" actions that modify engine parameters (e.g., "Persia drawdown" stance reduces war maintenance cost by 25% after 2 rounds). This gives political decisions mechanical teeth.
 

@@ -12,7 +12,7 @@
 
 For thirty years, Columbia was the undisputed global power. That era is ending.
 
-Cathay's economy is approaching Columbia's. Its navy grows faster than any fleet since the Cold War. Its tech sector has broken through sanctions to produce advanced chips domestically. Its "partnership without limits" with Nordostan has reshaped the global order into two competing blocs — and a growing number of countries refusing to choose between them.
+Cathay's economy is approaching Columbia's. Its navy grows faster than any fleet since the Cold War. Its tech sector has broken through sanctions to produce advanced chips domestically. Its "partnership without limits" with Sarmatia has reshaped the global order into two competing blocs — and a growing number of countries refusing to choose between them.
 
 Columbia's President — the Dealer — governs through instinct and transaction. He respects strength, despises weakness, and trusts no one he hasn't personally negotiated with. His approval rating sits at 38%. The opposition controls Congress and is using war authorization as a weapon against him. In two years, Columbia will elect a new president — or re-elect a transformed one. Every leader on earth is watching that clock.
 
@@ -22,11 +22,11 @@ Columbia's President — the Dealer — governs through instinct and transaction
 
 ## The Hot Wars
 
-**Heartland.** Nordostan invaded three years ago. The front line has barely moved in eighteen months. Nordostan's war economy consumes 40% of its budget; real inflation exceeds 20%. Heartland survives on Columbia's weapons and Europe's money. A 28-point peace plan is circulating — leaked from secret talks that excluded Heartland entirely. Three candidates will contest Heartland's wartime election this year: the sitting president, the fired general the army loves, and a former president offering peace through European integration.
+**Ruthenia.** Sarmatia invaded three years ago. The front line has barely moved in eighteen months. Sarmatia's war economy consumes 40% of its budget; real inflation exceeds 20%. Ruthenia survives on Columbia's weapons and Europe's money. A 28-point peace plan is circulating — leaked from secret talks that excluded Ruthenia entirely. Three candidates will contest Ruthenia's wartime election this year: the sitting president, the fired general the army loves, and a former president offering peace through European integration.
 
 **Persia.** Columbia and Levantia struck Persia six months ago — the largest military operation since 2003. The Supreme Leader's father was killed. A new Supreme Leader sits on a throne built by the IRGC commander who installed him. Persia's response: blocking the Gulf Gate, choking 30% of global oil through the world's most important shipping lane. Oil prices have not been below $130 since. The IRGC knows the blockade is a wasting asset — sustainable for two, maybe three more years. The question: negotiate from strength now, or hold until the regime breaks?
 
-**Caribe.** Columbia captured the president of one Caribbean nation and is pressuring another. The Monroe Doctrine is back. Nordostan, Cathay, and Persia are all offering the survivors patronage.
+**Caribe.** Columbia captured the president of one Caribbean nation and is pressuring another. The Monroe Doctrine is back. Sarmatia, Cathay, and Persia are all offering the survivors patronage.
 
 ---
 
@@ -46,11 +46,11 @@ Columbia's navy currently outguns Cathay's in the Pacific — 11 capital ships t
 
 **Columbia's political clock.** Presidential election in two years (Round 5). Three candidates: the current VP (Dealer's heir), the Secretary of State (establishment hawk), and an opposition populist. Every foreign policy decision between now and then is also a campaign decision. Foreign leaders are already hedging — making deals with all three.
 
-**Nordostan's economic clock.** The war economy cannot sustain itself indefinitely. Oil revenues falling, civilian infrastructure crumbling, dependency on Cathay deepening. Pathfinder needs either victory or a deal before the economy forces one on him.
+**Sarmatia's economic clock.** The war economy cannot sustain itself indefinitely. Oil revenues falling, civilian infrastructure crumbling, dependency on Cathay deepening. Pathfinder needs either victory or a deal before the economy forces one on him.
 
-**Cathay's window.** The fleet grows. Domestic chip production accelerates. The partnership with Nordostan deepens. But the military command has been hollowed by purges — 36 generals removed in three years. The economy is slowing. The window for action on Formosa may be opening, but the instrument is damaged.
+**Cathay's window.** The fleet grows. Domestic chip production accelerates. The partnership with Sarmatia deepens. But the military command has been hollowed by purges — 36 generals removed in three years. The economy is slowing. The window for action on Formosa may be opening, but the instrument is damaged.
 
-**The BRICS+ challenge.** Cathay, Nordostan, Bharata, Solaria, and others are building parallel financial infrastructure — alternative to the dollar, alternative to Western sanctions. If it works, Columbia's most powerful non-military weapon (sanctions) loses its edge. Bharata hosts the 2026 summit. A currency union vote is expected by Round 3.
+**The BRICS+ challenge.** Cathay, Sarmatia, Bharata, Solaria, and others are building parallel financial infrastructure — alternative to the dollar, alternative to Western sanctions. If it works, Columbia's most powerful non-military weapon (sanctions) loses its edge. Bharata hosts the 2026 summit. A currency union vote is expected by Round 3.
 
 **Nuclear shadows.** Nine countries possess nuclear weapons. Persia may be months from a tenth. Every escalation path in this simulation eventually passes through a nuclear decision point. The question is never whether nuclear weapons exist — it's whether leaders believe the other side would use them.
 

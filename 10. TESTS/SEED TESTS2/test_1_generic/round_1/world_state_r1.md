@@ -8,7 +8,7 @@
 Two active wars. Gulf Gate blockade driving oil to crisis levels. Power transition accelerating.
 
 ### Active Wars
-1. **Eastern Ereb Theater** — Nordostan (13 ground + 4 air + 1 AD) vs Heartland (10 ground + 3 air + 1 AD). Nordostan occupies ~40% of Heartland territory. Choson has 2 ground units supporting Nordostan.
+1. **Eastern Ereb Theater** — Sarmatia (13 ground + 4 air + 1 AD) vs Ruthenia (10 ground + 3 air + 1 AD). Sarmatia occupies ~40% of Ruthenia territory. Choson has 2 ground units supporting Sarmatia.
 2. **Mashriq Theater** — Columbia (4 ground + 3 air) + Levantia (2 ground + 2 air) vs Persia (8 ground + 6 air + 1 AD). Operation Epic Fury + Operation Rising Lion. Persia's Supreme Leader assassinated Feb 28.
 
 ### Gulf Gate Blockade (ACTIVE)
@@ -23,8 +23,8 @@ Persia holds 1 ground unit + 1 tactical air on cp_gulf_gate. Ground blockade = c
 |---------|-----|--------|-----------|---------|----------|-----------|-------|---------|----------|--------|
 | Columbia | 280 | 1.8% | 7.0 | 38% | 50 | 3.5% | 10 | L3 | L3 | Persia |
 | Cathay | 190 | 4.0% | 8.0 | 58% | 45 | 0.5% | 6 | L2 | L2 | — |
-| Nordostan | 20 | 1.0% | 5.0 | 55% | 6 | 5.0% | 2 | L3 | L1 | Heartland |
-| Heartland | 2.2 | 2.5% | 5.0 | 52% | 1 | 7.5% | 0 | L0 | L1 | Nordostan |
+| Sarmatia | 20 | 1.0% | 5.0 | 55% | 6 | 5.0% | 2 | L3 | L1 | Ruthenia |
+| Ruthenia | 2.2 | 2.5% | 5.0 | 52% | 1 | 7.5% | 0 | L0 | L1 | Sarmatia |
 | Persia | 5 | -3.0% | 4.0 | 40% | 1 | 50% | 0 | L0 | L0 | Columbia+Levantia |
 | Gallia | 34 | 1.0% | 7.0 | 40% | 8 | 2.5% | 1 | L2 | L2 | — |
 | Teutonia | 45 | 1.2% | 7.0 | 45% | 12 | 2.5% | 0 | L0 | L2 | — |
@@ -64,9 +64,9 @@ Persia holds 1 ground unit + 1 tactical air on cp_gulf_gate. Ground blockade = c
 - 1 at w(13,9) — Indian Ocean
 
 ### Sanctions Regime
-- Columbia → Nordostan L3, Persia L3, Choson L3, Caribe L3
+- Columbia → Sarmatia L3, Persia L3, Choson L3, Caribe L3
 - Cathay → Columbia L2 (retaliatory), Yamato L1, Hanguk L1
-- EU states → Nordostan L2-3, Persia L2-3
+- EU states → Sarmatia L2-3, Persia L2-3
 
 ### Tariffs
 - Columbia → Cathay: L3 (~47.5%)
@@ -74,12 +74,12 @@ Persia holds 1 ground unit + 1 tactical air on cp_gulf_gate. Ground blockade = c
 
 ### Scheduled Events This Sim
 - **Round 2**: Columbia midterm elections
-- **Round 3-4**: Heartland wartime election
+- **Round 3-4**: Ruthenia wartime election
 - **Round 5**: Columbia presidential election (CLIMAX)
 
 ### Organizations
 - Western Treaty (NATO): Columbia, Gallia, Teutonia, Freeland, Ponte, Albion, Phrygia
 - The Union (EU): Gallia, Teutonia, Freeland, Ponte (Albion observer)
-- The League (BRICS+): Cathay, Nordostan, Bharata, Persia, Solaria, Mirage, Phrygia (observer)
-- The Cartel (OPEC+): Solaria (leader), Nordostan, Persia, Mirage
-- The Council (UNSC): Columbia, Cathay, Gallia, Albion, Nordostan (P5 veto)
+- The League (BRICS+): Cathay, Sarmatia, Bharata, Persia, Solaria, Mirage, Phrygia (observer)
+- The Cartel (OPEC+): Solaria (leader), Sarmatia, Persia, Mirage
+- The Council (UNSC): Columbia, Cathay, Gallia, Albion, Sarmatia (P5 veto)

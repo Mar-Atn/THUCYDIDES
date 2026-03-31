@@ -1,6 +1,6 @@
 {
   "round": 8,
-  "narrative": "ROUND 8 WORLD BRIEFING\n========================================\n\nGlobal GDP: 1081.9 coins. Oil: $72/bbl.\n\nACTIVE CONFLICTS:\n  columbia vs persia (mashriq)\n  nordostan vs heartland (eastern_ereb)\n\nTOP ECONOMIES:\n  Cathay: GDP 347.4, growth +11.2%, stab 9/10\n  Columbia: GDP 346.3, growth +3.6%, stab 5/10\n  Bharata: GDP 78.4, growth +9.6%, stab 8/10\n  Teutonia: GDP 50.7, growth +1.8%, stab 8/10\n  Yamato: GDP 50.0, growth +2.9%, stab 8/10\n\nKEY INDICATORS:\n  WARNING: Nordostan stability 1/10\n  WARNING: Heartland stability 1/10\n  WARNING: Persia stability 1/10\n  WARNING: Levantia stability 1/10\n  WARNING: Phrygia stability 1.0/10\n  WARNING: Choson stability 1.84/10\n  WARNING: Caribe stability 1.0/10\n  GROUND BLOCKADE: gulf_gate by mirage (0G + 1N) -- AIR CANNOT BREAK",
+  "narrative": "ROUND 8 WORLD BRIEFING\n========================================\n\nGlobal GDP: 1081.9 coins. Oil: $72/bbl.\n\nACTIVE CONFLICTS:\n  columbia vs persia (mashriq)\n  sarmatia vs ruthenia (eastern_ereb)\n\nTOP ECONOMIES:\n  Cathay: GDP 347.4, growth +11.2%, stab 9/10\n  Columbia: GDP 346.3, growth +3.6%, stab 5/10\n  Bharata: GDP 78.4, growth +9.6%, stab 8/10\n  Teutonia: GDP 50.7, growth +1.8%, stab 8/10\n  Yamato: GDP 50.0, growth +2.9%, stab 8/10\n\nKEY INDICATORS:\n  WARNING: Sarmatia stability 1/10\n  WARNING: Ruthenia stability 1/10\n  WARNING: Persia stability 1/10\n  WARNING: Levantia stability 1/10\n  WARNING: Phrygia stability 1.0/10\n  WARNING: Choson stability 1.84/10\n  WARNING: Caribe stability 1.0/10\n  GROUND BLOCKADE: gulf_gate by mirage (0G + 1N) -- AIR CANNOT BREAK",
   "flags": [],
   "results_summary": {
     "oil_price": 71.58,
@@ -25,7 +25,7 @@
         "ground": 21,
         "naval": 9
       },
-      "nordostan": {
+      "sarmatia": {
         "gdp": 19.8,
         "growth": 0.8,
         "stability": 1,
@@ -35,7 +35,7 @@
         "ground": 14,
         "naval": 6
       },
-      "heartland": {
+      "ruthenia": {
         "gdp": 2.2,
         "growth": 2.9,
         "stability": 1,
@@ -220,7 +220,7 @@
     "abacus": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
     "circuit": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': [{'type': 'asset_protection', 'target': 'foreign_holdings'}]}}",
     "sage": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
-    "pathfinder": "{'budget': {'social_spending_ratio': 0.2, 'military_pct': 0.5, 'tech_pct': 0.05, 'reserve_pct': 0.25000000000000006, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'heartland', 'preferred_zone': 'heartland_2', 'units': 2}, {'target_country': 'heartland', 'preferred_zone': 'heartland_1', 'units': 2}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.7, 'tier': 'accelerated'}, 'naval': {'coins': 0.2, 'tier': 'normal'}, ",
+    "pathfinder": "{'budget': {'social_spending_ratio': 0.2, 'military_pct': 0.5, 'tech_pct': 0.05, 'reserve_pct': 0.25000000000000006, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'ruthenia', 'preferred_zone': 'ruthenia_2', 'units': 2}, {'target_country': 'ruthenia', 'preferred_zone': 'ruthenia_1', 'units': 2}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.7, 'tier': 'accelerated'}, 'naval': {'coins': 0.2, 'tier': 'normal'}, ",
     "ironhand": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
     "compass": "{'influence': {'advice': [{'to': 'pathfinder', 'content': 'sanctions_relief_opportunity'}], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': [{'type': 'back_channel', 'target': 'western_contacts', 'purpose': 'sanctions_relief_personal'}]}}",
     "beacon": "{'influence': {'advice': [], 'slow_walk': [], 'leak': []}, 'private': {'covert': [], 'personal_deals': []}}",
@@ -238,7 +238,7 @@
     "scales": "{'budget': {'social_spending_ratio': 0.22, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.4, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.8, 'tier': 'normal'}, 'naval': {'coins': 0.6, 'tier': 'normal'}, 'tactical_air': {'coins': 0.6, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
     "citadel": "{'budget': {'social_spending_ratio': 0.23000000000000004, 'military_pct': 0.505, 'tech_pct': 0.1, 'reserve_pct': 0.165, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [{'target_country': 'persia', 'preferred_zone': 'persia_1', 'units': 3}, {'target_country': 'persia', 'preferred_zone': 'persia_3', 'units': 1}], 'mobilization': 'partial', 'production': {'ground': {'coins': 0.3, 'tier': 'accelerated'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical",
     "chip": "{'budget': {'social_spending_ratio': 0.24, 'military_pct': 0.21000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.4, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.1, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
-    "bazaar": "{'budget': {'social_spending_ratio': 0.24, 'military_pct': 0.24000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.37, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.2, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
+    "vizier": "{'budget': {'social_spending_ratio': 0.24, 'military_pct': 0.24000000000000002, 'tech_pct': 0.15, 'reserve_pct': 0.37, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.2, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
     "sakura": "{'budget': {'social_spending_ratio': 0.32, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.29999999999999993, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.9, 'tier': 'normal'}, 'naval': {'coins': 0.7, 'tier': 'normal'}, 'tactical_air': {'coins': 0.7, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
     "wellspring": "{'budget': {'social_spending_ratio': 0.27, 'military_pct': 0.23, 'tech_pct': 0.15, 'reserve_pct': 0.35, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.1, 'tier': 'normal'}, 'naval': {'coins': 0.1, 'tier': 'normal'}, 'tactical_air': {'coins': 0.1, 'tier': 'normal'}}}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': [], 'opec': 'low'}",
     "pyro": "{'budget': {'social_spending_ratio': 0.2, 'military_pct': 0.27, 'tech_pct': 0.15, 'reserve_pct': 0.38, 'money_printed': 0, 'deficit': 0}, 'tariffs': {}, 'sanctions': {}, 'military': {'attacks': [], 'mobilization': None, 'production': {'ground': {'coins': 0.0, 'tier': 'normal'}, 'naval': {'coins': 0.0, 'tier': 'normal'}, 'tactical_air': {'coins': 0.0, 'tier': 'normal'}}, 'provocation': 'missile_test'}, 'diplomatic': {'proposals': [], 'public_statements': []}, 'transactions': []}",
@@ -271,7 +271,7 @@
     {
       "tx_id": 2,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -311,7 +311,7 @@
     {
       "tx_id": 4,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "arms_transfer",
       "details": {
         "unit_type": "ground",
@@ -353,7 +353,7 @@
     {
       "tx_id": 6,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -393,13 +393,13 @@
     {
       "tx_id": 8,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -415,13 +415,13 @@
     {
       "tx_id": 9,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -437,13 +437,13 @@
     {
       "tx_id": 10,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -459,13 +459,13 @@
     {
       "tx_id": 11,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -481,13 +481,13 @@
     {
       "tx_id": 12,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -503,7 +503,7 @@
     {
       "tx_id": 13,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -543,7 +543,7 @@
     {
       "tx_id": 15,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "arms_transfer",
       "details": {
         "unit_type": "ground",
@@ -564,7 +564,7 @@
     {
       "tx_id": 16,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -604,7 +604,7 @@
     {
       "tx_id": 18,
       "sender": "cathay",
-      "receiver": "nordostan",
+      "receiver": "sarmatia",
       "tx_type": "arms_transfer",
       "details": {
         "unit_type": "ground",
@@ -625,7 +625,7 @@
     {
       "tx_id": 19,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -665,7 +665,7 @@
     {
       "tx_id": 21,
       "sender": "cathay",
-      "receiver": "nordostan",
+      "receiver": "sarmatia",
       "tx_type": "arms_transfer",
       "details": {
         "unit_type": "ground",
@@ -686,13 +686,13 @@
     {
       "tx_id": 22,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -708,13 +708,13 @@
     {
       "tx_id": 23,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -730,13 +730,13 @@
     {
       "tx_id": 24,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -752,13 +752,13 @@
     {
       "tx_id": 25,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -774,13 +774,13 @@
     {
       "tx_id": 26,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -796,7 +796,7 @@
     {
       "tx_id": 27,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -836,7 +836,7 @@
     {
       "tx_id": 29,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -876,7 +876,7 @@
     {
       "tx_id": 31,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "coin_transfer",
       "details": {
         "amount": 2
@@ -916,13 +916,13 @@
     {
       "tx_id": 33,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -938,13 +938,13 @@
     {
       "tx_id": 34,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -960,13 +960,13 @@
     {
       "tx_id": 35,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -982,13 +982,13 @@
     {
       "tx_id": 36,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -1004,13 +1004,13 @@
     {
       "tx_id": 37,
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "tx_type": "treaty",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "status": "executed",
@@ -1077,9 +1077,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1102,9 +1102,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1127,9 +1127,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1258,9 +1258,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1283,9 +1283,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1308,9 +1308,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1414,9 +1414,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1439,9 +1439,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1464,9 +1464,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1595,9 +1595,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1620,9 +1620,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1645,9 +1645,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1776,9 +1776,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1801,9 +1801,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1826,9 +1826,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1946,9 +1946,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1971,9 +1971,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -1996,9 +1996,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -2116,9 +2116,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -2141,9 +2141,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -2166,9 +2166,9 @@
     },
     {
       "type": "attack",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -2286,9 +2286,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,
@@ -2300,9 +2300,9 @@
     },
     {
       "type": "attack",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_1",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_1",
       "origin_zone": null,
       "attacker_units_committed": 2,
       "success": true,

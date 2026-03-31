@@ -15,7 +15,7 @@ The SEED test system was diagnosed with critical issues causing all tests to pro
 2. **Budget allocation** -- Social spending is explicitly allocated and tracked
 3. **Stability friction** -- War, sanctions, and inflation impose real costs
 4. **Negotiation system** -- Role-specific proposals produce meaningful deals
-5. **Zone references** -- Fixed incorrect zone names (ee_* -> heartland_*, me_gulf_gate -> cp_gulf_gate)
+5. **Zone references** -- Fixed incorrect zone names (ee_* -> ruthenia_*, me_gulf_gate -> cp_gulf_gate)
 
 Post-fix results show clear differentiation across tests, realistic stability/support ranges, and active combat in all war theaters.
 
@@ -31,8 +31,8 @@ Post-fix results show clear differentiation across tests, realistic stability/su
 |-------|---------|---------|-------|------------|
 | 1     | 68      | 7       | 13    | Opening offensives in all theaters |
 | 2     | 71      | 5       | 14    | Columbia midterms: incumbent retains |
-| 3     | 68      | 2       | 17    | Heartland election: Bulwark wins |
-| 4     | 71      | 2       | 9     | Heartland runoff: Bulwark confirmed |
+| 3     | 68      | 2       | 17    | Ruthenia election: Bulwark wins |
+| 4     | 71      | 2       | 9     | Ruthenia runoff: Bulwark confirmed |
 | 5     | 68      | 3       | 8     | Columbia presidential: incumbent wins |
 | 6     | 71      | 2       | 8     | Continued attrition |
 | 7     | 68      | 2       | 10    | Cathay overtakes Columbia GDP |
@@ -51,8 +51,8 @@ Post-fix results show clear differentiation across tests, realistic stability/su
 | Cathay     | 347.4 | 9.0       | 70.6%   | 44       |
 | Columbia   | 335.9 | 3.9       | 28.8%   | 42       |
 | Bharata    | 78.4  | 7.6       | 85.0%   | 19       |
-| Nordostan  | 20.0  | 1.0       | 30.9%   | 25       |
-| Heartland  | 2.2   | 1.0       | 5.0%    | 9        |
+| Sarmatia  | 20.0  | 1.0       | 30.9%   | 25       |
+| Ruthenia  | 2.2   | 1.0       | 5.0%    | 9        |
 | Persia     | 1.6   | 1.0       | 5.0%    | 13       |
 | Levantia   | 5.7   | 1.0       | 75.6%   | 20       |
 
@@ -61,11 +61,11 @@ R1: 1.37 -> R4: 1.25 -> R8: 0.97
 
 The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the Thucydides Trap gap ratio crosses 1.0, marking a historic power transition.
 
-**What This Test Reveals**: Baseline dynamics show the "rising power overtakes incumbent" pattern clearly. Columbia's war commitments (Persia, supporting Heartland) drain stability, while Cathay grows unimpeded. The model produces the core Thucydides Trap dynamic.
+**What This Test Reveals**: Baseline dynamics show the "rising power overtakes incumbent" pattern clearly. Columbia's war commitments (Persia, supporting Ruthenia) drain stability, while Cathay grows unimpeded. The model produces the core Thucydides Trap dynamic.
 
 ---
 
-### Test 2: Aggressive Nordostan
+### Test 2: Aggressive Sarmatia
 
 **Seed**: 200 | **Overrides**: Pathfinder aggression=0.9, risk_tolerance=0.8; Ironhand aggression=0.6
 
@@ -73,11 +73,11 @@ The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the 
 |--------|---------------|-----------------|-------|
 | Total Combats | 25 | **35** | +40% |
 | Total Deals | 88 | **70** | -20% |
-| Nordostan Final Mil | 25 | **28** | +12% |
-| Heartland Final Mil | 9 | **8** | -11% |
+| Sarmatia Final Mil | 25 | **28** | +12% |
+| Ruthenia Final Mil | 9 | **8** | -11% |
 | Columbia Stability | 3.9 | **4.9** | +1.0 |
 
-**Key Differences**: Higher aggression produces 40% more combat. Nordostan commits larger forces per attack (aggression 0.9 vs 0.6 means 0.15 + 0.9*0.2 = 33% of forces vs 27%). The deal count drops 20% -- aggressive Nordostan prioritizes war over negotiation. Surprisingly, Columbia is more stable (4.9 vs 3.9) because the random seed produces different combat outcomes in the Persia theater.
+**Key Differences**: Higher aggression produces 40% more combat. Sarmatia commits larger forces per attack (aggression 0.9 vs 0.6 means 0.15 + 0.9*0.2 = 33% of forces vs 27%). The deal count drops 20% -- aggressive Sarmatia prioritizes war over negotiation. Surprisingly, Columbia is more stable (4.9 vs 3.9) because the random seed produces different combat outcomes in the Persia theater.
 
 **GDP Trajectory**: Columbia reaches 346.3 (vs 335.9 baseline) -- the different seed produces slightly better economic outcomes.
 
@@ -114,7 +114,7 @@ The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the 
 | Total Deals | 88 | **69** | -22% |
 | Columbia GDP | 335.9 | 346.3 | +10.4 |
 
-**Oil Price**: Oscillates 68-72 across all tests. OPEC decisions (Nordostan=low, Solaria=normal, Persia=normal) don't change between tests because Wellspring's aggression override doesn't directly affect OPEC production decision logic. The oil price formula is driven by supply/demand fundamentals.
+**Oil Price**: Oscillates 68-72 across all tests. OPEC decisions (Sarmatia=low, Solaria=normal, Persia=normal) don't change between tests because Wellspring's aggression override doesn't directly affect OPEC production decision logic. The oil price formula is driven by supply/demand fundamentals.
 
 **What This Test Reveals**: The oil cartel mechanics need stronger linkage between agent personality and OPEC production decisions. Currently, Wellspring's deal_seeking=0.4 doesn't change oil output. Recommendation: tie OPEC production to deal_seeking (low deal_seeking = more competitive = higher production).
 
@@ -152,7 +152,7 @@ The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the 
 
 **This is the most differentiated test.** Columbia suffers significantly: GDP 316 (lowest across all tests), stability 3.2 (worst), support 19.5% (lowest). The random seed produces combat outcomes that damage Columbia more. Levantia's support crashes to 34.9% (vs 75.6% baseline) -- the different seed produces more casualties for Levantia.
 
-**What This Test Reveals**: Alliance cohesion matters. When European allies pursue independent agendas (high deal_seeking, low aggression), the Western alliance coordination weakens, and Columbia bears more burden. The 35 combats match the aggressive Nordostan test -- when allies aren't helping, more combat falls on the primary belligerents.
+**What This Test Reveals**: Alliance cohesion matters. When European allies pursue independent agendas (high deal_seeking, low aggression), the Western alliance coordination weakens, and Columbia bears more burden. The 35 combats match the aggressive Sarmatia test -- when allies aren't helping, more combat falls on the primary belligerents.
 
 ---
 
@@ -164,7 +164,7 @@ The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the 
 |--------|---------------|----------------|-------|
 | Total Combats | 25 | **34** | +36% |
 | Columbia Stability | 3.9 | **4.6** | +0.7 |
-| Nordostan Final Mil | 25 | **26** | +1 |
+| Sarmatia Final Mil | 25 | **26** | +1 |
 
 **Gulf Gate Blockade**: The cp_gulf_gate zone has Persia naval (2) + tactical air (1) deployed. With Furnace aggression=0.7, Persia should maintain the blockade. However, the blockade requires ground forces in the zone, and Persia only has naval/air there. The ground blockade mechanic doesn't trigger.
 
@@ -184,7 +184,7 @@ The gap closes and reverses by round 8. Cathay overtakes Columbia in GDP -- the 
 
 **Key Finding**: The peace scenario produces the highest deal count (93) and lowest combat count (24). The opening round has 19 deals (vs 13 baseline) -- a 46% increase in diplomatic activity. However, combats only decrease 4% because war countries MUST fight regardless of deal-seeking. The combat is driven by structural war commitments, not personality.
 
-**What This Test Reveals**: Deal-seeking personality produces more diplomatic activity but cannot prevent combat when countries are at war. This is realistic -- ceasefires require mutual agreement, not just one side's willingness. The Nordostan-Heartland war and Columbia-Persia war continue regardless because ceasefire mechanics aren't fully implemented.
+**What This Test Reveals**: Deal-seeking personality produces more diplomatic activity but cannot prevent combat when countries are at war. This is realistic -- ceasefires require mutual agreement, not just one side's willingness. The Sarmatia-Ruthenia war and Columbia-Persia war continue regardless because ceasefire mechanics aren't fully implemented.
 
 ---
 
@@ -221,7 +221,7 @@ In all tests, the gap closes. In test 6 (Alliance Fracture), the gap is widest (
 
 1. **Zero combats** -- Agents were not generating attack actions due to impossible conditions. Fixed by making war countries attack every round.
 
-2. **Zone name mismatch** -- Code referenced `ee_east_front_north`, `ee_east_front_central`, `me_gulf_gate` but actual zones are `heartland_1`, `heartland_2`, `cp_gulf_gate`. Fixed all references.
+2. **Zone name mismatch** -- Code referenced `ee_east_front_north`, `ee_east_front_central`, `me_gulf_gate` but actual zones are `ruthenia_1`, `ruthenia_2`, `cp_gulf_gate`. Fixed all references.
 
 3. **Stability climbing to 10** -- Positive inertia (+0.15-0.30) plus GDP growth bonus (+0.5 max) plus social spending meeting baseline (+0.2) gave ~0.7/round positive delta with no negative factors. Fixed: reduced positive inertia, added war/sanctions/inflation friction, capped at 9.0.
 
@@ -233,7 +233,7 @@ In all tests, the gap closes. In test 6 (Alliance Fracture), the gap is widest (
 
 ### Remaining Issues for Future Calibration
 
-1. **Small economy floor**: Nordostan (GDP 20), Heartland (GDP 2.2), and Persia (GDP 1.6) have GDP growth effects that round to zero at this scale. Recommend using fractional GDP tracking or a log-scale stability calculation for small economies.
+1. **Small economy floor**: Sarmatia (GDP 20), Ruthenia (GDP 2.2), and Persia (GDP 1.6) have GDP growth effects that round to zero at this scale. Recommend using fractional GDP tracking or a log-scale stability calculation for small economies.
 
 2. **Cathay stability always at cap**: Cathay is peaceful, not sanctioned, and growing fast. Stability naturally rises to 9.0 (cap) and stays there. Consider: internal tensions (LGFV debt crisis from Abacus role brief), tech competition pressure, or social unrest mechanics.
 

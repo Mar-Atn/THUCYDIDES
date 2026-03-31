@@ -125,7 +125,7 @@ Organized by geopolitical alignment for intuitive grouping:
 | Country | Hex | Light BG | Emblem |
 |---------|-----|----------|--------|
 | Cathay | #D94A4A | #FAE8E8 | ⬡ Layered hexagon |
-| Nordostan | #808080 | #F0F0F0 | ◇ Diamond |
+| Sarmatia | #808080 | #F0F0F0 | ◇ Diamond |
 | Persia | #4AD97A | #E8FAF0 | ☽ Crescent |
 | Choson | #8B4513 | #F3EBE5 | ✶ Burst |
 | Caribe | #CC7722 | #F7EEE3 | ◎ Sun circle |
@@ -142,7 +142,7 @@ Organized by geopolitical alignment for intuitive grouping:
 **At War / Under Pressure:**
 | Country | Hex | Light BG | Emblem |
 |---------|-----|----------|--------|
-| Heartland | #D4A843 | #F8F2E5 | ⛨ Shield (defensive) |
+| Ruthenia | #D4A843 | #F8F2E5 | ⛨ Shield (defensive) |
 | Levantia | #5DADE2 | #EAF4F9 | ✡ Star of points |
 | Solaria | #F1C40F | #FBF5E0 | ☀ Sun |
 | Mirage | #A569BD | #F0E8F4 | ◈ Faceted gem |
@@ -153,7 +153,7 @@ Organized by geopolitical alignment for intuitive grouping:
 | Western Treaty (NATO) | #3A6FA0 | Compass rose |
 | The League (BRICS+) | #C0392B | Interlocked circles |
 | The Cartel (OPEC+) | #F39C12 | Oil drop |
-| The Union (EU) | #2E4057 | Ring of dots |
+| The Ereb Union (EU) | #2E4057 | Ring of dots |
 | The Council (UNSC) | #1A5276 | Globe outline |
 
 **Note:** Emblems will be designed as simple SVG icons — geometric, abstract, approximately 24×24px at minimum size. Style: single-weight line art or filled geometric shapes. NOT pictographic, NOT realistic. Think: what a stamp seal would look like if designed by Dieter Rams.
@@ -269,8 +269,8 @@ Think: **Egyptian hieroglyphic simplicity** meets **Isotype (Otto Neurath) picto
 |---------|---------|-------------|
 | Columbia | Authority | Five-point star — hegemonic, central |
 | Cathay | Structure | Nested hexagon — layered, expansive |
-| Nordostan | Hardness | Angular diamond — hard, unyielding |
-| Heartland | Defense | Upward shield — protecting, enduring |
+| Sarmatia | Hardness | Angular diamond — hard, unyielding |
+| Ruthenia | Defense | Upward shield — protecting, enduring |
 | Persia | Arc | Crescent form — historical, curved tension |
 | Gallia | Elevation | Vertical tower — proud, independent |
 | Teutonia | Industry | Anvil/cog — productive, solid |
@@ -295,7 +295,7 @@ Think: **Egyptian hieroglyphic simplicity** meets **Isotype (Otto Neurath) picto
 | Western Treaty | Navigation | Compass rose — direction, alliance |
 | The League | Unity | Interlocked circles — partnership, alternative |
 | The Cartel | Resource | Drop — oil, energy control |
-| The Union | Integration | Ring of dots — member states, consensus |
+| The Ereb Union | Integration | Ring of dots — member states, consensus |
 | The Council | Authority | Globe outline — world governance |
 | The Seven | Coordination | Seven-point form — elite economic club |
 
@@ -324,7 +324,7 @@ Think: **Egyptian hieroglyphic simplicity** meets **Isotype (Otto Neurath) picto
 
 ### Country Badge (in lists, tables, chat)
 ```
-[◇ Nordostan]  ← emblem + name, country color background tint
+[◇ Sarmatia]  ← emblem + name, country color background tint
 ```
 
 ### Alert Types

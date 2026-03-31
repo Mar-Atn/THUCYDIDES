@@ -35,7 +35,7 @@ The shadow behind every negotiation. Most participants will never command troops
 | Ground forces | Territory control, land warfare, border defense | Yes (budget) | The default. RISK-model combat. Dominant in European theater. |
 | Naval forces | Sea control, blockades, coastal bombardment (10%/unit), amphibious ops | Yes (budget) | Required for Formosa scenario. ~6-8 countries have significant navies. |
 | Tactical air / missiles | Short-range strikes, battlefield support, drones | Yes (budget) | Adjacent to own forces/bases only. Disposable — consumed on use. |
-| Strategic missiles | Long-range precision strike, global reach. **Warhead type (conventional or nuclear) chosen at launch — unknown to target.** | Cathay only (+1/round if funded) | Fixed starting allocation per country (Columbia ~10, Nordostan ~10, Cathay ~3+growing, Gallia ~2, Albion ~2). Only countries with nuclear L1+ can choose nuclear warhead. Global alert on launch. 10-min real-time execution window. |
+| Strategic missiles | Long-range precision strike, global reach. **Warhead type (conventional or nuclear) chosen at launch — unknown to target.** | Cathay only (+1/round if funded) | Fixed starting allocation per country (Columbia ~10, Sarmatia ~10, Cathay ~3+growing, Gallia ~2, Albion ~2). Only countries with nuclear L1+ can choose nuclear warhead. Global alert on launch. 10-min real-time execution window. |
 | Air defense | Protects zones from incoming air/missile strikes. Absorbs up to 3 strikes per unit. | Not producible | Fixed starting allocation. Scarce, tradeable. Deployment to zones is a major strategic decision. |
 
 ### Deployment and Basing
@@ -72,7 +72,7 @@ All units (apart from air/missile forces) are deployed to **theaters** visible o
 
 ### Balancing Mechanics
 
-Production capacity limits (each country has maximum units per type per round). Accelerated/maximum production follows an escalating cost-per-unit curve (1×/2×/4× per unit for 1×/2×/3× output; total cost 1×/4×/12×). Surge production is available but ruinously expensive. Country-specific maintenance costs (Columbia pays more per unit than Cathay/Nordostan). Absorption limits (transferred units at reduced effectiveness for 1 round). Seller depletion (selling = losing your own units). Strategic missiles and air defense are non-producible scarce resources (except Cathay's +1/round). Attack less efficient than defense (RISK model — attacker loses ties). Landing operations severely penalized. Ground attacks costly and politically risky (casualties cost domestic support).
+Production capacity limits (each country has maximum units per type per round). Accelerated/maximum production follows an escalating cost-per-unit curve (1×/2×/4× per unit for 1×/2×/3× output; total cost 1×/4×/12×). Surge production is available but ruinously expensive. Country-specific maintenance costs (Columbia pays more per unit than Cathay/Sarmatia). Absorption limits (transferred units at reduced effectiveness for 1 round). Seller depletion (selling = losing your own units). Strategic missiles and air defense are non-producible scarce resources (except Cathay's +1/round). Attack less efficient than defense (RISK model — attacker loses ties). Landing operations severely penalized. Ground attacks costly and politically risky (casualties cost domestic support).
 
 ### Combat Resolution
 
@@ -112,7 +112,7 @@ The global map starts with **two active theaters** (Eastern Ereb and Mashriq - P
 
 **Coins** — the universal hard currency. Digital. Realistic - like a real currency. Every transaction tracked. State treasuries and personal wealth (available for all roles, avalable from start and actively played by certain roles: oligarchs, business figures, Gulf royals — ~8-12 roles). Spot transactions are immediate and irreversible.
 
-**Economic structure** — each country has a fixed profile showing GDP composition across four sectors: Resources, Industry, Services, Technology. Participants don't manage sector allocation — the profile determines how specific sanctions, tariffs, and shocks affect them. E.g., Nordostan is Resources-heavy (vulnerable to energy sanctions), Cathay is Industry-heavy (vulnerable to tariffs), Columbia is Services/Tech-heavy (vulnerable to financial counter-measures).
+**Economic structure** — each country has a fixed profile showing GDP composition across four sectors: Resources, Industry, Services, Technology. Participants don't manage sector allocation — the profile determines how specific sanctions, tariffs, and shocks affect them. E.g., Sarmatia is Resources-heavy (vulnerable to energy sanctions), Cathay is Industry-heavy (vulnerable to tariffs), Columbia is Services/Tech-heavy (vulnerable to financial counter-measures).
 
 ### Budget Cycle (each round — submitted, processed by World Model Engine)
 
@@ -122,7 +122,7 @@ Every country submits a budget. The PM / finance minister owns it; head of state
 Revenue = f(GDP, tax_rate, trade_income, oil_revenue) - sanctions_cost - inflation_erosion - war_damage. See E1.2 for full formula.
 
 **Mandatory costs (auto-deducted):**
-- Military maintenance: existing units × country-specific cost per type (Columbia pays more per unit than Cathay/Nordostan — advanced equipment, higher wages)
+- Military maintenance: existing units × country-specific cost per type (Columbia pays more per unit than Cathay/Sarmatia — advanced equipment, higher wages)
 - Remainder = discretionary budget
 
 **Allocation decisions:**
@@ -158,7 +158,7 @@ Revenue = f(GDP, tax_rate, trade_income, oil_revenue) - sanctions_cost - inflati
 - Impact weighted by economy size and the size of coalition supporting sanctions and teh ssize of those helping to avade sanctions
 - Cost-to-sanctioner modeled (sanctions hurt the imposer too)
 - Secondary sanctions risk for evaders (possible to discover via intelligence)
-- Frozen assets mechanic (some assets of Nordostan are held in EU and US)
+- Frozen assets mechanic (some assets of Sarmatia are held in EU and US)
 - **Cost-to-sanctioner:** Sanctions cost the imposer proportionally to bilateral trade exposure with the target. Approximately 30-50% of the GDP damage inflicted on the target rebounds to the imposer as lost trade, supply chain disruption, and price inflation. Sanctions are a sacrifice, not a free weapon.
 - **Coalition threshold:** Below approximately 60% of the target's trade-GDP coverage enforcing sanctions, effectiveness drops by approximately 70% due to rerouting through non-sanctioning countries. Sanctions without a broad coalition are performative, not punitive.
 - **Financial sanctions (SWIFT/reserves freeze):** Dramatically more powerful than trade sanctions — can cripple a target's economy within 1 round. But carry a "dollar weaponization" cost: each use accelerates de-dollarization pressure among targets and observers.
@@ -166,9 +166,9 @@ Revenue = f(GDP, tax_rate, trade_income, oil_revenue) - sanctions_cost - inflati
 
 ### Oil / Resource Pricing
 
-A sub-mechanic for resource-producing countries (Solaria, Nordostan, Persia, others in OPEC+).
+A sub-mechanic for resource-producing countries (Solaria, Sarmatia, Persia, others in OPEC+).
 
-Each producer sets production level: low / normal / high. AI calculates resulting global price based on total supply vs. demand. High prices benefit producers, hurt importers (Cathay, Teutonia, Bharata — potential stability impact). Classic prisoner's dilemma: cooperate (restrict production, price high) or defect (overproduce, grab market share, crash price). Solaria and Nordostan are in OPEC+ together but are geopolitical adversaries — can they cooperate on oil while competing on everything else?
+Each producer sets production level: low / normal / high. AI calculates resulting global price based on total supply vs. demand. High prices benefit producers, hurt importers (Cathay, Teutonia, Bharata — potential stability impact). Classic prisoner's dilemma: cooperate (restrict production, price high) or defect (overproduce, grab market share, crash price). Solaria and Sarmatia are in OPEC+ together but are geopolitical adversaries — can they cooperate on oil while competing on everything else?
 
 Iran also has an option to block Ormuz straight by it s military units - and keep the blockade, reducing oil available in markets. Impact on prices of resources, negative for resource consuming nations and negative n volume for local producers in the middl east, while positive for other producers (Russia, Venezuela)
 
@@ -244,7 +244,7 @@ Three mechanics add a personal layer to leadership decisions:
 
 **Succession anxiety (autocracies):** When an autocratic leader's political support drops below 30%, a succession clock starts. Each consecutive round below threshold increases internal pressure mechanically (subordinates receive independent information, back-channels activate, emergency convening powers unlock). At 3 consecutive rounds, a forced leadership challenge triggers.
 
-**Health events:** Leaders aged 70+ (Helmsman 73, Pathfinder 73, Dealer 80) face a 5-10% chance per round of temporary incapacitation lasting 1 round. Cathay: Abacus acts (orderly, opaque). Nordostan: power vacuum (chaotic). Columbia: Volt acts (constitutional, transparent).
+**Health events:** Leaders aged 70+ (Helmsman 73, Pathfinder 73, Dealer 80) face a 5-10% chance per round of temporary incapacitation lasting 1 round. Cathay: Abacus acts (orderly, opaque). Sarmatia: power vacuum (chaotic). Columbia: Volt acts (constitutional, transparent).
 
 ### Elections Mechanic
 
@@ -252,7 +252,7 @@ Three mechanics add a personal layer to leadership decisions:
 
 **Columbia presidential (Round 5):** Nominations in Round 4 (candidates declare, brief speeches). General election: campaign speeches + debate. Team votes (Fixer/Pioneer = 2 votes each, others = 1) + AI popular vote (50%). Winner gains all executive powers. Former president stays as opposition.
 
-**Heartland wartime (Round 3-4):** Three candidates (Beacon, Bulwark, Broker). AI judges based on territory held, economy, casualties, Western support, campaign quality. Winner becomes president.
+**Ruthenia wartime (Round 3-4):** Three candidates (Beacon, Bulwark, Broker). AI judges based on territory held, economy, casualties, Western support, campaign quality. Winner becomes president.
 
 **Other democracies:** Triggered by stability crises (government falls below threshold). AI generates outcomes for single-role countries.
 
@@ -262,7 +262,7 @@ Three mechanics add a personal layer to leadership decisions:
 1. Any team member submits "coup attempt" to system
 2. X-minute window opens (invisible to others)
 3. Other team members must INDEPENDENTLY submit — no system signalling
-4. Threshold: >30% of team (Columbia 3+, Cathay 2+, Nordostan 2+, Persia 2+)
+4. Threshold: >30% of team (Columbia 3+, Cathay 2+, Sarmatia 2+, Persia 2+)
 5. If threshold not met → fails, initiators exposed globally
 6. If met → AI assesses probability (stability, leader support, military control, conspirator count, regime type)
 7. Universal resolution mechanic: probability displayed → fortune wheel → result
@@ -311,7 +311,7 @@ The existential dimension. Deterrence, escalation, proliferation.
 |-------|-----------|-------------------|
 | 1 | Basic weapons. Can test. Tactical capability | Choson, Bharata, Levantia |
 | 2 | Reliable arsenal. Tactical and limited strategic capability | Cathay, Albion, Gallia |
-| 3 | Full strategic arsenal. Global strike capability. MAD-capable | Columbia, Nordostan |
+| 3 | Full strategic arsenal. Global strike capability. MAD-capable | Columbia, Sarmatia |
 
 Actions: Nuclear test (L1+ countries, probabilistic success). Strategic missile launch with nuclear warhead (warhead type unknown to target — see Military domain). Technology transfer. Proliferation is a diplomatic currency.
 
@@ -352,7 +352,7 @@ Any country with advanced level of AI technology can restrict technology exports
 Cathay controls rare earth minerals essential for all tech manufacturing. Can restrict exports to Columbia and allies. Mutual vulnerability creates the possibility of negotiated restraint. (TBC)
 
 **Technology transfer:**
-Sell or share tech for coins or political concessions. Legitimate transfers (Columbia sells military AI to allies) are routine. Controversial transfers (Cathay shares drone tech with Nordostan) trigger diplomatic consequences. Proliferation risk parallels nuclear. Technlogy becomes effective next quarter. 
+Sell or share tech for coins or political concessions. Legitimate transfers (Columbia sells military AI to allies) are routine. Controversial transfers (Cathay shares drone tech with Sarmatia) trigger diplomatic consequences. Proliferation risk parallels nuclear. Technlogy becomes effective next quarter. 
 
 **AI-enhanced propaganda (Level 2+):**
 Countries with AI capability can target other countries' domestic politics — amplifying disinformation, manipulating social media, undermining trust in institutions. Substantially more effective than traditional propaganda. Lowers target's stability index and/or political support. Risk: attribution and international backlash. Hidden cost: normalizes information warfare, may invite retaliation against own society.
@@ -401,3 +401,6 @@ Most questions from v1.1 are now addressed in E1 Engine Architecture v0.7. Remai
 - **v2.0 (2026-03-21):** Aligned with E1 Engine Architecture v0.7. Military: 5 unit types (added strategic missiles with unified nuclear warhead unknown to target, air defense as deployable unit). Budget: production tiers (1×/4×/9×), capacity investment removed, country-specific maintenance costs. Economy: GDP formula reference, financial indexes, revenue formula. Politics: simplified to Stability + Political Support only, Columbia Dem/Rep split added. Tech: pre-set advancement model. Elections: detailed mechanics from E1. Coup: multi-step mechanic. Most open questions resolved by E1 specs.
 - **v1.1 (2026-03-20):** Added information asymmetry principle.
 - **v1.0 (2026-03-19):** Initial four-domain architecture.
+
+
+<!-- CM-006: Deployment rules updated 2026-03-30. Transit delay removed (instant deployment). Ship capacity formalized (1 ground + 2 air). Naval blockade restriction added. Approved by Marat. -->

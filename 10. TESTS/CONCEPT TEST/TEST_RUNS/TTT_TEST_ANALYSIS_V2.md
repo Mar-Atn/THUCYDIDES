@@ -20,8 +20,8 @@ V2 engine fixes resolve the most critical V1 flaw: **unrealistic universal stabi
 |---------|------|------|------------|
 | Columbia | 3.1 (avg) | 9.0 (avg) | V2 correct: peaceful superpower should not collapse |
 | Cathay | 3.3 (avg) | 8.8 (avg) | V2 correct: growing economy with no war should be stable |
-| Nordostan | 1.0 (all runs) | 1.9 (avg) | Both stressed, but V2 shows resilience before decline |
-| Heartland | 1.0 (all runs) | 1.0 (all runs) | Consistent: warzone with tiny GDP collapses regardless |
+| Sarmatia | 1.0 (all runs) | 1.9 (avg) | Both stressed, but V2 shows resilience before decline |
+| Ruthenia | 1.0 (all runs) | 1.0 (all runs) | Consistent: warzone with tiny GDP collapses regardless |
 | Persia | 1.0 (all runs) | 3.5 (avg) | V2 better: Iran is strained but functional |
 | Bharata | 3.1 (avg) | 8.7 (avg) | V2 correct: fastest-growing democracy should not crash |
 | Gallia | ~3 (fracturing) | ~7 (holding) | V2 correct: France is stable despite geopolitical stress |
@@ -61,20 +61,20 @@ V2 shows a **more dangerous** Thucydides Trap trajectory:
 | Metric | V1 | V2 |
 |--------|-----|-----|
 | Status | COLLAPSE_IMMINENT | COLLAPSE_IMMINENT |
-| Nordostan stability | 1.0 (all) | 1.7-2.2 |
-| Nordostan war tiredness | ~10+ | 8.4 |
-| Heartland stability | 1.0 (all) | 1.0 (all) |
-| Nordostan GDP | 17.5 (avg) | 20.0 (avg) |
+| Sarmatia stability | 1.0 (all) | 1.7-2.2 |
+| Sarmatia war tiredness | ~10+ | 8.4 |
+| Ruthenia stability | 1.0 (all) | 1.0 (all) |
+| Sarmatia GDP | 17.5 (avg) | 20.0 (avg) |
 
-V2 improvements for Nordostan:
+V2 improvements for Sarmatia:
 - Autocracy resilience bonus prevents immediate collapse
 - War tiredness decay (5%/round adaptation) prevents runaway fatigue
 - Sanctions-adapted economy (reduced market panic for long-sanctioned autocracies)
 - Capital controls limit capital flight vs democracies
 
-Nordostan declines from stability 5 to ~2 over 8 rounds (4 years of additional war). This is plausible: severe strain but not collapse. GDP holds around 20 (vs starting 22), showing the sanctions-resistant economy described in the design doc.
+Sarmatia declines from stability 5 to ~2 over 8 rounds (4 years of additional war). This is plausible: severe strain but not collapse. GDP holds around 20 (vs starting 22), showing the sanctions-resistant economy described in the design doc.
 
-Heartland remains at 1.0 -- with GDP of only 2, high war tiredness (starting at 5), and active combat, the small economy cannot sustain prolonged war. This represents Ukraine's dependence on Western aid for survival.
+Ruthenia remains at 1.0 -- with GDP of only 2, high war tiredness (starting at 5), and active combat, the small economy cannot sustain prolonged war. This represents Ukraine's dependence on Western aid for survival.
 
 ### 5. Nuclear Proliferation
 
@@ -90,8 +90,8 @@ Persia reaches L1 (nuclear threshold) in all runs. In V2, Levantia's graduated r
 
 V2 oil prices are more responsive to disruptions:
 - Hormuz blockade by Persia in several runs causes 60% price spike (vs 35% in V1)
-- Oil-producing countries (Nordostan, Solaria) benefit explicitly from high prices through the new oil_revenue calculation
-- This creates a feedback loop: sanctions on Nordostan reduce stability -> Nordostan threatens energy leverage -> oil prices rise -> Nordostan gets more oil revenue -> partial sanctions offset
+- Oil-producing countries (Sarmatia, Solaria) benefit explicitly from high prices through the new oil_revenue calculation
+- This creates a feedback loop: sanctions on Sarmatia reduce stability -> Sarmatia threatens energy leverage -> oil prices rise -> Sarmatia gets more oil revenue -> partial sanctions offset
 
 ### 7. AI Technology Race
 
@@ -103,9 +103,9 @@ Both versions show Columbia and Cathay reaching AI L3, with the AI tech race as 
 
 1. **Peaceful countries stay stable.** Columbia, Cathay, Bharata, Yamato, and European allies maintain high stability through institutional inertia and economic growth -- matching real-world expectations.
 
-2. **War-fighting countries decline gradually, not catastrophically.** Nordostan goes from 5.0 to ~2.0 over 8 rounds (4 years), consistent with Russia's real-world trajectory of "strained but functional."
+2. **War-fighting countries decline gradually, not catastrophically.** Sarmatia goes from 5.0 to ~2.0 over 8 rounds (4 years), consistent with Russia's real-world trajectory of "strained but functional."
 
-3. **Autocracy resilience is modeled.** Nordostan and Cathay benefit from regime-type-specific bonuses (capital controls, suppression of instability) at the cost of reduced political responsiveness.
+3. **Autocracy resilience is modeled.** Sarmatia and Cathay benefit from regime-type-specific bonuses (capital controls, suppression of instability) at the cost of reduced political responsiveness.
 
 4. **Sanctions are painful but survivable.** The adapted-economy mechanic for long-sanctioned autocracies prevents unrealistic GDP collapse while maintaining steady erosion.
 
@@ -121,20 +121,20 @@ Both versions show Columbia and Cathay reaching AI L3, with the AI tech race as 
 
 3. **Formosa crisis never triggers.** Despite enriched window calculations, no run produces a Formosa blockade. The window_score threshold (0.65) may be too high, or Cathay's naval buildup too slow (starting at 8, needing 10+ for the window to open).
 
-4. **Heartland has no path to survival.** GDP 2 with negative growth means Heartland collapses in every scenario. Need a "Western aid" mechanic that offsets some of the economic decline -- currently arms transfers boost military units but not economic resilience.
+4. **Ruthenia has no path to survival.** GDP 2 with negative growth means Ruthenia collapses in every scenario. Need a "Western aid" mechanic that offsets some of the economic decline -- currently arms transfers boost military units but not economic resilience.
 
 5. **Choson provocations too mild.** The attention-seeking logic works but Choson never meaningfully escalates. Need a mechanism for nuclear/ICBM tests that create diplomatic crises forcing Columbia response.
 
 6. **European differentiation weak.** Gallia, Teutonia, Freeland, Ponte, and Albion all end up similarly stable. Their different strategic positions (Gallia's autonomy drive, Teutonia's China-trade dependency, Ponte's debt crisis) should produce more divergent outcomes.
 
-7. **War termination missing.** The Nordostan-Heartland war never ends. Need a ceasefire/settlement mechanic triggered by mutual exhaustion, collapse of one side, or great-power mediation.
+7. **War termination missing.** The Sarmatia-Ruthenia war never ends. Need a ceasefire/settlement mechanic triggered by mutual exhaustion, collapse of one side, or great-power mediation.
 
 ---
 
 ## Recommendations for V3
 
 1. **Add war termination mechanics** -- ceasefire when both sides below stability 3, or when one side collapses below 1.5.
-2. **Add Western economic aid to Heartland** -- $5-10B/round equivalent keeping GDP from crashing below 1.5.
+2. **Add Western economic aid to Ruthenia** -- $5-10B/round equivalent keeping GDP from crashing below 1.5.
 3. **Lower Cathay Formosa window threshold** or increase naval production rate to test the Taiwan contingency.
 4. **Add domestic friction events** (protests, scandals, economic shocks) to prevent peaceful-country support from plateauing at 100%.
 5. **Add Choson nuclear/ICBM test events** that force Security Council responses and create diplomatic mini-crises.
@@ -152,5 +152,5 @@ Both versions show Columbia and Cathay reaching AI L3, with the AI tech race as 
 | V1-R4 | 256 | 0.881 | 313.7 | 276.4 | 1.0 | FRACTURING | Universal collapse |
 | **V2-R5** | **100** | **0.943** | **363.6** | **342.8** | **1.9** | **HOLDING** | Hormuz blocked, Persia reaches L1 |
 | **V2-R6** | **200** | **0.834** | **358.7** | **299.0** | **2.2** | **HOLDING** | Lower Cathay growth seed |
-| **V2-R7** | **300** | **0.924** | **371.0** | **342.8** | **1.7** | **HOLDING** | Nordostan lowest stability |
+| **V2-R7** | **300** | **0.924** | **371.0** | **342.8** | **1.7** | **HOLDING** | Sarmatia lowest stability |
 | **V2-R8** | **400** | **0.999** | **371.6** | **371.2** | **2.0** | **HOLDING** | Near GDP parity reached |

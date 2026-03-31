@@ -317,7 +317,7 @@ The command center for the moderator team. Full visibility, full control.
 
 **AI participant manager.** Status of all AI participants: current activity, queue depth, recent decisions. Ability to: pause/resume any AI, adjust activity frequency, view cognitive state (all 4 blocks), see reasoning for any decision, override a pending AI action, trigger manual reflection (inject information into the AI's perception). This is essential for a facilitator who needs to ensure AI participants behave appropriately and don't derail the game.
 
-**Event injection.** The moderator can create events that appear in the simulation: "Breaking: Nordostan general defects to Heartland" or "Earthquake damages Cathay's southern industrial zone." These become entries in the events log, are pushed to all relevant clients, and feed into the next World Model Engine processing. This is how the moderator shapes the narrative beyond what participants and engines produce.
+**Event injection.** The moderator can create events that appear in the simulation: "Breaking: Sarmatia general defects to Ruthenia" or "Earthquake damages Cathay's southern industrial zone." These become entries in the events log, are pushed to all relevant clients, and feed into the next World Model Engine processing. This is how the moderator shapes the narrative beyond what participants and engines produce.
 
 **Navigator oversight.** Aggregated view of all Navigator conversations: intro completion status per participant, mid-session activity, outro completion. Ability to view any transcript. Ability to add events to Navigator's event memory feed. This is the facilitator's window into participant engagement quality.
 
@@ -331,7 +331,7 @@ A read-only view designed for large screens visible to all participants and obse
 
 **Global map.** The two-layer map from C4, showing: active theaters with current control, naval positions in maritime zones, chokepoint status (open/contested/blocked), military movements that are publicly visible (not covert). Updated in real time via the real-time layer.
 
-**Key indicators dashboard.** A panel of global metrics: global oil price, trade volume index, power balance indicators (aggregate military/economic comparisons without giving conclusions), structural clock positions (Formosa capability, Columbia election countdown, Nordostan reserves, Persia nuclear progress), active conflict count.
+**Key indicators dashboard.** A panel of global metrics: global oil price, trade volume index, power balance indicators (aggregate military/economic comparisons without giving conclusions), structural clock positions (Formosa capability, Columbia election countdown, Sarmatia reserves, Persia nuclear progress), active conflict count.
 
 **News feed.** A scrolling ticker of public events: treaty signings, public speeches, combat outcomes (publicly visible ones), election results, organization meeting outcomes, moderator-injected events, press publications (if the Veritas press role is active). Each item is timestamped and attributed.
 
@@ -360,7 +360,7 @@ To illustrate how the modules work together, here are three representative scena
 5. Live Action Engine calculates: dice probability from unit matchups, morale modifier (from stability), tech modifier, terrain. Displays factors. Rolls dice. Resolves casualties and territory changes
 6. Live Action Engine writes results to database: events log (attack event + result), world state (territory control change, unit losses)
 7. Real-time layer pushes: map update to ALL connected clients (new territory control visible), casualty notification to both attacker and defender, alert to all participants ("Combat in Eastern European theater"), event to AI Participant Modules (perception input for affected AI countries)
-8. Public Display updates: map redraws, news ticker shows "Columbia forces engage Nordostan positions in southern sector"
+8. Public Display updates: map redraws, news ticker shows "Columbia forces engage Sarmatia positions in southern sector"
 9. Facilitator Dashboard highlights the event; moderator can annotate
 10. AI participants in affected countries trigger immediate reflection cycle (Block 3/4 update), may initiate reactive actions (messages to allies, counter-deployment planning)
 11. Secondary effects (GDP damage, stability impact) deferred to World Model Engine processing in Phase B
@@ -384,7 +384,7 @@ To illustrate how the modules work together, here are three representative scena
 2. Participant Interface sends a session request to the AI Assistant Module
 3. Navigator's Prompt Assembler builds context from 7 blocks: identity, SIM knowledge (from adapter), person context (role, country, team), conversation history (all previous Navigator sessions with this participant), event memory (recent SIM events), phase-specific assignment (MID mode — advisory), greeting logic
 4. Voice Engine establishes a voice session via ElevenLabs Conversational AI. The assembled prompt is loaded as the agent's context
-5. Participant speaks: "I'm confused about what sanctions I should set against Nordostan"
+5. Participant speaks: "I'm confused about what sanctions I should set against Sarmatia"
 6. Navigator responds in voice: clear explanation of how sanctions work, what levels mean, what the cost-to-self is, questions about what the participant is trying to achieve
 7. Full transcript captured (speech-to-text for participant, direct text for Navigator responses), stored in the database
 8. Session ends. If Navigator detects any commitments or intentions ("I think I'll set sanctions to level 2"), it logs this as a contextual note for future reference

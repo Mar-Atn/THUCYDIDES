@@ -25,7 +25,7 @@
       "id": "the_council",
       "name": "The Council (UN Security Council)",
       "type": "security",
-      "permanent_members": ["columbia", "cathay", "nordostan", "gallia", "albion"],
+      "permanent_members": ["columbia", "cathay", "sarmatia", "gallia", "albion"],
       "rotating_members": ["bharata"],
       "decision_rule": "p5_veto"
     },
@@ -33,7 +33,7 @@
       "id": "the_league",
       "name": "The League (BRICS+)",
       "type": "coordination",
-      "members": ["cathay", "nordostan", "bharata", "solaria", "persia", "mirage"],
+      "members": ["cathay", "sarmatia", "bharata", "solaria", "persia", "mirage"],
       "observers": ["phrygia"],
       "decision_rule": "loose_consensus"
     },
@@ -41,7 +41,7 @@
       "id": "the_cartel",
       "name": "The Cartel (OPEC+)",
       "type": "economic",
-      "members": ["solaria", "nordostan", "persia", "mirage"],
+      "members": ["solaria", "sarmatia", "persia", "mirage"],
       "decision_rule": "independent_production"
     },
     {
@@ -141,8 +141,8 @@
       }
     },
     {
-      "id": "nordostan",
-      "sim_name": "Nordostan",
+      "id": "sarmatia",
+      "sim_name": "Sarmatia",
       "parallel": "Russia",
       "regime_type": "autocracy",
       "organizations": ["the_council", "the_league", "the_cartel"],
@@ -184,8 +184,8 @@
       }
     },
     {
-      "id": "heartland",
-      "sim_name": "Heartland",
+      "id": "ruthenia",
+      "sim_name": "Ruthenia",
       "parallel": "Ukraine",
       "regime_type": "democracy",
       "organizations": [],
@@ -918,8 +918,8 @@
   "starting_conditions": {
     "wars": [
       {
-        "attacker": "nordostan",
-        "defender": "heartland",
+        "attacker": "sarmatia",
+        "defender": "ruthenia",
         "theater": "eastern_europe",
         "status": "active",
         "start_round": -8,
@@ -928,7 +928,7 @@
     ],
     "opec_production": {
       "solaria": "normal",
-      "nordostan": "normal",
+      "sarmatia": "normal",
       "persia": "normal",
       "mirage": "normal"
     },

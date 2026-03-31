@@ -22,14 +22,14 @@
 
 ## Country Hex Counts
 
-- **NORDOSTAN**: 8 hexes
+- **SARMATIA**: 8 hexes
 - **COLUMBIA**: 7 hexes
 - **CATHAY**: 7 hexes
 - **TEUTONIA**: 3 hexes
 - **SOGDIANA**: 3 hexes
 - **PERSIA**: 3 hexes
 - **BHARATA**: 3 hexes
-- **HEARTLAND**: 2 hexes
+- **RUTHENIA**: 2 hexes
 - **GALLIA**: 2 hexes
 - **PHRYGIA**: 2 hexes
 - **SOLARIA**: 2 hexes
@@ -67,23 +67,23 @@ Countries that share at least one land border edge:
 - BHARATA -- PERSIA
 - BHARATA -- SOGDIANA
 - CATHAY -- HANGUK
-- CATHAY -- NORDOSTAN
+- CATHAY -- SARMATIA
 - CATHAY -- SOGDIANA
 - CHOSON -- HANGUK
 - FREELAND -- GALLIA
-- FREELAND -- HEARTLAND
+- FREELAND -- RUTHENIA
 - FREELAND -- TEUTONIA
 - GALLIA -- LEVANTIA
 - GALLIA -- PONTE
 - GALLIA -- TEUTONIA
-- HEARTLAND -- NORDOSTAN
-- HEARTLAND -- PHRYGIA
-- HEARTLAND -- TEUTONIA
+- RUTHENIA -- SARMATIA
+- RUTHENIA -- PHRYGIA
+- RUTHENIA -- TEUTONIA
 - HORN -- SOLARIA
 - LEVANTIA -- PHRYGIA
 - LEVANTIA -- SOLARIA
 - MIRAGE -- SOLARIA
-- NORDOSTAN -- SOGDIANA
+- SARMATIA -- SOGDIANA
 - PERSIA -- PHRYGIA
 - PERSIA -- SOGDIANA
 - PERSIA -- SOLARIA
@@ -117,39 +117,39 @@ Countries that share at least one land border edge:
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
 | thule | Thule | land | teutonia | 2 | 4 | sea_1_3, sea_1_4, sea_2_3, sea_2_5, sea_3_3, sea_3_4 |
-| teutonia_1 | Teutonia | land | teutonia | 3 | 7 | sea_2_7, sea_2_8, sea_3_6, heartland_1, teutonia_2, freeland |
-| freeland | Freeland | land | freeland | 4 | 8 | teutonia_1, heartland_1, teutonia_2, heartland_2, gallia_2, sea_5_8 |
+| teutonia_1 | Teutonia | land | teutonia | 3 | 7 | sea_2_7, sea_2_8, sea_3_6, ruthenia_1, teutonia_2, freeland |
+| freeland | Freeland | land | freeland | 4 | 8 | teutonia_1, ruthenia_1, teutonia_2, ruthenia_2, gallia_2, sea_5_8 |
 | albion | Albion | land | albion | 4 | 5 | sea_3_4, sea_3_5, sea_4_4, sea_4_6, sea_5_4, sea_5_5 |
 | teutonia_2 | Teutonia | land | teutonia | 4 | 7 | sea_3_6, teutonia_1, sea_4_6, freeland, gallia_1, gallia_2 |
 | gallia_1 | Gallia | land | gallia | 5 | 6 | sea_4_6, teutonia_2, sea_5_5, gallia_2, ponte, sea_6_7 |
 | gallia_2 | Gallia | land | gallia | 5 | 7 | teutonia_2, freeland, gallia_1, sea_5_8, sea_6_7, levantia |
 | ponte | Ponte | land | ponte | 6 | 6 | sea_5_5, gallia_1, sea_6_5, sea_6_7, sea_7_5, sea_7_6 |
 
-### Heartland
+### Ruthenia
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| heartland_1 | Heartland | land | heartland | 3 | 8 | sea_2_8, nord_w1, teutonia_1, nord_w2, freeland, heartland_2 |
-| heartland_2 | Heartland | land | heartland | 4 | 9 | heartland_1, nord_w2, freeland, sea_4_10, sea_5_8, phrygia_1 |
+| ruthenia_1 | Ruthenia | land | ruthenia | 3 | 8 | sea_2_8, nord_w1, teutonia_1, nord_w2, freeland, ruthenia_2 |
+| ruthenia_2 | Ruthenia | land | ruthenia | 4 | 9 | ruthenia_1, nord_w2, freeland, sea_4_10, sea_5_8, phrygia_1 |
 
-### Nordostan
+### Sarmatia
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| nord_n1 | Nordostan | land | nordostan | 1 | 10 | sea_0_10, sea_0_11, sea_1_9, sea_1_11, nord_c1, nord_e1 |
-| nord_w1 | Nordostan | land | nordostan | 2 | 9 | sea_1_8, sea_1_9, sea_2_8, nord_c1, heartland_1, nord_w2 |
-| nord_c1 | Nordostan | land | nordostan | 2 | 10 | sea_1_9, nord_n1, nord_w1, nord_e1, nord_w2, nord_c2 |
-| nord_e1 | Nordostan | land | nordostan | 2 | 11 | nord_n1, sea_1_11, nord_c1, nord_e2, nord_c2, sogdiana_1 |
-| nord_e2 | Nordostan | land | nordostan | 2 | 12 | sea_1_11, sea_1_12, nord_e1, nord_e3, sogdiana_1, sogdiana_3 |
-| nord_e3 | Nordostan | land | nordostan | 2 | 13 | sea_1_12, sea_1_13, nord_e2, sea_2_14, sogdiana_3, cathay_1 |
-| nord_w2 | Nordostan | land | nordostan | 3 | 9 | nord_w1, nord_c1, heartland_1, nord_c2, heartland_2, sea_4_10 |
-| nord_c2 | Nordostan | land | nordostan | 3 | 10 | nord_c1, nord_e1, nord_w2, sogdiana_1, sea_4_10, sea_4_11 |
+| nord_n1 | Sarmatia | land | sarmatia | 1 | 10 | sea_0_10, sea_0_11, sea_1_9, sea_1_11, nord_c1, nord_e1 |
+| nord_w1 | Sarmatia | land | sarmatia | 2 | 9 | sea_1_8, sea_1_9, sea_2_8, nord_c1, ruthenia_1, nord_w2 |
+| nord_c1 | Sarmatia | land | sarmatia | 2 | 10 | sea_1_9, nord_n1, nord_w1, nord_e1, nord_w2, nord_c2 |
+| nord_e1 | Sarmatia | land | sarmatia | 2 | 11 | nord_n1, sea_1_11, nord_c1, nord_e2, nord_c2, sogdiana_1 |
+| nord_e2 | Sarmatia | land | sarmatia | 2 | 12 | sea_1_11, sea_1_12, nord_e1, nord_e3, sogdiana_1, sogdiana_3 |
+| nord_e3 | Sarmatia | land | sarmatia | 2 | 13 | sea_1_12, sea_1_13, nord_e2, sea_2_14, sogdiana_3, cathay_1 |
+| nord_w2 | Sarmatia | land | sarmatia | 3 | 9 | nord_w1, nord_c1, ruthenia_1, nord_c2, ruthenia_2, sea_4_10 |
+| nord_c2 | Sarmatia | land | sarmatia | 3 | 10 | nord_c1, nord_e1, nord_w2, sogdiana_1, sea_4_10, sea_4_11 |
 
 ### Mashriq (Middle East / Africa)
 
 | hex_id | display_name | type | owner | grid_row | grid_col | adjacent_hexes |
 |--------|-------------|------|-------|----------|----------|---------------|
-| phrygia_1 | Phrygia | land | phrygia | 5 | 9 | heartland_2, sea_4_10, sea_5_8, sea_5_10, phrygia_2, persia_2 |
+| phrygia_1 | Phrygia | land | phrygia | 5 | 9 | ruthenia_2, sea_4_10, sea_5_8, sea_5_10, phrygia_2, persia_2 |
 | persia_1 | Persia | land | persia | 5 | 11 | sea_4_11, sogdiana_2, sea_5_10, bharata_2, persia_3, sea_6_12 |
 | levantia | Levantia | land | levantia | 6 | 8 | gallia_2, sea_5_8, sea_6_7, phrygia_2, sea_7_7, solaria_1 |
 | phrygia_2 | Phrygia | land | phrygia | 6 | 9 | sea_5_8, phrygia_1, levantia, persia_2, solaria_1, solaria_2 |
@@ -209,48 +209,48 @@ Theater maps expand global hex zones into higher-granularity tactical hexes. Poi
 
 ---
 
-### Theater 1: Eastern Ereb (Heartland-Nordostan Conflict)
+### Theater 1: Eastern Ereb (Ruthenia-Sarmatia Conflict)
 
 **File:** `THEATER_EASTERN_EREB.svg`
-**Expands:** Global hexes `heartland_1`, `heartland_2`, `nord_w1`, `nord_w2`
+**Expands:** Global hexes `ruthenia_1`, `ruthenia_2`, `nord_w1`, `nord_w2`
 **Hex count:** 15 | **Canvas:** 900 x 700 | **Status:** Active at game start
 
 #### Hex Registry
 
 | hex_id | display_name | type | owner | adjacent_hexes | starting_units |
 |--------|-------------|------|-------|---------------|----------------|
-| ee_corridor | The Corridor | land | nordostan | ee_nord_staging_n, ee_occupied_north, ee_river_line | — |
-| ee_nord_staging_n | Northern Staging | land | nordostan | ee_corridor, ee_nord_staging_s, ee_occupied_north, ee_occupied_east | 3 ground |
-| ee_nord_staging_s | Southern Staging | land | nordostan | ee_nord_staging_n, ee_occupied_east | 2 ground, 1 missile |
-| ee_occupied_north | Occupied North | land_occupied | nordostan | ee_corridor, ee_nord_staging_n, ee_occupied_east, ee_front_north, ee_contested | 2 ground |
-| ee_occupied_east | Occupied East | land_occupied | nordostan | ee_nord_staging_n, ee_nord_staging_s, ee_occupied_north, ee_contested, ee_peninsula | 3 ground, 1 air |
-| ee_front_north | Northern Front | land | heartland | ee_occupied_north, ee_contested, ee_river_line, ee_capital | 2 ground, 1 air_defense |
-| ee_contested | The Contested Ground | land_contested | heartland | ee_occupied_north, ee_occupied_east, ee_front_north, ee_front_south, ee_central | 3 ground, 1 air, 1 air_defense |
-| ee_front_south | Southern Front | land | heartland | ee_contested, ee_central, ee_river_line, ee_peninsula | 2 ground |
-| ee_river_line | River Line | land | heartland | ee_corridor, ee_front_north, ee_front_south, ee_capital, ee_western | 1 ground |
-| ee_capital | The Capital | land | heartland | ee_front_north, ee_river_line, ee_central, ee_western | 1 ground, 1 air_defense |
-| ee_central | Central Heartland | land | heartland | ee_contested, ee_front_south, ee_capital | 1 ground |
-| ee_western | Western Heartland | land | heartland | ee_river_line, ee_capital, ee_nato_border | — |
+| ee_corridor | The Corridor | land | sarmatia | ee_nord_staging_n, ee_occupied_north, ee_river_line | — |
+| ee_nord_staging_n | Northern Staging | land | sarmatia | ee_corridor, ee_nord_staging_s, ee_occupied_north, ee_occupied_east | 3 ground |
+| ee_nord_staging_s | Southern Staging | land | sarmatia | ee_nord_staging_n, ee_occupied_east | 2 ground, 1 missile |
+| ee_occupied_north | Occupied North | land_occupied | sarmatia | ee_corridor, ee_nord_staging_n, ee_occupied_east, ee_front_north, ee_contested | 2 ground |
+| ee_occupied_east | Occupied East | land_occupied | sarmatia | ee_nord_staging_n, ee_nord_staging_s, ee_occupied_north, ee_contested, ee_peninsula | 3 ground, 1 air |
+| ee_front_north | Northern Front | land | ruthenia | ee_occupied_north, ee_contested, ee_river_line, ee_capital | 2 ground, 1 air_defense |
+| ee_contested | The Contested Ground | land_contested | ruthenia | ee_occupied_north, ee_occupied_east, ee_front_north, ee_front_south, ee_central | 3 ground, 1 air, 1 air_defense |
+| ee_front_south | Southern Front | land | ruthenia | ee_contested, ee_central, ee_river_line, ee_peninsula | 2 ground |
+| ee_river_line | River Line | land | ruthenia | ee_corridor, ee_front_north, ee_front_south, ee_capital, ee_western | 1 ground |
+| ee_capital | The Capital | land | ruthenia | ee_front_north, ee_river_line, ee_central, ee_western | 1 ground, 1 air_defense |
+| ee_central | Central Ruthenia | land | ruthenia | ee_contested, ee_front_south, ee_capital | 1 ground |
+| ee_western | Western Ruthenia | land | ruthenia | ee_river_line, ee_capital, ee_nato_border | — |
 | ee_nato_border | Alliance Border | land | nato | ee_western | — |
-| ee_peninsula | The Peninsula | land_occupied | nordostan | ee_occupied_east, ee_front_south, ee_sea | 1 ground, 1 naval |
-| ee_sea | Southern Waters | sea | neutral | ee_peninsula, ee_front_south | 1 naval (Nordostan) |
+| ee_peninsula | The Peninsula | land_occupied | sarmatia | ee_occupied_east, ee_front_south, ee_sea | 1 ground, 1 naval |
+| ee_sea | Southern Waters | sea | neutral | ee_peninsula, ee_front_south | 1 naval (Sarmatia) |
 
 #### Starting Force Summary
 
 | Side | Ground | Naval | Air | Air Defense | Missiles | Total |
 |------|--------|-------|-----|------------|----------|-------|
-| Nordostan | 11 | 2 | 1 | 0 | 1 | 15 |
-| Heartland | 10 | 0 | 1 | 3 | 0 | 14 |
+| Sarmatia | 11 | 2 | 1 | 0 | 1 | 15 |
+| Ruthenia | 10 | 0 | 1 | 3 | 0 | 14 |
 
 #### Special Rules
 
-1. **Occupied Territory:** `ee_occupied_north` and `ee_occupied_east` are former Heartland territory under Nordostan military control. Shown with striped overlay. Heartland may attempt to recapture.
-2. **Contested Zone:** `ee_contested` (The Contested Ground) is the critical hex. Heartland holds ~20% of the territory after 4 years of fighting. Nordostan claims it for any settlement. Heartland defends it as existential. Amber highlight. If Nordostan captures it, Heartland stability drops sharply.
-3. **The Corridor:** `ee_corridor` allows Nordostan to threaten a northern flank attack toward the capital, bypassing the front line. Historically uncommitted but a constant threat.
-4. **The Peninsula:** `ee_peninsula` is Nordostan-occupied with a naval base. Connected to Southern Waters. Provides naval projection into the theater.
-5. **Alliance Border:** `ee_nato_border` is protected by Article 5. Any attack on this hex triggers Alliance (NATO) collective defense. Effectively untouchable. No units deployed — serves as supply entry point for Western aid to Heartland.
-6. **Front Line:** The active front line runs between rows 2-3 (occupied/contested and Heartland front hexes). Shown as red dashed line.
-7. **Supply Corridor:** Western military aid enters through `ee_nato_border` -> `ee_western` -> `ee_capital` -> front lines. Disrupting this corridor (e.g., long-range strikes) degrades Heartland resupply.
+1. **Occupied Territory:** `ee_occupied_north` and `ee_occupied_east` are former Ruthenia territory under Sarmatia military control. Shown with striped overlay. Ruthenia may attempt to recapture.
+2. **Contested Zone:** `ee_contested` (The Contested Ground) is the critical hex. Ruthenia holds ~20% of the territory after 4 years of fighting. Sarmatia claims it for any settlement. Ruthenia defends it as existential. Amber highlight. If Sarmatia captures it, Ruthenia stability drops sharply.
+3. **The Corridor:** `ee_corridor` allows Sarmatia to threaten a northern flank attack toward the capital, bypassing the front line. Historically uncommitted but a constant threat.
+4. **The Peninsula:** `ee_peninsula` is Sarmatia-occupied with a naval base. Connected to Southern Waters. Provides naval projection into the theater.
+5. **Alliance Border:** `ee_nato_border` is protected by Article 5. Any attack on this hex triggers Alliance (NATO) collective defense. Effectively untouchable. No units deployed — serves as supply entry point for Western aid to Ruthenia.
+6. **Front Line:** The active front line runs between rows 2-3 (occupied/contested and Ruthenia front hexes). Shown as red dashed line.
+7. **Supply Corridor:** Western military aid enters through `ee_nato_border` -> `ee_western` -> `ee_capital` -> front lines. Disrupting this corridor (e.g., long-range strikes) degrades Ruthenia resupply.
 
 ---
 

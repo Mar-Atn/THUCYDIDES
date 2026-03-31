@@ -6,7 +6,7 @@ Runs the complete 3-engine system with AI agents for the SEED-level simulation.
 
 Usage:
     python run_seed_test.py                    # runs test_1_generic
-    python run_seed_test.py test_2_aggressive_nordostan
+    python run_seed_test.py test_2_aggressive_sarmatia
     python run_seed_test.py all                # runs all tests
 
 Author: ATLAS (World Model Engineer)
@@ -42,10 +42,10 @@ TESTS = {
         "description": "Baseline simulation with all agents at default settings.",
         "overrides": {},
     },
-    "test_2_aggressive_nordostan": {
+    "test_2_aggressive_sarmatia": {
         "rounds": 8,
         "seed": 200,
-        "name": "Aggressive Nordostan",
+        "name": "Aggressive Sarmatia",
         "description": "Pathfinder pushes for military victory, Ironhand follows.",
         "overrides": {
             "pathfinder": {"aggression": 0.9, "risk_tolerance": 0.8, "deal_seeking": 0.3},

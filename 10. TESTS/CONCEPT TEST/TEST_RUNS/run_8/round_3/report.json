@@ -26,7 +26,7 @@
         "inflation_factor": 0.999862,
         "blockade_factor": 1.0
       },
-      "nordostan": {
+      "sarmatia": {
         "old_gdp": 22.385005099276412,
         "new_gdp": 22.554568909714995,
         "growth_pct": 0.7574883708383006,
@@ -38,7 +38,7 @@
         "inflation_factor": 0.999217,
         "blockade_factor": 1.0
       },
-      "heartland": {
+      "ruthenia": {
         "old_gdp": 1.8558659584911552,
         "new_gdp": 1.8280112963026638,
         "growth_pct": -1.500898384446784,
@@ -247,7 +247,7 @@
       "columbia": {
         "damage": 0.03702443093430837,
         "costs_to_imposers": {
-          "nordostan": 0.0037881887155048395,
+          "sarmatia": 0.0037881887155048395,
           "choson": 0.0038690743117921625,
           "caribe": 0.003458140103968747,
           "persia": 0.0036943692424576
@@ -257,7 +257,7 @@
         "damage": 0.0,
         "costs_to_imposers": {}
       },
-      "nordostan": {
+      "sarmatia": {
         "damage": 0.007779669348470605,
         "costs_to_imposers": {
           "columbia": 0.001315362322126178,
@@ -271,13 +271,13 @@
           "phrygia": 0.0007360411463089855,
           "yamato": 0.0006859077998707114,
           "hanguk": 0.0007203206564172283,
-          "heartland": 0.0010852717166889236
+          "ruthenia": 0.0010852717166889236
         }
       },
-      "heartland": {
+      "ruthenia": {
         "damage": 6.53972800734516e-05,
         "costs_to_imposers": {
-          "nordostan": 8.719637343126881e-05
+          "sarmatia": 8.719637343126881e-05
         }
       },
       "persia": {
@@ -391,13 +391,13 @@
         "cost_as_target": 4.7797042013248845,
         "net_gdp_cost": 0.0
       },
-      "nordostan": {
+      "sarmatia": {
         "cost_as_imposer": 0.17945134590658057,
         "revenue_as_imposer": 0.5955428810856683,
         "cost_as_target": 0.42775919482149394,
         "net_gdp_cost": 0.011667659642406236
       },
-      "heartland": {
+      "ruthenia": {
         "cost_as_imposer": 0.005826584279583778,
         "revenue_as_imposer": 0.016547440447603062,
         "cost_as_target": 0.0018027868954633946,
@@ -503,8 +503,8 @@
     "stability": {
       "columbia": 7.77,
       "cathay": 6.95,
-      "nordostan": 4.25,
-      "heartland": 2.04,
+      "sarmatia": 4.25,
+      "ruthenia": 2.04,
       "persia": 3.21,
       "gallia": 5.97,
       "teutonia": 7.06,
@@ -525,8 +525,8 @@
     "support": {
       "columbia": 55.24,
       "cathay": 62.33,
-      "nordostan": 59.98,
-      "heartland": 15.79,
+      "sarmatia": 59.98,
+      "ruthenia": 15.79,
       "persia": 32.7,
       "gallia": 34.34,
       "teutonia": 43.07,
@@ -548,8 +548,8 @@
     "revenue": {
       "columbia": 61.75,
       "cathay": 42.81,
-      "nordostan": 2.52,
-      "heartland": 0.0,
+      "sarmatia": 2.52,
+      "ruthenia": 0.0,
       "persia": 0.0,
       "gallia": 10.46,
       "teutonia": 15.56,
@@ -592,7 +592,7 @@
         "surplus_deficit": 3.150000000000005,
         "new_treasury": 46.589999999999996
       },
-      "nordostan": {
+      "sarmatia": {
         "revenue": 2.52,
         "mandatory": 15.2,
         "maintenance": 13.2,
@@ -604,7 +604,7 @@
         "surplus_deficit": -12.68,
         "new_treasury": 0
       },
-      "heartland": {
+      "ruthenia": {
         "revenue": 0.0,
         "mandatory": 11.1,
         "maintenance": 8.1,
@@ -820,12 +820,12 @@
         "naval": 0,
         "tactical_air": 0
       },
-      "nordostan": {
+      "sarmatia": {
         "ground": 0,
         "naval": 0,
         "tactical_air": 0
       },
-      "heartland": {
+      "ruthenia": {
         "ground": 0,
         "naval": 0,
         "tactical_air": 0
@@ -920,11 +920,11 @@
         "nuclear_levelup": false,
         "ai_levelup": false
       },
-      "nordostan": {
+      "sarmatia": {
         "nuclear_levelup": false,
         "ai_levelup": false
       },
-      "heartland": {
+      "ruthenia": {
         "nuclear_levelup": false,
         "ai_levelup": false
       },
@@ -996,8 +996,8 @@
     "inflation": {
       "columbia": 2.15,
       "cathay": 0.92,
-      "nordostan": 5.22,
-      "heartland": 7.37,
+      "sarmatia": 5.22,
+      "ruthenia": 7.37,
       "persia": 15.35,
       "gallia": 1.53,
       "teutonia": 1.72,
@@ -1018,8 +1018,8 @@
     "debt": {
       "columbia": 5,
       "cathay": 4,
-      "nordostan": 2,
-      "heartland": 3,
+      "sarmatia": 2,
+      "ruthenia": 3,
       "persia": 1,
       "gallia": 4,
       "teutonia": 2,
@@ -1039,8 +1039,8 @@
     },
     "combat": [
       {
-        "attacker": "heartland",
-        "defender": "nordostan",
+        "attacker": "ruthenia",
+        "defender": "sarmatia",
         "zone": "ee_east_front_central",
         "attacker_units": 5,
         "defender_units": 2,
@@ -1062,12 +1062,12 @@
         "crisis": false,
         "capital_flight": 0.0
       },
-      "nordostan": {
+      "sarmatia": {
         "market_index": 47.43,
         "crisis": false,
         "capital_flight": 0.0
       },
-      "heartland": {
+      "ruthenia": {
         "market_index": 24.01,
         "crisis": true,
         "capital_flight": 0.04
@@ -1155,14 +1155,14 @@
     }
   },
   "ai_adjustments": {
-    "nordostan": [
+    "sarmatia": [
       {
         "type": "war_fatigue_acceleration",
         "fatigue_increase": 0.15012414468749996,
         "justification": "Prolonged war (11 rounds) accelerates public fatigue."
       }
     ],
-    "heartland": [
+    "ruthenia": [
       {
         "type": "war_fatigue_acceleration",
         "fatigue_increase": 0.20469949293749995,
@@ -1190,11 +1190,11 @@
     ]
   },
   "coherence_flags": [],
-  "narrative": "ROUND 3 WORLD BRIEFING\n========================================\n\nGlobal GDP: 873.5 coins. Oil price: $61/barrel.\n\nACTIVE CONFLICTS:\n  nordostan vs heartland in eastern_europe\n\nTOP ECONOMIES:\n  Columbia: GDP 301.3, growth 3.1%, stability 8/10\n  Cathay: GDP 234.0, growth 6.2%, stability 7/10\n  Bharata: GDP 51.7, growth 7.5%, stability 7/10\n  Teutonia: GDP 46.2, growth 0.9%, stability 7/10\n  Yamato: GDP 44.3, growth 1.5%, stability 8/10\n\nKEY INDICATORS:\n  WARNING: Heartland stability critical (2.04/10)\n  WARNING: Persia stability critical (3.21/10)\n  WARNING: Phrygia inflation at 28%\n  WARNING: Choson stability critical (4.0/10)\n  WARNING: Caribe stability critical (1.0/10)\n  WARNING: Caribe inflation at 37%\n  Columbia maintains AI Level 3\n  Cathay maintains AI Level 3\n  Yamato maintains AI Level 3",
+  "narrative": "ROUND 3 WORLD BRIEFING\n========================================\n\nGlobal GDP: 873.5 coins. Oil price: $61/barrel.\n\nACTIVE CONFLICTS:\n  sarmatia vs ruthenia in eastern_europe\n\nTOP ECONOMIES:\n  Columbia: GDP 301.3, growth 3.1%, stability 8/10\n  Cathay: GDP 234.0, growth 6.2%, stability 7/10\n  Bharata: GDP 51.7, growth 7.5%, stability 7/10\n  Teutonia: GDP 46.2, growth 0.9%, stability 7/10\n  Yamato: GDP 44.3, growth 1.5%, stability 8/10\n\nKEY INDICATORS:\n  WARNING: Ruthenia stability critical (2.04/10)\n  WARNING: Persia stability critical (3.21/10)\n  WARNING: Phrygia inflation at 28%\n  WARNING: Choson stability critical (4.0/10)\n  WARNING: Caribe stability critical (1.0/10)\n  WARNING: Caribe inflation at 37%\n  Columbia maintains AI Level 3\n  Cathay maintains AI Level 3\n  Yamato maintains AI Level 3",
   "log": [
     "=== ROUND 3 PROCESSING BEGINS ===",
     "--- PASS 1: DETERMINISTIC ---",
-    "  Tariff: heartland -> cathay set to 1",
+    "  Tariff: ruthenia -> cathay set to 1",
     "  Tariff: gallia -> cathay set to 0",
     "  Tariff: teutonia -> cathay set to 0",
     "  Tariff: phrygia -> cathay set to 0",
@@ -1205,11 +1205,11 @@
     "  Sanctions: ponte -> caribe set to 1",
     "  Sanctions: albion -> caribe set to 2",
     "  Sanctions: phrygia -> choson set to 3",
-    "  OPEC: nordostan production set to high",
+    "  OPEC: sarmatia production set to high",
     "  OPEC: persia production set to high",
     "  OPEC: solaria production set to normal",
     "  OPEC: mirage production set to low",
-    "  Combat ee_east_front_central: heartland(5) vs nordostan(2) -> attacker_losses=1, defender_losses=1",
+    "  Combat ee_east_front_central: ruthenia(5) vs sarmatia(2) -> attacker_losses=1, defender_losses=1",
     "  Covert cyber by cathay on formosa: SUCCESS, undetected",
     "  Covert disinformation by cathay on yamato: FAILED, undetected",
     "  Covert sabotage by levantia on persia: FAILED, DETECTED",
@@ -1235,29 +1235,29 @@
     "  Production cathay: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
     "  Stability cathay: 6.6 -> 7.0 (delta=+0.32)",
     "  Support cathay (autocracy): 59.4 -> 62.3 (delta=+2.93)",
-    "  Sanctions on nordostan: damage=0.0078, coalition_coverage=0.349, effectiveness=weak",
-    "  Tariffs nordostan: imposer_cost=0.179, revenue=0.596, target_cost=0.428, net_cost=0.012",
-    "  Inflation nordostan: 6.1% -> 5.2%",
-    "  GDP nordostan: 22.39 -> 22.55 (growth +0.76%, factors: tariff=0.999 sanc=0.992 war=0.920 tech=1.000 infl=0.999 block=1.000)",
-    "  Debt nordostan: 2.00 -> 2.00 (deficit=0.00)",
-    "  Revenue nordostan: 2.52 (base=4.96 oil=0.00 sanc_cost=0.29 infl_erosion=0.15 war=0.00 debt=2.00)",
-    "  CRISIS: nordostan reserves exhausted!",
-    "  Budget nordostan: rev=2.52 maint=13.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
-    "  Production nordostan: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
-    "  Stability nordostan: 4.6 -> 4.2 (delta=-0.36)",
-    "  Support nordostan (autocracy): 61.1 -> 60.0 (delta=-1.12)",
-    "  Sanctions on heartland: damage=0.0001, coalition_coverage=0.002, effectiveness=weak",
-    "  Tariffs heartland: imposer_cost=0.006, revenue=0.017, target_cost=0.002, net_cost=0.000",
-    "  Inflation heartland: 8.7% -> 7.4%",
-    "  GDP heartland: 1.86 -> 1.83 (growth -1.50%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=0.999 block=1.000)",
-    "  Debt heartland: 3.00 -> 3.00 (deficit=0.00)",
-    "  Revenue heartland: 0.00 (base=0.40 oil=0.00 sanc_cost=0.00 infl_erosion=0.13 war=0.01 debt=3.00)",
-    "  CRISIS: heartland reserves exhausted!",
-    "  Budget heartland: rev=0.00 maint=8.10 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
-    "  Production heartland: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
-    "  Stability heartland: 3.0 -> 2.0 (delta=-0.92)",
-    "  Support heartland (democracy): 25.8 -> 15.8 (delta=-10.00)",
-    "  FINANCIAL CRISIS heartland: market_index=24.0, capital_flight=0.04",
+    "  Sanctions on sarmatia: damage=0.0078, coalition_coverage=0.349, effectiveness=weak",
+    "  Tariffs sarmatia: imposer_cost=0.179, revenue=0.596, target_cost=0.428, net_cost=0.012",
+    "  Inflation sarmatia: 6.1% -> 5.2%",
+    "  GDP sarmatia: 22.39 -> 22.55 (growth +0.76%, factors: tariff=0.999 sanc=0.992 war=0.920 tech=1.000 infl=0.999 block=1.000)",
+    "  Debt sarmatia: 2.00 -> 2.00 (deficit=0.00)",
+    "  Revenue sarmatia: 2.52 (base=4.96 oil=0.00 sanc_cost=0.29 infl_erosion=0.15 war=0.00 debt=2.00)",
+    "  CRISIS: sarmatia reserves exhausted!",
+    "  Budget sarmatia: rev=2.52 maint=13.20 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production sarmatia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability sarmatia: 4.6 -> 4.2 (delta=-0.36)",
+    "  Support sarmatia (autocracy): 61.1 -> 60.0 (delta=-1.12)",
+    "  Sanctions on ruthenia: damage=0.0001, coalition_coverage=0.002, effectiveness=weak",
+    "  Tariffs ruthenia: imposer_cost=0.006, revenue=0.017, target_cost=0.002, net_cost=0.000",
+    "  Inflation ruthenia: 8.7% -> 7.4%",
+    "  GDP ruthenia: 1.86 -> 1.83 (growth -1.50%, factors: tariff=1.000 sanc=1.000 war=0.910 tech=1.000 infl=0.999 block=1.000)",
+    "  Debt ruthenia: 3.00 -> 3.00 (deficit=0.00)",
+    "  Revenue ruthenia: 0.00 (base=0.40 oil=0.00 sanc_cost=0.00 infl_erosion=0.13 war=0.01 debt=3.00)",
+    "  CRISIS: ruthenia reserves exhausted!",
+    "  Budget ruthenia: rev=0.00 maint=8.10 social=0.00 mil=0.00 tech=0.00 treasury=0.00",
+    "  Production ruthenia: {'ground': 0, 'naval': 0, 'tactical_air': 0}",
+    "  Stability ruthenia: 3.0 -> 2.0 (delta=-0.92)",
+    "  Support ruthenia (democracy): 25.8 -> 15.8 (delta=-10.00)",
+    "  FINANCIAL CRISIS ruthenia: market_index=24.0, capital_flight=0.04",
     "  Sanctions on persia: damage=0.0008, coalition_coverage=0.047, effectiveness=weak",
     "  Tariffs persia: imposer_cost=0.028, revenue=0.094, target_cost=0.065, net_cost=0.000",
     "  Inflation persia: 18.1% -> 15.4%",
@@ -1429,9 +1429,9 @@
     "  Stability mirage: 8.7 -> 9.0 (delta=+0.35)",
     "  Support mirage (autocracy): 80.3 -> 85.9 (delta=+5.56)",
     "--- PASS 2: AI CONTEXTUAL ADJUSTMENT ---",
-    "  AI ADJ nordostan: war_fatigue_acceleration \u2014 Prolonged war (11 rounds) accelerates public fatigue.",
-    "  AI ADJ heartland: war_fatigue_acceleration \u2014 Prolonged war (11 rounds) accelerates public fatigue.",
-    "  AI ADJ heartland: capital_flight \u2014 Low stability triggers capital exodus.",
+    "  AI ADJ sarmatia: war_fatigue_acceleration \u2014 Prolonged war (11 rounds) accelerates public fatigue.",
+    "  AI ADJ ruthenia: war_fatigue_acceleration \u2014 Prolonged war (11 rounds) accelerates public fatigue.",
+    "  AI ADJ ruthenia: capital_flight \u2014 Low stability triggers capital exodus.",
     "  AI ADJ persia: capital_flight \u2014 Low stability triggers capital exodus.",
     "  AI ADJ caribe: capital_flight \u2014 Low stability triggers capital exodus. (capital controls limit outflow)",
     "--- PASS 3: COHERENCE CHECK ---",

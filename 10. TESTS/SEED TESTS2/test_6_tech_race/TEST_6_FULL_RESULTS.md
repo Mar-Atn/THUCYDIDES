@@ -15,7 +15,7 @@
 - Columbia: maximum AI tech investment each round
 - Cathay: maximum AI + nuclear tech investment each round
 - No Formosa blockade unless Cathay initiates (tested as scenario branch in R5)
-- Background wars (Nordostan-Heartland, Columbia-Persia) continue at low intensity
+- Background wars (Sarmatia-Ruthenia, Columbia-Persia) continue at low intensity
 - Other countries invest at normal rates
 
 **Key Formula (from `world_model_engine.py` line 749-788):**
@@ -72,7 +72,7 @@ R&D progress per round = (investment / GDP) * 0.5 * rare_earth_factor
 - Cathay activates rare earth restrictions on Columbia at Level 3
 - Columbia allocates 18 coins to AI R&D (maximum push)
 - Cathay allocates 10 coins AI + 6 coins nuclear R&D
-- Background: Nordostan-Heartland war continues, Columbia-Persia conflict at low intensity
+- Background: Sarmatia-Ruthenia war continues, Columbia-Persia conflict at low intensity
 
 **Tech Investment Calculations:**
 
@@ -664,7 +664,7 @@ This means the nuclear deterrence escalation ladder (L3 = full triad) is largely
 Columbia spends 18 coins/round on AI tech -- a massive allocation from a ~70 coin discretionary budget. Over 8 rounds, that is 144 coins spent on a capability that never materializes (L4 never reached). Those 144 coins could have:
 - Produced ~48 ground units (at 3 coins each)
 - Funded social spending to maintain stability
-- Funded allies (Heartland, Formosa)
+- Funded allies (Ruthenia, Formosa)
 
 The game design creates a genuine dilemma only if the L4 payoff is achievable. Since it is not, the "optimal" strategy is to stop investing in AI tech once L3 is reached and spend elsewhere. This reduces the tech race to a knowledge problem (do players know L4 is unreachable?) rather than a strategic dilemma.
 

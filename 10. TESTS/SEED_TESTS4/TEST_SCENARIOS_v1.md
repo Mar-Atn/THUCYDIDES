@@ -14,9 +14,9 @@ No tweaks. All 21 countries, standard data, 8 rounds. Control test.
 Cathay attempts Formosa blockade/invasion R4. Others play naturally.
 **Focus:** Naval encirclement (3 zones), amphibious modifiers, air vs AD, coalition response, naval crossover.
 
-### S3: SANCTIONS STRESS TEST — "Maximum pressure on Nordostan"
+### S3: SANCTIONS STRESS TEST — "Maximum pressure on Sarmatia"
 Full Western sanctions L3. Watch S-curve, Cathay lifeline, swing states.
-**Focus:** S-curve validation, imposer cost, Nordostan economic clock, dollar credibility.
+**Focus:** S-curve validation, imposer cost, Sarmatia economic clock, dollar credibility.
 
 ### S4: NUCLEAR ESCALATION — "Persia reaches L1"
 Persia prioritizes nuclear R&D. Tests when ready. Escalation ladder.
@@ -31,10 +31,10 @@ Dealer arrests Tribune, fires Shield, emergency. Impeachment follows.
 **Focus:** Court mechanic, impeachment, Parliament dynamics, election formula, succession.
 
 ### S7: COVERT OPERATIONS — "Shadow war"
-Columbia and Nordostan intelligence go all-out. All cards used.
+Columbia and Sarmatia intelligence go all-out. All cards used.
 **Focus:** Intelligence accuracy, sabotage/cyber/disinfo probabilities, card depletion, attribution.
 
-### S8: HEARTLAND SURVIVAL — "Can Heartland last 6 rounds?"
+### S8: RUTHENIA SURVIVAL — "Can Ruthenia last 6 rounds?"
 Focus on fiscal model, aid dependency, mobilization, wartime election.
 **Focus:** Treasury collapse timeline, Die Hard zone, three-way politics, militia.
 

@@ -46,7 +46,7 @@ else:
 ```
 
 ### BUG 2: Columbia Oil Revenue Formula (Test 1) — HIGH
-**Problem:** Oil revenue = `price × resource_pct × GDP × 0.01`. Columbia (GDP 280, resources 8%) gets 29.9 coins/round at $133 oil — larger than Nordostan's windfall despite not being a comparable oil exporter. This makes Columbia immune to oil shocks.
+**Problem:** Oil revenue = `price × resource_pct × GDP × 0.01`. Columbia (GDP 280, resources 8%) gets 29.9 coins/round at $133 oil — larger than Sarmatia's windfall despite not being a comparable oil exporter. This makes Columbia immune to oil shocks.
 **Fix:** Oil revenue should use a fixed production capacity, not GDP-scaled. Or cap oil revenue as percentage of GDP (e.g., max 5% of GDP for non-OPEC producers).
 
 ### BUG 3: Formosa Export Collapse Not Modeled (Test 2) — HIGH
@@ -70,14 +70,14 @@ else:
 
 **Found in:** Tests 5, 7
 **Problem:** The stability formula is now well-calibrated, but the economic model underneath creates fiscal death spirals that overwhelm ALL stability buffers:
-- Heartland: maintenance 4.2 coins vs revenue 0.55 → 8x deficit
-- Nordostan: maintenance 12.9 vs revenue 3.3 → 4x deficit
+- Ruthenia: maintenance 4.2 coins vs revenue 0.55 → 8x deficit
+- Sarmatia: maintenance 12.9 vs revenue 3.3 → 4x deficit
 - Columbia (Test 7): debt burden consumes 67% of revenue by R4
 
 The chain: deficit → money printing → inflation spike → revenue erosion → larger deficit → more printing → crisis state → stability collapse. This happens faster than any stability mechanic can offset.
 
 **Not a stability formula bug** — it's an economic model structural issue. The missing pieces:
-1. **External aid mechanic** — Heartland receives 3 coins from Columbia, but maintenance still vastly exceeds total income
+1. **External aid mechanic** — Ruthenia receives 3 coins from Columbia, but maintenance still vastly exceeds total income
 2. **Wartime economy modifier** — defense-driven deficits should have lower inflation multiplier than peacetime deficits
 3. **Siege resilience needs amplification** — +0.10 offsets only ~10% of the negative delta for sanctioned autocracies. Need +0.30-0.50.
 4. **Debt forgiveness / restructuring** — no mechanism for countries to reduce accumulated debt burden
@@ -111,14 +111,14 @@ The chain: deficit → money printing → inflation spike → revenue erosion �
 | TESTS2 | $198 | Instant spike, no inertia |
 | **TESTS3** | **$133** | Inertia dampened. Gradual climb. **Fixed.** |
 
-### Heartland Stability R8
+### Ruthenia Stability R8
 | Test Batch | Test 5 Value | Notes |
 |------------|-------------|-------|
 | Old formula | 1.0 by R3 | Catastrophic |
 | TESTS2 | 2.31 | Improved but slightly low |
 | **TESTS3** | **1.0 by R5** | Formula caps work but economic spiral overwhelms |
 
-### Nordostan Stability R8
+### Sarmatia Stability R8
 | Test Batch | Test 5 Value | Notes |
 |------------|-------------|-------|
 | TESTS2 | 1.0 by R8 | Too fast |
@@ -140,7 +140,7 @@ The chain: deficit → money printing → inflation spike → revenue erosion �
 
 3. **Tech race with rare earth** — Columbia R4 unrestricted vs R8 restricted is a genuine 4-round strategic delay. The rare earth restriction is now a real weapon.
 
-4. **Crisis states accelerate peace** — Nordostan entering crisis forced ceasefire from R7 (TESTS2) to R5 (TESTS3). Economic pressure creates diplomatic urgency. Exactly right.
+4. **Crisis states accelerate peace** — Sarmatia entering crisis forced ceasefire from R7 (TESTS2) to R5 (TESTS3). Economic pressure creates diplomatic urgency. Exactly right.
 
 5. **Crash-test scenarios (Tests 7-8)** — Test 7 found the crisis multiplier bug that no baseline test would expose. Proves the value of adversarial testing.
 

@@ -54,7 +54,7 @@ High prices hurt Columbia more than Persia at this point.
 1. **To Columbia (indirect, via Phrygia back-channel, Anvil authorized):** "Persia prepared to discuss Gulf Gate adjustments for cessation of air strikes + sanctions relief framework. No preconditions."
 2. **To Gallia (Dawn authorized):** "Request informal meeting with Lumiere. Framework: nuclear transparency for sanctions relief, blockade adjustment for economic opening, human rights dialogue."
 3. **To Cathay:** "Request continued oil purchases + diplomatic protection. Open to Cathay facilitation between parties."
-4. **To Nordostan:** "Request ammunition resupply for coastal batteries. In return: continued drone tech sharing."
+4. **To Sarmatia:** "Request ammunition resupply for coastal batteries. In return: continued drone tech sharing."
 5. **To Bharata:** "Continued oil purchases essential. Favorable pricing for increased overland volume."
 
 ### Transactions
@@ -99,11 +99,11 @@ High prices hurt Columbia more than Persia at this point.
 | From | To | Purpose |
 |------|----|---------|
 | Dawn | Lumiere (Gallia) | Comprehensive de-escalation framework |
-| Dawn | Bazaar (Phrygia) | Independent mediation channel |
+| Dawn | Vizier (Phrygia) | Independent mediation channel |
 | Anvil | Columbia (indirect via Phrygia) | Test Columbia's price for blockade resolution |
 | Furnace | 3 senior ayatollahs | Build independent power base |
 | Joint | Cathay (Helmsman) | Economic lifeline + diplomatic facilitation |
-| Joint | Nordostan (Pathfinder) | Ammunition resupply + UNSC protection |
+| Joint | Sarmatia (Pathfinder) | Ammunition resupply + UNSC protection |
 
 ---
 

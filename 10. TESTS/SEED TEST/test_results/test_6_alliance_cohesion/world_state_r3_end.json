@@ -173,9 +173,9 @@
         "active_treaties": []
       }
     },
-    "nordostan": {
-      "id": "nordostan",
-      "sim_name": "Nordostan",
+    "sarmatia": {
+      "id": "sarmatia",
+      "sim_name": "Sarmatia",
       "parallel": "Russia",
       "regime_type": "autocracy",
       "team_type": "team",
@@ -260,9 +260,9 @@
         "active_treaties": []
       }
     },
-    "heartland": {
-      "id": "heartland",
-      "sim_name": "Heartland",
+    "ruthenia": {
+      "id": "ruthenia",
+      "sim_name": "Ruthenia",
       "parallel": "Ukraine",
       "regime_type": "democracy",
       "team_type": "team",
@@ -270,8 +270,8 @@
       "team_size_max": 3,
       "ai_default": false,
       "home_zones": [
-        "heartland_1",
-        "heartland_2"
+        "ruthenia_1",
+        "ruthenia_2"
       ],
       "economic": {
         "gdp": 2.2698,
@@ -1866,38 +1866,38 @@
         }
       }
     },
-    "heartland_1": {
-      "id": "heartland_1",
-      "display_name": "Heartland West",
+    "ruthenia_1": {
+      "id": "ruthenia_1",
+      "display_name": "Ruthenia West",
       "type": "land_home",
-      "owner": "heartland",
+      "owner": "ruthenia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 3
         },
-        "heartland": {
+        "ruthenia": {
           "ground": 3,
           "tactical_air": 1,
           "air_defense": 1
         }
       }
     },
-    "heartland_2": {
-      "id": "heartland_2",
-      "display_name": "Heartland East",
+    "ruthenia_2": {
+      "id": "ruthenia_2",
+      "display_name": "Ruthenia East",
       "type": "land_contested",
-      "owner": "heartland",
+      "owner": "ruthenia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 6,
           "tactical_air": 4,
           "air_defense": 1
         },
-        "heartland": {
+        "ruthenia": {
           "ground": 2,
           "tactical_air": 2
         },
@@ -1908,13 +1908,13 @@
     },
     "nord_n1": {
       "id": "nord_n1",
-      "display_name": "Nordostan Arctic",
+      "display_name": "Sarmatia Arctic",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "naval": 2,
           "strategic_missile": 3
         }
@@ -1922,22 +1922,22 @@
     },
     "nord_w1": {
       "id": "nord_w1",
-      "display_name": "Nordostan West",
+      "display_name": "Sarmatia West",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {}
     },
     "nord_w2": {
       "id": "nord_w2",
-      "display_name": "Nordostan Southwest",
+      "display_name": "Sarmatia Southwest",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 1,
           "naval": 2,
           "tactical_air": 1,
@@ -1947,13 +1947,13 @@
     },
     "nord_c1": {
       "id": "nord_c1",
-      "display_name": "Nordostan Central",
+      "display_name": "Sarmatia Central",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2,
           "tactical_air": 2,
           "strategic_missile": 7,
@@ -1963,31 +1963,31 @@
     },
     "nord_c2": {
       "id": "nord_c2",
-      "display_name": "Nordostan South Central",
+      "display_name": "Sarmatia South Central",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {}
     },
     "nord_e1": {
       "id": "nord_e1",
-      "display_name": "Nordostan East",
+      "display_name": "Sarmatia East",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {}
     },
     "nord_e2": {
       "id": "nord_e2",
-      "display_name": "Nordostan Far East",
+      "display_name": "Sarmatia Far East",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "ground": 2,
           "tactical_air": 1,
           "strategic_missile": 2
@@ -1996,13 +1996,13 @@
     },
     "nord_e3": {
       "id": "nord_e3",
-      "display_name": "Nordostan Pacific",
+      "display_name": "Sarmatia Pacific",
       "type": "land_home",
-      "owner": "nordostan",
+      "owner": "sarmatia",
       "theater": "ereb",
       "is_chokepoint": false,
       "forces": {
-        "nordostan": {
+        "sarmatia": {
           "naval": 1
         }
       }
@@ -2080,7 +2080,7 @@
         "columbia": {
           "naval": 2
         },
-        "nordostan": {
+        "sarmatia": {
           "naval": 1
         },
         "gallia": {
@@ -2615,7 +2615,7 @@
         "type": "land_land"
       },
       {
-        "zone": "heartland_1",
+        "zone": "ruthenia_1",
         "type": "land_land"
       }
     ],
@@ -2647,11 +2647,11 @@
         "type": "land_land"
       },
       {
-        "zone": "heartland_1",
+        "zone": "ruthenia_1",
         "type": "land_land"
       },
       {
-        "zone": "heartland_2",
+        "zone": "ruthenia_2",
         "type": "land_land"
       },
       {
@@ -2659,7 +2659,7 @@
         "type": "land_land"
       }
     ],
-    "heartland_1": [
+    "ruthenia_1": [
       {
         "zone": "teutonia_1",
         "type": "land_land"
@@ -2669,7 +2669,7 @@
         "type": "land_land"
       },
       {
-        "zone": "heartland_2",
+        "zone": "ruthenia_2",
         "type": "land_land"
       },
       {
@@ -2713,13 +2713,13 @@
         "type": "land_land"
       }
     ],
-    "heartland_2": [
+    "ruthenia_2": [
       {
         "zone": "freeland",
         "type": "land_land"
       },
       {
-        "zone": "heartland_1",
+        "zone": "ruthenia_1",
         "type": "land_land"
       },
       {
@@ -2753,7 +2753,7 @@
     ],
     "nord_w1": [
       {
-        "zone": "heartland_1",
+        "zone": "ruthenia_1",
         "type": "land_land"
       },
       {
@@ -2767,11 +2767,11 @@
     ],
     "nord_w2": [
       {
-        "zone": "heartland_1",
+        "zone": "ruthenia_1",
         "type": "land_land"
       },
       {
-        "zone": "heartland_2",
+        "zone": "ruthenia_2",
         "type": "land_land"
       },
       {
@@ -2789,7 +2789,7 @@
     ],
     "phrygia_1": [
       {
-        "zone": "heartland_2",
+        "zone": "ruthenia_2",
         "type": "land_land"
       },
       {
@@ -3362,7 +3362,7 @@
     "tariffs": {
       "columbia": {
         "cathay": 3,
-        "nordostan": 2,
+        "sarmatia": 2,
         "caribe": 3,
         "persia": 3,
         "choson": 2
@@ -3373,34 +3373,34 @@
         "hanguk": 1,
         "formosa": 2
       },
-      "nordostan": {
+      "sarmatia": {
         "columbia": 2,
         "albion": 2,
         "gallia": 2,
         "teutonia": 2,
         "freeland": 2,
         "ponte": 1,
-        "heartland": 2
+        "ruthenia": 2
       },
       "gallia": {
         "cathay": 1,
-        "nordostan": 1
+        "sarmatia": 1
       },
       "teutonia": {
         "cathay": 1,
-        "nordostan": 0
+        "sarmatia": 0
       },
       "freeland": {
         "cathay": 1,
-        "nordostan": 2,
+        "sarmatia": 2,
         "choson": 2
       },
       "ponte": {
-        "nordostan": 1
+        "sarmatia": 1
       },
       "albion": {
         "cathay": 1,
-        "nordostan": 1
+        "sarmatia": 1
       },
       "bharata": {
         "cathay": 1
@@ -3415,8 +3415,8 @@
       "caribe": {
         "columbia": 1
       },
-      "heartland": {
-        "nordostan": 3
+      "ruthenia": {
+        "sarmatia": 3
       },
       "persia": {
         "columbia": 2,
@@ -3428,7 +3428,7 @@
       },
       "choson": {
         "columbia": 2,
-        "heartland": 2,
+        "ruthenia": 2,
         "gallia": 2,
         "teutonia": 2,
         "freeland": 2,
@@ -3440,57 +3440,57 @@
     },
     "sanctions": {
       "columbia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 3,
         "choson": 3,
         "caribe": 3
       },
       "gallia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 2
       },
       "teutonia": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 2
       },
       "freeland": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 2
       },
       "albion": {
-        "nordostan": 3,
+        "sarmatia": 3,
         "persia": 2,
         "choson": 2
       },
       "ponte": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "persia": 1,
         "choson": 1
       },
       "levantia": {
         "persia": 3,
-        "nordostan": 1
+        "sarmatia": 1
       },
       "formosa": {
-        "nordostan": 1
+        "sarmatia": 1
       },
       "yamato": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "choson": 3
       },
       "hanguk": {
-        "nordostan": 2,
+        "sarmatia": 2,
         "choson": 3
       },
       "cathay": {
-        "nordostan": -1
+        "sarmatia": -1
       },
-      "nordostan": {
+      "sarmatia": {
         "columbia": 1,
-        "heartland": 3
+        "ruthenia": 3
       },
       "choson": {
         "columbia": 1,
@@ -3500,8 +3500,8 @@
       "caribe": {
         "columbia": 1
       },
-      "heartland": {
-        "nordostan": 3
+      "ruthenia": {
+        "sarmatia": 3
       },
       "persia": {
         "columbia": 3,
@@ -3604,7 +3604,7 @@
     "the_council": [
       "columbia",
       "cathay",
-      "nordostan",
+      "sarmatia",
       "gallia",
       "albion",
       "bharata"
@@ -3623,8 +3623,8 @@
     "the_assembly": [
       "columbia",
       "cathay",
-      "nordostan",
-      "heartland",
+      "sarmatia",
+      "ruthenia",
       "persia",
       "gallia",
       "teutonia",
@@ -3644,7 +3644,7 @@
     ],
     "the_league": [
       "cathay",
-      "nordostan",
+      "sarmatia",
       "persia",
       "bharata",
       "phrygia",
@@ -3652,7 +3652,7 @@
       "mirage"
     ],
     "the_cartel": [
-      "nordostan",
+      "sarmatia",
       "persia",
       "solaria",
       "mirage"
@@ -3679,19 +3679,19 @@
       "occupied_zones": []
     },
     {
-      "attacker": "nordostan",
-      "defender": "heartland",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
       "theater": "eastern_ereb",
       "start_round": -4,
       "occupied_zones": [
-        "heartland_2"
+        "ruthenia_2"
       ]
     }
   ],
   "oil_price": 67.62,
   "oil_price_index": 84.525,
   "opec_production": {
-    "nordostan": "low",
+    "sarmatia": "low",
     "persia": "normal",
     "solaria": "normal",
     "mirage": "normal"
@@ -3714,7 +3714,7 @@
       "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
       "signatories": [
         "columbia",
-        "heartland"
+        "ruthenia"
       ],
       "signed_round": 2,
       "active": true
@@ -3724,7 +3724,7 @@
       "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
       "signatories": [
         "columbia",
-        "heartland"
+        "ruthenia"
       ],
       "signed_round": 2,
       "active": true
@@ -3734,7 +3734,7 @@
       "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
       "signatories": [
         "columbia",
-        "heartland"
+        "ruthenia"
       ],
       "signed_round": 2,
       "active": true
@@ -3744,7 +3744,7 @@
       "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
       "signatories": [
         "columbia",
-        "heartland"
+        "ruthenia"
       ],
       "signed_round": 2,
       "active": true
@@ -3754,7 +3754,7 @@
       "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
       "signatories": [
         "columbia",
-        "heartland"
+        "ruthenia"
       ],
       "signed_round": 2,
       "active": true
@@ -4264,11 +4264,11 @@
         "nato_vote",
         "defense_spending",
         "eastern_flank",
-        "heartland_logistics"
+        "ruthenia_logistics"
       ],
       "objectives": [
         "maximum_security",
-        "nordostan_containment",
+        "sarmatia_containment",
         "nato_commitment"
       ],
       "ticking_clock": "NATO frontline. 4.8% GDP defense spending. Hosts Columbia forward deployments. Cohabitation with opposition president.",
@@ -4334,7 +4334,7 @@
         "post_brexit_relevance",
         "nuclear_credibility"
       ],
-      "ticking_clock": "NATO but not EU. Five Eyes intelligence broker. UNSC veto. Offering troops for Heartland ceasefire monitoring.",
+      "ticking_clock": "NATO but not EU. Five Eyes intelligence broker. UNSC veto. Offering troops for Ruthenia ceasefire monitoring.",
       "status": "active"
     },
     "pillar": {
@@ -4372,10 +4372,10 @@
       "id": "pathfinder",
       "character_name": "Pathfinder",
       "parallel": "Russian President",
-      "country_id": "nordostan",
-      "team": "Nordostan",
+      "country_id": "sarmatia",
+      "team": "Sarmatia",
       "faction": "President",
-      "title": "President of Nordostan",
+      "title": "President of Sarmatia",
       "age": 73,
       "gender": "M",
       "is_head_of_state": true,
@@ -4403,8 +4403,8 @@
       "id": "ironhand",
       "character_name": "Ironhand",
       "parallel": "Russian General",
-      "country_id": "nordostan",
-      "team": "Nordostan",
+      "country_id": "sarmatia",
+      "team": "Sarmatia",
       "faction": "Military",
       "title": "Chief of General Staff",
       "age": 60,
@@ -4434,8 +4434,8 @@
       "id": "compass",
       "character_name": "Compass",
       "parallel": "Russian Oligarch",
-      "country_id": "nordostan",
-      "team": "Nordostan",
+      "country_id": "sarmatia",
+      "team": "Sarmatia",
       "faction": "Economic",
       "title": "Oligarch / Back-Channel",
       "age": 55,
@@ -4464,10 +4464,10 @@
       "id": "ledger",
       "character_name": "Ledger",
       "parallel": "Russian PM/Technocrat",
-      "country_id": "nordostan",
-      "team": "Nordostan",
+      "country_id": "sarmatia",
+      "team": "Sarmatia",
       "faction": "Government",
-      "title": "Prime Minister of Nordostan",
+      "title": "Prime Minister of Sarmatia",
       "age": 50,
       "gender": "M",
       "is_head_of_state": false,
@@ -4494,10 +4494,10 @@
       "id": "beacon",
       "character_name": "Beacon",
       "parallel": "Ukrainian President",
-      "country_id": "heartland",
-      "team": "Heartland",
+      "country_id": "ruthenia",
+      "team": "Ruthenia",
       "faction": "Resistance",
-      "title": "President of Heartland",
+      "title": "President of Ruthenia",
       "age": 47,
       "gender": "M",
       "is_head_of_state": false,
@@ -4525,8 +4525,8 @@
       "id": "bulwark",
       "character_name": "Bulwark",
       "parallel": "Ukrainian General",
-      "country_id": "heartland",
-      "team": "Heartland",
+      "country_id": "ruthenia",
+      "team": "Ruthenia",
       "faction": "Military",
       "title": "Commander-in-Chief",
       "age": 50,
@@ -4555,8 +4555,8 @@
       "id": "broker",
       "character_name": "Broker",
       "parallel": "Ukrainian Politician",
-      "country_id": "heartland",
-      "team": "Heartland",
+      "country_id": "ruthenia",
+      "team": "Ruthenia",
       "faction": "Pragmatist",
       "title": "Opposition Leader",
       "age": 52,
@@ -4764,9 +4764,9 @@
       "ticking_clock": "KMT legislature blocking defense budget. $40B defense plan cut 70%. Silicon shield eroding as fabs built abroad.",
       "status": "active"
     },
-    "bazaar": {
-      "id": "bazaar",
-      "character_name": "Bazaar",
+    "vizier": {
+      "id": "vizier",
+      "character_name": "Vizier",
       "parallel": "Turkish President",
       "country_id": "phrygia",
       "team": "Phrygia",
@@ -4885,7 +4885,7 @@
         "nuclear_leverage",
         "blood_for_technology"
       ],
-      "ticking_clock": "15000+ troops in Heartland. 6000+ casualties. Blood-for-technology with Nordostan. Crisis on demand capability.",
+      "ticking_clock": "15000+ troops in Ruthenia. 6000+ casualties. Blood-for-technology with Sarmatia. Crisis on demand capability.",
       "status": "active"
     },
     "vanguard": {
@@ -4945,7 +4945,7 @@
         "break_blockade",
         "find_patrons"
       ],
-      "ticking_clock": "Under Columbia energy blockade. Nationwide blackout March 2026. Can invite Nordostan/Cathay military assets to trigger Monroe Doctrine crisis.",
+      "ticking_clock": "Under Columbia energy blockade. Nationwide blackout March 2026. Can invite Sarmatia/Cathay military assets to trigger Monroe Doctrine crisis.",
       "status": "active"
     },
     "spire": {
@@ -4997,7 +4997,7 @@
       "type": "transaction",
       "tx_type": "coin_transfer",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "amount": 2
       },
@@ -5037,9 +5037,9 @@
     },
     {
       "type": "combat",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 3,
       "defender_losses": 1,
@@ -5047,9 +5047,9 @@
     },
     {
       "type": "combat",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 1,
       "defender_losses": 1,
@@ -5089,7 +5089,7 @@
       "type": "transaction",
       "tx_type": "arms_transfer",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "unit_type": "ground",
         "count": 2
@@ -5113,7 +5113,7 @@
       "type": "transaction",
       "tx_type": "coin_transfer",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "amount": 2
       },
@@ -5135,12 +5135,12 @@
       "type": "transaction",
       "tx_type": "treaty",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "tx_id": 8,
@@ -5150,12 +5150,12 @@
       "type": "transaction",
       "tx_type": "treaty",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "tx_id": 9,
@@ -5165,12 +5165,12 @@
       "type": "transaction",
       "tx_type": "treaty",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "tx_id": 10,
@@ -5180,12 +5180,12 @@
       "type": "transaction",
       "tx_type": "treaty",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "tx_id": 11,
@@ -5195,12 +5195,12 @@
       "type": "transaction",
       "tx_type": "treaty",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "text": "Cooperation agreement: ['military_cooperation', 'arms_transfer', 'intelligence_sharing']",
         "signatories": [
           "columbia",
-          "heartland"
+          "ruthenia"
         ]
       },
       "tx_id": 12,
@@ -5228,9 +5228,9 @@
     },
     {
       "type": "combat",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 1,
       "defender_losses": 2,
@@ -5238,9 +5238,9 @@
     },
     {
       "type": "combat",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 1,
       "defender_losses": 1,
@@ -5297,7 +5297,7 @@
       "type": "transaction",
       "tx_type": "coin_transfer",
       "sender": "columbia",
-      "receiver": "heartland",
+      "receiver": "ruthenia",
       "details": {
         "amount": 2
       },
@@ -5337,9 +5337,9 @@
     },
     {
       "type": "combat",
-      "attacker": "nordostan",
-      "defender": "heartland",
-      "zone": "heartland_2",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 1,
       "defender_losses": 2,
@@ -5347,9 +5347,9 @@
     },
     {
       "type": "combat",
-      "attacker": "heartland",
-      "defender": "nordostan",
-      "zone": "heartland_2",
+      "attacker": "ruthenia",
+      "defender": "sarmatia",
+      "zone": "ruthenia_2",
       "zone_captured": false,
       "attacker_losses": 0,
       "defender_losses": 2,
@@ -5387,17 +5387,17 @@
     },
     {
       "type": "election",
-      "subtype": "heartland_wartime",
-      "country": "heartland",
+      "subtype": "ruthenia_wartime",
+      "country": "ruthenia",
       "incumbent_wins": false,
       "result": {
-        "election_type": "heartland_wartime",
-        "country": "heartland",
+        "election_type": "ruthenia_wartime",
+        "country": "ruthenia",
         "ai_score": 30.7,
         "player_score": 50.0,
         "final_incumbent_pct": 40.35,
         "incumbent_wins": false,
-        "note": "Heartland election: Beacon loses. Bulwark becomes president."
+        "note": "Ruthenia election: Beacon loses. Bulwark becomes president."
       },
       "round": 3
     }

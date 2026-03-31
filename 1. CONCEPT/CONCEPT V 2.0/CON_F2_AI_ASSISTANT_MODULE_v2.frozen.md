@@ -60,7 +60,7 @@ Help the participant set 1–2 concrete personal learning goals. Not "win the ga
 - "I want to experience what it's like to lead when your team disagrees with you"
 - "I just want to have fun and see what happens" ← this is a valid goal, and Navigator can work with it
 
-Navigator suggests concrete goals if the participant is unsure, drawing from the specific role they've been assigned. "You're playing Compass — the oligarch trying to keep Nordostan's economy alive while the war burns through the budget. One thing people in your role often discover is how hard it is to balance personal survival with national interest. Want to make that your focus?"
+Navigator suggests concrete goals if the participant is unsure, drawing from the specific role they've been assigned. "You're playing Compass — the oligarch trying to keep Sarmatia's economy alive while the war burns through the budget. One thing people in your role often discover is how hard it is to balance personal survival with national interest. Want to make that your focus?"
 
 **2. Rules and context understanding (essential)**
 Make sure the participant understands:
@@ -69,7 +69,7 @@ Make sure the participant understands:
 - The current situation (what's happening in the world as the SIM starts)
 - The interface (how to submit actions, where to find information, how to communicate)
 
-Navigator checks understanding with simple questions: "So if you want to sell arms to Heartland, what do you need to do?" If the answer is wrong, Navigator explains again — no judgment, no frustration.
+Navigator checks understanding with simple questions: "So if you want to sell arms to Ruthenia, what do you need to do?" If the answer is wrong, Navigator explains again — no judgment, no frustration.
 
 **3. Initial strategic thinking (if time allows)**
 Help the participant think about their opening moves:
@@ -218,7 +218,7 @@ Navigator stays current with SIM events through an auto-populated event feed (sa
 - World update summaries
 - Facilitator-injected events (moderator can add context Navigator should know)
 
-Navigator uses this to give contextually relevant advice: "I see that Nordostan just launched a ground offensive in the southern sector. As Heartland's president, that changes your calculus for the NATO meeting — you might want to use this to push for more military support."
+Navigator uses this to give contextually relevant advice: "I see that Sarmatia just launched a ground offensive in the southern sector. As Ruthenia's president, that changes your calculus for the NATO meeting — you might want to use this to push for more military support."
 
 ---
 
@@ -343,7 +343,7 @@ Model switching is supported at runtime. Context caching applies to Blocks 1–2
 
 ## Open Questions for Detailed Design
 
-1. **Name** — "Navigator" is a working name. Other candidates: Guide, Advisor, Compass (conflict with Nordostan's Compass role), Beacon (conflict with Heartland's Beacon role). The name should feel helpful, not authoritative.
+1. **Name** — "Navigator" is a working name. Other candidates: Guide, Advisor, Compass (conflict with Sarmatia's Compass role), Beacon (conflict with Ruthenia's Beacon role). The name should feel helpful, not authoritative.
 2. **Access timing during rounds** — Can participants talk to Navigator at any time during Phase A? Or should there be limits (e.g., Navigator pauses during the last 10 minutes to avoid distraction from deadline)?
 3. **Navigator awareness of participant's actual actions** — Should Navigator see what actions the participant has taken in the game (submitted budget, initiated attacks)? This would make mid-session advice more specific but adds data complexity.
 4. **Group reflection mode** — Should Navigator support a post-SIM group session (not just individual), where it helps facilitate a team debrief? Or is that the human facilitator's job?

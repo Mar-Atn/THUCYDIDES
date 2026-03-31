@@ -25,7 +25,7 @@
 - Base: $80
 - Supply: 1.0 - 4*0.06 = 0.76 (4 OPEC members at "low")
 - Gulf Gate blocked (Persia ground forces on cp_gulf_gate from init): disruption += 0.50. Total disruption = 1.50.
-- Wars: 2 (Nordostan-Heartland, Columbia-Persia). War premium = 2*0.05 = 0.10.
+- Wars: 2 (Sarmatia-Ruthenia, Columbia-Persia). War premium = 2*0.05 = 0.10.
 - Demand: ~1.006.
 - Raw price = 80 * (1.006/0.76) * 1.50 * (1+0.10) = 80 * 1.3237 * 1.50 * 1.10 = **~$175**
 
@@ -83,8 +83,8 @@ For this assessment, I will evaluate whether the FIX produces more REALISTIC beh
 | Oil price ($) | 160-185 | ~175 | ~175 | PASS |
 | Columbia GDP | 272-278 | ~319 (tech-driven) | ~251 | OVERCORRECTED |
 | Cathay GDP | 190-198 | ~220 (tech-driven) | ~175 | OVERCORRECTED |
-| Nordostan GDP | 20-22 | ~20.6 | ~20.6 | PASS |
-| Nordostan oil_revenue | 0.8-1.4 | ~1.40 | ~1.40 | PASS |
+| Sarmatia GDP | 20-22 | ~20.6 | ~20.6 | PASS |
+| Sarmatia oil_revenue | 0.8-1.4 | ~1.40 | ~1.40 | PASS |
 
 ### Analysis
 
@@ -107,7 +107,7 @@ Oil mechanics excellent. Blockade double-counting fixed. GDP corridors need reca
 - Supply = 1.0 (OPEC normal). Persia at war but no specific sanctions reducing supply unless in sanctions.csv. Let's check: 2 wars active. War premium = 0.10. No Gulf Gate disruption. No Formosa.
 - Raw = 80 * 1.0 * 1.0 * 1.10 = **$88**
 
-**R1 Nordostan GDP:**
+**R1 Sarmatia GDP:**
 - Base: 1.0% = 0.01
 - Oil shock: producer, price 88 > 80: +0.01 * (88-80)/50 = +0.0016
 - Sanctions hit: L3 from 5 countries. damage ~0.10-0.12. sanctions_hit = -0.20 to -0.24.
@@ -145,15 +145,15 @@ Still above R1 corridor of 10-30. The massive military maintenance (12.9) drives
 
 | Variable | R1 Expected | R1 Actual (Fixed) | v1 Actual | Verdict |
 |----------|------------|-------------------|-----------|---------|
-| Nordostan GDP | 17-20 | ~15.2 | ~15.6 | CALIBRATE |
-| Nordostan inflation | 10-30 | ~45.8 | ~43 | FAIL |
-| Nordostan treasury | 0-2 | 0 | 0 | PASS |
-| Nordostan debt_burden | 1.5-4.0 | ~2.56 | ~2.54 | PASS |
-| Nordostan stability | 4.5-5.0 | ~3.0 | ~3.0 | FAIL |
+| Sarmatia GDP | 17-20 | ~15.2 | ~15.6 | CALIBRATE |
+| Sarmatia inflation | 10-30 | ~45.8 | ~43 | FAIL |
+| Sarmatia treasury | 0-2 | 0 | 0 | PASS |
+| Sarmatia debt_burden | 1.5-4.0 | ~2.56 | ~2.54 | PASS |
+| Sarmatia stability | 4.5-5.0 | ~3.0 | ~3.0 | FAIL |
 
 ### Analysis
 
-**Fix 2 impact:** Social spending is now mandatory, increasing the deficit from ~1.6 (v1, where social wasn't spent) to the full 13.76. This is the CORRECT behavior -- Nordostan must pay for both military and social programs. However, it also means the inflation spike is even larger because the deficit is enormous.
+**Fix 2 impact:** Social spending is now mandatory, increasing the deficit from ~1.6 (v1, where social wasn't spent) to the full 13.76. This is the CORRECT behavior -- Sarmatia must pay for both military and social programs. However, it also means the inflation spike is even larger because the deficit is enormous.
 
 **Fix 4 impact:** Baseline inflation of 5.0% now persists (no artificial decay). The excess of 40.8% decays at 15%/round in subsequent rounds. This is correct behavior.
 
@@ -269,14 +269,14 @@ This scenario is minimally affected by the 4 fixes since it focuses on military 
 
 **War Tiredness:** All trajectories match v1 (unchanged mechanics). Within corridor.
 
-**Fix 2 impact on Heartland budget:**
-- Heartland GDP=2.2, tax=0.25. Revenue = 0.55. Maintenance = (10+0+0+0+0)*0.3 = 3.0. Social = 0.20*2.2 = 0.44 (now mandatory).
+**Fix 2 impact on Ruthenia budget:**
+- Ruthenia GDP=2.2, tax=0.25. Revenue = 0.55. Maintenance = (10+0+0+0+0)*0.3 = 3.0. Social = 0.20*2.2 = 0.44 (now mandatory).
 - Total mandatory = 3.44. Deficit = 3.44 - 0.55 = 2.89. Treasury 1 partially covers. Money printed = 1.89. Inflation spike.
-- This creates MORE fiscal pressure on Heartland than v1, which is realistic -- Heartland as a small war-torn economy SHOULD be under severe fiscal stress.
+- This creates MORE fiscal pressure on Ruthenia than v1, which is realistic -- Ruthenia as a small war-torn economy SHOULD be under severe fiscal stress.
 
-**Fix 4 impact on Heartland inflation:**
+**Fix 4 impact on Ruthenia inflation:**
 - Starting inflation 7.5%. Excess = 0. With money printing: new_excess = 1.89/2.2 * 80 = 68.7%. New inflation = 7.5 + 68.7 = **76.2%**.
-- This is a LOT. But Heartland has GDP 2.2 with 10 ground units costing 3.0 in maintenance + 0.44 social = 3.44 mandatory vs 0.55 revenue. The country is fundamentally insolvent. This is realistic for a small nation fighting a defensive war against a larger power.
+- This is a LOT. But Ruthenia has GDP 2.2 with 10 ground units costing 3.0 in maintenance + 0.44 social = 3.44 mandatory vs 0.55 revenue. The country is fundamentally insolvent. This is realistic for a small nation fighting a defensive war against a larger power.
 
 ### Results vs Expected
 
@@ -284,13 +284,13 @@ This scenario is minimally affected by the 4 fixes since it focuses on military 
 |----------|------------|-------------------|---------|
 | Cathay naval | 8 | 8 | PASS |
 | Columbia naval | 11 | 11 | PASS |
-| Heartland war_tiredness | 4.0-4.2 | 4.10 | PASS |
+| Ruthenia war_tiredness | 4.0-4.2 | 4.10 | PASS |
 | Columbia war_tiredness | 1.1-1.2 | 1.15 | PASS |
-| Nordostan war_tiredness | 4.0-4.2 | 4.075 | PASS |
-| Heartland stability | 4.7-5.0 | ~4.0 (inflation pressure from Fix 2) | CALIBRATE |
+| Sarmatia war_tiredness | 4.0-4.2 | 4.075 | PASS |
+| Ruthenia stability | 4.7-5.0 | ~4.0 (inflation pressure from Fix 2) | CALIBRATE |
 
 ### Credibility Score: 9/10
-Military mechanics are precise and unaffected by the fixes. Fix 2 creates MORE realistic fiscal pressure on small war-torn economies (Heartland), which slightly exceeds the corridor for stability but in a realistic direction.
+Military mechanics are precise and unaffected by the fixes. Fix 2 creates MORE realistic fiscal pressure on small war-torn economies (Ruthenia), which slightly exceeds the corridor for stability but in a realistic direction.
 
 ---
 
@@ -311,9 +311,9 @@ Military mechanics are precise and unaffected by the fixes. Fix 2 creates MORE r
 
 **R3 Columbia war_tiredness:** Not at war: 1.30 * 0.80 = 1.04. Within corridor 1.0-1.2.
 
-**R6 Heartland ceasefire:** Momentum +1.5. Tiredness decays. All mechanics work.
+**R6 Ruthenia ceasefire:** Momentum +1.5. Tiredness decays. All mechanics work.
 
-**Fix 2 impact:** Social spending mandatory throughout. Columbia's large GDP easily covers mandatory costs. Heartland struggles more (realistic).
+**Fix 2 impact:** Social spending mandatory throughout. Columbia's large GDP easily covers mandatory costs. Ruthenia struggles more (realistic).
 
 **Fix 4 impact:** Columbia (starting_inflation 3.5%) -- inflation stays at or above 3.5%. No artificial decay below baseline. Minor effect.
 
@@ -324,8 +324,8 @@ Military mechanics are precise and unaffected by the fixes. Fix 2 creates MORE r
 | Oil price ($) | 95-140 | ~84 | CALIBRATE (no inertia) |
 | Columbia momentum | 0.5-2.0 | ~1.5 | PASS |
 | Columbia war_tiredness | 1.0-1.2 | ~1.04 | PASS |
-| Heartland war_tiredness | 4.3-4.6 | ~4.4 | PASS |
-| Heartland momentum | -1.5-0.0 | ~-0.5 | PASS |
+| Ruthenia war_tiredness | 4.3-4.6 | ~4.4 | PASS |
+| Ruthenia momentum | -1.5-0.0 | ~-0.5 | PASS |
 
 ### Credibility Score: 8/10
 Ceasefire mechanics work correctly. Oil inertia issue persists (known calibration issue, not in 4 fixes). All other mechanics within corridor.
@@ -601,7 +601,7 @@ The Thucydides dynamic is correctly emergent. Naval parity, democratic constrain
 | S1: Oil Shock | 5/10 | 8/10 | +3 | Fix 1 (blockade_frac) |
 | S2: Sanctions Spiral | 6/10 | 7/10 | +1 | Fix 2 (social mandatory), Fix 4 (inflation baseline) |
 | S3: Semiconductor Crisis | 5/10 | 8/10 | +3 | Fix 1 (blockade_frac), Fix 3 (chokepoint sync) |
-| S4: Military Attrition | 8/10 | 9/10 | +1 | Fix 2 (realistic Heartland fiscal pressure) |
+| S4: Military Attrition | 8/10 | 9/10 | +1 | Fix 2 (realistic Ruthenia fiscal pressure) |
 | S5: Ceasefire Cascade | 7/10 | 8/10 | +1 | Fix 1 (no Gulf Gate GDP penalty) |
 | S6: Debt Death Spiral | 5/10 | 8/10 | +3 | Fix 2 (social mandatory) -- the critical fix |
 | S7: Inflation Runaway | 5/10 | 8/10 | +3 | Fix 4 (inflation baseline) -- the critical fix |
@@ -662,7 +662,7 @@ The 4 critical fixes bring the engine from 6.5/10 to 7.9/10. The most impactful 
 
 1. **Fix 1 (blockade_frac)** -- This single fix resolved the most widespread issue, eliminating the -24% GDP penalty that was being applied to ALL non-oil-producers whenever Gulf Gate was blocked. This affected 7 of 10 scenarios.
 
-2. **Fix 2 (social mandatory)** -- This fix activated the debt death spiral mechanic. Without it, countries could survive on maintenance alone, never triggering fiscal crises. With it, countries like Ponte and Nordostan correctly face impossible budgets when revenue drops.
+2. **Fix 2 (social mandatory)** -- This fix activated the debt death spiral mechanic. Without it, countries could survive on maintenance alone, never triggering fiscal crises. With it, countries like Ponte and Sarmatia correctly face impossible budgets when revenue drops.
 
 3. **Fix 4 (inflation baseline)** -- This fix makes high-inflation countries (Persia, Phrygia) behave correctly. Their structural inflation persists instead of magically decaying, and only crisis-induced excess inflation decays.
 

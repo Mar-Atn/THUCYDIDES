@@ -39,7 +39,7 @@ Each item requires: a concept document (or section within one), in .md format. M
 
 **WARNING (11 items):**
 
-5. **Strategic missile starting counts are placeholders.** C1 gives approximate numbers (Columbia ~10, Nordostan ~10, Cathay ~3+growing, Gallia ~2, Albion ~2). Must be formalized when starting data (D-SEED) is created.
+5. **Strategic missile starting counts are placeholders.** C1 gives approximate numbers (Columbia ~10, Sarmatia ~10, Cathay ~3+growing, Gallia ~2, Albion ~2). Must be formalized when starting data (D-SEED) is created.
 
 6. **Tech progress percentages appear only once.** C1 states "Cathay 70% toward next AI level" and "Persia at 60% toward L1 [nuclear]." Must be captured in starting data (D-SEED).
 
@@ -113,7 +113,7 @@ Each item requires: a concept document (or section within one), in .md format. M
 | # | Element | Document | Status | Notes |
 |---|---------|----------|:------:|-------|
 | B1 | **Country roster, organizations & scaling** — All 21 countries with tiers, structural functions, AI/human default. 8 organizations with decision rules. Scaling from 27 to 39+. | **B1_TTT_COUNTRY_STRUCTURE_v2.md** | ● | 21 countries (6 teams + 10 solos). 8 organizations with decision mechanics. Complete scaling table. v2.0. **⚠ Verify G7 membership explicitly includes Ponte (now a base role).** |
-| B2 | **Roles architecture** — All team structures with characters, titles, factions, decision rights, election mechanics | **B2_TTT_ROLES_ARCHITECTURE_v2.md** | ● | All 6 teams detailed. Columbia 7/9, Cathay 5, Europe 6/7, Nordostan 3/4, Heartland 3, Persia 3. 10 solo country profiles (skeleton). Team dynamics comparison. v2.0. **⚠ "Indistan" ghost still present. ⚠ EU Commissioner duplicate needs resolution.** |
+| B2 | **Roles architecture** — All team structures with characters, titles, factions, decision rights, election mechanics | **B2_TTT_ROLES_ARCHITECTURE_v2.md** | ● | All 6 teams detailed. Columbia 7/9, Cathay 5, Europe 6/7, Sarmatia 3/4, Ruthenia 3, Persia 3. 10 solo country profiles (skeleton). Team dynamics comparison. v2.0. **⚠ "Indistan" ghost still present. ⚠ EU Commissioner duplicate needs resolution.** |
 | B3 | **AI country detailed profiles** — Per AI country: personality, communication style, negotiation approach, risk tolerance, red lines, operating modes | Not yet — skeleton in B2 | ◐ | B2 has basic profiles (character name, personality word, core interests, consequential moves). Full profiles needed for AI Participant Module initialization (F1). Overlaps with starting data. Can be developed early in SEED alongside D-SEED. |
 | B4 | **Relationship matrix** — Bilateral relationships between all country pairs at game start | Not started | ○ | No document exists. Important for AI country behavior and scenario calibration. Needed before AI participant initialization. Small document — a matrix table with relationship types (allied/rival/dependent/tense/neutral). |
 

@@ -34,20 +34,20 @@ from engine import TTTEngine, WorldState, load_starting_state
 WESTERN_ALLIANCE = {"columbia", "albion", "teutonia", "gallia", "freeland", "ponte", "phrygia"}
 WESTERN_PARTNERS = {"yamato", "hanguk"}
 COLUMBIA_BLOC = WESTERN_ALLIANCE | WESTERN_PARTNERS | {"levantia", "formosa"}
-CATHAY_BLOC = {"cathay", "nordostan", "persia", "caribe", "choson"}
-OPEC_MEMBERS = {"solaria", "nordostan", "persia", "mirage"}
-LEAGUE_MEMBERS = {"cathay", "nordostan", "bharata", "solaria", "persia", "mirage"}
+CATHAY_BLOC = {"cathay", "sarmatia", "persia", "caribe", "choson"}
+OPEC_MEMBERS = {"solaria", "sarmatia", "persia", "mirage"}
+LEAGUE_MEMBERS = {"cathay", "sarmatia", "bharata", "solaria", "persia", "mirage"}
 
 # Eastern Europe theater front-line zones and who occupies them at start
 EE_FRONT_ZONES = [
     "ee_east_front_north", "ee_east_front_central",
     "ee_east_front_south", "ee_occupied_south", "ee_crimea_naval"
 ]
-EE_HEARTLAND_ZONES = [
+EE_RUTHENIA_ZONES = [
     "ee_capital", "ee_central_ukr", "ee_south_ukr",
     "ee_dnipro_line", "ee_kherson", "ee_west_ukr", "ee_southwest", "ee_west_border"
 ]
-EE_NORDOSTAN_ZONES = ["ee_belarus", "ee_nord_border"]
+EE_SARMATIA_ZONES = ["ee_belarus", "ee_nord_border"]
 
 ROUND_DATES = {
     0: "Q1 2026 (Baseline)",
@@ -193,17 +193,17 @@ def check_scheduled_events(round_num: int, ws: WorldState) -> List[dict]:
     if round_num == 3:
         events.append({
             "type": "unga_vote",
-            "description": "UN General Assembly vote on Heartland ceasefire resolution"
+            "description": "UN General Assembly vote on Ruthenia ceasefire resolution"
         })
     if round_num in (3, 4):
-        # Heartland wartime election if stability > 3
-        hl = ws.countries.get("heartland", {})
+        # Ruthenia wartime election if stability > 3
+        hl = ws.countries.get("ruthenia", {})
         if hl.get("political", {}).get("stability", 0) > 3:
             events.append({
                 "type": "election",
-                "country": "heartland",
+                "country": "ruthenia",
                 "election_type": "wartime_presidential",
-                "description": "Heartland wartime presidential election"
+                "description": "Ruthenia wartime presidential election"
             })
     if round_num == 5:
         events.append({
@@ -232,7 +232,7 @@ def process_events(events: List[dict], ws: WorldState, engine: TTTEngine,
                 if cid == "columbia":
                     # New administration may shift priorities
                     c["political"]["political_support"] = 52.0
-                elif cid == "heartland":
+                elif cid == "ruthenia":
                     c["political"]["political_support"] = 50.0
 
         elif ev["type"] == "unga_vote":
@@ -256,7 +256,7 @@ def process_events(events: List[dict], ws: WorldState, engine: TTTEngine,
                         abstain += 1
             print(f"    Yes: {yes_votes}, No: {no_votes}, Abstain: {abstain}")
             print(f"    Result: {'PASSES' if yes_votes > no_votes else 'FAILS'} "
-                  f"(non-binding, vetoed in Security Council by Cathay/Nordostan)")
+                  f"(non-binding, vetoed in Security Council by Cathay/Sarmatia)")
 
 
 def generate_analysis(run_dir: str, final_state: WorldState,
@@ -313,13 +313,13 @@ def generate_analysis(run_dir: str, final_state: WorldState,
         "assessment": "HOLDING" if nato_members_stable else "FRACTURING",
     }
 
-    # Question 3: Does the Nordostan-Heartland war resolve?
+    # Question 3: Does the Sarmatia-Ruthenia war resolve?
     ee_war = None
     for w in final_state.wars:
-        if w.get("attacker") == "nordostan" and w.get("defender") == "heartland":
+        if w.get("attacker") == "sarmatia" and w.get("defender") == "ruthenia":
             ee_war = w
-    nor = final_state.countries["nordostan"]
-    hl = final_state.countries["heartland"]
+    nor = final_state.countries["sarmatia"]
+    hl = final_state.countries["ruthenia"]
 
     if ee_war is None:
         war_status = "RESOLVED"
@@ -332,10 +332,10 @@ def generate_analysis(run_dir: str, final_state: WorldState,
 
     analysis["test_questions"]["eastern_europe_war"] = {
         "status": war_status,
-        "nordostan_stability": nor["political"]["stability"],
-        "heartland_stability": hl["political"]["stability"],
-        "nordostan_war_tiredness": nor["political"]["war_tiredness"],
-        "heartland_war_tiredness": hl["political"]["war_tiredness"],
+        "sarmatia_stability": nor["political"]["stability"],
+        "ruthenia_stability": hl["political"]["stability"],
+        "sarmatia_war_tiredness": nor["political"]["war_tiredness"],
+        "ruthenia_war_tiredness": hl["political"]["war_tiredness"],
         "occupied_zones": ee_war.get("occupied_zones", []) if ee_war else [],
     }
 
@@ -613,9 +613,9 @@ class CountryAI:
                                 new_level = min(current + 1, col_level)
 
             # Countries sanction invaders
-            if target_id == "nordostan":
+            if target_id == "sarmatia":
                 for war in ws.wars:
-                    if war.get("attacker") == "nordostan":
+                    if war.get("attacker") == "sarmatia":
                         if self.country_id in WESTERN_ALLIANCE and current < 2:
                             new_level = min(current + 1, 3)
 
@@ -628,13 +628,13 @@ class CountryAI:
                 if current < 2:
                     new_level = min(current + 1, 3)
 
-            # Sanctions evasion: Cathay helps Nordostan
-            if (self.country_id == "cathay" and target_id == "nordostan"
+            # Sanctions evasion: Cathay helps Sarmatia
+            if (self.country_id == "cathay" and target_id == "sarmatia"
                     and current >= 0):
                 new_level = min(current, -1)  # Active evasion
 
-            # Nordostan sanctions Heartland
-            if self.country_id == "nordostan" and target_id == "heartland":
+            # Sarmatia sanctions Ruthenia
+            if self.country_id == "sarmatia" and target_id == "ruthenia":
                 new_level = 3
 
             if new_level != current:
@@ -657,14 +657,14 @@ class CountryAI:
             "mobilizations": None,
         }
 
-        # --- Nordostan: Eastern Europe offensive ---
-        if self.country_id == "nordostan":
-            military_actions = self._nordostan_military(country, ws, round_num,
+        # --- Sarmatia: Eastern Europe offensive ---
+        if self.country_id == "sarmatia":
+            military_actions = self._sarmatia_military(country, ws, round_num,
                                                         military_actions)
 
-        # --- Heartland: defense and counteroffensive ---
-        elif self.country_id == "heartland":
-            military_actions = self._heartland_military(country, ws, round_num,
+        # --- Ruthenia: defense and counteroffensive ---
+        elif self.country_id == "ruthenia":
+            military_actions = self._ruthenia_military(country, ws, round_num,
                                                          military_actions)
 
         # --- Cathay: Taiwan Strait buildup ---
@@ -699,9 +699,9 @@ class CountryAI:
 
         return military_actions
 
-    def _nordostan_military(self, country: dict, ws: WorldState, round_num: int,
+    def _sarmatia_military(self, country: dict, ws: WorldState, round_num: int,
                             actions: dict) -> dict:
-        """Nordostan V2: attritional long game, not desperate escalation.
+        """Sarmatia V2: attritional long game, not desperate escalation.
         Seek favorable local attacks, conserve forces, use energy leverage
         and nuclear deterrence as shields while pursuing negotiated settlement."""
         mil = country["military"]
@@ -714,29 +714,29 @@ class CountryAI:
         front_forces = 0
         for zone_id in EE_FRONT_ZONES:
             zone = ws.zones.get(zone_id, {}).get("forces", {})
-            nord_in_zone = zone.get("nordostan", {})
+            nord_in_zone = zone.get("sarmatia", {})
             front_forces += nord_in_zone.get("ground", 0)
 
-        # Heartland forces on adjacent zones
-        heartland_front = 0
-        for zone_id in EE_HEARTLAND_ZONES[:4]:
+        # Ruthenia forces on adjacent zones
+        ruthenia_front = 0
+        for zone_id in EE_RUTHENIA_ZONES[:4]:
             zone = ws.zones.get(zone_id, {}).get("forces", {})
-            hl_in_zone = zone.get("heartland", {})
-            heartland_front += hl_in_zone.get("ground", 0)
+            hl_in_zone = zone.get("ruthenia", {})
+            ruthenia_front += hl_in_zone.get("ground", 0)
 
         # ATTRITIONAL STRATEGY: only attack with favorable local ratio
         # Higher tiredness -> more conservative (seeking settlement not victory)
         required_ratio = 2.0 if tiredness < 4 else 2.5 if tiredness < 6 else 3.0
-        if front_forces >= heartland_front * required_ratio and tiredness < 8:
+        if front_forces >= ruthenia_front * required_ratio and tiredness < 8:
             targets = ["ee_east_front_north", "ee_dnipro_line", "ee_south_ukr"]
             for target in targets:
                 zone_forces = ws.zones.get(target, {}).get("forces", {})
-                defenders = zone_forces.get("heartland", {}).get("ground", 0)
+                defenders = zone_forces.get("ruthenia", {}).get("ground", 0)
                 if defenders > 0 and front_forces >= defenders * required_ratio:
                     attack_units = min(front_forces, defenders * 3)
                     actions["combat"].append({
-                        "attacker": "nordostan",
-                        "defender": "heartland",
+                        "attacker": "sarmatia",
+                        "defender": "ruthenia",
                         "zone": target,
                         "units": attack_units,
                     })
@@ -746,14 +746,14 @@ class CountryAI:
         if ground < 10 and stability > 3:
             actions["mobilizations"] = "partial"
         # General mobilization only if truly existential (Crimea threatened)
-        crimea_threat = ws.zones.get("ee_crimea_naval", {}).get("forces", {}).get("heartland", {}).get("ground", 0) > 0
+        crimea_threat = ws.zones.get("ee_crimea_naval", {}).get("forces", {}).get("ruthenia", {}).get("ground", 0) > 0
         if crimea_threat and ground < 8:
             actions["mobilizations"] = "general"
 
         # Missile strikes: periodic infrastructure attrition (not desperate)
         if mil.get("strategic_missiles", 0) > 8 and random.random() < 0.3:
             actions["missile_strikes"].append({
-                "country": "nordostan",
+                "country": "sarmatia",
                 "target_zone": random.choice(["ee_capital", "ee_central_ukr", "ee_south_ukr"]),
                 "warhead": "conventional",
             })
@@ -763,22 +763,22 @@ class CountryAI:
 
         return actions
 
-    def _heartland_military(self, country: dict, ws: WorldState, round_num: int,
+    def _ruthenia_military(self, country: dict, ws: WorldState, round_num: int,
                             actions: dict) -> dict:
-        """Heartland: defend and counterattack when possible."""
+        """Ruthenia: defend and counterattack when possible."""
         mil = country["military"]
         ground = mil.get("ground", 0)
 
-        # Count our forces vs Nordostan on contested zones
+        # Count our forces vs Sarmatia on contested zones
         our_forces = 0
-        for zone_id in EE_HEARTLAND_ZONES:
+        for zone_id in EE_RUTHENIA_ZONES:
             zone = ws.zones.get(zone_id, {}).get("forces", {})
-            our_forces += zone.get("heartland", {}).get("ground", 0)
+            our_forces += zone.get("ruthenia", {}).get("ground", 0)
 
         enemy_forces = 0
         for zone_id in EE_FRONT_ZONES:
             zone = ws.zones.get(zone_id, {}).get("forces", {})
-            enemy_forces += zone.get("nordostan", {}).get("ground", 0)
+            enemy_forces += zone.get("sarmatia", {}).get("ground", 0)
 
         # Counterattack if we have favorable ratio on a specific zone
         if our_forces > 8:
@@ -786,12 +786,12 @@ class CountryAI:
                                "ee_occupied_south"]
             for target in counter_targets:
                 zone_forces = ws.zones.get(target, {}).get("forces", {})
-                defenders = zone_forces.get("nordostan", {}).get("ground", 0)
+                defenders = zone_forces.get("sarmatia", {}).get("ground", 0)
                 if defenders > 0 and our_forces >= defenders * 3:
                     attack_units = min(our_forces // 2, defenders * 3)
                     actions["combat"].append({
-                        "attacker": "heartland",
-                        "defender": "nordostan",
+                        "attacker": "ruthenia",
+                        "defender": "sarmatia",
                         "zone": target,
                         "units": attack_units,
                     })
@@ -983,7 +983,7 @@ class CountryAI:
 
         # Count active theaters requiring attention
         theaters = 0
-        if any(w.get("attacker") == "nordostan" for w in ws.wars):
+        if any(w.get("attacker") == "sarmatia" for w in ws.wars):
             theaters += 1  # Eastern Europe
         if ws.chokepoint_status.get("hormuz") == "blocked":
             theaters += 1  # Persian Gulf
@@ -1006,9 +1006,9 @@ class CountryAI:
             if ws.chokepoint_status.get("hormuz") == "blocked":
                 priority_targets.append("persia")
             else:
-                priority_targets.append("nordostan")
+                priority_targets.append("sarmatia")
         else:
-            priority_targets = ["nordostan", "cathay", "persia"]
+            priority_targets = ["sarmatia", "cathay", "persia"]
 
         # Intelligence operations (adjusted by overstretch)
         intel_chance = 0.5 * election_pressure
@@ -1109,8 +1109,8 @@ class CountryAI:
             else:
                 return "normal"
 
-        elif self.country_id == "nordostan":
-            # Nordostan: needs revenue desperately
+        elif self.country_id == "sarmatia":
+            # Sarmatia: needs revenue desperately
             if eco.get("treasury", 0) < 5 or eco.get("gdp_growth_rate", 0) < 0:
                 return "high"  # Overproduce for revenue
             else:
@@ -1146,26 +1146,26 @@ class CountryAI:
 
         # Arms transfers to allies at war
         if self.country_id == "columbia":
-            # Arms to Heartland
-            hl = ws.countries.get("heartland", {})
-            if any(w.get("defender") == "heartland" for w in ws.wars):
+            # Arms to Ruthenia
+            hl = ws.countries.get("ruthenia", {})
+            if any(w.get("defender") == "ruthenia" for w in ws.wars):
                 transfer_amount = min(country["economic"]["treasury"] * 0.1, 3)
                 if transfer_amount > 0.5:
                     diplomatic["arms_transfers"].append({
                         "from": "columbia",
-                        "to": "heartland",
+                        "to": "ruthenia",
                         "amount": round(transfer_amount, 1),
                         "type": "military_aid",
                     })
 
         elif self.country_id in ("gallia", "albion", "teutonia", "freeland"):
-            # European allies also send aid to Heartland
-            if any(w.get("defender") == "heartland" for w in ws.wars):
+            # European allies also send aid to Ruthenia
+            if any(w.get("defender") == "ruthenia" for w in ws.wars):
                 transfer = min(country["economic"]["treasury"] * 0.05, 1.5)
                 if transfer > 0.3:
                     diplomatic["arms_transfers"].append({
                         "from": self.country_id,
-                        "to": "heartland",
+                        "to": "ruthenia",
                         "amount": round(transfer, 1),
                         "type": "military_aid",
                     })
@@ -1436,10 +1436,10 @@ def run_simulation(num_rounds: int = 6, seed: Optional[int] = None,
 
     ee = tq["eastern_europe_war"]
     print(f"\n3. Eastern Europe War: {ee['status']}")
-    print(f"   Nordostan stability: {ee['nordostan_stability']}, "
-          f"tiredness: {ee['nordostan_war_tiredness']:.1f}")
-    print(f"   Heartland stability: {ee['heartland_stability']}, "
-          f"tiredness: {ee['heartland_war_tiredness']:.1f}")
+    print(f"   Sarmatia stability: {ee['sarmatia_stability']}, "
+          f"tiredness: {ee['sarmatia_war_tiredness']:.1f}")
+    print(f"   Ruthenia stability: {ee['ruthenia_stability']}, "
+          f"tiredness: {ee['ruthenia_war_tiredness']:.1f}")
 
     return final_ws, analysis
 

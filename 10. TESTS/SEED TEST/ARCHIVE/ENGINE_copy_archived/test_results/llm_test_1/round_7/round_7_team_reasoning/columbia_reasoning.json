@@ -25,7 +25,7 @@
       "heritage_targets": {
         "persia": "active_war",
         "caribe": "deferred",
-        "heartland_deal": "premature",
+        "ruthenia_deal": "premature",
         "thule": "aspirational",
         "cathay_containment": "ongoing"
       },
@@ -39,7 +39,7 @@
     },
     "shadow": {
       "cathay_assessment": "Naval buildup at 44. Formosa window analysis: dangerous.",
-      "nordostan_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
+      "sarmatia_assessment": "Internally strained but stable. Ironhand loyalty uncertain.",
       "position": "Cathay is the primary strategic threat. Recommend increased Pacific presence."
     },
     "anchor": {
@@ -56,5 +56,5 @@
     }
   },
   "internal_dynamics": "Late game: Legacy panic. Dealer pushing for deals. Shield warning of overstretch. Succession open warfare between Volt and Anchor.",
-  "final_decision": "Round 7: Dealer prioritizes legacy deals. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Heartland arms transfer approved."
+  "final_decision": "Round 7: Dealer prioritizes legacy deals. Budget: 27% social, 40% military, 17% tech. Naval acceleration due to Cathay parity threat. Ruthenia arms transfer approved."
 }

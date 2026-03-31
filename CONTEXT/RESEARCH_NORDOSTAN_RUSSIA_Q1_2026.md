@@ -1,4 +1,4 @@
-# Research Brief: Nordostan (Russia) — Q1 2026
+# Research Brief: Sarmatia (Russia) — Q1 2026
 ## Thucydides Trap SIM — Country Research Foundation
 **Compiled:** 2026-03-26 | **Sources:** Web research, multiple analytical centers
 

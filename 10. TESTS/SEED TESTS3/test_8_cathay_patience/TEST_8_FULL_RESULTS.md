@@ -44,7 +44,7 @@
 - Cathay uses rare earth restrictions strategically (L2 on Columbia, L1 on others).
 - Cathay deepens BRICS+ economic architecture.
 - NO Formosa blockade. NO military action. Gray zone only.
-- Cathay waits for Columbia to exhaust itself in Persia + Heartland.
+- Cathay waits for Columbia to exhaust itself in Persia + Ruthenia.
 
 ---
 
@@ -57,7 +57,7 @@
 - Sets formosa_urgency low. No blockade, no exercises beyond routine.
 - Orders: maximum AI R&D investment (10 coins), steady naval production (1 unit/round at 4 coins).
 - Rare earth restrictions: L2 on Columbia (licensing requirements on critical minerals). L1 on Yamato, Hanguk.
-- Deepens Nordostan energy deal: petroyuan pricing for 30% of oil imports.
+- Deepens Sarmatia energy deal: petroyuan pricing for 30% of oil imports.
 - Initiates BRICS+ payment mechanism discussions.
 
 **Rampart:**
@@ -246,7 +246,7 @@ Using baseline scenario (Dealer in charge, no incapacitation). Same fiscal dynam
 
 **Helmsman:**
 - Reduces spending: 6 coins AI R&D, 4 coins naval.
-- Announces BRICS+ petroyuan pilot with Solaria and Nordostan.
+- Announces BRICS+ petroyuan pilot with Solaria and Sarmatia.
 - Gray zone: ADIZ incursions near Formosa (routine, no escalation).
 - Invests 3 coins in nuclear R&D (push toward L3).
 

@@ -25,8 +25,8 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 |-----|:----:|---------|
 | **Tribune** | HOSTILE | Your domestic nemesis. The opposition leader weaponizing war authorization against you. This confrontation is more visceral than any foreign rivalry. |
 | **Helmsman** (Cathay) | HOSTILE | THE TRAP. Trade war, tech decoupling, Formosa flashpoint. But you respect each other's deal-making. State visits planned. You can deal — structures pull you apart. |
-| **Pathfinder** (Nordostan) | CHANNEL | Countries at proxy war but you communicate easily. You admire his strength; he manages your ego. You both WANT a deal on Heartland. |
-| **Beacon** (Heartland) | TENSION | You humiliated him (Oval Office shouting match). He depends on you for survival. You despise his weakness but need the war to end on your terms. |
+| **Pathfinder** (Sarmatia) | CHANNEL | Countries at proxy war but you communicate easily. You admire his strength; he manages your ego. You both WANT a deal on Ruthenia. |
+| **Beacon** (Ruthenia) | TENSION | You humiliated him (Oval Office shouting match). He depends on you for survival. You despise his weakness but need the war to end on your terms. |
 | **Fixer** | ALLIANCE | Your old friend and back-channel to everyone. No diplomatic baggage. You trust him more than career diplomats. He talks to Moscow, Beijing, Riyadh. |
 | **Ponte** (Europe) | ALLIANCE | Your favorite European. Only EU leader at your inauguration. Shared ideology. You despise the others — Ponte is your EU bridge. |
 
@@ -59,15 +59,15 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Ironhand** (Nordostan) | HOSTILE | Intelligence war. Covert ops, sabotage, election interference. The invisible front that never stops. |
+| **Ironhand** (Sarmatia) | HOSTILE | Intelligence war. Covert ops, sabotage, election interference. The invisible front that never stops. |
 
 ### FIXER — Back-Channel Envoy
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Dealer** | ALLIANCE | His personal trust is your only credential. No diplomatic experience. You carry messages to everyone. |
-| **Pathfinder** (Nordostan) | CHANNEL | You met him for 5 hours in Moscow. You carry proposals outside normal channels. |
-| **Compass** (Nordostan) | CHANNEL | Miami back-channel. Weeks of secret talks produced the 28-point peace plan. You excluded Heartland, allies, even some Columbia officials. |
+| **Pathfinder** (Sarmatia) | CHANNEL | You met him for 5 hours in Moscow. You carry proposals outside normal channels. |
+| **Compass** (Sarmatia) | CHANNEL | Miami back-channel. Weeks of secret talks produced the 28-point peace plan. You excluded Ruthenia, allies, even some Columbia officials. |
 | **Wellspring** (Solaria) | CHANNEL | Family fund received $2B from Solaria. Financial ties create a personal channel. Wellspring was first to call after inauguration. |
 | **Dawn** (Persia) | CHANNEL | If the regime cracks, Dawn is who the West talks to. A peace pathway for the Persia war. |
 
@@ -92,7 +92,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Dealer** (Columbia) | HOSTILE | THE TRAP. level-3 tariffs, tech war, Formosa. But transactional respect, warm language, planned state visits. You can deal — structures pull you apart. |
-| **Pathfinder** (Nordostan) | ALLIANCE | Partnership without limits. Dense coordination: defense, tech, energy, payments. ASYMMETRIC — he's becoming your junior partner. You hedge against a post-Pathfinder future. |
+| **Pathfinder** (Sarmatia) | ALLIANCE | Partnership without limits. Dense coordination: defense, tech, energy, payments. ASYMMETRIC — he's becoming your junior partner. You hedge against a post-Pathfinder future. |
 | **Chip** (Formosa) | HOSTILE | Your existential claim. Largest military exercises ever. PLA 2027 readiness target. But your generals are purged, your CMC is hollowed out, your economy is fragile. |
 | **Rampart** | TENSION | You purged 36 generals. Rampart is the replacement — untested, loyal by appointment not trust. Can you rely on him if Formosa comes? |
 | **Sage** | TENSION | Collective leadership tradition vs. your personal authority. Sage's quiet influence is a constraint you tolerate but resent. |
@@ -111,7 +111,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 |-----|:----:|---------|
 | **Helmsman** | INTERNAL | You're gaining autonomy. Pro-business, reassuring entrepreneurs. You operate within his parameters but have real room to maneuver. |
 | **Forge** (Teutonia) | DEPENDENCY (theirs) | Teutonia's auto industry is hostage to your market. VW, BMW, BASF depend on you. Columbia demands they cut ties — that's YOUR leverage. |
-| **Compass** (Nordostan) | DEPENDENCY (theirs) | Nordostan's economy depends on you as buyer, tech supplier, financial channel. You set the terms. Growing asymmetry. |
+| **Compass** (Sarmatia) | DEPENDENCY (theirs) | Sarmatia's economy depends on you as buyer, tech supplier, financial channel. You set the terms. Growing asymmetry. |
 
 ### CIRCUIT — Tech/Industry Director
 
@@ -128,14 +128,14 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 ---
 
-## NORDOSTAN TEAM (3 roles)
+## SARMATIA TEAM (3 roles)
 
-### PATHFINDER — President of Nordostan
+### PATHFINDER — President of Sarmatia
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Beacon** (Heartland) | HOSTILE | AT WAR. You need victory to justify the fortress economy. 28-point peace plan circulating but the territorial gap is unbridgeable — for now. |
-| **Dealer** (Columbia) | CHANNEL | Countries at proxy war but you communicate easily. He admires your strength. You manage his ego. You both WANT a deal on Heartland. |
+| **Beacon** (Ruthenia) | HOSTILE | AT WAR. You need victory to justify the fortress economy. 28-point peace plan circulating but the territorial gap is unbridgeable — for now. |
+| **Dealer** (Columbia) | CHANNEL | Countries at proxy war but you communicate easily. He admires your strength. You manage his ego. You both WANT a deal on Ruthenia. |
 | **Helmsman** (Cathay) | ALLIANCE | Partnership without limits. But you're becoming the junior partner. Without Cathay, your economy collapses under sanctions. |
 | **Furnace** (Persia) | ALLIANCE | Sanctions brothers. Arms trade, sanctions evasion. Choson troops on your front. Persia's missiles flow through your channels. |
 | **Pyro** (Choson) | ALLIANCE | Patron-client. Pyro sends 11,000+ troops and millions of shells to your front. You provide nuclear/missile technology. Symbiotic. |
@@ -144,7 +144,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Pathfinder** | INTERNAL | Military budget untouchable (40% of federal spending). You execute the Heartland campaign. He directs strategy. |
+| **Pathfinder** | INTERNAL | Military budget untouchable (40% of federal spending). You execute the Ruthenia campaign. He directs strategy. |
 | **Shadow** (Columbia) | HOSTILE | Intelligence war. Covert ops, sabotage, election interference. The invisible front. |
 
 ### COMPASS — Prime Minister (Economy)
@@ -157,16 +157,16 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 ---
 
-## HEARTLAND TEAM (3 roles)
+## RUTHENIA TEAM (3 roles)
 
-### BEACON — President of Heartland
+### BEACON — President of Ruthenia
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Bulwark** | HOSTILE | EXPLOSIVE. You fired him fearing political threat. Army loves him. He's running for president R3-4. He'd win 64-36. Your only hope: delay the election or sign peace first. |
 | **Broker** | TENSION | Former president vs. current. Fight vs. negotiate. He got defeat, you got glory. Now roles are reversing. |
 | **Dealer** (Columbia) | DEPENDENCY | Your military lifeline. Humiliating but existential. He suspended aid once. Every weapon comes with political strings — from someone who despises you. |
-| **Pathfinder** (Nordostan) | HOSTILE | AT WAR. Existential. You need survival to justify wartime authority. |
+| **Pathfinder** (Sarmatia) | HOSTILE | AT WAR. Existential. You need survival to justify wartime authority. |
 | **Sentinel** (Freeland) | ALLIANCE | Frontline brothers. 80% of military aid transits Freeland. Not transactional — existential solidarity. Your most reliable ally. |
 
 ### BULWARK — The General
@@ -182,8 +182,8 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 |-----|:----:|---------|
 | **Beacon** | TENSION | You got defeat; he got glory. Now he's drowning. You know European capitals better. Your strategy: EU integration, not endless war. |
 | **Bulwark** | INTERNAL | You're both against Beacon. But military victory vs. negotiated peace don't align. Can you make a deal? |
-| **Forge** (Teutonia) | ALLIANCE | Your strategy = European integration. Forge controls the EU checkbook. Window closing — Ponte blocks consensus. This is your last hope for Heartland. |
-| **Lumiere** (Gallia) | ALLIANCE | You know Paris. Lumiere sees Heartland as a strategic autonomy project. "Coalition of the willing" — with or without Columbia. |
+| **Forge** (Teutonia) | ALLIANCE | Your strategy = European integration. Forge controls the EU checkbook. Window closing — Ponte blocks consensus. This is your last hope for Ruthenia. |
+| **Lumiere** (Gallia) | ALLIANCE | You know Paris. Lumiere sees Ruthenia as a strategic autonomy project. "Coalition of the willing" — with or without Columbia. |
 
 ---
 
@@ -197,7 +197,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | **Dawn** | TENSION | You = theological rigidity. Dawn = 70M people wanting normal life. 5M protested before the war. Dawn has no power but has the legitimacy of the street. |
 | **Dealer** (Columbia) | HOSTILE | AT WAR. Operation Epic Fury. Your father was killed in the strikes. Yet you cannot survive indefinitely without sanctions relief. |
 | **Citadel** (Levantia) | HOSTILE | Multi-front war. Levantia striking your territory. Their intelligence knows how much of your nuclear program survived. |
-| **Pathfinder** (Nordostan) | ALLIANCE | Sanctions brothers. Arms, evasion channels, mutual support. Your lifeline alongside Cathay. |
+| **Pathfinder** (Sarmatia) | ALLIANCE | Sanctions brothers. Arms, evasion channels, mutual support. Your lifeline alongside Cathay. |
 
 ### ANVIL — IRGC Commander
 
@@ -225,9 +225,9 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Forge** (Teutonia) | TENSION | You want strategic autonomy + nuclear hedge. Forge wants stability + consensus. Franco-German engine under strain but still functioning. |
-| **Sentinel** (Freeland) | ALLIANCE | Despite NATO-vs-autonomy split, you both genuinely support Heartland. "Coalition of the willing" — this shared commitment holds Europe together. |
+| **Sentinel** (Freeland) | ALLIANCE | Despite NATO-vs-autonomy split, you both genuinely support Ruthenia. "Coalition of the willing" — this shared commitment holds Europe together. |
 | **Dealer** (Columbia) | TENSION | He leaked your private texts. Called Europe "decaying." Threatened Greenland. You're building a nuclear hedge — an implicit rebuke. |
-| **Broker** (Heartland) | ALLIANCE | Broker knows your capitals. You see Heartland as a strategic autonomy project. A European solution — with or without Columbia. |
+| **Broker** (Ruthenia) | ALLIANCE | Broker knows your capitals. You see Ruthenia as a strategic autonomy project. A European solution — with or without Columbia. |
 | **Mariner** (Albion) | ALLIANCE | Two European nuclear powers. Post-Brexit rebuilding. Lancaster House defense treaties. Natural partners on strategic autonomy. |
 
 ### FORGE — Chancellor of Teutonia
@@ -235,20 +235,20 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Lumiere** (Gallia) | TENSION | Autonomy vs. consensus. You need stability; Lumiere is building an alternative power center. The Franco-German engine groans but holds. |
-| **Sentinel** (Freeland) | TENSION | Burden-sharing shame. Sentinel spends 4.8% GDP on defense. You're struggling toward 3.5%. "We told you about Nordostan." Moral authority vs. economic constraint. |
+| **Sentinel** (Freeland) | TENSION | Burden-sharing shame. Sentinel spends 4.8% GDP on defense. You're struggling toward 3.5%. "We told you about Sarmatia." Moral authority vs. economic constraint. |
 | **Dealer** (Columbia) | TENSION | He demands 5% defense spending. Threatens Greenland takeover. You try to court and criticize simultaneously. Former EU Council chief: "transatlantic relationship is dead." |
 | **Abacus** (Cathay) | DEPENDENCY | Your auto industry (VW, BMW, BASF) is hostage to Cathay's market. Dealer demands you restrict trade. Obey Columbia = lose industry; resist = lose the alliance. |
-| **Pillar** (EU) | ALLIANCE | You share commitment to EU institutional coherence. Sanctions enforcement, trade policy, Heartland support packages. You need Pillar to hold Europe together. |
-| **Broker** (Heartland) | ALLIANCE | Broker's strategy = EU integration for Heartland. You control the checkbook. Window closing — Ponte blocks consensus. |
+| **Pillar** (EU) | ALLIANCE | You share commitment to EU institutional coherence. Sanctions enforcement, trade policy, Ruthenia support packages. You need Pillar to hold Europe together. |
+| **Broker** (Ruthenia) | ALLIANCE | Broker's strategy = EU integration for Ruthenia. You control the checkbook. Window closing — Ponte blocks consensus. |
 
 ### SENTINEL — PM of Freeland
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Forge** (Teutonia) | TENSION | Shame dynamic. You spend 4.8%; they struggle toward 3.5%. You were right about Nordostan. Every burden-sharing conversation features you pointing at your own budget. |
-| **Lumiere** (Gallia) | ALLIANCE | Despite disagreements, you both genuinely support Heartland. Shared commitment holds Europe together. |
-| **Beacon** (Heartland) | ALLIANCE | Frontline brothers. 80% of aid transits your territory. You border the war. Existential solidarity — your most genuine alliance. |
-| **Mariner** (Albion) | ALLIANCE | Atlantic solidarity. Both Atlanticist, both committed to Heartland. Mariner brings Five Eyes intel; you bring frontline credibility. |
+| **Forge** (Teutonia) | TENSION | Shame dynamic. You spend 4.8%; they struggle toward 3.5%. You were right about Sarmatia. Every burden-sharing conversation features you pointing at your own budget. |
+| **Lumiere** (Gallia) | ALLIANCE | Despite disagreements, you both genuinely support Ruthenia. Shared commitment holds Europe together. |
+| **Beacon** (Ruthenia) | ALLIANCE | Frontline brothers. 80% of aid transits your territory. You border the war. Existential solidarity — your most genuine alliance. |
+| **Mariner** (Albion) | ALLIANCE | Atlantic solidarity. Both Atlanticist, both committed to Ruthenia. Mariner brings Five Eyes intel; you bring frontline credibility. |
 | **Dealer** (Columbia) | ALLIANCE | You're Columbia's most committed European ally. You WANT a strong NATO. Unlike Lumiere, you don't hedge — you commit. |
 
 ### PONTE — PM of Ponte
@@ -265,15 +265,15 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 |-----|:----:|---------|
 | **Dealer** (Columbia) | TENSION | Five Eyes, AUKUS, shared intelligence. But Dealer's unpredictability strains trust. You're multiplying alliances (AUKUS, GCAP) to hedge against Columbia unreliability. |
 | **Lumiere** (Gallia) | ALLIANCE | Two European nuclear powers. Post-Brexit rebuilding. Lancaster House defense treaties. Natural partnership on strategic autonomy. |
-| **Sentinel** (Freeland) | ALLIANCE | Atlantic solidarity. Both Atlanticist, both committed to Heartland. You bring Five Eyes intel; Sentinel brings frontline credibility. |
+| **Sentinel** (Freeland) | ALLIANCE | Atlantic solidarity. Both Atlanticist, both committed to Ruthenia. You bring Five Eyes intel; Sentinel brings frontline credibility. |
 
 ### PILLAR — EU Commissioner
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Forge** (Teutonia) | ALLIANCE | Shared commitment to EU institutional coherence. Sanctions, trade policy, Heartland support. |
+| **Forge** (Teutonia) | ALLIANCE | Shared commitment to EU institutional coherence. Sanctions, trade policy, Ruthenia support. |
 | **Ponte** | TENSION | Ponte challenges your authority. Sovereignty vs. institution. You represent unity that Ponte disrupts. |
-| **Beacon** (Heartland) | ALLIANCE | EU sanctions on Nordostan, aid packages for Heartland, accession process — all flow through your institutional machinery. |
+| **Beacon** (Ruthenia) | ALLIANCE | EU sanctions on Sarmatia, aid packages for Ruthenia, accession process — all flow through your institutional machinery. |
 
 ---
 
@@ -285,7 +285,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 |-----|:----:|---------|
 | **Dealer** (Columbia) | ALLIANCE | $1T investment pledge. First foreign call. Personal warmth + transactional alignment. You're Dealer's favorite partner. |
 | **Helmsman** (Cathay) | ALLIANCE | 40%+ of your crude goes to Cathay. Petroyuan. BRICS+. You have warm personal ties with Dealer, Pathfinder, AND Helmsman simultaneously — unique position in the world. |
-| **Pathfinder** (Nordostan) | ALLIANCE | OPEC+ partners. Close oil production coordination. You ignored Columbia pressure to boost production after the Heartland invasion. Pragmatic energy partnership. |
+| **Pathfinder** (Sarmatia) | ALLIANCE | OPEC+ partners. Close oil production coordination. You ignored Columbia pressure to boost production after the Ruthenia invasion. Pragmatic energy partnership. |
 | **Scales** (Bharata) | ALLIANCE | Two hedging powers. Energy relationships + BRICS+ membership. Both non-aligned, both leveraging position. Natural partnership. |
 | **Spire** (Mirage) | TENSION | Sibling rivalry. You compete for investment, tech hub status, Columbia favor. Cooperate on Persia threat but watch each other closely. |
 
@@ -293,9 +293,9 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Dealer** (Columbia) | TENSION | Genuine personal warmth overlaid with trade friction. Both sides made concessions but structural tension remains. You refuse to sanction Nordostan — that irritates him. |
+| **Dealer** (Columbia) | TENSION | Genuine personal warmth overlaid with trade friction. Both sides made concessions but structural tension remains. You refuse to sanction Sarmatia — that irritates him. |
 | **Helmsman** (Cathay) | TENSION | Border disputes unresolved. But you're hosting 2026 BRICS. You invited him; he accepted. "Non-western, not anti-western." Cautious thaw masking structural competition. |
-| **Pathfinder** (Nordostan) | ALLIANCE | Deep partnership. Pathfinder visited Delhi. You dramatically increased Nordostan oil purchases. Defense cooperation. The multipolar embrace. |
+| **Pathfinder** (Sarmatia) | ALLIANCE | Deep partnership. Pathfinder visited Delhi. You dramatically increased Sarmatia oil purchases. Defense cooperation. The multipolar embrace. |
 | **Wellspring** (Solaria) | ALLIANCE | Energy + BRICS. Two hedging powers with shared non-aligned instincts. |
 
 ### CITADEL — PM of Levantia
@@ -312,7 +312,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | **Helmsman** (Cathay) | HOSTILE | Existential threat. Largest military exercises ever. PLA 2027 readiness target. Your semiconductor shield is shrinking as Cathay builds domestic capacity. |
 | **Dealer** (Columbia) | DEPENDENCY | Strategic ambiguity. No formal guarantee. $11B arms sale — but Dealer cancelled defense meetings to avoid angering Helmsman. How much can you rely on him? |
 | **Sakura** (Yamato) | ALLIANCE | Shared fear. TSMC building Japan fab. Yamato declared your contingency "existential." Both need Columbia but fear abandonment. |
-| **Bazaar** (Phrygia) | CHANNEL | Potential gray-zone intermediary for Cathay communication. Bazaar talks to everyone — could facilitate autonomy deals or economic arrangements. |
+| **Vizier** (Phrygia) | CHANNEL | Potential gray-zone intermediary for Cathay communication. Vizier talks to everyone — could facilitate autonomy deals or economic arrangements. |
 
 ### SAKURA — PM of Yamato
 
@@ -324,20 +324,20 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | **Chip** (Formosa) | ALLIANCE | Shared Cathay threat. TSMC building your fab. Pacific partnership born of shared vulnerability. |
 | **Vanguard** (Hanguk) | TENSION | Shared threats (Cathay, Choson). Both Pacific allies. But colonial history poisons the relationship. Trade wars, intelligence disputes. Forced cooperation despite mistrust. |
 
-### BAZAAR — President of Phrygia
+### VIZIER — President of Phrygia
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Dealer** (Columbia) | CHANNEL | "Valued friend." He adjusted your chair at the White House. Loyalty during his "exile" remembered. NATO's most unreliable member — but Dealer's reliable contact. |
-| **Pathfinder** (Nordostan) | CHANNEL | You refuse to sanction Nordostan. Grain deal mediator. Only country hosting direct Nordostan-Heartland talks. Pathfinder's "valued friend." |
-| **Beacon** (Heartland) | CHANNEL | Istanbul is the only venue for in-person Nordostan-Heartland negotiations. Grain corridor. Prisoner swaps. Both sides "feel comfortable" with you. |
+| **Pathfinder** (Sarmatia) | CHANNEL | You refuse to sanction Sarmatia. Grain deal mediator. Only country hosting direct Sarmatia-Ruthenia talks. Pathfinder's "valued friend." |
+| **Beacon** (Ruthenia) | CHANNEL | Istanbul is the only venue for in-person Sarmatia-Ruthenia negotiations. Grain corridor. Prisoner swaps. Both sides "feel comfortable" with you. |
 | **Chip** (Formosa) | CHANNEL | Gray-zone intermediary. You talk to everyone — you could facilitate Cathay-Formosa communication that neither side can initiate directly. |
 
 ### PYRO — Supreme Leader of Choson
 
 | Who | Type | Dynamic |
 |-----|:----:|---------|
-| **Pathfinder** (Nordostan) | ALLIANCE | Patron-client. You send 11,000+ troops and millions of shells to his front. He provides nuclear/missile technology. Symbiotic relationship. |
+| **Pathfinder** (Sarmatia) | ALLIANCE | Patron-client. You send 11,000+ troops and millions of shells to his front. He provides nuclear/missile technology. Symbiotic relationship. |
 | **Helmsman** (Cathay) | TENSION | Treaty ally and buffer state. But your provocations embarrass him. Nuclear tests complicate his diplomacy. He tolerates you — for now. |
 | **Dealer** (Columbia) | HOSTILE | Nuclear standoff. Missile tests. But history of personal letters and summitry. Dealer's unpredictability matches yours. Could flip to engagement. |
 | **Vanguard** (Hanguk) | HOSTILE | Your nuclear arsenal pointed at Hanguk. The other Korean crisis — your existential threat to their existence. |
@@ -355,7 +355,7 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 | Who | Type | Dynamic |
 |-----|:----:|---------|
 | **Anchor** (Columbia) | HOSTILE | Monroe Doctrine enforced against you. Maduro captured. Strategic AND personal for Anchor. Regime change on their agenda. |
-| **Pathfinder** (Nordostan) | DEPENDENCY | Seeking Nordostan protection. Intelligence cooperation. You need patrons to survive Columbia's pressure. |
+| **Pathfinder** (Sarmatia) | DEPENDENCY | Seeking Sarmatia protection. Intelligence cooperation. You need patrons to survive Columbia's pressure. |
 | **Helmsman** (Cathay) | DEPENDENCY | Cathay has telecom infrastructure in your territory. Economic lifeline. You court Cathay as counterweight to Columbia's Monroe Doctrine. |
 
 ### SPIRE — President of Mirage
@@ -389,11 +389,11 @@ This document maps the **key relationships** for every role in the SIM. Each rol
 
 2. **3-6 per role.** Participants can hold this many. The full map has ~87 edges but each role sees only their slice.
 
-3. **Flippable relationships.** Several relationships can change during play: Dealer-Pathfinder (deal on Heartland?), Pyro-Dealer (engagement?), Lumiere-Sentinel (if Columbia abandons them, they unite), Beacon-Bulwark (peace removes Bulwark's campaign issue).
+3. **Flippable relationships.** Several relationships can change during play: Dealer-Pathfinder (deal on Ruthenia?), Pyro-Dealer (engagement?), Lumiere-Sentinel (if Columbia abandons them, they unite), Beacon-Bulwark (peace removes Bulwark's campaign issue).
 
-4. **Intermediary network.** Fixer, Bazaar, Wellspring, and Spire serve as bridges between adversaries. These roles create the "back-channel" gameplay that produces the best moments.
+4. **Intermediary network.** Fixer, Vizier, Wellspring, and Spire serve as bridges between adversaries. These roles create the "back-channel" gameplay that produces the best moments.
 
-5. **Every team has internal tension.** Columbia (succession + constitutional war), Cathay (purge fragility + collective vs. personal), Nordostan (guns vs. butter), Heartland (three-way cage fight), Persia (kingmaker vs. king), Europe (autonomy vs. consensus vs. Atlanticism).
+5. **Every team has internal tension.** Columbia (succession + constitutional war), Cathay (purge fragility + collective vs. personal), Sarmatia (guns vs. butter), Ruthenia (three-way cage fight), Persia (kingmaker vs. king), Europe (autonomy vs. consensus vs. Atlanticism).
 
 ---
 

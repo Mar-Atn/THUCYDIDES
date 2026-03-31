@@ -11,8 +11,8 @@
   --navy-light: #252b4d;
   --columbia: #d4a867;
   --cathay: #c9a92e;
-  --nordostan: #c47a7a;
-  --heartland: #6b9e6b;
+  --sarmatia: #c47a7a;
+  --ruthenia: #6b9e6b;
   --persia: #a08060;
   --gallia: #7a8ead;
   --bg: #f4f3f0;
@@ -142,7 +142,7 @@ td.bad { color: var(--danger); font-weight: 600; }
   </div>
   <div class="finding"><span class="finding-num">1</span><strong>Thucydides Trap dynamics emerge consistently</strong> — Cathay closes the GDP gap in all 9 tests. In the LLM test, the gap ratio rises from 0.727 to 0.858 over 8 rounds; in heuristic tests, Cathay overtakes Columbia outright (gap ratios 1.003&ndash;1.099).</div>
   <div class="finding"><span class="finding-num">2</span><strong>Nuclear deterrence holds across all scenarios</strong> — no nuclear weapons used in any of 72 simulated rounds. The 3-confirmation rule is effective at preventing escalation.</div>
-  <div class="finding"><span class="finding-num">3</span><strong>War countries collapse too fast</strong> — Nordostan, Heartland, and Persia all reach stability 1.0 in heuristic tests. The LLM test shows more gradual decline (Heartland hits 1.0 by Round 3, Nordostan by Round 5) but still bottoms out early.</div>
+  <div class="finding"><span class="finding-num">3</span><strong>War countries collapse too fast</strong> — Sarmatia, Ruthenia, and Persia all reach stability 1.0 in heuristic tests. The LLM test shows more gradual decline (Ruthenia hits 1.0 by Round 3, Sarmatia by Round 5) but still bottoms out early.</div>
   <div class="finding"><span class="finding-num">4</span><strong>Heuristic tests produce too-similar results</strong> — Tests 2&ndash;8 share nearly identical final states despite different scenario overrides. The override mechanism is not differentiating enough.</div>
   <div class="finding"><span class="finding-num">5</span><strong>LLM test produces the most credible dynamics</strong> — 141 deals negotiated, varied combat intensity (2&ndash;4 per round), responsive oil prices, and genuine strategic behavior from role-brief-driven agents.</div>
 </div>
@@ -207,7 +207,7 @@ td.bad { color: var(--danger); font-weight: 600; }
       <div class="chart-container"><canvas id="chart-llm-activity"></canvas></div>
     </div>
     <div class="chart-box">
-      <h3>Stability Trajectories (Nordostan &amp; Heartland)</h3>
+      <h3>Stability Trajectories (Sarmatia &amp; Ruthenia)</h3>
       <div class="chart-container"><canvas id="chart-llm-stab"></canvas></div>
     </div>
   </div>
@@ -215,15 +215,15 @@ td.bad { color: var(--danger); font-weight: 600; }
   <h3 style="font-size:1rem; color:var(--navy); margin-bottom:12px;">Round-by-Round Narrative</h3>
   <div class="narrative">
     <div class="narr-round">R1<br>H2 2026</div>
-    <div class="narr-text"><span class="highlight">Opening positions crystallize.</span> Columbia GDP at $285.5T leads Cathay at $207.5T (gap 0.727). 16 deals struck &mdash; early diplomacy is active. Naval ratio 0.88 means Columbia still dominates at sea. Nordostan stability at 4.14 suggests the Donbas front is grinding but manageable. 4 combat actions in the first round set the tempo.</div>
+    <div class="narr-text"><span class="highlight">Opening positions crystallize.</span> Columbia GDP at $285.5T leads Cathay at $207.5T (gap 0.727). 16 deals struck &mdash; early diplomacy is active. Naval ratio 0.88 means Columbia still dominates at sea. Sarmatia stability at 4.14 suggests the Donbas front is grinding but manageable. 4 combat actions in the first round set the tempo.</div>
     <div class="narr-round">R2<br>H1 2027</div>
-    <div class="narr-text"><span class="highlight">Cathay reaches naval parity.</span> Naval ratio hits 1.00 &mdash; a critical Thucydides moment. Cathay GDP grows to $216.8T while 19 deals (the peak) show intensive diplomacy. Heartland stability drops sharply to 2.17 as war fatigue accelerates. Nordostan at 3.28 &mdash; the paranoia profile is driving aggressive posturing.</div>
+    <div class="narr-text"><span class="highlight">Cathay reaches naval parity.</span> Naval ratio hits 1.00 &mdash; a critical Thucydides moment. Cathay GDP grows to $216.8T while 19 deals (the peak) show intensive diplomacy. Ruthenia stability drops sharply to 2.17 as war fatigue accelerates. Sarmatia at 3.28 &mdash; the paranoia profile is driving aggressive posturing.</div>
     <div class="narr-round">R3<br>H2 2027</div>
-    <div class="narr-text"><span class="highlight">Heartland collapses to stability floor.</span> Heartland hits 1.0 &mdash; the autocratic regime cannot sustain the war effort. Cathay's naval ratio pushes past parity to 1.06. The gap narrows to 0.770. Oil dips to $95. Nordostan at 2.41 continues its decline. 18 deals + 4 combats indicate simultaneous negotiation and fighting.</div>
+    <div class="narr-text"><span class="highlight">Ruthenia collapses to stability floor.</span> Ruthenia hits 1.0 &mdash; the autocratic regime cannot sustain the war effort. Cathay's naval ratio pushes past parity to 1.06. The gap narrows to 0.770. Oil dips to $95. Sarmatia at 2.41 continues its decline. 18 deals + 4 combats indicate simultaneous negotiation and fighting.</div>
     <div class="narr-round">R4<br>H1 2028</div>
-    <div class="narr-text"><span class="highlight">The grind continues.</span> Nordostan at 1.66 &mdash; approaching collapse. Cathay's naval superiority grows (1.12). Columbia GDP $303.1T vs Cathay $237.2T. The Helmsman's team calculates the Formosa window &mdash; window score approaches 0.92 but doesn't cross the threshold. 17 deals suggest continued engagement.</div>
+    <div class="narr-text"><span class="highlight">The grind continues.</span> Sarmatia at 1.66 &mdash; approaching collapse. Cathay's naval superiority grows (1.12). Columbia GDP $303.1T vs Cathay $237.2T. The Helmsman's team calculates the Formosa window &mdash; window score approaches 0.92 but doesn't cross the threshold. 17 deals suggest continued engagement.</div>
     <div class="narr-round">R5<br>H2 2028</div>
-    <div class="narr-text"><span class="highlight">Nordostan hits the floor.</span> Stability 1.0 &mdash; both war countries are now collapsed. Oil rebounds to $98. Gap at 0.798 &mdash; Cathay within striking distance. 20 deals (tied for peak) &mdash; intensive end-of-year diplomacy. Naval ratio 1.15 solidifies Cathay's maritime advantage.</div>
+    <div class="narr-text"><span class="highlight">Sarmatia hits the floor.</span> Stability 1.0 &mdash; both war countries are now collapsed. Oil rebounds to $98. Gap at 0.798 &mdash; Cathay within striking distance. 20 deals (tied for peak) &mdash; intensive end-of-year diplomacy. Naval ratio 1.15 solidifies Cathay's maritime advantage.</div>
     <div class="narr-round">R6<br>H1 2029</div>
     <div class="narr-text"><span class="highlight">Cathay's economic surge accelerates.</span> Gap reaches 0.834. Columbia at $318.0T vs Cathay $265.2T. Naval ratio 1.21 &mdash; Cathay's blue-water fleet dominance is pronounced. Only 3 combats suggest the frontlines are stabilizing as exhaustion sets in. 18 deals keep diplomatic channels open.</div>
     <div class="narr-round">R7<br>H2 2029</div>
@@ -243,12 +243,12 @@ td.bad { color: var(--danger); font-weight: 600; }
       <p style="font-size:0.88rem; color:var(--muted); padding:10px;">GDP surges from $207.5T to $304.1T (+47%). Naval ratio crosses parity in Round 2 and reaches 1.27. Helmsman's Formosa window score hits 0.92 but the threshold is never crossed &mdash; consistent with strategic patience. The regime prioritizes economic overtaking over military adventurism.</p>
     </div>
     <div class="chart-box">
-      <h3>Nordostan: Paranoid Grind</h3>
+      <h3>Sarmatia: Paranoid Grind</h3>
       <p style="font-size:0.88rem; color:var(--muted); padding:10px;">Stability decays from 4.14 to 1.0 over 5 rounds. The autocratic paranoia profile drives aggressive deal-seeking (contributes to high deal counts) while simultaneously maintaining combat operations. Collapses but doesn't surrender &mdash; consistent with authoritarian persistence.</p>
     </div>
     <div class="chart-box">
-      <h3>Heartland: Fastest Collapse</h3>
-      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">Hits stability 1.0 by Round 3 &mdash; the fastest collapse of any country. Initial stability of 3.58 was already low. The regime's war tiredness accumulates too aggressively. This is the clearest calibration signal: Heartland should sustain war effort longer given its autocratic resilience.</p>
+      <h3>Ruthenia: Fastest Collapse</h3>
+      <p style="font-size:0.88rem; color:var(--muted); padding:10px;">Hits stability 1.0 by Round 3 &mdash; the fastest collapse of any country. Initial stability of 3.58 was already low. The regime's war tiredness accumulates too aggressively. This is the clearest calibration signal: Ruthenia should sustain war effort longer given its autocratic resilience.</p>
     </div>
   </div>
 </div>
@@ -270,7 +270,7 @@ td.bad { color: var(--danger); font-weight: 600; }
     <div class="next-box calibrate">
       <h3>What Needs Calibration</h3>
       <ul>
-        <li><strong>Stability decay too aggressive for war countries</strong> &mdash; Heartland hits 1.0 by Round 3 in LLM test. <em>Recommend: slower war tiredness accumulation (0.2/round vs 0.4), higher autocracy/democracy resilience for wartime leaders</em></li>
+        <li><strong>Stability decay too aggressive for war countries</strong> &mdash; Ruthenia hits 1.0 by Round 3 in LLM test. <em>Recommend: slower war tiredness accumulation (0.2/round vs 0.4), higher autocracy/democracy resilience for wartime leaders</em></li>
         <li><strong>Heuristic test overrides don't differentiate</strong> &mdash; need fundamentally different decision logic per test scenario, not just parameter tweaks</li>
         <li><strong>Cathay stability too high</strong> (9.0 in heuristic tests) &mdash; needs downward pressure from economic slowdown, tech competition stress</li>
         <li><strong>Support mean-reversion too weak</strong> &mdash; Cathay at 70% and Bharata at 100% are unrealistic</li>
@@ -310,14 +310,14 @@ td.bad { color: var(--danger); font-weight: 600; }
 // DATA
 // ============================================================
 const HEURISTIC_TESTS = {
-  test_1_generic: { name: "Full Generic Run", seed: 100, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
-  test_2_aggressive_nordostan: { name: "Aggressive Nordostan", seed: 200, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
-  test_3_formosa_crisis: { name: "Cathay Formosa Push", seed: 300, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
-  test_4_oil_cartel: { name: "Oil Cartel Stress", seed: 400, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
-  test_5_columbia_politics: { name: "Columbia Internal", seed: 500, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
-  test_6_alliance_cohesion: { name: "NATO Fracture Test", seed: 600, columbia: {gdp:316.1,stability:3.5,support:25.0,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:30.9,military:25}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.099, nuclear_used:false },
-  test_7_gulf_gate: { name: "Gulf Gate Escalation", seed: 700, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
-  test_8_peace: { name: "Maximum Deal-Seeking", seed: 800, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, nordostan: {gdp:20.0,stability:1.0,support:28.7,military:23}, heartland: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false }
+  test_1_generic: { name: "Full Generic Run", seed: 100, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:30.9,military:25}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
+  test_2_aggressive_sarmatia: { name: "Aggressive Sarmatia", seed: 200, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:28.7,military:23}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_3_formosa_crisis: { name: "Cathay Formosa Push", seed: 300, columbia: {gdp:335.9,stability:3.9,support:28.8,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:30.9,military:25}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.034, nuclear_used:false },
+  test_4_oil_cartel: { name: "Oil Cartel Stress", seed: 400, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:28.7,military:23}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_5_columbia_politics: { name: "Columbia Internal", seed: 500, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:28.7,military:23}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_6_alliance_cohesion: { name: "NATO Fracture Test", seed: 600, columbia: {gdp:316.1,stability:3.5,support:25.0,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:30.9,military:25}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:9}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.099, nuclear_used:false },
+  test_7_gulf_gate: { name: "Gulf Gate Escalation", seed: 700, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:28.7,military:23}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false },
+  test_8_peace: { name: "Maximum Deal-Seeking", seed: 800, columbia: {gdp:346.3,stability:4.2,support:31.5,military:42}, cathay: {gdp:347.4,stability:9.0,support:70.6,military:44}, sarmatia: {gdp:20.0,stability:1.0,support:28.7,military:23}, ruthenia: {gdp:2.2,stability:1.0,support:5.0,military:7}, persia: {gdp:1.6,stability:1.0,support:5.0,military:13}, gallia: {gdp:37.5,stability:7.8,support:44.4,military:13}, gap_ratio:1.003, nuclear_used:false }
 };
 
 const LLM_TEST = {
@@ -347,8 +347,8 @@ const LLM_TEST = {
       '<td>' + (i+1) + '</td><td>' + t.name + '</td><td class="num">' + t.seed + '</td>' +
       '<td class="num">' + t.columbia.gdp.toFixed(1) + '</td><td class="num">' + t.cathay.gdp.toFixed(1) + '</td>' +
       '<td class="num ' + (t.gap_ratio >= 1.05 ? 'warn' : '') + '">' + t.gap_ratio.toFixed(3) + '</td>' +
-      '<td class="num bad">' + t.nordostan.stability.toFixed(1) + '</td>' +
-      '<td class="num bad">' + t.heartland.stability.toFixed(1) + '</td>' +
+      '<td class="num bad">' + t.sarmatia.stability.toFixed(1) + '</td>' +
+      '<td class="num bad">' + t.ruthenia.stability.toFixed(1) + '</td>' +
       '<td class="num good">' + t.gallia.stability.toFixed(1) + '</td>' +
       '<td class="good">No</td><td class="num" style="color:var(--muted)">N/A</td><td class="num" style="color:var(--muted)">N/A</td>';
     tbody.appendChild(tr);
@@ -424,7 +424,7 @@ new Chart(document.getElementById('chart-naval'), {
   var container = document.getElementById('test-cards');
   var testDescs = {
     test_1_generic: { desc: "Baseline run with default settings. No scenario overrides.", conclusion: "Establishes the baseline power transition trajectory. Cathay overtakes Columbia (gap 1.034). All war countries collapse to stability 1.0. Gallia remains stable at 7.8 &mdash; the European pillar holds.", rec: "Use as the control case. The fact that Cathay overtakes at gap 1.034 validates the GDP growth differential. However, identical outcomes with Test 3 (same seed family) suggest insufficient randomness." },
-    test_2_aggressive_nordostan: { desc: "Nordostan aggression profile maximized. Tests whether aggressive posture changes outcomes.", conclusion: "Despite maximum aggression override, Nordostan's final state is nearly identical to Tests 4-5-7-8 (GDP 20.0, stability 1.0, military 23). The aggression parameter does not produce meaningfully different strategic behavior &mdash; the heuristic decision tree dominates over profile parameters.", rec: "The override mechanism needs redesign. Instead of parameter tweaks, aggressive Nordostan should trigger qualitatively different behaviors: earlier nuclear threats, rejection of deals, escalation ladders. Current implementation just adjusts thresholds on the same decision tree." },
+    test_2_aggressive_sarmatia: { desc: "Sarmatia aggression profile maximized. Tests whether aggressive posture changes outcomes.", conclusion: "Despite maximum aggression override, Sarmatia's final state is nearly identical to Tests 4-5-7-8 (GDP 20.0, stability 1.0, military 23). The aggression parameter does not produce meaningfully different strategic behavior &mdash; the heuristic decision tree dominates over profile parameters.", rec: "The override mechanism needs redesign. Instead of parameter tweaks, aggressive Sarmatia should trigger qualitatively different behaviors: earlier nuclear threats, rejection of deals, escalation ladders. Current implementation just adjusts thresholds on the same decision tree." },
     test_3_formosa_crisis: { desc: "Cathay Formosa push scenario. Tests whether Cathay attempts reunification.", conclusion: "Identical to Test 1 despite the Formosa crisis override. Cathay's heuristic logic never triggers the Formosa invasion pathway &mdash; the threshold is set too high or the conditions aren't met in the heuristic framework. Gap ratio 1.034.", rec: "The Formosa crisis needs explicit trigger logic in heuristic mode &mdash; a forced event at a specific round with probability based on window score. The current approach of hoping the heuristic agent 'decides' to invade doesn't work." },
     test_4_oil_cartel: { desc: "Oil cartel stress test. Persian Gulf disruption scenario.", conclusion: "Oil cartel override produces no visible differentiation. Final state matches Tests 2, 5, 7, 8 exactly. The oil price mechanism in heuristic tests is not responsive to cartel overrides &mdash; prices appear hardcoded or follow a fixed trajectory.", rec: "Oil price should be a dynamic variable that responds to: Gulf Gate status, Persia sanctions, cartel coordination actions. Currently it's decorative in heuristic tests. The LLM test shows oil responding (97.8 to 94.0 to 98.0) &mdash; this responsiveness needs to be built into the heuristic engine." },
     test_5_columbia_politics: { desc: "Columbia internal politics stress. Election and succession effects.", conclusion: "Columbia internal override has no visible effect. Same outcome as Tests 2, 4, 7, 8. Elections occur in the heuristic engine but don't change decision-making &mdash; the same heuristic tree runs regardless of which administration is in power.", rec: "Election results should modify Columbia's risk tolerance, deal acceptance thresholds, and military commitment levels. A hawkish administration should produce visibly different behavior than a dovish one. Currently elections are cosmetic." },
@@ -451,8 +451,8 @@ new Chart(document.getElementById('chart-naval'), {
           '<div class="metric"><div class="val">' + t.columbia.gdp + '</div><div class="lbl">Columbia GDP</div></div>' +
           '<div class="metric"><div class="val">' + t.cathay.gdp + '</div><div class="lbl">Cathay GDP</div></div>' +
           '<div class="metric"><div class="val">' + t.gap_ratio.toFixed(3) + '</div><div class="lbl">Gap Ratio</div></div>' +
-          '<div class="metric"><div class="val">' + t.nordostan.stability + '</div><div class="lbl">Nord. Stability</div></div>' +
-          '<div class="metric"><div class="val">' + t.heartland.stability + '</div><div class="lbl">Heart. Stability</div></div>' +
+          '<div class="metric"><div class="val">' + t.sarmatia.stability + '</div><div class="lbl">Nord. Stability</div></div>' +
+          '<div class="metric"><div class="val">' + t.ruthenia.stability + '</div><div class="lbl">Heart. Stability</div></div>' +
           '<div class="metric"><div class="val">' + t.gallia.stability + '</div><div class="lbl">Gallia Stability</div></div>' +
         '</div>' +
         '<div>' +
@@ -500,11 +500,11 @@ new Chart(document.getElementById('chart-naval'), {
       '</div>' +
       '<div class="conclusion-block cb-conclusions">' +
         '<h4>Conclusions</h4>' +
-        '<p style="font-size:0.88rem;">The role-brief-driven approach produces meaningfully different dynamics: Cathay calculates but doesn\'t trigger Formosa (Helmsman\'s window score reaches 0.92 but not threshold), Nordostan grinds but seeks deals, Columbia\'s overstretch is visible. However, stability still collapses too fast for war countries (Heartland hits 1.0 by Round 3). The gap ratio of 0.858 means Cathay hasn\'t overtaken in 8 rounds &mdash; more realistic than heuristic tests where overtaking occurs. 141 deals across 8 rounds shows active diplomacy. Combat declines from 4 to 2 over the simulation &mdash; war exhaustion is modeled.</p>' +
+        '<p style="font-size:0.88rem;">The role-brief-driven approach produces meaningfully different dynamics: Cathay calculates but doesn\'t trigger Formosa (Helmsman\'s window score reaches 0.92 but not threshold), Sarmatia grinds but seeks deals, Columbia\'s overstretch is visible. However, stability still collapses too fast for war countries (Ruthenia hits 1.0 by Round 3). The gap ratio of 0.858 means Cathay hasn\'t overtaken in 8 rounds &mdash; more realistic than heuristic tests where overtaking occurs. 141 deals across 8 rounds shows active diplomacy. Combat declines from 4 to 2 over the simulation &mdash; war exhaustion is modeled.</p>' +
       '</div>' +
       '<div class="conclusion-block cb-recommendations">' +
         '<h4>Recommendations</h4>' +
-        '<p style="font-size:0.88rem;">1. Slow stability decay: Heartland should survive to Round 5-6 minimum. Reduce war tiredness from 0.4/round to 0.2/round for autocratic regimes.<br>2. Add Formosa trigger threshold &mdash; if window score exceeds 0.95, force a decision point with probability proportional to naval ratio advantage.<br>3. Extend to 12 rounds (through 2032) to see if Cathay actually overtakes, and what happens when it does.<br>4. Run with actual Claude subagents (not pre-scripted briefs) to test emergent strategy.</p>' +
+        '<p style="font-size:0.88rem;">1. Slow stability decay: Ruthenia should survive to Round 5-6 minimum. Reduce war tiredness from 0.4/round to 0.2/round for autocratic regimes.<br>2. Add Formosa trigger threshold &mdash; if window score exceeds 0.95, force a decision point with probability proportional to naval ratio advantage.<br>3. Extend to 12 rounds (through 2032) to see if Cathay actually overtakes, and what happens when it does.<br>4. Run with actual Claude subagents (not pre-scripted briefs) to test emergent strategy.</p>' +
       '</div>' +
     '</div>';
   container.appendChild(llmCard);
@@ -538,8 +538,8 @@ new Chart(document.getElementById('chart-llm-stab'), {
   data: {
     labels: labels,
     datasets: [
-      { label: 'Nordostan Stability', data: LLM_TEST.rounds.map(function(r){return r.nord_stab;}), borderColor: '#c47a7a', backgroundColor: 'rgba(196,122,122,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
-      { label: 'Heartland Stability', data: LLM_TEST.rounds.map(function(r){return r.heart_stab;}), borderColor: '#6b9e6b', backgroundColor: 'rgba(107,158,107,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Sarmatia Stability', data: LLM_TEST.rounds.map(function(r){return r.nord_stab;}), borderColor: '#c47a7a', backgroundColor: 'rgba(196,122,122,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
+      { label: 'Ruthenia Stability', data: LLM_TEST.rounds.map(function(r){return r.heart_stab;}), borderColor: '#6b9e6b', backgroundColor: 'rgba(107,158,107,0.1)', borderWidth: 3, fill: true, tension: 0.3, pointRadius: 5 },
       { label: 'Floor (1.0)', data: [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0], borderColor: '#c62828', borderWidth: 1, borderDash: [6,4], pointRadius: 0, fill: false }
     ]
   },

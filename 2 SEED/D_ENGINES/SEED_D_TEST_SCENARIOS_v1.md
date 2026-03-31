@@ -12,8 +12,8 @@
 |---------|-----|--------|-----|----------|-----------|-----------|-------|--------|--------|------|-------------|------|
 | Columbia | 280 | 1.8% | 0.24 | 50 | 3.5% | 7.0 | 11 | 22 | democracy | yes | 0.65 | 5.0 |
 | Cathay | 190 | 4.0% | 0.20 | 45 | 0.5% | 8.0 | 7 | 25 | autocracy | no | 0.25 | 2.0 |
-| Nordostan | 20 | 1.0% | 0.20 | 6 | 5.0% | 5.0 | 2 | 18 | autocracy | yes | 0.15 | 0.5 |
-| Heartland | 2.2 | 2.5% | 0.25 | 1 | 7.5% | 5.0 | 0 | 10 | democracy | no | 0.10 | 0.3 |
+| Sarmatia | 20 | 1.0% | 0.20 | 6 | 5.0% | 5.0 | 2 | 18 | autocracy | yes | 0.15 | 0.5 |
+| Ruthenia | 2.2 | 2.5% | 0.25 | 1 | 7.5% | 5.0 | 0 | 10 | democracy | no | 0.10 | 0.3 |
 | Persia | 5.0 | -3.0% | 0.18 | 1 | 50.0% | 4.0 | 0 | 8 | hybrid | yes | 0.15 | 0.0 |
 | Ponte | 22 | 0.8% | 0.40 | 4 | 2.5% | 6.0 | 0 | 4 | democracy | no | 0.30 | 8.0 |
 | Teutonia | 45 | 1.2% | 0.38 | 12 | 2.5% | 7.0 | 0 | 6 | democracy | no | 0.45 | 2.0 |
@@ -34,18 +34,18 @@ D1 (Oil Price Shock -> GDP Contraction), D6 (Oil Producer Windfall), D8 (OPEC Pr
 
 ### Setup (Prescribed Actions)
 
-**Active wars:** Nordostan-Heartland (pre-existing), Columbia-Persia (starting R0).
+**Active wars:** Sarmatia-Ruthenia (pre-existing), Columbia-Persia (starting R0).
 **Gulf Gate:** Blocked from R1 onward (Persia ground blockade, already initialized from deployments).
-**OPEC:** All members (Nordostan, Persia, Solaria, Mirage) set to "low" production R1-R4. Solaria defects to "high" R5. All "high" R6-R8.
+**OPEC:** All members (Sarmatia, Persia, Solaria, Mirage) set to "low" production R1-R4. Solaria defects to "high" R5. All "high" R6-R8.
 **No other actions.** No sanctions, no tariffs, no tech investment, no military production orders.
 
 **Round-by-round actions:**
-- R1: `blockade_changes: {gulf_gate_ground: {controller: persia}}` (confirm active), `opec_production: {nordostan: low, persia: low, solaria: low, mirage: low}`
+- R1: `blockade_changes: {gulf_gate_ground: {controller: persia}}` (confirm active), `opec_production: {sarmatia: low, persia: low, solaria: low, mirage: low}`
 - R2: Same OPEC as R1. No changes.
 - R3: Same OPEC as R1. No changes.
 - R4: Same OPEC as R1. No changes.
-- R5: `opec_production: {nordostan: low, persia: low, solaria: high, mirage: low}`
-- R6: `opec_production: {nordostan: high, persia: high, solaria: high, mirage: high}`
+- R5: `opec_production: {sarmatia: low, persia: low, solaria: high, mirage: low}`
+- R6: `opec_production: {sarmatia: high, persia: high, solaria: high, mirage: high}`
 - R7: Same as R6.
 - R8: Same as R6.
 
@@ -58,8 +58,8 @@ D1 (Oil Price Shock -> GDP Contraction), D6 (Oil Producer Windfall), D8 (OPEC Pr
 | Oil price ($) | 160-185 | 155-190 | 150-195 | 145-200 | 140-175 | 95-125 | 85-115 | 80-110 |
 | Columbia GDP | 272-278 | 266-276 | 260-274 | 254-272 | 250-270 | 252-272 | 254-274 | 256-276 |
 | Cathay GDP | 190-198 | 190-198 | 188-198 | 186-198 | 186-198 | 190-200 | 194-206 | 198-210 |
-| Nordostan GDP | 20-22 | 20-23 | 20-24 | 20-25 | 20-24 | 19-22 | 18-21 | 18-21 |
-| Nordostan oil_revenue | 0.8-1.4 | 0.8-1.5 | 0.8-1.5 | 0.8-1.5 | 0.7-1.3 | 0.4-0.8 | 0.3-0.7 | 0.3-0.7 |
+| Sarmatia GDP | 20-22 | 20-23 | 20-24 | 20-25 | 20-24 | 19-22 | 18-21 | 18-21 |
+| Sarmatia oil_revenue | 0.8-1.4 | 0.8-1.5 | 0.8-1.5 | 0.8-1.5 | 0.7-1.3 | 0.4-0.8 | 0.3-0.7 | 0.3-0.7 |
 | Teutonia GDP | 43-45 | 42-45 | 41-45 | 40-44 | 40-44 | 41-45 | 42-46 | 43-47 |
 | Columbia economic_state | NORMAL | NORMAL | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL | NORMAL |
 | Solaria GDP (oil prod) | 11-12 | 11-13 | 11-14 | 11-14 | 11-13 | 10.5-12 | 10.5-12 | 10.5-12 |
@@ -69,8 +69,8 @@ D1 (Oil Price Shock -> GDP Contraction), D6 (Oil Producer Windfall), D8 (OPEC Pr
   - Oil spikes above $140 in R1 with Gulf Gate blocked + OPEC restriction
   - Oil drops by $30+ between R5 and R7 after OPEC defection to "high"
   - Oil importers (Columbia, Cathay, Teutonia) show negative oil_shock contribution to GDP
-  - Oil producers (Nordostan, Solaria) show positive oil_revenue in R1-R4
-  - Nordostan GDP does NOT decline despite being at war (oil windfall offsets -- D6 paradox)
+  - Oil producers (Sarmatia, Solaria) show positive oil_revenue in R1-R4
+  - Sarmatia GDP does NOT decline despite being at war (oil windfall offsets -- D6 paradox)
   - All variables within corridor
 - **CALIBRATE** if 1-2 variables out of range by <20%
 - **FAIL** if:
@@ -88,34 +88,34 @@ D2 (Sanctions -> GDP Erosion), D3 (Money Printing -> Inflation), D4 (Debt Accumu
 
 ### Setup (Prescribed Actions)
 
-**Active wars:** Nordostan-Heartland (pre-existing).
+**Active wars:** Sarmatia-Ruthenia (pre-existing).
 **Gulf Gate:** Open (Persia ceasefire assumed, or not relevant -- disable gulf_gate blockade).
-**Sanctions:** Columbia, Gallia, Teutonia, Albion, Freeland all impose L3 sanctions on Nordostan starting R1. Maintained R1-R8.
+**Sanctions:** Columbia, Gallia, Teutonia, Albion, Freeland all impose L3 sanctions on Sarmatia starting R1. Maintained R1-R8.
 **No other actions.** OPEC normal. No tariffs. No military production.
 
 **Round-by-round actions:**
-- R1: `sanction_changes: {columbia: {nordostan: 3}, gallia: {nordostan: 3}, teutonia: {nordostan: 3}, albion: {nordostan: 3}, freeland: {nordostan: 3}}`
+- R1: `sanction_changes: {columbia: {sarmatia: 3}, gallia: {sarmatia: 3}, teutonia: {sarmatia: 3}, albion: {sarmatia: 3}, freeland: {sarmatia: 3}}`
 - R2-R8: No changes (sanctions persist).
 
 ### Expected Outcome Ranges (the corridor)
 
-**Coalition coverage calculation:** Trade weights of columbia+gallia+teutonia+albion+freeland with nordostan need to exceed 0.60 for full effectiveness. Given the GDP sizes and sector complementarity, this coalition should comfortably exceed 60%.
+**Coalition coverage calculation:** Trade weights of columbia+gallia+teutonia+albion+freeland with sarmatia need to exceed 0.60 for full effectiveness. Given the GDP sizes and sector complementarity, this coalition should comfortably exceed 60%.
 
-**Nordostan revenue baseline:** GDP 20 * tax 0.20 = 4.0. Oil revenue adds ~0.5-1.0 at base oil price. Mandatory costs: ~18 ground * 0.3 + 8 air * 0.3 + 2 naval * 0.3 + 12 missiles * 0.3 + 3 AD * 0.3 = ~12.9 maintenance + 0.25 * 20 = 5.0 social = ~17.9. Revenue of ~5.0 vs mandatory of ~17.9 = immediate deficit of ~12.9. Treasury of 6 depletes in R1.
+**Sarmatia revenue baseline:** GDP 20 * tax 0.20 = 4.0. Oil revenue adds ~0.5-1.0 at base oil price. Mandatory costs: ~18 ground * 0.3 + 8 air * 0.3 + 2 naval * 0.3 + 12 missiles * 0.3 + 3 AD * 0.3 = ~12.9 maintenance + 0.25 * 20 = 5.0 social = ~17.9. Revenue of ~5.0 vs mandatory of ~17.9 = immediate deficit of ~12.9. Treasury of 6 depletes in R1.
 
 | Variable | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 |
 |----------|----|----|----|----|----|----|----|----|
-| Nordostan GDP | 17-20 | 14-19 | 12-18 | 11-17 | 10-16 | 10-16 | 10-16 | 10-16 |
-| Nordostan inflation | 10-30 | 20-50 | 30-70 | 35-80 | 30-70 | 25-65 | 22-60 | 20-55 |
-| Nordostan treasury | 0-2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| Nordostan debt_burden | 1.5-4.0 | 3.0-7.0 | 4.5-10 | 6.0-13 | 7.0-14 | 8.0-15 | 8.5-16 | 9.0-17 |
-| Nordostan stability | 4.5-5.0 | 4.0-4.8 | 3.5-4.6 | 3.2-4.4 | 3.0-4.2 | 2.8-4.2 | 2.7-4.2 | 2.5-4.2 |
-| Nordostan economic_state | NORMAL-STRESSED | STRESSED | STRESSED-CRISIS | STRESSED-CRISIS | CRISIS | CRISIS | CRISIS | CRISIS |
+| Sarmatia GDP | 17-20 | 14-19 | 12-18 | 11-17 | 10-16 | 10-16 | 10-16 | 10-16 |
+| Sarmatia inflation | 10-30 | 20-50 | 30-70 | 35-80 | 30-70 | 25-65 | 22-60 | 20-55 |
+| Sarmatia treasury | 0-2 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| Sarmatia debt_burden | 1.5-4.0 | 3.0-7.0 | 4.5-10 | 6.0-13 | 7.0-14 | 8.0-15 | 8.5-16 | 9.0-17 |
+| Sarmatia stability | 4.5-5.0 | 4.0-4.8 | 3.5-4.6 | 3.2-4.4 | 3.0-4.2 | 2.8-4.2 | 2.7-4.2 | 2.5-4.2 |
+| Sarmatia economic_state | NORMAL-STRESSED | STRESSED | STRESSED-CRISIS | STRESSED-CRISIS | CRISIS | CRISIS | CRISIS | CRISIS |
 | Sanctions_hit (R1 vs R5) | 3-8% | 3-8% | 3-8% | 3-8% | 2-6% | 2-6% | 2-6% | 2-6% |
 
 ### Pass/Fail Criteria
 - **PASS** if:
-  - Nordostan GDP declines 15-45% over 8 rounds (sanctions + deficit + inflation compound)
+  - Sarmatia GDP declines 15-45% over 8 rounds (sanctions + deficit + inflation compound)
   - Treasury depletes by R1-R2 (tiny treasury vs. huge mandatory costs)
   - Inflation rises above baseline by 15%+ within 3 rounds (money printing chain)
   - Debt burden accumulates each round (deficit * 0.15 persistent)
@@ -126,7 +126,7 @@ D2 (Sanctions -> GDP Erosion), D3 (Money Printing -> Inflation), D4 (Debt Accumu
 - **FAIL** if:
   - Sanctions produce zero GDP impact (sanctions_damage not calculated)
   - Inflation unchanged after treasury depletion (money printing -> inflation chain broken)
-  - Nordostan stability drops below 2.0 by R4 (autocratic resilience not applied)
+  - Sarmatia stability drops below 2.0 by R4 (autocratic resilience not applied)
   - Sanctions damage identical R1 and R8 (no adaptation/diminishing returns)
   - Debt_burden resets between rounds
 
@@ -139,7 +139,7 @@ D5 (Semiconductor Disruption -> GDP Crash), D7 (Economic Crisis Contagion), D13 
 
 ### Setup (Prescribed Actions)
 
-**Active wars:** Nordostan-Heartland (pre-existing). Columbia-Persia (starting).
+**Active wars:** Sarmatia-Ruthenia (pre-existing). Columbia-Persia (starting).
 **Formosa blockade:** Cathay declares naval blockade of Formosa Strait starting R1. No ground invasion (Formosa has 4 ground; Cathay cannot achieve 4:1 ratio across strait). Blockade maintained R1-R8.
 **No other actions.** OPEC normal. No sanctions beyond existing. No tech investment.
 
@@ -196,7 +196,7 @@ D9 (Naval Buildup -> Parity Crossing), D10 (Overstretch -> Forced Redeployment),
 
 ### Setup (Prescribed Actions)
 
-**Active wars:** Nordostan-Heartland (pre-existing, start_round=-4). Columbia-Persia (starting R0).
+**Active wars:** Sarmatia-Ruthenia (pre-existing, start_round=-4). Columbia-Persia (starting R0).
 **Cathay naval buildup:** Cathay invests 5 coins/round in naval production at normal tier (cost 4/unit, cap 1/round) R1-R8.
 **Columbia:** No additional naval investment (relies on auto-production every 2 rounds).
 **No sanctions, no blockades, OPEC normal.** Focus is purely on military mechanics.
@@ -213,8 +213,8 @@ D9 (Naval Buildup -> Parity Crossing), D10 (Overstretch -> Forced Redeployment),
 - Parity crossing: Cathay catches Columbia around R4-R5.
 
 **War tiredness math:**
-- Heartland (defender, war started R-4): duration by R1 = 5 rounds. Since >3, society adaptation: base 0.20 * 0.5 = 0.10/round. Starting tiredness 4.0. R1: 4.10, R2: 4.20, R3: 4.30...
-- Nordostan (attacker, war started R-4): base 0.15 * 0.5 = 0.075/round. Starting tiredness 4.0. R1: 4.075...
+- Ruthenia (defender, war started R-4): duration by R1 = 5 rounds. Since >3, society adaptation: base 0.20 * 0.5 = 0.10/round. Starting tiredness 4.0. R1: 4.10, R2: 4.20, R3: 4.30...
+- Sarmatia (attacker, war started R-4): base 0.15 * 0.5 = 0.075/round. Starting tiredness 4.0. R1: 4.075...
 - Columbia (attacker in Persia war, started R0): base 0.15/round R1-R3 (duration <3), then 0.075 R4+. Starting tiredness 1.0. R1: 1.15, R2: 1.30, R3: 1.45, R4: 1.525...
 
 | Variable | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 |
@@ -222,10 +222,10 @@ D9 (Naval Buildup -> Parity Crossing), D10 (Overstretch -> Forced Redeployment),
 | Cathay naval | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 |
 | Columbia naval | 11 | 12 | 12 | 13 | 13 | 14 | 14 | 15 |
 | Naval ratio (Cathay/Col) | 0.73 | 0.75 | 0.83 | 0.85 | 0.92 | 0.93 | 1.00 | 1.00 |
-| Heartland war_tiredness | 4.0-4.2 | 4.1-4.3 | 4.2-4.5 | 4.3-4.6 | 4.4-4.7 | 4.5-4.8 | 4.6-4.9 | 4.7-5.0 |
+| Ruthenia war_tiredness | 4.0-4.2 | 4.1-4.3 | 4.2-4.5 | 4.3-4.6 | 4.4-4.7 | 4.5-4.8 | 4.6-4.9 | 4.7-5.0 |
 | Columbia war_tiredness | 1.1-1.2 | 1.2-1.4 | 1.4-1.6 | 1.5-1.7 | 1.5-1.8 | 1.6-1.9 | 1.6-2.0 | 1.7-2.1 |
-| Nordostan war_tiredness | 4.0-4.2 | 4.1-4.3 | 4.1-4.4 | 4.2-4.5 | 4.3-4.5 | 4.3-4.6 | 4.4-4.6 | 4.4-4.7 |
-| Heartland stability | 4.7-5.0 | 4.4-4.9 | 4.2-4.8 | 4.0-4.6 | 3.8-4.5 | 3.6-4.4 | 3.4-4.3 | 3.2-4.2 |
+| Sarmatia war_tiredness | 4.0-4.2 | 4.1-4.3 | 4.1-4.4 | 4.2-4.5 | 4.3-4.5 | 4.3-4.6 | 4.4-4.6 | 4.4-4.7 |
+| Ruthenia stability | 4.7-5.0 | 4.4-4.9 | 4.2-4.8 | 4.0-4.6 | 3.8-4.5 | 3.6-4.4 | 3.4-4.3 | 3.2-4.2 |
 | Columbia political_support | 35-40 | 33-39 | 31-38 | 30-37 | 29-36 | 28-36 | 27-35 | 26-35 |
 
 ### Pass/Fail Criteria
@@ -234,7 +234,7 @@ D9 (Naval Buildup -> Parity Crossing), D10 (Overstretch -> Forced Redeployment),
   - Columbia auto-production fires on even rounds (11->12 on R2, 12->13 on R4, etc.)
   - War tiredness grows for all belligerents each round
   - Society adaptation halves tiredness growth after 3 rounds of war duration
-  - Heartland stability erodes visibly (war friction + tiredness penalty)
+  - Ruthenia stability erodes visibly (war friction + tiredness penalty)
   - Columbia political support erodes (war tiredness > 2 triggers -(wt-2)*1.0 for democracies)
   - War_hit produces GDP penalty proportional to occupied zones
 - **CALIBRATE** if naval numbers are off by 1 unit (production capacity edge case)
@@ -243,7 +243,7 @@ D9 (Naval Buildup -> Parity Crossing), D10 (Overstretch -> Forced Redeployment),
   - Columbia auto-production fires every round instead of every 2
   - War tiredness does not increase for belligerents
   - War tiredness growth does not slow after 3 rounds (adaptation missing)
-  - Heartland stability completely stable despite active war
+  - Ruthenia stability completely stable despite active war
 
 ---
 
@@ -254,13 +254,13 @@ D17 (Ceasefire -> Stability Recovery -> Momentum Boost), D24 (Peace Deal = Posit
 
 ### Setup (Prescribed Actions)
 
-**Active wars:** Nordostan-Heartland (pre-existing), Columbia-Persia (starting R0).
+**Active wars:** Sarmatia-Ruthenia (pre-existing), Columbia-Persia (starting R0).
 **Gulf Gate:** Blocked R1-R3 (Persia ground blockade).
 **Actions:**
 - R1-R2: Wars active, Gulf Gate blocked. No other actions.
 - R3: Columbia-Persia ceasefire. Gulf Gate blockade lifted. `blockade_changes: {gulf_gate_ground: null}`. Remove Persia from wars list.
-- R4-R5: Peace in Mashriq. Nordostan-Heartland continues.
-- R6: Nordostan-Heartland ceasefire. Remove from wars list.
+- R4-R5: Peace in Mashriq. Sarmatia-Ruthenia continues.
+- R6: Sarmatia-Ruthenia ceasefire. Remove from wars list.
 - R7-R8: Full peace.
 
 **Round-by-round actions:**
@@ -269,7 +269,7 @@ D17 (Ceasefire -> Stability Recovery -> Momentum Boost), D24 (Peace Deal = Posit
 - R3: Ceasefire Columbia-Persia. Lift Gulf Gate blockade. `sanction_changes: {}` (existing sanctions persist but no new).
 - R4: No changes. (Post-Mashriq ceasefire.)
 - R5: No changes.
-- R6: Ceasefire Nordostan-Heartland. Remove war.
+- R6: Ceasefire Sarmatia-Ruthenia. Remove war.
 - R7: No changes.
 - R8: No changes.
 
@@ -284,20 +284,20 @@ D17 (Ceasefire -> Stability Recovery -> Momentum Boost), D24 (Peace Deal = Posit
 | Oil price ($) | 130-175 | 130-175 | 95-140 | 85-120 | 80-110 | 75-100 | 72-95 | 70-92 |
 | Columbia momentum | -0.5-0.3 | -1.0-0.3 | 0.5-2.0 | 0.5-2.3 | 0.5-2.5 | 0.5-2.5 | 0.5-2.8 | 0.5-3.0 |
 | Columbia war_tiredness | 1.1-1.3 | 1.2-1.5 | 1.0-1.2 | 0.8-1.0 | 0.6-0.8 | 0.5-0.7 | 0.4-0.6 | 0.3-0.5 |
-| Heartland war_tiredness | 4.1-4.3 | 4.2-4.5 | 4.3-4.6 | 4.4-4.7 | 4.5-4.8 | 3.6-3.9 | 2.9-3.2 | 2.3-2.6 |
-| Heartland momentum | -1.0-0.0 | -1.5-0.0 | -1.5-0.0 | -1.5-0.0 | -1.5-0.0 | 0.0-2.0 | 0.0-2.3 | 0.0-2.5 |
+| Ruthenia war_tiredness | 4.1-4.3 | 4.2-4.5 | 4.3-4.6 | 4.4-4.7 | 4.5-4.8 | 3.6-3.9 | 2.9-3.2 | 2.3-2.6 |
+| Ruthenia momentum | -1.0-0.0 | -1.5-0.0 | -1.5-0.0 | -1.5-0.0 | -1.5-0.0 | 0.0-2.0 | 0.0-2.3 | 0.0-2.5 |
 | Columbia GDP | 272-280 | 268-280 | 270-282 | 272-285 | 274-288 | 276-290 | 278-292 | 280-294 |
-| Heartland stability | 4.7-5.0 | 4.5-4.9 | 4.3-4.8 | 4.2-4.8 | 4.1-4.7 | 4.2-5.0 | 4.4-5.2 | 4.6-5.4 |
-| Heartland economic_state | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | STRESSED-NORMAL | STRESSED-NORMAL | NORMAL |
+| Ruthenia stability | 4.7-5.0 | 4.5-4.9 | 4.3-4.8 | 4.2-4.8 | 4.1-4.7 | 4.2-5.0 | 4.4-5.2 | 4.6-5.4 |
+| Ruthenia economic_state | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | NORMAL-STRESSED | STRESSED-NORMAL | STRESSED-NORMAL | NORMAL |
 
 ### Pass/Fail Criteria
 - **PASS** if:
   - Oil drops $30+ within 2 rounds of Gulf Gate reopening (supply normalization)
   - Columbia momentum jumps +1.0 or more in R3 (ceasefire rally in Pass 2)
-  - Heartland momentum jumps +1.0 or more in R6 (ceasefire rally)
-  - War tiredness decays at ~0.80 multiplier per round after ceasefire (Columbia R3+, Heartland R6+)
+  - Ruthenia momentum jumps +1.0 or more in R6 (ceasefire rally)
+  - War tiredness decays at ~0.80 multiplier per round after ceasefire (Columbia R3+, Ruthenia R6+)
   - War tiredness decay is visible: Columbia R4 tiredness < Columbia R2 tiredness
-  - Heartland stability improves after R6 ceasefire (war friction stops, tiredness decays)
+  - Ruthenia stability improves after R6 ceasefire (war friction stops, tiredness decays)
   - Recovery is SLOWER than decline: momentum builds at +0.3/round max (not instant +5.0)
   - Economic state recovery takes 2+ rounds per level (stressed->normal needs 2 rounds of positive indicators)
 - **CALIBRATE** if momentum boost is present but smaller than expected (1.0 instead of 1.5)
@@ -318,7 +318,7 @@ D3 (Money Printing -> Inflation), D4 (Debt Accumulation -> Fiscal Death Spiral),
 ### Setup (Prescribed Actions)
 
 **Focus country:** Ponte (Italy parallel). GDP 22, tax 0.40, treasury 4, inflation 2.5%, stability 6.0, debt_burden 8.0, democracy.
-**Active wars:** Nordostan-Heartland only (Ponte not involved).
+**Active wars:** Sarmatia-Ruthenia only (Ponte not involved).
 **Actions:** Ponte receives no aid, no trade benefits. Social spending maintained at baseline (0.30 * GDP). No military production.
 **Key mechanic:** Ponte's high debt_burden (8.0) vs revenue (GDP 22 * 0.40 = 8.8 base). Starting debt nearly equals revenue.
 
@@ -432,7 +432,7 @@ D7 (Economic Crisis Contagion), D21 (Military Overstretch + Economic Crisis = St
 This combines oil shock + semiconductor disruption + tariffs + war costs to force Columbia into crisis state.
 
 **Round-by-round actions:**
-- R1: `blockade_changes: {gulf_gate_ground: {controller: persia}, formosa_strait: {controller: cathay}}`, `opec_production: {nordostan: low, persia: low, solaria: low, mirage: low}`, `tariff_changes: {cathay: {columbia: 2}}`
+- R1: `blockade_changes: {gulf_gate_ground: {controller: persia}, formosa_strait: {controller: cathay}}`, `opec_production: {sarmatia: low, persia: low, solaria: low, mirage: low}`, `tariff_changes: {cathay: {columbia: 2}}`
 - R2: `sanction_changes: {cathay: {columbia: 2}}`
 - R3-R8: No new changes. Pressures persist.
 
@@ -544,7 +544,7 @@ D25 (The Thucydides Trap), D9, D14, D15, D19, D20 (cross-cutting)
 
 ### Setup (Prescribed Actions)
 
-**All starting conditions active.** Wars: Nordostan-Heartland, Columbia-Persia. Gulf Gate blocked. Existing sanctions.
+**All starting conditions active.** Wars: Sarmatia-Ruthenia, Columbia-Persia. Gulf Gate blocked. Existing sanctions.
 **This scenario uses FIXED scripted actions to simulate reasonable strategic behavior without AI:**
 
 **Round-by-round actions:**
@@ -554,15 +554,15 @@ D25 (The Thucydides Trap), D9, D14, D15, D19, D20 (cross-cutting)
 - R2 (Columbia midterms): Same Cathay naval build. Columbia election fires. Oil price pressure on voters.
   - `budgets: {cathay: {military: {naval: {coins: 5, tier: normal}}}}`
   - `votes: {columbia: {incumbent_pct: 48}}` (slight opposition advantage)
-- R3: Cathay continues naval build. Heartland election fires.
+- R3: Cathay continues naval build. Ruthenia election fires.
   - `budgets: {cathay: {military: {naval: {coins: 5, tier: normal}}}}`
-  - `votes: {heartland: {incumbent_pct: 45}}`
+  - `votes: {ruthenia: {incumbent_pct: 45}}`
 - R4: Cathay at near-parity. Cathay imposes rare earth restrictions L1 on Columbia.
   - `budgets: {cathay: {military: {naval: {coins: 5, tier: normal}}}}`
   - `rare_earth_restrictions: {columbia: 1}`
 - R5 (Columbia presidential): Naval parity crossed or near. Columbia presidential election fires.
   - `votes: {columbia: {incumbent_pct: 45}}`
-- R6: Post-election. Nordostan-Heartland ceasefire.
+- R6: Post-election. Sarmatia-Ruthenia ceasefire.
 - R7: Stabilization round.
 - R8: Final assessment.
 
@@ -581,15 +581,15 @@ D25 (The Thucydides Trap), D9, D14, D15, D19, D20 (cross-cutting)
 | Cathay stability | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 | 7.5-8.0 |
 | Columbia midterm (R2) | -- | lose (AI 30-45) | -- | -- | -- | -- | -- | -- |
 | Columbia presidential (R5) | -- | -- | -- | -- | toss-up (AI 35-50) | -- | -- | -- |
-| Heartland election (R3) | -- | -- | lose (AI 25-40) | -- | -- | -- | -- | -- |
+| Ruthenia election (R3) | -- | -- | lose (AI 25-40) | -- | -- | -- | -- | -- |
 
 ### Pass/Fail Criteria
 - **PASS** if:
   - Cathay closes GDP ratio from ~0.68 toward 0.80-0.95 by R8 (structural growth differential)
   - Naval parity approaches or crosses by R5-R7 (Cathay active build vs Columbia auto-production)
   - Columbia midterms (R2) show war penalty + oil penalty making incumbent score < 50
-  - Heartland election (R3) shows war tiredness strongly penalizing incumbent
-  - Autocratic resilience visible: Cathay stability flat while Columbia/Heartland erode
+  - Ruthenia election (R3) shows war tiredness strongly penalizing incumbent
+  - Autocratic resilience visible: Cathay stability flat while Columbia/Ruthenia erode
   - Nuclear deterrence implicit: no direct Cathay-Columbia war despite tension
   - At least 2 of the 5 elections produce incumbent loss
   - Economic interdependence visible: Cathay growth affected by trade disruption if tensions escalate

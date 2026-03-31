@@ -89,7 +89,7 @@ Actions applied (in order):
 **Inputs:**
 - Base price: $80 (hardcoded)
 - OPEC production decisions (per member: "min", "low", "normal", "high", "max")
-- Sanctions on oil producers (nordostan, persia) at L2+
+- Sanctions on oil producers (sarmatia, persia) at L2+
 - Chokepoint blockade status (Gulf Gate, Formosa, Suez, Malacca, etc.)
 - Economic states of all countries (demand side)
 - GDP growth rates of all countries (demand elasticity)
@@ -107,7 +107,7 @@ SUPPLY SIDE (Updated 2026-03-30 per action review — 5 levels):
     if decision == "low":  supply -= 0.06
     if decision == "high": supply += 0.06
     if decision == "max":  supply += 0.12
-  For each oil producer (nordostan, persia):
+  For each oil producer (sarmatia, persia):
     if sanctions_level >= 2: supply -= 0.08
   supply = max(0.5, supply)
 
@@ -943,7 +943,7 @@ MOBILIZATION — FINITE DEPLETABLE POOL (Updated 2026-03-30 per action review �
     Under active invasion:  -0.2 stability
 
   Columbia special: mobilization requires parliament approval (narrative, no mechanic).
-  Heartland and Nordostan start with PARTIALLY DEPLETED pools (see starting values table below).
+  Ruthenia and Sarmatia start with PARTIALLY DEPLETED pools (see starting values table below).
 
   delta -= stability_cost_from_mobilization (per above table)
 
@@ -953,7 +953,7 @@ MILITIA / VOLUNTEER CALL (invaded/bombed countries only):
   Combat effectiveness: 0.5× (militia units get -1 dice modifier)
   Stability cost: -0.3
   Represents: popular resistance, revolutionary guard, volunteer fighters
-  Purpose: gives the "losing" side a desperation option (e.g., Persia under strike, Heartland under invasion)
+  Purpose: gives the "losing" side a desperation option (e.g., Persia under strike, Ruthenia under invasion)
   Militia units tracked separately (militia_units counter) for combat modifier.
 
 PROPAGANDA:
@@ -1018,7 +1018,7 @@ DEMOCRACY / HYBRID:
     delta -= (oil_price - 150) * 0.05
   Election proximity:
     Columbia: -1.0 at R1, -2.0 at R4
-    Heartland: -1.5 at R2 and R3
+    Ruthenia: -1.5 at R2 and R3
   War tiredness (if > 2):
     delta -= (war_tiredness - 2) * 1.0
 
@@ -1051,8 +1051,8 @@ BOUNDS:
 | Round | Election | Country |
 |-------|----------|---------|
 | 2 | Columbia midterms | columbia |
-| 3 | Heartland wartime | heartland |
-| 4 | Heartland wartime runoff | heartland |
+| 3 | Ruthenia wartime | ruthenia |
+| 4 | Ruthenia wartime runoff | ruthenia |
 | 5 | Columbia presidential | columbia |
 
 **AI Incumbent Score Formula:**
@@ -1068,7 +1068,7 @@ oil_penalty (importers, oil > $150):
 
 ai_score = clamp(50 + econ_perf + stab_factor + war_penalty + crisis_penalty + oil_penalty, 0, 100)
 
-HEARTLAND SPECIAL:
+RUTHENIA SPECIAL:
   territory_factor = -3 per occupied zone (defender)
   ai_score_adjusted = clamp(ai_score + territory_factor - war_tiredness * 2, 0, 100)
 
@@ -1079,7 +1079,7 @@ FINAL RESULT:
 
 **Consequences:**
 - Columbia midterms loss: Parliament shifts to 3-2 opposition majority
-- Heartland election loss: Beacon loses, Bulwark becomes president
+- Ruthenia election loss: Beacon loses, Bulwark becomes president
 - Columbia presidential loss: New president installed
 
 **Engine location:** `world_model_engine.py:1302-1408`
@@ -1133,7 +1133,7 @@ If NOT pursuing AND unresolved (R6+):
 |---------|------|-----|----------------|
 | columbia | dealer | 80 | 0.9 |
 | cathay | helmsman | 73 | 0.7 |
-| nordostan | pathfinder | 73 | 0.6 |
+| sarmatia | pathfinder | 73 | 0.6 |
 
 **Formula:**
 
@@ -1144,7 +1144,7 @@ prob = base_prob * (1 - medical_quality * 0.5)
 Example probabilities:
   Columbia (80, 0.9): 0.13 * 0.55 = 7.15% per round
   Cathay (73, 0.7):   0.06 * 0.65 = 3.90% per round
-  Nordostan (73, 0.6): 0.06 * 0.70 = 4.20% per round
+  Sarmatia (73, 0.6): 0.06 * 0.70 = 4.20% per round
 
 If health event triggers:
   15% chance: Death (role status = "dead", succession crisis)
@@ -1250,7 +1250,7 @@ MODIFIERS (integers only):
     - Morale formula (replaced by simple Low morale threshold)
 
 SHIPS AS TRANSPORT:
-  Ships carry 1 ground unit + up to 5 air units.
+  Ships carry 1 ground unit + up to 2 air units.
   Transport between rounds (Phase B).
   Can attack adjacent land zone from ship position (amphibious).
 
@@ -1610,7 +1610,7 @@ SUCCESS PROBABILITY (varies by target location):
   Domestic assassination: 60% hit
   International assassination (default): 20% hit
   International — Levantia: 50% hit (Mossad capability)
-  International — Nordostan: 30% hit
+  International — Sarmatia: 30% hit
 
   NO AI or intelligence modifiers. Raw probability only.
 
@@ -2015,7 +2015,7 @@ No authorization check beyond existence
 | Disinformation success | 55% base | LAE:new | 2-3 cards, easiest covert op (updated 2026-03-30) |
 | Election meddling | 1 card per game, 2-5% impact | LAE:new | Risk of backlash (updated 2026-03-30) |
 | Assassination domestic | 60% hit | LAE:708 | No modifiers, raw probability (updated 2026-03-30) |
-| Assassination international | 20% default, Levantia 50%, Nordostan 30% | LAE:708 | Per-country (updated 2026-03-30) |
+| Assassination international | 20% default, Levantia 50%, Sarmatia 30% | LAE:708 | Per-country (updated 2026-03-30) |
 | Assassination survival | 50% (4-6 on d6) | LAE:727 | Even if assassination "succeeds" |
 | Coup base probability | 15% (two plotters) | LAE:791 | + protest +25%, + low stability/support (updated 2026-03-30) |
 | Propaganda cap | +10 support max | LAE:661 | Before AI tech multiplier |
@@ -2052,17 +2052,17 @@ Phase B (combined world update + deployment). Production and mobilization run FI
 - **Own territory:** Move to any zone in your own country — immediate
 - **Allied territory (military alliance):** Move to any zone in an allied country's territory — members of Western Treaty (NATO) can deploy to each other's territory by default
 - **Basing rights territory:** Move to the specific zone where basing rights have been granted (per C6 basing rights transaction)
-- **Foreign theater (long-distance):** Move to any valid destination above, but if crossing more than one zone from current position to a different theater — **1 round transit delay** (submitted in Phase B of Round N, arrives at start of Phase B Round N+1)
+- **Foreign theater (long-distance):** Move to any valid destination above, but if crossing more than one zone from current position to a different theater — **no transit delay (instant deployment)** (submitted in Phase B of Round N, arrives at start of Phase B Round N+1)
 - **Cannot deploy to:** Enemy territory (must attack, not deploy), neutral territory without basing rights, sea zones
 
 ### Tactical air units (drones/UAVs)
 - **Range:** Same theater — can operate from any zone within the theater they're deployed in
-- **Redeployment:** Can be moved to a different theater, subject to 1 round transit like ground units
+- **Redeployment:** Can be moved to a different theater, subject to same rules as ground units (instant)
 - **No basing needed for own territory**
 
 ### Air defense units
 - **Stationary:** Defend the zone they're placed in
-- **Redeployment:** Can be moved like ground units (own/allied territory, 1 round transit for cross-theater)
+- **Redeployment:** Can be moved like ground units (own/allied territory, instant deployment)
 
 ### Strategic missiles
 - **Not deployed to zones:** Remain in home country (launch sites)
@@ -2248,8 +2248,8 @@ When a Head of State is killed or incapacitated:
 |---------|-----------|----------|
 | Columbia | Volt (VP) | Automatic. Same participant, gains HoS powers. |
 | Cathay | Sage (Party Elder) | Automatic. Acting Chairman. Collective leadership asserts. |
-| Nordostan | Ironhand (General) | Military succession. Acting President. |
-| Heartland | Bulwark (if active), else Broker | Next most senior active role. |
+| Sarmatia | Ironhand (General) | Military succession. Acting President. |
+| Ruthenia | Bulwark (if active), else Broker | Next most senior active role. |
 | Persia | Anvil selects | Kingmaker mechanic. Anvil chooses (Dawn, NPC, or himself). Political event. |
 | Solo countries | Facilitator assigns | AI control or new participant. |
 
@@ -2295,7 +2295,7 @@ Same 2-minute rule. Sage represents the collective leadership check.
 
 This mechanic prevents casual nuclear use by European powers while preserving the option under genuine existential threat.
 
-### Nordostan (2 confirmations)
+### Sarmatia (2 confirmations)
 1. **Pathfinder** (President) — initiates
 2. **Ironhand** (General) — co-signs
 
@@ -2324,8 +2324,8 @@ Each country has a finite, non-recoverable mobilization pool. Values below repre
 |---------|-----------|-------------|------------------------|-------|
 | Columbia | 12 | 0 | 12 | Requires parliament approval (narrative) |
 | Cathay | 15 | 0 | 15 | Largest pool |
-| Nordostan | 10 | 5 | 5 | Partially mobilized (ongoing war) |
-| Heartland | 8 | 4 | 4 | Partially mobilized (ongoing war) |
+| Sarmatia | 10 | 5 | 5 | Partially mobilized (ongoing war) |
+| Ruthenia | 8 | 4 | 4 | Partially mobilized (ongoing war) |
 | Bharata | 8 | 0 | 8 | |
 | Persia | 6 | 0 | 6 | |
 | Gallia | 4 | 0 | 4 | |
@@ -2426,7 +2426,7 @@ ENFORCEMENT:
 
 AVAILABILITY:
   Columbia: Full court system. Independent judiciary.
-  Heartland: Limited court (can be overridden by President with -0.5 stability cost).
+  Ruthenia: Limited court (can be overridden by President with -0.5 stability cost).
   Autocracies: No court system. HoS decision is final.
 ```
 
@@ -2434,7 +2434,7 @@ AVAILABILITY:
 
 # PART 6I: IMPEACHMENT (Added 2026-03-30 per action review)
 
-Available in Columbia and Heartland only.
+Available in Columbia and Ruthenia only.
 
 ```
 COLUMBIA IMPEACHMENT:
@@ -2446,7 +2446,7 @@ COLUMBIA IMPEACHMENT:
     Removed leader stays in play but loses HoS powers.
     Succession chain activates (see Part 6D).
 
-HEARTLAND IMPEACHMENT:
+RUTHENIA IMPEACHMENT:
   Initiation: Any team member can initiate.
   Process: 2 real participant votes needed + AI emulates remaining team members.
     AI default: loyal to president (votes against impeachment unless conditions extreme).
@@ -2543,7 +2543,7 @@ Cathay holds the strait with 2 remaining ships. Columbia retreats with 2 ships.
 | **Intelligence fog of war** | Partial | Espionage returns noisy estimates (+/-15%). No systematic information hiding between players -- deferred to orchestrator/moderator. |
 | **Refugee flows** | Not modeled | War and collapse do not generate refugee movements that affect neighboring countries. |
 | **Cyber warfare (strategic)** | Simplified | Cyber is one of five covert op types with a flat 1% GDP damage. No modeling of critical infrastructure vulnerability. |
-| **Naval combat (fleet battles)** | **Implemented (2026-03-30)** | RISK dice in sea zones. Sunk ship = all embarked units (1 ground + up to 5 air) also lost. Same modifiers as ground (AI L4, morale, carrier air). See Part 6J below. |
+| **Naval combat (fleet battles)** | **Implemented (2026-03-30)** | RISK dice in sea zones. Sunk ship = all embarked units (1 ground + up to 2 air) also lost. Same modifiers as ground (AI L4, morale, carrier air). See Part 6J below. |
 | **Air superiority** | Implicit | Tactical air units are counted but there is no separate air superiority phase. Air defense only intercepts missiles. |
 | **Occupation governance** | Not modeled | Capturing a zone transfers ownership but there are no occupation costs, resistance, or governance mechanics. |
 | **Territory liberation** | Manual | No automatic reconquest mechanic. Players must order attacks to retake zones. |

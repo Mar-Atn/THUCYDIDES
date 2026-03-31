@@ -21,8 +21,8 @@
     --light-bg: #F5F6F8;
     --columbia: #4A90D9;
     --cathay: #D94A4A;
-    --nordostan: #808080;
-    --heartland: #D4A843;
+    --sarmatia: #808080;
+    --ruthenia: #D4A843;
     --persia: #4AD97A;
     --albion: #3B6E8F;
     --water: #D4E4F0;
@@ -548,7 +548,7 @@
 <!-- ============================================================ -->
 <div class="card">
 <h2>Section 7: Eastern Ereb Front -- Map Context</h2>
-<p class="section-note">3x4 hex grid showing the Nordostan-Heartland border. Uses recommended best tank icon (Tank 2: Stencil) at 12px.</p>
+<p class="section-note">3x4 hex grid showing the Sarmatia-Ruthenia border. Uses recommended best tank icon (Tank 2: Stencil) at 12px.</p>
 
 <div style="display:flex;justify-content:center;padding:20px 0;">
   <div id="map-grid"></div>
@@ -629,8 +629,8 @@ const sizes = [48, 32, 18, 12, 10];
 const countries = [
   { name: 'Columbia', color: '#4A90D9' },
   { name: 'Cathay', color: '#D94A4A' },
-  { name: 'Nordostan', color: '#808080' },
-  { name: 'Heartland', color: '#D4A843' },
+  { name: 'Sarmatia', color: '#808080' },
+  { name: 'Ruthenia', color: '#D4A843' },
   { name: 'Persia', color: '#4AD97A' },
   { name: 'Albion', color: '#3B6E8F' },
 ];
@@ -793,9 +793,9 @@ function mapIcon(id, size, color) {
 }
 
 // 3x4 hex grid: 4 columns, 3 rows (alternating offset)
-// Row 0 (4 cells): land, Nordostan (4 tanks), Nordostan (3 tanks), land
-// Row 1 (4 cells, offset): Heartland (3 tanks), occupied/striped (2 Nord tanks), Nordostan empty, land
-// Row 2 (4 cells): land, Heartland (2 tanks), land, land
+// Row 0 (4 cells): land, Sarmatia (4 tanks), Sarmatia (3 tanks), land
+// Row 1 (4 cells, offset): Ruthenia (3 tanks), occupied/striped (2 Nord tanks), Sarmatia empty, land
+// Row 2 (4 cells): land, Ruthenia (2 tanks), land, land
 const gridRows = [
   { offset: false, cells: [
     { bg: landBg, units: [] },
@@ -850,12 +850,12 @@ mapGrid.innerHTML = gridHTML;
 // Legend
 const mapLegend = document.getElementById('map-legend');
 mapLegend.innerHTML = `
-  <span><span class="legend-dot" style="background:${nordBg}"></span> Nordostan</span>
-  <span><span class="legend-dot" style="background:${heartBg}"></span> Heartland</span>
+  <span><span class="legend-dot" style="background:${nordBg}"></span> Sarmatia</span>
+  <span><span class="legend-dot" style="background:${heartBg}"></span> Ruthenia</span>
   <span><span class="legend-dot" style="background:${landBg}"></span> Neutral</span>
   <span><span class="legend-dot" style="background:repeating-linear-gradient(45deg,#D4A843,#D4A843 2px,#808080 2px,#808080 4px)"></span> Occupied</span>
-  <span>${mapIcon(mapTank, 12, nordColor)} Nordostan tanks</span>
-  <span>${mapIcon(mapTank, 12, heartColor)} Heartland tanks</span>
+  <span>${mapIcon(mapTank, 12, nordColor)} Sarmatia tanks</span>
+  <span>${mapIcon(mapTank, 12, heartColor)} Ruthenia tanks</span>
 `;
 </script>
 

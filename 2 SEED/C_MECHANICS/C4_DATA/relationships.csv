@@ -1,17 +1,17 @@
 from_country,to_country,relationship,dynamic
 columbia,cathay,strategic_rival,THE Trap itself. Largest bilateral trade under ~47.5% tariff assault. Economic interdependence + military competition in Pacific. Cathay closing AI gap. Semiconductor supply chain through Formosa.
-columbia,nordostan,hostile,Nuclear peer adversary. Sanctions regime. Proxy conflict via Heartland. Two-front nightmare with Cathay.
-columbia,heartland,close_ally,Ally at war. Weapons and aid provider. Pushing for negotiated settlement. Heartland fears abandonment.
+columbia,sarmatia,hostile,Nuclear peer adversary. Sanctions regime. Proxy conflict via Ruthenia. Two-front nightmare with Cathay.
+columbia,ruthenia,close_ally,Ally at war. Weapons and aid provider. Pushing for negotiated settlement. Ruthenia fears abandonment.
 columbia,persia,at_war,Operation Epic Fury. Joint campaign with Levantia. Two carrier strike groups committed. Regime change objective.
 columbia,gallia,alliance,NATO ally with friction. Strategic autonomy disagreement. Shares intelligence. Respects nuclear capability.
 columbia,teutonia,alliance,NATO ally with friction. Hosts main European base. Pressured on 5% GDP defense. Cathay trade dependency frustrates.
-columbia,freeland,alliance,NATO frontline. Most enthusiastic ally. Maximally hawkish on Nordostan. Hosts forward deployments.
+columbia,freeland,alliance,NATO frontline. Most enthusiastic ally. Maximally hawkish on Sarmatia. Hosts forward deployments.
 columbia,ponte,alliance,NATO ally but EU weak link. Russia-sympathetic. China-curious. Massive debt. Watched nervously.
 columbia,albion,close_ally,Special relationship. NATO Five Eyes UNSC. Most reliable European interlocutor. Pacific naval alignment.
 columbia,bharata,friendly,Courtship. Desperately needs Bharata in sanctions coalition. Bharata plays both sides. Essential but frustrating.
 columbia,levantia,close_ally,Joint operations in Persia. Regional military superpower. Undeclared nuclear state. Politically impossible to distance.
 columbia,formosa,close_ally,Protectorate. Strategic ambiguity. 65% semiconductor dependency. Ultimate test if Cathay moves.
-columbia,phrygia,alliance,NATO member playing every side. Controls Bosphorus. Buys Nordostan air defense. Trusted on nothing.
+columbia,phrygia,alliance,NATO member playing every side. Controls Bosphorus. Buys Sarmatia air defense. Trusted on nothing.
 columbia,yamato,alliance,Pacific alliance cornerstone. Remilitarizing. Hosts major bases. Strategic anxiety about Cathay aligns perfectly.
 columbia,solaria,friendly,OPEC kingpin. Oil pricing power. Hedging Columbia-Cathay. Arms buyer. Increasingly independent.
 columbia,choson,hostile,Nuclear wildcard. No diplomatic channel. Deterrence via Yamato/Hanguk bases. Provocation risk.
@@ -19,8 +19,8 @@ columbia,hanguk,alliance,US ally. Hosts bases. Semiconductor power. Domestic cri
 columbia,caribe,hostile,Post-intervention. Operation Absolute Resolve. Energy blockade. Monroe Doctrine tested.
 columbia,mirage,friendly,Financial hub. Arms buyer. Gulf military facilities. Critical logistics for Persia war. Hedges everyone.
 cathay,columbia,strategic_rival,THE Trap itself. Rising challenger vs declining hegemon. ~30% average tariffs post-Supreme Court chaos. Rare earth vs chip export controls = mutual technological chokehold.
-cathay,nordostan,close_ally,Partnership without limits evolving to asymmetric dependency. Energy buyer. Arms trade. Joint BRICS+. Nordostan as junior partner.
-cathay,heartland,neutral,Carefully neutral. Calls for peaceful resolution. Mild sanctions-evasion support to Nordostan. Studies conflict for Taiwan lessons.
+cathay,sarmatia,close_ally,Partnership without limits evolving to asymmetric dependency. Energy buyer. Arms trade. Joint BRICS+. Sarmatia as junior partner.
+cathay,ruthenia,neutral,Carefully neutral. Calls for peaceful resolution. Mild sanctions-evasion support to Sarmatia. Studies conflict for Taiwan lessons.
 cathay,persia,friendly,BRICS+ member. Energy supplier. Sanctions-evasion partner. But no military support after Epic Fury.
 cathay,gallia,tense,UNSC P5 peer. Wary respect. Strategic autonomy could benefit or complicate. Less economically dependent than Teutonia.
 cathay,teutonia,friendly,Largest European trade partner. Auto industry dependency. Tool for splitting European consensus. BRI investment.
@@ -37,48 +37,48 @@ cathay,choson,close_ally,Patron. Buffer state. Economic lifeline. Can restrain o
 cathay,hanguk,tense,Enormous trade dependency leverage. Columbia bases threaten Cathay. THAAD friction. Samsung competitor.
 cathay,caribe,friendly,Strategic foothold in Columbia near-abroad. Testing Monroe Doctrine. Telecom infrastructure.
 cathay,mirage,friendly,Financial/trade hub. BRI logistics. Pragmatic partnership facilitating trade bypassing Western finance.
-nordostan,columbia,hostile,Nuclear peer adversary. Sanctions regime. Strategic confrontation.
-nordostan,cathay,close_ally,Junior partner in partnership without limits. Energy exporter. Growing dependency on Cathay.
-nordostan,heartland,at_war,Active war since 2022. Occupied territories. Proxy and direct conflict.
-nordostan,persia,friendly,Sanctions-evasion partners. Arms trade. Both targeted by Western sanctions.
-nordostan,gallia,hostile,UNSC adversary. European sanctions. Nuclear tension.
-nordostan,teutonia,hostile,Former energy supplier. Sanctions severed ties. Nord Stream destroyed.
-nordostan,freeland,hostile,Frontline NATO state. Maximum threat perception. Historical enmity.
-nordostan,ponte,tense,EU member most sympathetic to Nordostan. Potential crack in sanctions wall.
-nordostan,albion,hostile,Strong sanctions enforcer. Intelligence adversary. Nuclear peer tension.
-nordostan,bharata,friendly,Oil buyer. Defense customer. BRICS+ partner. Bharata refuses to sanction.
-nordostan,levantia,tense,Opposing sides in Syria. Limited direct conflict. Regional rivalry.
-nordostan,formosa,neutral,No significant relationship. Distant geographically and strategically.
-nordostan,phrygia,friendly,NATO member blocking consensus. Bosphorus access. Arms customer. Useful disruptor.
-nordostan,yamato,tense,Pacific fleet competition. Kuril Islands dispute. Limited direct interaction.
-nordostan,solaria,friendly,OPEC+ partner. Oil production coordination. BRICS+ member.
-nordostan,choson,close_ally,Arms supplier. Choson troops in Heartland. Nuclear patron.
-nordostan,hanguk,tense,Adversary through Choson connection. Limited direct relationship.
-nordostan,caribe,friendly,Offering Cuba aid. Foothold in Western hemisphere. Testing Monroe Doctrine.
-nordostan,mirage,neutral,Financial hub. Limited strategic engagement. OPEC+ coordination.
-heartland,columbia,close_ally,Dependent on Columbia weapons and aid. Fears abandonment. Pushed toward negotiated settlement.
-heartland,cathay,neutral,Cathay officially neutral. Studies conflict. No direct support or opposition.
-heartland,nordostan,at_war,Existential war. Occupied territories. National survival at stake.
-heartland,persia,neutral,No significant direct relationship. Both under pressure from different directions.
-heartland,gallia,friendly,EU supporter. Potential member. Military aid provider.
-heartland,teutonia,friendly,EU supporter. Economic aid. Refugees hosted in Teutonia.
-heartland,freeland,close_ally,Neighbor and strongest European supporter. Weapons transit. Refugee host.
-heartland,ponte,neutral,EU member but weakest supporter. Ponte ambivalent on sanctions.
-heartland,albion,friendly,Intelligence sharing. Military aid. Strong political support.
-heartland,bharata,neutral,Bharata refuses to take sides. Frustrating neutrality.
-heartland,levantia,neutral,Limited relationship. Both democracies under military pressure.
-heartland,formosa,neutral,Distant. Shared sympathy as threatened democracies.
-heartland,phrygia,tense,Phrygia blocks NATO consensus. Bosphorus control affects supply lines.
-heartland,yamato,neutral,Distant. Limited strategic interaction.
-heartland,solaria,neutral,Limited relationship. Solaria hedges.
-heartland,choson,hostile,Choson troops fighting for Nordostan. Direct adversary.
-heartland,hanguk,neutral,Limited relationship. Both democracies under threat.
-heartland,caribe,neutral,No significant relationship.
-heartland,mirage,neutral,No significant relationship.
+sarmatia,columbia,hostile,Nuclear peer adversary. Sanctions regime. Strategic confrontation.
+sarmatia,cathay,close_ally,Junior partner in partnership without limits. Energy exporter. Growing dependency on Cathay.
+sarmatia,ruthenia,at_war,Active war since 2022. Occupied territories. Proxy and direct conflict.
+sarmatia,persia,friendly,Sanctions-evasion partners. Arms trade. Both targeted by Western sanctions.
+sarmatia,gallia,hostile,UNSC adversary. European sanctions. Nuclear tension.
+sarmatia,teutonia,hostile,Former energy supplier. Sanctions severed ties. Nord Stream destroyed.
+sarmatia,freeland,hostile,Frontline NATO state. Maximum threat perception. Historical enmity.
+sarmatia,ponte,tense,EU member most sympathetic to Sarmatia. Potential crack in sanctions wall.
+sarmatia,albion,hostile,Strong sanctions enforcer. Intelligence adversary. Nuclear peer tension.
+sarmatia,bharata,friendly,Oil buyer. Defense customer. BRICS+ partner. Bharata refuses to sanction.
+sarmatia,levantia,tense,Opposing sides in Syria. Limited direct conflict. Regional rivalry.
+sarmatia,formosa,neutral,No significant relationship. Distant geographically and strategically.
+sarmatia,phrygia,friendly,NATO member blocking consensus. Bosphorus access. Arms customer. Useful disruptor.
+sarmatia,yamato,tense,Pacific fleet competition. Kuril Islands dispute. Limited direct interaction.
+sarmatia,solaria,friendly,OPEC+ partner. Oil production coordination. BRICS+ member.
+sarmatia,choson,close_ally,Arms supplier. Choson troops in Ruthenia. Nuclear patron.
+sarmatia,hanguk,tense,Adversary through Choson connection. Limited direct relationship.
+sarmatia,caribe,friendly,Offering Cuba aid. Foothold in Western hemisphere. Testing Monroe Doctrine.
+sarmatia,mirage,neutral,Financial hub. Limited strategic engagement. OPEC+ coordination.
+ruthenia,columbia,close_ally,Dependent on Columbia weapons and aid. Fears abandonment. Pushed toward negotiated settlement.
+ruthenia,cathay,neutral,Cathay officially neutral. Studies conflict. No direct support or opposition.
+ruthenia,sarmatia,at_war,Existential war. Occupied territories. National survival at stake.
+ruthenia,persia,neutral,No significant direct relationship. Both under pressure from different directions.
+ruthenia,gallia,friendly,EU supporter. Potential member. Military aid provider.
+ruthenia,teutonia,friendly,EU supporter. Economic aid. Refugees hosted in Teutonia.
+ruthenia,freeland,close_ally,Neighbor and strongest European supporter. Weapons transit. Refugee host.
+ruthenia,ponte,neutral,EU member but weakest supporter. Ponte ambivalent on sanctions.
+ruthenia,albion,friendly,Intelligence sharing. Military aid. Strong political support.
+ruthenia,bharata,neutral,Bharata refuses to take sides. Frustrating neutrality.
+ruthenia,levantia,neutral,Limited relationship. Both democracies under military pressure.
+ruthenia,formosa,neutral,Distant. Shared sympathy as threatened democracies.
+ruthenia,phrygia,tense,Phrygia blocks NATO consensus. Bosphorus control affects supply lines.
+ruthenia,yamato,neutral,Distant. Limited strategic interaction.
+ruthenia,solaria,neutral,Limited relationship. Solaria hedges.
+ruthenia,choson,hostile,Choson troops fighting for Sarmatia. Direct adversary.
+ruthenia,hanguk,neutral,Limited relationship. Both democracies under threat.
+ruthenia,caribe,neutral,No significant relationship.
+ruthenia,mirage,neutral,No significant relationship.
 persia,columbia,at_war,Under attack. Operation Epic Fury. Supreme Leader killed. Regime survival at stake.
 persia,cathay,friendly,BRICS+ partner. Energy buyer. Sanctions-evasion support. But no military support.
-persia,nordostan,friendly,Sanctions-evasion partners. Arms supplier. Shared adversary in West.
-persia,heartland,neutral,No direct relationship. Both at war with different adversaries.
+persia,sarmatia,friendly,Sanctions-evasion partners. Arms supplier. Shared adversary in West.
+persia,ruthenia,neutral,No direct relationship. Both at war with different adversaries.
 persia,gallia,hostile,European sanctions. UNSC adversary.
 persia,teutonia,tense,EU sanctions. Limited diplomatic channel.
 persia,freeland,tense,EU sanctions. No direct relationship.
@@ -96,8 +96,8 @@ persia,caribe,friendly,Shared resistance to Columbia. Limited practical cooperat
 persia,mirage,hostile,Under attack. 357 ballistic missiles 1815 drones 15 cruise missiles launched at UAE. Hosting Columbia war infrastructure.
 gallia,columbia,alliance,NATO ally with friction. Disagrees on Persia trade policy. Strategic autonomy champion.
 gallia,cathay,tense,Wary respect. UNSC peers. Less economically dependent than Teutonia.
-gallia,nordostan,hostile,Strong sanctions. UNSC adversary. Nuclear tension.
-gallia,heartland,friendly,EU supporter. Military aid. Potential enlargement sponsor.
+gallia,sarmatia,hostile,Strong sanctions. UNSC adversary. Nuclear tension.
+gallia,ruthenia,friendly,EU supporter. Military aid. Potential enlargement sponsor.
 gallia,persia,tense,Sanctions enforcer. Nuclear proliferation concern.
 gallia,teutonia,alliance,EU co-leadership. Franco-German engine. Tensions on defense spending and economic policy.
 gallia,freeland,alliance,EU and NATO partner. Different strategic priorities.
@@ -115,8 +115,8 @@ gallia,caribe,neutral,Limited relationship. Former colonial connections.
 gallia,mirage,friendly,Arms buyer. Financial hub. Gulf partner.
 teutonia,columbia,alliance,NATO ally with friction. Hosts main Columbia base. Pressured on defense spending.
 teutonia,cathay,friendly,Massive trade partner. Auto industry dependency. Drags feet on tech restrictions.
-teutonia,nordostan,hostile,Former energy dependency severed. Strong sanctions. NATO deterrence.
-teutonia,heartland,friendly,EU supporter. Economic aid. Refugee host.
+teutonia,sarmatia,hostile,Former energy dependency severed. Strong sanctions. NATO deterrence.
+teutonia,ruthenia,friendly,EU supporter. Economic aid. Refugee host.
 teutonia,persia,tense,EU sanctions. Limited diplomatic channel.
 teutonia,gallia,alliance,EU co-leader. Franco-German engine. Strategic tensions on autonomy and spending.
 teutonia,freeland,alliance,EU and NATO. Different priorities on defense vs economy.
@@ -134,13 +134,13 @@ teutonia,caribe,neutral,Limited relationship.
 teutonia,mirage,friendly,Investment and trade hub. Financial partnership.
 freeland,columbia,alliance,Most enthusiastic Columbia ally. Hosts forward deployments. Buys Columbia weapons.
 freeland,cathay,neutral,Limited direct relationship. Concerned about BRI influence.
-freeland,nordostan,hostile,Existential threat. Maximum hawk. Frontline state.
-freeland,heartland,close_ally,Neighbor and strongest supporter. Weapons transit. Refugee host. Existential solidarity.
+freeland,sarmatia,hostile,Existential threat. Maximum hawk. Frontline state.
+freeland,ruthenia,close_ally,Neighbor and strongest supporter. Weapons transit. Refugee host. Existential solidarity.
 freeland,persia,tense,EU sanctions aligned. Limited direct interest.
 freeland,gallia,alliance,EU and NATO. Different strategic priorities.
 freeland,teutonia,alliance,EU partner. Pushes for more defense spending.
 freeland,ponte,alliance,EU partner. Frustrated by Ponte ambivalence.
-freeland,albion,friendly,NATO partner. Shared hawkish stance on Nordostan.
+freeland,albion,friendly,NATO partner. Shared hawkish stance on Sarmatia.
 freeland,bharata,neutral,Limited relationship.
 freeland,levantia,neutral,Limited relationship.
 freeland,formosa,neutral,Limited relationship.
@@ -153,8 +153,8 @@ freeland,caribe,neutral,No significant relationship.
 freeland,mirage,neutral,Limited relationship.
 ponte,columbia,alliance,NATO ally. EU weak link. Debt makes Ponte vulnerable to pressure from all sides.
 ponte,cathay,friendly,Belt and Road foothold. China-curious. Could break EU consensus.
-ponte,nordostan,tense,Russia-sympathetic but EU sanctions compliance. Could be crack in wall.
-ponte,heartland,neutral,Weakest EU supporter of Heartland. Ambivalent on enlargement.
+ponte,sarmatia,tense,Russia-sympathetic but EU sanctions compliance. Could be crack in wall.
+ponte,ruthenia,neutral,Weakest EU supporter of Ruthenia. Ambivalent on enlargement.
 ponte,persia,neutral,EU sanctions compliance minimal.
 ponte,gallia,alliance,EU partner. Different economic interests. Mediterranean solidarity.
 ponte,teutonia,alliance,EU partner. Resents fiscal pressure from Teutonia.
@@ -172,8 +172,8 @@ ponte,caribe,neutral,No significant relationship.
 ponte,mirage,friendly,Investment partner. Financial hub.
 albion,columbia,close_ally,Special relationship. Five Eyes. UNSC. Most reliable European partner for Columbia.
 albion,cathay,tense,Hawkish rhetoric. AUKUS. Pacific ambitions. Limited economic leverage.
-albion,nordostan,hostile,Strong sanctions. Intelligence adversary. Salisbury poisoning legacy.
-albion,heartland,friendly,Military aid. Intelligence sharing. Strong political support.
+albion,sarmatia,hostile,Strong sanctions. Intelligence adversary. Salisbury poisoning legacy.
+albion,ruthenia,friendly,Military aid. Intelligence sharing. Strong political support.
 albion,persia,hostile,Sanctions enforcer. Gulf military presence.
 albion,gallia,friendly,Channel rivalry but cooperation. NATO and UNSC peers.
 albion,teutonia,friendly,Economic partnership. NATO coordination.
@@ -191,8 +191,8 @@ albion,caribe,neutral,Historical connections. Limited strategic interest.
 albion,mirage,friendly,Gulf hub. Financial partnership. Arms buyer.
 bharata,columbia,friendly,Deepening defense ties. Plays both sides. Frustrating but essential for Columbia.
 bharata,cathay,tense,Regional rival. Border disputes. BRICS+ partners. Competition for influence.
-bharata,nordostan,friendly,Oil buyer. Defense customer. Refuses to sanction. BRICS+ partner.
-bharata,heartland,neutral,Refuses to take sides. Strategic neutrality.
+bharata,sarmatia,friendly,Oil buyer. Defense customer. Refuses to sanction. BRICS+ partner.
+bharata,ruthenia,neutral,Refuses to take sides. Strategic neutrality.
 bharata,persia,friendly,Energy buyer. BRICS+ partner.
 bharata,gallia,friendly,Defense sales partner. Strategic engagement.
 bharata,teutonia,friendly,Trade and investment partnership.
@@ -210,8 +210,8 @@ bharata,caribe,neutral,No significant relationship.
 bharata,mirage,friendly,Financial hub. Investment partner. Gulf workers.
 levantia,columbia,close_ally,Joint operations in Persia. Regional superpower pulling Columbia into ME.
 levantia,cathay,tense,Minimal engagement. Tech/intelligence concern.
-levantia,nordostan,tense,Opposing sides in Syria. Limited direct conflict.
-levantia,heartland,neutral,Limited relationship. Shared democratic values.
+levantia,sarmatia,tense,Opposing sides in Syria. Limited direct conflict.
+levantia,ruthenia,neutral,Limited relationship. Shared democratic values.
 levantia,persia,at_war,Operation Rising Lion. Joint campaign with Columbia. Existential threat.
 levantia,gallia,friendly,Defense cooperation. Historical complexity.
 levantia,teutonia,friendly,Diplomatic partner. Historical responsibility dynamic.
@@ -229,8 +229,8 @@ levantia,caribe,neutral,No significant relationship.
 levantia,mirage,friendly,Abraham Accords. Normalization. Gulf alignment.
 formosa,columbia,close_ally,Protectorate relationship. Strategic ambiguity. Semiconductor leverage.
 formosa,cathay,hostile,Existential threat. Claims sovereignty. Military intimidation. Semiconductor as deterrent.
-formosa,nordostan,neutral,No significant relationship.
-formosa,heartland,neutral,Shared sympathy as threatened democracies.
+formosa,sarmatia,neutral,No significant relationship.
+formosa,ruthenia,neutral,Shared sympathy as threatened democracies.
 formosa,persia,neutral,No significant relationship.
 formosa,gallia,neutral,Limited diplomatic engagement.
 formosa,teutonia,neutral,Trade partner. Semiconductor supplier.
@@ -246,10 +246,10 @@ formosa,choson,neutral,No significant relationship.
 formosa,hanguk,friendly,Semiconductor competition and cooperation.
 formosa,caribe,neutral,No significant relationship.
 formosa,mirage,neutral,No significant relationship.
-phrygia,columbia,alliance,NATO member. Controls Bosphorus. Plays every side. Buys Nordostan weapons.
+phrygia,columbia,alliance,NATO member. Controls Bosphorus. Plays every side. Buys Sarmatia weapons.
 phrygia,cathay,friendly,BRICS+ observer. Arms buyer. Tool for weakening NATO from within.
-phrygia,nordostan,friendly,Breaks NATO consensus. Arms customer. Bosphorus access negotiations.
-phrygia,heartland,tense,Blocks NATO consensus on Heartland. Grain deal mediator.
+phrygia,sarmatia,friendly,Breaks NATO consensus. Arms customer. Bosphorus access negotiations.
+phrygia,ruthenia,tense,Blocks NATO consensus on Ruthenia. Grain deal mediator.
 phrygia,persia,friendly,Neighbor. Trade partner. Energy transit.
 phrygia,gallia,tense,Mediterranean rivalry. NATO friction.
 phrygia,teutonia,tense,Migration pressure. NATO cooperation strained.
@@ -267,8 +267,8 @@ phrygia,caribe,neutral,No significant relationship.
 phrygia,mirage,friendly,Gulf-Mediterranean corridor. Investment.
 yamato,columbia,alliance,Pacific alliance cornerstone. Hosts major bases. Remilitarizing with encouragement.
 yamato,cathay,hostile,Most capable regional adversary. Senkaku dispute. Historic enmity. Primary Pacific deterrent.
-yamato,nordostan,tense,Kuril Islands dispute. Pacific fleet competition.
-yamato,heartland,neutral,Limited relationship.
+yamato,sarmatia,tense,Kuril Islands dispute. Pacific fleet competition.
+yamato,ruthenia,neutral,Limited relationship.
 yamato,persia,neutral,Energy concerns. Limited direct interest.
 yamato,gallia,friendly,Pacific interests. Defense cooperation.
 yamato,teutonia,friendly,Manufacturing partnership. Economic alignment.
@@ -286,8 +286,8 @@ yamato,caribe,neutral,No significant relationship.
 yamato,mirage,neutral,Limited relationship.
 solaria,columbia,friendly,Oil pricing power. Arms buyer. Hedging. Increasingly independent.
 solaria,cathay,friendly,Largest oil customer. Petroyuan negotiations. BRICS+ partner.
-solaria,nordostan,friendly,OPEC+ partner. Oil coordination.
-solaria,heartland,neutral,Limited relationship.
+solaria,sarmatia,friendly,OPEC+ partner. Oil coordination.
+solaria,ruthenia,neutral,Limited relationship.
 solaria,persia,hostile,Under active missile/drone attack since Feb 28. Ras Tanura refinery partial shutdown. First direct Iranian strikes on all GCC states in history.
 solaria,gallia,friendly,Arms buyer. Diplomatic partner.
 solaria,teutonia,friendly,Energy buyer. Investment.
@@ -305,8 +305,8 @@ solaria,caribe,neutral,Oil market connection.
 solaria,mirage,friendly,Gulf allies. OPEC+ coordination.
 choson,columbia,hostile,Nuclear adversary. No diplomatic channel. Provocation capability.
 choson,cathay,close_ally,Patron relationship. Economic lifeline. Buffer state.
-choson,nordostan,close_ally,Arms supplier. Troops in Heartland. Nuclear patron.
-choson,heartland,hostile,Troops fighting for Nordostan.
+choson,sarmatia,close_ally,Arms supplier. Troops in Ruthenia. Nuclear patron.
+choson,ruthenia,hostile,Troops fighting for Sarmatia.
 choson,persia,friendly,Arms trade. Missile technology.
 choson,gallia,hostile,Sanctions target.
 choson,teutonia,hostile,Sanctions target.
@@ -324,8 +324,8 @@ choson,caribe,neutral,Fellow isolated states.
 choson,mirage,neutral,No significant relationship.
 hanguk,columbia,alliance,Hosts Columbia bases. Semiconductor power. Cathay trade dependency.
 hanguk,cathay,tense,Massive trade dependency. THAAD friction. Samsung competition.
-hanguk,nordostan,tense,Sanctions enforcer. Indirect adversary via Choson.
-hanguk,heartland,neutral,Limited relationship.
+hanguk,sarmatia,tense,Sanctions enforcer. Indirect adversary via Choson.
+hanguk,ruthenia,neutral,Limited relationship.
 hanguk,persia,neutral,Limited relationship.
 hanguk,gallia,friendly,Trade and diplomatic partner.
 hanguk,teutonia,friendly,Trade and tech partnership.
@@ -343,8 +343,8 @@ hanguk,caribe,neutral,No significant relationship.
 hanguk,mirage,neutral,Limited relationship.
 caribe,columbia,hostile,Post-intervention. Operation Absolute Resolve. Energy blockade. Resistance.
 caribe,cathay,friendly,Economic aid. Testing Monroe Doctrine. Telecom infrastructure.
-caribe,nordostan,friendly,Military aid. Foothold in Western hemisphere.
-caribe,heartland,neutral,No significant relationship.
+caribe,sarmatia,friendly,Military aid. Foothold in Western hemisphere.
+caribe,ruthenia,neutral,No significant relationship.
 caribe,persia,friendly,Shared resistance to Columbia.
 caribe,gallia,neutral,Limited relationship.
 caribe,teutonia,neutral,Limited relationship.
@@ -362,8 +362,8 @@ caribe,hanguk,neutral,No significant relationship.
 caribe,mirage,neutral,No significant relationship.
 mirage,columbia,friendly,Financial hub. Gulf military facilities. Arms buyer. Logistics for Persia war.
 mirage,cathay,friendly,BRI logistics. Financial hub bypassing Western finance.
-mirage,nordostan,neutral,OPEC+ coordination. Limited strategic engagement.
-mirage,heartland,neutral,No significant relationship.
+mirage,sarmatia,neutral,OPEC+ coordination. Limited strategic engagement.
+mirage,ruthenia,neutral,No significant relationship.
 mirage,persia,hostile,Under active attack. 357 ballistic missiles 1815 drones 15 cruise missiles. 9 dead 166 injured. Missiles near Dubai skyline. No-enemies strategy destroyed.
 mirage,gallia,friendly,Arms buyer. Financial partnership.
 mirage,teutonia,friendly,Investment and financial partner.

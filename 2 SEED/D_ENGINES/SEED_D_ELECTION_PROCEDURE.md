@@ -11,8 +11,8 @@ Elections are defined in `world_state.py` under `SCHEDULED_EVENTS`:
 | Round | Election | Country | Subtype |
 |-------|----------|---------|---------|
 | 2 | Columbia Midterms | columbia | `columbia_midterms` |
-| 3 | Heartland Wartime Election | heartland | `heartland_wartime` |
-| 4 | Heartland Wartime Runoff | heartland | `heartland_wartime_runoff` |
+| 3 | Ruthenia Wartime Election | ruthenia | `ruthenia_wartime` |
+| 4 | Ruthenia Wartime Runoff | ruthenia | `ruthenia_wartime_runoff` |
 | 5 | Columbia Presidential | columbia | `columbia_presidential` |
 
 Elections are processed automatically by the World Model Engine at the end of the specified round, inside `deterministic_pass()`.
@@ -41,7 +41,7 @@ Where:
 - **stab_factor** = `(stability - 5) * 5.0` (above-5 stability helps, below-5 hurts)
 - **war_penalty** = `-5.0` per active war the country is involved in
 
-For **Heartland wartime elections**, additional modifiers apply:
+For **Ruthenia wartime elections**, additional modifiers apply:
 - **territory_factor** = `-3` per occupied zone (losing territory hurts incumbent)
 - **war_tiredness** = `-2 * war_tiredness` (prolonged war erodes support)
 
@@ -57,7 +57,7 @@ Passed in via `actions["votes"][country_id]["incumbent_pct"]`. This represents t
 - **Incumbent wins:** Parliament stays status quo (President's camp retains majority).
 - **Incumbent loses:** Opposition wins Seat 5. Parliament flips to 3-2 opposition majority (Tribune + Challenger + NPC Seat 5). This blocks the President's budget unless they negotiate.
 
-### Heartland Wartime Election (Rounds 3-4)
+### Ruthenia Wartime Election (Rounds 3-4)
 - **Incumbent wins (Beacon survives):** No change. Beacon continues as president.
 - **Incumbent loses:** Beacon is replaced by Bulwark as president. This triggers a leadership change and potential policy shift (more hawkish or dovish depending on Bulwark's character).
 
@@ -75,8 +75,8 @@ In `world_state.py`, verify:
 ```python
 SCHEDULED_EVENTS = {
     2: [{"type": "election", "subtype": "columbia_midterms", "country": "columbia"}],
-    3: [{"type": "election", "subtype": "heartland_wartime", "country": "heartland"}],
-    4: [{"type": "election", "subtype": "heartland_wartime_runoff", "country": "heartland"}],
+    3: [{"type": "election", "subtype": "ruthenia_wartime", "country": "ruthenia"}],
+    4: [{"type": "election", "subtype": "ruthenia_wartime_runoff", "country": "ruthenia"}],
     5: [{"type": "election", "subtype": "columbia_presidential", "country": "columbia"}],
 }
 ```
@@ -116,14 +116,14 @@ print(election_events[-1])
 - **Player votes at 0%:** Pure AI-driven result (halved).
 - **Player votes at 100%:** Incumbent guaranteed to win unless AI score is 0.
 
-### 5. Verify Heartland war modifiers
+### 5. Verify Ruthenia war modifiers
 
-Set up Heartland with occupied zones and high war_tiredness, then run Round 3:
+Set up Ruthenia with occupied zones and high war_tiredness, then run Round 3:
 ```python
-ws.countries["heartland"]["political"]["war_tiredness"] = 5
-actions = {"votes": {"heartland": {"incumbent_pct": 45.0}}}
+ws.countries["ruthenia"]["political"]["war_tiredness"] = 5
+actions = {"votes": {"ruthenia": {"incumbent_pct": 45.0}}}
 results, _, _ = engine.process_round(ws, actions, round_num=3)
-print(results["deterministic"]["elections"]["heartland"])
+print(results["deterministic"]["elections"]["ruthenia"])
 # Expect: incumbent_wins = False (war-weary, territory lost, low voter support)
 ```
 

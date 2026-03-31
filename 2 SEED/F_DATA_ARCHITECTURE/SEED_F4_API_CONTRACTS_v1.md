@@ -212,8 +212,8 @@ Response 200:
   },
   "active_wars": [
     {
-      "attacker": "nordostan",
-      "defender": "heartland",
+      "attacker": "sarmatia",
+      "defender": "ruthenia",
       "theater": "eastern_ereb"
     },
     ...
@@ -381,7 +381,7 @@ Request Body:
       { "action_type": "attack", "target_zone": "persia_west", "units": { "ground": 4, "tactical_air": 3 } }
     ],
     "diplomatic": [
-      { "action_type": "public_statement", "content": "Columbia stands with Heartland." }
+      { "action_type": "public_statement", "content": "Columbia stands with Ruthenia." }
     ]
   }
 }
@@ -576,7 +576,7 @@ Request Body:
   "idempotency_key": "mod_override_round3_v1",
   "overrides": [
     {
-      "path": "countries.heartland.political.stability",
+      "path": "countries.ruthenia.political.stability",
       "new_value": 4.0,
       "reason": "Manual adjustment for off-screen political crisis"
     }
@@ -956,7 +956,7 @@ Clients maintain a local state copy and apply deltas. If a client detects a vers
       "chokepoint_status": { ... },
       "public_economic_tiers": {
         "columbia": "major",
-        "heartland": "medium",
+        "ruthenia": "medium",
         "persia": "medium"
       }
     },
@@ -966,7 +966,7 @@ Clients maintain a local state copy and apply deltas. If a client detects a vers
     },
     "relationships": {
       "columbia": "hostile",
-      "heartland": "tense",
+      "ruthenia": "tense",
       "persia": "neutral"
     }
   },

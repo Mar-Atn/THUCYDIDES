@@ -37,7 +37,7 @@ Open democratic dysfunction. Power formally divided between branches. Disagreeme
 
 | # | Character | Title | Camp | Parl. seat | Election votes | Core interests / ambitions | Specific rights |
 |---|-----------|-------|------|:----------:|:--------------:|---------------------------|-----------------|
-| 8 | **Fixer** | Presidential Envoy (Middle East / Peace) | President's (pragmatic) | — | 2 | Broker Middle East deals, Heartland peace. Personal business wealth. Conflicts of interest everywhere. Kushner/Witkoff archetype. | Independent diplomatic channel (deniable, personal). Middle East portfolio. Heartland peace portfolio. Personal coins. Campaign fundraising. Weighted election influence. |
+| 8 | **Fixer** | Presidential Envoy (Middle East / Peace) | President's (pragmatic) | — | 2 | Broker Middle East deals, Ruthenia peace. Personal business wealth. Conflicts of interest everywhere. Kushner/Witkoff archetype. | Independent diplomatic channel (deniable, personal). Middle East portfolio. Ruthenia peace portfolio. Personal coins. Campaign fundraising. Weighted election influence. |
 | 9 | **Pioneer** | Presidential Envoy (Tech / Business) | Swing (tech pragmatist) | — | 2 | AI development, semiconductor negotiations, Thule. Business empire depends on policy outcomes. Cathay supply chain contacts. | Independent tech/business diplomatic channel. Cathay back-channel through business contacts. Thule portfolio. Personal coins. Weighted election influence. May run as independent candidate. |
 
 **5th parliamentary seat (Seat 5 — "The Contested Seat"):** Initially held by a presidential loyalist NPC, giving the President's camp a starting 3-2 majority (Dealer + Volt + Seat 5 vs. Tribune + Challenger). If Fixer or Pioneer are active (expansion roles), one of them is assigned Seat 5 instead of the NPC.
@@ -90,7 +90,7 @@ Not internal factions within one country — sovereign nations that must act col
 |---|-----------|---------|:-------:|---------------------------|-----------------|
 | 1 | **Lumière** | Gallia (France) | Yes | Strategic autonomy. European defense independence. French leadership. Nuclear. UNSC veto. Skeptical of EU enlargement that dilutes French influence. | Independent nuclear capability. UNSC permanent seat + veto. Can deploy military independently (Africa, Mediterranean). Proposes EU strategic autonomy initiatives. |
 | 2 | **Forge** | Teutonia (Germany) | Yes | Economic stability above all. Massive China trade exposure. Reluctant rearmer. Consensus-seeker. Most torn player in Europe. | Largest EU economy — economic decisions carry disproportionate weight. Hosts Columbia's main European base (can renegotiate). Industrial base critical for arms production. |
-| 3 | **Sentinel** | Freeland (Poland) | Yes | Maximum NATO commitment. Closest to Columbia. Heartland support. "We told you so about Russia." Existential security threat on border. | Geographic position (border with conflict zone). Largest continental EU military after France. Hosts Columbia forward deployments. Moral authority on Russia. |
+| 3 | **Sentinel** | Freeland (Poland) | Yes | Maximum NATO commitment. Closest to Columbia. Ruthenia support. "We told you so about Russia." Existential security threat on border. | Geographic position (border with conflict zone). Largest continental EU military after France. Hosts Columbia forward deployments. Moral authority on Russia. |
 | 4 | **Ponte** | Ponte (Italy) | Yes | EU's weak link. Massive debt. Russia-sympathetic. China-curious (Belt & Road). The swing vote that can break EU consensus. | Can block any EU decision. Represents Southern European economic vulnerability. Mediterranean migration dimension. Controls central Mediterranean naval access. |
 | 5 | **Mariner** | Albion (UK) | No (not in EU) | Special relationship with Columbia. Five Eyes intelligence. Post-Brexit relevance. Naval power with Pacific ambitions. | Nuclear capability. UNSC permanent seat + veto. Five Eyes (intelligence Columbia doesn't share with EU). Strong navy. Financial center (City of London — sanctions enforcement). NOT in EU decisions. |
 | 6 | **Pillar** | EU Commissioner | No (chairs, no vote) | EU institutional power and relevance. Wants unity — without it, the institution is irrelevant. Resists any single member dominating. Brussels bureaucrat who controls the agenda, brokers compromises, and represents the EU externally. Nightmare: members bypassing EU to cut bilateral deals. | Chairs all EU meetings. Sets EU agenda (controls what gets discussed). Represents EU externally on trade, sanctions coordination, institutional matters. Can call emergency EU sessions. Can publicly frame issues (press statements on behalf of EU). Proposes compromise packages. Cannot vote — power is procedural and reputational, not sovereign. |
@@ -103,7 +103,7 @@ Not internal factions within one country — sovereign nations that must act col
 
 ---
 
-## Nordostan (Russia) — 3 base / 4 full
+## Sarmatia (Russia) — 3 base / 4 full
 
 Personal, paranoid, brittle. Three (or four) directions: continue the war and outlast, produce a military result, or pursue economic survival through deals. The coup mechanic is always latent.
 
@@ -133,7 +133,7 @@ When Ledger is added, Compass becomes a pure Oligarch — personal wealth, back-
 
 ---
 
-## Heartland (Ukraine) — 3
+## Ruthenia (Ukraine) — 3
 
 Three futures competing. Wartime election (Round 3-4) determined by AI based on gameplay. All three active from Round 1.
 
@@ -170,10 +170,10 @@ Each has a character name, personality, and decision framework. When human-playe
 | 1 | **Scales** | Bharata (India) | Patient, calculating, refuses to commit | Non-alignment, court all sides, regional primacy, UNSC seat | Sanctions stance determines coalition effectiveness. Nuclear dimension with regional rivals. | Yes |
 | 2 | **Citadel** | Levantia (Israel) | Decisive, unapologetic, survival-first | Iran neutralization, regional dominance, survival | Unilateral strike on Persia = regional crisis forcing Columbia's hand. | Yes |
 | 3 | **Chip** | Formosa (Taiwan) | Anxious, strategic, globally essential | Survival, semiconductor leverage, US commitment | Semiconductor chokepoint. Blockade/invasion crashes global tech. | Yes |
-| 4 | **Bazaar** | Phrygia (Turkey) | Transactional, opportunistic, charming | Broker everything, NATO + BRICS observer, regional power | Controls Bosphorus. Can block NATO decisions. Arms dealer. | Yes |
+| 4 | **Vizier** | Phrygia (Turkey) | Transactional, opportunistic, charming | Broker everything, NATO + BRICS observer, regional power | Controls Bosphorus. Can block NATO decisions. Arms dealer. | Yes |
 | 5 | **Sakura** | Yamato (Japan) | Cautious but awakening, increasingly assertive | Pacific security, remilitarization, alliance reliability | Chip supply chain decisions. Pacific military posture. Could go nuclear. | Yes |
 | 6 | **Wellspring** | Solaria (Saudi Arabia) | Pragmatic, patient, leverage-obsessed | Oil pricing, BRICS+ currency, hedge US-China | OPEC+ production reshapes global economy. Currency union swing vote. | Yes |
-| 7 | **Pyro** | Choson (N. Korea) | Erratic, threatening, attention-seeking | Regime survival, nuclear leverage, extract payments | Nuclear tests/provocations create crises on demand. Troops in Nordostan. | Yes |
+| 7 | **Pyro** | Choson (N. Korea) | Erratic, threatening, attention-seeking | Regime survival, nuclear leverage, extract payments | Nuclear tests/provocations create crises on demand. Troops in Sarmatia. | Yes |
 | 8 | **Vanguard** | Hanguk (S. Korea) | Anxious, capable, trapped | Security from North, China trade, tech power | Semiconductor supply chain. Korean peninsula anchor. | Yes |
 | 9 | **Havana** | Caribe (Cuba+Ven.) | Defiant, cornered, provocative | Regime survival, US pressure, Russia/China foothold | US near-abroad crisis. Monroe Doctrine trigger. | Yes |
 | 10 | **Spire** | Mirage (UAE) | Sleek, connected, pragmatic | Financial hub, arms buyer, hedger | Financial flows, arms deals, connects everyone to everyone. | Yes |
@@ -206,7 +206,7 @@ Priority for human assignment (when participants available): Bharata > Phrygia >
 
 ## Team Dynamics Comparison
 
-| | Columbia | Cathay | Europe | Nordostan | Heartland | Persia |
+| | Columbia | Cathay | Europe | Sarmatia | Ruthenia | Persia |
 |--|---------|--------|--------|-----------|-----------|--------|
 | **Power structure** | Divided (institutional) | Concentrated (hierarchical) | Sovereign (collective) | Personal (paranoid) | Contested (electoral) | Theocratic + military |
 | **Disagreement style** | Public, institutional | Hidden, behind facade | Inter-state, procedural | Whispered, dangerous | Temporal — 3 futures | Suppressed but explosive |
@@ -219,5 +219,5 @@ Priority for human assignment (when participants available): Bharata > Phrygia >
 
 ## Changelog
 
-- **v2.0 (2026-03-20):** Complete restructure. Columbia expanded to 7/9 with political matrix (3 camps, 3 swing), Challenger, Fixer, Pioneer, 5-seat parliament, two elections. Cathay expanded to 5 with Sage (Elder). Europe expanded to 5/6 with Ponte (Italy) and optional Spain. Persia (Iran) added as 3-player team. Nordostan revised to 3/4. Solo countries consolidated to 10. Optional structural roles defined. Complete scaling table. Team dynamics comparison across all 6 teams.
+- **v2.0 (2026-03-20):** Complete restructure. Columbia expanded to 7/9 with political matrix (3 camps, 3 swing), Challenger, Fixer, Pioneer, 5-seat parliament, two elections. Cathay expanded to 5 with Sage (Elder). Europe expanded to 5/6 with Ponte (Italy) and optional Spain. Persia (Iran) added as 3-player team. Sarmatia revised to 3/4. Solo countries consolidated to 10. Optional structural roles defined. Complete scaling table. Team dynamics comparison across all 6 teams.
 - **v1.0 (2026-03-19):** Initial roles architecture. 5 teams, 15 AI countries.

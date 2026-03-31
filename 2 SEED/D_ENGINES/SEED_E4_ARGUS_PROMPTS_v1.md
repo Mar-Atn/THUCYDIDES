@@ -177,7 +177,7 @@ Assembled once at game start from TTT design documents. Contains:
 - **Round structure:** Phase A (negotiation, 45-80 min) → Phase B (world update) → Phase C (deployment). 6-8 rounds, each = 6 months.
 - **Economic mechanics:** GDP, sanctions, tariffs, oil price, inflation, budget cycle, debt. Plain-language summaries with examples.
 - **Military mechanics:** Unit types (ground, naval, air, air defense, strategic), RISK combat, amphibious 3:1 ratio, blockade rules, transit time, production.
-- **Political mechanics:** Stability (1-10), support (0-100%), elections (Columbia R5, Heartland R3-4), coups, propaganda.
+- **Political mechanics:** Stability (1-10), support (0-100%), elections (Columbia R5, Ruthenia R3-4), coups, propaganda.
 - **Technology:** Nuclear (L0-L4) and AI (L0-L4) tracks. R&D investment, breakthroughs.
 - **Transaction types:** Coin transfer, arms transfer, tech transfer, basing rights, treaty, agreement (ceasefire/peace), org creation.
 - **Live actions:** Attack, blockade, missile strike, covert ops, arrest, assassination, coup, protest. Authorization requirements.
@@ -191,11 +191,11 @@ Assembled once at game start from TTT design documents. Contains:
 
 ## BLOCK 3: Role Context
 
-Populated from the participant's role assignment. Example for Beacon (Heartland President):
+Populated from the participant's role assignment. Example for Beacon (Ruthenia President):
 
 ```
 CHARACTER: Beacon
-COUNTRY: Heartland
+COUNTRY: Ruthenia
 POSITION: President
 TEAM: Beacon (you, president), Bulwark (the general you fired — running against you),
       Broker (former president, peace candidate)
@@ -207,7 +207,7 @@ YOUR POWERS:
 - Elections: you face election in Round 3 or 4
 
 YOUR SITUATION:
-- At war with Nordostan. Front line stalled.
+- At war with Sarmatia. Front line stalled.
 - Dependent on Columbia for weapons and money. Dealer despises you.
 - Approval at 52%, falling. War tiredness rising.
 - Bulwark would beat you 64-36 in a runoff.
@@ -251,9 +251,9 @@ Current round's world state as visible to this role. Updated after each world up
 Auto-populated from the SIM event log. Chronological feed of events visible to this role:
 
 ```
-R1: NATO opening session — 12 members attended, joint statement on Heartland support.
+R1: NATO opening session — 12 members attended, joint statement on Ruthenia support.
 R1: Oil price at $142 (Gulf Gate blockade effect).
-R1: Cathay-Nordostan joint military exercise announced (Pacific).
+R1: Cathay-Sarmatia joint military exercise announced (Pacific).
 R2: Columbia mid-term results: opposition gains 4 seats. Dealer's war authority challenged.
 R2: Your GDP dropped 3.2%. Sanctions impact visible.
 R2: OPEC+ meeting: Wellspring proposed production cut, Persia blocked.

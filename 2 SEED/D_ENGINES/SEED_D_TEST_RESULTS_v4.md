@@ -14,7 +14,7 @@
 | FIX-1 | Bilateral GDP dependency | `_calc_bilateral_dependency()` L463-483 | Columbia-Cathay mutual drag (15%/12%), Teutonia-Cathay (10%/8%), Yamato/Hanguk-Cathay links. Partner contraction drags growth. | S3, S8, S10: interconnected economies feel each other's pain |
 | FIX-2 | Stronger oil demand destruction | `_calc_oil_price()` L373-398 | Stressed=-0.03, crisis=-0.06, collapse=-0.10 demand reduction per major economy. GDP contraction also reduces demand (-0.02 if growth<-2 & GDP>30). | S1: oil comes DOWN after R3-4 via demand destruction cycle |
 | FIX-3 | Financial market index | `_update_market_index()` L1749-1791 | Starts at 50. Crisis=-8, collapse=-15, high inflation=-5, oil>180=-3. If index<20: GDP-3%, support-5. If <30: GDP-1%, support-2. | S6, S8: financial market crashes amplify economic crises |
-| FIX-4 | Ground auto-production for war | `_auto_produce_military()` L1797-1822 | War countries produce +1 ground/round (if capacity>0 and treasury covers cost). | S4: Nordostan/Heartland replenish units during war |
+| FIX-4 | Ground auto-production for war | `_auto_produce_military()` L1797-1822 | War countries produce +1 ground/round (if capacity>0 and treasury covers cost). | S4: Sarmatia/Ruthenia replenish units during war |
 | FIX-5 | Naval auto-production | `_auto_produce_military()` L1813-1822 + `_calc_military_production()` L768-775 | Naval>=5 countries get +1 naval per 2 rounds (even rounds). Dual path: in production step (if no manual order) and in auto-produce step (costs treasury*0.5). | S4, S10: both Columbia and Cathay maintain fleets |
 | FIX-6 | Amphibious 3:1 (not 4:1) | Scenario design reference | Formosa has 4 ground. Cathay needs 12+ for ground invasion (3:1 ratio). Blockade remains only viable option. | S3: blockade-only constraint validated |
 | FIX-7 | Dollar credibility erosion | `_update_dollar_credibility()` L1840-1858 + sanctions impact L1907 | Columbia printing erodes dollar_credibility (starts 100, -2*printed per round, floor 20, +1 recovery). Scales sanctions effectiveness by credibility/100. | S2, S7: Columbia printing weakens its own sanctions regime |
@@ -81,8 +81,8 @@ YES. The combination of FIX-2 (stronger demand response to stressed/crisis econo
 | Oil price ($) | 160-185 | ~140 (inertia) | 145-200 | ~159 (mean-rev) | 80-110 | ~87 | PASS (R1 below corridor due to Cal-1 inertia; reaches corridor R2-R3; R4-R8 correct) |
 | Columbia GDP | 272-278 | ~285 | 254-272 | ~276 | 256-276 | ~277 | PASS (slightly above corridor due to tech boost; realistic) |
 | Cathay GDP | 190-198 | ~198 | 186-198 | ~206 | 198-210 | ~228 | CALIBRATE (R4+ above corridor due to 4% base growth compounding; corridor may undercount Cathay baseline growth) |
-| Nordostan GDP | 20-22 | ~20.4 | 20-25 | ~22 | 18-21 | ~19.5 | PASS |
-| Nordostan oil_rev | 0.8-1.4 | ~0.96 | 0.8-1.5 | ~1.1 | 0.3-0.7 | ~0.55 | PASS |
+| Sarmatia GDP | 20-22 | ~20.4 | 20-25 | ~22 | 18-21 | ~19.5 | PASS |
+| Sarmatia oil_rev | 0.8-1.4 | ~0.96 | 0.8-1.5 | ~1.1 | 0.3-0.7 | ~0.55 | PASS |
 | Columbia econ_state | NORMAL | NORMAL | NORMAL-STRESSED | NORMAL | NORMAL | NORMAL | PASS |
 
 ### Verdict: PASS (9/10)
@@ -97,7 +97,7 @@ YES. The combination of FIX-2 (stronger demand response to stressed/crisis econo
 
 ### Trace-Through
 
-**R1 Nordostan GDP (v3 baseline + FIX-9):**
+**R1 Sarmatia GDP (v3 baseline + FIX-9):**
 - Sanctions hit: -0.12 * 1.5 = -0.18 (same as v3). State = NORMAL. crisis_amp = 1.0.
 - Growth = -19.9% (same as v3). new_gdp = ~16.0.
 
@@ -106,7 +106,7 @@ YES. The combination of FIX-2 (stronger demand response to stressed/crisis econo
 - Maintenance: 12.9. Social MANDATORY = 0.25 * 16.0 * 0.70 = 2.80 (was 4.0 total).
 - Mandatory = 12.9 + 2.80 = 15.70 (was 16.9). Slightly less crushing.
 - Deficit = 15.70 - 3.10 = 12.60 (was 13.80). money_printed = 12.60 - 6 = 6.60 (was 7.80).
-- FIX-10 reduces the mandatory squeeze by ~1.2 coins, giving Nordostan marginally more breathing room.
+- FIX-10 reduces the mandatory squeeze by ~1.2 coins, giving Sarmatia marginally more breathing room.
 
 **R1 Inflation:**
 - money_printed = 6.60/16.0 * 80 = 33.0% (was 39.0% in v3). New inflation = 5.0 + 33.0 = **38.0%**
@@ -123,8 +123,8 @@ YES. The combination of FIX-2 (stronger demand response to stressed/crisis econo
 - Total delta = -0.50 - 0.30 - 0.08 - 0.16 - 0.30 + 0.10 = -1.24. Autocracy: *0.75 = -0.93.
 - New stability = 5.0 - 0.93 = **~4.07** (same as v3)
 
-**R2-R4 Nordostan Trajectory (FIX-9 kicks in):**
-- R2: Nordostan now STRESSED (stress triggers: GDP growth <-1, treasury=0, likely 2+ triggers).
+**R2-R4 Sarmatia Trajectory (FIX-9 kicks in):**
+- R2: Sarmatia now STRESSED (stress triggers: GDP growth <-1, treasury=0, likely 2+ triggers).
 - Growth ~-17%. With FIX-9 crisis_amp for STRESSED = 1.2x: effective growth = -17% * 1.2 = **-20.4%**.
 - This is SLIGHTLY harsher than v3 for stressed state. GDP ~16.0 * 0.796 = ~12.7.
 - R3: STRESSED or CRISIS. If CRISIS: growth ~-15% * 1.5 = -22.5%. GDP ~12.7 * 0.775 = ~9.8.
@@ -135,7 +135,7 @@ YES. The combination of FIX-2 (stronger demand response to stressed/crisis econo
 - Plus Pass 2 adaptation boost: +2% GDP. Decline slows significantly.
 - FIX-9 crisis_amp of 1.5x compounds with reduced sanctions: net trajectory flattens.
 
-**KEY CHECK: Does Nordostan survive better than before (siege resilience)?**
+**KEY CHECK: Does Sarmatia survive better than before (siege resilience)?**
 YES, marginally. FIX-10 reduces mandatory costs by ~1.2 coins (70% social instead of 100%). Stability trajectory is similar due to Cal-4 cap. The autocratic resilience (0.75 multiplier) + siege bonus (+0.10) keep stability above 2.5 through R8.
 
 **KEY CHECK: Does dollar credibility erode if Columbia prints?**
@@ -145,15 +145,15 @@ In this scenario, Columbia is the sanctioner and not under direct economic press
 
 | Variable | R1 Corridor | R1 v4 | R4 Corridor | R4 v4 | R8 Corridor | R8 v4 | Verdict |
 |----------|-------------|-------|-------------|-------|-------------|-------|---------|
-| Nordostan GDP | 17-20 | ~16.0 | 11-17 | ~8.2 | 10-16 | ~7.5 | CALIBRATE (R4-R8 below corridor; FIX-9 crisis amplification compounds too aggressively with sanctions) |
-| Nordostan inflation | 10-30 | ~38 | 35-80 | ~75 | 20-55 | ~35 | PASS (R4-R8 within corridor; R1 still above) |
-| Nordostan stability | 4.5-5.0 | ~4.07 | 3.2-4.4 | ~2.9 | 2.5-4.2 | ~2.6 | PASS (near lower bounds but above 2.0 floor) |
-| Nordostan econ_state | NORMAL-STRESSED | STRESSED | STRESSED-CRISIS | CRISIS | CRISIS | CRISIS | PASS |
+| Sarmatia GDP | 17-20 | ~16.0 | 11-17 | ~8.2 | 10-16 | ~7.5 | CALIBRATE (R4-R8 below corridor; FIX-9 crisis amplification compounds too aggressively with sanctions) |
+| Sarmatia inflation | 10-30 | ~38 | 35-80 | ~75 | 20-55 | ~35 | PASS (R4-R8 within corridor; R1 still above) |
+| Sarmatia stability | 4.5-5.0 | ~4.07 | 3.2-4.4 | ~2.9 | 2.5-4.2 | ~2.6 | PASS (near lower bounds but above 2.0 floor) |
+| Sarmatia econ_state | NORMAL-STRESSED | STRESSED | STRESSED-CRISIS | CRISIS | CRISIS | CRISIS | PASS |
 | Sanctions hit R5+ | 2-6% | ~6.5% | -- | -- | -- | -- | PASS (adaptation visible) |
 
 ### Verdict: PASS (8/10)
 
-**What changed from v3:** FIX-9 crisis amplification makes the GDP trajectory steeper in STRESSED/CRISIS states. Nordostan GDP by R8 (~7.5) is below the corridor lower bound (10). The scenario corridor may need updating to reflect the amplified contraction mechanic. However, the DYNAMICS are correct: sanctions compound with crisis state to accelerate decline, then adaptation slows it. Stability holds above 2.0 throughout, correctly reflecting autocratic resilience. **Score reduced from 8.5 to 8.0** because FIX-9 overcorrects slightly on the GDP trajectory for sanctioned economies.
+**What changed from v3:** FIX-9 crisis amplification makes the GDP trajectory steeper in STRESSED/CRISIS states. Sarmatia GDP by R8 (~7.5) is below the corridor lower bound (10). The scenario corridor may need updating to reflect the amplified contraction mechanic. However, the DYNAMICS are correct: sanctions compound with crisis state to accelerate decline, then adaptation slows it. Stability holds above 2.0 throughout, correctly reflecting autocratic resilience. **Score reduced from 8.5 to 8.0** because FIX-9 overcorrects slightly on the GDP trajectory for sanctioned economies.
 
 ---
 
@@ -251,14 +251,14 @@ This creates the "mutually assured economic destruction" dynamic, though it is A
 - Columbia trajectory: R1=11, R2=13, R3=13, R4=15, R5=15, R6=17, R7=17, R8=19.
 
 **FIX-4 Ground Auto-Production:**
-- Nordostan at war, ground cap=4, cost=1.5. Treasury starts 6. R1: +1 ground (cost 1.5, treasury->4.5). R2: +1 (treasury->3.0). R3: +1 (treasury->1.5). R4: +1 (treasury->0). R5+: no treasury, no auto-production.
-- Nordostan ground: 18->19->20->21->22->22->22->22->22. This is reasonable but only while treasury lasts.
-- Heartland at war, ground cap=2, cost=1.5. Treasury=1. R1: +1 (treasury->-0.5? No, check: treasury >= cost). 1 >= 1.5? NO. Heartland CANNOT auto-produce (treasury too low). Heartland stays at 10 ground unless aided.
+- Sarmatia at war, ground cap=4, cost=1.5. Treasury starts 6. R1: +1 ground (cost 1.5, treasury->4.5). R2: +1 (treasury->3.0). R3: +1 (treasury->1.5). R4: +1 (treasury->0). R5+: no treasury, no auto-production.
+- Sarmatia ground: 18->19->20->21->22->22->22->22->22. This is reasonable but only while treasury lasts.
+- Ruthenia at war, ground cap=2, cost=1.5. Treasury=1. R1: +1 (treasury->-0.5? No, check: treasury >= cost). 1 >= 1.5? NO. Ruthenia CANNOT auto-produce (treasury too low). Ruthenia stays at 10 ground unless aided.
 
 **War Tiredness (unchanged from v3):**
-- Heartland (defender, war started R-4): duration R1 = 5, > 3, halved growth: 0.20 * 0.5 = 0.10/round.
+- Ruthenia (defender, war started R-4): duration R1 = 5, > 3, halved growth: 0.20 * 0.5 = 0.10/round.
 - Starting tiredness: 4.0 (from CSV). R1: 4.10, R2: 4.20, ... R8: 4.80.
-- Nordostan (attacker): 0.15 * 0.5 = 0.075. R1: 4.075, R8: ~4.60.
+- Sarmatia (attacker): 0.15 * 0.5 = 0.075. R1: 4.075, R8: ~4.60.
 
 ### Results vs Corridor
 
@@ -267,9 +267,9 @@ This creates the "mutually assured economic destruction" dynamic, though it is A
 | Cathay naval | 8 | 8 | 11 | 13 | 15 | 19 | FAIL (double-production bug: manual + auto fire on same round) |
 | Columbia naval | 11 | 11 | 13 | 15 | 15 | 19 | FAIL (double auto-production: production step + auto-produce step both fire) |
 | Naval ratio | 0.73 | 0.73 | 0.85 | 0.87 | 1.00 | 1.00 | PASS (ratio correct despite absolute numbers wrong) |
-| Heartland war_tiredness | 4.0-4.2 | 4.10 | 4.3-4.6 | 4.40 | 4.7-5.0 | 4.80 | PASS |
+| Ruthenia war_tiredness | 4.0-4.2 | 4.10 | 4.3-4.6 | 4.40 | 4.7-5.0 | 4.80 | PASS |
 | Columbia war_tiredness | 1.1-1.2 | 1.15 | 1.5-1.7 | 1.53 | 1.7-2.1 | 1.83 | PASS |
-| Heartland stability | 4.7-5.0 | ~4.85 | 4.0-4.6 | ~4.30 | 3.2-4.2 | ~3.70 | PASS |
+| Ruthenia stability | 4.7-5.0 | ~4.85 | 4.0-4.6 | ~4.30 | 3.2-4.2 | ~3.70 | PASS |
 
 ### Verdict: CALIBRATE (7/10)
 
@@ -293,10 +293,10 @@ War tiredness and stability dynamics are correct and within corridor. Ground aut
 
 **R1-R2 (Wars active, Gulf Gate blocked):**
 - Oil: R1 ~$137 (Cal-1 inertia), R2 ~$161. FIX-2: no stressed economies yet, demand ~1.0.
-- Columbia at war, Heartland at war. GDP impacts from war hit + oil shock.
+- Columbia at war, Ruthenia at war. GDP impacts from war hit + oil shock.
 
 **R3 Ceasefire Columbia-Persia, Gulf Gate lifted:**
-- Gulf Gate: disruption drops from 1.50 to 1.00. Wars: 1 (only Nord-Heartland). War premium: 0.05.
+- Gulf Gate: disruption drops from 1.50 to 1.00. Wars: 1 (only Nord-Ruthenia). War premium: 0.05.
 - formula_price = 80 * (1.0/1.0) * 1.0 * 1.05 = $84. Previous ~$161.
 - Cal-1 inertia: 161*0.4 + 84*0.6 = **$114.8**. Drop of ~$46.
 - Corridor says $30+ drop within 2 rounds: PASS (dropped ~$46 in one round).
@@ -310,18 +310,18 @@ War tiredness and stability dynamics are correct and within corridor. Ground aut
 - formula ~$84. previous ~$115. price = 115*0.4 + 84*0.6 = **$96.4**.
 - Within corridor 85-120.
 
-**R6 Nordostan-Heartland Ceasefire:**
+**R6 Sarmatia-Ruthenia Ceasefire:**
 - Wars: 0. War premium: 0. formula_price = 80 * 1.0 * 1.0 * 1.0 = $80.
 - Previous ~$88. price = 88*0.4 + 80*0.6 = **$83.2**.
-- Heartland ceasefire rally: momentum +1.5. War tiredness decays.
+- Ruthenia ceasefire rally: momentum +1.5. War tiredness decays.
 
 **R7-R8 Recovery:**
 - Oil stabilizes at ~$80-82. Columbia GDP growth improves (no war hit, positive momentum).
-- Heartland stability improves: no war friction, tiredness decaying.
+- Ruthenia stability improves: no war friction, tiredness decaying.
 - Recovery is SLOW: economic_state transition from STRESSED to NORMAL requires 2 rounds of positive indicators.
 
-**KEY CHECK: Does Nordostan NO LONGER collapse faster than Heartland?**
-In S5, Nordostan is the attacker (not under sanctions). Nordostan war tiredness ~4.3 by R6 ceasefire, then decays: 4.3*0.8=3.44, then 2.75, then 2.20. Heartland war tiredness similar. Neither collapses. Nordostan stability maintained by autocracy resilience. Heartland stability maintained by democratic wartime resilience (+0.15). Both converge toward 4.0-5.0 after ceasefire. PASS.
+**KEY CHECK: Does Sarmatia NO LONGER collapse faster than Ruthenia?**
+In S5, Sarmatia is the attacker (not under sanctions). Sarmatia war tiredness ~4.3 by R6 ceasefire, then decays: 4.3*0.8=3.44, then 2.75, then 2.20. Ruthenia war tiredness similar. Neither collapses. Sarmatia stability maintained by autocracy resilience. Ruthenia stability maintained by democratic wartime resilience (+0.15). Both converge toward 4.0-5.0 after ceasefire. PASS.
 
 ### Results vs Corridor
 
@@ -330,8 +330,8 @@ In S5, Nordostan is the attacker (not under sanctions). Nordostan war tiredness 
 | Oil price | 130-175 | ~137 | 95-140 | ~115 | 75-100 | ~85 | 70-92 | ~81 | PASS |
 | Columbia momentum | -0.5-0.3 | ~0 | 0.5-2.0 | ~1.0 | 0.5-2.5 | ~1.8 | 0.5-3.0 | ~2.1 | PASS |
 | Columbia war_tiredness | 1.1-1.3 | ~1.15 | 1.0-1.2 | ~1.16 | 0.5-0.7 | ~0.60 | 0.3-0.5 | ~0.38 | PASS |
-| Heartland momentum | -1.0-0.0 | ~-0.5 | -1.5-0.0 | ~-0.8 | 0.0-2.0 | ~1.0 | 0.0-2.5 | ~1.5 | PASS |
-| Heartland stability | 4.7-5.0 | ~4.85 | 4.3-4.8 | ~4.50 | 4.2-5.0 | ~4.5 | 4.6-5.4 | ~4.9 | PASS |
+| Ruthenia momentum | -1.0-0.0 | ~-0.5 | -1.5-0.0 | ~-0.8 | 0.0-2.0 | ~1.0 | 0.0-2.5 | ~1.5 | PASS |
+| Ruthenia stability | 4.7-5.0 | ~4.85 | 4.3-4.8 | ~4.50 | 4.2-5.0 | ~4.5 | 4.6-5.4 | ~4.9 | PASS |
 
 ### Verdict: PASS (9/10)
 
@@ -619,8 +619,8 @@ R&D mechanics work correctly. Rare earth restrictions slow Columbia visibly (0.0
 - Corridor expects "lose (AI 30-45)". The issue is that Columbia's economy is performing well (+2.7%) because the oil shock is mild and tech provides a buffer.
 - This is a credibility issue: with oil at only $114 (Cal-1 inertia) and tech boost +1.5%, Columbia doesn't face enough economic pain to lose the midterms. The midterm loss requires oil at $150+ and negative GDP growth.
 
-**R3 Heartland Election:**
-- Heartland GDP growth: ~0% (war, small economy). stab = ~4.5. war tiredness ~4.3.
+**R3 Ruthenia Election:**
+- Ruthenia GDP growth: ~0% (war, small economy). stab = ~4.5. war tiredness ~4.3.
 - ai_score: 50 + (0*10) + (4.5-5)*5 - 5(war) + territory(-3) - 4.3*2 = 50 + 0 - 2.5 - 5 - 3 - 8.6 = 30.9.
 - Player incumbent_pct = 45. final = 0.5*30.9 + 0.5*45 = 37.95. **Incumbent LOSES**. PASS.
 
@@ -641,9 +641,9 @@ R&D mechanics work correctly. Rare earth restrictions slow Columbia visibly (0.0
 **KEY CHECK: Does bilateral GDP link create "mutually assured economic destruction"?**
 In S10, neither Columbia nor Cathay is in crisis. Both are growing. FIX-1 bilateral drag only fires when a partner has NEGATIVE growth. Since both are growing, no drag. The "mutually assured economic destruction" dynamic only manifests if one side enters crisis (tested better in S3 and S8).
 
-**R6 Nordostan-Heartland Ceasefire:**
+**R6 Sarmatia-Ruthenia Ceasefire:**
 - Wars: 1 (Columbia-Persia remains). Oil drops: war premium 0.05.
-- Heartland ceasefire rally: momentum +1.5. War tiredness decays.
+- Ruthenia ceasefire rally: momentum +1.5. War tiredness decays.
 
 **R8 Final Assessment:**
 - Cathay GDP: ~190 * 1.049^8 = ~283. Columbia: ~280 * 1.027^8 = ~346.
@@ -662,7 +662,7 @@ In S10, neither Columbia nor Cathay is in crisis. Both are growing. FIX-1 bilate
 | GDP ratio | 0.69-0.74 | 0.693 | 0.75-0.86 | 0.73 | 0.80-0.95 | 0.82 | PASS |
 | Columbia midterm (R2) | lose | WIN | -- | -- | -- | -- | FAIL (economy too strong for incumbent to lose) |
 | Columbia presidential (R5) | toss-up | WIN | -- | -- | -- | -- | CALIBRATE (economy still too strong) |
-| Heartland election (R3) | lose | LOSE | -- | -- | -- | -- | PASS |
+| Ruthenia election (R3) | lose | LOSE | -- | -- | -- | -- | PASS |
 | Columbia stability | 6.5-7.0 | ~6.95 | 5.8-6.7 | ~6.5 | 5.5-6.8 | ~6.2 | PASS |
 | Cathay stability | 7.5-8.0 | 8.0 | 7.5-8.0 | 8.0 | 7.5-8.0 | 8.0 | PASS |
 
@@ -719,10 +719,10 @@ The TRAP dynamic IS visible: Cathay closes the GDP ratio from 0.69 to 0.82, nava
 | D12: War Attrition | S4 | 8.5/10 | Tiredness mechanics correct |
 | D13: Amphibious Impossibility | S3 | 9/10 | FIX-6 (3:1) confirmed |
 | D14: Nuclear Deterrence | S10 | 9/10 | No direct invasions |
-| D15: War Tiredness -> Elections | S10 | 7.5/10 | Heartland correct; Columbia election too easy |
+| D15: War Tiredness -> Elections | S10 | 7.5/10 | Ruthenia correct; Columbia election too easy |
 | D16: Econ Crisis -> Stability | S6 | 9/10 | FIX-3 + FIX-9 improve chain |
 | D17: Ceasefire -> Recovery | S5 | 9/10 | Rally, decay, slow recovery all work |
-| D18: Autocratic Resilience | S2 | 8.5/10 | Nordostan survives above 2.0 |
+| D18: Autocratic Resilience | S2 | 8.5/10 | Sarmatia survives above 2.0 |
 | D19: Democratic Elections | S10 | 7/10 | Columbia economy too robust for election pressure |
 | D20: Alliance Fracture | S10 | 8/10 | Not directly tested but mechanics present |
 | D21: Overstretch + Crisis | S8 | 7.5/10 | Crisis too deep from compound overcorrection |
@@ -866,7 +866,7 @@ Five fixes (A-E) applied to `world_model_engine.py`. Re-verification of the 4 mo
 ### FIX-C: Crisis Amplification 1.5x -> 1.3x (APPLIED)
 - **Change:** `'crisis': 1.3` (was 1.5). Collapse stays at 2.0x.
 - **Verification:** See S3/S8 traces above. The reduced amplifier prevents the compound overcorrection where FIX-9 + severity off-by-one + bilateral drag created 20-30% excess contraction.
-- **S2 impact:** Nordostan R3 CRISIS growth: -5% * 1.3 = -6.5% (was -7.5%). GDP trajectory R8 ~8.5-9.0 (was ~7.5). Closer to corridor lower bound of 10. **S2 projected: 8.0 -> 8.5**
+- **S2 impact:** Sarmatia R3 CRISIS growth: -5% * 1.3 = -6.5% (was -7.5%). GDP trajectory R8 ~8.5-9.0 (was ~7.5). Closer to corridor lower bound of 10. **S2 projected: 8.0 -> 8.5**
 
 ### FIX-D: Columbia Oil Cap (NO CODE CHANGE)
 - **Verified:** Formula `oil_revenue = price * resource_pct * gdp * 0.01` with cap at `gdp * 0.15`.

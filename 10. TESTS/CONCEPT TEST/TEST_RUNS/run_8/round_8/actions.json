@@ -35,7 +35,7 @@
       "arms_transfers": [
         {
           "from": "columbia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 3.0,
           "type": "military_aid"
         }
@@ -99,7 +99,7 @@
       "ai": 5.85
     }
   },
-  "nordostan": {
+  "sarmatia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -141,7 +141,7 @@
       "ai": 0.0
     }
   },
-  "heartland": {
+  "ruthenia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -171,8 +171,8 @@
     "military": {
       "combat": [
         {
-          "attacker": "heartland",
-          "defender": "nordostan",
+          "attacker": "ruthenia",
+          "defender": "sarmatia",
           "zone": "ee_east_front_south",
           "units": 5
         }
@@ -271,7 +271,7 @@
       "arms_transfers": [
         {
           "from": "gallia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.3,
           "type": "military_aid"
         }
@@ -321,7 +321,7 @@
       "arms_transfers": [
         {
           "from": "teutonia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.6,
           "type": "military_aid"
         }

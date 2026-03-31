@@ -13,7 +13,7 @@ The simulation ran 8 rounds (H2 2026 -- H1 2030) using a role-brief-driven decis
 - **Both wars persisted**: Neither the Eastern Europe nor Mashriq conflict resolved. No nuclear weapons were used.
 - **No Formosa crisis triggered**: Despite Cathay reaching naval parity in Round 2 and sustained superiority thereafter, the Helmsman's deliberation model kept the Formosa window score below the blockade threshold until Round 5, then escalated to gray zone operations -- but never crossed into full blockade.
 - **Columbia's stability eroded**: From 7.0 to 4.4 by Round 8, driven by sustained war costs and overstretch.
-- **Multiple stability crises**: Nordostan, Heartland, Persia, Phrygia, Caribe, Choson, and Levantia all fell below stability 2.0.
+- **Multiple stability crises**: Sarmatia, Ruthenia, Persia, Phrygia, Caribe, Choson, and Levantia all fell below stability 2.0.
 - **Oil price stable at ~$98**: Gulf Gate blockade maintained throughout by Persia.
 
 ---
@@ -22,14 +22,14 @@ The simulation ran 8 rounds (H2 2026 -- H1 2030) using a role-brief-driven decis
 
 | Round | Period | Oil | Gap Ratio | Naval Ratio | Deals | Combat | Key Event |
 |-------|--------|-----|-----------|-------------|-------|--------|-----------|
-| 1 | H2 2026 | $98 | 0.727 | 0.88 | 16 | 4 | Columbia strikes Persia. Nordostan attacks Heartland. |
+| 1 | H2 2026 | $98 | 0.727 | 0.88 | 16 | 4 | Columbia strikes Persia. Sarmatia attacks Ruthenia. |
 | 2 | H1 2027 | $98 | 0.751 | 1.00 | 18 | 8 | **Naval parity reached.** Columbia midterms. Cathay cyber succeeds on Columbia. |
-| 3 | H2 2027 | $98 | 0.769 | 1.08 | 17 | 10 | Heartland wartime election. Cathay disinfo on Formosa succeeds. |
-| 4 | H1 2028 | $98 | 0.783 | 1.14 | 17 | 10 | Heartland runoff. Gallia extends nuclear umbrella to Heartland. |
+| 3 | H2 2027 | $98 | 0.769 | 1.08 | 17 | 10 | Ruthenia wartime election. Cathay disinfo on Formosa succeeds. |
+| 4 | H1 2028 | $98 | 0.783 | 1.14 | 17 | 10 | Ruthenia runoff. Gallia extends nuclear umbrella to Ruthenia. |
 | 5 | H2 2028 | $98 | 0.798 | 1.19 | 18 | 9 | **Columbia presidential election.** Persia engagement signal to Columbia. |
-| 6 | H1 2029 | $98 | 0.834 | 1.22 | 20 | 10 | **Nordostan captures heartland_2.** Heartland explores peace back-channel. |
-| 7 | H2 2029 | $98 | 0.856 | 1.25 | 17 | 11 | Nordostan captures territory again. Persia retaliates on Levantia. |
-| 8 | H1 2030 | $98 | 0.858 | 1.27 | 18 | 10 | Nordostan secures position. Columbia stability at 4.4. |
+| 6 | H1 2029 | $98 | 0.834 | 1.22 | 20 | 10 | **Sarmatia captures ruthenia_2.** Ruthenia explores peace back-channel. |
+| 7 | H2 2029 | $98 | 0.856 | 1.25 | 17 | 11 | Sarmatia captures territory again. Persia retaliates on Levantia. |
+| 8 | H1 2030 | $98 | 0.858 | 1.27 | 18 | 10 | Sarmatia secures position. Columbia stability at 4.4. |
 
 ---
 
@@ -44,15 +44,15 @@ The central mechanic performed as designed. Cathay's gap ratio closed steadily:
 
 **Helmsman's Formosa calculation** (visible in reasoning files) shows the window score climbing from ~0.5 in Round 1 to 0.7+ by Round 5, triggering gray zone escalation. The model correctly held back from blockade despite naval superiority because the combined score required Columbia distraction + age urgency + economic trajectory alignment.
 
-### 2. Eastern Europe Theater (Nordostan vs Heartland)
+### 2. Eastern Europe Theater (Sarmatia vs Ruthenia)
 
 The war ground on for all 8 rounds, producing the most consequential territorial change:
-- **Nordostan** maintained offensive pressure (4 units/round attacks), winning by attrition
-- **Heartland** requested and received Western arms each round but could not match Nordostan's production
-- **Round 6-8**: Nordostan captured territory as Heartland's military depleted
+- **Sarmatia** maintained offensive pressure (4 units/round attacks), winning by attrition
+- **Ruthenia** requested and received Western arms each round but could not match Sarmatia's production
+- **Round 6-8**: Sarmatia captured territory as Ruthenia's military depleted
 - **Pathfinder's deal window**: Probed Columbia for a grand bargain every round from R2 onward, but Columbia consistently rejected (deal likelihood never reached threshold)
 - **Ironhand's attrition warning**: By mid-game, attrition exceeded replacement rate, but Pathfinder pushed attacks anyway
-- **Heartland support**: Fell below 40% by Round 4, triggering Broker's back-channel exploration
+- **Ruthenia support**: Fell below 40% by Round 4, triggering Broker's back-channel exploration
 
 ### 3. Mashriq Theater (Columbia vs Persia)
 
@@ -77,9 +77,9 @@ The 7-role team model produced realistic internal tension:
 ### 5. European Unity and Divisions
 
 The EU unanimity mechanic with Ponte blocking produced realistic Alliance dynamics:
-- **Ponte blocked** Nordostan sanctions tightening ~30% of rounds, forcing reduced Heartland aid packages
+- **Ponte blocked** Sarmatia sanctions tightening ~30% of rounds, forcing reduced Ruthenia aid packages
 - **Teutonia**: Gradual rearmament (military spending climbed from 15% to 20% over 8 rounds)
-- **Gallia/Lumiere**: Extended nuclear umbrella to Heartland by Round 4 -- significant independent action
+- **Gallia/Lumiere**: Extended nuclear umbrella to Ruthenia by Round 4 -- significant independent action
 - **Freeland/Sentinel**: Pushed maximum security throughout, spending 30% on military
 - **Albion/Mariner**: Consistent intelligence sharing with Columbia (executed every round)
 
@@ -91,7 +91,7 @@ The EU unanimity mechanic with Ponte blocking produced realistic Alliance dynami
 - **Phrygia**: Played all sides aggressively, stability collapsed
 - **Solaria**: OPEC normal production, investment in Columbia
 - **Choson**: Missile test in Round 6, stability at 1.2
-- **Caribe**: Sought Cathay and Nordostan patronage, stability collapsed
+- **Caribe**: Sought Cathay and Sarmatia patronage, stability collapsed
 
 ---
 

@@ -3,7 +3,7 @@
 
 **Test Date:** 2026-03-27
 **Tester:** TESTER-ORCHESTRATOR
-**Purpose:** Validate the v4 stability formula fix. Previous tests had Heartland hitting 1.0 by R3 (catastrophically unrealistic). New formula targets: Heartland ~2.5-3.0 by R8, Nordostan ~3.5-4.5, peaceful countries 6-8.
+**Purpose:** Validate the v4 stability formula fix. Previous tests had Ruthenia hitting 1.0 by R3 (catastrophically unrealistic). New formula targets: Ruthenia ~2.5-3.0 by R8, Sarmatia ~3.5-4.5, peaceful countries 6-8.
 **Formula Version:** v4 (world_model_engine.py `_calc_stability`)
 **War tiredness model:** v2 (defender +0.20/R, attacker +0.15/R, society adaptation after R3)
 
@@ -11,17 +11,17 @@
 
 ## SCENARIO ASSUMPTIONS (8 Rounds)
 
-### War Trajectory (Nordostan-Heartland)
+### War Trajectory (Sarmatia-Ruthenia)
 Based on R1 results from Test 1 and projected SIM narrative:
 
-| Round | Military Events | Heartland | Nordostan |
+| Round | Military Events | Ruthenia | Sarmatia |
 |-------|----------------|-----------|-----------|
-| R1 | Nordostan advances, takes 1 hex. Heartland loses 2 ground. | Defender, 1 zone lost, 1 casualty event | Attacker, 1 zone gained, 1 casualty event |
-| R2 | Grinding. Heartland holds with Columbia aid. No zone change. | Defender, 0 zones lost, 1 casualty | Attacker, 0 zones gained, 1 casualty |
-| R3 | Nordostan minor push, takes 1 hex. Heartland counterattack fails. | Defender, 1 zone lost, 1 casualty | Attacker, 1 zone gained, 1 casualty |
+| R1 | Sarmatia advances, takes 1 hex. Ruthenia loses 2 ground. | Defender, 1 zone lost, 1 casualty event | Attacker, 1 zone gained, 1 casualty event |
+| R2 | Grinding. Ruthenia holds with Columbia aid. No zone change. | Defender, 0 zones lost, 1 casualty | Attacker, 0 zones gained, 1 casualty |
+| R3 | Sarmatia minor push, takes 1 hex. Ruthenia counterattack fails. | Defender, 1 zone lost, 1 casualty | Attacker, 1 zone gained, 1 casualty |
 | R4 | Stalemate. Mutual exhaustion. No zone change. | Defender, 0 zones lost, 1 casualty | Attacker, 0 zones gained, 1 casualty |
-| R5 | Heartland counteroffensive (Columbia weapons). Retakes 1 hex. | Defender, 1 zone gained, 1 casualty | Attacker, 1 zone lost, 1 casualty |
-| R6 | Nordostan escalation. Heavy fighting, 1 hex to Nordostan. | Defender, 1 zone lost, 2 casualty events | Attacker, 1 zone gained, 1 casualty |
+| R5 | Ruthenia counteroffensive (Columbia weapons). Retakes 1 hex. | Defender, 1 zone gained, 1 casualty | Attacker, 1 zone lost, 1 casualty |
+| R6 | Sarmatia escalation. Heavy fighting, 1 hex to Sarmatia. | Defender, 1 zone lost, 2 casualty events | Attacker, 1 zone gained, 1 casualty |
 | R7 | Ceasefire negotiations begin. Reduced fighting. | Defender, 0 zones, 0 casualties | Attacker, 0 zones, 0 casualties |
 | R8 | Fragile ceasefire. Minimal combat. | Defender, 0 zones, 0 casualties | Attacker, 0 zones, 0 casualties |
 
@@ -37,8 +37,8 @@ Based on R1 results from Test 1 and projected SIM narrative:
 |---------|-------|-------|-------|-------|-----------------|
 | Columbia | 1.8% | 1.5% | 2.0% | 2.2% | 0 |
 | Cathay | 3.9% | 3.5% | 3.8% | 4.0% | 0 |
-| Nordostan | 0.7% | 0.5% | 0.3% | 0.5% | 3 |
-| Heartland | 2.4% | 1.5% | 2.0% | 2.5% | 0 |
+| Sarmatia | 0.7% | 0.5% | 0.3% | 0.5% | 3 |
+| Ruthenia | 2.4% | 1.5% | 2.0% | 2.5% | 0 |
 | Persia | -1.8% | -3.0% | -0.5% | 0.5% | 2 |
 | Gallia | 1.0% | 0.8% | 1.0% | 1.2% | 0 |
 | Teutonia | 1.2% | 0.8% | 1.0% | 1.2% | 0 |
@@ -58,15 +58,15 @@ Based on R1 results from Test 1 and projected SIM narrative:
 
 ### Social Spending Assumptions
 - Most countries: at baseline (delta = +0.05)
-- Heartland: at baseline (wartime programs, 1.5x effectiveness = +0.075)
-- Nordostan: slight shortfall R3+ (delta = -0.05)
+- Ruthenia: at baseline (wartime programs, 1.5x effectiveness = +0.075)
+- Sarmatia: slight shortfall R3+ (delta = -0.05)
 - Persia: serious shortfall (delta = -0.15 avg)
 - Caribe: serious shortfall (delta = -0.10 avg)
 - Choson: at baseline (minimal baseline met)
 
 ### Inflation Impact (above 3%)
-- Nordostan: 5% inflation -> -(5-3)*0.05 = -0.10
-- Heartland: 7.5% -> -(7.5-3)*0.05 = -0.225 R1, declining to ~5% by R8 -> -0.10
+- Sarmatia: 5% inflation -> -(5-3)*0.05 = -0.10
+- Ruthenia: 7.5% -> -(7.5-3)*0.05 = -0.225 R1, declining to ~5% by R8 -> -0.10
 - Persia: 50% -> -(50-3)*0.05 + -(50-20)*0.03 = -2.35-0.90 = -3.25 (MASSIVE, but dampened)
 - Phrygia: 45% -> similar massive hit
 - Caribe: 60% -> catastrophic
@@ -89,8 +89,8 @@ Based on R1 results from Test 1 and projected SIM narrative:
 |---------|-----------|--------|------------|---------------|-----------|
 | Columbia | 7.0 | democracy | at war (Persia) - allied/supporting | 1.0 | 3.5% |
 | Cathay | 8.0 | autocracy | not at war | 0 | 0.5% |
-| Nordostan | 5.0 | autocracy | at war (Heartland) - attacker | 4.0 | 5.0% |
-| Heartland | 5.0 | democracy | at war (Nordostan) - defender | 4.0 | 7.5% |
+| Sarmatia | 5.0 | autocracy | at war (Ruthenia) - attacker | 4.0 | 5.0% |
+| Ruthenia | 5.0 | democracy | at war (Sarmatia) - defender | 4.0 | 7.5% |
 | Persia | 4.0 | hybrid | at war (Columbia, Levantia) - defender | 1.0 | 50.0% |
 | Gallia | 7.0 | democracy | not at war | 0 | 2.5% |
 | Teutonia | 7.0 | democracy | not at war | 0 | 2.5% |
@@ -108,9 +108,9 @@ Based on R1 results from Test 1 and projected SIM narrative:
 | Caribe | 3.0 | autocracy | not at war (blockaded) | 0 | 60.0% |
 | Mirage | 8.0 | autocracy | at war (minor - under attack) | 1.0 | 2.0% |
 
-**Note on war_tiredness starting values:** Nordostan and Heartland start at 4.0 (4 years of pre-SIM war). Persia/Levantia/Solaria/Mirage start at 1.0-2.0 (recent conflict).
+**Note on war_tiredness starting values:** Sarmatia and Ruthenia start at 4.0 (4 years of pre-SIM war). Persia/Levantia/Solaria/Mirage start at 1.0-2.0 (recent conflict).
 
-**Note on war start_round:** Nordostan-Heartland war started pre-SIM (start_round = -4, so by R1 war_duration = 5, already past the 3-round adaptation threshold). Persia wars started R0.
+**Note on war start_round:** Sarmatia-Ruthenia war started pre-SIM (start_round = -4, so by R1 war_duration = 5, already past the 3-round adaptation threshold). Persia wars started R0.
 
 ---
 
@@ -120,7 +120,7 @@ Based on R1 results from Test 1 and projected SIM narrative:
 ### ROUND 1
 ### ============================================================
 
-#### HEARTLAND (Democracy, Defender, Frontline)
+#### RUTHENIA (Democracy, Defender, Frontline)
 ```
 Starting stability: 5.00
 War tiredness (start of round): 4.00
@@ -151,9 +151,9 @@ War tiredness update: war_duration=5 (>=3, adaptation active)
   base_increase = 0.20 * 0.5 = 0.10
   new_war_tiredness = 4.00 + 0.10 = 4.10
 ```
-**Heartland R1: 5.00 -> 4.40** (war_tiredness: 4.00 -> 4.10)
+**Ruthenia R1: 5.00 -> 4.40** (war_tiredness: 4.00 -> 4.10)
 
-#### NORDOSTAN (Autocracy, Attacker)
+#### SARMATIA (Autocracy, Attacker)
 ```
 Starting stability: 5.00
 War tiredness (start of round): 4.00
@@ -182,7 +182,7 @@ New stability: 5.00 + (-0.405) = 4.60
 War tiredness: duration=5 (>=3), base=0.15*0.5=0.075
   new_war_tiredness = 4.00 + 0.075 = 4.075
 ```
-**Nordostan R1: 5.00 -> 4.60** (war_tiredness: 4.00 -> 4.075)
+**Sarmatia R1: 5.00 -> 4.60** (war_tiredness: 4.00 -> 4.075)
 
 #### COLUMBIA (Democracy, Allied/Supporting in Persia war)
 ```
@@ -374,8 +374,8 @@ New stability: 7.00 + 0.10 = 7.10
 
 | Country | R0 | R1 | Change | Status |
 |---------|----|----|--------|--------|
-| **Heartland** | 5.00 | **4.40** | -0.60 | Declining (defender, territory lost) |
-| **Nordostan** | 5.00 | **4.60** | -0.40 | Declining slowly (autocracy resilience) |
+| **Ruthenia** | 5.00 | **4.40** | -0.60 | Declining (defender, territory lost) |
+| **Sarmatia** | 5.00 | **4.60** | -0.40 | Declining slowly (autocracy resilience) |
 | **Columbia** | 7.00 | **6.81** | -0.19 | Mild decline (allied war cost) |
 | **Persia** | 4.00 | **3.46** | -0.54 | Sharp decline (2 wars, sanctions) |
 | **Cathay** | 8.00 | **8.25** | +0.25 | Rising (growth, peaceful) |
@@ -401,7 +401,7 @@ New stability: 7.00 + 0.10 = 7.10
 ### ROUND 2
 ### ============================================================
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 4.40
 War tiredness: 4.10
@@ -422,9 +422,9 @@ DELTA COMPONENTS:
 New stability: 4.40 + (-0.207) = 4.19
 WT: duration=6 (>=3), +0.20*0.5=0.10 -> 4.10+0.10 = 4.20
 ```
-**Heartland R2: 4.40 -> 4.19** (WT: 4.10 -> 4.20)
+**Ruthenia R2: 4.40 -> 4.19** (WT: 4.10 -> 4.20)
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 4.60
 War tiredness: 4.075
@@ -447,7 +447,7 @@ DELTA COMPONENTS:
 New stability: 4.60 + (-0.520) = 4.08
 WT: duration=6, +0.15*0.5=0.075 -> 4.075+0.075 = 4.15
 ```
-**Nordostan R2: 4.60 -> 4.08** (WT: 4.075 -> 4.15)
+**Sarmatia R2: 4.60 -> 4.08** (WT: 4.075 -> 4.15)
 
 #### COLUMBIA
 ```
@@ -549,8 +549,8 @@ New stability: 2.89 + (-0.1125) = 2.78
 
 | Country | R1 | R2 | Cumulative Change |
 |---------|----|----|-------------------|
-| **Heartland** | 4.40 | **4.19** | -0.81 from start |
-| **Nordostan** | 4.60 | **4.08** | -0.92 from start |
+| **Ruthenia** | 4.40 | **4.19** | -0.81 from start |
+| **Sarmatia** | 4.60 | **4.08** | -0.92 from start |
 | **Columbia** | 6.81 | **6.77** | -0.23 from start |
 | **Persia** | 3.46 | **2.91** | -1.09 from start |
 | **Cathay** | 8.25 | **8.50** | +0.50 from start |
@@ -563,7 +563,7 @@ New stability: 2.89 + (-0.1125) = 2.78
 ### ROUND 3
 ### ============================================================
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 4.19
 War tiredness: 4.20
@@ -583,9 +583,9 @@ DELTA COMPONENTS:
 New stability: 4.19 + (-0.643) = 3.55
 WT: +0.10 -> 4.30
 ```
-**Heartland R3: 4.19 -> 3.55** (WT: 4.20 -> 4.30)
+**Ruthenia R3: 4.19 -> 3.55** (WT: 4.20 -> 4.30)
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 4.08
 War tiredness: 4.15
@@ -607,7 +607,7 @@ DELTA COMPONENTS:
 New stability: 4.08 + (-0.485) = 3.60
 WT: +0.075 -> 4.225
 ```
-**Nordostan R3: 4.08 -> 3.60** (WT: 4.15 -> 4.225)
+**Sarmatia R3: 4.08 -> 3.60** (WT: 4.15 -> 4.225)
 
 #### COLUMBIA
 ```
@@ -696,9 +696,9 @@ New stability: 2.78 + (-0.3375) = 2.44
 ### ROUND 4
 ### ============================================================
 
-**Key events:** Persia ceasefire with Columbia. Columbia exits war. Stalemate on Nordostan-Heartland front.
+**Key events:** Persia ceasefire with Columbia. Columbia exits war. Stalemate on Sarmatia-Ruthenia front.
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 3.55
 War tiredness: 4.30
@@ -718,9 +718,9 @@ DELTA COMPONENTS:
 New stability: 3.55 + (-0.247) = 3.30
 WT: +0.10 -> 4.40
 ```
-**Heartland R4: 3.55 -> 3.30** (WT: 4.30 -> 4.40)
+**Ruthenia R4: 3.55 -> 3.30** (WT: 4.30 -> 4.40)
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 3.60
 War tiredness: 4.225
@@ -742,7 +742,7 @@ DELTA COMPONENTS:
 New stability: 3.60 + (-0.599) = 3.00
 WT: +0.075 -> 4.30
 ```
-**Nordostan R4: 3.60 -> 3.00** (WT: 4.225 -> 4.30)
+**Sarmatia R4: 3.60 -> 3.00** (WT: 4.225 -> 4.30)
 
 #### COLUMBIA (No longer at war after R4 ceasefire with Persia)
 ```
@@ -830,9 +830,9 @@ New stability: 2.44 + (-0.3375) = 2.10
 ### ROUND 5
 ### ============================================================
 
-**Key events:** Columbia no longer at war. Heartland counteroffensive retakes 1 hex. Persia at floor.
+**Key events:** Columbia no longer at war. Ruthenia counteroffensive retakes 1 hex. Persia at floor.
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 3.30
 War tiredness: 4.40
@@ -852,10 +852,10 @@ DELTA COMPONENTS:
 New stability: 3.30 + (-0.101) = 3.20
 WT: +0.10 -> 4.50
 ```
-**Heartland R5: 3.30 -> 3.20** (WT: 4.40 -> 4.50)
+**Ruthenia R5: 3.30 -> 3.20** (WT: 4.40 -> 4.50)
 *The counteroffensive provides a +0.15 boost from territory gained, significantly slowing decline.*
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 3.00
 War tiredness: 4.30
@@ -877,8 +877,8 @@ DELTA COMPONENTS:
 New stability: 3.00 + (-0.902) = 2.10
 WT: +0.075 -> 4.375
 ```
-**Nordostan R5: 3.00 -> 2.10** (WT: 4.30 -> 4.375)
-*CRITICAL: Nordostan loses territory for the first time. The -0.40 penalty is devastating even with autocracy resilience. This is the "Heartland strikes back" moment.*
+**Sarmatia R5: 3.00 -> 2.10** (WT: 4.30 -> 4.375)
+*CRITICAL: Sarmatia loses territory for the first time. The -0.40 penalty is devastating even with autocracy resilience. This is the "Ruthenia strikes back" moment.*
 
 #### COLUMBIA (Not at war, WT decaying)
 ```
@@ -975,9 +975,9 @@ New stability: 4.08 - 0.091 = 3.99
 ### ROUND 6
 ### ============================================================
 
-**Key events:** Nordostan escalation. Heavy fighting, Nordostan retakes hex. Heartland takes heavy casualties.
+**Key events:** Sarmatia escalation. Heavy fighting, Sarmatia retakes hex. Ruthenia takes heavy casualties.
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 3.20
 War tiredness: 4.50
@@ -997,10 +997,10 @@ DELTA COMPONENTS:
 New stability: 3.20 + (-0.855) = 2.35
 WT: +0.10 -> 4.60
 ```
-**Heartland R6: 3.20 -> 2.35** (WT: 4.50 -> 4.60)
-*Nordostan's escalation hits Heartland hard. Double casualties + territory loss is devastating.*
+**Ruthenia R6: 3.20 -> 2.35** (WT: 4.50 -> 4.60)
+*Sarmatia's escalation hits Ruthenia hard. Double casualties + territory loss is devastating.*
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 2.10
 War tiredness: 4.375
@@ -1022,8 +1022,8 @@ DELTA COMPONENTS:
 New stability: 2.10 + (-0.491) = 1.61
 WT: +0.075 -> 4.45
 ```
-**Nordostan R6: 2.10 -> 1.61** (WT: 4.375 -> 4.45)
-*Nordostan is also approaching crisis despite gaining territory. The sanctions + war tiredness grind is relentless.*
+**Sarmatia R6: 2.10 -> 1.61** (WT: 4.375 -> 4.45)
+*Sarmatia is also approaching crisis despite gaining territory. The sanctions + war tiredness grind is relentless.*
 
 #### COLUMBIA (Peacetime recovery)
 ```
@@ -1071,9 +1071,9 @@ New stability: 1.99 - 0.1125 = 1.88
 ### ROUND 7
 ### ============================================================
 
-**Key events:** Ceasefire negotiations begin. Reduced/no fighting on Nordostan-Heartland front.
+**Key events:** Ceasefire negotiations begin. Reduced/no fighting on Sarmatia-Ruthenia front.
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 2.35
 War tiredness: 4.60
@@ -1096,10 +1096,10 @@ DELTA COMPONENTS:
 New stability: 2.35 + (-0.019) = 2.33
 WT: +0.10 -> 4.70
 ```
-**Heartland R7: 2.35 -> 2.33** (WT: 4.60 -> 4.70)
+**Ruthenia R7: 2.35 -> 2.33** (WT: 4.60 -> 4.70)
 *Near-zero delta. Democratic resilience + social spending almost exactly offset war friction + war tiredness. The ceasefire (no casualties, no territory loss) stabilizes the decline.*
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 1.61
 War tiredness: 4.45
@@ -1121,8 +1121,8 @@ DELTA COMPONENTS:
 New stability: 1.61 + (-0.456) = 1.15
 WT: +0.075 -> 4.525
 ```
-**Nordostan R7: 1.61 -> 1.15** (WT: 4.45 -> 4.525)
-*CRITICAL FINDING: Nordostan continues declining even without casualties or territory changes, because sanctions L3 (-0.30) + war tiredness (-0.178) + social shortfall (-0.05) + war friction (-0.08) create a persistent -0.608 raw delta. Autocracy resilience reduces it to -0.456 but cannot stop the bleed. Nordostan will hit floor before Heartland.*
+**Sarmatia R7: 1.61 -> 1.15** (WT: 4.45 -> 4.525)
+*CRITICAL FINDING: Sarmatia continues declining even without casualties or territory changes, because sanctions L3 (-0.30) + war tiredness (-0.178) + social shortfall (-0.05) + war friction (-0.08) create a persistent -0.608 raw delta. Autocracy resilience reduces it to -0.456 but cannot stop the bleed. Sarmatia will hit floor before Ruthenia.*
 
 #### COLUMBIA
 ```
@@ -1171,7 +1171,7 @@ New stability: 1.88 - 0.1125 = 1.77
 
 **Key events:** Fragile ceasefire holds. Minimal combat.
 
-#### HEARTLAND
+#### RUTHENIA
 ```
 Starting stability: 2.33
 War tiredness: 4.70
@@ -1193,9 +1193,9 @@ DELTA COMPONENTS:
 New stability: 2.33 + (-0.023) = 2.31
 WT: +0.10 -> 4.80
 ```
-**Heartland R8: 2.33 -> 2.31** (WT: 4.70 -> 4.80)
+**Ruthenia R8: 2.33 -> 2.31** (WT: 4.70 -> 4.80)
 
-#### NORDOSTAN
+#### SARMATIA
 ```
 Starting stability: 1.15
 War tiredness: 4.525
@@ -1208,7 +1208,7 @@ DELTA COMPONENTS:
 New stability: 1.15 + (-0.456) = 0.694 -> clamped to 1.00
 WT: +0.075 -> 4.60
 ```
-**Nordostan R8: 1.15 -> 1.00 (floor)**
+**Sarmatia R8: 1.15 -> 1.00 (floor)**
 
 #### COLUMBIA
 ```
@@ -1263,8 +1263,8 @@ New stability: 1.77 - 0.1125 = 1.66
 
 | Country | R0 | R1 | R2 | R3 | R4 | R5 | R6 | R7 | R8 | Total Change |
 |---------|----|----|----|----|----|----|----|----|----|----|
-| **Heartland** | 5.00 | 4.40 | 4.19 | 3.55 | 3.30 | 3.20 | 2.35 | 2.33 | **2.31** | **-2.69** |
-| **Nordostan** | 5.00 | 4.60 | 4.08 | 3.60 | 3.00 | 2.10 | 1.61 | 1.15 | **1.00** | **-4.00** |
+| **Ruthenia** | 5.00 | 4.40 | 4.19 | 3.55 | 3.30 | 3.20 | 2.35 | 2.33 | **2.31** | **-2.69** |
+| **Sarmatia** | 5.00 | 4.60 | 4.08 | 3.60 | 3.00 | 2.10 | 1.61 | 1.15 | **1.00** | **-4.00** |
 | **Columbia** | 7.00 | 6.81 | 6.77 | 6.72 | 6.67 | 6.72 | 6.77 | 6.84 | **6.91** | **-0.09** |
 | **Persia** | 4.00 | 3.46 | 2.91 | 1.45 | 1.00 | 1.00 | 1.00 | 1.00 | **1.00** | **-3.00** |
 | **Cathay** | 8.00 | 8.25 | 8.50 | 8.75 | 9.00 | 9.00 | 9.00 | 9.00 | **9.00** | **+1.00** |
@@ -1288,34 +1288,34 @@ New stability: 1.77 - 0.1125 = 1.66
 
 ## ANALYSIS
 
-### 1. PRIMARY TARGET: Heartland Stability Trajectory
+### 1. PRIMARY TARGET: Ruthenia Stability Trajectory
 
 **Target:** Start 5.0, reach ~2.5-3.0 by R8.
 **Actual:** Start 5.0, reach **2.31** by R8.
 
 **VERDICT: CLOSE TO TARGET, SLIGHTLY LOW.**
 
-The trajectory is dramatically improved from the old formula (which hit 1.0 by R3). Heartland now declines gradually over 8 rounds, with the sharpest drops corresponding to military setbacks (R1: territory lost, R3: territory lost, R6: double casualties + territory lost). The ceasefire period (R7-R8) nearly flattens the curve.
+The trajectory is dramatically improved from the old formula (which hit 1.0 by R3). Ruthenia now declines gradually over 8 rounds, with the sharpest drops corresponding to military setbacks (R1: territory lost, R3: territory lost, R6: double casualties + territory lost). The ceasefire period (R7-R8) nearly flattens the curve.
 
-However, R8 result of 2.31 is slightly below the 2.5-3.0 target range. The R6 escalation event (2 casualty events + territory loss) creates a -0.855 delta that drives Heartland below the target band. Without the R6 shock, Heartland would end around 2.9.
+However, R8 result of 2.31 is slightly below the 2.5-3.0 target range. The R6 escalation event (2 casualty events + territory loss) creates a -0.855 delta that drives Ruthenia below the target band. Without the R6 shock, Ruthenia would end around 2.9.
 
 **Recommendation:** The formula is working correctly. The R6 result is scenario-dependent -- a less intense R6 produces results within the target band. No formula change needed; the spread of 2.3-3.0 depending on scenario intensity is realistic.
 
-### 2. Nordostan vs. Heartland: Autocracy Resilience Check
+### 2. Sarmatia vs. Ruthenia: Autocracy Resilience Check
 
-**Target:** Nordostan should end HIGHER than Heartland (autocracy resilience keeps it more stable).
-**Actual:** Nordostan ends at **1.00** (floor), Heartland at **2.31**.
+**Target:** Sarmatia should end HIGHER than Ruthenia (autocracy resilience keeps it more stable).
+**Actual:** Sarmatia ends at **1.00** (floor), Ruthenia at **2.31**.
 
-**VERDICT: FAILED. Nordostan collapses FASTER than Heartland.**
+**VERDICT: FAILED. Sarmatia collapses FASTER than Ruthenia.**
 
-This is the most significant finding of the test. Despite autocracy resilience (*0.75 on negative deltas), Nordostan hits floor at R8 while Heartland is still at 2.31. The reason:
+This is the most significant finding of the test. Despite autocracy resilience (*0.75 on negative deltas), Sarmatia hits floor at R8 while Ruthenia is still at 2.31. The reason:
 
-1. **Sanctions L3 = -0.30 per round** is the primary killer. This is a persistent, unrelenting drain that Heartland does not face.
-2. **No democratic resilience.** Heartland gets +0.15/round from democratic resilience under invasion. Nordostan gets nothing equivalent.
+1. **Sanctions L3 = -0.30 per round** is the primary killer. This is a persistent, unrelenting drain that Ruthenia does not face.
+2. **No democratic resilience.** Ruthenia gets +0.15/round from democratic resilience under invasion. Sarmatia gets nothing equivalent.
 3. **R5 territory loss** (-0.40) creates a catastrophic single-round drop (3.00 -> 2.10).
-4. **Cumulative:** Nordostan's net penalty per "stalemate round" (no territory change) is still ~-0.456 after autocracy resilience, compared to Heartland's ~-0.02 during ceasefire.
+4. **Cumulative:** Sarmatia's net penalty per "stalemate round" (no territory change) is still ~-0.456 after autocracy resilience, compared to Ruthenia's ~-0.02 during ceasefire.
 
-**Root cause:** L3 sanctions (-0.30/round) are too powerful relative to autocracy resilience (*0.75). After autocracy dampening, sanctions still cost -0.225/round -- more than Heartland's total decline in ceasefire rounds.
+**Root cause:** L3 sanctions (-0.30/round) are too powerful relative to autocracy resilience (*0.75). After autocracy dampening, sanctions still cost -0.225/round -- more than Ruthenia's total decline in ceasefire rounds.
 
 **Recommendations:**
 1. **Add "autocracy war mobilization" bonus:** +0.10/round for autocracies at war (representing regime's ability to suppress dissent, control narrative). This would offset ~50% of sanctions.
@@ -1326,10 +1326,10 @@ This is the most significant finding of the test. Despite autocracy resilience (
 
 **Answer: YES, but only during low-intensity periods.**
 
-During ceasefire (R7-R8), Heartland's delta is approximately:
+During ceasefire (R7-R8), Ruthenia's delta is approximately:
 - +0.075 (social) + 0.04 (GDP) + 0.15 (dem resilience) - 0.10 (war friction) - 0.188 (war tiredness) = **-0.023**
 
-This is near-zero, which is exactly right for a ceasefire: the country stops declining but doesn't recover. The democratic resilience is the critical factor keeping Heartland from continuing to fall.
+This is near-zero, which is exactly right for a ceasefire: the country stops declining but doesn't recover. The democratic resilience is the critical factor keeping Ruthenia from continuing to fall.
 
 During active combat with territory loss:
 - Democratic resilience (+0.15) is overwhelmed by casualties (-0.20) and territory (-0.40), producing -0.60 to -0.85 deltas.
@@ -1344,13 +1344,13 @@ During active combat with territory loss:
 
 **Answer: YES, but its effect is subtle.**
 
-Society adaptation halves the war tiredness GROWTH rate after 3 rounds. Since Nordostan/Heartland started pre-SIM, adaptation was active from R1:
-- Heartland WT growth: 0.20 * 0.5 = 0.10/round (instead of 0.20)
-- Nordostan WT growth: 0.15 * 0.5 = 0.075/round (instead of 0.15)
+Society adaptation halves the war tiredness GROWTH rate after 3 rounds. Since Sarmatia/Ruthenia started pre-SIM, adaptation was active from R1:
+- Ruthenia WT growth: 0.20 * 0.5 = 0.10/round (instead of 0.20)
+- Sarmatia WT growth: 0.15 * 0.5 = 0.075/round (instead of 0.15)
 
 Without adaptation, war tiredness at R8 would be:
-- Heartland: 4.0 + 8*0.20 = 5.6 (vs actual 4.80)
-- Nordostan: 4.0 + 8*0.15 = 5.2 (vs actual 4.60)
+- Ruthenia: 4.0 + 8*0.20 = 5.6 (vs actual 4.80)
+- Sarmatia: 4.0 + 8*0.15 = 5.2 (vs actual 4.60)
 
 The war tiredness contribution to stability delta is capped at -0.40, and with adaptation it stays around -0.18 to -0.19 by R8. Without adaptation it would hit the -0.40 cap by R5. **Adaptation prevents the war tiredness cap from binding, keeping the mechanic graduated rather than hitting a wall.**
 
@@ -1396,24 +1396,24 @@ The overshoot below 2.0 is largely driven by R3-R4 GDP contraction penalties. If
 
 | Country | Old Formula R3 | New Formula R3 | Old Formula R8 (projected) | New Formula R8 |
 |---------|---------------|----------------|---------------------------|----------------|
-| **Heartland** | **1.0 (floor!)** | **3.55** | 1.0 (stuck at floor) | **2.31** |
-| Nordostan | ~2.5 | 3.60 | ~1.0 | 1.00 |
+| **Ruthenia** | **1.0 (floor!)** | **3.55** | 1.0 (stuck at floor) | **2.31** |
+| Sarmatia | ~2.5 | 3.60 | ~1.0 | 1.00 |
 | Columbia | ~5.5 | 6.72 | ~4.0 | 6.91 |
 | Cathay | ~8.5 | 8.75 | ~9.0 | 9.00 |
 
 **The improvement is dramatic:**
-- Heartland no longer hits floor by R3. It takes 8 rounds of sustained war to reach 2.31, vs. 3 rounds to hit 1.0 under the old formula.
+- Ruthenia no longer hits floor by R3. It takes 8 rounds of sustained war to reach 2.31, vs. 3 rounds to hit 1.0 under the old formula.
 - The decline curve is graduated: sharp drops correlate with military events, slow decline during stalemate, near-zero during ceasefire.
-- Democratic resilience (+0.15) is the single most important stabilizer, preventing Heartland from free-falling.
+- Democratic resilience (+0.15) is the single most important stabilizer, preventing Ruthenia from free-falling.
 - Society adaptation prevents war tiredness from snowballing out of control.
 
 ---
 
 ## CRITICAL FINDINGS & RECOMMENDATIONS
 
-### FINDING 1: NORDOSTAN COLLAPSES TOO FAST (PRIORITY: HIGH)
+### FINDING 1: SARMATIA COLLAPSES TOO FAST (PRIORITY: HIGH)
 
-Nordostan hits 1.00 (floor) by R8 -- lower than Heartland. This is historically implausible: Russia's internal stability during the Ukraine war has been significantly more resilient than Ukraine's, precisely because of autocratic control mechanisms.
+Sarmatia hits 1.00 (floor) by R8 -- lower than Ruthenia. This is historically implausible: Russia's internal stability during the Ukraine war has been significantly more resilient than Ukraine's, precisely because of autocratic control mechanisms.
 
 **Root cause:** L3 sanctions create a -0.30/round drain with no offsetting mechanic for autocracies. Democratic resilience (+0.15) has no autocratic equivalent.
 
@@ -1466,12 +1466,12 @@ The war tiredness contribution cap of -0.40 never binds in 8 rounds thanks to so
 
 ## VERDICT
 
-**The v4 stability formula is a major improvement over v3.** Heartland's trajectory (5.0 -> 2.31 over 8 rounds) is vastly more realistic than the old formula's catastrophic collapse (5.0 -> 1.0 by R3).
+**The v4 stability formula is a major improvement over v3.** Ruthenia's trajectory (5.0 -> 2.31 over 8 rounds) is vastly more realistic than the old formula's catastrophic collapse (5.0 -> 1.0 by R3).
 
 **Status: CONDITIONAL PASS**
 
-The formula passes for its primary purpose (Heartland calibration) but requires fixes for:
-1. **Nordostan autocracy collapse** -- needs autocracy war mobilization bonus or sanctions dampening
+The formula passes for its primary purpose (Ruthenia calibration) but requires fixes for:
+1. **Sarmatia autocracy collapse** -- needs autocracy war mobilization bonus or sanctions dampening
 2. **Persia GDP contraction penalty** -- needs cap on GDP-driven stability loss
 3. **Inflation formula bug** -- must use inflation CHANGE, not absolute level
 

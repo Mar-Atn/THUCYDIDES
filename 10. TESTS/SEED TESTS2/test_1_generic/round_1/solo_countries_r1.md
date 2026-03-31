@@ -7,7 +7,7 @@
 **Strategy:** Run the clock. Take deliverables from all quadrants, commit to none. Multi-alignment is the doctrine.
 
 - **Budget:** 3 coins semiconductor acceleration, 1 coin naval, 2 coins reserve
-- **Sanctions stance:** Selective compliance. Continue discounted Nordostan oil imports. Non-confrontational non-compliance.
+- **Sanctions stance:** Selective compliance. Continue discounted Sarmatia oil imports. Non-confrontational non-compliance.
 - **Military:** No redeployment from Cathay border. 1 naval unit to Indian Ocean patrol (tanker protection at $237 oil).
 - **Diplomatic:** Accept Columbia defense pact "in principle, provisionally, without signing." Accept Cathay Ladakh disengagement "in principle, provisionally." Extract concessions, delay commitments.
 - **BRICS+ Summit:** Economic cooperation + Persia mediation framework. Position as peacemaker. Push UNSC permanent seat bid.
@@ -45,11 +45,11 @@
 
 **Strategy:** Every caravan pays a toll. Monetize geography, Bosphorus, summit hosting, mediation.
 
-- **Economy emergency:** Request below-market gas from Nordostan (TurkStream). Gulf investment drive targeting 2-3 coins from Solaria/Mirage.
-- **Bosphorus:** Selective restriction. Warships of belligerents restricted. Commercial shipping open. Charge Nordostan "administrative costs" (2 coins) for keeping gas flowing.
-- **NATO Summit (host):** Set agenda to maximize leverage — burden-sharing, southern flank, Heartland mediation. Bury BRICS+ observer status discussion.
-- **Diplomatic:** To Nordostan: "I'm your Mediterranean route. Gas + 2 coins." To Columbia: "F-35 reinstatement + 2 coins stabilization." To Cathay: "Belt and Road 2 coins for BRICS+ membership advancement."
-- **Mediation offer:** Formally offer to mediate Heartland war. Every session = intelligence on both sides' positions.
+- **Economy emergency:** Request below-market gas from Sarmatia (TurkStream). Gulf investment drive targeting 2-3 coins from Solaria/Mirage.
+- **Bosphorus:** Selective restriction. Warships of belligerents restricted. Commercial shipping open. Charge Sarmatia "administrative costs" (2 coins) for keeping gas flowing.
+- **NATO Summit (host):** Set agenda to maximize leverage — burden-sharing, southern flank, Ruthenia mediation. Bury BRICS+ observer status discussion.
+- **Diplomatic:** To Sarmatia: "I'm your Mediterranean route. Gas + 2 coins." To Columbia: "F-35 reinstatement + 2 coins stabilization." To Cathay: "Belt and Road 2 coins for BRICS+ membership advancement."
+- **Mediation offer:** Formally offer to mediate Ruthenia war. Every session = intelligence on both sides' positions.
 
 ---
 
@@ -78,11 +78,11 @@
 
 ---
 
-## PYRO (Choson) — GDP 0.3, Nuclear L1, 2 ground in Heartland
+## PYRO (Choson) — GDP 0.3, Nuclear L1, 2 ground in Ruthenia
 
-**Strategy:** Maximum distraction window. Extract tech from Nordostan. Provoke without consequence.
+**Strategy:** Maximum distraction window. Extract tech from Sarmatia. Provoke without consequence.
 
-- **Nordostan deployment:** Authorize THIRD WAVE — 6,000 troops to Heartland. Demand in return: nuclear reactor components for submarine program, satellite recon, ICBM guidance systems. "Troops ship when technology ships."
+- **Sarmatia deployment:** Authorize THIRD WAVE — 6,000 troops to Ruthenia. Demand in return: nuclear reactor components for submarine program, satellite recon, ICBM guidance systems. "Troops ship when technology ships."
 - **CRISIS ON DEMAND: ICBM launch over Yamato (Hwasong-18, Pacific splashdown).** Mid-round timing when Columbia maximally distracted. Forces Columbia to choose between Pacific redeployment and Middle East. Costs nothing militarily.
 - **DMZ:** Full readiness. 14,000 artillery pointed at Seoul. Leverage, not use.
 - **No nuclear test this round.** Sequential escalation — save for R2 if needed.
@@ -110,11 +110,11 @@
 **Strategy:** Calibrated desperation. Just enough threat to force negotiation, just enough restraint to avoid invasion.
 
 - **Survival:** Redirect fuel to hospitals/water. 4 hours civilian electricity. Distribute Cathay aid immediately. Security forces visible but not repressive.
-- **Monroe Doctrine card:** SIGNAL, not trigger. Leak "discussions with international partners about security cooperation." Do NOT invite Nordostan/Cathay military. Threat more valuable than trigger.
+- **Monroe Doctrine card:** SIGNAL, not trigger. Leak "discussions with international partners about security cooperation." Do NOT invite Sarmatia/Cathay military. Threat more valuable than trigger.
 - **To Columbia (private):** "I know what you fear. I have not done it. Restraint has a price. Let us talk."
-- **Counter-offer to expected demands:** Reduce (not eliminate) Nordostan intel presence. Restructure Cathay signals as "academic cooperation." Reject elections. Offer "political reform consultation with observers." Protect Venezuelan oil (Orinoco belt = long-term survival card).
+- **Counter-offer to expected demands:** Reduce (not eliminate) Sarmatia intel presence. Restructure Cathay signals as "academic cooperation." Reject elections. Offer "political reform consultation with observers." Protect Venezuelan oil (Orinoco belt = long-term survival card).
 - **Need from Columbia:** Blockade lifted, humanitarian aid, partial sanctions relief, frozen assets released (~$10B), grid assistance.
-- **Patron management:** Nordostan — tanker escorts/diplomatic cover. Cathay — fuel, generators, grid tech.
+- **Patron management:** Sarmatia — tanker escorts/diplomatic cover. Cathay — fuel, generators, grid tech.
 
 ---
 
@@ -123,7 +123,7 @@
 **Strategy:** Most connected node in the network. Charge for everything. Take sides on nothing — except against whoever is bombing the skyline.
 
 - **Financial hub protection:** 2 coins perception management (top 50 investor outreach), 1 coin financial district security, government-backed war risk insurance.
-- **Sanctions routing:** ENABLE Nordostan evasion (8-12 coins/round flowing through Dubai, selective compliance). NEUTRAL on Cathay tech. ENFORCE Persia sanctions (they're bombing me).
+- **Sanctions routing:** ENABLE Sarmatia evasion (8-12 coins/round flowing through Dubai, selective compliance). NEUTRAL on Cathay tech. ENFORCE Persia sanctions (they're bombing me).
 - **Military:** 1 coin emergency AD replenishment. Request THAAD from Columbia. Passive posture — do NOT enter the war.
 - **Diplomatic broker:** To Columbia — THAAD + arms for logistics hosting. To Persia — ceasefire facilitation offer via Oman. To Cathay — host Formosa back-channel discussions for BRI investment. To Levantia — Iron Dome tech for financial district. To Solaria — Gulf axis, joint defense.
 - **Back-channel hosting:** Accept ALL mediation requests. Intelligence from every conversation. Charge all parties.

@@ -2087,10 +2087,10 @@ if __name__ == "__main__":
         "budgets": {},
         "tariff_changes": {},
         "sanction_changes": {},
-        "opec_production": {"solaria": "normal", "nordostan": "normal",
+        "opec_production": {"solaria": "normal", "sarmatia": "normal",
                             "persia": "normal", "mirage": "normal"},
         "combat": [
-            {"attacker": "nordostan", "defender": "heartland",
+            {"attacker": "sarmatia", "defender": "ruthenia",
              "zone": "ee_east_front_north", "units": 3}
         ],
         "blockades": [],
@@ -2111,7 +2111,7 @@ if __name__ == "__main__":
         print(f"  ! {flag}")
 
     print(f"\nCountry summaries:")
-    for cid in ["columbia", "cathay", "nordostan", "heartland", "persia"]:
+    for cid in ["columbia", "cathay", "sarmatia", "ruthenia", "persia"]:
         c = new_ws.countries[cid]
         print(f"  {c['sim_name']:12s}: GDP={c['economic']['gdp']:7.1f}  "
               f"Growth={c['economic']['gdp_growth_rate']:+5.1f}%  "

@@ -434,7 +434,7 @@ The TTT-specific translation layer. This is where knowledge of TTT's game mechan
 Converts TTT's game state into digestible briefings:
 
 - **Economic data** → "Your GDP grew 2.3% this round. Revenue next round: 45 coins (down from 48 — sanctions cost 3 coins). Inflation at 4.2%. Reserves: 12 coins."
-- **Military situation** → "You have 8 ground units (4 in home territory, 4 at Gulf base), 3 naval units (Persian Gulf), 2 air defense (1 home, 1 Gulf). No active combat involving your forces. Nordostan-Heartland war continues — 3 new zones changed control."
+- **Military situation** → "You have 8 ground units (4 in home territory, 4 at Gulf base), 3 naval units (Persian Gulf), 2 air defense (1 home, 1 Gulf). No active combat involving your forces. Sarmatia-Ruthenia war continues — 3 new zones changed control."
 - **Diplomatic context** → "Pending proposals: Cathay offers 10-year oil contract at fixed price. Columbia's Fixer requests private meeting about Iran. BRICS+ currency vote scheduled Round 4."
 - **Political state** → "Your stability: 7 (stable). Political support: 65%. No domestic threats active."
 

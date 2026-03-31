@@ -19,8 +19,8 @@
     --selected-bg: #F0F8F1;
     --columbia: #4A90D9;
     --cathay: #D94A4A;
-    --nordostan: #808080;
-    --heartland: #D4A843;
+    --sarmatia: #808080;
+    --ruthenia: #D4A843;
     --dark-bg: #1B2838;
     --light-bg: #F5F6F8;
     --water: #D4E4F0;
@@ -560,7 +560,7 @@
 <!-- ============================================================ -->
 <div class="card">
 <h2>Section 5: Full Map Preview</h2>
-<p class="section-note">4x6 hex grid showing realistic military deployment. Nordostan (gray), Heartland (gold), Columbia naval (blue), Cathay naval (red). Icons stacked, not counted.</p>
+<p class="section-note">4x6 hex grid showing realistic military deployment. Sarmatia (gray), Ruthenia (gold), Columbia naval (blue), Cathay naval (red). Icons stacked, not counted.</p>
 
 <div style="display:flex;justify-content:center;padding:20px 0;">
   <div id="map-grid"></div>
@@ -736,8 +736,8 @@ const cathayBg = '#E8C8C8';
 
 const CC = '#D94A4A';   // Cathay
 const CO = '#4A90D9';   // Columbia
-const ND = '#808080';   // Nordostan
-const HL = '#D4A843';   // Heartland
+const ND = '#808080';   // Sarmatia
+const HL = '#D4A843';   // Ruthenia
 
 const e = (bg) => ({ bg, u: [] });
 
@@ -796,12 +796,12 @@ mapRows.forEach((row, ri) => {
 mapGrid.innerHTML = gridHTML;
 
 document.getElementById('map-legend').innerHTML = `
-  <span><span class="legend-dot" style="background:${nordBg}"></span> Nordostan</span>
-  <span><span class="legend-dot" style="background:${heartBg}"></span> Heartland</span>
+  <span><span class="legend-dot" style="background:${nordBg}"></span> Sarmatia</span>
+  <span><span class="legend-dot" style="background:${heartBg}"></span> Ruthenia</span>
   <span><span class="legend-dot" style="background:${waterBg}"></span> Water</span>
   <span><span class="legend-dot" style="background:${landBg}"></span> Neutral land</span>
-  <span>${iconSVG('ground-a2',12,ND)} Nordostan</span>
-  <span>${iconSVG('ground-a2',12,HL)} Heartland</span>
+  <span>${iconSVG('ground-a2',12,ND)} Sarmatia</span>
+  <span>${iconSVG('ground-a2',12,HL)} Ruthenia</span>
   <span>${iconSVG('naval-a',12,CO)} Columbia</span>
   <span>${iconSVG('naval-a',12,CC)} Cathay</span>
 `;

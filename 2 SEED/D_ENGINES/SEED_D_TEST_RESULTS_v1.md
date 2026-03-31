@@ -14,12 +14,12 @@
 - Base: $80
 - Supply: 1.0 - 4*0.06 (4 OPEC members at "low") = 0.76. Persia has pre-existing sanctions from starting data? Checking: sanctions.csv loads at init. Persia is at war with Columbia/Levantia. Sanctions on Persia from sanctions.csv -- per scenario, no sanctions prescribed. But Persia has `_get_sanctions_on` checking bilateral. If no sanctions imposed, supply stays at 0.76.
 - Gulf Gate: blocked from initial load (`_check_ground_blockades` fires, Persia has ground forces on cp_gulf_gate). `chokepoint_status["gulf_gate_ground"] = "blocked"`. So disruption += 0.50. Disruption = 1.50.
-- Wars: 2 active (Nordostan-Heartland, Columbia-Persia). War premium = 2*0.05 = 0.10.
+- Wars: 2 active (Sarmatia-Ruthenia, Columbia-Persia). War premium = 2*0.05 = 0.10.
 - Demand: 1.0 (no major economies in crisis yet). GDP growth avg across ~20 countries: many have positive growth. Average ~2.2%. demand += (2.2-2.0)*0.03 = +0.006. Demand ~1.006.
 - Raw price = 80 * (1.006/0.76) * 1.50 * (1+0.10) = 80 * 1.3237 * 1.50 * 1.10 = 80 * 2.184 = **$174.7**
 - Below $200, no soft cap. Price = **~$175**
 
-**R1 Oil Revenue (Nordostan):** price=175, resource_pct=40/100=0.40, GDP=20. Revenue = 175 * 0.40 * 20 * 0.01 = **$1.40**
+**R1 Oil Revenue (Sarmatia):** price=175, resource_pct=40/100=0.40, GDP=20. Revenue = 175 * 0.40 * 20 * 0.01 = **$1.40**
 
 **R1 Columbia GDP:**
 - Base growth: 1.8% = 0.018
@@ -49,14 +49,14 @@ This is far below expected 190-198.
 | Oil price ($) | 160-185 | ~175 | PASS |
 | Columbia GDP | 272-278 | ~251 | FAIL |
 | Cathay GDP | 190-198 | ~175 | FAIL |
-| Nordostan GDP | 20-22 | ~20.6 | PASS |
-| Nordostan oil_revenue | 0.8-1.4 | ~1.40 | PASS |
+| Sarmatia GDP | 20-22 | ~20.6 | PASS |
+| Sarmatia oil_revenue | 0.8-1.4 | ~1.40 | PASS |
 
 ### Analysis
 
 **Oil price formula: WORKS WELL.** The supply/demand/disruption/war model produces realistic prices. OPEC production decisions have clear impact (-6% supply each), Gulf Gate disruption is significant (+50%), and the soft cap above $200 is properly implemented.
 
-**Oil revenue formula: WORKS.** Nordostan at $175 oil gets 1.40 coins revenue -- meaningful windfall that partially offsets war costs.
+**Oil revenue formula: WORKS.** Sarmatia at $175 oil gets 1.40 coins revenue -- meaningful windfall that partially offsets war costs.
 
 **CRITICAL BUG: Blockade fraction double-counts Gulf Gate disruption.** The `_get_blockade_fraction` function applies oil_impact=0.60 from the CHOKEPOINTS dict for `gulf_gate_ground` to ALL non-oil-producers. This creates a -24% GDP blockade_hit on top of the -3% oil_shock that already captures the oil price spike. The Gulf Gate disruption is counted TWICE:
 1. Oil price formula: disruption += 0.50 -> raises oil price -> oil_shock captures GDP impact
@@ -81,22 +81,22 @@ Oil pricing excellent. But blockade_fraction double-counting makes GDP results u
 
 ### Trace-Through
 
-**Setup:** Gulf Gate OPEN (per scenario). 5 countries impose L3 sanctions on Nordostan R1-R8.
+**Setup:** Gulf Gate OPEN (per scenario). 5 countries impose L3 sanctions on Sarmatia R1-R8.
 
-**R1 Sanctions Impact on Nordostan:**
+**R1 Sanctions Impact on Sarmatia:**
 - Coalition: columbia, gallia, teutonia, albion, freeland all at L3.
-- Trade weights: Need `derive_trade_weights` output. Nordostan GDP=20, large but not dominant. Coalition partners have combined GDP of 280+34+45+33+9 = 401. Nordostan trade weight with these countries depends on sector complementarity. Nordostan resources=40, industry=25 -- heavy resource exporter. Columbia industry=18, services=55 -- moderate complementarity. Given the formula `GDP_a * GDP_b * complementarity / total`, coalition coverage should be well above 0.60.
+- Trade weights: Need `derive_trade_weights` output. Sarmatia GDP=20, large but not dominant. Coalition partners have combined GDP of 280+34+45+33+9 = 401. Sarmatia trade weight with these countries depends on sector complementarity. Sarmatia resources=40, industry=25 -- heavy resource exporter. Columbia industry=18, services=55 -- moderate complementarity. Given the formula `GDP_a * GDP_b * complementarity / total`, coalition coverage should be well above 0.60.
 - Effectiveness = 1.0 (coalition coverage > 60%).
 - Raw impact per sanctioner: level(3) * bw * 0.03. Total raw ~ 3 * total_coverage * 0.03.
 - sanctions_damage capped at 0.50.
 - sanctions_hit = -damage * 2.0. If damage ~0.10-0.15, hit = -0.20 to -0.30 (20-30%).
 - But sanctions_hit gets multiplied by crisis_mult (1.0 initially).
 
-**R1 Nordostan GDP:**
+**R1 Sarmatia GDP:**
 - Base growth: 1.0% = 0.01
 - Oil shock: producer, oil at ~$90 (Gulf Gate open, 2 wars, OPEC normal). oil_shock = +0.01 * (90-80)/50 = +0.002
 - Sanctions hit: -damage * 2.0. Estimate damage ~0.08-0.12 (L3 from 5 countries, effectiveness 1.0). Hit = -0.16 to -0.24.
-- War hit: Nordostan is attacker in Heartland war. Occupied zones = ["heartland_2"] = 1. war_hit = -(1*0.03 + 0) = -0.03.
+- War hit: Sarmatia is attacker in Ruthenia war. Occupied zones = ["ruthenia_2"] = 1. war_hit = -(1*0.03 + 0) = -0.03.
 - Tech boost: AI L1 = 0.0
 - Blockade: no gulf gate blocked, no relevant chokepoints. blockade_hit = 0.
 - Growth = (0.01 + 0.002 - 0.20 - 0.03 + 0 + 0) * 1.0 = ~ -0.218 = -21.8%
@@ -122,7 +122,7 @@ This is well above the R1 expected corridor of 10-30. The massive deficit from m
 - Old: 5.0
 - GDP growth: -21.8% < -2: delta += max(-21.8*0.15, -0.30) = -0.30 (capped)
 - Social spending: ratio = baseline 0.25 (default from collate_events). If social baseline 0.25, ratio >= baseline: delta += 0.05.
-- War friction: Nordostan is attacker. delta -= 0.08. War tiredness = 4.0 (starting). delta -= min(4.0*0.04, 0.4) = -0.16.
+- War friction: Sarmatia is attacker. delta -= 0.08. War tiredness = 4.0 (starting). delta -= min(4.0*0.04, 0.4) = -0.16.
 - Sanctions friction: L3 sanctions. delta -= 0.1 * 3 * 1.0 = -0.30. Under heavy sanctions: sanctions_pain = damage * GDP. delta -= abs(pain/gdp) * 0.8.
 - Inflation friction: delta from baseline(5.0) = 43.35-5 = 38.35. (38.35-3)*0.05 = 1.77. (38.35-20)*0.03 = 0.55. Total = -2.32.
 - Crisis state penalty: still NORMAL (state updates after stability). 0.
@@ -139,11 +139,11 @@ This is BELOW the R1 expected corridor of 4.5-5.0.
 
 | Variable | R1 Expected | R1 Actual | Verdict |
 |----------|------------|-----------|---------|
-| Nordostan GDP | 17-20 | ~15.6 | CALIBRATE |
-| Nordostan inflation | 10-30 | ~43 | FAIL |
-| Nordostan treasury | 0-2 | 0 | PASS |
-| Nordostan debt_burden | 1.5-4.0 | ~2.54 | PASS |
-| Nordostan stability | 4.5-5.0 | ~3.0 | FAIL |
+| Sarmatia GDP | 17-20 | ~15.6 | CALIBRATE |
+| Sarmatia inflation | 10-30 | ~43 | FAIL |
+| Sarmatia treasury | 0-2 | 0 | PASS |
+| Sarmatia debt_burden | 1.5-4.0 | ~2.54 | PASS |
+| Sarmatia stability | 4.5-5.0 | ~3.0 | FAIL |
 
 ### Analysis
 
@@ -155,7 +155,7 @@ This is BELOW the R1 expected corridor of 4.5-5.0.
 - Siege resilience (+0.10) fires for autocracies at war under heavy sanctions.
 
 **What doesn't:**
-1. **Inflation spikes too fast.** The 80x money-printing multiplier produces a 39% inflation spike in R1 because the deficit is enormous (military maintenance of 12.9 coins alone). The expected corridor assumes 10-30% inflation in R1, but the massive maintenance costs force extreme money printing. The issue is partly that Nordostan's military is very expensive (43 total units * 0.3 = 12.9 maintenance) vs its GDP of 15-20.
+1. **Inflation spikes too fast.** The 80x money-printing multiplier produces a 39% inflation spike in R1 because the deficit is enormous (military maintenance of 12.9 coins alone). The expected corridor assumes 10-30% inflation in R1, but the massive maintenance costs force extreme money printing. The issue is partly that Sarmatia's military is very expensive (43 total units * 0.3 = 12.9 maintenance) vs its GDP of 15-20.
 2. **Stability drops too fast.** The inflation friction formula `(inflation_delta - 3) * 0.05` with delta=38 produces -1.77 penalty, plus `(inflation_delta - 20) * 0.03` = -0.55. Combined -2.32 from inflation alone overwhelms the autocratic resilience. The GDP contraction cap at -0.30 helps but inflation friction is uncapped.
 3. **Sanctions GDP hit may be too aggressive.** The `-damage * 2.0` multiplier on top of coalition effectiveness produces large R1 hits. The scenario expects 3-8% per round, but the actual formula may produce 15-25%.
 
@@ -189,7 +189,7 @@ Core sanctions mechanics work. But the sanctions + money printing + inflation ch
 
 **R1 Oil Price:**
 - Gulf Gate: scenario says Columbia-Persia war starts but no Gulf Gate blockade specified (Gulf Gate may still be blocked from initial load if Persia forces remain on cp_gulf_gate). Let me check: Persia starts with ground forces deployed to cp_gulf_gate per `_check_ground_blockades()`. So Gulf Gate IS blocked unless scenario specifically lifts it.
-- Scenario says "Active wars: Nordostan-Heartland, Columbia-Persia. No other actions. OPEC normal."
+- Scenario says "Active wars: Sarmatia-Ruthenia, Columbia-Persia. No other actions. OPEC normal."
 - Gulf Gate blocked from starting deployments. Disruption += 0.50.
 - Formosa blocked. Disruption += 0.10. Total disruption = 1.60.
 - Supply = 1.0 (OPEC normal). No sanctions reducing supply.
@@ -197,7 +197,7 @@ Core sanctions mechanics work. But the sanctions + money printing + inflation ch
 - Demand ~1.006.
 - Raw = 80 * (1.006/1.0) * 1.60 * 1.10 = 80 * 1.006 * 1.60 * 1.10 = 80 * 1.7706 = **$141.6**
 
-Wait, but scenario expects 88-100 for R1 oil. This means the scenario assumes Gulf Gate is NOT blocked. Let me re-read: "Active wars: Nordostan-Heartland (pre-existing). Columbia-Persia (starting). Formosa blockade: Cathay declares naval blockade... No other actions. OPEC normal. No sanctions beyond existing. No tech investment."
+Wait, but scenario expects 88-100 for R1 oil. This means the scenario assumes Gulf Gate is NOT blocked. Let me re-read: "Active wars: Sarmatia-Ruthenia (pre-existing). Columbia-Persia (starting). Formosa blockade: Cathay declares naval blockade... No other actions. OPEC normal. No sanctions beyond existing. No tech investment."
 
 The scenario doesn't explicitly say Gulf Gate open. But if Persia starts with forces on cp_gulf_gate (from deployments.csv), it IS blocked from the start. The oil price expected at 88-100 implies Gulf Gate is OPEN. This is a scenario design issue -- Persia's ground forces on Gulf Gate are initialized from deployments, and the scenario doesn't prescribe lifting it.
 
@@ -267,8 +267,8 @@ Semiconductor mechanics are fundamentally sound (direction, asymmetry, scaling).
 **Columbia naval trajectory:** R1=11, R2=12, R3=12, R4=13, R5=13, R6=14, R7=14, R8=15.
 Both match expected corridors exactly.
 
-**War Tiredness (Heartland R1):**
-- Heartland is defender. base_increase = 0.20.
+**War Tiredness (Ruthenia R1):**
+- Ruthenia is defender. base_increase = 0.20.
 - War duration: start_round=-4, R1: duration = 1 - (-4) = 5 rounds. >= 3: society adaptation. base_increase *= 0.5 = 0.10.
 - Starting tiredness from CSV: 4.0. New: 4.0 + 0.10 = **4.10**. Within corridor 4.0-4.2.
 
@@ -277,23 +277,23 @@ Both match expected corridors exactly.
 - Duration: R1 - 0 = 1. < 3: no adaptation.
 - Starting tiredness from CSV: 1.0. New: 1.0 + 0.15 = **1.15**. Within corridor 1.1-1.2.
 
-**War Tiredness (Nordostan R1):**
-- Nordostan is attacker in Heartland war (start_round=-4). base_increase = 0.15.
+**War Tiredness (Sarmatia R1):**
+- Sarmatia is attacker in Ruthenia war (start_round=-4). base_increase = 0.15.
 - Duration: 1 - (-4) = 5. >= 3: adaptation. 0.15 * 0.5 = 0.075.
 - Starting: 4.0. New: 4.075. Within corridor 4.0-4.2.
 
-**Heartland Stability R1:**
+**Ruthenia Stability R1:**
 - Old: 5.0.
 - Positive inertia: 5.0 < 7: no.
-- GDP growth: Heartland base 2.5%. Oil shock (importer, oil ~$130 with Gulf Gate blocked from init): -0.02*(130-100)/50 = -0.012. Blockade_frac: Gulf Gate blocked, not oil producer: frac += 0.60. blockade_hit = -0.24. Growth = (0.025 - 0.012 - 0.24 + war_hit + tech) ... again blockade_fraction issue.
+- GDP growth: Ruthenia base 2.5%. Oil shock (importer, oil ~$130 with Gulf Gate blocked from init): -0.02*(130-100)/50 = -0.012. Blockade_frac: Gulf Gate blocked, not oil producer: frac += 0.60. blockade_hit = -0.24. Growth = (0.025 - 0.012 - 0.24 + war_hit + tech) ... again blockade_fraction issue.
 
 Actually wait, for this scenario: "No sanctions, no blockades, OPEC normal." This means Gulf Gate should be open. But it IS blocked from starting deployments. Same problem as S3.
 
 If we assume the scenario correctly lifts Gulf Gate (or it's not blocked), then:
-- Oil price ~$88 (2 wars, no disruption). Growth for Heartland more reasonable.
+- Oil price ~$88 (2 wars, no disruption). Growth for Ruthenia more reasonable.
 
 **Assuming Gulf Gate issue is resolved:**
-- Heartland stability follows expected trajectory. War friction as defender: -0.10. Democratic wartime resilience (frontline): +0.15. War tiredness: -min(4.1*0.04, 0.4) = -0.164. Inflation friction (baseline 7.5%, current ~6.4 after decay): delta likely negative = 0. Social spending OK: +0.05.
+- Ruthenia stability follows expected trajectory. War friction as defender: -0.10. Democratic wartime resilience (frontline): +0.15. War tiredness: -min(4.1*0.04, 0.4) = -0.164. Inflation friction (baseline 7.5%, current ~6.4 after decay): delta likely negative = 0. Social spending OK: +0.05.
 - Delta ~ 0 + 0.05 - 0.10 + 0.15 - 0.164 + small GDP term = ~-0.064.
 - New stab: 5.0 - 0.064 = ~4.94. Within corridor 4.7-5.0.
 
@@ -303,10 +303,10 @@ If we assume the scenario correctly lifts Gulf Gate (or it's not blocked), then:
 |----------|------------|-----------|---------|
 | Cathay naval | 8 | 8 | PASS |
 | Columbia naval | 11 | 11 | PASS |
-| Heartland war_tiredness | 4.0-4.2 | 4.10 | PASS |
+| Ruthenia war_tiredness | 4.0-4.2 | 4.10 | PASS |
 | Columbia war_tiredness | 1.1-1.2 | 1.15 | PASS |
-| Nordostan war_tiredness | 4.0-4.2 | 4.075 | PASS |
-| Heartland stability | 4.7-5.0 | ~4.94 | PASS |
+| Sarmatia war_tiredness | 4.0-4.2 | 4.075 | PASS |
+| Ruthenia stability | 4.7-5.0 | ~4.94 | PASS |
 | Columbia political_support | 35-40 | ~37-38 | PASS |
 
 ### Analysis
@@ -341,13 +341,13 @@ Military mechanics are well-calibrated. Naval buildup, production capacity, auto
 - Previous state: Columbia at_war = True.
 - Action removes Persia war from ws.wars.
 - `_apply_blockade_changes({"gulf_gate_ground": None})` lifts Gulf Gate.
-- At Round 3: `at_war_now = False` (assuming only Persia war removed; Columbia isn't in Nordostan-Heartland war).
+- At Round 3: `at_war_now = False` (assuming only Persia war removed; Columbia isn't in Sarmatia-Ruthenia war).
 - `was_at_war = True` (from previous_states snapshot).
 - Pass 2 ceasefire_rally fires: momentum += 1.5.
 
 **R3 Oil Price:**
 - Gulf Gate now open. Supply = 1.0 (OPEC normal). Disruption = 1.0 (no blockades).
-- Wars: 1 (Nordostan-Heartland only). War premium = 0.05.
+- Wars: 1 (Sarmatia-Ruthenia only). War premium = 0.05.
 - Demand ~1.0.
 - Raw = 80 * 1.0 * 1.0 * 1.05 = **$84**. Within corridor 95-140.
 
@@ -359,9 +359,9 @@ Actually, looking more carefully: R1-R2 had Gulf Gate blocked (per scenario), so
 - Not at war anymore: `pol["war_tiredness"] = max(current_wt * 0.80, 0)`.
 - R2 tiredness ~1.30. R3: 1.30 * 0.80 = **1.04**. Within corridor 1.0-1.2.
 
-**R6 Ceasefire (Nordostan-Heartland):**
-- Heartland war tiredness R5 ~4.6. R6 decay: 4.6 * 0.80 = 3.68. R7: 2.94. R8: 2.35. Within corridor.
-- Heartland ceasefire rally: momentum += 1.5 in Pass 2.
+**R6 Ceasefire (Sarmatia-Ruthenia):**
+- Ruthenia war tiredness R5 ~4.6. R6 decay: 4.6 * 0.80 = 3.68. R7: 2.94. R8: 2.35. Within corridor.
+- Ruthenia ceasefire rally: momentum += 1.5 in Pass 2.
 
 **Momentum Build Rate:**
 - After ceasefire, positive signals: if GDP growth > 2: +0.15. If state == normal: +0.15. If stability > 6: +0.15. Boost capped at +0.3/round.
@@ -374,8 +374,8 @@ Actually, looking more carefully: R1-R2 had Gulf Gate blocked (per scenario), so
 | Oil price ($) | 95-140 | ~84 | 75-100 | ~84 | CALIBRATE |
 | Columbia momentum | 0.5-2.0 | ~1.5 | 0.5-2.5 | ~2.4 | PASS |
 | Columbia war_tiredness | 1.0-1.2 | ~1.04 | 0.5-0.7 | ~0.53 | PASS |
-| Heartland war_tiredness | 4.3-4.6 | ~4.4 | 3.6-3.9 | ~3.68 | PASS |
-| Heartland momentum | -1.5-0.0 | ~-0.5 | 0.0-2.0 | ~1.5 | PASS |
+| Ruthenia war_tiredness | 4.3-4.6 | ~4.4 | 3.6-3.9 | ~3.68 | PASS |
+| Ruthenia momentum | -1.5-0.0 | ~-0.5 | 0.0-2.0 | ~1.5 | PASS |
 
 ### Analysis
 
@@ -485,7 +485,7 @@ The debt and inflation mechanics work in isolation, but the budget execution doe
    ```
    Or better: `total_spending = max(social, social_baseline_cost) + mil_budget + tech_budget + maintenance`
 2. **Fix social_spending_ratio in events.** Track ACTUAL social spending vs baseline, not a synthetic default. When actual spending < baseline, stability should be penalized.
-3. This fix would cascade through S2 (Nordostan) and S7 (Persia) as well, producing more realistic fiscal crises.
+3. This fix would cascade through S2 (Sarmatia) and S7 (Persia) as well, producing more realistic fiscal crises.
 
 ---
 
@@ -522,7 +522,7 @@ The debt and inflation mechanics work in isolation, but the budget execution doe
 - Growth = (-0.03 + 0.019 + 0) * 1.0 = -0.011 = -1.1%.
 - New GDP = 5 * 0.989 = **4.95**
 
-**Key finding:** Oil revenue provides a significant buffer for Persia. At $175 oil with Gulf Gate blocked, Persia earns 3.06 coins oil revenue -- enough to cover most of its military maintenance. The Nordostan Enrichment Paradox applies to Persia too.
+**Key finding:** Oil revenue provides a significant buffer for Persia. At $175 oil with Gulf Gate blocked, Persia earns 3.06 coins oil revenue -- enough to cover most of its military maintenance. The Sarmatia Enrichment Paradox applies to Persia too.
 
 **R1 Inflation delta from baseline:** 42.5 - 50.0 = -7.5. Negative delta = no inflation friction on stability. The 15% decay actually REDUCES Persia's inflation below its starting baseline, creating the paradox where inflation delta is negative.
 

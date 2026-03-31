@@ -13,8 +13,8 @@ Standard SEED starting conditions. No player actions — pure formula validation
 
 | Country | Stability | Regime | At War | Sanctions On | War Tired | GDP | Inflation | Treasury |
 |---------|-----------|--------|--------|-------------|-----------|-----|-----------|----------|
-| Heartland | 5.0 | democracy | YES (defender vs Nordostan) | None significant | 4.0 | 2.2 | 7.5 | 1.0 |
-| Nordostan | 5.0 | autocracy | YES (attacker vs Heartland) | L3 (broad coalition) | 4.0 | 20.0 | 5.0 | 6.0 |
+| Ruthenia | 5.0 | democracy | YES (defender vs Sarmatia) | None significant | 4.0 | 2.2 | 7.5 | 1.0 |
+| Sarmatia | 5.0 | autocracy | YES (attacker vs Ruthenia) | L3 (broad coalition) | 4.0 | 20.0 | 5.0 | 6.0 |
 | Persia | 4.0 | hybrid | YES (defender vs Columbia+Levantia) | L3 (Columbia), L2+ (EU) | 1.0 | 5.0 | 50.0 | 1.0 |
 | Caribe | 3.0 | autocracy | NO | L3 (Columbia) | 0.0 | 2.0 | 60.0 | 1.0 |
 | Columbia | 7.0 | democracy | YES (attacker vs Persia) | None significant | 1.0 | 280 | 3.5 | 50 |
@@ -47,7 +47,7 @@ Using standard scenario: Gulf Gate ground blockade active (Persia forces), 2 war
 | R1 | $80.0 | $96.8 | $90.1 | 2 wars (premium +10%), Gulf Gate blocked (+50% disruption), supply=1.0, demand~1.0. formula=80*(1.0/1.0)*1.50*(1.10)=$132. Wait — Gulf Gate IS blocked from start (Persia ground forces). Recalculating. |
 
 **Recalculation R1:**
-- Supply: 1.0 (OPEC normal). Sanctions on Nordostan (L3, oil producer): -0.08. Sanctions on Persia (L3): -0.08. Supply = 1.0 - 0.08 - 0.08 = 0.84.
+- Supply: 1.0 (OPEC normal). Sanctions on Sarmatia (L3, oil producer): -0.08. Sanctions on Persia (L3): -0.08. Supply = 1.0 - 0.08 - 0.08 = 0.84.
 - Disruption: Gulf Gate blocked = +0.50. Disruption = 1.50.
 - Wars: 2. War premium = 0.10.
 - Demand: ~1.0 (no crises yet, avg GDP growth slightly positive ~+2.3%, demand += (2.3-2.0)*0.03 = +0.009).
@@ -60,7 +60,7 @@ Using standard scenario: Gulf Gate ground blockade active (Persia forces), 2 war
 | R2 | $127 | ~$158 | **$146** | Same conditions, converging |
 | R3 | $146 | ~$155 | **$150** | Slight demand reduction from stressed economies |
 | R4 | $150 | ~$152 | **$151** | Near equilibrium |
-| R5 | $151 | ~$148 | **$150** | Demand destruction starting (Nordostan crisis) |
+| R5 | $151 | ~$148 | **$150** | Demand destruction starting (Sarmatia crisis) |
 | R6 | $150 | ~$145 | **$148** | More demand destruction |
 | R7 | $148 | ~$143 | **$145** | Gradual decline |
 | R8 | $145 | ~$140 | **$143** | Stabilizing |
@@ -71,18 +71,18 @@ Using standard scenario: Gulf Gate ground blockade active (Persia forces), 2 war
 
 ---
 
-### HEARTLAND (Target: 2.5-3.5 by R8)
+### RUTHENIA (Target: 2.5-3.5 by R8)
 **Starting:** Stability 5.0, democracy, defender in war (start R-4), war_tiredness 4.0, GDP 2.2, inflation 7.5, treasury 1.0.
 
 War duration at R1: R1 - (-4) = 5 rounds. Society adaptation ACTIVE (>=3). WT growth = 0.20 * 0.5 = 0.10/round.
 
-**GDP trajectory:** Heartland is tiny (GDP 2.2), not oil producer, high inflation baseline (7.5%). Revenue ~ 2.2 * 0.25 = 0.55. Military maintenance: (10+0+3+0+1)*0.3 = 4.2. Social baseline: 0.20 * 2.2 = 0.44. Mandatory = 4.2 + 0.44 = 4.64. Revenue 0.55 << 4.64. Deficit = 4.09. Treasury 1.0 covers 1.0, prints 3.09. Inflation spike: 3.09/2.2 * 80 = 112.4pp. New inflation: 7.5 + 112.4 = 119.9%. Inflation DELTA from baseline (7.5): 112.4.
+**GDP trajectory:** Ruthenia is tiny (GDP 2.2), not oil producer, high inflation baseline (7.5%). Revenue ~ 2.2 * 0.25 = 0.55. Military maintenance: (10+0+3+0+1)*0.3 = 4.2. Social baseline: 0.20 * 2.2 = 0.44. Mandatory = 4.2 + 0.44 = 4.64. Revenue 0.55 << 4.64. Deficit = 4.09. Treasury 1.0 covers 1.0, prints 3.09. Inflation spike: 3.09/2.2 * 80 = 112.4pp. New inflation: 7.5 + 112.4 = 119.9%. Inflation DELTA from baseline (7.5): 112.4.
 
-This creates extreme conditions. Heartland is a wartime economy running on printed money. BUT Cal-4 caps inflation stability friction at -0.50.
+This creates extreme conditions. Ruthenia is a wartime economy running on printed money. BUT Cal-4 caps inflation stability friction at -0.50.
 
 #### Round 1
 ```
-Country: Heartland
+Country: Ruthenia
 Old stability: 5.00
 GDP growth: ~-5.8% (base 2.5%, oil shock at $127: -0.02*(127-100)/50 = -1.08%, war_hit: 1 occupied zone = -3%, infra damage 0.05*0.05 = -0.25%)
   Growth = (0.025 - 0.0108 - 0.0325) * 1.0 = -0.0183 = -1.83%
@@ -93,7 +93,7 @@ Territory lost: 1 zone occupied (pre-existing), events territory_lost=0 (no new 
 Casualties: 0 (no combat resolution this round, baseline test) = 0.00
 Democratic resilience (frontline democracy): +0.15
 Siege resilience: N/A (not autocracy) = 0.00
-Sanctions friction: 0 (no significant sanctions on Heartland) = 0.00
+Sanctions friction: 0 (no significant sanctions on Ruthenia) = 0.00
 Inflation friction: delta = 112.4 (after money printing).
   Raw: -(112.4-3)*0.05 - (112.4-20)*0.03 = -5.47 - 2.77 = -8.24
   Cal-4 CAP: max(-8.24, -0.50) = -0.50
@@ -110,7 +110,7 @@ New stability: 5.0 - 0.535 = 4.465 → **4.47**
 
 #### Round 2
 ```
-Country: Heartland
+Country: Ruthenia
 Old stability: 4.47
 War tiredness: 4.0 + 0.10 = 4.10 (society adaptation active)
 GDP: ~2.12 (declined ~1.8%). Deficit worsens. More money printing. Inflation climbs further.
@@ -133,7 +133,7 @@ New stability: 4.47 - 0.939 = 3.53 → **3.53**
 
 #### Round 3
 ```
-Country: Heartland
+Country: Ruthenia
 Old stability: 3.53
 War tiredness: 4.20
 GDP: ~2.0 (continuing decline). Crisis state likely "crisis" (3+ stress triggers: negative growth, treasury=0, inflation >> baseline+15).
@@ -151,7 +151,7 @@ Net delta: -0.10 - 0.168 + 0.15 - 0.50 - 0.30 + 0.075 - 0.30 = -1.143
 New stability: 3.53 - 1.143 = 2.39 → **2.39**
 ```
 
-#### Rounds 4-8 (Heartland trajectory)
+#### Rounds 4-8 (Ruthenia trajectory)
 The decline continues but slows as stability approaches the floor. Key factors:
 - War tiredness grows slowly (0.10/round with adaptation)
 - Cal-4 cap holds inflation at -0.50
@@ -170,29 +170,29 @@ The decline continues but slows as stability approaches the floor. Key factors:
 | R7 | 1.00 | — | — | — | — | — | — | — | — | **1.00** |
 | R8 | 1.00 | — | — | — | — | — | — | — | — | **1.00** |
 
-**RESULT: Heartland R8 = 1.00 (at floor). Target was 2.5-3.5.**
+**RESULT: Ruthenia R8 = 1.00 (at floor). Target was 2.5-3.5.**
 
-**VERDICT: FAIL — Heartland collapses to stability floor by R5.**
+**VERDICT: FAIL — Ruthenia collapses to stability floor by R5.**
 
-**Root cause:** Heartland's GDP (2.2) cannot support its military (14 units * 0.3 = 4.2 maintenance) plus social spending (0.44). Revenue is ~0.55. The deficit triggers massive money printing every round. Even with Cal-4 capping inflation friction at -0.50, the combined weight of war friction (-0.10), war tiredness (-0.17), inflation cap (-0.50), GDP contraction (-0.30), and crisis state (-0.30 to -0.50) totals approximately -1.0 to -1.35 per round, which no amount of democratic resilience (+0.15) or social spending (+0.075) can offset.
+**Root cause:** Ruthenia's GDP (2.2) cannot support its military (14 units * 0.3 = 4.2 maintenance) plus social spending (0.44). Revenue is ~0.55. The deficit triggers massive money printing every round. Even with Cal-4 capping inflation friction at -0.50, the combined weight of war friction (-0.10), war tiredness (-0.17), inflation cap (-0.50), GDP contraction (-0.30), and crisis state (-0.30 to -0.50) totals approximately -1.0 to -1.35 per round, which no amount of democratic resilience (+0.15) or social spending (+0.075) can offset.
 
-**Key insight:** The Cal-4 cap works correctly — without it, Heartland would collapse R1 (inflation friction alone would be -8.24). But Heartland's structural deficit (military costs 8x revenue) creates a fiscal death spiral that collapses stability through GDP contraction and crisis state channels, not just inflation. The inflation cap delays but does not prevent collapse.
+**Key insight:** The Cal-4 cap works correctly — without it, Ruthenia would collapse R1 (inflation friction alone would be -8.24). But Ruthenia's structural deficit (military costs 8x revenue) creates a fiscal death spiral that collapses stability through GDP contraction and crisis state channels, not just inflation. The inflation cap delays but does not prevent collapse.
 
-**Recommendation:** Heartland needs either (a) reduced starting military (or zero maintenance for defending forces — "wartime conscripts"), (b) external aid mechanics (Western aid packages), or (c) a dedicated "wartime economy" modifier that reduces the stability penalty when the deficit is caused by defense spending. Without intervention, Heartland is a failed state by R5 in every scenario.
+**Recommendation:** Ruthenia needs either (a) reduced starting military (or zero maintenance for defending forces — "wartime conscripts"), (b) external aid mechanics (Western aid packages), or (c) a dedicated "wartime economy" modifier that reduces the stability penalty when the deficit is caused by defense spending. Without intervention, Ruthenia is a failed state by R5 in every scenario.
 
 ---
 
-### NORDOSTAN (Target: 3.5-4.5 by R8)
+### SARMATIA (Target: 3.5-4.5 by R8)
 **Starting:** Stability 5.0, autocracy, attacker in war (start R-4), war_tiredness 4.0, GDP 20.0, inflation 5.0, treasury 6.0, L3 sanctions from broad coalition.
 
 War duration at R1: 5 rounds. Society adaptation ACTIVE. WT growth = 0.15 * 0.5 = 0.075/round.
 
-Sanctions level: L3 (max from columbia, gallia, teutonia, freeland, albion, heartland).
-Coalition coverage: Columbia + Gallia + Teutonia + Freeland + Albion + Heartland + Yamato + Hanguk + Levantia + Formosa = broad. Coverage likely > 0.60, so effectiveness = 1.0.
+Sanctions level: L3 (max from columbia, gallia, teutonia, freeland, albion, ruthenia).
+Coalition coverage: Columbia + Gallia + Teutonia + Freeland + Albion + Ruthenia + Yamato + Hanguk + Levantia + Formosa = broad. Coverage likely > 0.60, so effectiveness = 1.0.
 
 #### Round 1
 ```
-Country: Nordostan
+Country: Sarmatia
 Old stability: 5.00
 
 GDP calculation:
@@ -236,7 +236,7 @@ New stability: 5.0 - 0.86 = 4.14 → **4.14**
 
 #### Round 2
 ```
-Country: Nordostan
+Country: Sarmatia
 Old stability: 4.14
 War tiredness: 4.0 + 0.075 = 4.075
 GDP: ~13.5 (further contraction ~-16%, debt burden growing)
@@ -260,7 +260,7 @@ New stability: 4.14 - 0.941 = 3.20 → **3.20**
 
 #### Round 3
 ```
-Country: Nordostan
+Country: Sarmatia
 Old stability: 3.20
 War tiredness: 4.15
 GDP: ~11.4. Inflation excess continues. Crisis state escalates.
@@ -292,13 +292,13 @@ New stability: 3.20 - 1.093 = 2.11 → **2.11**
 | R7 | 1.00 | — | — | — | — | — | — | — | — | — | — | **1.00** |
 | R8 | 1.00 | — | — | — | — | — | — | — | — | — | — | **1.00** |
 
-Note: At R5, sanctions_rounds > 4 → sanctions friction reduces: -0.1 * 3 * 0.70 = -0.21. But Nordostan is already at the floor.
+Note: At R5, sanctions_rounds > 4 → sanctions friction reduces: -0.1 * 3 * 0.70 = -0.21. But Sarmatia is already at the floor.
 
-**RESULT: Nordostan R8 = 1.00 (at floor). Target was 3.5-4.5.**
+**RESULT: Sarmatia R8 = 1.00 (at floor). Target was 3.5-4.5.**
 
-**VERDICT: FAIL — Nordostan hits stability floor by R4.**
+**VERDICT: FAIL — Sarmatia hits stability floor by R4.**
 
-**Root cause:** Same structural deficit problem as Heartland but from the opposite cause. Nordostan's military (43 units * 0.3 = 12.9 maintenance) consumes far more than revenue can support (~3.3 coins). The L3 sanctions from a broad coalition produce -19% GDP R1, compounding with the massive deficit-driven inflation. Even with autocracy resilience (×0.75) and siege resilience (+0.10), the combined delta of approximately -0.9 to -1.2/round sends stability to the floor by R4.
+**Root cause:** Same structural deficit problem as Ruthenia but from the opposite cause. Sarmatia's military (43 units * 0.3 = 12.9 maintenance) consumes far more than revenue can support (~3.3 coins). The L3 sanctions from a broad coalition produce -19% GDP R1, compounding with the massive deficit-driven inflation. Even with autocracy resilience (×0.75) and siege resilience (+0.10), the combined delta of approximately -0.9 to -1.2/round sends stability to the floor by R4.
 
 **The siege resilience fix (+0.10) is working but is insufficient.** It offsets only ~8% of the negative delta. Against a combined assault of sanctions (-0.32), inflation cap (-0.50), GDP contraction (-0.30), war friction (-0.08), and war tiredness (-0.17), the +0.10 is a bandaid on a hemorrhage.
 
@@ -567,8 +567,8 @@ Levantia (at war as ally) declines slowly — realistic for a country in a dista
 
 | Country | Start | R1 | R2 | R4 | R8 | Target | Verdict |
 |---------|-------|----|----|----|----|--------|---------|
-| **Heartland** | 5.0 | 4.47 | 3.53 | 1.04 | 1.00 | 2.5-3.5 | **FAIL** — collapses to floor |
-| **Nordostan** | 5.0 | 4.14 | 3.20 | 1.00 | 1.00 | 3.5-4.5 | **FAIL** — collapses to floor |
+| **Ruthenia** | 5.0 | 4.47 | 3.53 | 1.04 | 1.00 | 2.5-3.5 | **FAIL** — collapses to floor |
+| **Sarmatia** | 5.0 | 4.14 | 3.20 | 1.00 | 1.00 | 3.5-4.5 | **FAIL** — collapses to floor |
 | **Persia** | 4.0 | 2.82 | 1.57 | 1.00 | 1.00 | NOT collapse R1 | **PASS** — survives R1 (Cal-4 works) |
 | **Caribe** | 3.0 | 2.58 | 2.08 | 1.00 | 1.00 | Gradual decline | **PARTIAL PASS** — gradual, but still collapses |
 | **Columbia** | 7.0 | 7.00 | 6.98 | 6.81 | 6.42 | 5.5-7.0 | **PASS** |
@@ -582,11 +582,11 @@ Levantia (at war as ally) declines slowly — realistic for a country in a dista
 | Fix | Working? | Evidence |
 |-----|----------|----------|
 | **Cal-4: Inflation cap -0.50** | YES | Persia R1: raw inflation friction -3.34, capped to -0.50. Prevents instant collapse. Without cap, Persia = 1.0 at R1. With cap, Persia = 2.82 at R1. |
-| **Siege resilience +0.10** | YES but insufficient | Nordostan R1: +0.10 applied. But total negative delta is -0.96, so +0.10 offsets only 10%. Nordostan still collapses R4. |
+| **Siege resilience +0.10** | YES but insufficient | Sarmatia R1: +0.10 applied. But total negative delta is -0.96, so +0.10 offsets only 10%. Sarmatia still collapses R4. |
 | **GDP contraction cap -0.30** | YES | All countries with negative growth: penalty capped at -0.30 regardless of severity (-19%, -17%, etc. all produce -0.30). |
 | **Crisis state penalty** | YES | Escalation visible: normal(0)→stressed(-0.10)→crisis(-0.30)→collapse(-0.50). Adds appropriate pressure. |
-| **Democratic resilience +0.15** | YES | Heartland gets +0.15/round as frontline democracy. Meaningful but not sufficient against combined negatives. |
-| **Autocracy resilience ×0.75** | YES | Nordostan negative deltas reduced by 25%. Visible in calculations. |
+| **Democratic resilience +0.15** | YES | Ruthenia gets +0.15/round as frontline democracy. Meaningful but not sufficient against combined negatives. |
+| **Autocracy resilience ×0.75** | YES | Sarmatia negative deltas reduced by 25%. Visible in calculations. |
 | **Positive inertia +0.05** | YES | Columbia, Cathay, peaceful countries with stab 7+ get small positive drift. Works as designed. |
 
 ---
@@ -594,17 +594,17 @@ Levantia (at war as ally) declines slowly — realistic for a country in a dista
 ## CRITICAL FINDINGS
 
 ### Finding 1: Wartime Economies with Large Militaries Collapse Regardless of Fixes
-Both Heartland and Nordostan have military maintenance costs (4.2 and 12.9 coins respectively) that vastly exceed their revenue (~0.55 and ~3.3 coins). This structural deficit drives money printing, inflation, debt accumulation, and crisis state escalation that overwhelms ALL stability buffers.
+Both Ruthenia and Sarmatia have military maintenance costs (4.2 and 12.9 coins respectively) that vastly exceed their revenue (~0.55 and ~3.3 coins). This structural deficit drives money printing, inflation, debt accumulation, and crisis state escalation that overwhelms ALL stability buffers.
 
 **The v3 fixes delay collapse by 1-2 rounds but do not prevent it.**
 
 The stability formula has 5 negative channels (war friction, war tiredness, sanctions, inflation, GDP contraction, crisis state) but only 3 positive channels (democratic/siege resilience, social spending, GDP growth bonus) — and the positive channels are capped at small values (+0.15, +0.10, +0.075) while the negative channels stack to -1.0 to -1.4 per round.
 
 ### Finding 2: Cal-4 Inflation Cap is the Single Most Important Fix
-Without Cal-4, Persia collapses R1, Heartland collapses R1, Nordostan collapses R1. With Cal-4, all three survive at least 2-3 rounds. The cap works exactly as designed.
+Without Cal-4, Persia collapses R1, Ruthenia collapses R1, Sarmatia collapses R1. With Cal-4, all three survive at least 2-3 rounds. The cap works exactly as designed.
 
 ### Finding 3: Missing Mechanics — External Aid
-Heartland has no mechanism to receive Western economic/military aid. In reality, a country like Heartland would receive billions in aid that offsets the deficit. Without this mechanic, Heartland is structurally doomed.
+Ruthenia has no mechanism to receive Western economic/military aid. In reality, a country like Ruthenia would receive billions in aid that offsets the deficit. Without this mechanic, Ruthenia is structurally doomed.
 
 ### Finding 4: Siege Resilience Needs Amplification
 The +0.10 bonus for sanctioned autocracies at war is correct in concept but too small to matter. Against -0.96 total delta, +0.10 is noise. Recommend +0.30 to +0.50, or a multiplicative modifier (e.g., total negative delta × 0.60 for siege conditions instead of ×0.75 for autocracy alone).
@@ -615,7 +615,7 @@ The +0.10 bonus for sanctioned autocracies at war is correct in concept but too 
 
 **Passes:** Cal-4 inflation cap (critical), GDP contraction cap, crisis state escalation, democratic resilience, peaceful country stability, Columbia/Cathay trajectories.
 
-**Fails:** Heartland target (1.0 vs 2.5-3.5), Nordostan target (1.0 vs 3.5-4.5). Both structural — the stability formula cannot compensate for fiscal death spirals.
+**Fails:** Ruthenia target (1.0 vs 2.5-3.5), Sarmatia target (1.0 vs 3.5-4.5). Both structural — the stability formula cannot compensate for fiscal death spirals.
 
 **Root cause is not in the stability formula itself but in the economic chain:** military maintenance costs >> revenue → deficit → money printing → inflation + debt + crisis state → stacking stability penalties. The stability formula faithfully reflects economic reality — the problem is that the economic starting conditions are unsustainable without external intervention mechanics.
 

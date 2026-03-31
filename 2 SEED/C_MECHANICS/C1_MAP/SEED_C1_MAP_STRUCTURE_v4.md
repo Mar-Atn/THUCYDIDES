@@ -16,9 +16,9 @@ Other theaters (Formosa, Mashriq, Caribbean, Thule, Korea) resolved at global he
 - Caribbean/Thule/Korea: political events, 1 hex resolution sufficient
 
 **Global-Theater Link:** Eastern Ereb theater hexes link to global hexes:
-- All Heartland theater hexes → global (12,5)
-- Nordostan rows 1-3 → global (13,4)
-- Nordostan rows 4+ → global (13,5)
+- All Ruthenia theater hexes → global (12,5)
+- Sarmatia rows 1-3 → global (13,4)
+- Sarmatia rows 4+ → global (13,5)
 
 ---
 
@@ -27,30 +27,30 @@ Other theaters (Formosa, Mashriq, Caribbean, Thule, Korea) resolved at global he
 | hex_id | owner | row | col |
 |--------|-------|-----|-----|
 | freeland_1 | freeland | 2 | 10 |
-| nordostan_1 | nordostan | 2 | 11 |
-| nordostan_2 | nordostan | 2 | 12 |
-| nordostan_3 | nordostan | 2 | 16 |
+| sarmatia_1 | sarmatia | 2 | 11 |
+| sarmatia_2 | sarmatia | 2 | 12 |
+| sarmatia_3 | sarmatia | 2 | 16 |
 | columbia_1 | columbia | 3 | 3 |
 | thule_1 | thule | 3 | 6 |
 | albion_1 | albion | 3 | 8 |
 | freeland_2 | freeland | 3 | 10 |
-| heartland_1 | heartland | 3 | 11 |
-| nordostan_4 | nordostan | 3 | 12 |
-| nordostan_5 | nordostan | 3 | 13 |
-| nordostan_6 | nordostan | 3 | 14 |
-| nordostan_7 | nordostan | 3 | 15 |
-| nordostan_8 | nordostan | 3 | 16 |
+| ruthenia_1 | ruthenia | 3 | 11 |
+| sarmatia_4 | sarmatia | 3 | 12 |
+| sarmatia_5 | sarmatia | 3 | 13 |
+| sarmatia_6 | sarmatia | 3 | 14 |
+| sarmatia_7 | sarmatia | 3 | 15 |
+| sarmatia_8 | sarmatia | 3 | 16 |
 | choson_1 | choson | 3 | 18 |
 | columbia_2 | columbia | 4 | 2 |
 | columbia_3 | columbia | 4 | 3 |
 | albion_2 | albion | 4 | 7 |
 | teutonia_2 | teutonia | 4 | 9 |
 | teutonia_3 | teutonia | 4 | 10 |
-| heartland_2 | heartland | 4 | 11 |
-| nordostan_9 | nordostan | 4 | 12 |
-| nordostan_10 | nordostan | 4 | 13 |
-| nordostan_11 | nordostan | 4 | 14 |
-| nordostan_12 | nordostan | 4 | 16 |
+| ruthenia_2 | ruthenia | 4 | 11 |
+| sarmatia_9 | sarmatia | 4 | 12 |
+| sarmatia_10 | sarmatia | 4 | 13 |
+| sarmatia_11 | sarmatia | 4 | 14 |
+| sarmatia_12 | sarmatia | 4 | 16 |
 | hanguk_1 | hanguk | 4 | 17 |
 | yamato_1 | yamato | 4 | 19 |
 | columbia_4 | columbia | 5 | 3 |

@@ -25,23 +25,23 @@
 **Casualties:** Columbia -1 naval (total: 9). Persia -1 ground at Gulf Gate (total ground: 7).
 **War tiredness:** Columbia +0.15, Persia +0.20 (defender).
 
-### 2. Donetsk Concentration Offensive (Nordostan)
-**Nordostan:** 12 ground + 4 tac air concentrated on Donetsk axis
-**Heartland defense:** 7 ground + 2 tac air on front line
+### 2. Donetsk Concentration Offensive (Sarmatia)
+**Sarmatia:** 12 ground + 4 tac air concentrated on Donetsk axis
+**Ruthenia defense:** 7 ground + 2 tac air on front line
 
 **Resolution:**
-- Nordostan attacks with local superiority (~1.7:1 ratio)
-- Modifiers: Nordostan tech +0 (AI L1). Heartland terrain +0.5 (defending home). Choson support +0.5 (2 units rear security enabling concentration).
-- Heartland drone logistics strikes: -0.3 modifier to Nordostan supply lines
+- Sarmatia attacks with local superiority (~1.7:1 ratio)
+- Modifiers: Sarmatia tech +0 (AI L1). Ruthenia terrain +0.5 (defending home). Choson support +0.5 (2 units rear security enabling concentration).
+- Ruthenia drone logistics strikes: -0.3 modifier to Sarmatia supply lines
 
 **Dice rolls (simulated):**
 - 5 unit-pair engagements on Donetsk axis
-- Nordostan wins 3, Heartland wins 2 (concentration advantage partially offset by defense)
-- Nordostan loses 1 ground. Heartland loses 2 ground.
+- Sarmatia wins 3, Ruthenia wins 2 (concentration advantage partially offset by defense)
+- Sarmatia loses 1 ground. Ruthenia loses 2 ground.
 
-**Result: NORDOSTAN ADVANCES.** Gains 1 additional theater hex (heartland_15 occupied). Heartland front line pushed back slightly. No strategic breakthrough — grinding advance as designed.
+**Result: SARMATIA ADVANCES.** Gains 1 additional theater hex (ruthenia_15 occupied). Ruthenia front line pushed back slightly. No strategic breakthrough — grinding advance as designed.
 
-**Casualties:** Nordostan -1 ground (12→11 on front). Heartland -2 ground (7→5 on front, 3 reserve).
+**Casualties:** Sarmatia -1 ground (12→11 on front). Ruthenia -2 ground (7→5 on front, 3 reserve).
 **War tiredness:** Both +0.15/0.20.
 
 ### 3. Choson ICBM Launch Over Yamato
@@ -78,12 +78,12 @@
 
 | Transaction | Status | Effect |
 |-------------|--------|--------|
-| Columbia → Heartland: 3 coins military aid | EXECUTED | Heartland treasury +3 (→4 before maintenance) |
+| Columbia → Ruthenia: 3 coins military aid | EXECUTED | Ruthenia treasury +3 (→4 before maintenance) |
 | Columbia → Formosa: 1 coin security package | EXECUTED | Formosa treasury +1 (→9) |
-| Cathay → Nordostan: expanded energy at 15% discount | EXECUTED | Nordostan revenue +1.5 coins (energy sales). Cathay costs +2 coins. |
+| Cathay → Sarmatia: expanded energy at 15% discount | EXECUTED | Sarmatia revenue +1.5 coins (energy sales). Cathay costs +2 coins. |
 | Cathay → Ponte: 3 coins BRI infrastructure | EXECUTED | Ponte treasury +3 (→7). Cathay treasury -3. |
 | IRGC → Persia state: 1.8 coins | INTERNAL | Deficit covered. Anvil's reserves: 5→3.2. |
-| Nordostan ↔ Choson: tech for troops | EXECUTED | Choson gains nuclear sub components. Nordostan gains 2 ground units (3rd wave, arrive R2). |
+| Sarmatia ↔ Choson: tech for troops | EXECUTED | Choson gains nuclear sub components. Sarmatia gains 2 ground units (3rd wave, arrive R2). |
 
 ---
 
@@ -92,7 +92,7 @@
 ### Oil Price Calculation
 ```
 base = $80
-supply_factor = 1.0 - 0.06 (Nordostan HIGH) = 0.94
+supply_factor = 1.0 - 0.06 (Sarmatia HIGH) = 0.94
 sanctions_supply_hit = 0.08 × 2 = 0.16
 final_supply = max(0.5, 0.94 - 0.16) = 0.78
 disruption = 1.0 + 0.40 (Gulf Gate PARTIAL — reduced from 0.80) = 1.40
@@ -105,11 +105,11 @@ OIL PRICE = 80 × (1.0/0.78) × 1.40 × 1.20 × 1.15
          = 80 × 2.478
          = $198/barrel
 ```
-**Oil price R1: $198** (down from $237 starting due to partial Gulf Gate breach + Nordostan flooding market)
+**Oil price R1: $198** (down from $237 starting due to partial Gulf Gate breach + Sarmatia flooding market)
 
 ### Oil Revenue to Producers
 - Solaria: $198 × oil_share × GDP factor = +2.1 coins revenue boost
-- Nordostan: $198 × HIGH production = +1.8 coins (partially offset by discount)
+- Sarmatia: $198 × HIGH production = +1.8 coins (partially offset by discount)
 - Mirage: +0.8 coins
 - Persia: Minimal (war-disrupted exports, mostly smuggling)
 
@@ -121,10 +121,10 @@ New GDP: 280 × 1.0181 = **285.1**
 **Cathay:** base 4.0% × tariff(0.96) × rare_earth_self(1.0) × tech(1.05) × inflation(1.0) × semiconductor(0.975) = 4.0% × 0.983 = **3.93%**
 New GDP: 190 × 1.0393 = **197.5** (+1 naval produced = 7 total)
 
-**Nordostan:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.96) = 1.0% × 0.745 = **0.75%**
+**Sarmatia:** base 1.0% × sanctions(0.85) × war(0.92) × tech(1.0) × inflation(0.96) = 1.0% × 0.745 = **0.75%**
 New GDP: 20 × 1.0075 = **20.15** (Treasury: 6 → ~0 after deficit)
 
-**Heartland:** base 2.5% × war(0.90) × sanctions_on_nordostan_benefit(1.0) × aid_boost(1.05) = 2.5% × 0.945 = **2.36%**
+**Ruthenia:** base 2.5% × war(0.90) × sanctions_on_sarmatia_benefit(1.0) × aid_boost(1.05) = 2.5% × 0.945 = **2.36%**
 New GDP: 2.2 × 1.0236 = **2.25** (Treasury: 1 + 3 aid - maintenance = ~2)
 
 **Persia:** base -3.0% × war(0.85) × sanctions(0.80) × blockade(0.90) = -3.0% × 0.612 = **-1.84%** (contraction slowed by oil revenue at high prices)
@@ -140,8 +140,8 @@ STABILITY FORMULA: old + delta (war friction + economic + democratic resilience 
 |---------|-----|-------------|----------|-----------------|-----------|-------|-----|--------|
 | Columbia | 7.0 | -0.05 (allied) | +0.0 | — | — | — | **6.95** | -0.05 |
 | Cathay | 8.0 | 0 | +0.05 | — | — | — | **8.05** | +0.05 |
-| Nordostan | 5.0 | -0.08 (attacker) | -0.05 | — | ×0.75 = -0.10 | — | **4.90** | -0.10 |
-| Heartland | 5.0 | -0.10 (defender) | -0.03 | +0.15 | — | territory -0.4 | **4.62** | -0.38 |
+| Sarmatia | 5.0 | -0.08 (attacker) | -0.05 | — | ×0.75 = -0.10 | — | **4.90** | -0.10 |
+| Ruthenia | 5.0 | -0.10 (defender) | -0.03 | +0.15 | — | territory -0.4 | **4.62** | -0.38 |
 | Persia | 4.0 | -0.10 (defender) | -0.10 | — | — | fatwa rally +0.1 | **3.90** | -0.10 |
 | Yamato | 8.0 | 0 | +0.0 | — | — | ICBM shock -0.3 | **7.70** | -0.30 |
 | Solaria | 7.0 | -0.05 (under attack) | +0.10 (oil revenue) | — | ×0.75 | — | **7.04** | +0.04 |
@@ -156,8 +156,8 @@ STABILITY FORMULA: old + delta (war friction + economic + democratic resilience 
 |---------|-----|--------|-----|-------|
 | Columbia | 38% | -1.0 (war, oil prices, overstretch) | **37%** | Tribune investigation gaining traction |
 | Cathay | 58% | +0.5 (stability, growth) | **58.5%** | Steady |
-| Nordostan | 55% | -1.0 (war tiredness) | **54%** | Pathfinder's narrative holds |
-| Heartland | 52% | -2.0 (territory lost, casualties) | **50%** | Beacon vulnerable |
+| Sarmatia | 55% | -1.0 (war tiredness) | **54%** | Pathfinder's narrative holds |
+| Ruthenia | 52% | -2.0 (territory lost, casualties) | **50%** | Beacon vulnerable |
 | Persia | 40% | -1.5 (war damage, economy) | **38.5%** | Dawn's support rising |
 
 ### Technology Advancement
@@ -181,8 +181,8 @@ STABILITY FORMULA: old + delta (war friction + economic + democratic resilience 
 |---------|-----|-----------|---------|----------|-------|-----------|
 | Columbia | 285.1 | 6.95 | 37% | ~42 | **9** (-1 Gulf Gate) | Gulf Gate partial breach |
 | Cathay | 197.5 | 8.05 | 58.5% | ~40 | **7** (+1 produced) | All 7 ships near Formosa |
-| Nordostan | 20.15 | 4.90 | 54% | **~0** | 2 | Donetsk advance, treasury empty |
-| Heartland | 2.25 | 4.62 | 50% | ~2 | 0 | Lost 2 ground + 1 hex |
+| Sarmatia | 20.15 | 4.90 | 54% | **~0** | 2 | Donetsk advance, treasury empty |
+| Ruthenia | 2.25 | 4.62 | 50% | ~2 | 0 | Lost 2 ground + 1 hex |
 | Persia | 4.91 | 3.90 | 38.5% | ~0 | 0 | Gulf Gate ground unit lost, fatwa issued |
 | Gallia | 34.3 | 7.0 | 40% | ~7 | 1 | Mediation initiative launched |
 | Teutonia | 45.5 | 7.0 | 45% | ~10 | 0 | Energy crisis management |

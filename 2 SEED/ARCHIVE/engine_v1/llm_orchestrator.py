@@ -29,8 +29,8 @@ from transaction_engine import TransactionEngine
 from live_action_engine import LiveActionEngine
 from world_model_engine import WorldModelEngine
 from llm_agent_runner import (
-    deliberate_columbia, deliberate_cathay, deliberate_nordostan,
-    deliberate_heartland, deliberate_persia, deliberate_europe,
+    deliberate_columbia, deliberate_cathay, deliberate_sarmatia,
+    deliberate_ruthenia, deliberate_persia, deliberate_europe,
     deliberate_solo, assess_gap_ratio, assess_military_balance,
     assess_economic_health, assess_war_status,
     SOLO_DECISION_LOGIC, get_role_briefs,
@@ -51,8 +51,8 @@ DATA_DIR = os.path.join(os.path.dirname(ENGINE_DIR), "data")
 TEAMS = {
     "columbia": ["dealer", "volt", "anchor", "shield", "shadow", "tribune", "challenger"],
     "cathay": ["helmsman", "rampart", "abacus", "circuit", "sage"],
-    "nordostan": ["pathfinder", "ironhand", "compass"],
-    "heartland": ["beacon", "bulwark", "broker"],
+    "sarmatia": ["pathfinder", "ironhand", "compass"],
+    "ruthenia": ["beacon", "bulwark", "broker"],
     "persia": ["furnace", "anvil", "dawn"],
 }
 
@@ -532,7 +532,7 @@ def run_llm_test(num_rounds: int = 8, seed: int = 42,
           f"{len(ws.wars)} active wars, {len(ws.roles)} roles.")
 
     # Verify role briefs exist
-    for team in ["columbia", "cathay", "nordostan", "heartland", "persia", "europe"]:
+    for team in ["columbia", "cathay", "sarmatia", "ruthenia", "persia", "europe"]:
         briefs = get_role_briefs(team)
         print(f"  {team}: {len(briefs)} roles parsed from brief")
 
@@ -582,17 +582,17 @@ def run_llm_test(num_rounds: int = 8, seed: int = 42,
         all_negotiations.extend(cat_negs)
         all_reasoning["cathay"] = cat_reasoning
 
-        print(f"    Nordostan deliberating...")
-        nord_actions, nord_negs, nord_reasoning = deliberate_nordostan(ws, round_num, rng)
-        all_actions["nordostan"] = nord_actions
+        print(f"    Sarmatia deliberating...")
+        nord_actions, nord_negs, nord_reasoning = deliberate_sarmatia(ws, round_num, rng)
+        all_actions["sarmatia"] = nord_actions
         all_negotiations.extend(nord_negs)
-        all_reasoning["nordostan"] = nord_reasoning
+        all_reasoning["sarmatia"] = nord_reasoning
 
-        print(f"    Heartland deliberating...")
-        hl_actions, hl_negs, hl_reasoning = deliberate_heartland(ws, round_num, rng)
-        all_actions["heartland"] = hl_actions
+        print(f"    Ruthenia deliberating...")
+        hl_actions, hl_negs, hl_reasoning = deliberate_ruthenia(ws, round_num, rng)
+        all_actions["ruthenia"] = hl_actions
         all_negotiations.extend(hl_negs)
-        all_reasoning["heartland"] = hl_reasoning
+        all_reasoning["ruthenia"] = hl_reasoning
 
         print(f"    Persia deliberating...")
         per_actions, per_negs, per_reasoning = deliberate_persia(ws, round_num, rng)
@@ -749,7 +749,7 @@ def generate_analysis(output_dir: str, results: dict) -> str:
     lines.append("")
 
     lines.append("### Eastern Europe Theater")
-    lines.append("- Nordostan-Heartland war: grinding attrition")
+    lines.append("- Sarmatia-Ruthenia war: grinding attrition")
     lines.append("- Pathfinder's deal window calculation vs Ironhand's military reality")
     lines.append("- Beacon's territorial red lines vs declining support")
     lines.append("")
@@ -785,7 +785,7 @@ def generate_analysis(output_dir: str, results: dict) -> str:
     lines.append("### Differences from Heuristic Architecture")
     lines.append("- Cathay's Formosa timing is calculated from naval ratio + age + distraction level")
     lines.append("- Columbia's budget reflects Shield vs Volt vs Anchor tension")
-    lines.append("- Nordostan's war strategy responds to Ironhand's attrition assessment")
+    lines.append("- Sarmatia's war strategy responds to Ironhand's attrition assessment")
     lines.append("- Persia's nuclear pace depends on Anvil-Furnace power balance")
     lines.append("- Europe's decisions reflect unanimity constraint with Ponte blocking")
     lines.append("")

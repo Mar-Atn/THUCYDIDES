@@ -58,9 +58,9 @@ Hidden tensions behind a unified facade. All four agree on goals (national rejuv
 
 ---
 
-### Nordostan (Russia) — 4 players
+### Sarmatia (Russia) — 4 players
 
-Personal, paranoid, brittle. Power concentrated through relationships, not institutions. The president controls everything through a web of mutual dependency and mutual suspicion. Unlike Cathay (where the system would continue differently without the leader), Nordostan without its president is an open question — succession crisis, power vacuum, possible collapse. The coup mechanic is always latent.
+Personal, paranoid, brittle. Power concentrated through relationships, not institutions. The president controls everything through a web of mutual dependency and mutual suspicion. Unlike Cathay (where the system would continue differently without the leader), Sarmatia without its president is an open question — succession crisis, power vacuum, possible collapse. The coup mechanic is always latent.
 
 | # | Character | Title | Archetype | Core tension |
 |---|-----------|-------|-----------|-------------|
@@ -69,7 +69,7 @@ Personal, paranoid, brittle. Power concentrated through relationships, not insti
 | 3 | **Ledger** | Prime Minister | The economic survivor | Fund the war or save the economy (resources for neither). Most Western-compatible figure — useful and therefore suspected. |
 | 4 | **Compass** | Oligarch | The shadow diplomat | Personal wealth (20-30 coins), international connections, back-channel access. Wants sanctions relief for personal reasons that align with national interest. Can be arrested anytime. |
 
-**Key mechanic:** President can arrest anyone on Nordostan soil. Nuclear launch requires President + General. Budget submitted by PM, overridable by President. Oligarch operates independently through personal channels — may or may not inform the president. Coup attempt possible by General + PM (+ Oligarch funding); probability depends on social score, political support, co-conspirators, dice roll.
+**Key mechanic:** President can arrest anyone on Sarmatia soil. Nuclear launch requires President + General. Budget submitted by PM, overridable by President. Oligarch operates independently through personal channels — may or may not inform the president. Coup attempt possible by General + PM (+ Oligarch funding); probability depends on social score, political support, co-conspirators, dice roll.
 
 ---
 
@@ -88,7 +88,7 @@ Not a single country with internal factions — four sovereign nations that must
 
 ---
 
-### Heartland (Ukraine) — 3 players
+### Ruthenia (Ukraine) — 3 players
 
 Three players, one country, a wartime election that changes everything. All three are active from Round 1 — the President governs, the General advocates from outside command, the Politician explores peace. Foreign leaders can meet all three, pre-negotiating with the potential next president. At a triggered or scheduled round, the AI determines the election result based on actual gameplay (territory, economy, casualties, support). The winner takes the helm. The losers remain active as opposition.
 
@@ -121,7 +121,7 @@ These are not NPCs — they are full actors with goals, personality, and agency.
 | Character | Country | Key interests | Personality | Consequential moves |
 |-----------|---------|--------------|-------------|-------------------|
 | **Scales** | Bharata (India) | Non-alignment, court all sides, regional primacy | Patient, calculating, refuses to commit | Sanctions stance determines coalition effectiveness. Nuclear dimension with Indistan. |
-| **Bazaar** | Phrygia (Turkey) | Broker everything, NATO + BRICS observer, regional power | Transactional, opportunistic, charmingly unreliable | Controls Bosphorus straits. Can block NATO decisions. Arms dealer to all sides. |
+| **Vizier** | Phrygia (Turkey) | Broker everything, NATO + BRICS observer, regional power | Transactional, opportunistic, charmingly unreliable | Controls Bosphorus straits. Can block NATO decisions. Arms dealer to all sides. |
 | **Wellspring** | Solaria (Saudi Arabia) | Oil pricing, BRICS+ currency, hedge US-China | Pragmatic, patient, leverage-obsessed | OPEC+ production decisions reshape global economy. Currency union swing vote. |
 | **Furnace** | Persia (Iran) | Nuclear program, regional influence, sanctions relief | Intense, patient, ideological but rational | Nuclear threshold crossing triggers UNSC crisis. Proxy network creates Middle East escalation. |
 | **Citadel** | Levantia (Israel) | Survival, Iran neutralization, regional dominance | Decisive, unapologetic, independently capable | Unilateral strike on Persia = regional crisis forcing Columbia's hand. |
@@ -152,7 +152,7 @@ The design works from 22 to 35+ human participants. The world is always complete
 
 | Priority | Roles filled | Humans | Notes |
 |----------|-------------|:------:|-------|
-| 1 — Always human | Columbia (6), Cathay (4), Nordostan (4), Europe (4), Heartland (3) | 21 | Core teams. The irreducible minimum. Every human is on a team. |
+| 1 — Always human | Columbia (6), Cathay (4), Sarmatia (4), Europe (4), Ruthenia (3) | 21 | Core teams. The irreducible minimum. Every human is on a team. |
 | 2 — First expansion | +Columbia 7th (Spark), +Press (Veritas) | 23 | Adds the wild card tycoon and human press. |
 | 3 — Key solo countries become human | +Bharata, +Phrygia, +Yamato | 26 | The swing states and Pacific anchor most benefit from human unpredictability. |
 | 4 — Deepen the world | +Solaria, +Persia, +Levantia, +Formosa | 30 | Major solo actors become human. Middle East and Taiwan gain human agency. |
@@ -168,7 +168,7 @@ The design works from 22 to 35+ human participants. The world is always complete
 
 ## Team Dynamics Comparison
 
-| | Columbia | Cathay | Nordostan | Europe | Heartland |
+| | Columbia | Cathay | Sarmatia | Europe | Ruthenia |
 |--|---------|--------|-----------|--------|-----------|
 | **Power structure** | Divided (institutional) | Concentrated (hierarchical) | Personal (paranoid) | Sovereign (collective) | Contested (electoral) |
 | **Disagreement style** | Public, institutional | Hidden, behind facade | Whispered, dangerous | Inter-state, procedural | Temporal — three futures competing |
@@ -186,7 +186,7 @@ The design works from 22 to 35+ human participants. The world is always complete
 3. AI character cognitive architecture — extending KING's 4-block model for country-level decision-making
 4. Interaction model between human players and AI countries — web platform, moderator-facilitated, or hybrid
 5. Whether Columbia needs the 7th role (Spark) in the core 21 or only as expansion
-6. Whether Heartland's election is at a fixed round or triggered by conditions
+6. Whether Ruthenia's election is at a fixed round or triggered by conditions
 7. Press role: human or AI? Human adds creativity; AI adds consistency and availability
 8. Character name final validation — read aloud in fast conversation, test for 12-hour durability
 
@@ -194,4 +194,4 @@ The design works from 22 to 35+ human participants. The world is always complete
 
 ## Changelog
 
-- **v1.0 (2026-03-19):** Initial roles architecture. Human-teams-plus-AI-world philosophy. Five team structures (Columbia 6-7, Cathay 4, Nordostan 4, Europe 4, Heartland 3). 15 AI-operated countries with character profiles. Scaling framework from 22 to 35+ participants. Team dynamics comparison. Working character names proposed.
+- **v1.0 (2026-03-19):** Initial roles architecture. Human-teams-plus-AI-world philosophy. Five team structures (Columbia 6-7, Cathay 4, Sarmatia 4, Europe 4, Ruthenia 3). 15 AI-operated countries with character profiles. Scaling framework from 22 to 35+ participants. Team dynamics comparison. Working character names proposed.

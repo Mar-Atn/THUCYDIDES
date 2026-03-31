@@ -219,7 +219,7 @@ All deliverables are either complete or in progress. No items are "not started."
 **Approved by:** Marat (2026-03-30, during action review)
 
 ### CM-002: Complete Action Review (2026-03-30)
-**Change:** All 31 SIM actions reviewed one-by-one with Marat and revised. Major changes to: ground attack (simplified modifiers, dice-based), blockade (ground-forces-only), nuclear system (5-tier with 10-min clock), intelligence (renamed, per-individual pools, always-returns-answer), sanctions (S-curve coalition model), tariffs (per-sector option), oil (5 levels), mobilization (finite depletable pool), assassination (per-country probability), coup (trust mechanic), plus new mechanics: Court (AI judge for democracies), Impeachment (Columbia/Heartland), Protest (auto + stimulated).
+**Change:** All 31 SIM actions reviewed one-by-one with Marat and revised. Major changes to: ground attack (simplified modifiers, dice-based), blockade (ground-forces-only), nuclear system (5-tier with 10-min clock), intelligence (renamed, per-individual pools, always-returns-answer), sanctions (S-curve coalition model), tariffs (per-sector option), oil (5 levels), mobilization (finite depletable pool), assassination (per-country probability), coup (trust mechanic), plus new mechanics: Court (AI judge for democracies), Impeachment (Columbia/Ruthenia), Protest (auto + stimulated).
 **Affects Concept:** CON_E1 (Engine Architecture), CON_C2 (Action System), CON_G1 (Web App Architecture). Multiple mechanics revised from concept-level specifications.
 **Files updated:** SEED_G_WEB_APP_SPEC_v1.md (full rewrite of actions), SEED_D8_ENGINE_FORMULAS_v1.md (v1.1, 20+ sections updated), world_model_engine.py (sanctions S-curve, oil 5-level, mobilization pool), live_action_engine.py (combat modifiers, blockade, assassination, coup), world_state.py (new constants, mobilization_pool loading), countries.csv (mobilization_pool column), roles.csv (intelligence_pool column).
 **Approved by:** Marat (2026-03-30, action-by-action review)
@@ -230,3 +230,11 @@ All deliverables are either complete or in progress. No items are "not started."
 **Affects Concept:** CON_E1 (Engine Architecture) — mobilization section should note militia sub-mechanic. CON_C2 (Action System) — militia call as a new action type.
 **Decision:** Proceed at SEED level. Concept docs to be updated at next Concept review sweep (minor addition, consistent with existing mobilization framework).
 **Approved by:** Marat (2026-03-30, verbal)
+
+### CM-006: Deployment Rules Clarification (2026-03-30)
+**Change:** (1) Transit delay removed — deployment is instant, combat delay inherent in round structure. (2) Ship capacity formalized: 1 ground + 2 air units per ship, own country only. (3) Strategic missiles cannot embark. (4) Naval cannot deploy into active blockade. (5) Air per ship corrected from 5 (G spec error) to 2 (D8 correct).
+**Rationale:** Simplifies deployment (no tracking of in-transit units). Overstretch mechanic preserved through force positioning choices, not transit timers. Ship capacity needed for amphibious assault mechanics.
+**Affects Concept:** CON_C1 (Domains), CON_C2 (Actions), CON_C3 (Time Structure), CON_E1 (Engine). Transit delay language updated. Ship capacity added.
+**Affects SEED:** G spec (ship capacity 5→2, transit delay removed), D8 (ground embarkation + blockade restriction added).
+**Affects DET:** Naming conventions Section 0, database deployment_validation function.
+**Approved by:** Marat (2026-03-30, verbal during deployment rules discussion)

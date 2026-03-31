@@ -231,21 +231,21 @@ The SIM does not start with a crisis. It starts with a **condition** — the str
 **Multiple ticking clocks** create overlapping urgency:
 - Cathay's tech advancement toward frontier AI (visible progress bar — each milestone ratchets anxiety)
 - Cathay's Formosa military capability crossing from "marginal" to "adequate" to "strong"
-- Nordostan's economic reserves depleting (countdown to crisis)
-- Heartland's war fatigue eroding stability (countdown to political change)
+- Sarmatia's economic reserves depleting (countdown to crisis)
+- Ruthenia's war fatigue eroding stability (countdown to political change)
 - Columbia's election approaching (countdown to potential policy reversal)
 - Cathay's economic slowdown widening the gap between military ambition and economic capacity
 
 **Five potential catharsis points** (attractors, not scripted events):
 1. **Formosa crisis** — the most dangerous attractor, drawn by the military buildup and semiconductor dependency
 2. **Columbia election** — political rupture that could reverse every commitment
-3. **Heartland resolution** — peace deal, frozen conflict, or escalation that reshapes Europe and tests the rules-based order
+3. **Ruthenia resolution** — peace deal, frozen conflict, or escalation that reshapes Europe and tests the rules-based order
 4. **Financial architecture fracture** — BRICS+ currency union that ends dollar dominance
-5. **Nuclear threshold** — Persia, or Nordostan's tactical use, or Cathay reaching strategic parity
+5. **Nuclear threshold** — Persia, or Sarmatia's tactical use, or Cathay reaching strategic parity
 
 Which attractor becomes the SIM's climax depends entirely on participant decisions. They must manage ALL of them — and the one they neglect is the one that explodes. The number of active crises at game end is itself the scorecard: fewer = better leadership, more = the Trap closing.
 
-**Compound escalation** is the Trap's mechanism made mechanical: each attractor makes the others more dangerous. The Heartland war drains Columbia → Pacific presence weakens → Formosa crisis becomes more likely. Sanctions strain the global economy → BRICS+ currency alternative becomes more attractive → financial fracture accelerates. Columbia election approaching → short-term decisions dominate → allies lose confidence → hedging toward Cathay accelerates.
+**Compound escalation** is the Trap's mechanism made mechanical: each attractor makes the others more dangerous. The Ruthenia war drains Columbia → Pacific presence weakens → Formosa crisis becomes more likely. Sanctions strain the global economy → BRICS+ currency alternative becomes more attractive → financial fracture accelerates. Columbia election approaching → short-term decisions dominate → allies lose confidence → hedging toward Cathay accelerates.
 
 ### Key Design Implications
 

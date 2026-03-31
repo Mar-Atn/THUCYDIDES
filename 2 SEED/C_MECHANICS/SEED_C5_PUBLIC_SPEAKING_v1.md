@@ -30,7 +30,7 @@ Communication is FREE. The SIM does not regulate who talks to whom, when, or how
 | **R1** | Opening statements | Optional — any HoS can address the room | Brief (2-3 min each), voluntary |
 | **R3** | UNGA session | Every country declares position | Mandatory — each country 1-2 min. Recorded. Creates public record. |
 | **R5** | Columbia presidential speeches | Candidates (Volt, Anchor, Challenger) | Formal speeches + optional debate. All participants watch. |
-| **R3-4** | Heartland wartime election | Candidates (Beacon, Bulwark, Broker) | Brief statements. Heartland team + interested observers. |
+| **R3-4** | Ruthenia wartime election | Candidates (Beacon, Bulwark, Broker) | Brief statements. Ruthenia team + interested observers. |
 
 ---
 

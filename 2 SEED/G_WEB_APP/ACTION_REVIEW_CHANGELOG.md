@@ -29,7 +29,7 @@
 ### #5 Mobilization
 - FINITE DEPLETABLE POOL per country (not repeatable)
 - Partial = half remaining pool. Full = all remaining pool. Never recovers.
-- Heartland and Nordostan already partially mobilized at game start
+- Ruthenia and Sarmatia already partially mobilized at game start
 - Stability cost varies by country type (democracy at peace -1.5, democracy at war -0.5, autocracy -0.3, under invasion -0.2)
 - Columbia mobilization needs parliament approval (no mechanic — just stated)
 - Pool sizes per country defined
@@ -56,7 +56,7 @@
   - Air support: +1 defender (yes/no binary)
   - "Fatherland" appeal: +1 one-time card, 60% success, delayed risk 2 rounds later
 - REMOVED: naval support modifier, militia modifier, home territory, capital, scaled air support
-- Ships carry 1 ground unit + up to 5 air units. Transport between rounds. Attack adjacent land from ship.
+- Ships carry 1 ground unit + up to 2 air units. Transport between rounds. Attack adjacent land from ship.
 - Amphibious: -1 modifier replaces 3:1 ratio requirement
 
 ### #8 Blockade — MAJOR REVISION
@@ -79,7 +79,7 @@
 - 10-minute authorization clock (SIM enters special mode)
 - 10-minute flight time after launch
 - Detection tiers: L3+ for subsurface test, everyone for open test, L2+ for missile launches
-- Country-specific authorization: Columbia 3-person, Cathay 3-person, Europe AI gate, Nordostan 2-person, Choson/Persia/Levantia HoS alone
+- Country-specific authorization: Columbia 3-person, Cathay 3-person, Europe AI gate, Sarmatia 2-person, Choson/Persia/Levantia HoS alone
 - Response options during flight: intercept (coalition AD), counter-launch, massive counter-attack, do nothing
 - Nuclear unknown until impact — nobody knows if conventional or nuclear during flight
 
@@ -152,7 +152,7 @@
 
 ### #22 Assassination
 - 1 card per game per eligible role
-- Domestic: 60% hit. International: 20% default, Levantia 50%, Nordostan 30%
+- Domestic: 60% hit. International: 20% default, Levantia 50%, Sarmatia 30%
 - Hit = 50/50 kill/survive (injured + martyr effect)
 - No AI or intel modifiers. Raw probability.
 - International: higher chance of being revealed if failed.
@@ -171,9 +171,9 @@
 - Public event.
 
 ### #25 Impeachment
-- Columbia and Heartland only
+- Columbia and Ruthenia only
 - Columbia: any parliament member initiates → parliament votes (real participants)
-- Heartland: any team member initiates → 2 real votes needed + AI emulates remaining (loyal to president by default)
+- Ruthenia: any team member initiates → 2 real votes needed + AI emulates remaining (loyal to president by default)
 - Both sides submit positions. Takes 1 round.
 - Removed leader stays in play, loses executive powers.
 
@@ -210,7 +210,7 @@
 - Physical meeting. App handles invitation/notification only.
 
 ### #31 Nominate for Election
-- 10 minutes before election. Triggered by moderator. Focus: Columbia, some Heartland.
+- 10 minutes before election. Triggered by moderator. Focus: Columbia, some Ruthenia.
 
 ---
 

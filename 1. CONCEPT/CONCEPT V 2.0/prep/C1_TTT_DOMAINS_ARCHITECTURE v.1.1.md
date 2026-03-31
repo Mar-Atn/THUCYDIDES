@@ -95,7 +95,7 @@ The global map starts with **two active theaters** (Eastern Ereb and Mashriq - P
 
 **Coins** — the universal hard currency. Digital. Realistic - like a real currency. Every transaction tracked. State treasuries and personal wealth (available for all roles, avalable from start and actively played by certain roles: oligarchs, business figures, Gulf royals — ~8-12 roles). Spot transactions are immediate and irreversible.
 
-**Economic structure** — each country has a fixed profile showing GDP composition across four sectors: Resources, Industry, Services, Technology. Participants don't manage sector allocation — the profile determines how specific sanctions, tariffs, and shocks affect them. E.g., Nordostan is Resources-heavy (vulnerable to energy sanctions), Cathay is Industry-heavy (vulnerable to tariffs), Columbia is Services/Tech-heavy (vulnerable to financial counter-measures).
+**Economic structure** — each country has a fixed profile showing GDP composition across four sectors: Resources, Industry, Services, Technology. Participants don't manage sector allocation — the profile determines how specific sanctions, tariffs, and shocks affect them. E.g., Sarmatia is Resources-heavy (vulnerable to energy sanctions), Cathay is Industry-heavy (vulnerable to tariffs), Columbia is Services/Tech-heavy (vulnerable to financial counter-measures).
 
 ### Budget Cycle (each round)
 
@@ -109,7 +109,7 @@ Every country submits a budget. The PM / finance minister owns it; head of state
 **Deliberate decisions:**
 - Military production budget (new units/types, production level - standard/accelerated - at higher per unit costs)
 - Social spending (above or below baseline — direct lever on stability index)
-- AI R&D government investment (advancing AI level — primarily Columbia and Cathay, but available to EU and Nordostan)
+- AI R&D government investment (advancing AI level — primarily Columbia and Cathay, but available to EU and Sarmatia)
 - Capacity investment (expanding production capacity — long-term militarization/demilitarization - new capacity will be added next round, new units - in two rounds)
 - International transfers (aid, loans, arms payments, any spot transactions)
 - Money printing (create coins from nothing — generates inflation, AI engine tracks cumulative impact, inflation leads to unhappy people)
@@ -132,14 +132,14 @@ Every country submits a budget. The PM / finance minister owns it; head of state
 - Impact weighted by economy size and the size of coalition supporting sanctions and teh ssize of those helping to avade sanctions
 - Cost-to-sanctioner modeled (sanctions hurt the imposer too)
 - Secondary sanctions risk for evaders (possible to discover via intelligence)
-- Frozen assets mechanic (some assets of Nordostan are held in EU and US)
+- Frozen assets mechanic (some assets of Sarmatia are held in EU and US)
 
 
 ### Oil / Resource Pricing
 
-A sub-mechanic for resource-producing countries (Solaria, Nordostan, Persia, others in OPEC+).
+A sub-mechanic for resource-producing countries (Solaria, Sarmatia, Persia, others in OPEC+).
 
-Each producer sets production level: low / normal / high. AI calculates resulting global price based on total supply vs. demand. High prices benefit producers, hurt importers (Cathay, Teutonia, Bharata — potential social score impact). Classic prisoner's dilemma: cooperate (restrict production, price high) or defect (overproduce, grab market share, crash price). Solaria and Nordostan are in OPEC+ together but are geopolitical adversaries — can they cooperate on oil while competing on everything else?
+Each producer sets production level: low / normal / high. AI calculates resulting global price based on total supply vs. demand. High prices benefit producers, hurt importers (Cathay, Teutonia, Bharata — potential social score impact). Classic prisoner's dilemma: cooperate (restrict production, price high) or defect (overproduce, grab market share, crash price). Solaria and Sarmatia are in OPEC+ together but are geopolitical adversaries — can they cooperate on oil while competing on everything else?
 
 Iran also has an option to block Ormuz straight by it s military units - and keep the blockade, reducing oil available in markets. Impact on prices of resources, negative for resource consuming nations and negative n volume for local producers in the middl east, while positive for other producers (Russia, Venezuela)
 
@@ -210,7 +210,7 @@ Low stability + Low support = **Collapse zone** (coup, revolution, or electoral 
 
 **Columbia presidential cycle:** Mid-terms in round 2 (if SIM starts 2026). Presidential election in round 5 (close to the end of the simulation). Creates escalating domestic constraint — every decision judged through electoral lens. Loss of Congress restricts budget and policy authority.
 
-**Heartland elections:** Can be triggered by parliament (decision of the 3 participant). Wartime election = dramatic moment. Current president vs. alternatives offering different war/peace visions.
+**Ruthenia elections:** Can be triggered by parliament (decision of the 3 participant). Wartime election = dramatic moment. Current president vs. alternatives offering different war/peace visions.
 
 **Other democracies:** Triggered by stability crises (government falls below threshold). For single-role countries, AI generates outcomes: "New government elected with more hawkish/dovish mandate."
 
@@ -261,9 +261,9 @@ The existential dimension. Deterrence, escalation, proliferation.
 |-------|-----------|-------------------|
 | 1 | Basic weapons. Can test. Tactical capability | Choson, Bharata, Indistan, Levantia |
 | 2 | Reliable arsenal. Tactical and limited strategic capability | Cathay, Albion, Gallia |
-| 3 | Full strategic arsenal. Global strike capability. MAD-capable | Columbia, Nordostan |
+| 3 | Full strategic arsenal. Global strike capability. MAD-capable | Columbia, Sarmatia |
 
-Actions: test, tactical strike (L1), strike on city (L2), strategic strike (L3), transfer technology to another country, sell weapon. Escalation ladder and authorization chain preserved from SIM4. Proliferation is a diplomatic currency — Nordostan's Level 3 tech is something Cathay and others want.
+Actions: test, tactical strike (L1), strike on city (L2), strategic strike (L3), transfer technology to another country, sell weapon. Escalation ladder and authorization chain preserved from SIM4. Proliferation is a diplomatic currency — Sarmatia's Level 3 tech is something Cathay and others want.
 
 Countries can invest to advance nuclear level (expensive, slow, internationally provocative). Persia at Level 0 attempting to reach Level 1 is a major plotline.
 
@@ -302,7 +302,7 @@ Any country with advanced level of AI technology can restrict technology exports
 Cathay controls rare earth minerals essential for all tech manufacturing. Can restrict exports to Columbia and allies. Mutual vulnerability creates the possibility of negotiated restraint. (TBC)
 
 **Technology transfer:**
-Sell or share tech for coins or political concessions. Legitimate transfers (Columbia sells military AI to allies) are routine. Controversial transfers (Cathay shares drone tech with Nordostan) trigger diplomatic consequences. Proliferation risk parallels nuclear. Technlogy becomes effective next quarter. 
+Sell or share tech for coins or political concessions. Legitimate transfers (Columbia sells military AI to allies) are routine. Controversial transfers (Cathay shares drone tech with Sarmatia) trigger diplomatic consequences. Proliferation risk parallels nuclear. Technlogy becomes effective next quarter. 
 
 **AI-enhanced propaganda (Level 2+):**
 Countries with AI capability can target other countries' domestic politics — amplifying disinformation, manipulating social media, undermining trust in institutions. Substantially more effective than traditional propaganda. Lowers target's stability index and/or political support. Risk: attribution and international backlash. Hidden cost: normalizes information warfare, may invite retaliation against own society.

@@ -54,8 +54,8 @@ STABILITY_THRESHOLDS = {
 # Scheduled events
 SCHEDULED_EVENTS = {
     2: [{"type": "election", "subtype": "columbia_midterms", "country": "columbia"}],
-    3: [{"type": "election", "subtype": "heartland_wartime", "country": "heartland"}],
-    4: [{"type": "election", "subtype": "heartland_wartime_runoff", "country": "heartland"}],
+    3: [{"type": "election", "subtype": "ruthenia_wartime", "country": "ruthenia"}],
+    4: [{"type": "election", "subtype": "ruthenia_wartime_runoff", "country": "ruthenia"}],
     5: [{"type": "election", "subtype": "columbia_presidential", "country": "columbia"}],
 }
 
@@ -351,14 +351,14 @@ class WorldState:
                     if pair not in war_pairs_seen:
                         war_pairs_seen.add(pair)
                         # Determine attacker/defender from context
-                        if pair == ("heartland", "nordostan"):
+                        if pair == ("ruthenia", "sarmatia"):
                             self.wars.append({
-                                "attacker": "nordostan",
-                                "defender": "heartland",
+                                "attacker": "sarmatia",
+                                "defender": "ruthenia",
                                 "theater": "eastern_ereb",
                                 "start_round": -4,  # pre-sim war
                                 "occupied_zones": [
-                                    "heartland_2",
+                                    "ruthenia_2",
                                 ],
                             })
                         elif pair == ("columbia", "persia") or pair == ("levantia", "persia"):

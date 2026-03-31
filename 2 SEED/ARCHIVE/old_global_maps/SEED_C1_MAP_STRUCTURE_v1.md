@@ -67,17 +67,17 @@ For odd rows (r % 2 == 1), neighbors at:
 | gallia_1 | Gallia W | gallia | 6 | 7 |
 | gallia_2 | Gallia E | gallia | 6 | 8 |
 | ponte | Ponte | ponte | 7 | 7 |
-| heartland_1 | Heartland N | heartland | 4 | 9 |
-| heartland_2 | Heartland S | heartland | 5 | 10 |
-| nord_n1 | Nordostan N | nordostan | 2 | 11 |
-| ~~nord_w1~~ | ~~Nordostan W1~~ | ~~nordostan~~ | ~~3~~ | ~~10~~ | *REMOVED — converted to sea*
-| nord_c1 | Nordostan C1 | nordostan | 3 | 11 |
-| nord_e1 | Nordostan E1 | nordostan | 3 | 12 |
-| nord_e2 | Nordostan E2 | nordostan | 3 | 13 |
-| nord_e3 | Nordostan E3 | nordostan | 3 | 14 |
-| nord_w2 | Nordostan W2 | nordostan | 4 | 10 |
-| nord_c2 | Nordostan C2 | nordostan | 4 | 11 |
-| nord_sw | Nordostan SW | nordostan | 5 | 11 |
+| ruthenia_1 | Ruthenia N | ruthenia | 4 | 9 |
+| ruthenia_2 | Ruthenia S | ruthenia | 5 | 10 |
+| nord_n1 | Sarmatia N | sarmatia | 2 | 11 |
+| ~~nord_w1~~ | ~~Sarmatia W1~~ | ~~sarmatia~~ | ~~3~~ | ~~10~~ | *REMOVED — converted to sea*
+| nord_c1 | Sarmatia C1 | sarmatia | 3 | 11 |
+| nord_e1 | Sarmatia E1 | sarmatia | 3 | 12 |
+| nord_e2 | Sarmatia E2 | sarmatia | 3 | 13 |
+| nord_e3 | Sarmatia E3 | sarmatia | 3 | 14 |
+| nord_w2 | Sarmatia W2 | sarmatia | 4 | 10 |
+| nord_c2 | Sarmatia C2 | sarmatia | 4 | 11 |
+| nord_sw | Sarmatia SW | sarmatia | 5 | 11 |
 | phrygia_1 | Phrygia N | phrygia | 6 | 10 |
 | phrygia_2 | Phrygia S | phrygia | 7 | 10 |
 | persia_1 | Persia N | persia | 6 | 12 |
@@ -96,8 +96,8 @@ For odd rows (r % 2 == 1), neighbors at:
 | bharata_3 | Bharata E | bharata | 6 | 14 |
 | bharata_4 | Bharata W | bharata | 7 | 13 |
 | bharata_5 | Bharata S | bharata | 8 | 13 |
-| nord_e4 | Nordostan E4 | nordostan | 4 | 14 |
-| nord_e5 | Nordostan E5 | nordostan | 4 | 15 |
+| nord_e4 | Sarmatia E4 | sarmatia | 4 | 14 |
+| nord_e5 | Sarmatia E5 | sarmatia | 4 | 15 |
 | cathay_1 | Cathay NW | cathay | 5 | 14 |
 | cathay_2 | Cathay W | cathay | 5 | 15 |
 | cathay_3 | Cathay C | cathay | 5 | 16 |
@@ -132,27 +132,27 @@ col_south:      col_main_3, col_main_4
 caribe:         (island, no land adjacency — connected via cp_caribe_passage water)
 
 thule:          (island, no land adjacency)
-teutonia_1:     heartland_1, teutonia_2, freeland
+teutonia_1:     ruthenia_1, teutonia_2, freeland
 teutonia_2:     teutonia_1, freeland, gallia_1, gallia_2
-freeland:       teutonia_1, heartland_1, teutonia_2, heartland_2, gallia_2
+freeland:       teutonia_1, ruthenia_1, teutonia_2, ruthenia_2, gallia_2
 albion:         (island, no land adjacency)
 gallia_1:       teutonia_2, gallia_2, ponte
 gallia_2:       teutonia_2, freeland, gallia_1, levantia
 ponte:          gallia_1
 
-heartland_1:    teutonia_1, freeland, heartland_2, nord_w1, nord_w2
-heartland_2:    heartland_1, freeland, phrygia_1, nord_w2
+ruthenia_1:    teutonia_1, freeland, ruthenia_2, nord_w1, nord_w2
+ruthenia_2:    ruthenia_1, freeland, phrygia_1, nord_w2
 
 nord_n1:        nord_c1, nord_e1
-nord_w1:        heartland_1, nord_c1, nord_w2
+nord_w1:        ruthenia_1, nord_c1, nord_w2
 nord_c1:        nord_n1, nord_w1, nord_e1, nord_w2, nord_c2
 nord_e1:        nord_n1, nord_c1, nord_e2, nord_c2, sogdiana_1
 nord_e2:        nord_e1, nord_e3, sogdiana_1, sogdiana_3
 nord_e3:        nord_e2, sogdiana_3, cathay_1
-nord_w2:        nord_w1, nord_c1, heartland_1, nord_c2, heartland_2
+nord_w2:        nord_w1, nord_c1, ruthenia_1, nord_c2, ruthenia_2
 nord_c2:        nord_c1, nord_e1, nord_w2, sogdiana_1
 
-phrygia_1:      heartland_2, phrygia_2, persia_2
+phrygia_1:      ruthenia_2, phrygia_2, persia_2
 phrygia_2:      phrygia_1, levantia, persia_2, solaria_1, solaria_2
 persia_1:       sogdiana_2, bharata_2, persia_3
 persia_2:       phrygia_1, phrygia_2, persia_3, solaria_2
@@ -193,8 +193,8 @@ yamato_2:       yamato_1
 |---------|------|--------|
 | Columbia | #D4B896 | #666 |
 | Cathay | #E8D5A3 | #666 |
-| Nordostan | #D4A5A5 | #666 |
-| Heartland | #A5C8A5 | #666 |
+| Sarmatia | #D4A5A5 | #666 |
+| Ruthenia | #A5C8A5 | #666 |
 | Teutonia | #8FB59A | #666 |
 | Freeland | #A5C8D4 | #666 |
 | Persia | #C8A57A | #666 |
@@ -283,8 +283,8 @@ Theater maps use the **same hex geometry** as the global map (pointy-top, regula
 
 | Global Hex | Global Grid | Theater Hexes |
 |-----------|-------------|---------------|
-| heartland_1 | (4,9) | ee_front_1, ee_front_2, ee_depth_1, ee_depth_2, ee_capital, ee_west_1, ee_west_2 |
-| heartland_2 | (4,10) → (5,10) | ee_front_3, ee_front_4, ee_depth_3, ee_south_1, ee_south_2 |
+| ruthenia_1 | (4,9) | ee_front_1, ee_front_2, ee_depth_1, ee_depth_2, ee_capital, ee_west_1, ee_west_2 |
+| ruthenia_2 | (4,10) → (5,10) | ee_front_3, ee_front_4, ee_depth_3, ee_south_1, ee_south_2 |
 | nord_w1 | (3,10) | ee_staging_1, ee_staging_2, ee_occupied_1, ee_occupied_2, ee_corridor |
 | nord_w2 | (4,10) | ee_staging_3, ee_occupied_3, ee_occupied_4, ee_bastion_approach, ee_peninsula |
 
@@ -328,7 +328,7 @@ When a theater activates:
 
 ## Section 4: Theater — Eastern Ereb (23 hexes)
 
-**Expands:** heartland_1, heartland_2, nord_w1, nord_w2 (plus border/sea hexes)
+**Expands:** ruthenia_1, ruthenia_2, nord_w1, nord_w2 (plus border/sea hexes)
 **Canvas:** 900 x 600
 **Status:** Active at game start
 
@@ -338,34 +338,34 @@ Pointy-top hexagons, s=25. Grid uses (row, col) with odd-row right offset.
 
 | hex_id | display_name | type | owner | grid (r,c) |
 |--------|-------------|------|-------|------------|
-| ee_staging_1 | Staging North | land | nordostan | (1,5) |
-| ee_staging_2 | Staging Central | land | nordostan | (2,5) |
-| ee_staging_3 | Staging South | land | nordostan | (3,5) |
-| ee_occupied_1 | Occupied NW | land_occupied | nordostan | (2,4) |
-| ee_occupied_2 | Occupied NE | land_occupied | nordostan | (1,4) |
-| ee_occupied_3 | Occupied SW | land_occupied | nordostan | (3,4) |
-| ee_occupied_4 | Occupied SE | land_occupied | nordostan | (4,5) |
-| ee_bastion_approach | Bastion Approach | land | nordostan | (3,3) |
-| ee_bastion | The Bastion | land_fortified | heartland | (4,4) |
-| ee_front_1 | Front North | land | heartland | (3,2) |
-| ee_front_2 | Front West | land | heartland | (4,3) |
-| ee_front_3 | Front South | land | heartland | (5,3) |
-| ee_front_4 | Front East | land | heartland | (5,4) |
-| ee_depth_1 | River Line North | land | heartland | (4,2) |
-| ee_depth_2 | River Line Central | land | heartland | (5,2) |
-| ee_depth_3 | River Line South | land | heartland | (6,2) |
-| ee_capital | The Capital | land | heartland | (5,1) |
-| ee_west_1 | Western Corridor | land | heartland | (4,1) |
-| ee_west_2 | Western Supply | land | heartland | (6,1) |
-| ee_south_1 | Southern Sector | land | heartland | (7,2) |
-| ee_south_2 | Southern Flank | land | heartland | (7,3) |
-| ee_corridor | Northern Flank | land | nordostan | (1,3) |
-| ee_peninsula | Naval Base | land_occupied | nordostan | (6,5) |
+| ee_staging_1 | Staging North | land | sarmatia | (1,5) |
+| ee_staging_2 | Staging Central | land | sarmatia | (2,5) |
+| ee_staging_3 | Staging South | land | sarmatia | (3,5) |
+| ee_occupied_1 | Occupied NW | land_occupied | sarmatia | (2,4) |
+| ee_occupied_2 | Occupied NE | land_occupied | sarmatia | (1,4) |
+| ee_occupied_3 | Occupied SW | land_occupied | sarmatia | (3,4) |
+| ee_occupied_4 | Occupied SE | land_occupied | sarmatia | (4,5) |
+| ee_bastion_approach | Bastion Approach | land | sarmatia | (3,3) |
+| ee_bastion | The Bastion | land_fortified | ruthenia | (4,4) |
+| ee_front_1 | Front North | land | ruthenia | (3,2) |
+| ee_front_2 | Front West | land | ruthenia | (4,3) |
+| ee_front_3 | Front South | land | ruthenia | (5,3) |
+| ee_front_4 | Front East | land | ruthenia | (5,4) |
+| ee_depth_1 | River Line North | land | ruthenia | (4,2) |
+| ee_depth_2 | River Line Central | land | ruthenia | (5,2) |
+| ee_depth_3 | River Line South | land | ruthenia | (6,2) |
+| ee_capital | The Capital | land | ruthenia | (5,1) |
+| ee_west_1 | Western Corridor | land | ruthenia | (4,1) |
+| ee_west_2 | Western Supply | land | ruthenia | (6,1) |
+| ee_south_1 | Southern Sector | land | ruthenia | (7,2) |
+| ee_south_2 | Southern Flank | land | ruthenia | (7,3) |
+| ee_corridor | Northern Flank | land | sarmatia | (1,3) |
+| ee_peninsula | Naval Base | land_occupied | sarmatia | (6,5) |
 | ee_sea_1 | Southern Sea W | sea | neutral | (7,4) |
 | ee_sea_2 | Southern Sea E | sea | neutral | (7,5) |
 | ee_alliance | Alliance Border | land | alliance | (4,0) |
 
-**Total: 26 hexes** (8 Nordostan + 1 Bastion + 12 Heartland + 1 corridor + 1 peninsula + 2 sea + 1 alliance)
+**Total: 26 hexes** (8 Sarmatia + 1 Bastion + 12 Ruthenia + 1 corridor + 1 peninsula + 2 sea + 1 alliance)
 
 ### Adjacency List (Theater)
 
@@ -400,7 +400,7 @@ ee_sea_2:             ee_sea_1, ee_peninsula
 
 ### The Front Line
 
-The active front line runs between the Nordostan-controlled hexes (occupied_*, bastion_approach) and the Heartland-controlled hexes (front_*, bastion). Shown as a **red dashed line** on the SVG.
+The active front line runs between the Sarmatia-controlled hexes (occupied_*, bastion_approach) and the Ruthenia-controlled hexes (front_*, bastion). Shown as a **red dashed line** on the SVG.
 
 Specifically, the front line edges are between:
 - ee_corridor / ee_front_1
@@ -414,16 +414,16 @@ Specifically, the front line edges are between:
 
 | Hex | Mechanic |
 |-----|----------|
-| ee_bastion | **Fortified:** +1 to defender dice. THE strategic prize. Nordostan claims it; Heartland defends it as existential. |
-| ee_alliance | **Article 5:** Any attack triggers Alliance collective defense. Untouchable. Functions as supply entry for Western aid to Heartland. |
-| ee_corridor | **Northern Flank:** Allows Nordostan to threaten a bypass attack toward the capital. Uncommitted but constant threat. |
-| ee_peninsula | **Occupied Naval Base:** Nordostan-controlled. Provides naval projection into theater sea hexes. |
-| ee_capital | **Political Center:** Star marker. Loss triggers severe stability penalty for Heartland. |
+| ee_bastion | **Fortified:** +1 to defender dice. THE strategic prize. Sarmatia claims it; Ruthenia defends it as existential. |
+| ee_alliance | **Article 5:** Any attack triggers Alliance collective defense. Untouchable. Functions as supply entry for Western aid to Ruthenia. |
+| ee_corridor | **Northern Flank:** Allows Sarmatia to threaten a bypass attack toward the capital. Uncommitted but constant threat. |
+| ee_peninsula | **Occupied Naval Base:** Sarmatia-controlled. Provides naval projection into theater sea hexes. |
+| ee_capital | **Political Center:** Star marker. Loss triggers severe stability penalty for Ruthenia. |
 
 ### Supply Corridors
 
-- **Heartland supply:** ee_alliance -> ee_west_1 -> ee_capital -> ee_depth_* -> ee_front_*
-- **Nordostan supply:** Off-map (north edge) -> ee_staging_* -> ee_occupied_* -> front
+- **Ruthenia supply:** ee_alliance -> ee_west_1 -> ee_capital -> ee_depth_* -> ee_front_*
+- **Sarmatia supply:** Off-map (north edge) -> ee_staging_* -> ee_occupied_* -> front
 
 ---
 
@@ -574,7 +574,7 @@ Crossing the strait from any Cathay staging hex to any Formosa hex requires **4:
 
 | Theater | Global Hexes | Activation |
 |---------|-------------|------------|
-| Eastern Ereb | heartland_1, heartland_2, nord_w1, nord_w2 | Game start |
+| Eastern Ereb | ruthenia_1, ruthenia_2, nord_w1, nord_w2 | Game start |
 | Mashriq | persia_2, persia_3, cp_gulf_gate, solaria_2, mirage, phrygia_2, levantia | Game start |
 | Formosa Strait | cathay_6, cathay_7, cp_formosa_strait, formosa | On escalation |
 

@@ -75,7 +75,7 @@ The project: **The Thucydides Trap (TTT)** — an immersive leadership simulatio
 | Day | Decision | Why | Impact |
 |-----|----------|-----|--------|
 | 1 | 14-agent team with MARCO orchestrator | Complex project needs specialist roles | Enabled parallel work streams |
-| 2 | Fictional country names (Columbia, Cathay, Nordostan...) | Corporate audiences, political sensitivity | All documents use SIM names |
+| 2 | Fictional country names (Columbia, Cathay, Sarmatia...) | Corporate audiences, political sensitivity | All documents use SIM names |
 | 2 | 37 core + 3 expansion roles | Coverage + scalability | 25-39 participants supported |
 | 3 | Hex grid map (not zone-based) | Visual clarity, modular theaters | Global 10×20 + theater 10×10 |
 | 3 | Three-pass engine (deterministic → AI → coherence) | Realism + controllability | Expert panel catches qualitative dynamics |

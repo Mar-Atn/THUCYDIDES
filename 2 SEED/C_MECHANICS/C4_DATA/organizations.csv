@@ -1,6 +1,6 @@
 id,sim_name,parallel,decision_rule,chair_role_id,voting_threshold,meeting_frequency,can_be_created,description
 western_treaty,Western Treaty,NATO,consensus,,unanimous,scheduled_r1_r4,false,Military alliance with Article 5 collective defense. ~70% of combined spending from Columbia.
-the_union,The Union,EU,consensus,pillar,unanimous,scheduled_r1_r3,false,Political-economic union. Trade policy and sanctions coordination. Commissioner chairs.
+the_ereb_union,The Ereb Union,EU,consensus,pillar,unanimous,scheduled_r1_r3,false,Political-economic union. Trade policy and sanctions coordination. Commissioner chairs.
 the_council,The Council,UN Security Council,p5_veto,,p5_unanimous_plus_majority,scheduled_r1_r4,false,International security body. P5 veto power. Structurally paralyzed on major issues.
 the_league,The League,BRICS+,loose_consensus,,non_binding,scheduled_r2_r4,false,Coordination forum for non-Western powers. Alternative payment systems and development bank.
 the_cartel,The Cartel,OPEC+,independent_production,,voluntary_coordination,every_round,false,Oil production coordination. Each member independently sets production. Classic prisoners dilemma.

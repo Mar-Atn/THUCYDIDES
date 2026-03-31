@@ -8,7 +8,7 @@
 
 ## The Collective Action Problem
 
-Europe is not a country. It is five sovereign nations — France, Germany, Poland, Italy, and the United Kingdom — bound together by overlapping but imperfect institutions. Four of the five belong to the European Union, where every decision on sanctions, trade, enlargement, and defense requires unanimity. All five belong to NATO, where every decision on military action requires consensus. One — the UK — sits inside NATO but outside the EU, creating a permanent structural mismatch between military coordination and economic coordination.
+Europe is not a country. It is five sovereign nations — France, Germany, Poland, Italy, and the United Kingdom — bound together by overlapping but imperfect institutions. Four of the five belong to the Ereb Union, where every decision on sanctions, trade, enlargement, and defense requires unanimity. All five belong to NATO, where every decision on military action requires consensus. One — the UK — sits inside NATO but outside the EU, creating a permanent structural mismatch between military coordination and economic coordination.
 
 This means Europe cannot act unless it agrees. And it rarely agrees, because the five nations have genuinely different interests, threat perceptions, economic exposures, and political constraints. The dysfunction is not incompetence — it is the rational product of sovereignty. Each government answers to its own electorate, manages its own economy, and faces its own existential fears. What is good for Poland's security may be catastrophic for Germany's exports. What France wants for European independence may terrify Poland into clinging harder to Washington. What Italy needs for fiscal survival may require breaking with everyone else.
 
@@ -24,7 +24,7 @@ European politics in 2026 is defined by three competing gravitational forces:
 
 ## The Commissioner and Institutional Power
 
-The EU Commissioner (Pillar) chairs all EU meetings, sets the agenda, represents the EU externally on trade and institutional matters, and proposes compromise packages. The Commissioner cannot vote. Power is entirely procedural — controlling what gets discussed, when, and how it is framed publicly. The Commissioner's institutional interest is EU unity: without it, the institution is irrelevant and members cut bilateral deals that bypass Brussels entirely. The Commissioner's nightmare is any single member state — especially Gallia or Teutonia — dominating the agenda, or members going around the EU to deal directly with Columbia, Cathay, or Nordostan.
+The EU Commissioner (Pillar) chairs all EU meetings, sets the agenda, represents the EU externally on trade and institutional matters, and proposes compromise packages. The Commissioner cannot vote. Power is entirely procedural — controlling what gets discussed, when, and how it is framed publicly. The Commissioner's institutional interest is EU unity: without it, the institution is irrelevant and members cut bilateral deals that bypass Brussels entirely. The Commissioner's nightmare is any single member state — especially Gallia or Teutonia — dominating the agenda, or members going around the EU to deal directly with Columbia, Cathay, or Sarmatia.
 
 ## NATO Dynamics
 
@@ -59,7 +59,7 @@ Columbia wants to acquire Thule — a territory that, in game terms, belongs to 
 
 | Organization | Role in Org | Voting/Decision Rights | Notes |
 |-------------|------------|----------------------|-------|
-| The Union (EU) | Co-leader with Teutonia. Founding member. | Consensus vote — can block any EU decision | Pushes strategic autonomy agenda. Skeptical of enlargement that dilutes French influence. |
+| The Ereb Union (EU) | Co-leader with Teutonia. Founding member. | Consensus vote — can block any EU decision | Pushes strategic autonomy agenda. Skeptical of enlargement that dilutes French influence. |
 | Western Treaty (NATO) | Founding member. Independent nuclear power. | Consensus — can block any decision | Maintains independent nuclear command outside NATO integrated structure. Participates but does not subordinate. |
 | The Council (UNSC) | Permanent member (P5) | Veto power | Can unilaterally block any Security Council resolution. Uses position to maintain independent global role. |
 | The Seven (G7) | Member | Non-binding coordination | Uses G7 to project French positions on defense, development, and climate. |
@@ -71,11 +71,11 @@ Columbia wants to acquire Thule — a territory that, in game terms, belongs to 
 | Country | Relationship | Key Dynamic |
 |---------|:------------:|------------|
 | **Teutonia** | Alliance (complex) | Franco-German engine of EU. Deep institutional cooperation. But Gallia wants defense autonomy while Teutonia wants trade preservation. Nuclear cooperation deepening (Merz in French nuclear exercises). |
-| **Freeland** | Alliance (tense) | Both EU and NATO members. Deep friction — Gallia sees Freeland as Columbia's trojan horse in Europe. Freeland sees Gallia's strategic autonomy as weakening NATO. Disagree on everything except opposing Nordostan. |
+| **Freeland** | Alliance (tense) | Both EU and NATO members. Deep friction — Gallia sees Freeland as Columbia's trojan horse in Europe. Freeland sees Gallia's strategic autonomy as weakening NATO. Disagree on everything except opposing Sarmatia. |
 | **Ponte** | Alliance (transactional) | Need Ponte's EU vote. Ponte is persuadable — financial relief buys alignment. Mediterranean solidarity. But Ponte's Russia sympathy and fiscal fragility make it unreliable. |
 | **Albion** | Alliance (wary respect) | Two nuclear powers, two UNSC vetoes. Starmer and Macron cooperating on Ukraine peace framework. Post-Brexit Albion needs European partnerships; Gallia offers military-to-military cooperation. But centuries of rivalry and structural competition for European leadership persist. |
 | **Columbia** | Alliance/Treaty (strained) | NATO ally, but Gallia building hedge against Columbia's unreliability. Disagreement on Persia war (France deployed independently), Thule, trade. Macron's nuclear expansion is implicit rebuke of Columbia. |
-| **Nordostan** | Hostile | Sanctions supporter but Macron increasingly calling for European dialogue with Moscow. France's UNSC veto gives independent leverage. |
+| **Sarmatia** | Hostile | Sanctions supporter but Macron increasingly calling for European dialogue with Moscow. France's UNSC veto gives independent leverage. |
 | **Cathay** | Tense/cautious | Less exposed than Teutonia to China trade but concerned about fair competition. More willing to confront on trade imbalance. |
 
 ---
@@ -172,7 +172,7 @@ What makes Gallia essential: the player who runs Lumiere holds the only independ
 
 | Organization | Role in Org | Voting/Decision Rights | Notes |
 |-------------|------------|----------------------|-------|
-| The Union (EU) | Co-leader with Gallia. Largest economy. | Consensus vote — can block any EU decision | Economic decisions carry disproportionate weight. The checkbook of Europe. |
+| The Ereb Union (EU) | Co-leader with Gallia. Largest economy. | Consensus vote — can block any EU decision | Economic decisions carry disproportionate weight. The checkbook of Europe. |
 | Western Treaty (NATO) | Member. Hosts Columbia's main European base. | Consensus — can block any decision | Reluctant rearmer. Hosts Ramstein and other critical US/NATO facilities. |
 | The Seven (G7) | Member | Non-binding coordination | Uses G7 to maintain economic coordination. Torn between G7 solidarity and China trade dependency. |
 
@@ -188,7 +188,7 @@ What makes Gallia essential: the player who runs Lumiere holds the only independ
 | **Albion** | Alliance (practical) | Post-Brexit relationship rebuilt through defense cooperation. Albion's intelligence and military capability valued. But Albion's absence from EU means Teutonia cannot count on it for trade and sanctions coordination. |
 | **Columbia** | Alliance/Treaty (under pressure) | Hosts Columbia's main European base — leverage but also dependency. Columbia simultaneously demands Teutonia spend 5% on defense, restrict China trade, and accept Thule pressure. These demands are contradictory and economically impossible simultaneously. |
 | **Cathay** | Tense (economic dependency) | THE constraint on Teutonia's foreign policy. German trade deficit with China has quadrupled since 2020. Automotive, chemicals, machinery industries deeply intertwined with Chinese supply chains. "De-risking" is policy — decoupling is economic suicide. |
-| **Nordostan** | Hostile | Sanctions supporter. Energy dependency resolved post-2022 (LNG terminals, renewables). But energy costs remain higher. War fatigue is real — Teutonia wants a negotiated end to the Heartland conflict. |
+| **Sarmatia** | Hostile | Sanctions supporter. Energy dependency resolved post-2022 (LNG terminals, renewables). But energy costs remain higher. War fatigue is real — Teutonia wants a negotiated end to the Ruthenia conflict. |
 
 ---
 
@@ -212,7 +212,7 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 |-----------|-------|-------|
 | GDP (game coins) | 45 | 1 coin = ~$100B. ~$4.5T real. Largest European economy. |
 | GDP growth rate (base %) | 1.2% | Recovering from three years of recession. 0.2% in 2025. |
-| Economic sectors | Resources: 3%, Industry: 28%, Services: 50%, Technology: 19% | Industry-heavy. Export-dependent. Manufacturing heartland. |
+| Economic sectors | Resources: 3%, Industry: 28%, Services: 50%, Technology: 19% | Industry-heavy. Export-dependent. Manufacturing ruthenia. |
 | Tax/revenue rate | 0.38 | ~17 coins revenue per round. |
 | Starting treasury (coins) | 12 | Solid reserves. Orderly fiscal management. |
 | Trade balance (coins) | +3 | Export surplus — but surplus with China has collapsed. Surplus driven by intra-EU and global machinery/auto exports. |
@@ -239,7 +239,7 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 | Maintenance cost | 0.4 per unit | Total: ~4.8 coins/round for 12 units. |
 | Bases hosted | Columbia main European base (Ramstein + others): Ground 2, Tac Air 2 | Major US military presence. Leverage AND dependency. Can renegotiate terms but evicting Columbia would shatter NATO. |
 | Bases abroad | None | Teutonia projects no military power abroad. |
-| War status | Not at war | Supporting Heartland with weapons and aid but no combat deployment. |
+| War status | Not at war | Supporting Ruthenia with weapons and aid but no combat deployment. |
 
 ---
 
@@ -284,7 +284,7 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 
 | Organization | Role in Org | Voting/Decision Rights | Notes |
 |-------------|------------|----------------------|-------|
-| The Union (EU) | Member. Largest Eastern European state. | Consensus vote — can block any EU decision | Pro-EU under Tusk but faces domestic opposition. Security hawk that pushes EU toward harder Russia line. |
+| The Ereb Union (EU) | Member. Largest Eastern European state. | Consensus vote — can block any EU decision | Pro-EU under Tusk but faces domestic opposition. Security hawk that pushes EU toward harder Russia line. |
 | Western Treaty (NATO) | Frontline member. Highest defense spending (% GDP). | Consensus — can block any decision | Hosts Columbia forward deployments. Most committed conventional military builder in Europe. |
 
 ---
@@ -294,12 +294,12 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 | Country | Relationship | Key Dynamic |
 |---------|:------------:|------------|
 | **Columbia** | Alliance (closest in Europe) | Freeland is Columbia's most enthusiastic European ally. Buys American weapons, hosts US troops, follows Washington's lead on security. Sometimes bypasses EU/France to deal directly with Washington. But depends on Article 5 more than anyone — existentially. |
-| **Gallia** | Alliance (tense) | Deep friction. Freeland sees Gallia's strategic autonomy as weakening the NATO commitment Poland needs to survive. Gallia sees Freeland as Columbia's trojan horse that undermines European independence. Both support Heartland but for different reasons. |
+| **Gallia** | Alliance (tense) | Deep friction. Freeland sees Gallia's strategic autonomy as weakening the NATO commitment Poland needs to survive. Gallia sees Freeland as Columbia's trojan horse that undermines European independence. Both support Ruthenia but for different reasons. |
 | **Teutonia** | Alliance (divergent) | Both EU members but radically different priorities. Freeland demands maximum military commitment; Teutonia prioritizes economic stability. Freeland's defense spending (4.8% GDP) shames Teutonia's slower buildup. |
 | **Ponte** | Alliance (suspicious) | Freeland views Ponte's Russia sympathy as dangerous and its blocking potential as irresponsible. Both were governed by right-wing populists at various points, but Tusk's Freeland has pivoted toward institutional EU cooperation. |
-| **Albion** | Alliance (warm) | Security alignment. Both are maximum Heartland supporters. Both prioritize NATO over EU strategic autonomy. Albion's intelligence capability valued. Post-Brexit UK and Poland increasingly coordinate on Eastern European security. |
-| **Heartland** | Close ally (strongest supporter) | Geographic neighbor. 80% of military aid transits Polish territory. Freeland will be "lead country" on logistics for any peace deal. Visceral understanding of Russian threat — Poland's security depends on Heartland's survival as a buffer state. |
-| **Nordostan** | Hostile (existential) | Freeland's security posture is built entirely around the Nordostan threat. Borders Kaliningrad exclave. Hosts NATO forward presence. "We told you so about Russia" — Poland warned about Moscow for decades while Western Europe built gas pipelines. |
+| **Albion** | Alliance (warm) | Security alignment. Both are maximum Ruthenia supporters. Both prioritize NATO over EU strategic autonomy. Albion's intelligence capability valued. Post-Brexit UK and Poland increasingly coordinate on Eastern European security. |
+| **Ruthenia** | Close ally (strongest supporter) | Geographic neighbor. 80% of military aid transits Polish territory. Freeland will be "lead country" on logistics for any peace deal. Visceral understanding of Russian threat — Poland's security depends on Ruthenia's survival as a buffer state. |
+| **Sarmatia** | Hostile (existential) | Freeland's security posture is built entirely around the Sarmatia threat. Borders Kaliningrad exclave. Hosts NATO forward presence. "We told you so about Russia" — Poland warned about Moscow for decades while Western Europe built gas pipelines. |
 
 ---
 
@@ -307,7 +307,7 @@ What makes Teutonia essential: the player who runs Forge holds the largest econo
 
 Freeland enters mid-2026 as NATO's most committed conventional military power and Europe's security conscience. Under Prime Minister Tusk — a pro-EU centrist who replaced the nationalist PiS government — Poland is allocating a record 200 billion zloty (EUR 46.86 billion) to defense in 2026, representing 4.8% of GDP. This is the highest defense-to-GDP ratio in NATO, surpassing even Columbia. Poland aims for 5% by year's end — years ahead of NATO's 2035 target.
 
-This is not posturing. Poland borders Nordostan's Kaliningrad exclave and Belarus. The Heartland conflict zone is immediately to the east. Poland facilitated delivery of more than 350 tanks to Ukraine and runs the POLLOGHUB in Rzeszow, through which an estimated 80% of all military aid to Heartland has passed. For Freeland, the war next door is not an abstraction — it is the confirmation of everything Poland has warned about since joining NATO.
+This is not posturing. Poland borders Sarmatia's Kaliningrad exclave and Belarus. The Ruthenia conflict zone is immediately to the east. Poland facilitated delivery of more than 350 tanks to Ukraine and runs the POLLOGHUB in Rzeszow, through which an estimated 80% of all military aid to Ruthenia has passed. For Freeland, the war next door is not an abstraction — it is the confirmation of everything Poland has warned about since joining NATO.
 
 Domestically, Tusk faces a cohabitation-like crisis: opposition President Nawrocki has vetoed EU defense loans worth EUR 43.7 billion, creating friction between executive branches. Tusk has warned of "Polexit" threats from the right-wing opposition, claiming Russia, MAGA sympathizers, and Orban want to "smash the EU." Poland's fastest-growing economy in Europe (3.6-3.7% GDP growth) gives fiscal room for defense spending that other European nations lack.
 
@@ -350,7 +350,7 @@ What makes Freeland essential: the smallest economy but the largest military com
 | Maintenance cost | 0.3 per unit | Total: ~2.7 coins/round for 9 units. Efficient but growing fast. |
 | Bases hosted | Columbia forward deployment: Ground 1 | US troops on Polish soil. NATO multinational brigade. |
 | Bases abroad | None | Defensive posture. No expeditionary ambition. |
-| War status | Not at war | Maximum support for Heartland short of combat deployment. |
+| War status | Not at war | Maximum support for Ruthenia short of combat deployment. |
 
 ---
 
@@ -361,7 +361,7 @@ What makes Freeland essential: the smallest economy but the largest military com
 | Stability Index (1-10) | 8 | Strong democratic consensus on security. Cohabitation friction with opposition president but institutions functional. |
 | Political Support (0-100%) | 55% | Security consensus. Tusk's pro-EU, pro-NATO line has broad support. Opposition attacks on EU membership backfire with majority. |
 
-**Internal dynamics summary:** Tusk governs with a stable pro-EU coalition but faces an opposition president (Nawrocki) who can veto legislation and EU defense loans. This cohabitation creates friction on specific policies but does not undermine the broad security consensus — virtually all Polish political forces agree on the Nordostan threat and the need for military strength. The real domestic tension is between those who want Poland inside the EU mainstream (Tusk) and those who want a more nationalist, sovereignty-first approach (PiS/opposition). On defense and Ukraine, there is near-unanimity.
+**Internal dynamics summary:** Tusk governs with a stable pro-EU coalition but faces an opposition president (Nawrocki) who can veto legislation and EU defense loans. This cohabitation creates friction on specific policies but does not undermine the broad security consensus — virtually all Polish political forces agree on the Sarmatia threat and the need for military strength. The real domestic tension is between those who want Poland inside the EU mainstream (Tusk) and those who want a more nationalist, sovereignty-first approach (PiS/opposition). On defense and Ukraine, there is near-unanimity.
 
 ---
 
@@ -395,7 +395,7 @@ What makes Freeland essential: the smallest economy but the largest military com
 
 | Organization | Role in Org | Voting/Decision Rights | Notes |
 |-------------|------------|----------------------|-------|
-| The Union (EU) | Member. Third-largest EU economy. | Consensus vote — can block any EU decision | THE swing vote. Can veto sanctions, trade policy, Heartland accession, defense coordination. Whoever offers financial relief gets Ponte's vote. |
+| The Ereb Union (EU) | Member. Third-largest EU economy. | Consensus vote — can block any EU decision | THE swing vote. Can veto sanctions, trade policy, Ruthenia accession, defense coordination. Whoever offers financial relief gets Ponte's vote. |
 | Western Treaty (NATO) | Member. Southern flank. | Consensus — can block any decision | Mediterranean focus. Less engaged on Eastern European security than northern allies. |
 | The Seven (G7) | Member | Non-binding coordination | Italy in the G7 gives Ponte a seat at the top table despite economic vulnerability. |
 
@@ -410,18 +410,18 @@ What makes Freeland essential: the smallest economy but the largest military com
 | **Teutonia** | Alliance (dependent) | Teutonia's economic health determines EU fiscal policy that Italy depends on. ReArm Europe loan instrument (SAFE) requires German backing. Ponte needs Teutonia's checkbook. |
 | **Freeland** | Alliance (awkward) | Both EU members but different threat perceptions. Freeland's Eastern European security obsession gets more attention and resources than Ponte's Mediterranean concerns (migration, Libya, energy). |
 | **Albion** | Alliance (distant) | Less natural partnership. Post-Brexit UK less engaged with Italian interests. Some Mediterranean naval coordination. |
-| **Nordostan** | Tense (complicated) | Coalition partners (Salvini's League) actively sympathize with Moscow. Meloni personally pivoted to support Heartland but faces internal resistance on sanctions. Ponte is the most likely EU member to break sanctions consensus. |
+| **Sarmatia** | Tense (complicated) | Coalition partners (Salvini's League) actively sympathize with Moscow. Meloni personally pivoted to support Ruthenia but faces internal resistance on sanctions. Ponte is the most likely EU member to break sanctions consensus. |
 | **Cathay** | Friendly (curious) | Only G7 country to sign Belt and Road MOU (2019). Meloni reviewing but Chinese investment temptation persists for a debt-laden economy. IMEC corridor (India-Middle East-Europe) as alternative — but BRI money is real and available now. |
 
 ---
 
 ### SECTION 4: HISTORY & CONTEXT
 
-Ponte enters mid-2026 as Europe's most consequential swing vote and its most financially vulnerable major power. Prime Minister Meloni — a right-wing leader who has surprised many by maintaining a broadly pro-Western foreign policy — suffered a significant blow in March 2026 when voters rejected her flagship judicial reform referendum, 54% to 46%. Her coalition is fractious: two of three coalition parties (Salvini's League and Forza Italia) publicly question continued support for Heartland and sanctions on Nordostan. Salvini has been accused of receiving Russian funds and openly criticizes sanctions as harmful to Italian businesses.
+Ponte enters mid-2026 as Europe's most consequential swing vote and its most financially vulnerable major power. Prime Minister Meloni — a right-wing leader who has surprised many by maintaining a broadly pro-Western foreign policy — suffered a significant blow in March 2026 when voters rejected her flagship judicial reform referendum, 54% to 46%. Her coalition is fractious: two of three coalition parties (Salvini's League and Forza Italia) publicly question continued support for Ruthenia and sanctions on Sarmatia. Salvini has been accused of receiving Russian funds and openly criticizes sanctions as harmful to Italian businesses.
 
 Italy's debt-to-GDP ratio stands at 137.9% — second highest in the EU after Greece. GDP growth slowed to 0.4% in 2025 with only 0.8% forecast for 2026. Italy is under the EU's Excessive Debt Procedure, targeting a 2.8% deficit. The country is fiscally the most vulnerable major European state: any economic shock — sanctions costs, trade disruption, energy price spikes — hits Ponte hardest. Italy is heavily reliant on EU funds, which limits Meloni's room to maneuver on the European stage while simultaneously giving other EU members leverage over her.
 
-This fiscal vulnerability is what makes Ponte's EU vote so valuable — and so dangerous. Italy can block any EU decision requiring unanimity: sanctions on Nordostan, trade restrictions on Cathay, Heartland EU accession, defense coordination packages. The question is always: what does Ponte want in return? Meloni has leveraged Italy's position as a Trump-EU bridge, but this bridge-builder role requires maintaining relationships in every direction simultaneously — which means committing fully to no one.
+This fiscal vulnerability is what makes Ponte's EU vote so valuable — and so dangerous. Italy can block any EU decision requiring unanimity: sanctions on Sarmatia, trade restrictions on Cathay, Ruthenia EU accession, defense coordination packages. The question is always: what does Ponte want in return? Meloni has leveraged Italy's position as a Trump-EU bridge, but this bridge-builder role requires maintaining relationships in every direction simultaneously — which means committing fully to no one.
 
 Ponte models the Hungary-type blocking dynamic at a much larger scale. Hungary can obstruct; Italy can reshape. When Meloni calls for Europe to "reach out to Russia over peace," it carries weight that Orban's similar statements never do, because Italy is a G7 economy, a founding EU member, and a NATO ally with a real military. Ponte's defection from the sanctions consensus would not just embarrass the EU — it would shatter it.
 
@@ -512,7 +512,7 @@ What makes Ponte essential: the player who runs this role holds the EU's veto �
 | The Seven (G7) | Member | Non-binding coordination | Uses G7 to maintain influence post-Brexit. Financial sector gives outsized economic leverage. |
 | Five Eyes | Core member (with Columbia, Australia, Canada, New Zealand) | Intelligence sharing | THE unique asset. Five Eyes intelligence that EU members do not receive through NATO channels. Trading chip: can share selectively with European allies to buy influence. |
 
-**NOT a member of:** The Union (EU). Cannot vote on EU sanctions, trade, enlargement, or defense coordination. Must influence EU through bilateral relationships with Gallia, Teutonia, Freeland, Ponte.
+**NOT a member of:** The Ereb Union (EU). Cannot vote on EU sanctions, trade, enlargement, or defense coordination. Must influence EU through bilateral relationships with Gallia, Teutonia, Freeland, Ponte.
 
 ---
 
@@ -523,10 +523,10 @@ What makes Ponte essential: the player who runs this role holds the EU's veto �
 | **Columbia** | Close ally ("Special Relationship") | NATO, Five Eyes, UNSC. Post-Brexit Albion needs Columbia more than ever. Pacific naval ambitions (AUKUS) align with Columbia's Indo-Pacific strategy. But Starmer more willing to push back on Trump than predecessors — hosting Ukraine leadership, building European coalitions. |
 | **Gallia** | Alliance (wary partnership) | Two nuclear powers, two UNSC vetoes. Starmer and Macron cooperating on Ukraine peace framework and potential European reassurance force. But structural competition for European leadership persists. Gallia is in the EU room; Albion is outside it. |
 | **Teutonia** | Alliance (rebuilding) | Post-Brexit relationship improving through defense cooperation. Germany values British military capability and intelligence. Trade relationship recovering. |
-| **Freeland** | Alliance (security alignment) | Both maximum Heartland supporters. Both prioritize NATO. Coordinate on Eastern European security. |
+| **Freeland** | Alliance (security alignment) | Both maximum Ruthenia supporters. Both prioritize NATO. Coordinate on Eastern European security. |
 | **Ponte** | Alliance (limited) | Less natural partnership. Geographic and strategic distance. |
-| **Heartland** | Close ally (strongest European supporter) | Starmer has emerged as leading European voice for Ukraine. Hosted NATO/Zelenskyy summit. Offering troops for ceasefire monitoring force. UK-Ukraine security agreements signed. |
-| **Nordostan** | Hostile | Strong sanctions enforcement. Intelligence operations. Sub-threshold warfare acknowledged — Starmer warned of "potential for real war with Russia in next 5 years." |
+| **Ruthenia** | Close ally (strongest European supporter) | Starmer has emerged as leading European voice for Ukraine. Hosted NATO/Zelenskyy summit. Offering troops for ceasefire monitoring force. UK-Ukraine security agreements signed. |
+| **Sarmatia** | Hostile | Strong sanctions enforcement. Intelligence operations. Sub-threshold warfare acknowledged — Starmer warned of "potential for real war with Russia in next 5 years." |
 
 ---
 
@@ -536,9 +536,9 @@ Albion enters mid-2026 in its most consequential geopolitical moment since the F
 
 The Strategic Defence Review, completed in early 2026, accepts recommendations for nuclear modernization (including development of a second nuclear delivery system beyond Trident), a reserve corps of two army divisions, and enhanced maritime contribution to the North Atlantic and Norwegian Sea. Defense spending is pledged to reach 2.5% of GDP by 2027 and 3% by end of parliament. The nuclear arsenal absorbs up to 25% of the defense budget — Dreadnought-class SSBN replacements for the Vanguard fleet, plus AUKUS nuclear-powered attack submarines.
 
-Albion's structural problem is unique: it is NATO's second-largest European military power but is excluded from every EU decision on sanctions, trade, and enlargement. The "structural orphan" problem means Albion participates in military coordination but cannot influence the economic coordination that determines whether sanctions hold, whether trade restrictions bite, or whether Heartland gets an EU accession path. Albion must influence the EU through bilateral relationships — which gives its intelligence assets and military capability outsized diplomatic value.
+Albion's structural problem is unique: it is NATO's second-largest European military power but is excluded from every EU decision on sanctions, trade, and enlargement. The "structural orphan" problem means Albion participates in military coordination but cannot influence the economic coordination that determines whether sanctions hold, whether trade restrictions bite, or whether Ruthenia gets an EU accession path. Albion must influence the EU through bilateral relationships — which gives its intelligence assets and military capability outsized diplomatic value.
 
-Five Eyes is the unique trading chip. Columbia shares intelligence with Albion that it does not share with EU allies through NATO channels. This means Albion can selectively share intelligence with European partners — Gallia, Teutonia, Freeland — to buy influence and cooperation. The intelligence asymmetry is real and consequential: Albion knows things about Nordostan's military posture, Cathay's intentions, and Columbia's internal deliberations that other European nations can only access through Albion's willingness to share.
+Five Eyes is the unique trading chip. Columbia shares intelligence with Albion that it does not share with EU allies through NATO channels. This means Albion can selectively share intelligence with European partners — Gallia, Teutonia, Freeland — to buy influence and cooperation. The intelligence asymmetry is real and consequential: Albion knows things about Sarmatia's military posture, Cathay's intentions, and Columbia's internal deliberations that other European nations can only access through Albion's willingness to share.
 
 Starmer has seized diplomatic initiative on Ukraine — hosting virtual meetings of Western leaders, initiating a "coalition of the willing" for peace deal implementation, and offering British troops as part of a ceasefire monitoring force. This activism is rebuilding European partnerships that Brexit damaged and demonstrating post-Brexit relevance through military capability and diplomatic leadership rather than EU membership.
 
@@ -579,7 +579,7 @@ What makes Albion essential: nuclear deterrent, UNSC veto, Five Eyes intelligenc
 | Maintenance cost | 0.5 per unit | Total: ~7 coins/round for 14 units. Nuclear deterrent is expensive (25% of defense budget). |
 | Bases hosted | None significant on home soil | |
 | Bases abroad | Cyprus (Akrotiri/Dhekelia), Gibraltar, Diego Garcia, Falklands | Residual global presence. Diego Garcia leased to Columbia. |
-| War status | Not at war | Offering troops for Ukraine ceasefire monitoring. Active intelligence operations against Nordostan. |
+| War status | Not at war | Offering troops for Ukraine ceasefire monitoring. Active intelligence operations against Sarmatia. |
 
 ---
 
@@ -617,19 +617,19 @@ The economic asymmetry compounds the political tension. Teutonia's GDP is 30% la
 
 This is the deepest ideological divide in European geopolitics. Gallia sees Freeland as Columbia's trojan horse — a nation so dependent on the American security guarantee that it will undermine any European initiative that might reduce US commitment. Freeland sees Gallia's strategic autonomy as a dangerous fantasy — a project that weakens NATO at the exact moment when the Russian threat is highest and the American commitment is most fragile.
 
-Both support Heartland — but for different reasons. Gallia supports Heartland as proof that Europe can act independently on security. Freeland supports Heartland because Ukraine's survival is Poland's first line of defense. Gallia wants a European army. Freeland wants more American troops. These positions are not reconcilable through compromise — they reflect genuinely different theories of how European security works.
+Both support Ruthenia — but for different reasons. Gallia supports Ruthenia as proof that Europe can act independently on security. Freeland supports Ruthenia because Ukraine's survival is Poland's first line of defense. Gallia wants a European army. Freeland wants more American troops. These positions are not reconcilable through compromise — they reflect genuinely different theories of how European security works.
 
 ### Teutonia <-> Freeland: The Spending Shame
 
 Freeland spends 4.8% of GDP on defense. Teutonia is scrambling toward 3.5%. Freeland has been warning about Russia since 2004. Teutonia was building gas pipelines to Moscow until 2022. This history gives Freeland moral authority that its economic weight would never justify — and it uses it. Every NATO discussion on burden-sharing features Poland pointing to its own budget and asking why Germany, with five times the GDP, cannot match the commitment.
 
-The threat perception gap is equally wide. For Freeland, Nordostan is an existential threat — tanks could reach Warsaw in days. For Teutonia, the threat is real but not existential in the same visceral way — and economic collapse from overcommitting to defense is an equally valid fear. Both are right. Neither can admit the other's fear is legitimate without undermining their own position.
+The threat perception gap is equally wide. For Freeland, Sarmatia is an existential threat — tanks could reach Warsaw in days. For Teutonia, the threat is real but not existential in the same visceral way — and economic collapse from overcommitting to defense is an equally valid fear. Both are right. Neither can admit the other's fear is legitimate without undermining their own position.
 
 ### Ponte <-> Everyone: The Unreliable Partner Everyone Needs
 
-Ponte's EU vote makes it the most courted and most mistrusted player at the European table. Every EU decision requiring unanimity — sanctions renewal, trade restrictions, Heartland accession, defense packages — requires Ponte to say yes. And Ponte's yes always has a price.
+Ponte's EU vote makes it the most courted and most mistrusted player at the European table. Every EU decision requiring unanimity — sanctions renewal, trade restrictions, Ruthenia accession, defense packages — requires Ponte to say yes. And Ponte's yes always has a price.
 
-The fiscal constraint is genuine: with 8 coins per round consumed by debt service, Ponte has almost no discretionary budget. Every commitment costs money Italy does not have. This makes Ponte vulnerable to whoever offers financial relief — and multiple parties are offering. Columbia courts Ponte as a Trump-EU bridge. Cathay offers Belt and Road investment. Nordostan offers sanctions relief that would reduce energy costs. The EU offers recovery funds contingent on fiscal discipline. Ponte plays all sides not out of cynicism but out of fiscal desperation — and the other Europeans know it, resent it, and cannot do without it.
+The fiscal constraint is genuine: with 8 coins per round consumed by debt service, Ponte has almost no discretionary budget. Every commitment costs money Italy does not have. This makes Ponte vulnerable to whoever offers financial relief — and multiple parties are offering. Columbia courts Ponte as a Trump-EU bridge. Cathay offers Belt and Road investment. Sarmatia offers sanctions relief that would reduce energy costs. The EU offers recovery funds contingent on fiscal discipline. Ponte plays all sides not out of cynicism but out of fiscal desperation — and the other Europeans know it, resent it, and cannot do without it.
 
 The Salvini factor adds genuine unpredictability. If Meloni's coalition collapses and a more Russia-sympathetic government emerges, the EU sanctions consensus collapses with it. Every European foreign policy decision must account for the probability that Ponte might not hold.
 
@@ -645,7 +645,7 @@ Post-Brexit, Albion's relevance depends entirely on military capability and dipl
 
 The EU Commissioner (Pillar) wants one thing above all: EU relevance. If the four EU members cannot agree, the institution is a talking shop and every member cuts bilateral deals that bypass Brussels. If one member dominates — Gallia imposing its defense agenda, Teutonia imposing its economic caution, Freeland imposing its security maximalism — the EU becomes a vehicle for national interest rather than collective action.
 
-The Commissioner's tools are procedural: agenda-setting, meeting scheduling, public framing, compromise proposals. But procedural power is real power when four sovereigns need someone to bridge their differences. The Commissioner can decide what gets discussed first (sanctions renewal before Heartland accession, or vice versa?), can frame proposals publicly (does the press conference emphasize unity or expose disagreement?), and can call emergency sessions that force decisions before members are ready.
+The Commissioner's tools are procedural: agenda-setting, meeting scheduling, public framing, compromise proposals. But procedural power is real power when four sovereigns need someone to bridge their differences. The Commissioner can decide what gets discussed first (sanctions renewal before Ruthenia accession, or vice versa?), can frame proposals publicly (does the press conference emphasize unity or expose disagreement?), and can call emergency sessions that force decisions before members are ready.
 
 The Commissioner's nightmare: Gallia and Teutonia cutting a bilateral deal on defense that excludes Freeland and Ponte. Ponte being bought off by Columbia or Cathay in a bilateral arrangement. Albion offering intelligence directly to individual EU members rather than through institutional channels. Any of these scenarios makes the EU Commissioner irrelevant — and irrelevance is institutional death.
 
@@ -655,7 +655,7 @@ The Commissioner's nightmare: Gallia and Teutonia cutting a bilateral deal on de
 |-------|--------|----------|----------|-------|-------------------------------|
 | Russia sanctions renewal | Support (with engagement) | Support (reluctantly) | Maximum support | Wavering — coalition pressure | Strong support |
 | China trade restrictions | Support (confrontational) | Resist (trade dependency) | Follow Columbia's lead | Resist (needs investment) | Support (follows Columbia) |
-| Heartland EU accession | Skeptical (dilutes French influence) | Supportive (Eastern stability) | Maximum support | Blocking risk (cost) | N/A (not in EU) |
+| Ruthenia EU accession | Skeptical (dilutes French influence) | Supportive (Eastern stability) | Maximum support | Blocking risk (cost) | N/A (not in EU) |
 | Defense spending (5% GDP) | Aspirational (2.25% current) | Accelerating (toward 3.5%) | Already exceeding (4.8%) | Impossible (debt crisis) | Moving toward 3% |
 | Strategic autonomy | Champion | Cautious supporter | Opposed (weakens NATO) | Indifferent (follows money) | Opposed (prefers Atlanticism) |
 | Thule solidarity | Strong (sovereignty principle) | Measured (needs Columbia) | Nervous (needs Columbia more) | Follows crowd | Supports sovereignty |

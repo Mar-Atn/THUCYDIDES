@@ -17,11 +17,11 @@ Six focused tests were run against the updated SEED engine (v4 stability, v2 oil
 
 | Test | Verdict | Key Finding |
 |------|---------|-------------|
-| **1. Generic Baseline** | **PASS** | Full 8-round arc. Cathay blockades Formosa R4 (after purge lifts + L3 nuclear). Persia ceasefire R4. Heartland ceasefire R7. Columbia election R5 (Anchor wins). Formosa resolved R7 via TSMC JV framework. Oil $237→$82. |
+| **1. Generic Baseline** | **PASS** | Full 8-round arc. Cathay blockades Formosa R4 (after purge lifts + L3 nuclear). Persia ceasefire R4. Ruthenia ceasefire R7. Columbia election R5 (Anchor wins). Formosa resolved R7 via TSMC JV framework. Oil $237→$82. |
 | **2. Formosa Crisis** | **PASS** | Cathay blockades R3 (purge lifts). NEVER invades (4:1 ratio impossible). Semiconductor disruption fires. Blockade self-limiting (Cathay treasury depletes in 5 rounds). |
-| **3. Gulf Gate Economics** | **PASS** | Oil formula well-calibrated. $221→$250(cap)→$117 trajectory. OPEC prisoner's dilemma works. Blockade enriches Nordostan (emergent). |
+| **3. Gulf Gate Economics** | **PASS** | Oil formula well-calibrated. $221→$250(cap)→$117 trajectory. OPEC prisoner's dilemma works. Blockade enriches Sarmatia (emergent). |
 | **4. Peace Negotiation** | **PASS (with gaps)** | Ceasefire achieved R7. Transaction engine works. 9 design holes found, 3 Priority 1 (breach, territory freeze, ally coverage). |
-| **5. Stability Calibration** | **CONDITIONAL PASS** | Heartland 5.0→2.31 (vs old 1.0 by R3). But Nordostan collapses faster than Heartland — wrong. 3 formula fixes needed. |
+| **5. Stability Calibration** | **CONDITIONAL PASS** | Ruthenia 5.0→2.31 (vs old 1.0 by R3). But Sarmatia collapses faster than Ruthenia — wrong. 3 formula fixes needed. |
 | **6. Tech Race** | **FAIL — CRITICAL BUG** | Columbia CANNOT reach AI L4 in 8 rounds. R&D formula too slow. Cathay AI data bugged (auto-promotes R1). Rare earth restrictions have no strategic impact. |
 
 ---
@@ -48,8 +48,8 @@ Six focused tests were run against the updated SEED engine (v4 stability, v2 oil
 
 ## CALIBRATION FIXES NEEDED
 
-### FIX 1: Nordostan Stability Decays Too Fast (Test 5)
-**Problem:** Nordostan hits 1.0 (floor) by R8 — faster than Heartland (2.31). Historically implausible: autocracies are MORE resilient to war stress, not less.
+### FIX 1: Sarmatia Stability Decays Too Fast (Test 5)
+**Problem:** Sarmatia hits 1.0 (floor) by R8 — faster than Ruthenia (2.31). Historically implausible: autocracies are MORE resilient to war stress, not less.
 **Root cause:** L3 sanctions create -0.30/round persistent drain with no autocratic equivalent to democratic resilience (+0.15).
 **Fix:** Add "siege resilience" mechanic: heavily sanctioned autocracies gain +0.10/round stability bonus (institutional adaptation to sanctions regime). Alternative: reduce sanctions stability impact for autocracies.
 
@@ -80,7 +80,7 @@ The ceasefire transaction ends wars, but there's no code to detect violations, f
 When a ceasefire is signed, the current front line should be stored as `ceasefire_line` in the agreement data structure. Currently not tracked.
 
 ### GAP 3: Ally Coverage in Ceasefire Undefined (Test 4 — Priority 1)
-Choson has 2 ground units fighting alongside Nordostan. A Nordostan-Heartland ceasefire does not automatically cover Choson. Must either require all-party signature or add `covers_allies` flag.
+Choson has 2 ground units fighting alongside Sarmatia. A Sarmatia-Ruthenia ceasefire does not automatically cover Choson. Must either require all-party signature or add `covers_allies` flag.
 
 ### GAP 4: TSMC Kill Switch Not Mechanized (Test 2)
 Circuit's intelligence about TSMC's destruction protocol is narrative-only. Should be a mechanic: if Formosa is invaded (not blockaded), semiconductor production is destroyed with X% probability, reducing global tech supply permanently.
@@ -99,10 +99,10 @@ Tribune, Challenger, Broker, Dawn, Sage — all produced rich role-play but zero
 Cathay's window calculation (R3-R5 optimal, constrained by purge penalty + nuclear L3) ran independently in every test. The gap ratio closed from 0.679 toward 0.82-0.85 over 8 rounds. The structural tension between Cathay's rising power and Columbia's overstretch IS the game.
 
 ### 2. Oil Economy Creates Genuine Strategic Pressure
-The Gulf Gate blockade is the most consequential single action in the SIM economy. It drives oil to $200+, funds Nordostan's war, crushes importers, motivates Columbia to assault the chokepoint, and creates OPEC prisoner's dilemmas. Exactly right for a geopolitical SIM.
+The Gulf Gate blockade is the most consequential single action in the SIM economy. It drives oil to $200+, funds Sarmatia's war, crushes importers, motivates Columbia to assault the chokepoint, and creates OPEC prisoner's dilemmas. Exactly right for a geopolitical SIM.
 
 ### 3. Elections as Forcing Functions
-Columbia midterms (R2), Heartland wartime election (R3-4), and Columbia presidential (R5) all created genuine decision pressure. In Test 4, the Heartland election was the turning point — Bulwark replacing Beacon enabled the ceasefire. Elections work.
+Columbia midterms (R2), Ruthenia wartime election (R3-4), and Columbia presidential (R5) all created genuine decision pressure. In Test 4, the Ruthenia election was the turning point — Bulwark replacing Beacon enabled the ceasefire. Elections work.
 
 ### 4. Independent Agent Behavior
 37 roles across 7 agent groups produced genuinely independent decisions. Internal team tensions (Dealer vs Shield, Helmsman vs Sage, Beacon vs Bulwark vs Broker, Furnace vs Anvil vs Dawn) created realistic faction dynamics without orchestrator intervention. No agent "helped" their country succeed.
@@ -130,14 +130,14 @@ Cathay's Formosa blockade depleted its treasury from 40 to 2 coins in 5 rounds. 
 
 **Verdict: Oil is NOT static.** Range across tests: $82-$250. Formula responds to blockades, ceasefires, OPEC, and sanctions. The old 68-72 static bug is definitively fixed.
 
-### Heartland Stability
+### Ruthenia Stability
 | Round | Test 1 | Test 4 | Test 5 | OLD Formula |
 |-------|--------|--------|--------|-------------|
 | R1 | 4.62 | 4.62 | 4.62 | ~4.0 |
 | R3 | ~4.0 | 4.20 | 3.97 | **1.0** |
 | R8 | ~4.0 | 5.55 (ceasefire R7) | 2.31 | 1.0 |
 
-**Verdict: Heartland does NOT hit 1.0 by R3.** The stability fix works. Democratic resilience + society adaptation produce realistic gradual decline. Ceasefire enables recovery (Test 4: 4.20→5.55).
+**Verdict: Ruthenia does NOT hit 1.0 by R3.** The stability fix works. Democratic resilience + society adaptation produce realistic gradual decline. Ceasefire enables recovery (Test 4: 4.20→5.55).
 
 ### Gap Ratio (Cathay/Columbia GDP)
 | Round | Test 1 | Test 2 | Test 6 |
@@ -162,9 +162,9 @@ Cathay's Formosa blockade depleted its treasury from 40 to 2 coins in 5 rounds. 
 | Event | T1 | T2 | T3 | T4 | T5 | T6 |
 |-------|----|----|----|----|----|----|
 | R2 Midterms | Yes (incumbent barely survives 52.6%) | Yes | Yes | Yes | Yes | Yes |
-| R3 Heartland Election | Yes (Beacon survives 54.6%) | Yes | Yes | Yes (Bulwark wins) | Yes | Yes |
+| R3 Ruthenia Election | Yes (Beacon survives 54.6%) | Yes | Yes | Yes (Bulwark wins) | Yes | Yes |
 | R5 Presidential | Yes (**Anchor wins** 52.0%) | Yes (opposition wins) | Yes | Yes | Yes | Yes |
-| Ceasefire (any) | **R4 Persia + R7 Heartland** | No | R5 Persia | R7 Heartland + R5 Persia | No | No |
+| Ceasefire (any) | **R4 Persia + R7 Ruthenia** | No | R5 Persia | R7 Ruthenia + R5 Persia | No | No |
 | Formosa Blockade | **R4** | **R3** | R4 (brief) | No | No | No |
 | Nuclear Use | 0 | 0 | 0 | 0 | 0 | 0 |
 | Semiconductor Disruption | **R4-R7** | **R3-R8** | R4 (brief) | No | No | No |
@@ -183,7 +183,7 @@ Cathay's Formosa blockade depleted its treasury from 40 to 2 coins in 5 rounds. 
 5. **Ceasefire territory freeze** — store `ceasefire_line` in agreement data
 
 ### Should Fix (Improves Realism)
-6. **Nordostan siege resilience** — add +0.10/round for sanctioned autocracies
+6. **Sarmatia siege resilience** — add +0.10/round for sanctioned autocracies
 7. **Persia GDP contraction cap** — limit stability penalty to -0.30/round
 8. **Soft oil cap** — asymptotic approach to $250 instead of hard clamp
 9. **Ally coverage in ceasefire** — `covers_allies` flag or require all-party signature
@@ -227,8 +227,8 @@ SEED TESTS2/
 │       ├── world_state_r1.md              ← Starting state
 │       ├── team_columbia_r1.md            ← 7-role deliberation
 │       ├── team_cathay_r1.md              ← 5-role deliberation
-│       ├── team_nordostan_r1.md           ← 3-role deliberation
-│       ├── team_heartland_r1.md           ← 3-role deliberation
+│       ├── team_sarmatia_r1.md           ← 3-role deliberation
+│       ├── team_ruthenia_r1.md           ← 3-role deliberation
 │       ├── team_persia_r1.md              ← 3-role deliberation
 │       ├── team_europe_r1.md              ← 6-role deliberation
 │       ├── solo_countries_r1.md           ← 10-role deliberation

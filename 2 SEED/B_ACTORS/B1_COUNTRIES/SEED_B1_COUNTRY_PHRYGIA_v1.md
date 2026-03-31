@@ -14,7 +14,7 @@
 | **Regime Type** | Hybrid |
 | **Team Type** | Solo (1 human or AI) |
 | **Team Size** | 1 |
-| **Roles** | Bazaar |
+| **Roles** | Vizier |
 
 ---
 
@@ -22,7 +22,7 @@
 
 | Organization | Role in Org | Voting/Decision Rights | Notes |
 |-------------|------------|----------------------|-------|
-| Western Treaty (NATO) | Member. Second-largest military in the alliance. | Consensus — can block any decision | 2026 NATO summit host. Can veto any NATO action. Buys Nordostan air defense. Columbia trusts Phrygia on nothing but cannot expel it without destroying the alliance. |
+| Western Treaty (NATO) | Member. Second-largest military in the alliance. | Consensus — can block any decision | 2026 NATO summit host. Can veto any NATO action. Buys Sarmatia air defense. Columbia trusts Phrygia on nothing but cannot expel it without destroying the alliance. |
 | The League (BRICS+) | Observer | Non-voting | Attending as observer. Exploring full membership. This dual NATO/BRICS positioning IS the strategy. |
 
 ---
@@ -31,10 +31,10 @@
 
 | Country | Relationship | Key Dynamic |
 |---------|:------------:|------------|
-| **Columbia** | Alliance/Treaty (deeply strained) | NATO ally that Columbia cannot trust. S-400 purchase from Nordostan triggered F-35 expulsion. Controls Bosphorus — essential for Black Sea strategy. Columbia cannot kick Phrygia out of NATO without wrecking the alliance. Hosting 2026 NATO summit gives Phrygia maximum leverage. |
-| **Nordostan** | Friendly (transactional) | Energy dependency (Nordostan gas). S-400 buyer. Mediator in Heartland war. But relationship is pragmatic, not ideological — Phrygia would sell Nordostan out for the right price. TurkStream pipeline gives Nordostan energy leverage. |
+| **Columbia** | Alliance/Treaty (deeply strained) | NATO ally that Columbia cannot trust. S-400 purchase from Sarmatia triggered F-35 expulsion. Controls Bosphorus — essential for Black Sea strategy. Columbia cannot kick Phrygia out of NATO without wrecking the alliance. Hosting 2026 NATO summit gives Phrygia maximum leverage. |
+| **Sarmatia** | Friendly (transactional) | Energy dependency (Sarmatia gas). S-400 buyer. Mediator in Ruthenia war. But relationship is pragmatic, not ideological — Phrygia would sell Sarmatia out for the right price. TurkStream pipeline gives Sarmatia energy leverage. |
 | **Cathay** | Friendly (growing) | Belt and Road participant. Trade expanding. Cathay sees Phrygia as a wedge in NATO. Phrygia sees Cathay as economic diversification from Western dependency. |
-| **Heartland** | Friendly (mediator) | Bayraktar drones supplied to Heartland. Mediator in peace talks (Grain Deal, prisoner exchanges). Phrygia positions as the indispensable broker. Controls Black Sea access that shapes the war. |
+| **Ruthenia** | Friendly (mediator) | Bayraktar drones supplied to Ruthenia. Mediator in peace talks (Grain Deal, prisoner exchanges). Phrygia positions as the indispensable broker. Controls Black Sea access that shapes the war. |
 | **Gallia** | Tense (competitor) | Mediterranean rivalry. Libya, Eastern Mediterranean gas disputes. EU accession dead. But both NATO members with shared institutional obligations. |
 | **Persia** | Tense (affected by war) | Iran war fallout: Persia missiles shot down over Phrygia territory. Shared border. Energy relationship. Phrygia opposes the war publicly but does not materially obstruct Columbia/Levantia operations. |
 | **Solaria** | Friendly (Gulf investment) | Gulf sovereign wealth funds investing in Phrygia's struggling economy. Shared Sunni Muslim solidarity. Energy cooperation. |
@@ -44,17 +44,17 @@
 
 ## SECTION 4: HISTORY & CONTEXT
 
-Phrygia is the ultimate swing state — a NATO member that buys Nordostan air defense, a BRICS+ observer that hosts the Western alliance's summit, a mediator in the Heartland war that profits from both sides, and a country whose president has turned strategic ambiguity into a personal art form.
+Phrygia is the ultimate swing state — a NATO member that buys Sarmatia air defense, a BRICS+ observer that hosts the Western alliance's summit, a mediator in the Ruthenia war that profits from both sides, and a country whose president has turned strategic ambiguity into a personal art form.
 
-President Erdogan has governed for over two decades, concentrating power in a presidential system that makes foreign policy intensely personal. Phrygia's positioning is not institutional strategy — it is one man's intuition about leverage, executed in real time. The result is a country that everyone needs for something and nobody trusts for anything: Columbia needs the Bosphorus and NATO's southern flank, Nordostan needs energy transit routes and sanctions workarounds, Cathay needs a NATO insider, the EU needs migration management, and the Gulf states need a Sunni power broker.
+President Erdogan has governed for over two decades, concentrating power in a presidential system that makes foreign policy intensely personal. Phrygia's positioning is not institutional strategy — it is one man's intuition about leverage, executed in real time. The result is a country that everyone needs for something and nobody trusts for anything: Columbia needs the Bosphorus and NATO's southern flank, Sarmatia needs energy transit routes and sanctions workarounds, Cathay needs a NATO insider, the EU needs migration management, and the Gulf states need a Sunni power broker.
 
-The economy is the constraint. Inflation peaked above 75% in 2024 and remains in double digits in 2026, projected at roughly 16%. The lira has lost most of its value against the dollar over the past decade. GDP growth is projected at 3.8% for 2026 — respectable on paper, devastating in real purchasing power terms. Erdogan's unorthodox economic policies (cutting interest rates during inflation) created the crisis; his belated return to orthodoxy is producing a painful but necessary correction. Gulf investment and Nordostan energy deals keep the economy afloat. Phrygia's foreign policy flexibility is partly a function of economic desperation — it cannot afford to alienate any source of capital.
+The economy is the constraint. Inflation peaked above 75% in 2024 and remains in double digits in 2026, projected at roughly 16%. The lira has lost most of its value against the dollar over the past decade. GDP growth is projected at 3.8% for 2026 — respectable on paper, devastating in real purchasing power terms. Erdogan's unorthodox economic policies (cutting interest rates during inflation) created the crisis; his belated return to orthodoxy is producing a painful but necessary correction. Gulf investment and Sarmatia energy deals keep the economy afloat. Phrygia's foreign policy flexibility is partly a function of economic desperation — it cannot afford to alienate any source of capital.
 
 The Syria dimension is new and lucrative. Following Assad's fall, Phrygia has emerged as the dominant external actor in Syrian reconstruction, securing $11 billion in energy and airport contracts. The Kilis-Aleppo natural gas pipeline, channeling Azerbaijani gas, began operations in August 2025. Phrygia is positioning as an energy hub connecting Caspian gas, Gulf LNG, and European markets — a transit chokepoint to complement its existing Bosphorus chokepoint.
 
 The Iran war complicates everything. Persia's retaliatory missiles were shot down over Phrygia's territory — involuntary involvement in a war Phrygia opposes publicly. Phrygia's border with Persia means refugee flows, energy disruption, and the risk of being drawn into a conflict that serves no Phrygian interest.
 
-What makes Phrygia interesting to play: you are the bazaar at the crossroads of every conflict. Everyone must pass through your territory, use your straits, or seek your vote. Your leverage is geographic and institutional — the Bosphorus and the NATO veto. Your weakness is economic: inflation devours your treasury and forces you to keep dealing. The game is extracting maximum payment from every transaction while committing to nothing that limits future transactions.
+What makes Phrygia interesting to play: you are the vizier at the crossroads of every conflict. Everyone must pass through your territory, use your straits, or seek your vote. Your leverage is geographic and institutional — the Bosphorus and the NATO veto. Your weakness is economic: inflation devours your treasury and forces you to keep dealing. The game is extracting maximum payment from every transaction while committing to nothing that limits future transactions.
 
 ---
 
@@ -69,7 +69,7 @@ What makes Phrygia interesting to play: you are the bazaar at the crossroads of 
 | Starting treasury (coins) | 4 | Low reserves. Central bank reserves depleted defending lira. Gulf investment fills gaps. |
 | Inflation rate (%) | 45.0% | **Highest in the SIM among non-failed states.** Down from 75%+ peak. Projected to reach 16% by year-end. Still devastating for household purchasing power. |
 | Trade balance (coins) | -3 | Chronic deficit. Energy imports the main driver. Tourism and defense exports partially offset. |
-| Oil producer? | No — net importer | Dependent on Nordostan gas (TurkStream), Azerbaijani gas, Gulf LNG. Energy transit hub ambitions. |
+| Oil producer? | No — net importer | Dependent on Sarmatia gas (TurkStream), Azerbaijani gas, Gulf LNG. Energy transit hub ambitions. |
 | Formosa semiconductor dependency | 0.20 | Low. Not a major tech economy. Defense industry uses less cutting-edge chips. |
 | Debt burden (coins/round) | 3 | External debt significant. Corporate foreign-currency debt a vulnerability. Lira depreciation increases real burden. |
 | Social spending baseline (%) | 22% | Erdogan's political base requires social transfers. Minimum wage hikes. Cost-of-living subsidies. |
@@ -84,7 +84,7 @@ What makes Phrygia interesting to play: you are the bazaar at the crossroads of 
 | Naval forces | 2 | `g_phrygia` (1 — Aegean/Mediterranean), `w(9,6)` (1) | Growing blue-water ambitions. Domestic frigate program. Controls Bosphorus naval transit. |
 | Tactical air/missiles | 3 | `g_phrygia` (3) | F-16 fleet (no F-35 — expelled from program over S-400). Domestic Bayraktar TB2/TB3 drones. Cruise missiles (domestic). |
 | Strategic missiles | 0 | — | No nuclear capability. No ballistic missiles. |
-| Air defense | 1 | `g_phrygia` (1) | S-400 from Nordostan (the purchase that broke the F-35 deal). Domestic air defense in development. |
+| Air defense | 1 | `g_phrygia` (1) | S-400 from Sarmatia (the purchase that broke the F-35 deal). Domestic air defense in development. |
 
 | Military Parameter | Value | Notes |
 |-------------------|-------|-------|
@@ -98,8 +98,8 @@ What makes Phrygia interesting to play: you are the bazaar at the crossroads of 
 **SPECIAL MECHANIC: Bosphorus Strait Control**
 
 Phrygia controls the Bosphorus and Dardanelles — the only passage between the Black Sea and the Mediterranean. Under the Montreux Convention, Phrygia has legal authority to restrict warship transit during wartime. This gives Phrygia:
-- Ability to block Nordostan naval access to the Mediterranean (or allow it).
-- Leverage over Heartland conflict (Black Sea access shapes the naval war).
+- Ability to block Sarmatia naval access to the Mediterranean (or allow it).
+- Leverage over Ruthenia conflict (Black Sea access shapes the naval war).
 - Bargaining power with every maritime nation that needs Black Sea access.
 - A chokepoint card that can be played once per round as a diplomatic lever.
 
@@ -123,7 +123,7 @@ Phrygia controls the Bosphorus and Dardanelles — the only passage between the 
 
 | Track | Level | R&D Progress | Notes |
 |-------|:-----:|:------------:|-------|
-| Nuclear | L0 | 0% | No nuclear program. Akkuyu nuclear power plant (built by Nordostan) under construction but civilian only. Could pivot but decades from weapons capability. |
+| Nuclear | L0 | 0% | No nuclear program. Akkuyu nuclear power plant (built by Sarmatia) under construction but civilian only. Could pivot but decades from weapons capability. |
 | AI/Semiconductor | L1 | 25% toward L2 | Defense tech strong (drones, autonomous systems). But no semiconductor fabrication, limited AI research compared to peers. Bayraktar success is engineering, not frontier science. |
 
 | Tech Parameter | Value | Notes |
@@ -136,12 +136,12 @@ Phrygia controls the Bosphorus and Dardanelles — the only passage between the 
 
 ## STRATEGIC ROLE IN THE SIM
 
-Phrygia is the bazaar at the crossroads — the country that trades with everyone, commits to no one, and profits from the chaos of others. Playing Bazaar means:
+Phrygia is the vizier at the crossroads — the country that trades with everyone, commits to no one, and profits from the chaos of others. Playing Vizier means:
 
-- **The Bosphorus is your trump card.** Every Black Sea decision passes through your straits. Nordostan needs them for naval power projection. Heartland needs them restricted to contain Nordostan. Columbia needs them managed for NATO coherence. You decide — for a price.
-- **NATO membership is your shield and your weapon.** You cannot be expelled without destroying the alliance's credibility. Your consensus veto blocks any NATO decision you dislike. You can demand concessions for every vote. But the shield works both ways — Article 5 protects you from Cathay and Nordostan adventurism.
-- **Everyone needs something from you.** Nordostan needs energy transit. Columbia needs the straits and southern flank. Cathay needs a NATO insider. The EU needs migration management. The Gulf needs a Sunni power broker. Persia needs a neighbor not actively hostile. You sell access, mediation, and ambiguity.
+- **The Bosphorus is your trump card.** Every Black Sea decision passes through your straits. Sarmatia needs them for naval power projection. Ruthenia needs them restricted to contain Sarmatia. Columbia needs them managed for NATO coherence. You decide — for a price.
+- **NATO membership is your shield and your weapon.** You cannot be expelled without destroying the alliance's credibility. Your consensus veto blocks any NATO decision you dislike. You can demand concessions for every vote. But the shield works both ways — Article 5 protects you from Cathay and Sarmatia adventurism.
+- **Everyone needs something from you.** Sarmatia needs energy transit. Columbia needs the straits and southern flank. Cathay needs a NATO insider. The EU needs migration management. The Gulf needs a Sunni power broker. Persia needs a neighbor not actively hostile. You sell access, mediation, and ambiguity.
 - **Inflation is your weakness.** 45% inflation means your treasury bleeds every round. You cannot afford principled positions — only profitable ones. Economic desperation forces you to keep dealing, which means everyone can buy your cooperation if the price is right.
 - **The Syria bet could pay off.** $11B in reconstruction contracts. Energy hub positioning. If Syria stabilizes under your influence, Phrygia's economic and strategic position transforms. If Syria collapses again, you absorb refugees and instability.
 
-The Bazaar player wins by being indispensable to every transaction, extracting payment from every side, and never getting locked into a commitment that forecloses future deals — while keeping the economy alive long enough to collect.
+The Vizier player wins by being indispensable to every transaction, extracting payment from every side, and never getting locked into a commitment that forecloses future deals — while keeping the economy alive long enough to collect.

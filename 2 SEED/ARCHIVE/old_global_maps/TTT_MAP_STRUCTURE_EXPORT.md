@@ -8,89 +8,89 @@
 
 | hex_id | owner | occupied_by | row | col |
 |--------|-------|-------------|-----|-----|
-| nordostan_1 | nordostan |  | 0 | 0 |
-| nordostan_2 | nordostan |  | 0 | 1 |
-| nordostan_3 | nordostan |  | 0 | 2 |
-| nordostan_4 | nordostan |  | 0 | 3 |
-| nordostan_5 | nordostan |  | 0 | 4 |
-| nordostan_6 | nordostan |  | 0 | 5 |
-| nordostan_7 | nordostan |  | 0 | 6 |
-| nordostan_8 | nordostan |  | 0 | 7 |
-| nordostan_9 | nordostan |  | 0 | 8 |
-| nordostan_10 | nordostan |  | 0 | 9 |
-| nordostan_11 | nordostan |  | 1 | 0 |
-| nordostan_12 | nordostan |  | 1 | 1 |
-| nordostan_13 | nordostan |  | 1 | 2 |
-| nordostan_14 | nordostan |  | 1 | 3 |
-| nordostan_15 | nordostan |  | 1 | 4 |
-| nordostan_16 | nordostan |  | 1 | 5 |
-| nordostan_17 | nordostan |  | 1 | 6 |
-| nordostan_18 | nordostan |  | 1 | 7 |
-| nordostan_19 | nordostan |  | 1 | 8 |
-| nordostan_20 | nordostan |  | 1 | 9 |
-| heartland_1 | heartland |  | 2 | 0 |
-| heartland_2 | heartland |  | 2 | 1 |
-| heartland_3 | heartland |  | 2 | 2 |
-| nordostan_21 | nordostan |  | 2 | 3 |
-| nordostan_22 | nordostan |  | 2 | 4 |
-| nordostan_23 | nordostan |  | 2 | 5 |
-| nordostan_24 | nordostan |  | 2 | 6 |
-| nordostan_25 | nordostan |  | 2 | 7 |
-| nordostan_26 | nordostan |  | 2 | 8 |
-| nordostan_27 | nordostan |  | 2 | 9 |
-| heartland_4 | heartland |  | 3 | 0 |
-| heartland_5 | heartland |  | 3 | 1 |
-| heartland_6 | heartland |  | 3 | 2 |
-| heartland_7 | heartland |  | 3 | 3 |
-| heartland_8 | heartland | nordostan | 3 | 4 |
-| heartland_9 | heartland | nordostan | 3 | 5 |
-| nordostan_28 | nordostan |  | 3 | 6 |
-| nordostan_29 | nordostan |  | 3 | 7 |
-| nordostan_30 | nordostan |  | 3 | 8 |
-| nordostan_31 | nordostan |  | 3 | 9 |
-| heartland_10 | heartland |  | 4 | 0 |
-| heartland_11 | heartland |  | 4 | 1 |
-| heartland_12 | heartland |  | 4 | 2 |
-| heartland_13 | heartland |  | 4 | 3 |
-| heartland_14 | heartland |  | 4 | 4 |
-| heartland_15 | heartland | nordostan | 4 | 5 |
-| heartland_16 | heartland | nordostan | 4 | 6 |
-| nordostan_32 | nordostan | nordostan | 4 | 7 |
-| nordostan_33 | nordostan |  | 4 | 8 |
-| nordostan_34 | nordostan |  | 4 | 9 |
-| heartland_17 | heartland |  | 5 | 0 |
-| heartland_18 | heartland |  | 5 | 1 |
-| heartland_19 | heartland |  | 5 | 2 |
-| heartland_20 | heartland |  | 5 | 3 |
-| heartland_21 | heartland |  | 5 | 4 |
-| heartland_22 | heartland |  | 5 | 5 |
-| heartland_23 | heartland | nordostan | 5 | 6 |
-| nordostan_35 | nordostan |  | 5 | 7 |
-| nordostan_36 | nordostan |  | 5 | 8 |
-| nordostan_37 | nordostan |  | 5 | 9 |
-| heartland_24 | heartland |  | 6 | 0 |
-| heartland_25 | heartland |  | 6 | 1 |
-| heartland_26 | heartland |  | 6 | 2 |
-| heartland_27 | heartland |  | 6 | 3 |
-| heartland_28 | heartland |  | 6 | 4 |
-| heartland_29 | heartland | nordostan | 6 | 5 |
-| heartland_30 | heartland | nordostan | 6 | 6 |
-| heartland_31 | heartland | nordostan | 6 | 7 |
-| nordostan_38 | nordostan |  | 6 | 8 |
-| nordostan_39 | nordostan |  | 6 | 9 |
-| heartland_32 | heartland |  | 7 | 0 |
-| heartland_33 | heartland |  | 7 | 1 |
-| heartland_34 | heartland |  | 7 | 2 |
-| heartland_35 | heartland | nordostan | 7 | 4 |
-| nordostan_40 | nordostan |  | 7 | 8 |
-| nordostan_41 | nordostan |  | 7 | 9 |
-| heartland_36 | heartland |  | 8 | 0 |
-| heartland_37 | heartland |  | 8 | 1 |
-| heartland_38 | heartland |  | 8 | 2 |
-| heartland_39 | heartland | nordostan | 8 | 4 |
-| heartland_40 | heartland | nordostan | 8 | 5 |
-| heartland_41 | heartland |  | 9 | 0 |
-| heartland_42 | heartland |  | 9 | 1 |
+| sarmatia_1 | sarmatia |  | 0 | 0 |
+| sarmatia_2 | sarmatia |  | 0 | 1 |
+| sarmatia_3 | sarmatia |  | 0 | 2 |
+| sarmatia_4 | sarmatia |  | 0 | 3 |
+| sarmatia_5 | sarmatia |  | 0 | 4 |
+| sarmatia_6 | sarmatia |  | 0 | 5 |
+| sarmatia_7 | sarmatia |  | 0 | 6 |
+| sarmatia_8 | sarmatia |  | 0 | 7 |
+| sarmatia_9 | sarmatia |  | 0 | 8 |
+| sarmatia_10 | sarmatia |  | 0 | 9 |
+| sarmatia_11 | sarmatia |  | 1 | 0 |
+| sarmatia_12 | sarmatia |  | 1 | 1 |
+| sarmatia_13 | sarmatia |  | 1 | 2 |
+| sarmatia_14 | sarmatia |  | 1 | 3 |
+| sarmatia_15 | sarmatia |  | 1 | 4 |
+| sarmatia_16 | sarmatia |  | 1 | 5 |
+| sarmatia_17 | sarmatia |  | 1 | 6 |
+| sarmatia_18 | sarmatia |  | 1 | 7 |
+| sarmatia_19 | sarmatia |  | 1 | 8 |
+| sarmatia_20 | sarmatia |  | 1 | 9 |
+| ruthenia_1 | ruthenia |  | 2 | 0 |
+| ruthenia_2 | ruthenia |  | 2 | 1 |
+| ruthenia_3 | ruthenia |  | 2 | 2 |
+| sarmatia_21 | sarmatia |  | 2 | 3 |
+| sarmatia_22 | sarmatia |  | 2 | 4 |
+| sarmatia_23 | sarmatia |  | 2 | 5 |
+| sarmatia_24 | sarmatia |  | 2 | 6 |
+| sarmatia_25 | sarmatia |  | 2 | 7 |
+| sarmatia_26 | sarmatia |  | 2 | 8 |
+| sarmatia_27 | sarmatia |  | 2 | 9 |
+| ruthenia_4 | ruthenia |  | 3 | 0 |
+| ruthenia_5 | ruthenia |  | 3 | 1 |
+| ruthenia_6 | ruthenia |  | 3 | 2 |
+| ruthenia_7 | ruthenia |  | 3 | 3 |
+| ruthenia_8 | ruthenia | sarmatia | 3 | 4 |
+| ruthenia_9 | ruthenia | sarmatia | 3 | 5 |
+| sarmatia_28 | sarmatia |  | 3 | 6 |
+| sarmatia_29 | sarmatia |  | 3 | 7 |
+| sarmatia_30 | sarmatia |  | 3 | 8 |
+| sarmatia_31 | sarmatia |  | 3 | 9 |
+| ruthenia_10 | ruthenia |  | 4 | 0 |
+| ruthenia_11 | ruthenia |  | 4 | 1 |
+| ruthenia_12 | ruthenia |  | 4 | 2 |
+| ruthenia_13 | ruthenia |  | 4 | 3 |
+| ruthenia_14 | ruthenia |  | 4 | 4 |
+| ruthenia_15 | ruthenia | sarmatia | 4 | 5 |
+| ruthenia_16 | ruthenia | sarmatia | 4 | 6 |
+| sarmatia_32 | sarmatia | sarmatia | 4 | 7 |
+| sarmatia_33 | sarmatia |  | 4 | 8 |
+| sarmatia_34 | sarmatia |  | 4 | 9 |
+| ruthenia_17 | ruthenia |  | 5 | 0 |
+| ruthenia_18 | ruthenia |  | 5 | 1 |
+| ruthenia_19 | ruthenia |  | 5 | 2 |
+| ruthenia_20 | ruthenia |  | 5 | 3 |
+| ruthenia_21 | ruthenia |  | 5 | 4 |
+| ruthenia_22 | ruthenia |  | 5 | 5 |
+| ruthenia_23 | ruthenia | sarmatia | 5 | 6 |
+| sarmatia_35 | sarmatia |  | 5 | 7 |
+| sarmatia_36 | sarmatia |  | 5 | 8 |
+| sarmatia_37 | sarmatia |  | 5 | 9 |
+| ruthenia_24 | ruthenia |  | 6 | 0 |
+| ruthenia_25 | ruthenia |  | 6 | 1 |
+| ruthenia_26 | ruthenia |  | 6 | 2 |
+| ruthenia_27 | ruthenia |  | 6 | 3 |
+| ruthenia_28 | ruthenia |  | 6 | 4 |
+| ruthenia_29 | ruthenia | sarmatia | 6 | 5 |
+| ruthenia_30 | ruthenia | sarmatia | 6 | 6 |
+| ruthenia_31 | ruthenia | sarmatia | 6 | 7 |
+| sarmatia_38 | sarmatia |  | 6 | 8 |
+| sarmatia_39 | sarmatia |  | 6 | 9 |
+| ruthenia_32 | ruthenia |  | 7 | 0 |
+| ruthenia_33 | ruthenia |  | 7 | 1 |
+| ruthenia_34 | ruthenia |  | 7 | 2 |
+| ruthenia_35 | ruthenia | sarmatia | 7 | 4 |
+| sarmatia_40 | sarmatia |  | 7 | 8 |
+| sarmatia_41 | sarmatia |  | 7 | 9 |
+| ruthenia_36 | ruthenia |  | 8 | 0 |
+| ruthenia_37 | ruthenia |  | 8 | 1 |
+| ruthenia_38 | ruthenia |  | 8 | 2 |
+| ruthenia_39 | ruthenia | sarmatia | 8 | 4 |
+| ruthenia_40 | ruthenia | sarmatia | 8 | 5 |
+| ruthenia_41 | ruthenia |  | 9 | 0 |
+| ruthenia_42 | ruthenia |  | 9 | 1 |
 
 ## Chokepoints
 
@@ -112,87 +112,87 @@
 Land-to-land adjacencies (computed from grid positions):
 
 ```
-nordostan_1: nordostan_2, nordostan_11
-nordostan_2: nordostan_1, nordostan_3, nordostan_11, nordostan_12
-nordostan_3: nordostan_2, nordostan_4, nordostan_12, nordostan_13
-nordostan_4: nordostan_3, nordostan_5, nordostan_13, nordostan_14
-nordostan_5: nordostan_4, nordostan_6, nordostan_14, nordostan_15
-nordostan_6: nordostan_5, nordostan_7, nordostan_15, nordostan_16
-nordostan_7: nordostan_6, nordostan_8, nordostan_16, nordostan_17
-nordostan_8: nordostan_7, nordostan_9, nordostan_17, nordostan_18
-nordostan_9: nordostan_8, nordostan_10, nordostan_18, nordostan_19
-nordostan_10: nordostan_9, nordostan_19, nordostan_20
-nordostan_11: nordostan_1, nordostan_2, nordostan_12, heartland_1, heartland_2
-nordostan_12: nordostan_2, nordostan_3, nordostan_11, nordostan_13, heartland_2, heartland_3
-nordostan_13: nordostan_3, nordostan_4, nordostan_12, nordostan_14, heartland_3, nordostan_21
-nordostan_14: nordostan_4, nordostan_5, nordostan_13, nordostan_15, nordostan_21, nordostan_22
-nordostan_15: nordostan_5, nordostan_6, nordostan_14, nordostan_16, nordostan_22, nordostan_23
-nordostan_16: nordostan_6, nordostan_7, nordostan_15, nordostan_17, nordostan_23, nordostan_24
-nordostan_17: nordostan_7, nordostan_8, nordostan_16, nordostan_18, nordostan_24, nordostan_25
-nordostan_18: nordostan_8, nordostan_9, nordostan_17, nordostan_19, nordostan_25, nordostan_26
-nordostan_19: nordostan_9, nordostan_10, nordostan_18, nordostan_20, nordostan_26, nordostan_27
-nordostan_20: nordostan_10, nordostan_19, nordostan_27
-heartland_1: nordostan_11, heartland_2, heartland_4
-heartland_2: nordostan_11, nordostan_12, heartland_1, heartland_3, heartland_4, heartland_5
-heartland_3: nordostan_12, nordostan_13, heartland_2, nordostan_21, heartland_5, heartland_6
-nordostan_21: nordostan_13, nordostan_14, heartland_3, nordostan_22, heartland_6, heartland_7
-nordostan_22: nordostan_14, nordostan_15, nordostan_21, nordostan_23, heartland_7, heartland_8
-nordostan_23: nordostan_15, nordostan_16, nordostan_22, nordostan_24, heartland_8, heartland_9
-nordostan_24: nordostan_16, nordostan_17, nordostan_23, nordostan_25, heartland_9, nordostan_28
-nordostan_25: nordostan_17, nordostan_18, nordostan_24, nordostan_26, nordostan_28, nordostan_29
-nordostan_26: nordostan_18, nordostan_19, nordostan_25, nordostan_27, nordostan_29, nordostan_30
-nordostan_27: nordostan_19, nordostan_20, nordostan_26, nordostan_30, nordostan_31
-heartland_4: heartland_1, heartland_2, heartland_5, heartland_10, heartland_11
-heartland_5: heartland_2, heartland_3, heartland_4, heartland_6, heartland_11, heartland_12
-heartland_6: heartland_3, nordostan_21, heartland_5, heartland_7, heartland_12, heartland_13
-heartland_7: nordostan_21, nordostan_22, heartland_6, heartland_8, heartland_13, heartland_14
-heartland_8: nordostan_22, nordostan_23, heartland_7, heartland_9, heartland_14, heartland_15
-heartland_9: nordostan_23, nordostan_24, heartland_8, nordostan_28, heartland_15, heartland_16
-nordostan_28: nordostan_24, nordostan_25, heartland_9, nordostan_29, heartland_16, nordostan_32
-nordostan_29: nordostan_25, nordostan_26, nordostan_28, nordostan_30, nordostan_32, nordostan_33
-nordostan_30: nordostan_26, nordostan_27, nordostan_29, nordostan_31, nordostan_33, nordostan_34
-nordostan_31: nordostan_27, nordostan_30, nordostan_34
-heartland_10: heartland_4, heartland_11, heartland_17
-heartland_11: heartland_4, heartland_5, heartland_10, heartland_12, heartland_17, heartland_18
-heartland_12: heartland_5, heartland_6, heartland_11, heartland_13, heartland_18, heartland_19
-heartland_13: heartland_6, heartland_7, heartland_12, heartland_14, heartland_19, heartland_20
-heartland_14: heartland_7, heartland_8, heartland_13, heartland_15, heartland_20, heartland_21
-heartland_15: heartland_8, heartland_9, heartland_14, heartland_16, heartland_21, heartland_22
-heartland_16: heartland_9, nordostan_28, heartland_15, nordostan_32, heartland_22, heartland_23
-nordostan_32: nordostan_28, nordostan_29, heartland_16, nordostan_33, heartland_23, nordostan_35
-nordostan_33: nordostan_29, nordostan_30, nordostan_32, nordostan_34, nordostan_35, nordostan_36
-nordostan_34: nordostan_30, nordostan_31, nordostan_33, nordostan_36, nordostan_37
-heartland_17: heartland_10, heartland_11, heartland_18, heartland_24, heartland_25
-heartland_18: heartland_11, heartland_12, heartland_17, heartland_19, heartland_25, heartland_26
-heartland_19: heartland_12, heartland_13, heartland_18, heartland_20, heartland_26, heartland_27
-heartland_20: heartland_13, heartland_14, heartland_19, heartland_21, heartland_27, heartland_28
-heartland_21: heartland_14, heartland_15, heartland_20, heartland_22, heartland_28, heartland_29
-heartland_22: heartland_15, heartland_16, heartland_21, heartland_23, heartland_29, heartland_30
-heartland_23: heartland_16, nordostan_32, heartland_22, nordostan_35, heartland_30, heartland_31
-nordostan_35: nordostan_32, nordostan_33, heartland_23, nordostan_36, heartland_31, nordostan_38
-nordostan_36: nordostan_33, nordostan_34, nordostan_35, nordostan_37, nordostan_38, nordostan_39
-nordostan_37: nordostan_34, nordostan_36, nordostan_39
-heartland_24: heartland_17, heartland_25, heartland_32
-heartland_25: heartland_17, heartland_18, heartland_24, heartland_26, heartland_32, heartland_33
-heartland_26: heartland_18, heartland_19, heartland_25, heartland_27, heartland_33, heartland_34
-heartland_27: heartland_19, heartland_20, heartland_26, heartland_28, heartland_34
-heartland_28: heartland_20, heartland_21, heartland_27, heartland_29, heartland_35
-heartland_29: heartland_21, heartland_22, heartland_28, heartland_30, heartland_35
-heartland_30: heartland_22, heartland_23, heartland_29, heartland_31
-heartland_31: heartland_23, nordostan_35, heartland_30, nordostan_38
-nordostan_38: nordostan_35, nordostan_36, heartland_31, nordostan_39, nordostan_40
-nordostan_39: nordostan_36, nordostan_37, nordostan_38, nordostan_40, nordostan_41
-heartland_32: heartland_24, heartland_25, heartland_33, heartland_36, heartland_37
-heartland_33: heartland_25, heartland_26, heartland_32, heartland_34, heartland_37, heartland_38
-heartland_34: heartland_26, heartland_27, heartland_33, heartland_38
-heartland_35: heartland_28, heartland_29, heartland_39, heartland_40
-nordostan_40: nordostan_38, nordostan_39, nordostan_41
-nordostan_41: nordostan_39, nordostan_40
-heartland_36: heartland_32, heartland_37, heartland_41
-heartland_37: heartland_32, heartland_33, heartland_36, heartland_38, heartland_41, heartland_42
-heartland_38: heartland_33, heartland_34, heartland_37, heartland_42
-heartland_39: heartland_35, heartland_40
-heartland_40: heartland_35, heartland_39
-heartland_41: heartland_36, heartland_37, heartland_42
-heartland_42: heartland_37, heartland_38, heartland_41
+sarmatia_1: sarmatia_2, sarmatia_11
+sarmatia_2: sarmatia_1, sarmatia_3, sarmatia_11, sarmatia_12
+sarmatia_3: sarmatia_2, sarmatia_4, sarmatia_12, sarmatia_13
+sarmatia_4: sarmatia_3, sarmatia_5, sarmatia_13, sarmatia_14
+sarmatia_5: sarmatia_4, sarmatia_6, sarmatia_14, sarmatia_15
+sarmatia_6: sarmatia_5, sarmatia_7, sarmatia_15, sarmatia_16
+sarmatia_7: sarmatia_6, sarmatia_8, sarmatia_16, sarmatia_17
+sarmatia_8: sarmatia_7, sarmatia_9, sarmatia_17, sarmatia_18
+sarmatia_9: sarmatia_8, sarmatia_10, sarmatia_18, sarmatia_19
+sarmatia_10: sarmatia_9, sarmatia_19, sarmatia_20
+sarmatia_11: sarmatia_1, sarmatia_2, sarmatia_12, ruthenia_1, ruthenia_2
+sarmatia_12: sarmatia_2, sarmatia_3, sarmatia_11, sarmatia_13, ruthenia_2, ruthenia_3
+sarmatia_13: sarmatia_3, sarmatia_4, sarmatia_12, sarmatia_14, ruthenia_3, sarmatia_21
+sarmatia_14: sarmatia_4, sarmatia_5, sarmatia_13, sarmatia_15, sarmatia_21, sarmatia_22
+sarmatia_15: sarmatia_5, sarmatia_6, sarmatia_14, sarmatia_16, sarmatia_22, sarmatia_23
+sarmatia_16: sarmatia_6, sarmatia_7, sarmatia_15, sarmatia_17, sarmatia_23, sarmatia_24
+sarmatia_17: sarmatia_7, sarmatia_8, sarmatia_16, sarmatia_18, sarmatia_24, sarmatia_25
+sarmatia_18: sarmatia_8, sarmatia_9, sarmatia_17, sarmatia_19, sarmatia_25, sarmatia_26
+sarmatia_19: sarmatia_9, sarmatia_10, sarmatia_18, sarmatia_20, sarmatia_26, sarmatia_27
+sarmatia_20: sarmatia_10, sarmatia_19, sarmatia_27
+ruthenia_1: sarmatia_11, ruthenia_2, ruthenia_4
+ruthenia_2: sarmatia_11, sarmatia_12, ruthenia_1, ruthenia_3, ruthenia_4, ruthenia_5
+ruthenia_3: sarmatia_12, sarmatia_13, ruthenia_2, sarmatia_21, ruthenia_5, ruthenia_6
+sarmatia_21: sarmatia_13, sarmatia_14, ruthenia_3, sarmatia_22, ruthenia_6, ruthenia_7
+sarmatia_22: sarmatia_14, sarmatia_15, sarmatia_21, sarmatia_23, ruthenia_7, ruthenia_8
+sarmatia_23: sarmatia_15, sarmatia_16, sarmatia_22, sarmatia_24, ruthenia_8, ruthenia_9
+sarmatia_24: sarmatia_16, sarmatia_17, sarmatia_23, sarmatia_25, ruthenia_9, sarmatia_28
+sarmatia_25: sarmatia_17, sarmatia_18, sarmatia_24, sarmatia_26, sarmatia_28, sarmatia_29
+sarmatia_26: sarmatia_18, sarmatia_19, sarmatia_25, sarmatia_27, sarmatia_29, sarmatia_30
+sarmatia_27: sarmatia_19, sarmatia_20, sarmatia_26, sarmatia_30, sarmatia_31
+ruthenia_4: ruthenia_1, ruthenia_2, ruthenia_5, ruthenia_10, ruthenia_11
+ruthenia_5: ruthenia_2, ruthenia_3, ruthenia_4, ruthenia_6, ruthenia_11, ruthenia_12
+ruthenia_6: ruthenia_3, sarmatia_21, ruthenia_5, ruthenia_7, ruthenia_12, ruthenia_13
+ruthenia_7: sarmatia_21, sarmatia_22, ruthenia_6, ruthenia_8, ruthenia_13, ruthenia_14
+ruthenia_8: sarmatia_22, sarmatia_23, ruthenia_7, ruthenia_9, ruthenia_14, ruthenia_15
+ruthenia_9: sarmatia_23, sarmatia_24, ruthenia_8, sarmatia_28, ruthenia_15, ruthenia_16
+sarmatia_28: sarmatia_24, sarmatia_25, ruthenia_9, sarmatia_29, ruthenia_16, sarmatia_32
+sarmatia_29: sarmatia_25, sarmatia_26, sarmatia_28, sarmatia_30, sarmatia_32, sarmatia_33
+sarmatia_30: sarmatia_26, sarmatia_27, sarmatia_29, sarmatia_31, sarmatia_33, sarmatia_34
+sarmatia_31: sarmatia_27, sarmatia_30, sarmatia_34
+ruthenia_10: ruthenia_4, ruthenia_11, ruthenia_17
+ruthenia_11: ruthenia_4, ruthenia_5, ruthenia_10, ruthenia_12, ruthenia_17, ruthenia_18
+ruthenia_12: ruthenia_5, ruthenia_6, ruthenia_11, ruthenia_13, ruthenia_18, ruthenia_19
+ruthenia_13: ruthenia_6, ruthenia_7, ruthenia_12, ruthenia_14, ruthenia_19, ruthenia_20
+ruthenia_14: ruthenia_7, ruthenia_8, ruthenia_13, ruthenia_15, ruthenia_20, ruthenia_21
+ruthenia_15: ruthenia_8, ruthenia_9, ruthenia_14, ruthenia_16, ruthenia_21, ruthenia_22
+ruthenia_16: ruthenia_9, sarmatia_28, ruthenia_15, sarmatia_32, ruthenia_22, ruthenia_23
+sarmatia_32: sarmatia_28, sarmatia_29, ruthenia_16, sarmatia_33, ruthenia_23, sarmatia_35
+sarmatia_33: sarmatia_29, sarmatia_30, sarmatia_32, sarmatia_34, sarmatia_35, sarmatia_36
+sarmatia_34: sarmatia_30, sarmatia_31, sarmatia_33, sarmatia_36, sarmatia_37
+ruthenia_17: ruthenia_10, ruthenia_11, ruthenia_18, ruthenia_24, ruthenia_25
+ruthenia_18: ruthenia_11, ruthenia_12, ruthenia_17, ruthenia_19, ruthenia_25, ruthenia_26
+ruthenia_19: ruthenia_12, ruthenia_13, ruthenia_18, ruthenia_20, ruthenia_26, ruthenia_27
+ruthenia_20: ruthenia_13, ruthenia_14, ruthenia_19, ruthenia_21, ruthenia_27, ruthenia_28
+ruthenia_21: ruthenia_14, ruthenia_15, ruthenia_20, ruthenia_22, ruthenia_28, ruthenia_29
+ruthenia_22: ruthenia_15, ruthenia_16, ruthenia_21, ruthenia_23, ruthenia_29, ruthenia_30
+ruthenia_23: ruthenia_16, sarmatia_32, ruthenia_22, sarmatia_35, ruthenia_30, ruthenia_31
+sarmatia_35: sarmatia_32, sarmatia_33, ruthenia_23, sarmatia_36, ruthenia_31, sarmatia_38
+sarmatia_36: sarmatia_33, sarmatia_34, sarmatia_35, sarmatia_37, sarmatia_38, sarmatia_39
+sarmatia_37: sarmatia_34, sarmatia_36, sarmatia_39
+ruthenia_24: ruthenia_17, ruthenia_25, ruthenia_32
+ruthenia_25: ruthenia_17, ruthenia_18, ruthenia_24, ruthenia_26, ruthenia_32, ruthenia_33
+ruthenia_26: ruthenia_18, ruthenia_19, ruthenia_25, ruthenia_27, ruthenia_33, ruthenia_34
+ruthenia_27: ruthenia_19, ruthenia_20, ruthenia_26, ruthenia_28, ruthenia_34
+ruthenia_28: ruthenia_20, ruthenia_21, ruthenia_27, ruthenia_29, ruthenia_35
+ruthenia_29: ruthenia_21, ruthenia_22, ruthenia_28, ruthenia_30, ruthenia_35
+ruthenia_30: ruthenia_22, ruthenia_23, ruthenia_29, ruthenia_31
+ruthenia_31: ruthenia_23, sarmatia_35, ruthenia_30, sarmatia_38
+sarmatia_38: sarmatia_35, sarmatia_36, ruthenia_31, sarmatia_39, sarmatia_40
+sarmatia_39: sarmatia_36, sarmatia_37, sarmatia_38, sarmatia_40, sarmatia_41
+ruthenia_32: ruthenia_24, ruthenia_25, ruthenia_33, ruthenia_36, ruthenia_37
+ruthenia_33: ruthenia_25, ruthenia_26, ruthenia_32, ruthenia_34, ruthenia_37, ruthenia_38
+ruthenia_34: ruthenia_26, ruthenia_27, ruthenia_33, ruthenia_38
+ruthenia_35: ruthenia_28, ruthenia_29, ruthenia_39, ruthenia_40
+sarmatia_40: sarmatia_38, sarmatia_39, sarmatia_41
+sarmatia_41: sarmatia_39, sarmatia_40
+ruthenia_36: ruthenia_32, ruthenia_37, ruthenia_41
+ruthenia_37: ruthenia_32, ruthenia_33, ruthenia_36, ruthenia_38, ruthenia_41, ruthenia_42
+ruthenia_38: ruthenia_33, ruthenia_34, ruthenia_37, ruthenia_42
+ruthenia_39: ruthenia_35, ruthenia_40
+ruthenia_40: ruthenia_35, ruthenia_39
+ruthenia_41: ruthenia_36, ruthenia_37, ruthenia_42
+ruthenia_42: ruthenia_37, ruthenia_38, ruthenia_41
 ```

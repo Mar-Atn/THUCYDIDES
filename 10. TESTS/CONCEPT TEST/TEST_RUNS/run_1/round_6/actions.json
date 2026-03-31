@@ -42,7 +42,7 @@
         {
           "country": "columbia",
           "type": "cyber",
-          "target": "nordostan"
+          "target": "sarmatia"
         }
       ],
       "mobilizations": null
@@ -51,7 +51,7 @@
       "arms_transfers": [
         {
           "from": "columbia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 3,
           "type": "military_aid"
         }
@@ -115,7 +115,7 @@
       "ai": 4.27
     }
   },
-  "nordostan": {
+  "sarmatia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -145,7 +145,7 @@
       "blockades": [],
       "missile_strikes": [
         {
-          "country": "nordostan",
+          "country": "sarmatia",
           "target_zone": "ee_capital",
           "warhead": "conventional"
         }
@@ -163,7 +163,7 @@
       "ai": 0.0
     }
   },
-  "heartland": {
+  "ruthenia": {
     "budget": {
       "social_spending": 0.0,
       "military_total": 0.0,
@@ -193,8 +193,8 @@
     "military": {
       "combat": [
         {
-          "attacker": "heartland",
-          "defender": "nordostan",
+          "attacker": "ruthenia",
+          "defender": "sarmatia",
           "zone": "ee_east_front_central",
           "units": 3
         }
@@ -299,7 +299,7 @@
       "arms_transfers": [
         {
           "from": "gallia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.4,
           "type": "military_aid"
         }
@@ -349,7 +349,7 @@
       "arms_transfers": [
         {
           "from": "teutonia",
-          "to": "heartland",
+          "to": "ruthenia",
           "amount": 0.6,
           "type": "military_aid"
         }

@@ -79,8 +79,8 @@ svg { width: 100%; height: 100%; }
       <h4>Teams</h4>
       <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Columbia</div>
       <div class="legend-item"><div class="legend-dot" style="background:#d94a4a"></div> Cathay</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Nordostan</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Heartland</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div> Sarmatia</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div> Ruthenia</div>
       <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div> Persia</div>
       <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div> Europe</div>
       <div class="legend-item"><div class="legend-dot" style="background:#6b7280"></div> Solo countries</div>
@@ -111,8 +111,8 @@ svg { width: 100%; height: 100%; }
     <div class="filter-btn active" data-filter="all">All</div>
     <div class="filter-btn" data-filter="columbia">Columbia</div>
     <div class="filter-btn" data-filter="cathay">Cathay</div>
-    <div class="filter-btn" data-filter="nordostan">Nordostan</div>
-    <div class="filter-btn" data-filter="heartland">Heartland</div>
+    <div class="filter-btn" data-filter="sarmatia">Sarmatia</div>
+    <div class="filter-btn" data-filter="ruthenia">Ruthenia</div>
     <div class="filter-btn" data-filter="persia">Persia</div>
     <div class="filter-btn" data-filter="europe">Europe</div>
     <div class="filter-btn" data-filter="solo">Solo</div>
@@ -125,8 +125,8 @@ svg { width: 100%; height: 100%; }
 const TEAMS = {
   columbia:  { color: '#4a90d9', label: 'Columbia' },
   cathay:    { color: '#d94a4a', label: 'Cathay' },
-  nordostan: { color: '#8b5cf6', label: 'Nordostan' },
-  heartland: { color: '#f59e0b', label: 'Heartland' },
+  sarmatia: { color: '#8b5cf6', label: 'Sarmatia' },
+  ruthenia: { color: '#f59e0b', label: 'Ruthenia' },
   persia:    { color: '#10b981', label: 'Persia' },
   europe:    { color: '#3b82f6', label: 'Europe' },
   solo:      { color: '#6b7280', label: 'Solo' },
@@ -153,15 +153,15 @@ const nodes = [
   { id: 'circuit',    label: 'Circuit',    team: 'cathay', role: 'Tech/Industry Director — semiconductor self-sufficiency, civil-military fusion, tech summit host', size: 11 },
   { id: 'sage',       label: 'Sage',       team: 'cathay', role: 'Party Elder — collective leadership tradition, institutional memory, quiet influence', size: 11 },
 
-  // NORDOSTAN (3 roles — canonical names, no Specter)
-  { id: 'pathfinder', label: 'Pathfinder', team: 'nordostan', role: 'President — war leader, fortress mentality, respects transactional leaders', size: 17 },
-  { id: 'ironhand',   label: 'Ironhand',   team: 'nordostan', role: 'Chief of General Staff — executes Heartland campaign, institutional subordination', size: 12 },
-  { id: 'compass_n',  label: 'Compass',    team: 'nordostan', role: 'PM — wartime economy, sanctions evasion, civilian budget collapsing under military spending', size: 11 },
+  // SARMATIA (3 roles — canonical names, no Specter)
+  { id: 'pathfinder', label: 'Pathfinder', team: 'sarmatia', role: 'President — war leader, fortress mentality, respects transactional leaders', size: 17 },
+  { id: 'ironhand',   label: 'Ironhand',   team: 'sarmatia', role: 'Chief of General Staff — executes Ruthenia campaign, institutional subordination', size: 12 },
+  { id: 'compass_n',  label: 'Compass',    team: 'sarmatia', role: 'PM — wartime economy, sanctions evasion, civilian budget collapsing under military spending', size: 11 },
 
-  // HEARTLAND (3 roles)
-  { id: 'beacon',     label: 'Beacon',     team: 'heartland', role: 'President — resistance leader, humiliated by Dealer, legitimacy eroding', size: 14 },
-  { id: 'bulwark',    label: 'Bulwark',    team: 'heartland', role: 'General — removed from command, army loves him, running for president R3-4', size: 13 },
-  { id: 'broker',     label: 'Broker',     team: 'heartland', role: 'Former President — peace candidate, knows European capitals, pragmatist', size: 12 },
+  // RUTHENIA (3 roles)
+  { id: 'beacon',     label: 'Beacon',     team: 'ruthenia', role: 'President — resistance leader, humiliated by Dealer, legitimacy eroding', size: 14 },
+  { id: 'bulwark',    label: 'Bulwark',    team: 'ruthenia', role: 'General — removed from command, army loves him, running for president R3-4', size: 13 },
+  { id: 'broker',     label: 'Broker',     team: 'ruthenia', role: 'Former President — peace candidate, knows European capitals, pragmatist', size: 12 },
 
   // PERSIA (3 roles)
   { id: 'furnace',    label: 'Furnace',    team: 'persia', role: 'Supreme Leader — installed by IRGC, starting to believe in own authority', size: 14 },
@@ -171,7 +171,7 @@ const nodes = [
   // EUROPE (6 roles — including Ponte, Mariner, Pillar)
   { id: 'lumiere',    label: 'Lumiere',    team: 'europe', role: 'President of Gallia — nuclear power, strategic autonomy, politically paralyzed at home', size: 14 },
   { id: 'forge',      label: 'Forge',      team: 'europe', role: 'Chancellor of Teutonia — EU checkbook, Cathay-dependent industry, anxious about everything', size: 14 },
-  { id: 'sentinel',   label: 'Sentinel',   team: 'europe', role: 'PM of Freeland — frontline state, hawkish, moral authority ("we told you about Nordostan")', size: 13 },
+  { id: 'sentinel',   label: 'Sentinel',   team: 'europe', role: 'PM of Freeland — frontline state, hawkish, moral authority ("we told you about Sarmatia")', size: 13 },
   { id: 'ponte',      label: 'Ponte',      team: 'europe', role: 'PM of Ponte — Dealer\'s favorite European, pragmatic nationalist, pro-Ukraine but EU-skeptic on integration', size: 12 },
   { id: 'mariner',    label: 'Mariner',    team: 'europe', role: 'PM of Albion — nuclear power, Five Eyes, AUKUS, rebuilding EU ties, special relationship strained', size: 11 },
   { id: 'pillar',     label: 'Pillar',     team: 'europe', role: 'EU Commissioner — sanctions enforcement, trade policy, institutional EU unity', size: 10 },
@@ -179,11 +179,11 @@ const nodes = [
   // SOLO (10 roles — all canonical names)
   { id: 'wellspring', label: 'Wellspring', team: 'solo', role: 'Crown Prince of Solaria — warm ties with ALL major powers, petroyuan, $1T pledge to Columbia', size: 13 },
   { id: 'scales',     label: 'Scales',     team: 'solo', role: 'PM of Bharata — non-aligned, tariff friction with Dealer, BRICS host, plays all sides', size: 13 },
-  { id: 'bazaar',     label: 'Bazaar',     team: 'solo', role: 'President of Phrygia — mediator for everything, NATO member courting everyone, Bosphorus control', size: 12 },
+  { id: 'vizier',     label: 'Vizier',     team: 'solo', role: 'President of Phrygia — mediator for everything, NATO member courting everyone, Bosphorus control', size: 12 },
   { id: 'chip',       label: 'Chip',       team: 'solo', role: 'President of Formosa — semiconductor shield, existential Cathay threat, split government', size: 12 },
   { id: 'sakura',     label: 'Sakura',     team: 'solo', role: 'PM of Yamato — remilitarizing at historic pace, fears Columbia abandonment, Pacific cornerstone', size: 11 },
   { id: 'citadel',    label: 'Citadel',    team: 'solo', role: 'PM of Levantia — wartime leader, Operation Epic Fury ally, undeclared nuclear capability', size: 12 },
-  { id: 'pyro',       label: 'Pyro',       team: 'solo', role: 'Supreme Leader of Choson — nuclear provocateur, troops fighting for Nordostan, patron dependency', size: 10 },
+  { id: 'pyro',       label: 'Pyro',       team: 'solo', role: 'Supreme Leader of Choson — nuclear provocateur, troops fighting for Sarmatia, patron dependency', size: 10 },
   { id: 'vanguard',   label: 'Vanguard',   team: 'solo', role: 'President of Hanguk — political crisis (martial law aftermath), semiconductor power, Pacific ally', size: 10 },
   { id: 'havana',     label: 'Havana',     team: 'solo', role: 'Leadership of Caribe — post-intervention survival, seeking Russia/China/Iran patrons', size: 9 },
   { id: 'spire',      label: 'Spire',      team: 'solo', role: 'President of Mirage — investment/tech hub, hedging US/China, Gulf rivalry with Solaria', size: 10 },
@@ -213,13 +213,13 @@ const edges = [
   { from: 'helmsman', to: 'sage',     type: 'tension',  label: 'Collective vs. personal', desc: 'Sage embodies collective leadership tradition. Helmsman has centralized everything. Sage\'s quiet influence is a constraint Helmsman tolerates but resents.' },
 
   // =============================================
-  // NORDOSTAN INTERNAL
+  // SARMATIA INTERNAL
   // =============================================
-  { from: 'pathfinder', to: 'ironhand',  type: 'internal', label: 'War machine', desc: 'Military budget untouchable (40% federal spending, 8%+ GDP). Ironhand executes Heartland campaign. Pathfinder directs.' },
+  { from: 'pathfinder', to: 'ironhand',  type: 'internal', label: 'War machine', desc: 'Military budget untouchable (40% federal spending, 8%+ GDP). Ironhand executes Ruthenia campaign. Pathfinder directs.' },
   { from: 'pathfinder', to: 'compass_n', type: 'tension',  label: 'Guns eating butter', desc: 'Oil revenue down 34%. Budget cut 10% — all civilian. Real inflation 20%+. Compass manages impossible equation while military devours resources.' },
 
   // =============================================
-  // HEARTLAND INTERNAL
+  // RUTHENIA INTERNAL
   // =============================================
   { from: 'beacon',  to: 'bulwark', type: 'hostile',  label: 'EXPLOSIVE', desc: 'Beacon fired Bulwark fearing political threat. Army loves Bulwark. Running for president R3-4. Would win 64-36. Beacon\'s only hope: delay election or sign peace first.' },
   { from: 'beacon',  to: 'broker',  type: 'tension',  label: 'Bitter history', desc: 'Former president vs. current. Fight vs. negotiate. Broker got defeat, Beacon got glory. Now roles reversing.' },
@@ -236,12 +236,12 @@ const edges = [
   // EUROPE INTERNAL — now with alliance edges
   // =============================================
   { from: 'lumiere',  to: 'forge',     type: 'tension',  label: 'Autonomy vs. consensus', desc: 'Lumiere wants strategic autonomy + nuclear hedge. Forge wants stability + consensus. Franco-German engine under strain but still functioning.' },
-  { from: 'sentinel', to: 'forge',     type: 'tension',  label: 'Burden-sharing shame', desc: 'Sentinel spends 4.8% GDP defense. Forge struggling toward 3.5%. "We told you about Nordostan." Moral authority vs. economic constraint.' },
-  { from: 'lumiere',  to: 'sentinel',  type: 'alliance', label: 'Heartland solidarity', desc: 'Despite NATO-vs-autonomy split, both GENUINELY support Heartland. "Coalition of the willing" for defense. This shared commitment holds Europe together.' },
+  { from: 'sentinel', to: 'forge',     type: 'tension',  label: 'Burden-sharing shame', desc: 'Sentinel spends 4.8% GDP defense. Forge struggling toward 3.5%. "We told you about Sarmatia." Moral authority vs. economic constraint.' },
+  { from: 'lumiere',  to: 'sentinel',  type: 'alliance', label: 'Ruthenia solidarity', desc: 'Despite NATO-vs-autonomy split, both GENUINELY support Ruthenia. "Coalition of the willing" for defense. This shared commitment holds Europe together.' },
   { from: 'ponte',    to: 'forge',     type: 'tension',  label: 'EU budget battles', desc: 'Ponte blocks EU spending and migration consensus. Forge needs EU unity — Ponte is the constant obstacle on fiscal integration.' },
   { from: 'ponte',    to: 'pillar',    type: 'tension',  label: 'Sovereignty vs. institution', desc: 'Ponte challenges EU Commission authority on migration, fiscal rules. Pillar represents institutional unity that Ponte disrupts.' },
-  { from: 'forge',    to: 'pillar',    type: 'alliance', label: 'EU project', desc: 'Forge and Pillar share commitment to EU institutional coherence. Sanctions enforcement, trade policy, Heartland support packages.' },
-  { from: 'mariner',  to: 'sentinel',  type: 'alliance', label: 'Atlantic solidarity', desc: 'Both Atlanticist, both committed to Heartland. Mariner brings Five Eyes intel, Sentinel brings frontline credibility. Natural partnership.' },
+  { from: 'forge',    to: 'pillar',    type: 'alliance', label: 'EU project', desc: 'Forge and Pillar share commitment to EU institutional coherence. Sanctions enforcement, trade policy, Ruthenia support packages.' },
+  { from: 'mariner',  to: 'sentinel',  type: 'alliance', label: 'Atlantic solidarity', desc: 'Both Atlanticist, both committed to Ruthenia. Mariner brings Five Eyes intel, Sentinel brings frontline credibility. Natural partnership.' },
 
   // =============================================
   // THE CENTRAL TRAP
@@ -251,9 +251,9 @@ const edges = [
   // =============================================
   // DEALER\'S SURPRISING RAPPORT WITH "ENEMIES"
   // =============================================
-  { from: 'dealer',     to: 'pathfinder', type: 'channel',  label: 'Personal rapport', desc: 'Countries at proxy war but leaders communicate easily. Alaska summit: Pathfinder dominated body language. Dealer admires strength. Pathfinder manages ego. WANT a deal on Heartland.' },
+  { from: 'dealer',     to: 'pathfinder', type: 'channel',  label: 'Personal rapport', desc: 'Countries at proxy war but leaders communicate easily. Alaska summit: Pathfinder dominated body language. Dealer admires strength. Pathfinder manages ego. WANT a deal on Ruthenia.' },
   { from: 'fixer',      to: 'pathfinder', type: 'channel',  label: 'Moscow back-channel', desc: 'Fixer met Pathfinder for 5 hours in Moscow. No diplomatic experience but Dealer\'s personal trust. Carries proposals outside normal channels.' },
-  { from: 'fixer',      to: 'compass_n',  type: 'channel',  label: 'Miami talks', desc: 'Fixer met Nordostan envoy in Miami — weeks of secret talks produced 28-point peace plan. Excluded Heartland, allies, even some Columbia officials.' },
+  { from: 'fixer',      to: 'compass_n',  type: 'channel',  label: 'Miami talks', desc: 'Fixer met Sarmatia envoy in Miami — weeks of secret talks produced 28-point peace plan. Excluded Ruthenia, allies, even some Columbia officials.' },
 
   // =============================================
   // DEALER AND ALLIES — contempt vs. warmth
@@ -276,16 +276,16 @@ const edges = [
   // STRATEGIC PARTNERSHIPS
   // =============================================
   { from: 'helmsman',   to: 'pathfinder', type: 'alliance', label: 'Partnership without limits', desc: 'Dense coordination: defense, tech, AI, energy, payments. ASYMMETRIC — Pathfinder becoming junior partner. Cathay hedges against post-Pathfinder future.' },
-  { from: 'pathfinder', to: 'furnace',    type: 'alliance', label: 'Sanctions brothers', desc: 'Both under Western sanctions. Arms trade, sanctions evasion. Choson troops fighting for Nordostan. Persia missiles via Nordostan tech.' },
-  { from: 'pathfinder', to: 'pyro',       type: 'alliance', label: 'Patron-client', desc: 'Pyro sends 11,000+ troops and millions of artillery shells to Heartland front. Pathfinder provides nuclear/missile technology in return. Symbiotic.' },
+  { from: 'pathfinder', to: 'furnace',    type: 'alliance', label: 'Sanctions brothers', desc: 'Both under Western sanctions. Arms trade, sanctions evasion. Choson troops fighting for Sarmatia. Persia missiles via Sarmatia tech.' },
+  { from: 'pathfinder', to: 'pyro',       type: 'alliance', label: 'Patron-client', desc: 'Pyro sends 11,000+ troops and millions of artillery shells to Ruthenia front. Pathfinder provides nuclear/missile technology in return. Symbiotic.' },
 
   // =============================================
   // DEPENDENCIES
   // =============================================
-  { from: 'beacon',     to: 'dealer',     type: 'dependency', label: 'Military lifeline', desc: 'Heartland depends on Columbia for survival. Humiliating but existential. Dealer suspended aid once. Every weapon comes with political strings.' },
+  { from: 'beacon',     to: 'dealer',     type: 'dependency', label: 'Military lifeline', desc: 'Ruthenia depends on Columbia for survival. Humiliating but existential. Dealer suspended aid once. Every weapon comes with political strings.' },
   { from: 'chip',       to: 'dealer',     type: 'dependency', label: 'Strategic ambiguity', desc: 'Formosa relies on implied protection. No formal guarantee. $11B arms sale BUT Dealer cancelled defense meetings to avoid angering Helmsman.' },
   { from: 'anvil',      to: 'helmsman',   type: 'dependency', label: 'Economic lifeline', desc: '48% of Persia\'s oil goes to Cathay. Without Cathay channels, economy collapses. Cathay has leverage — can squeeze or sustain at will.' },
-  { from: 'compass_n',  to: 'abacus',     type: 'dependency', label: 'Sanctions lifeline', desc: 'Nordostan economy depends on Cathay as buyer, tech supplier, financial channel. Growing asymmetry. Cathay sets the terms.' },
+  { from: 'compass_n',  to: 'abacus',     type: 'dependency', label: 'Sanctions lifeline', desc: 'Sarmatia economy depends on Cathay as buyer, tech supplier, financial channel. Growing asymmetry. Cathay sets the terms.' },
   { from: 'forge',      to: 'abacus',     type: 'dependency', label: 'Auto industry hostage', desc: 'VW, BMW, BASF deeply dependent on Cathay market. Dealer demands restrictions. Forge trapped: obey Columbia = lose industry; resist = lose alliance.' },
 
   // =============================================
@@ -295,15 +295,15 @@ const edges = [
   { from: 'chip',       to: 'sakura',     type: 'alliance', label: 'Shared fear', desc: 'Both face Cathay threat. TSMC building Japan fab. Yamato declared Taiwan contingency "existential." Both need Columbia but fear abandonment.' },
   { from: 'shield',     to: 'rampart',    type: 'hostile',  label: 'Pacific arms race', desc: 'Naval buildup: Columbia 11 vs Cathay 7 (+1/round). Crossover R3-4. Yamato remilitarizing. The military dimension of the Trap.' },
   { from: 'sakura',     to: 'helmsman',   type: 'hostile',  label: 'Existential threat', desc: 'Yamato declared Formosa contingency an "existential crisis." Cathay retaliated with rare earth restrictions. Remilitarizing at historic pace — fastest since 1945.' },
-  { from: 'bazaar',     to: 'chip',       type: 'channel',  label: 'Gray-zone channel', desc: 'Phrygia as potential intermediary for Cathay-Formosa communication. Bazaar talks to everyone — could facilitate autonomy deals or economic arrangements.' },
+  { from: 'vizier',     to: 'chip',       type: 'channel',  label: 'Gray-zone channel', desc: 'Phrygia as potential intermediary for Cathay-Formosa communication. Vizier talks to everyone — could facilitate autonomy deals or economic arrangements.' },
 
   // =============================================
   // INTERMEDIARY NETWORK
   // =============================================
   { from: 'fixer',      to: 'wellspring', type: 'channel', label: 'Money + mediation', desc: 'Family fund received $2B from Solaria. Wellspring first to call after inauguration. $1T investment pledge. Financial ties create personal channel.' },
-  { from: 'bazaar',     to: 'pathfinder', type: 'channel', label: 'Reliable interlocutor', desc: 'Phrygia refuses to sanction Nordostan. Grain deal mediator. Only country hosting direct Nordostan-Heartland talks. Pathfinder\'s "valued friend."' },
-  { from: 'bazaar',     to: 'dealer',     type: 'channel', label: 'Valued friend', desc: 'Dealer adjusted Bazaar\'s chair at White House. Loyalty during "exile" remembered. Nuclear cooperation deal. NATO\'s most unreliable member but Dealer\'s reliable contact.' },
-  { from: 'bazaar',     to: 'beacon',     type: 'channel', label: 'Istanbul talks', desc: 'Only country facilitating in-person Nordostan-Heartland negotiations. Grain corridor. Prisoner swaps. Both sides "feel comfortable" with Phrygia.' },
+  { from: 'vizier',     to: 'pathfinder', type: 'channel', label: 'Reliable interlocutor', desc: 'Phrygia refuses to sanction Sarmatia. Grain deal mediator. Only country hosting direct Sarmatia-Ruthenia talks. Pathfinder\'s "valued friend."' },
+  { from: 'vizier',     to: 'dealer',     type: 'channel', label: 'Valued friend', desc: 'Dealer adjusted Vizier\'s chair at White House. Loyalty during "exile" remembered. Nuclear cooperation deal. NATO\'s most unreliable member but Dealer\'s reliable contact.' },
+  { from: 'vizier',     to: 'beacon',     type: 'channel', label: 'Istanbul talks', desc: 'Only country facilitating in-person Sarmatia-Ruthenia negotiations. Grain corridor. Prisoner swaps. Both sides "feel comfortable" with Phrygia.' },
   { from: 'dawn',       to: 'fixer',      type: 'channel', label: 'Reform channel', desc: 'If regime cracks, Dawn is the interlocutor the West talks to. Anvil knows this — keeps Dawn alive partly for this reason. A peace pathway for the Persia war.' },
 
   // =============================================
@@ -311,7 +311,7 @@ const edges = [
   // =============================================
   { from: 'wellspring', to: 'helmsman',   type: 'alliance', label: 'Oil for influence', desc: '40%+ crude to Cathay. Petroyuan. BRICS+. MBS has warm personal ties with Dealer, Pathfinder, AND Helmsman simultaneously — unique position.' },
   { from: 'wellspring', to: 'dealer',     type: 'alliance', label: 'Clean slate', desc: '$1T investment pledge. First foreign call. Personal warmth + transactional alignment. Solaria is Dealer\'s favorite partner.' },
-  { from: 'wellspring', to: 'pathfinder', type: 'alliance', label: 'OPEC+ partners', desc: 'Close oil production coordination. Wellspring ignored Columbia pressure to boost production after Heartland invasion. Pragmatic energy partnership.' },
+  { from: 'wellspring', to: 'pathfinder', type: 'alliance', label: 'OPEC+ partners', desc: 'Close oil production coordination. Wellspring ignored Columbia pressure to boost production after Ruthenia invasion. Pragmatic energy partnership.' },
   { from: 'wellspring', to: 'spire',      type: 'tension',  label: 'Gulf rivalry', desc: 'Sibling rivalry between Solaria and Mirage. Compete for investment, tech hub status, Columbia favor. Cooperate on Persia threat but watch each other closely.' },
 
   // =============================================
@@ -319,7 +319,7 @@ const edges = [
   // =============================================
   { from: 'scales',     to: 'dealer',     type: 'tension',  label: 'Tariff friction', desc: 'Genuine personal warmth (stadium rallies, "Howdy Modi" legacy) overlaid with trade tension. Both sides made concessions but structural friction remains.' },
   { from: 'scales',     to: 'helmsman',   type: 'tension',  label: 'Rival partners', desc: 'Border disputes unresolved. BUT: Bharata hosting 2026 BRICS. Invited Helmsman, who accepted. "Non-western, not anti-western." Cautious thaw.' },
-  { from: 'scales',     to: 'pathfinder', type: 'alliance', label: 'Deep partnership', desc: 'Pathfinder visited Delhi Dec 2025. Bharata dramatically increased Nordostan oil purchases. Defense cooperation. The multipolar embrace.' },
+  { from: 'scales',     to: 'pathfinder', type: 'alliance', label: 'Deep partnership', desc: 'Pathfinder visited Delhi Dec 2025. Bharata dramatically increased Sarmatia oil purchases. Defense cooperation. The multipolar embrace.' },
   { from: 'scales',     to: 'wellspring', type: 'alliance', label: 'Energy + BRICS', desc: 'Two hedging powers with energy relationships and BRICS+ membership. Both non-aligned, both leveraging position. Natural partnership.' },
 
   // =============================================
@@ -345,26 +345,26 @@ const edges = [
   // MARINER (Albion) — post-Brexit bridge
   // =============================================
   { from: 'mariner',    to: 'dealer',     type: 'tension',  label: 'Special relationship strained', desc: 'Five Eyes, AUKUS, shared intelligence. But Dealer\'s unpredictability strains trust. Albion multiplying alliances (AUKUS, GCAP) to hedge against Columbia unreliability.' },
-  { from: 'mariner',    to: 'lumiere',    type: 'alliance', label: 'Nuclear partners', desc: 'Two European nuclear powers. Post-Brexit rebuilding. Shared Heartland commitment. Lancaster House defense treaties. Natural partners on strategic autonomy.' },
+  { from: 'mariner',    to: 'lumiere',    type: 'alliance', label: 'Nuclear partners', desc: 'Two European nuclear powers. Post-Brexit rebuilding. Shared Ruthenia commitment. Lancaster House defense treaties. Natural partners on strategic autonomy.' },
 
   // =============================================
   // HAVANA (Caribe) — survival mode
   // =============================================
   { from: 'anchor',     to: 'havana',     type: 'hostile',  label: 'Monroe Doctrine', desc: 'Anchor drives Caribe policy — strategic AND personal (heritage). Monroe Doctrine enforced. Maduro captured. Regime change on the agenda.' },
-  { from: 'havana',     to: 'pathfinder', type: 'dependency', label: 'Patron seeking', desc: 'Seeking Nordostan protection. Intelligence cooperation. Havana needs patrons to survive Columbia pressure.' },
+  { from: 'havana',     to: 'pathfinder', type: 'dependency', label: 'Patron seeking', desc: 'Seeking Sarmatia protection. Intelligence cooperation. Havana needs patrons to survive Columbia pressure.' },
   { from: 'havana',     to: 'helmsman',   type: 'dependency', label: 'Telecom + trade', desc: 'Cathay has telecom infrastructure in Caribe. Economic lifeline. Havana courting Cathay as counterweight to Columbia\'s Monroe Doctrine.' },
 
   // =============================================
   // KEY CROSS-BORDER PERSONAL CHANNELS
   // =============================================
-  { from: 'broker',     to: 'forge',      type: 'alliance', label: 'EU accession path', desc: 'Broker\'s strategy = European integration. Forge controls EU checkbook. Window closing — Ponte blocks. Broker\'s last hope for Heartland.' },
-  { from: 'broker',     to: 'lumiere',    type: 'alliance', label: 'Paris channel', desc: 'Broker knows European capitals. Lumiere sees Heartland as strategic autonomy project. "Coalition of the willing" for peace.' },
-  { from: 'shadow',     to: 'ironhand',   type: 'hostile',  label: 'Intelligence war', desc: 'Columbia vs. Nordostan intelligence. Covert ops, sabotage, election interference. The invisible front that never stops.' },
+  { from: 'broker',     to: 'forge',      type: 'alliance', label: 'EU accession path', desc: 'Broker\'s strategy = European integration. Forge controls EU checkbook. Window closing — Ponte blocks. Broker\'s last hope for Ruthenia.' },
+  { from: 'broker',     to: 'lumiere',    type: 'alliance', label: 'Paris channel', desc: 'Broker knows European capitals. Lumiere sees Ruthenia as strategic autonomy project. "Coalition of the willing" for peace.' },
+  { from: 'shadow',     to: 'ironhand',   type: 'hostile',  label: 'Intelligence war', desc: 'Columbia vs. Sarmatia intelligence. Covert ops, sabotage, election interference. The invisible front that never stops.' },
   { from: 'sage',       to: 'anchor',     type: 'channel',  label: 'FM back-channel', desc: 'Sage can explore deals leaders can\'t discuss publicly. Six rounds of talks already held. Calibrated for Dealer\'s transactional style.' },
   { from: 'beacon',     to: 'sentinel',   type: 'alliance', label: 'Frontline brothers', desc: '80% of military aid transits Freeland. Borders the war. Not transactional — existential solidarity. Sentinel is Beacon\'s most reliable ally.' },
   { from: 'sakura',     to: 'dealer',     type: 'tension',  label: 'Anxious ally', desc: 'Cornerstone Pacific alliance BUT Columbia signaling contraction. Yamato remilitarizing because it no longer trusts protection. Anxiety, not warmth.' },
   { from: 'sakura',     to: 'shield',     type: 'alliance', label: 'Military alliance', desc: 'US-Japan military relationship is Pacific deterrence cornerstone. Joint exercises, base hosting, intelligence sharing. Shield\'s most capable partner.' },
-  { from: 'pillar',     to: 'beacon',     type: 'alliance', label: 'Institutional support', desc: 'EU sanctions on Nordostan, aid packages for Heartland, accession process — all flow through Pillar\'s institutional machinery.' },
+  { from: 'pillar',     to: 'beacon',     type: 'alliance', label: 'Institutional support', desc: 'EU sanctions on Sarmatia, aid packages for Ruthenia, accession process — all flow through Pillar\'s institutional machinery.' },
 ];
 
 // ============================================================
@@ -384,8 +384,8 @@ let panX = 0, panY = 0;
 const teamPositions = {
   columbia:  { x: W * 0.12, y: H * 0.32 },
   cathay:    { x: W * 0.88, y: H * 0.28 },
-  nordostan: { x: W * 0.62, y: H * 0.08 },
-  heartland: { x: W * 0.38, y: H * 0.08 },
+  sarmatia: { x: W * 0.62, y: H * 0.08 },
+  ruthenia: { x: W * 0.38, y: H * 0.08 },
   persia:    { x: W * 0.62, y: H * 0.85 },
   europe:    { x: W * 0.25, y: H * 0.72 },
   solo:      { x: W * 0.52, y: H * 0.50 },

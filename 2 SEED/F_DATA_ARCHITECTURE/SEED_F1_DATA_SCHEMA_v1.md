@@ -93,7 +93,7 @@ One row per country. The master country record.
 | `prod_cap_tactical` | int | Max tactical air producible per round | `3` |
 | `maintenance_per_unit` | float | Cost per unit per round | `0.5` |
 | `strategic_missile_growth` | int | Auto-produced per round (Cathay only) | `0` |
-| `mobilization_pool` | int | Finite reserve of mobilizable ground units. Depleted by partial (half) or full (all) mobilization. Never recovers. Heartland/Nordostan start partially depleted. | `12` (Columbia), `4` (Heartland, 4 of 8 already used) |
+| `mobilization_pool` | int | Finite reserve of mobilizable ground units. Depleted by partial (half) or full (all) mobilization. Never recovers. Ruthenia/Sarmatia start partially depleted. | `12` (Columbia), `4` (Ruthenia, 4 of 8 already used) |
 | **Political** |
 | `stability` | float | Starting stability (1-10) | `7` |
 | `political_support` | float | Starting support (0-100) | `38` |
@@ -212,7 +212,7 @@ Non-zero sanctions pairs only. All unmentioned pairs default to 0.
 | Column | Type | Description | Example |
 |--------|------|-------------|---------|
 | `country` | string | Country's sanctions position | `columbia` |
-| `target` | string | Target of sanctions | `nordostan` |
+| `target` | string | Target of sanctions | `sarmatia` |
 | `level` | int | Sanctions level (-3 to +3) | `3` |
 
 ---
@@ -244,7 +244,7 @@ Every zone on the global and theater maps.
 | `owner` | string | FK → countries.id (or `none`) | `columbia` |
 | `theater` | string | Theater if applicable (`global`/`eastern_ereb`). **SEED DECISION (2026-03-27):** Only `eastern_ereb` has a detailed theater map; all other regions use `global` hex resolution. Legacy values `mashriq`/`taiwan`/`caribbean`/`thule`/`korea` archived. | `global` |
 | `is_chokepoint` | bool | Maritime chokepoint? | `false` |
-| `die_hard` | bool | Fortified "Die Hard" position? +1 defender bonus in ground combat. | `false` (only `heartland_2` = `true` at game start) |
+| `die_hard` | bool | Fortified "Die Hard" position? +1 defender bonus in ground combat. | `false` (only `ruthenia_2` = `true` at game start) |
 
 *(Column `die_hard` added 2026-03-30 per CM-002 action review)*
 

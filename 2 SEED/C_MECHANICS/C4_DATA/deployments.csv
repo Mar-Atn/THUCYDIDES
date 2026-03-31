@@ -40,17 +40,17 @@ cathay,strategic_missile,1,cathay_7,SSBNs - South China Sea bastion
 cathay,air_defense,1,cathay_3,Central defense
 cathay,air_defense,1,cathay_6,Coastal defense
 cathay,air_defense,1,cathay_2,Western defense
-nordostan,ground,2,nord_c1,Moscow/central strategic reserve
-nordostan,ground,2,nord_e2,Far East/Cathay border defense
-nordostan,ground,1,nord_w2,Caucasus/southern flank
-nordostan,tactical_air,2,nord_c1,Strategic aviation homeland defense
-nordostan,tactical_air,1,nord_w2,Southern air defense/strike
-nordostan,tactical_air,1,nord_e2,Far East air defense
-nordostan,strategic_missile,7,nord_c1,ICBM silos mobile launchers strategic bombers
-nordostan,strategic_missile,2,nord_e2,Mobile launchers Pacific SSBN patrols
-nordostan,strategic_missile,3,nord_n1,SSBNs Northern Fleet bastion
-nordostan,air_defense,1,nord_c1,Moscow strategic defense
-nordostan,air_defense,1,nord_w2,Southern/Caucasus defense
+sarmatia,ground,2,nord_c1,Moscow/central strategic reserve
+sarmatia,ground,2,nord_e2,Far East/Cathay border defense
+sarmatia,ground,1,nord_w2,Caucasus/southern flank
+sarmatia,tactical_air,2,nord_c1,Strategic aviation homeland defense
+sarmatia,tactical_air,1,nord_w2,Southern air defense/strike
+sarmatia,tactical_air,1,nord_e2,Far East air defense
+sarmatia,strategic_missile,7,nord_c1,ICBM silos mobile launchers strategic bombers
+sarmatia,strategic_missile,2,nord_e2,Mobile launchers Pacific SSBN patrols
+sarmatia,strategic_missile,3,nord_n1,SSBNs Northern Fleet bastion
+sarmatia,air_defense,1,nord_c1,Moscow strategic defense
+sarmatia,air_defense,1,nord_w2,Southern/Caucasus defense
 persia,ground,2,persia_2,IRGC ground forces + Gulf Gate coastal defense batteries
 persia,ground,2,persia_1,Nuclear facility defense
 persia,ground,2,persia_3,Strategic depth ballistic missile guards
@@ -84,7 +84,7 @@ albion,air_defense,1,albion,Sky Sabre homeland
 bharata,ground,10,bharata_2,Bulk on Cathay border and internal
 bharata,ground,2,bharata_1,Indian Ocean / Andaman & Nicobar
 bharata,tactical_air,4,bharata_2,Mixed fleet Su-30MKI Rafale Tejas
-bharata,air_defense,2,bharata_2,S-400 from Nordostan + domestic
+bharata,air_defense,2,bharata_2,S-400 from Sarmatia + domestic
 levantia,ground,3,levantia,Homeland + West Bank
 levantia,ground,2,phrygia_2,Lebanon theater
 levantia,ground,1,levantia,Persia-facing reserves
@@ -98,7 +98,7 @@ phrygia,ground,4,phrygia_1,Homeland + Syrian border
 phrygia,ground,1,phrygia_2,Syria deployment
 phrygia,ground,1,phrygia_2,Strait defense
 phrygia,tactical_air,3,phrygia_1,F-16 fleet Bayraktar drones
-phrygia,air_defense,1,phrygia_1,S-400 from Nordostan
+phrygia,air_defense,1,phrygia_1,S-400 from Sarmatia
 yamato,ground,3,yamato_2,Self-Defense Forces homeland
 yamato,tactical_air,3,yamato_2,F-35 fleet Type-12 standoff missiles
 yamato,air_defense,2,yamato_2,Aegis BMD PAC-3
@@ -119,21 +119,21 @@ mirage,ground,2,mirage,Homeland professional force
 mirage,tactical_air,2,mirage,F-16s Mirage 2000s drones
 mirage,air_defense,2,mirage,THAAD Patriot IRIS-T
 albion,naval,2,"w(8,4)",Atlantic/home waters
-nordostan,naval,2,nord_w2,Northern Fleet (Arctic/submarine)
+sarmatia,naval,2,nord_w2,Northern Fleet (Arctic/submarine)
 gallia,naval,1,"w(10,7)",Mediterranean/carrier group
 bharata,naval,2,"w(14,10)",Indian Ocean fleet
 yamato,naval,2,"w(20,5)",Pacific home waters
 phrygia,naval,1,phrygia_1,Bosphorus/Med
-nordostan,ground,8,heartland_2,Front line offensive forces (theater rows 4-6)
-nordostan,ground,5,heartland_1,Occupation/rear security forces (theater rows 3-4)
-nordostan,tactical_air,4,heartland_2,"Front-line aviation, glide bombs, drones"
-nordostan,air_defense,1,heartland_2,Theater air defense covering front
-choson,ground,2,heartland_2,Deployed to support Nordostan offensive
-heartland,ground,7,heartland_2,"Front line defense (theater rows 5-7, Die Hard zone)"
-heartland,ground,3,heartland_1,"Strategic reserve, capital defense, western logistics"
-heartland,tactical_air,2,heartland_2,"Front-line air support, drones, HIMARS"
-heartland,tactical_air,1,heartland_1,Air defense/strike reserve
-heartland,air_defense,1,heartland_1,Patriot/NASAMS protecting capital and infrastructure
+sarmatia,ground,8,ruthenia_2,Front line offensive forces (theater rows 4-6)
+sarmatia,ground,5,ruthenia_1,Occupation/rear security forces (theater rows 3-4)
+sarmatia,tactical_air,4,ruthenia_2,"Front-line aviation, glide bombs, drones"
+sarmatia,air_defense,1,ruthenia_2,Theater air defense covering front
+choson,ground,2,ruthenia_2,Deployed to support Sarmatia offensive
+ruthenia,ground,7,ruthenia_2,"Front line defense (theater rows 5-7, Die Hard zone)"
+ruthenia,ground,3,ruthenia_1,"Strategic reserve, capital defense, western logistics"
+ruthenia,tactical_air,2,ruthenia_2,"Front-line air support, drones, HIMARS"
+ruthenia,tactical_air,1,ruthenia_1,Air defense/strike reserve
+ruthenia,air_defense,1,ruthenia_1,Patriot/NASAMS protecting capital and infrastructure
 columbia,naval,3,"w(13,9)",Gulf — 2 CSGs for Operation Epic Fury
 columbia,naval,2,"w(10,7)",Mediterranean — Persia war support + Suez
 columbia,naval,2,"w(18,5)",East Cathay Sea — Formosa deterrence patrol

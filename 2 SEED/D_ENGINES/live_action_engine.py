@@ -45,7 +45,7 @@ COVERT_DETECTION_BASE = {
 }
 
 # Countries with enhanced covert capabilities
-INTELLIGENCE_POWERS = {"columbia", "cathay", "levantia", "albion", "nordostan"}
+INTELLIGENCE_POWERS = {"columbia", "cathay", "levantia", "albion", "sarmatia"}
 
 # Max covert ops per round
 MAX_COVERT_OPS_PER_ROUND = {
@@ -803,7 +803,7 @@ class LiveActionEngine:
     # Country-specific assassination bonuses (international)
     _ASSASSINATION_COUNTRY_BONUS = {
         "levantia": 0.30,   # total 50% (20% + 30%)
-        "nordostan": 0.10,  # total 30% (20% + 10%)
+        "sarmatia": 0.10,  # total 30% (20% + 10%)
     }
 
     def resolve_assassination(self, country: str, target_role: str,

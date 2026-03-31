@@ -271,7 +271,7 @@ Fortune describes the Strait as an Iranian "kill box" — preventing the US Navy
 - Israel conducting continuous strikes, targeting leadership.
 - Iran retaliating with missile barrages on Israeli cities.
 
-### With Russia (Nordostan): ALLY
+### With Russia (Sarmatia): ALLY
 - BRICS+ partner. Arms supplier (Shahed drones were key Russian weapon in Ukraine).
 - Sanctions evasion partner.
 - Russia condemned strikes but provided no military support.
