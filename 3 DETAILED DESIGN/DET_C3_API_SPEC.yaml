@@ -216,7 +216,7 @@ components:
           type: string
         type:
           type: string
-          enum: [land_home, land_contested, sea, chokepoint]
+          enum: [land_home, land_contested, sea, chokepoint, chokepoint_sea]
         owner:
           type: string
         theater:
@@ -320,7 +320,7 @@ components:
           type: string
         status:
           type: string
-          enum: [active, fired, arrested, incapacitated, dead]
+          enum: [active, fired, arrested, incapacitated, dead, exiled]
         personal_coins:
           type: number
           format: double
@@ -453,7 +453,7 @@ components:
                 properties:
                   action_type:
                     type: string
-                    enum: [attack, blockade, naval_combat, naval_bombardment, air_strike, strategic_missile, nuclear_strike]
+                    enum: [ground_attack, blockade, naval_combat, naval_bombardment, air_strike, strategic_missile, nuclear_test, troop_deployment]
                   target_zone:
                     type: string
                   from_zone:

@@ -56,7 +56,7 @@ Every event in the system conforms to this envelope. The `payload` field varies 
 
 ---
 
-## 1.2 Action Events (31 Types)
+## 1.2 Action Events (32 Types)
 
 ### Regular Inputs (Phase A deadline)
 
@@ -816,6 +816,28 @@ Nomination for scheduled election. 10 minutes before election.
 }
 ```
 
+#### `action.court_proceeding`
+
+Triggered when a participant files a court complaint in a democracy.
+
+```json
+{
+  "event_type": "action.court_proceeding",
+  "visibility": "PUBLIC",
+  "payload": {
+    "run_id": "uuid",
+    "round": 3,
+    "country_id": "columbia",
+    "plaintiff_role_id": "tribune",
+    "defendant_role_id": "dealer",
+    "plaintiff_arguments": "The President arrested me without legal basis...",
+    "defendant_arguments": "National security required immediate action...",
+    "verdict": "OVERTURNED",
+    "verdict_reasoning": "Arrest lacked evidence of actual threat to national security."
+  }
+}
+```
+
 ---
 
 ## 1.3 Engine Events
@@ -1321,6 +1343,7 @@ Complete list of all event types for validation and schema registry.
 | | `action.coup_attempt` | PUBLIC |
 | | `action.protest` | PUBLIC |
 | | `action.impeachment` | PUBLIC |
+| | `action.court_proceeding` | PUBLIC |
 | **Action: Transaction** | `action.transaction_propose` | ROLE |
 | | `action.transaction_confirm` | COUNTRY |
 | | `action.agreement_sign` | PUBLIC* |

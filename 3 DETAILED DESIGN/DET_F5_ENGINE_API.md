@@ -117,7 +117,7 @@ Processes a single real-time action (combat, blockade, covert op, political acti
 {
   "sim_run_id": "sim_2026_04_15",
   "round_num": 3,
-  "action_type": "attack",
+  "action_type": "ground_attack",
   "actor_role_id": "dealer",
   "actor_country_id": "columbia",
   "target": {
@@ -130,7 +130,7 @@ Processes a single real-time action (combat, blockade, covert op, political acti
       "tactical_air": 3
     }
   },
-  "idempotency_key": "act_r3_dealer_attack_persia_west_v1"
+  "idempotency_key": "act_r3_dealer_ground_attack_persia_west_v1"
 }
 ```
 
@@ -196,7 +196,7 @@ All action_type values use canonical names per [DET_NAMING_CONVENTIONS.md](DET_N
       "id": "evt_auto_001",
       "round_num": 3,
       "phase": "A",
-      "action_type": "attack",
+      "action_type": "ground_attack",
       "actor_role_id": "dealer",
       "target": "persia_west",
       "details": {
@@ -489,7 +489,7 @@ Triggers the full between-round batch processing cycle. **Facilitator only.**
   "event_log": [
     {
       "id": "evt_001",
-      "action_type": "attack",
+      "action_type": "ground_attack",
       "actor_role_id": "dealer",
       "round_num": 3,
       "phase": "A",

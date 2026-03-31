@@ -663,6 +663,38 @@ CREATE TABLE ai_decisions (
 CREATE INDEX idx_ai_dec_sim ON ai_decisions(sim_run_id, role_id, round_num);
 
 -- =============================================================================
+-- SECTION 5B: ARGUS (AI ASSISTANT) PERSISTENCE
+-- =============================================================================
+
+CREATE TABLE argus_conversations (
+    conversation_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    run_id UUID NOT NULL REFERENCES sim_runs(run_id),
+    role_id UUID NOT NULL REFERENCES roles(role_id),
+    phase TEXT NOT NULL CHECK (phase IN ('intro', 'mid', 'outro')),
+    started_at TIMESTAMPTZ DEFAULT NOW(),
+    ended_at TIMESTAMPTZ,
+    transcript TEXT,
+    mode TEXT DEFAULT 'voice' CHECK (mode IN ('voice', 'text')),
+    -- Intro completion tracking
+    goals_covered BOOLEAN DEFAULT FALSE,
+    rules_covered BOOLEAN DEFAULT FALSE,
+    strategy_covered BOOLEAN DEFAULT FALSE,
+    -- Outro structured data extraction
+    extracted_data JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE argus_event_memory (
+    memory_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    run_id UUID NOT NULL REFERENCES sim_runs(run_id),
+    round_num INTEGER NOT NULL,
+    event_text TEXT NOT NULL,
+    visibility TEXT DEFAULT 'public',
+    source TEXT DEFAULT 'engine',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================================================
 -- SECTION 6: ARTEFACTS TABLE
 -- =============================================================================
 
@@ -713,6 +745,8 @@ ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE meetings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_contexts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ai_decisions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE argus_conversations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE argus_event_memory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artefacts ENABLE ROW LEVEL SECURITY;
 
 -- -------------------------------------------------------
@@ -925,6 +959,24 @@ CREATE POLICY ai_ctx_read ON ai_contexts FOR SELECT USING (
 CREATE POLICY ai_dec_read ON ai_decisions FOR SELECT USING (
     is_facilitator(ai_decisions.sim_run_id)
 );
+
+-- ARGUS CONVERSATIONS: participants see own, facilitators see all
+CREATE POLICY "Participants see own Argus conversations"
+    ON argus_conversations FOR SELECT
+    USING (role_id IN (
+        SELECT role_id FROM roles WHERE assigned_user_id = auth.uid()
+    ));
+
+CREATE POLICY "Facilitators see all Argus conversations"
+    ON argus_conversations FOR SELECT
+    USING (
+        EXISTS (SELECT 1 FROM facilitators WHERE user_id = auth.uid() AND run_id = argus_conversations.run_id)
+    );
+
+-- ARGUS EVENT MEMORY: public events visible to all
+CREATE POLICY "Public event memory visible to all"
+    ON argus_event_memory FOR SELECT
+    USING (visibility = 'public');
 
 -- ARTEFACTS: own role's artefacts, team_shared for team, public for all
 CREATE POLICY artefacts_read ON artefacts FOR SELECT USING (
