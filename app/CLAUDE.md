@@ -9,7 +9,7 @@
 - **Backend/Engines:** Python 3.11+, FastAPI, async handlers
 - **Frontend:** TypeScript, React 18+, Vite
 - **Database:** Supabase (PostgreSQL + Realtime + Edge Functions + Auth)
-- **AI/LLM:** Dual provider — Gemini (primary) + Claude (secondary), centrally configurable
+- **AI/LLM:** Dual provider — Gemini + Claude, centrally configurable. **See `app/config/LLM_MODELS.md` for current model IDs, pricing, and usage guide.** This file is the single source of truth for all LLM model references — update it when new models launch.
 
 ## Check KING First
 

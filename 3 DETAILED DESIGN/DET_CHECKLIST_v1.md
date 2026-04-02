@@ -1,6 +1,6 @@
 # Detailed Design Checklist
 ## Thucydides Trap SIM — Stage 3
-**Version:** 2.0 | **Date:** 2026-03-30 | **Status:** PLANNING
+**Version:** 3.0 | **Date:** 2026-04-01 | **Status:** GATE PASSED — DET COMPLETE
 **Prerequisite:** SEED gate PASSED
 
 ---
@@ -76,15 +76,15 @@ Everything needed so that BUILD can start with zero ambiguity. No code is writte
 
 Before BUILD starts:
 
-- [ ] All CSVs finalized and loaded into Supabase
-- [ ] Database schema deployed and verified (can query, RLS works)
-- [ ] All API keys provisioned and tested (LLM call works, voice works)
-- [ ] Vercel + Supabase + Git all connected and deployable
-- [ ] System contracts document complete (every event, channel, endpoint defined)
-- [ ] CLAUDE.md v2 approved by Marat
-- [ ] Development plan approved by Marat
-- [ ] At least 3 role artefact packs complete (for testing)
-- [ ] One "hello world" deployment: login page + role assignment + data display from Supabase
+- [x] All CSVs finalized and loaded into Supabase — 2026-04-01, seed data verified (see D7)
+- [x] Database schema deployed and verified — 26 tables, 4 migrations, RLS enabled
+- [x] All API keys provisioned and tested — Anthropic, Gemini, ElevenLabs (stored), Supabase
+- [x] Vercel + Supabase + Git all connected and deployable
+- [x] System contracts document complete — C1 (2179 lines), C3 (OpenAPI spec)
+- [x] CLAUDE.md v2 approved by Marat — 2026-04-01
+- [x] Development plan approved by Marat — E3 v1.0
+- [ ] At least 3 role artefact packs complete — DEFERRED to Phase 2 (unmanned spacecraft has no human players)
+- [ ] One "hello world" deployment — Sprint 1 task (not DET gate blocker per unmanned strategy)
 
 ---
 
@@ -94,9 +94,9 @@ Before BUILD starts:
 IDEA
   └── CONCEPT (what & why)                          ✅ PASSED
         └── SEED (canonical specs)                   ✅ PASSED
-              └── DETAILED DESIGN (how, exactly)     ← WE ARE HERE
-                    └── [GATE: ready to build?]
-                          └── BUILD (implementation)
+              └── DETAILED DESIGN (how, exactly)     ✅ PASSED 2026-04-01
+                    └── [GATE: ready to build?]       ✅ YES
+                          └── BUILD (implementation)  ← WE ARE HERE
                                 ├── Module 1: Platform
                                 ├── Module 2: Engines
                                 ├── Module 3: Facilitator

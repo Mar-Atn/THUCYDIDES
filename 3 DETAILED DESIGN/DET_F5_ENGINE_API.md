@@ -1,8 +1,10 @@
 # DET_F5_ENGINE_API.md
 ## TTT Detailed Design -- Engine API Specification
-**Version:** 1.1 | **Date:** 2026-03-30 | **Status:** DRAFT
+**Version:** 1.2 | **Date:** 2026-04-03 | **Status:** DRAFT
 **Owner:** NOVA (Backend) + ATLAS (Engine)
 **Cross-references:** [D1 Tech Stack](DET_D1_TECH_STACK.md) | [F4 API Contracts](../2%20SEED/F_DATA_ARCHITECTURE/SEED_F4_API_CONTRACTS_v1.md) | [D Engine Interface](../2%20SEED/D_ENGINES/SEED_D_ENGINE_INTERFACE_v1.md) | [D8 Engine Formulas](../2%20SEED/D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md) | [Naming Conventions](DET_NAMING_CONVENTIONS.md) | [Edge Functions](DET_EDGE_FUNCTIONS.md)
+
+> **Updated 2026-04-03 to reflect BUILD calibration (F1-F104). See CALIBRATION_CHANGE_LOG.md.**
 
 ---
 
@@ -513,7 +515,7 @@ Triggers the full between-round batch processing cycle. **Facilitator only.**
 | `round_num` | int | Yes | Round to process |
 | `country_actions` | object | Yes | All 20+ countries' submitted actions (including AI-generated). Keys are country IDs. |
 | `event_log` | array | Yes | All Phase A events for this round |
-| `options.use_ai_panel` | bool | No (default: true) | Whether to run Pass 2 (AI expert panel). If false, only deterministic Pass 1 runs. |
+| `options.use_ai_panel` | bool | No (default: true) | Whether to run Pass 2 (AI expert panel). If false, only deterministic Pass 1 runs -- momentum and contagion will be skipped entirely. |
 | `options.generate_narrative` | bool | No (default: true) | Whether to generate round narrative in Pass 3 |
 | `options.auto_fix_coherence` | bool | No (default: true) | Whether Pass 3 auto-fixes HIGH severity contradictions |
 | `idempotency_key` | string | Yes | Unique key |
@@ -539,7 +541,8 @@ Triggers the full between-round batch processing cycle. **Facilitator only.**
             "inflation": 5.8,
             "debt_burden": 3.4,
             "economic_state": "normal",
-            "momentum": 1.1,
+            "momentum": null,
+            "market_indexes": { "wall_street": 102, "europa": 97, "dragon": 88 },
             "revenue_last_round": 57.2
           },
           "military": { "ground": 23, "naval": 12, "tactical_air": 15, "strategic_missile": 12, "air_defense": 4 },
@@ -627,7 +630,10 @@ Triggers the full between-round batch processing cycle. **Facilitator only.**
 - **Idempotent:** Re-submitting with the same key returns the cached result. The world state is not re-processed.
 - **Rate limit:** 2 requests/minute (facilitator only; prevents accidental double-processing).
 - **Latency:** Target < 5 minutes. Pass 1 (deterministic): < 1 second. Pass 2 (AI panel): < 30 seconds. Pass 3 (coherence + narrative): < 60 seconds.
-- **Internal call:** `WorldModelEngine(world_state).process_round(round_num, country_actions, event_log)` -- the full 14-step chained pipeline.
+- **Internal call:** `WorldModelEngine(world_state).process_round(round_num, country_actions, event_log)` -- the full chained pipeline.
+- **Pass 1 (deterministic):** Steps 0-9, 11.5 (market indexes), 12-13. Steps 10 (momentum) and 11 (contagion) are excluded -- they are delegated to Pass 2.
+- **Pass 2 (AI expert panel):** Owns momentum assignment, contagion effects, and crisis state transitions. Also performs coefficient recomputation: sanctions and tariff coefficients are recalculated every round before GDP computation. The panel reviews deterministic outputs and applies qualitative adjustments that formulas cannot capture.
+- **Step 11.5 (market indexes):** Three regional indexes (Wall Street, Europa, Dragon) are computed from component country economic health. These feed into stability calculations in Step 12.
 - **Facilitator review:** The response includes `coherence_flags` and `expert_panel` data. The facilitator reviews these before publishing the new state. A separate endpoint (2.9) handles publishing.
 
 ---

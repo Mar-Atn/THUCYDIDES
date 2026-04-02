@@ -45,10 +45,8 @@ FORMOSA_SURROUNDING_ZONES = [
     "w(18,8)",   # Northeast approach
 ]
 
-# Cal-3 v3: Tech boost applied to GROWTH RATE, not GDP multiplier.
-# L3 adds +1.5 percentage points to growth rate (not x1.15 to GDP).
-# L4 adds +3.0pp. This prevents unrealistic GDP doubling over 8 rounds.
-AI_LEVEL_TECH_FACTOR = {0: 0.0, 1: 0.0, 2: 0.005, 3: 0.015, 4: 0.030}
+# F98: L0-L3 no GDP boost (already in base rate). L4 = probabilistic 1.5-3.5% GDP + 30% chance +1 troops.
+AI_LEVEL_TECH_FACTOR = {0: 0.0, 1: 0.0, 2: 0.0, 3: 0.0, 4: 0.025}  # L4 base; actual is 0.015-0.035 (rolled)
 AI_LEVEL_COMBAT_BONUS = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2}
 
 NUCLEAR_RD_THRESHOLDS = {0: 0.60, 1: 0.80, 2: 1.00}
@@ -111,7 +109,8 @@ class WorldState:
         self.formosa_blockade: bool = False  # Whether Formosa is under naval blockade
         self.dollar_credibility: float = 100.0  # 0-100, eroded by Columbia money printing
         self.formosa_resolved: bool = False  # Whether Formosa question has been resolved
-        self.oil_above_150_rounds: int = 0  # Consecutive rounds oil price > $150
+        self.oil_above_150_rounds: int = 0  # Consecutive rounds oil price > $100
+        self.market_indexes: dict = {"wall_street": 100.0, "europa": 100.0, "dragon": 100.0}  # F103: 3 regional indexes
 
     # --- CSV Loading ---
 
@@ -192,7 +191,8 @@ class WorldState:
                         "starting_inflation": float(row["inflation"]),  # baseline for delta
                         "sanctions_rounds": 0,            # consecutive rounds under L2+ sanctions
                         "formosa_disruption_rounds": 0,   # consecutive rounds of semiconductor disruption
-                        "market_index": 50,               # financial market confidence (0-100)
+                        "oil_production_mbpd": float(row.get("oil_production_mbpd", 0)),  # D5: mbpd
+                        "gdp_growth_base": float(row["gdp_growth_base"]),  # F2: immutable structural rate
                         # --- Flat sector aliases for per-sector tariff calculations ---
                         "sector_resources": float(row["sector_resources"]),
                         "sector_industry": float(row["sector_industry"]),
@@ -549,6 +549,7 @@ class WorldState:
             "dollar_credibility": self.dollar_credibility,
             "formosa_resolved": self.formosa_resolved,
             "oil_above_150_rounds": self.oil_above_150_rounds,
+            "market_indexes": dict(self.market_indexes),
         }
 
     def save_to_json(self, path: str) -> None:
@@ -583,6 +584,7 @@ class WorldState:
         ws.dollar_credibility = d.get("dollar_credibility", 100.0)
         ws.formosa_resolved = d.get("formosa_resolved", False)
         ws.oil_above_150_rounds = d.get("oil_above_150_rounds", 0)
+        ws.market_indexes = d.get("market_indexes", {"wall_street": 100.0, "europa": 100.0, "dragon": 100.0})
         return ws
 
     def to_json(self, indent: int = 2) -> str:

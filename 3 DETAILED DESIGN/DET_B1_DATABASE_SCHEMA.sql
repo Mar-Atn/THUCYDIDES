@@ -1,7 +1,9 @@
 -- =============================================================================
 -- DET_B1_DATABASE_SCHEMA.sql
 -- Thucydides Trap SIM — Complete PostgreSQL Schema for Supabase
--- Version: 1.1 | Date: 2026-03-30
+-- Version: 1.2 | Date: 2026-04-03
+-- Updated 2026-04-03: Added oil_production_mbpd, sanctions/tariff coefficients,
+--   sanctions_recovery_rounds, sanctions_adaptation_rounds, market_indexes JSONB.
 -- Source of truth: SEED F1 Data Schema, F2 Data Architecture, world_state.py, CSVs
 -- Naming authority: DET_NAMING_CONVENTIONS.md
 -- Includes: B1 (schema), B2 (RLS policies), B4 (database functions)
@@ -93,9 +95,15 @@ CREATE TABLE countries (
     opec_member             BOOLEAN NOT NULL DEFAULT FALSE,
     opec_production         TEXT NOT NULL DEFAULT 'na'
                             CHECK (opec_production IN ('min', 'low', 'normal', 'high', 'max', 'na')),
+    oil_production_mbpd     NUMERIC(6,2) NOT NULL DEFAULT 0,  -- Million barrels per day (D5)
     formosa_dependency      NUMERIC(4,3) NOT NULL DEFAULT 0,
     debt_burden             NUMERIC(10,2) NOT NULL DEFAULT 0,
     social_baseline         NUMERIC(4,3) NOT NULL DEFAULT 0.20,
+    -- Calibration coefficients (sanctions/tariff impact baselines)
+    sanctions_coefficient   NUMERIC(6,4) NOT NULL DEFAULT 1.0,
+    tariff_coefficient      NUMERIC(6,4) NOT NULL DEFAULT 1.0,
+    sanctions_recovery_rounds  INT NOT NULL DEFAULT 0,
+    sanctions_adaptation_rounds INT NOT NULL DEFAULT 0,
     -- Military (CONFIG)
     mil_ground              INT NOT NULL DEFAULT 0,
     mil_naval               INT NOT NULL DEFAULT 0,
@@ -351,6 +359,7 @@ CREATE TABLE world_state (
     oil_price_index             NUMERIC(8,2) NOT NULL DEFAULT 100.0,
     global_trade_volume_index   NUMERIC(8,2) NOT NULL DEFAULT 100.0,
     dollar_credibility          NUMERIC(6,2) NOT NULL DEFAULT 100.0 CHECK (dollar_credibility >= 0 AND dollar_credibility <= 100),
+    market_indexes              JSONB NOT NULL DEFAULT '{}'::JSONB,  -- Regional indexes: wall_street, europa, dragon
     -- Global military/political
     nuclear_used_this_sim       BOOLEAN NOT NULL DEFAULT FALSE,
     formosa_blockade            BOOLEAN NOT NULL DEFAULT FALSE,
@@ -411,6 +420,7 @@ CREATE TABLE country_state (
     economic_state          TEXT NOT NULL DEFAULT 'normal'
                             CHECK (economic_state IN ('normal', 'stressed', 'crisis', 'collapse')),
     market_index            INT NOT NULL DEFAULT 50 CHECK (market_index >= 0 AND market_index <= 100),
+    market_indexes          JSONB NOT NULL DEFAULT '{}'::JSONB,  -- Regional indexes: wall_street, europa, dragon
     revenue                 NUMERIC(12,2) NOT NULL DEFAULT 0,
     -- Military CORE
     mil_ground              INT NOT NULL DEFAULT 0,
@@ -1290,12 +1300,14 @@ BEGIN
     -- Create new round snapshots by copying current state
     -- (World state)
     INSERT INTO world_state (sim_run_id, round_num, oil_price, oil_price_index,
-        global_trade_volume_index, dollar_credibility, nuclear_used_this_sim,
+        global_trade_volume_index, dollar_credibility, market_indexes,
+        nuclear_used_this_sim,
         formosa_blockade, opec_production, chokepoint_status, wars,
         active_blockades, ground_blockades, rare_earth_restrictions,
         treaties, basing_rights, blockaded_zones)
     SELECT sim_run_id, v_current_round + 1, oil_price, oil_price_index,
-        global_trade_volume_index, dollar_credibility, nuclear_used_this_sim,
+        global_trade_volume_index, dollar_credibility, market_indexes,
+        nuclear_used_this_sim,
         formosa_blockade, opec_production, chokepoint_status, wars,
         active_blockades, ground_blockades, rare_earth_restrictions,
         treaties, basing_rights, blockaded_zones
@@ -1305,13 +1317,13 @@ BEGIN
     -- (Country states)
     INSERT INTO country_state (sim_run_id, country_id, round_num, gdp, gdp_growth_rate,
         treasury, inflation, debt_burden, momentum, opec_production, economic_state,
-        market_index, revenue, mil_ground, mil_naval, mil_tactical_air,
+        market_index, market_indexes, revenue, mil_ground, mil_naval, mil_tactical_air,
         mil_strategic_missiles, mil_air_defense, mobilization_pool, stability,
         political_support, war_tiredness, dem_rep_split_dem, dem_rep_split_rep,
         regime_status, nuclear_level, nuclear_rd_progress, ai_level, ai_rd_progress)
     SELECT sim_run_id, country_id, v_current_round + 1, gdp, gdp_growth_rate,
         treasury, inflation, debt_burden, momentum, opec_production, economic_state,
-        market_index, revenue, mil_ground, mil_naval, mil_tactical_air,
+        market_index, market_indexes, revenue, mil_ground, mil_naval, mil_tactical_air,
         mil_strategic_missiles, mil_air_defense, mobilization_pool, stability,
         political_support, war_tiredness, dem_rep_split_dem, dem_rep_split_rep,
         regime_status, nuclear_level, nuclear_rd_progress, ai_level, ai_rd_progress

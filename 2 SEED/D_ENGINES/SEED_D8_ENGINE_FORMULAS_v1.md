@@ -1,5 +1,7 @@
 # TTT SEED D8 -- Engine Formula Documentation v1
 
+> **Calibration History:** Updated 2026-04-03 to reflect 104 formula changes from supervised parameter review (F1-F104). Code in `app/engine/engines/` is the authoritative source.
+
 ## AUDIT REFERENCE SPECIFICATION
 
 **Purpose:** This document formalizes every formula, mechanic, and state variable in the TTT engine code as a readable, auditable specification. If there is ever a question about how the engine works, this document is the definitive answer.
@@ -10,8 +12,8 @@
 - `transaction_engine.py` (v2.0 -- bilateral transfers)
 - `world_state.py` (v2.0 -- shared state model)
 
-**Document version:** 1.1
-**Date:** 2026-03-30
+**Document version:** 1.2
+**Date:** 2026-04-03
 
 ---
 
@@ -33,26 +35,26 @@ The World Model Engine processes between-round updates in three sequential passe
 |------|------|-------|---------------|
 | 0 | Apply submitted actions | Global | Tariffs, sanctions, OPEC, rare earth, blockades |
 | 1 | Oil price | Global | Supply, demand, disruption, war premium |
-| 2 | GDP growth | Per country | Oil price, sanctions, tariffs, war, tech, momentum, crisis state |
+| 2 | GDP growth | Per country | Oil price delta, sanctions coefficient, tariffs (prisoner's dilemma), war, tech (L4 only), maturity, shock absorption |
 | 3 | Revenue | Per country | GDP (from step 2), tax rate, oil revenue, debt, inflation |
 | 4 | Budget execution | Per country | Revenue (from step 3), mandatory costs, player allocations |
 | 5 | Military production | Per country | Budget (from step 4), production capacity, costs |
 | 6 | Technology advancement | Per country | R&D investment, rare earth restrictions |
 | 7 | Inflation update | Per country | Money printed (from step 4), GDP |
 | 8 | Debt service update | Per country | Deficit (from step 4) |
-| 9 | Economic state transitions | Per country | All economic indicators from steps 1-8 |
-| 10 | Momentum update | Per country | GDP growth, economic state, oil, war, disruptions |
-| 11 | Contagion | Cross-country | Economic states, trade weights |
-| 12 | Stability update | Per country | GDP growth, social spending, war, sanctions, inflation, crisis state |
-| 13 | Political support update | Per country | GDP growth, stability, casualties, crisis state, oil price |
-| -- | Post-steps | Various | Revolution check, health events, market index, Helmsman legacy, capitulation, elections |
+| 9 | Economic state transitions | Per country | DELEGATED TO AI PASS 2 (crisis state determined by AI, not formula ladder) |
+| 10 | Momentum update | Per country | REMOVED from deterministic engine. AI Pass 2 handles. |
+| 11 | Contagion | Cross-country | DELEGATED TO AI PASS 2. |
+| 12 | Stability update | Per country | GDP growth, social spending, war, inflation delta, regime modifiers, market stress |
+| 13 | Political support update | Per country | GDP growth, stability, inflation, regime type |
+| -- | Post-steps | Various | Revolution check, health events, market indexes (3 regional), Helmsman legacy, capitulation, elections |
 
 ## 1.3 What Is Deterministic vs. AI-Assisted vs. Coherence-Checked
 
 | Category | Examples | Nature |
 |----------|----------|--------|
-| **Deterministic** | Oil price, GDP, revenue, budget, inflation, debt, economic state, momentum, contagion, stability, political support | Pure formulas. Same inputs always produce same outputs (except 5% oil volatility noise). |
-| **AI-Assisted** (Pass 2) | Market panic (5% GDP hit on crisis entry), capital flight (3-8% GDP), ceasefire rally (+1.5 momentum), sanctions adaptation (+2% GDP), brain drain (-0.02 AI R&D), rally-around-flag (diminishing) | Heuristic rules simulating behavioral/psychological effects. |
+| **Deterministic** | Oil price, GDP, revenue, budget, inflation, debt, stability, political support, market indexes | Pure formulas. Same inputs always produce same outputs. No volatility noise. |
+| **AI-Assisted** (Pass 2) | Crisis state (replaces formula ladder), momentum, contagion, market panic, capital flight, ceasefire rally, sanctions adaptation, brain drain, rally-around-flag, capitulation | AI decides crisis state with -1% to -2% GDP penalty. Momentum and contagion delegated entirely. ±0.5 stability, ±5pp support adjustments. |
 | **Coherence-Checked** (Pass 3) | GDP growth during crisis forced negative, collapse with high stability flagged, oil shock on growing importers corrected | Auto-fixes implausible states. |
 
 ## 1.4 Engine Version History
@@ -62,6 +64,7 @@ The World Model Engine processes between-round updates in three sequential passe
 | **v1** | Basic linear model. No feedback loops. No crisis states. |
 | **v2** | Feedback loop architecture. Crisis escalation ladder. Momentum. Contagion. Asymmetric recovery. Soft oil cap. Semiconductor duration-scaling. Sanctions diminishing returns. |
 | **v2.5 (Cal fixes)** | Cal-1: Oil price inertia (60/40 blend). Cal-2: Sanctions multiplier 2.0 to 1.5; diminishing returns 0.70 to 0.60. Cal-3: Tech boost on growth rate not GDP multiplier. Cal-4: Inflation stability friction capped at -0.50/round. |
+| **v3.0 (F1-F104)** | 104 formula changes from supervised parameter review. Oil: floor $15, inertia 30/70, no volatility, demand destruction >$100/3rds, exponent 2.5, OPEC weighted, Gulf-only war premium, mbpd oil revenue. GDP: immutable base, delta-only factors, maturity dampener, shock absorption. Sanctions: complete rebuild as GDP coefficient model (S-curve 0.2→5% to 0.8→80%, MAX_DAMAGE 0.87). Tariffs: prisoner's dilemma model. Budget: social % of GDP, maintenance x3, debt escalating interest. Inflation: printing x60, oil ±3pp/$50. Crisis/momentum/contagion: delegated to AI Pass 2. Market indexes: 3 regional (Wall Street, Europa, Dragon). Stability/support simplified. Elections: base from political_support. Revolution: coup 25%. Tech: L0-L3 no GDP boost, L4 probabilistic. |
 
 ---
 
@@ -88,25 +91,26 @@ Actions applied (in order):
 
 **Inputs:**
 - Base price: $80 (hardcoded)
-- OPEC production decisions (per member: "min", "low", "normal", "high", "max")
+- OPEC production decisions (per member: "min", "low", "normal", "high", "max") -- weighted by production share with 2x lever
 - Sanctions on oil producers (sarmatia, persia) at L2+
-- Chokepoint blockade status (Gulf Gate, Formosa, Suez, Malacca, etc.)
+- Chokepoint blockade status (Gulf Gate only for war premium)
 - Economic states of all countries (demand side)
 - GDP growth rates of all countries (demand elasticity)
-- Number of active wars (war premium)
+- Gulf-region wars only (war premium)
 - Previous round oil price (inertia)
-- Oil above $150 duration counter (mean-reversion pressure)
+- Oil above $100 duration counter (demand destruction after 3 rounds)
 
 **Formula:**
 
 ```
-SUPPLY SIDE (Updated 2026-03-30 per action review — 5 levels):
+SUPPLY SIDE (F1-F104: OPEC weighted by production share with 2× lever):
   supply = 1.0
   For each OPEC member:
-    if decision == "min":  supply -= 0.12
-    if decision == "low":  supply -= 0.06
-    if decision == "high": supply += 0.06
-    if decision == "max":  supply += 0.12
+    weight = member_production_share * 2.0  (production share × 2× lever)
+    if decision == "min":  supply -= 0.12 * weight
+    if decision == "low":  supply -= 0.06 * weight
+    if decision == "high": supply += 0.06 * weight
+    if decision == "max":  supply += 0.12 * weight
   For each oil producer (sarmatia, persia):
     if sanctions_level >= 2: supply -= 0.08
   supply = max(0.5, supply)
@@ -131,8 +135,16 @@ DEMAND SIDE:
     demand += (avg_gdp_growth - 2.0) * 0.03
   demand = max(0.6, demand)
 
-WAR PREMIUM:
-  war_premium = num_active_wars * 0.05
+DEMAND DESTRUCTION (F1-F104: >$100 for 3 rounds, exponent 2.5):
+  if oil_above_100_rounds >= 3:
+    destruction = ((oil_price - 100) / 100) ^ 2.5
+    demand *= (1 - destruction)
+    demand = max(0.4, demand)
+
+WAR PREMIUM (F1-F104: Gulf-only):
+  war_premium = 0.0
+  For each active war in Gulf region ONLY:
+    war_premium += 0.05
   war_premium = min(war_premium, 0.15)
 
 RAW PRICE:
@@ -145,30 +157,25 @@ SOFT CAP (asymptotic above $200):
     formula_price = 200 + 50 * (1 - e^(-(raw_price - 200) / 100))
   Theoretical maximum: ~$250
 
-FLOOR:
-  formula_price = max(30, formula_price)
+FLOOR (F1-F104: $15, was $30):
+  formula_price = max(15, formula_price)
 
-INERTIA (Cal-1):
-  price = previous_price * 0.4 + formula_price * 0.6
+INERTIA (F1-F104: 30/70 blend, was 40/60):
+  price = previous_price * 0.30 + formula_price * 0.70
 
-VOLATILITY:
-  price *= (1 + gaussian_noise(0, 0.05))
-
-MEAN-REVERSION (if oil > $150 for 3+ consecutive rounds):
-  price *= 0.92  (demand destruction accelerates)
+NO VOLATILITY (F1-F104: removed gaussian noise)
 
 FLOOR (final):
-  price = max(30, price)
+  price = max(15, price)
 ```
 
-**Plain English:** Oil price is driven by supply (OPEC decisions and sanctions on producers), demand (economic health of major economies), disruption (chokepoint blockades), and war risk. The price moves 60% toward the new equilibrium each round and 40% sticky from the previous price. Above $200, an asymptotic formula prevents runaway -- the theoretical ceiling is around $250. If oil stays above $150 for three or more rounds, an 8% demand destruction penalty kicks in.
+**Plain English:** Oil price is driven by supply (OPEC decisions weighted by production share with 2x lever, and sanctions on producers), demand (economic health of major economies), disruption (chokepoint blockades), and Gulf-region war risk only. The price moves 70% toward the new equilibrium each round and 30% sticky from the previous price. Above $200, an asymptotic formula prevents runaway. If oil stays above $100 for three or more rounds, demand destruction kicks in with a 2.5 exponent. Volatility noise has been removed for determinism. Floor is $15.
 
-**Oil Revenue to Producers:**
+**Oil Revenue to Producers (F1-F104: mbpd-based formula):**
 ```
 For each oil-producing country:
-  resource_pct = sector_resources / 100
-  oil_revenue = price * resource_pct * GDP * 0.01
-  Columbia special: oil_revenue = min(oil_revenue, GDP * 0.15)
+  oil_revenue = oil_price * country.mbpd * 0.009
+  (mbpd = millions of barrels per day, from country data)
 ```
 
 **Output:** `ws.oil_price`, `ws.oil_price_index` (= price / 80 * 100), per-country `oil_revenue`
@@ -176,11 +183,15 @@ For each oil-producing country:
 **Feedback loops:** Oil price feeds GDP (Step 2) via oil_shock. GDP contraction reduces demand, which moderates oil price next round. Oil revenue feeds budget (Step 4), allowing producers to fund military operations despite sanctions.
 
 **Calibration notes:**
-- Inertia blend: 40% previous / 60% new (Cal-1 v3)
+- Inertia blend: 30% previous / 70% new (F1-F104, was 40/60)
 - Gulf Gate disruption: +50% (reduced from +80% in v1)
 - Soft cap formula: `200 + 50 * (1 - exp(-(raw - 200) / 100))`
-- Volatility: gaussian noise with sigma = 0.05
-- Mean-reversion: 0.92 multiplier after 3 rounds above $150
+- No volatility (removed, was gaussian sigma 0.05)
+- Demand destruction: >$100 for 3 rounds, exponent 2.5 (was >$150, linear)
+- Floor: $15 (was $30)
+- OPEC: weighted by production share with 2x lever (was uniform)
+- War premium: Gulf-region wars only (was all wars)
+- Oil revenue: mbpd-based `price × mbpd × 0.009` (was GDP-biased)
 
 **Engine location:** `world_model_engine.py:337-474`
 
@@ -191,117 +202,128 @@ For each oil-producing country:
 **Purpose:** Calculates each country's GDP growth rate by summing all additive factors, then applying the crisis state multiplier. GDP is the foundation -- it feeds revenue, budget capacity, military spending power, and political support.
 
 **Inputs:**
-- Base growth rate (from country data, typically 2-6%)
-- Tariff impact (from `_calc_tariff_impact`)
-- Sanctions damage (from `_calc_sanctions_impact`)
-- Oil price (from Step 1)
+- Immutable `gdp_growth_base` (from country data, halved for 6-month rounds)
+- Tariff impact (prisoner's dilemma model)
+- Sanctions damage (GDP coefficient model)
+- Oil price DELTA from starting state (from Step 1)
 - Formosa disruption status and duration
 - War zones occupied and infrastructure damage
-- AI technology level
-- Economic momentum
+- AI technology level (L0-L3 = 0 boost, L4 probabilistic)
+- Maturity dampener (for developed economies)
+- Shock absorption (for small economies)
 - Blockade fraction
 - Bilateral trade dependency
-- Economic state (crisis multiplier)
+- Crisis state penalty from AI Pass 2 (-1% to -2%)
 
 **Formula:**
 
 ```
-base_growth = country.gdp_growth_rate / 100  (as decimal)
+base_growth = country.gdp_growth_base / 2  (F1-F104: IMMUTABLE base, halved for 6-month rounds)
 
-TARIFF HIT (Updated 2026-03-30 per action review — per-sector input):
-  Tariffs accept per-sector granularity: 4 sectors (resources/industry/services/technology).
-  Default: one level applied to all 4 sectors. Expandable: set independently per sector.
-  tariff_hit = -(net_tariff_cost / GDP) * 1.5
-  where net_tariff_cost = SUM over sectors of (sector_tariff_level × sector_weight × bilateral_trade)
+TARIFF HIT (F1-F104: Complete rebuild — prisoner's dilemma model):
+  Imposer hit:
+    tariff_hit_imposer = -(imposer_market_power × target_trade_exposure × K)
+    where K = 0.54 (calibrated constant)
+  Target hit:
+    tariff_hit_target = -(target_trade_exposure × imposer_market_power × K)
+  Asymmetric: large economy imposing on small = small hurt more, large hurt less
+  Customs revenue: imposer gains tariff_revenue = tariff_rate × bilateral_trade_value
+  Tariff inflation: applied as LEVEL (not cumulative across rounds)
 
-SANCTIONS HIT (Updated 2026-03-30 per action review — S-curve effectiveness model):
-  Step A: Calculate coverage (how much of target's trade is under sanctions)
+SANCTIONS HIT (F1-F104: Complete rebuild — GDP coefficient model):
+  Recomputed every round (no compounding).
+  GDP coefficient range: 0.50 to 1.0 (where 1.0 = no damage, 0.50 = max damage)
+
+  Step A: Calculate coverage
     coverage = SUM over all sanctioning countries of:
       (sanctioner_GDP_share × sanctions_level / 3)
-    where sanctioner_GDP_share = sanctioner.GDP / global_GDP
 
-  Step B: Map coverage to effectiveness via S-curve (piecewise linear interpolation):
+  Step B: Map coverage to effectiveness via S-curve (F1-F104 recalibrated):
     coverage 0.0 →  0% effectiveness
-    coverage 0.3 → 10% effectiveness
-    coverage 0.5 → 20% effectiveness
-    coverage 0.7 → 60% effectiveness
-    coverage 0.9 → 90% effectiveness
-    coverage 1.0 → 95% effectiveness (theoretical max)
+    coverage 0.2 →  5% effectiveness
+    coverage 0.4 → 25% effectiveness
+    coverage 0.5 → 40% effectiveness
+    coverage 0.7 → 70% effectiveness
+    coverage 0.8 → 80% effectiveness
     Interpolate linearly between points.
+    MAX_DAMAGE = 0.87 (GDP coefficient floor = 0.13)
 
-  Step C: Apply to target GDP
-    sanctions_hit = -effectiveness * base_sanctions_multiplier * 1.5
+  Step C: Apply sector vulnerability
+    effectiveness *= sector_vulnerability_weight (per target country)
 
-  Step D: Adaptation over time (unchanged)
-    If sanctions_rounds > 4:
-      sanctions_hit *= 0.60  (40% less effective -- adaptation)
+  Step D: GDP coefficient
+    gdp_coefficient = 1.0 - (effectiveness * MAX_DAMAGE)
+    gdp_coefficient = max(0.13, gdp_coefficient)
 
-  Step E: Cost to imposers
-    For each sanctioning country:
-      imposer_cost = bilateral_trade_weight × (sanctions_level / 3) × imposer.GDP × disruption_factor
-      where disruption_factor = 0.01 (1% of GDP scaled by trade exposure and level)
-      imposer.GDP -= imposer_cost
+  Step E: No compounding — coefficient is absolute, not additive to previous round
+  Step F: Lifting sanctions = immediate recovery (coefficient returns toward 1.0)
+
+  No adaptation over time (removed — recomputation handles it).
+  No dollar credibility modifier (removed from sanctions).
 
   Coalition dynamics: West alone ≈ coverage 0.3-0.5 (modest).
   Add swing states (Bharata, Phrygia) ≈ 0.6-0.7 (serious).
   Cathay joins coalition ≈ 0.8-0.9 (devastating).
 
-OIL SHOCK:
-  If oil importer and oil_price > $100:
-    oil_shock = -0.02 * (oil_price - 100) / 50
-  If oil producer and oil_price > $80:
-    oil_shock = +0.01 * (oil_price - 80) / 50
+OIL SHOCK (F1-F104: delta-only — only CHANGES from starting oil price count):
+  oil_delta = current_oil_price - starting_oil_price
+  If oil importer and oil_delta > 0:
+    oil_shock = -0.02 * oil_delta / 50
+  If oil producer and oil_delta > 0:
+    oil_shock = +0.01 * oil_delta / 50
+  If oil_delta <= 0: no shock (return to baseline = no effect)
 
-SEMICONDUCTOR DISRUPTION (duration-scaling):
+SEMICONDUCTOR DISRUPTION (duration-scaling — unchanged):
   If Formosa disrupted and country has formosa_dependency > 0:
     severity = min(1.0, 0.3 + 0.2 * max(0, disruption_rounds - 1))
       Round 1: 0.3, Round 2: 0.5, Round 3: 0.7, Round 4: 0.9, Round 5+: 1.0
     tech_sector_pct = sector_technology / 100
     semi_hit = -formosa_dependency * severity * tech_sector_pct
 
-WAR DAMAGE:
+WAR DAMAGE (unchanged):
   war_zones = count of occupied zones in wars involving this country
   infra_damage = occupied_zones * 0.05 per zone (for defenders), capped at 1.0
   war_hit = -(war_zones * 0.03 + infra_damage * 0.05)
 
-TECH FACTOR (Cal-3: applied to growth rate, not GDP multiplier):
-  AI Level 0-1: +0.0pp
-  AI Level 2:   +0.5pp  (+0.005)
-  AI Level 3:   +1.5pp  (+0.015)
-  AI Level 4:   +3.0pp  (+0.030)
+TECH FACTOR (F1-F104: L0-L3 = 0, L4 probabilistic):
+  AI Level 0:   +0.0pp
+  AI Level 1:   +0.0pp
+  AI Level 2:   +0.0pp
+  AI Level 3:   +0.0pp
+  AI Level 4:   probabilistic boost (determined by AI Pass 2)
 
-MOMENTUM EFFECT:
-  momentum_effect = momentum * 0.01  (range: -5% to +5%)
+MOMENTUM EFFECT (F1-F104: REMOVED from deterministic engine):
+  Momentum is zeroed in Pass 1. AI Pass 2 handles momentum adjustments.
 
-BLOCKADE HIT:
+MATURITY DAMPENER (F1-F104: NEW):
+  For developed economies (GDP per capita above threshold):
+    growth *= maturity_factor  (reduces base growth for rich countries)
+
+SHOCK ABSORPTION (F1-F104: NEW):
+  For small economies (GDP < threshold):
+    negative_shocks *= absorption_factor  (small economies absorb shocks less)
+
+BLOCKADE HIT (unchanged):
   blockade_frac = trade-weighted chokepoint disruption fraction
   blockade_hit = -blockade_frac * 0.4
 
-BILATERAL DEPENDENCY:
+BILATERAL DEPENDENCY (unchanged):
   For each bilateral pair (e.g., columbia-cathay: 15% exposure):
     if partner_growth < 0:
       bilateral_drag += partner_growth * exposure_weight
   bilateral_drag /= 100  (convert to decimal)
 
 AGGREGATE RAW GROWTH:
-  raw_growth = base_growth + tariff_hit + sanctions_hit + oil_shock
-               + semi_hit + war_hit + tech_boost + momentum_effect
+  raw_growth = base_growth + tariff_hit + sanctions_coefficient_effect + oil_shock
+               + semi_hit + war_hit + tech_boost
                + blockade_hit + bilateral_drag
 
-CRISIS MULTIPLIER (direction-aware, FIX 9):
-  If raw_growth < 0 (contraction):
-    normal:   effective_growth = raw_growth * 1.0
-    stressed: effective_growth = raw_growth * 1.2  (20% worse)
-    crisis:   effective_growth = raw_growth * 1.3  (30% worse)
-    collapse: effective_growth = raw_growth * 2.0  (twice as bad)
-  If raw_growth >= 0 (growth):
-    normal:   effective_growth = raw_growth * 1.0
-    stressed: effective_growth = raw_growth * 0.85
-    crisis:   effective_growth = raw_growth * 0.5
-    collapse: effective_growth = raw_growth * 0.2
+CRISIS PENALTY (F1-F104: delegated to AI Pass 2):
+  AI Pass 2 determines crisis state and applies -1% to -2% GDP penalty.
+  No deterministic crisis multiplier ladder.
 
 NEW GDP:
-  new_gdp = old_gdp * (1 + effective_growth)
+  new_gdp = old_gdp * (1 + raw_growth) * sanctions_gdp_coefficient
   new_gdp = max(0.5, new_gdp)  (floor at 0.5 coins)
 ```
 
@@ -318,12 +340,16 @@ NEW GDP:
 
 **Output:** `country.economic.gdp`, `country.economic.gdp_growth_rate`
 
-**Feedback loops:** GDP feeds revenue (Step 3), which feeds budget (Step 4), which feeds military capacity, money printing, and inflation. GDP growth feeds stability (Step 12), political support (Step 13), and momentum (Step 10). GDP contraction feeds demand destruction in oil price (Step 1 next round) and crisis state transitions (Step 9).
+**Feedback loops:** GDP feeds revenue (Step 3), which feeds budget (Step 4), which feeds military capacity, money printing, and inflation. GDP growth feeds stability (Step 12) and political support (Step 13). GDP contraction feeds demand destruction in oil price (Step 1 next round). Crisis state is now determined by AI Pass 2 (not formula ladder).
 
 **Calibration notes:**
-- Sanctions multiplier: 1.5 (Cal-2, was 2.0)
-- Sanctions adaptation: 60% effectiveness after 4 rounds (Cal-2, was 70%)
-- Tech boost: additive to growth rate, not multiplicative to GDP (Cal-3)
+- Base growth: immutable `gdp_growth_base`, halved for 6-month rounds (F1-F104)
+- Delta-only factors: oil/sanctions/tariffs only count CHANGES from starting state (F1-F104)
+- Sanctions: GDP coefficient model 0.50-1.0, no compounding (F1-F104)
+- Tariffs: prisoner's dilemma, K=0.54 (F1-F104)
+- Tech boost: L0-L3 = 0, L4 probabilistic (F1-F104, was L2:+0.5, L3:+1.5, L4:+3.0)
+- Momentum: removed from deterministic engine (F1-F104)
+- Crisis multiplier: removed, delegated to AI Pass 2 (F1-F104)
 - GDP floor: 0.5 coins
 
 **Engine location:** `world_model_engine.py:506-624`
@@ -348,9 +374,9 @@ NEW GDP:
 ```
 base_revenue = GDP * tax_rate
 
-oil_revenue = (set in Step 1, stored in country.economic.oil_revenue)
+oil_revenue = oil_price × country.mbpd × 0.009  (F1-F104: mbpd-based)
 
-debt_service = country.economic.debt_burden  (permanent, accumulated)
+debt_service = total_debt × interest_rate  (F1-F104: escalating interest, see Step 8)
 
 inflation_erosion:
   inflation_delta = max(0, current_inflation - starting_inflation)
@@ -361,6 +387,8 @@ war_damage_cost:
   war_damage = infra_damage * 0.02 * GDP
 
 sanctions_cost_on_revenue:
+  (F1-F104: sanctions now handled via GDP coefficient in Step 2,
+   but remaining direct revenue costs from trade disruption):
   For each sanctioner with sanctions on this country:
     sanc_cost += level * bilateral_trade_weight * 0.015 * GDP
 
@@ -370,7 +398,7 @@ TOTAL REVENUE:
   revenue = max(0, revenue)
 ```
 
-**Plain English:** Revenue starts as GDP times tax rate, plus any oil windfall. Then subtract four drains: (1) permanent debt burden from past deficits, (2) inflation erosion based on how far inflation has risen above the country's structural baseline, (3) war damage costs proportional to occupied territory, and (4) sanctions costs proportional to the sanctioner's trade weight and sanction level. Revenue cannot go below zero.
+**Plain English:** Revenue starts as GDP times tax rate, plus oil windfall (now mbpd-based). Then subtract: (1) debt service with escalating interest rates, (2) inflation erosion based on how far inflation has risen above baseline, (3) war damage costs proportional to occupied territory, and (4) remaining sanctions trade disruption costs. Revenue cannot go below zero.
 
 **Output:** Revenue value used in Step 4 (budget execution)
 
@@ -394,54 +422,71 @@ TOTAL REVENUE:
 **Formula:**
 
 ```
-MANDATORY COSTS:
-  maintenance = total_units * maintenance_cost_per_unit  (default 0.3/unit)
+MANDATORY COSTS (F1-F104: maintenance ×3, social as % of GDP × revenue):
+  maintenance = total_units * maintenance_cost_per_unit * 3  (F1-F104: ×3 multiplier)
     total_units = ground + naval + tactical_air + strategic_missiles + air_defense
-  social_baseline = social_spending_baseline * GDP
-    mandatory_social = social_baseline * 0.70  (70% is mandatory -- FIX 10)
-    discretionary_social_pool = social_baseline * 0.30  (30% player can cut)
-  mandatory = maintenance + mandatory_social
+  social_spending = social_pct * revenue  (F1-F104: percentage of GDP applied to revenue)
+    where social_pct varies by country type:
+      Developed (Columbia, Teutonia, etc.): 15%
+      EU members: 20%
+      Others: 10%
+  mandatory = maintenance + social_spending
 
 DISCRETIONARY:
   discretionary = max(revenue - mandatory, 0)
-  social_extra = min(player_social_allocation, discretionary)
-  remaining = discretionary - social_extra
-  military_budget = min(player_military_allocation, remaining)
-  remaining -= military_budget
+  military_budget = min(player_military_allocation, discretionary)
+  remaining = discretionary - military_budget
   tech_budget = min(player_tech_allocation, remaining)
 
 TOTAL SPENDING:
-  total = mandatory_social + social_extra + military_budget + tech_budget + maintenance
+  total = social_spending + military_budget + tech_budget + maintenance
 
-DEFICIT HANDLING:
+DEFICIT HANDLING (F1-F104: 50/50 borrowed/printed split):
   If total_spending > revenue:
     deficit = total_spending - revenue
-    If treasury >= deficit:
-      treasury -= deficit  (draw from reserves)
+    borrowed = deficit * 0.50  (F1-F104: half is borrowed)
+    printed = deficit * 0.50   (F1-F104: half is printed)
+    If treasury >= borrowed:
+      treasury -= borrowed
     Else:
-      money_printed = deficit - treasury
+      printed += borrowed - treasury
       treasury = 0
-      inflation += (money_printed / GDP) * 80.0  (aggressive: 80x multiplier)
-      debt_burden += deficit * 0.15  (15% of deficit becomes permanent)
+    money_printed = printed
+    inflation += (money_printed / GDP) * 60.0  (F1-F104: 60x multiplier, was 80x)
   Else:
     surplus = revenue - total_spending
     treasury += surplus
+    inflation -= 1.0  (F1-F104: surplus reduces inflation by 1pp/round)
+
+OIL REVENUE (F1-F104: mbpd-based, moved from Step 1 for clarity):
+  oil_revenue = oil_price × country.mbpd × 0.009
+
+DEBT (F1-F104: % of GDP with escalating interest):
+  debt_as_pct_of_gdp = total_debt / GDP
+  base_interest = 3%
+  If debt_as_pct_of_gdp > 100%:
+    excess_pct = (debt_as_pct_of_gdp - 100%) / 20%
+    interest_rate = base_interest + (1% × excess_pct)  (escalating: +1% per 20% over 100%)
+  debt_service = total_debt × interest_rate
 
 SOCIAL SPENDING RATIO (tracked for stability):
-  actual_social_ratio = (mandatory_social + social_extra) / GDP
+  actual_social_ratio = social_spending / GDP
 ```
 
-**Plain English:** The government must pay military maintenance and 70% of social spending no matter what. After that, whatever revenue remains is split among additional social spending, military production, and tech R&D based on player choices. If spending exceeds revenue, the treasury is drawn down first. When the treasury hits zero, the shortfall is covered by money printing, which immediately spikes inflation (80x multiplier) and adds 15% of the deficit as permanent debt burden.
+**Plain English:** The government must pay military maintenance (at 3x the per-unit rate) and social spending (a percentage of revenue that varies by country type: 15% developed, 20% EU, 10% others). After that, remaining revenue funds military production and tech R&D. If spending exceeds revenue, the deficit is split 50/50 between borrowing and money printing. Money printing spikes inflation at a 60x multiplier. Surpluses reduce inflation by 1pp/round. Debt accrues escalating interest: 3% base rate, plus 1% for every 20% of GDP above 100% debt-to-GDP ratio.
 
 **Output:** `deficit`, `money_printed`, `new_treasury`, social/military/tech budgets
 
-**Feedback loops:** Money printing feeds inflation (Step 7). Deficit feeds debt burden (Step 8). Debt burden reduces next round's revenue (Step 3). This creates the classic hyperinflation spiral: deficit causes printing, printing causes inflation, inflation erodes revenue, lower revenue causes larger deficit.
+**Feedback loops:** Money printing feeds inflation (Step 7). Deficit feeds debt burden (Step 8). Debt burden with escalating interest reduces next round's revenue (Step 3). This creates the classic fiscal squeeze, but the 50/50 split and escalating interest replace the old permanent debt accumulation.
 
 **Calibration notes:**
-- Money printing inflation multiplier: 80x
-- Debt burden accumulation: 15% of deficit
-- Social spending split: 70% mandatory / 30% discretionary (FIX 10)
-- Maintenance cost default: 0.3 coins per unit per round
+- Money printing inflation multiplier: 60x (F1-F104, was 80x)
+- Deficit split: 50% borrowed / 50% printed (F1-F104, was all-or-nothing)
+- Social spending: % of GDP × revenue (developed 15%, EU 20%, others 10%) (F1-F104)
+- Maintenance: ×3 multiplier (F1-F104, was 1x)
+- Oil revenue: mbpd-based `price × mbpd × 0.009` (F1-F104)
+- Debt: % of GDP with escalating interest 3% base + 1% per 20% over 100% (F1-F104)
+- Surplus: -1pp inflation/round (F1-F104, was no effect)
 
 **Engine location:** `world_model_engine.py:675-752`
 
@@ -519,7 +564,7 @@ RARE EARTH IMPACT:
   Else:
     rd_factor = 1.0
 
-NUCLEAR R&D:
+NUCLEAR R&D (F1-F104: Persia starts at 70%. Sabotage -15-20%, bombing -25%):
   progress = (nuc_investment / GDP) * 0.8 * rd_factor
   nuclear_rd_progress += progress
   Thresholds for level-up:
@@ -528,7 +573,14 @@ NUCLEAR R&D:
     L2 -> L3: progress >= 1.00
   On level-up: progress resets to 0
 
-AI R&D:
+  PERSIA SPECIAL (F1-F104): Starts at 70% progress toward L1.
+  SABOTAGE EFFECT (F1-F104): Successful sabotage reduces nuclear progress by 15-20%.
+  BOMBING EFFECT (F1-F104): Successful bombing reduces nuclear progress by 25%.
+
+AI R&D (F1-F104: Only Columbia + Cathay compete. L4 achievable R7-8 with private investment):
+  RESTRICTION: Only Columbia and Cathay can advance AI R&D competitively.
+  Other countries can receive tech transfers but cannot independently research.
+
   speed_multiplier = {normal: 1, accelerated: 2, maximum: 3}[selected_speed]
   cost_this_round = ai_budget_allocation * speed_multiplier
   progress = (cost_this_round / GDP) * 0.8 * rd_factor
@@ -539,6 +591,7 @@ AI R&D:
     This is NOT visible to the investing country.
     Other countries can discover it via espionage.
     Nuclear track does NOT get private matching.
+    L4 achievable by R7-8 with sustained private investment.
 
   ai_rd_progress += effective_progress
 
@@ -548,6 +601,10 @@ AI R&D:
     L2 -> L3: progress >= 0.60
     L3 -> L4: progress >= 1.00
   On level-up: progress resets to 0
+
+  GDP BOOST FROM AI LEVELS (F1-F104: L0-L3 = 0, L4 probabilistic):
+    L0-L3: NO GDP boost (was L2:+0.5pp, L3:+1.5pp)
+    L4: probabilistic boost determined by AI Pass 2 (was fixed +3.0pp)
 
 ACCELERATION COSTS:
   Normal (1×): standard cost per progress point
@@ -564,7 +621,7 @@ PERSONAL TECH INVESTMENT (G13):
       ai_rd_progress += progress_boost
 ```
 
-**Plain English:** R&D investment is converted to progress proportional to investment divided by GDP, multiplied by the R&D multiplier (0.8) and rare earth factor. Countries can accelerate R&D at 2× or 3× cost for proportionally faster progress. For AI technology specifically, private sector investment automatically matches government spending — a hidden mechanic that doubles AI progress without the country knowing why (discoverable via espionage). Rare earth restrictions from Cathay reduce R&D efficiency. Technology levels advance when accumulated progress crosses a HIDDEN threshold, then progress resets. Participants see a progress bar but never the exact threshold — creating genuine uncertainty about when a breakthrough will happen.
+**Plain English:** R&D investment is converted to progress proportional to investment divided by GDP, multiplied by the R&D multiplier (0.8) and rare earth factor. Only Columbia and Cathay compete in AI R&D; other countries can receive tech transfers. Countries can accelerate R&D at 2x or 3x cost for proportionally faster progress. For AI technology specifically, private sector investment automatically matches government spending -- a hidden mechanic that doubles AI progress (discoverable via espionage). L4 is achievable by R7-8 with sustained private investment. AI levels L0-L3 provide NO GDP boost; L4 provides a probabilistic boost determined by AI Pass 2. Persia starts nuclear R&D at 70% progress toward L1. Sabotage reduces nuclear progress by 15-20%, bombing by 25%. Rare earth restrictions from Cathay reduce R&D efficiency. Technology levels advance when accumulated progress crosses a HIDDEN threshold, then progress resets.
 
 **Output:** Updated `nuclear_level`, `nuclear_rd_progress`, `ai_level`, `ai_rd_progress`
 
@@ -599,24 +656,39 @@ excess = max(0, previous_inflation - baseline_inflation)
 DECAY (on excess only):
   new_excess = excess * 0.85  (15% natural decay per round)
 
-MONEY PRINTING SPIKE:
+MONEY PRINTING SPIKE (F1-F104: 60x, was 80x):
   if money_printed > 0 and GDP > 0:
-    new_excess += (money_printed / GDP) * 80.0
+    new_excess += (money_printed / GDP) * 60.0
+
+OIL IMPACT (F1-F104: NEW — ±3pp per $50):
+  oil_delta = current_oil_price - starting_oil_price
+  oil_inflation = (oil_delta / 50) * 3.0  (±3pp per $50 change)
+  new_excess += max(0, oil_inflation)  (only positive oil changes add inflation)
+
+TARIFF INFLATION (F1-F104: NEW — applied as level, not cumulative):
+  tariff_inflation = current_tariff_level_effect  (level-based, not accumulated)
+  new_excess += tariff_inflation
+
+SURPLUS EFFECT (F1-F104: NEW):
+  If running budget surplus: new_excess -= 1.0  (surplus reduces inflation 1pp/round)
 
 NEW INFLATION:
   new_inflation = baseline + new_excess
   new_inflation = clamp(new_inflation, 0, 500)  (hard cap at 500%)
 ```
 
-**Plain English:** Inflation has two components. Structural inflation (the starting baseline) never decays -- it represents the country's normal price environment. Excess inflation above that baseline decays by 15% per round naturally. Money printing adds to excess inflation at an aggressive 80x multiplier: printing 10% of GDP adds 8 percentage points of inflation. The inflation hard cap is 500%.
+**Plain English:** Inflation has two components. Structural inflation (the starting baseline) never decays. Excess inflation above baseline decays by 15% per round. Money printing adds excess at 60x multiplier (was 80x). Oil price changes add ±3pp per $50 deviation from starting price. Tariff levels contribute to inflation as a level (not cumulative). Budget surpluses reduce inflation by 1pp/round. The hard cap is 500%.
 
 **Output:** `country.economic.inflation`
 
-**Feedback loops:** Inflation feeds inflation erosion in revenue (Step 3), which increases deficit, which causes more printing, which increases inflation further. Inflation also feeds stability via inflation friction (Step 12).
+**Feedback loops:** Inflation feeds inflation erosion in revenue (Step 3), which increases deficit, which causes more printing, which increases inflation further. Inflation also feeds stability via inflation friction (Step 12) and political support.
 
 **Calibration notes:**
 - Natural decay: 15% of excess per round (multiplier 0.85)
-- Money printing multiplier: 80x
+- Money printing multiplier: 60x (F1-F104, was 80x)
+- Oil inflation: ±3pp per $50 deviation (F1-F104, new)
+- Tariff inflation: level-based, not cumulative (F1-F104, new)
+- Surplus: -1pp/round (F1-F104, new)
 - Hard cap: 500%
 - Only EXCESS above baseline decays (structural baseline persists)
 
@@ -626,255 +698,186 @@ NEW INFLATION:
 
 #### 8. Debt Service Update
 
-**Purpose:** Converts deficits into permanent debt burden. Debt burden is subtracted from future revenue, creating a compound fiscal trap.
+**Purpose:** Tracks debt as percentage of GDP with escalating interest rates. Higher debt-to-GDP ratios incur progressively worse interest costs.
 
 **Inputs:**
-- Current debt burden (accumulated)
+- Current total debt
+- GDP (for debt-to-GDP ratio)
 - Deficit from this round (from Step 4)
 
-**Formula:**
+**Formula (F1-F104: complete rebuild -- % of GDP with escalating interest):**
 
 ```
 If deficit > 0:
-  new_debt = old_debt + deficit * 0.15
-Else:
-  new_debt = old_debt  (debt never decreases automatically)
-new_debt = max(0, new_debt)
+  total_debt += deficit
+
+debt_to_gdp = total_debt / GDP
+
+BASE INTEREST:
+  interest_rate = 0.03  (3% base)
+
+ESCALATING INTEREST (above 100% debt-to-GDP):
+  If debt_to_gdp > 1.0:
+    excess_brackets = (debt_to_gdp - 1.0) / 0.20  (one bracket per 20% over 100%)
+    interest_rate += 0.01 * excess_brackets  (+1% per bracket)
+
+DEBT SERVICE:
+  debt_service = total_debt * interest_rate
+
+SURPLUS DEBT REDUCTION:
+  If surplus > 0:
+    total_debt -= surplus  (surpluses reduce debt)
+    total_debt = max(0, total_debt)
 ```
 
-**Plain English:** Each round's deficit adds 15% of itself to permanent debt burden. A country running a 5-coin deficit per round accumulates 0.75 coins/round in debt service. After 4 rounds: 3.0 coins of permanent drag on revenue. Debt is never automatically reduced -- it persists as a permanent drain.
+**Plain English:** Debt is tracked as total debt with a debt-to-GDP ratio. Interest starts at 3% but escalates: at 120% debt-to-GDP the rate is 4%, at 140% it is 5%, at 160% it is 6%, etc. This creates accelerating fiscal pressure without the old permanent-drag model. Surpluses can reduce total debt. The escalating interest makes high debt increasingly dangerous but recoverable.
 
-**Output:** `country.economic.debt_burden`
+**Output:** `country.economic.debt_burden`, `country.economic.total_debt`
 
-**Feedback loops:** Debt reduces revenue (Step 3 next round), which increases deficits, which adds more debt. This is the fiscal death spiral. The only way out is running surpluses or growing GDP faster than debt accumulates.
+**Feedback loops:** Debt service reduces revenue (Step 3 next round). Higher debt-to-GDP means higher interest, which means larger debt service, which means larger deficits. But surpluses and GDP growth can reverse the spiral.
 
 **Engine location:** `world_model_engine.py:886-893`
 
 ---
 
-#### 9. Economic State Transitions (Crisis Ladder)
+#### 9. Economic State / Crisis (DELEGATED TO AI PASS 2)
 
-**Purpose:** Manages the four-state crisis ladder: NORMAL, STRESSED, CRISIS, COLLAPSE. Downward transitions are immediate; upward transitions require sustained positive indicators over multiple rounds.
+**Purpose:** Determines economic crisis state. **F1-F104: DELEGATED TO AI PASS 2.** The 4-state ladder (normal/stressed/crisis/collapse), all triggers, and all multipliers have been REMOVED from the deterministic engine. AI Pass 2 now decides crisis state based on holistic assessment.
 
-**Inputs:**
-- Oil price, oil importer status
-- Inflation vs. baseline
-- GDP growth rate
-- Treasury level, debt burden
-- Political stability
-- Formosa disruption status and dependency
+**Previous formula:** REMOVED. The stress triggers, crisis triggers, downward/upward transition rules, and recovery timers are no longer in the deterministic engine.
 
-**Formula:**
-
+**Current implementation:**
 ```
-STRESS TRIGGERS (count):
-  oil_price > 150 AND oil importer?          +1
-  inflation > baseline + 15?                  +1
-  GDP growth < -1%?                           +1
-  treasury <= 0?                              +1
-  stability < 4?                              +1
-  formosa_disrupted AND dependency > 0.3?     +1
+AI Pass 2 evaluates overall economic health (GDP growth, inflation, debt, war,
+sanctions, oil) and assigns crisis state.
 
-CRISIS TRIGGERS (count):
-  oil_price > 200 AND oil importer?           +1
-  inflation > baseline + 30?                  +1
-  GDP growth < -3%?                           +1
-  treasury <= 0 AND debt > GDP * 10%?         +1
-  disruption_rounds >= 3 AND dep > 0.5?       +1
+GDP PENALTY from crisis state (applied by AI Pass 2):
+  normal:   0%
+  stressed: -1% GDP
+  crisis:   -1.5% GDP
+  collapse: -2% GDP
 
-DOWNWARD TRANSITIONS (immediate):
-  normal -> stressed:  if stress_triggers >= 2
-  stressed -> crisis:  if crisis_triggers >= 2 (resets crisis_rounds to 0)
-  crisis -> collapse:  if crisis_rounds >= 3 AND crisis_triggers >= 2
-
-UPWARD TRANSITIONS (slow):
-  collapse -> crisis:  if crisis_triggers == 0 for 3 consecutive rounds
-  crisis -> stressed:  if stress_triggers <= 1 for 2 consecutive rounds
-  stressed -> normal:  if stress_triggers == 0 for 2 consecutive rounds
-
-RECOVERY RESET:
-  If conditions worsen during attempted recovery: recovery_rounds = 0
+No deterministic trigger counts, no recovery timers, no crisis_rounds tracking.
+AI has full discretion within the -1% to -2% GDP penalty range.
 ```
 
-**Plain English:** The economy escalates through four states. Two or more stress triggers push a country from normal to stressed. Two or more crisis triggers push from stressed to crisis. After 3 rounds in crisis with triggers still active, collapse follows. Recovery is deliberately slow: collapse to crisis takes 3 clean rounds, crisis to stressed takes 2, stressed to normal takes 2. Total recovery from collapse to normal: minimum 7 rounds.
+**Plain English:** Crisis state is now an AI judgment call, not a formula. The AI evaluates the full economic picture and assigns a state with a corresponding GDP penalty. This replaces the rigid trigger-counting system with contextual intelligence.
 
-**Output:** `country.economic.economic_state`, `crisis_rounds`, `recovery_rounds`
+**Output:** `country.economic.economic_state` (set by AI Pass 2)
 
-**Feedback loops:** Crisis state amplifies GDP contraction (via crisis multiplier in Step 2), reduces stability (Step 12), and triggers capital flight (Pass 2). This creates a reinforcing doom loop that is hard to escape.
-
-**Engine location:** `world_model_engine.py:899-988`
+**Engine location:** AI Pass 2 (was `world_model_engine.py:899-988`)
 
 ---
 
-#### 10. Momentum Update (Confidence)
+#### 10. Momentum (REMOVED FROM DETERMINISTIC ENGINE)
 
-**Purpose:** Tracks economic confidence. Builds slowly, crashes fast. The asymmetry is a core design principle: it takes much longer to build confidence than to destroy it.
+**F1-F104: REMOVED.** Momentum is no longer computed in the deterministic Pass 1. AI Pass 2 handles all momentum/confidence effects as part of its holistic adjustment.
 
-**Inputs:**
-- GDP growth rate
-- Economic state
-- Political stability
-- Oil price (for importers)
-- Formosa disruption
-- War entry/exit status (transition detection)
+**Previous formula:** REMOVED. The positive signal caps, negative signal crashes, and asymmetric build/destroy rates are no longer in the deterministic engine.
 
-**Formula:**
-
+**Current implementation:**
 ```
-POSITIVE SIGNALS (capped at +0.3/round):
-  GDP growth > 2%:     +0.15
-  economic state == normal:  +0.15
-  stability > 6:       +0.15
-  boost = min(0.3, total_positive)
-
-NEGATIVE SIGNALS (NO cap -- crashes are fast):
-  economic state == crisis:   -1.0
-  economic state == collapse: -2.0
-  GDP growth < -2%:           -0.5
-  oil_price > $200 (importer):-0.5
-  formosa_disrupted (dep>0.3):-0.5
-  just entered war this round:-1.0
-
-NEW MOMENTUM:
-  momentum = clamp(old + boost + crash, -5.0, +5.0)
+Momentum variable is zeroed in Pass 1.
+AI Pass 2 may adjust GDP and stability based on its assessment of
+economic confidence, but this is part of the AI's holistic adjustment
+(capped at 30% of previous GDP total).
 ```
 
-**Plain English:** Confidence builds at most +0.3 per round but can crash by up to -5.0 per round. A country entering collapse loses -2.0 in one round; recovering to that same level takes at least 7 rounds of perfect conditions (+0.3 max per round). This asymmetry means destruction is approximately 7x faster than recovery.
+**Output:** `country.economic.momentum` (set to 0 in Pass 1, adjusted by AI Pass 2)
 
-**Output:** `country.economic.momentum`
-
-**Feedback loops:** Momentum feeds GDP growth (Step 2) via `momentum * 0.01` (up to +/-5% GDP growth effect). Positive momentum improves GDP, which improves stability, which improves momentum further. Negative momentum does the reverse.
-
-**Engine location:** `world_model_engine.py:994-1048`
+**Engine location:** AI Pass 2 (was `world_model_engine.py:994-1048`)
 
 ---
 
-#### 11. Contagion (Cross-Country)
+#### 11. Contagion (DELEGATED TO AI PASS 2)
 
-**Purpose:** When major economies enter crisis or collapse, their trade partners absorb GDP hits and momentum drops. Prevents any major economy from collapsing in isolation.
+**F1-F104: DELEGATED TO AI PASS 2.** The deterministic contagion formula has been removed. AI Pass 2 now handles cross-country economic spillover effects as part of its holistic adjustment.
 
-**Inputs:**
-- Economic states of all countries
-- GDP of all countries (MAJOR_ECONOMY_THRESHOLD = 30.0)
-- Trade weights between country pairs (derived from GDP and sector complementarity)
+**Previous formula:** REMOVED. The trade-weight-based GDP hits and momentum drops are no longer computed deterministically.
 
-**Formula:**
-
+**Current implementation:**
 ```
-For each country in crisis or collapse with GDP >= 30:
-  severity = 1.0 (crisis) or 2.0 (collapse)
-  For each trade partner with bilateral_trade_weight > 0.10:
-    GDP_hit = severity * trade_weight * 0.02
-    partner.GDP *= (1 - GDP_hit)
-    partner.GDP = max(0.5, partner.GDP)
-    partner.momentum -= 0.3
+AI Pass 2 evaluates cross-country economic conditions and applies
+contagion effects where appropriate. This is part of the AI's holistic
+adjustment (capped at 30% of previous GDP total per country).
 ```
 
-**Plain English:** If a major economy (GDP >= 30 coins) enters crisis, each of its significant trade partners (>10% bilateral trade weight) loses a small percentage of GDP and takes a momentum hit. Collapse is twice as severe as crisis. Small economies do not generate contagion. Contagion is applied after per-country GDP calculations to avoid double-counting.
+**Plain English:** Contagion is now an AI judgment. The AI can identify when a major economy's distress should spill over to trade partners, but the mechanism is contextual rather than formulaic.
 
-**Output:** Partner GDP reductions, partner momentum drops
+**Output:** AI Pass 2 adjustments to partner GDP
 
-**Feedback loops:** Contagion can cascade: if the contagion hit pushes a second major economy into crisis, that economy generates its own contagion wave in the next round.
-
-**Engine location:** `world_model_engine.py:1054-1090`
+**Engine location:** AI Pass 2 (was `world_model_engine.py:1054-1090`)
 
 ---
 
-#### 12. Financial Market Index (Per Country)
+#### 12. Market Indexes (F1-F104: 3 Regional Indexes)
 
-**Purpose:** Tracks financial market confidence per country (0-100 scale). Market crashes have mechanical consequences on GDP growth and political support.
+**Purpose:** Tracks financial market health via 3 regional indexes computed from component country health. Market stress feeds into stability.
 
-**Inputs:**
-- GDP growth rate, economic state, stability
-- Inflation delta
-- Oil price
-- Trade partner market indices
+**F1-F104: Complete rebuild.** Replaced per-country market index with 3 regional indexes.
 
-**Formula:**
+**3 Regional Indexes:**
 
 ```
-POSITIVE DRIVERS:
+WALL STREET INDEX:
+  Components: Columbia, Albion, Freeland
+  Computed from weighted average of component country health:
+    health = f(GDP_growth, inflation_delta, economic_state, stability)
+  Each component weighted by GDP share within the index
+
+EUROPA INDEX:
+  Components: Teutonia, Gallia, other EU members
+  Same health computation, GDP-weighted
+
+DRAGON INDEX:
+  Components: Cathay, Hanguk, Yamato, Bharata
+  Same health computation, GDP-weighted
+
+HEALTH COMPUTATION (per component country):
+  health = base_100
   GDP growth > 2%:        +3
-  economic state normal:   +1
-  stability > 6:           +1
+  GDP growth < -2%:       -5
+  economic state crisis:  -8
+  economic state collapse:-15
+  inflation > baseline+20:-5
+  stability < 4:          -3
 
-NEGATIVE DRIVERS:
-  economic state crisis:   -8
-  economic state collapse: -15
-  inflation > baseline+20: -5
-  oil_price > 180:         -3
+INDEX VALUE:
+  index = weighted_average(component_health_scores)
+  index = clamp(index, 0, 100)
 
-PARTNER CONTAGION:
-  For each trade partner with market_index < 30:
-    index -= 3 * partner_weight
-
-BOUNDS:
-  market_index = clamp(index, 0, 100)
-
-CONSEQUENCES:
-  If market_index < 20: GDP growth -= 3.0%, political support -= 5
-  If market_index < 30: GDP growth -= 1.0%, political support -= 2
+CONSEQUENCES (feed into stability, Step 12):
+  Market stress from regional index feeds stability as a modifier.
+  If relevant_regional_index < 30: stability -= 0.3 (market stress)
+  If relevant_regional_index < 20: stability -= 0.5 (market crisis)
 ```
-
-**Trade Partner Weights (hardcoded):**
-
-| Country | Partners (weight) |
-|---------|-------------------|
-| columbia | cathay(0.6), teutonia(0.3), yamato(0.3), hanguk(0.2), albion(0.2) |
-| cathay | columbia(0.6), teutonia(0.4), yamato(0.3), hanguk(0.4), bharata(0.2) |
-| teutonia | cathay(0.4), columbia(0.3), gallia(0.3), albion(0.2), freeland(0.2) |
-| yamato | columbia(0.3), cathay(0.4), hanguk(0.3) |
-| hanguk | cathay(0.5), columbia(0.3), yamato(0.3) |
-| bharata | columbia(0.2), cathay(0.3) |
 
 **Engine location:** `world_model_engine.py:1783-1825`
 
 ---
 
-#### 13. Dollar Credibility
+#### 13. Dollar Credibility (REMOVED)
 
-**Purpose:** Columbia money printing weakens the dollar, making Columbia-imposed sanctions less effective. Creates a trade-off: printing money to fund wars undermines the sanctions weapon.
+**F1-F104: REMOVED.** Dollar credibility has been removed from the engine. Sanctions effectiveness is now determined solely by the GDP coefficient model (see Step 2, Sanctions Hit) without a dollar credibility modifier.
 
-**Inputs:**
-- Columbia's money printed this round
-- Current dollar credibility (0-100)
+**Previous formula:** REMOVED. The money-printing erosion, natural recovery, and sanctions effectiveness scaling are no longer in the engine.
 
-**Formula:**
-
-```
-If Columbia printed money this round:
-  credibility -= money_printed * 2
-Else:
-  credibility = min(100, credibility + 1)  (slow natural recovery)
-
-credibility = max(20, credibility)  (floor at 20)
-
-EFFECT ON SANCTIONS:
-  In _calc_sanctions_impact:
-    total_damage *= dollar_credibility / 100
-```
-
-**Plain English:** Each coin Columbia prints erodes dollar credibility by 2 points. Dollar credibility scales sanctions effectiveness linearly. At 50% credibility, all sanctions are half as effective. The floor is 20% (sanctions never become completely useless). Natural recovery is +1 per round when not printing.
-
-**Output:** `ws.dollar_credibility`
-
-**Engine location:** `world_model_engine.py:1868-1886`
+**Rationale:** The sanctions rebuild as a GDP coefficient model makes dollar credibility redundant. Sanctions effectiveness is determined by coalition coverage and S-curve mapping, not by Columbia's fiscal behavior.
 
 ---
 
-#### 14. Stability Update (v4 Formula)
+#### 14. Stability Update (F1-F104: Simplified)
 
-**Purpose:** The master formula that determines political stability -- the single most important political variable. Stability below thresholds triggers protests, coups, and regime collapse.
+**Purpose:** The master formula that determines political stability. Stability below thresholds triggers protests, coups, and regime collapse. **F1-F104: Simplified.** Removed sanctions friction and crisis penalty (both delegated to AI Pass 2). Added market stress from regional indexes. AI Pass 2 adds ±0.5.
 
 **Inputs:**
 - GDP growth rate
-- Social spending ratio vs. baseline
+- Social spending ratio
 - War status (frontline, primary, ally)
 - Casualties, territory changes
 - War tiredness
-- Sanctions level and duration
 - Inflation delta from baseline
-- Economic state (crisis penalty)
+- Market stress (from regional indexes)
 - Mobilization level
 - Propaganda boost
 - Regime type (democracy/autocracy/hybrid)
@@ -898,7 +901,7 @@ SOCIAL SPENDING:
   If social_ratio >= baseline - 5%: delta -= 0.05
   If below that:                   delta -= shortfall * 3
 
-WAR FRICTION:
+WAR FRICTION (unchanged):
   If frontline defender:  delta -= 0.10
   If primary combatant:   delta -= 0.08
   If ally:                delta -= 0.05
@@ -908,10 +911,7 @@ WAR FRICTION:
   delta -= min(war_tiredness * 0.04, 0.40)  (capped)
   If frontline democracy/hybrid: delta += 0.15  (wartime democratic resilience)
 
-SANCTIONS FRICTION:
-  delta -= 0.1 * sanctions_level * (0.70 if sanctions_rounds > 4 else 1.0)
-  If heavy sanctions (L2+):
-    delta -= abs(sanctions_pain / GDP) * 0.8
+SANCTIONS FRICTION: REMOVED (F1-F104: delegated to AI Pass 2)
 
 INFLATION FRICTION (Cal-4: capped at -0.50):
   inflation_delta = current_inflation - starting_inflation
@@ -920,13 +920,14 @@ INFLATION FRICTION (Cal-4: capped at -0.50):
   friction = max(friction, -0.50)
   delta += friction
 
-CRISIS STATE PENALTY:
-  normal:   +0.00
-  stressed: -0.10
-  crisis:   -0.30
-  collapse: -0.50
+CRISIS STATE PENALTY: REMOVED (F1-F104: delegated to AI Pass 2)
 
-MOBILIZATION — FINITE DEPLETABLE POOL (Updated 2026-03-30 per action review — MAJOR REVISION):
+MARKET STRESS (F1-F104: NEW — from regional indexes):
+  relevant_index = regional index for this country's region
+  If relevant_index < 30: delta -= 0.3  (market stress)
+  If relevant_index < 20: delta -= 0.5  (market crisis, replaces <30 penalty)
+
+MOBILIZATION — FINITE DEPLETABLE POOL (unchanged):
   Each country has a mobilization_pool (integer). Once used, units NEVER recover.
   Two options:
     Partial mobilization: deploys HALF of remaining pool (rounded down).
@@ -947,14 +948,11 @@ MOBILIZATION — FINITE DEPLETABLE POOL (Updated 2026-03-30 per action review �
 
   delta -= stability_cost_from_mobilization (per above table)
 
-MILITIA / VOLUNTEER CALL (invaded/bombed countries only):
+MILITIA / VOLUNTEER CALL (unchanged):
   Available when: home territory occupied OR at war AND under bombardment
   Produces: 1-3 militia ground units (based on GDP: max(1, min(3, GDP/30)))
   Combat effectiveness: 0.5× (militia units get -1 dice modifier)
   Stability cost: -0.3
-  Represents: popular resistance, revolutionary guard, volunteer fighters
-  Purpose: gives the "losing" side a desperation option (e.g., Persia under strike, Ruthenia under invasion)
-  Militia units tracked separately (militia_units counter) for combat modifier.
 
 PROPAGANDA:
   delta += propaganda_boost
@@ -970,6 +968,9 @@ AUTOCRACY RESILIENCE:
 SIEGE RESILIENCE:
   If autocracy AND at war AND under heavy sanctions:
     delta += 0.10  (institutional adaptation to siege conditions)
+
+AI PASS 2 ADJUSTMENT (F1-F104: NEW):
+  AI Pass 2 applies ±0.5 stability adjustment based on holistic assessment.
 
 FINAL:
   new_stability = clamp(old_stability + delta, 1.0, 9.0)
@@ -993,13 +994,13 @@ FINAL:
 
 ---
 
-#### 15. Political Support Update
+#### 15. Political Support Update (F1-F104: Updated)
 
-**Purpose:** Tracks how much the population supports the current leadership. Different formulas for democracies vs. autocracies.
+**Purpose:** Tracks how much the population supports the current leadership. Different formulas for democracies vs. autocracies. **F1-F104: Added inflation impact, GDP for autocracies. Removed crisis penalties. AI Pass 2 adds ±5pp.**
 
 **Inputs:**
 - GDP growth rate, stability, casualties
-- Economic state
+- Inflation (NEW)
 - Oil price (for importers)
 - Election proximity
 - War tiredness
@@ -1012,8 +1013,10 @@ DEMOCRACY / HYBRID:
   delta += (gdp_growth - 2.0) * 0.8
   delta -= casualties * 3.0
   delta += (stability - 6.0) * 0.5
-  Crisis penalty:
-    stressed: -2.0, crisis: -5.0, collapse: -10.0
+  Crisis penalty: REMOVED (F1-F104: delegated to AI Pass 2)
+  Inflation impact (F1-F104: NEW):
+    inflation_delta = current_inflation - starting_inflation
+    If inflation_delta > 5: delta -= (inflation_delta - 5) * 0.3
   Oil shock (importers, oil > $150):
     delta -= (oil_price - 150) * 0.05
   Election proximity:
@@ -1022,8 +1025,9 @@ DEMOCRACY / HYBRID:
   War tiredness (if > 2):
     delta -= (war_tiredness - 2) * 1.0
 
-AUTOCRACY:
+AUTOCRACY (F1-F104: added GDP effect):
   delta += (stability - 6.0) * 0.8
+  delta += (gdp_growth - 1.0) * 0.5  (F1-F104: NEW — GDP matters for autocracies too)
   delta -= perceived_weakness * 5.0
   delta += repression_effect
   delta += nationalist_rally
@@ -1031,6 +1035,12 @@ AUTOCRACY:
 ALL REGIMES:
   Mean-reversion toward 50%:
     delta -= (old_support - 50) * 0.05
+
+AI PASS 2 ADJUSTMENT (F1-F104: NEW):
+  AI Pass 2 applies ±5pp support adjustment based on holistic assessment.
+
+REVOLUTION CHECK (F1-F104: updated threshold):
+  Revolution triggers when: stability <= 2 AND political_support < 20%
 
 BOUNDS:
   new_support = clamp(old_support + delta, 5.0, 85.0)
@@ -1055,22 +1065,31 @@ BOUNDS:
 | 4 | Ruthenia wartime runoff | ruthenia |
 | 5 | Columbia presidential | columbia |
 
-**AI Incumbent Score Formula:**
+**AI Incumbent Score Formula (F1-F104: base from political_support, not 50):**
 
 ```
+base = political_support  (F1-F104: starts from current support, was hardcoded 50)
 econ_perf = gdp_growth * 10.0
 stab_factor = (stability - 5) * 5.0
 war_penalty = -5.0 per active war involving this country
-crisis_penalty:
-  stressed: -5, crisis: -15, collapse: -25
 oil_penalty (importers, oil > $150):
   -(oil_price - 150) * 0.1
 
-ai_score = clamp(50 + econ_perf + stab_factor + war_penalty + crisis_penalty + oil_penalty, 0, 100)
+ai_score = clamp(base + econ_perf + stab_factor + war_penalty + oil_penalty, 0, 100)
+  (NOTE: crisis_penalty removed — crisis state delegated to AI Pass 2)
 
-RUTHENIA SPECIAL:
-  territory_factor = -3 per occupied zone (defender)
-  ai_score_adjusted = clamp(ai_score + territory_factor - war_tiredness * 2, 0, 100)
+COLUMBIA MIDTERMS (F1-F104: 7+7 voters):
+  14 total voters: 7 human participants + 7 AI voters
+  AI voters vote based on ai_score
+  Human participants vote freely
+
+COLUMBIA PRESIDENTIAL (F1-F104: with spoiler candidate):
+  Includes spoiler/third-party candidate mechanic
+  Spoiler draws votes from both sides based on dissatisfaction
+
+RUTHENIA (F1-F104: 3+2 voters, forced by any 2 players):
+  5 total voters: 3 human participants + 2 AI voters
+  Election can be FORCED by any 2 players agreeing to call it
 
 FINAL RESULT:
   final_incumbent = 0.5 * ai_score + 0.5 * player_incumbent_pct
@@ -1078,7 +1097,7 @@ FINAL RESULT:
 ```
 
 **Consequences:**
-- Columbia midterms loss: Parliament shifts to 3-2 opposition majority
+- Columbia midterms loss: Parliament shifts to opposition majority
 - Ruthenia election loss: Beacon loses, Bulwark becomes president
 - Columbia presidential loss: New president installed
 
@@ -1276,16 +1295,18 @@ LOSSES APPLIED:
 
 ---
 
-#### 2. Blockade (Updated 2026-03-30 per action review — MAJOR REVISION)
+#### 2. Blockade (F1-F104: Ship OR ground can block. Full/partial choice.)
 
-**Purpose:** Establishes control over chokepoints and sea zones. GROUND FORCES ONLY can blockade (not naval superiority).
+**Purpose:** Establishes control over chokepoints and sea zones. **F1-F104: Ship OR ground can block.** Full/partial is a player choice.
 
 **Mechanics:**
 
 ```
-BLOCKADE ESTABLISHMENT (ground forces only):
-  Chokepoint blockade requires ground forces on the shore/chokepoint zone.
-  Naval units do NOT establish blockades — only ground units.
+BLOCKADE ESTABLISHMENT (F1-F104: ship OR ground):
+  Chokepoint blockade can be established by:
+    - Ground forces on the shore/chokepoint zone, OR
+    - Naval units in the adjacent sea zone
+  Player chooses full or partial blockade.
 
   Two levels for ALL blockades:
     PARTIAL blockade: reduces trade throughput by 50%
@@ -1676,12 +1697,12 @@ CO-CONSPIRATOR OPTIONS:
   2. REJECT SILENTLY — coup fails, no one else knows (initiator exposed to co-conspirator only)
   3. BETRAY — initiator is ARRESTED IMMEDIATELY. Co-conspirator gains trust with ruler.
 
-IF BOTH ACCEPT — PROBABILITY CHECK:
-  prob = 0.15 (base — higher than old 0.05, reflects two committed plotters)
+IF BOTH ACCEPT — PROBABILITY CHECK (F1-F104: base 25%, was 15%):
+  prob = 0.25 (F1-F104: base — was 0.15)
   If active protest underway:  prob += 0.25 (protest as cover/catalyst)
   If stability < 5:           prob += (5 - stability) * 0.05
   If support < 40:            prob += (40 - support) / 100 * 0.15
-  prob = clamp(prob, 0.15, 0.85)
+  prob = clamp(prob, 0.25, 0.85)
 
   NOTE: Military chief NOT required (was required before).
   Trust between players IS the mechanic. No special role bonuses.
@@ -1706,8 +1727,9 @@ IF FAILED:
 
 **Purpose:** Protests can be AUTOMATIC (engine checks conditions each round) or STIMULATED (one-time card). Public event visible to all.
 
-**Automatic Protests (engine-triggered each round):**
+**Automatic Protests (F1-F104: auto-trigger from conditions):**
 ```
+Protests auto-trigger based on political conditions.
 Engine checks political_support each round:
   Support > 60%:   protest FIZZLES (no effect)
   Support 40-60%:  MODEST protest. Stability -0.5.
@@ -1723,10 +1745,12 @@ EFFECT: +20% probability of protest occurring next round in target country.
   Stacks with automatic conditions.
 ```
 
-**Elite-Led Protest (revolution mechanic — unchanged):**
+**Elite-Led Protest (revolution mechanic — F1-F104: revolution = player leads, capitulation to AI Pass 2):**
 ```
 Triggered when: stability <= 2 AND support < 20 (revolution check)
 An elite participant can CHOOSE to lead the protest.
+Revolution requires a PLAYER to lead it (not automatic).
+Capitulation decisions delegated to AI Pass 2.
 
 prob = 0.30 + (20 - support) / 100 + max(0, (3 - stability)) * 0.10
 prob = clamp(prob, 0.15, 0.80)
@@ -1897,13 +1921,13 @@ No authorization check beyond existence
 | social_spending_baseline | float | 0-1 | From CSV | -- |
 | oil_revenue | float | 0+ | 0 | Step 1 |
 | inflation_revenue_erosion | float | 0+ | 0 | Step 3 |
-| economic_state | string | normal/stressed/crisis/collapse | "normal" | Step 9 |
-| momentum | float | -5.0 to +5.0 | 0 | Step 10, Pass 2 |
-| crisis_rounds | int | 0+ | 0 | Step 9 |
-| recovery_rounds | int | 0+ | 0 | Step 9 |
+| economic_state | string | normal/stressed/crisis/collapse | "normal" | AI Pass 2 (F1-F104: delegated) |
+| momentum | float | -5.0 to +5.0 | 0 | AI Pass 2 (F1-F104: removed from Pass 1) |
+| crisis_rounds | int | 0+ | 0 | AI Pass 2 (F1-F104: delegated) |
+| recovery_rounds | int | 0+ | 0 | AI Pass 2 (F1-F104: delegated) |
 | sanctions_rounds | int | 0+ | 0 | Step 0 |
 | formosa_disruption_rounds | int | 0+ | 0 | Step 0 |
-| market_index | int | 0-100 | 50 | Market index update |
+| market_index | int | 0-100 | 50 | 3 regional indexes: Wall Street, Europa, Dragon (F1-F104) |
 | money_printed_this_round | float | 0+ | 0 | Step 4 |
 | _actual_social_ratio | float | 0-1 | -- | Step 4 |
 
@@ -1955,14 +1979,14 @@ No authorization check beyond existence
 | Variable | Type | Range | Starting Value | Updated By |
 |----------|------|-------|----------------|------------|
 | round_num | int | 0+ | 0 | Orchestrator |
-| oil_price | float | 30+ | 80.0 | Step 1 |
+| oil_price | float | 15+ (F1-F104, was 30+) | 80.0 | Step 1 |
 | oil_price_index | float | 0+ | 100.0 | Step 1 |
 | global_trade_volume_index | float | 0+ | 100.0 | -- |
 | nuclear_used_this_sim | bool | -- | False | Nuclear strike |
-| dollar_credibility | float | 20-100 | 100.0 | Dollar credibility update |
+| dollar_credibility | float | -- | -- | REMOVED (F1-F104) |
 | formosa_blockade | bool | -- | False | Blockade actions |
 | formosa_resolved | bool | -- | False | Treaty/agreement |
-| oil_above_150_rounds | int | 0+ | 0 | Step 1 |
+| oil_above_100_rounds | int | 0+ | 0 | Step 1 (F1-F104: was oil_above_150_rounds) |
 
 ## Per-Role Variables
 
@@ -1984,45 +2008,53 @@ No authorization check beyond existence
 | Oil base price | $80 | WME:347 | Starting point for oil price calculation |
 | Oil soft cap start | $200 | WME:426 | Asymptotic formula begins |
 | Oil soft cap max | ~$250 | WME:429 | Theoretical ceiling |
-| Oil floor | $30 | WME:432 | Minimum oil price |
-| Oil inertia blend | 40/60 (old/new) | WME:437 | How fast oil price adjusts |
-| Oil volatility sigma | 0.05 | WME:441 | Random noise on oil |
-| Oil mean-reversion trigger | 3 rounds > $150 | WME:448 | When demand destruction accelerates |
-| Oil mean-reversion multiplier | 0.92 | WME:449 | 8% downward pressure |
-| OPEC supply impact | min:-0.12, low:-0.06, high:+0.06, max:+0.12 per member | WME:354 | Per-member supply shift (5 levels) |
+| Oil floor | $15 (F1-F104, was $30) | WME:432 | Minimum oil price |
+| Oil inertia blend | 30/70 (old/new) (F1-F104, was 40/60) | WME:437 | How fast oil price adjusts |
+| Oil volatility | REMOVED (F1-F104) | -- | No random noise |
+| Oil demand destruction trigger | 3 rounds > $100 (F1-F104, was >$150) | WME:448 | Exponent 2.5 (was linear) |
+| Oil OPEC weighting | production share × 2× lever (F1-F104) | WME:354 | Weighted by production share |
+| Oil war premium | Gulf-region wars only (F1-F104) | WME:419 | Was all wars |
+| Oil revenue formula | price × mbpd × 0.009 (F1-F104) | WME:new | mbpd-based, was GDP-biased |
+| OPEC supply impact | min:-0.12, low:-0.06, high:+0.06, max:+0.12 × production_share × 2 (F1-F104) | WME:354 | Weighted by production share with 2× lever |
 | Sanctions supply impact | -0.08 per L2+ producer | WME:362 | Supply reduction from sanctions |
 | Gulf Gate disruption | +0.50 | WME:371 | Oil disruption multiplier |
 | Formosa disruption (oil) | +0.10 | WME:375 | Oil disruption multiplier |
 | War premium | +0.05 per war, max 0.15 | WME:419-420 | Oil risk premium |
-| Sanctions GDP multiplier | 1.5 | WME:519 | How sanctions damage converts to GDP hit |
-| Sanctions adaptation factor | 0.60 after 4 rounds | WME:524 | Diminishing sanctions effectiveness |
-| Sanctions S-curve | 0.3→10%, 0.5→20%, 0.7→60%, 0.9→90% | WME:new | Coverage-to-effectiveness mapping (updated 2026-03-30) |
-| Sanctions imposer cost | bilateral_trade × (level/3) × GDP × 0.01 | WME:new | Cost to sanctioning country (updated 2026-03-30) |
+| Sanctions model | GDP coefficient 0.50-1.0 (F1-F104: complete rebuild) | WME:new | Recomputed every round, no compounding |
+| Sanctions S-curve | 0.2→5%, 0.4→25%, 0.5→40%, 0.7→70%, 0.8→80% (F1-F104) | WME:new | Recalibrated coverage-to-effectiveness |
+| Sanctions MAX_DAMAGE | 0.87 (F1-F104) | WME:new | GDP coefficient floor = 0.13 |
+| Sanctions sector vulnerability | per-country weighting (F1-F104) | WME:new | Sector-specific damage |
+| Sanctions lifting | immediate recovery (F1-F104) | WME:new | Coefficient returns toward 1.0 |
+| Dollar credibility | REMOVED (F1-F104) | -- | No longer modifies sanctions |
+| Tariff model | prisoner's dilemma: imposer_market_power × target_trade_exposure × K(0.54) (F1-F104) | WME:new | Asymmetric, with customs revenue |
 | Oil importer shock | -2% per $50 above $100 | WME:534 | GDP contraction from oil |
 | Oil producer benefit | +1% per $50 above $80 | WME:538 | GDP boost from oil |
 | Semiconductor severity ramp | 0.3, 0.5, 0.7, 0.9, 1.0 | WME:548 | Duration-scaling disruption |
-| Crisis GDP multiplier (growth) | normal:1.0, stressed:0.85, crisis:0.5, collapse:0.2 | WME:69-74 | Dampens positive growth |
-| Crisis GDP amplifier (contraction) | normal:1.0, stressed:1.2, crisis:1.3, collapse:2.0 | WME:584-589 | Amplifies negative growth |
+| Crisis GDP multiplier | REMOVED (F1-F104: delegated to AI Pass 2) | -- | Was direction-aware multiplier ladder |
 | GDP floor | 0.5 coins | WME:595 | Minimum GDP |
-| Money printing inflation multiplier | 80x | WME:721,876 | How aggressively printing causes inflation |
+| Money printing inflation multiplier | 60x (F1-F104, was 80x) | WME:721,876 | How aggressively printing causes inflation |
 | Inflation natural decay | 0.85 on excess | WME:872 | 15% decay per round |
+| Inflation oil impact | ±3pp per $50 (F1-F104, new) | WME:new | Oil price change → inflation |
+| Inflation tariff | level-based, not cumulative (F1-F104, new) | WME:new | Tariff level → inflation |
+| Inflation surplus effect | -1pp/round (F1-F104, new) | WME:new | Surplus reduces inflation |
 | Inflation hard cap | 500% | WME:879 | Maximum inflation |
-| Debt accumulation rate | 15% of deficit | WME:724,892 | Permanent debt burden per round |
+| Deficit split | 50% borrowed / 50% printed (F1-F104) | WME:new | Was all-or-nothing |
+| Debt model | % of GDP, escalating interest (F1-F104) | WME:new | 3% base + 1% per 20% over 100% |
+| Social spending | % of GDP × revenue: dev 15%, EU 20%, other 10% (F1-F104) | WME:new | Was 70/30 mandatory/discretionary |
+| Maintenance multiplier | ×3 (F1-F104) | WME:new | Was ×1 |
 | R&D multiplier | 0.8 | WME:90 | Base R&D efficiency |
 | Rare earth penalty | 15% per level | WME:2161 | R&D slowdown per restriction level |
 | Rare earth floor | 40% | WME:2162 | Minimum R&D factor |
-| AI tech GDP boost | L2:+0.5pp, L3:+1.5pp, L4:+3.0pp | WS:39 | Added to GDP growth rate |
+| AI tech GDP boost | L0-L3: 0, L4: probabilistic (F1-F104) | WS:39 | Was L2:+0.5, L3:+1.5, L4:+3.0 |
 | AI combat bonus | L4: +0 or +1 (random, fixed once) | WS:40 | Determined once when L4 reached (updated 2026-03-30) |
-| Momentum build rate | max +0.3/round | WME:1015 | Slow confidence building |
-| Momentum crash rate | up to -5.0/round | WME:1017-1035 | Fast confidence destruction |
-| Momentum range | -5.0 to +5.0 | WME:1037 | Confidence bounds |
-| Contagion GDP threshold | 30.0 coins | WME:84 | Only major economies generate contagion |
-| Contagion trade weight threshold | 10% | WME:1067 | Only significant trade partners affected |
-| Contagion hit formula | severity * weight * 0.02 | WME:1071 | GDP reduction to partner |
+| Momentum | REMOVED from Pass 1, AI Pass 2 handles (F1-F104) | -- | Was max +0.3/-5.0 per round |
+| Contagion | DELEGATED to AI Pass 2 (F1-F104) | -- | Was severity × weight × 0.02 |
+| Market indexes | 3 regional: Wall Street, Europa, Dragon (F1-F104, new) | WME:new | Component country health → stability |
 | Stability range | 1.0-9.0 | WME:1224 | Hard bounds |
 | Stability GDP cap | -0.30/round | WME:1125 | Max contraction penalty |
 | Inflation friction cap | -0.50/round | WME:1194 | Cal-4 cap |
-| Crisis stability penalty | stressed:-0.10, crisis:-0.30, collapse:-0.50 | WME:76-81 | Per round |
+| Crisis state | DELEGATED to AI Pass 2, -1% to -2% GDP penalty (F1-F104) | -- | Was 4-state ladder with trigger counts |
+| Market stress on stability | index<30: -0.3, index<20: -0.5 (F1-F104, new) | WME:new | Regional index → stability |
 | Autocracy resilience | 0.75x on negative delta | WME:1217 | 25% resistance |
 | Siege resilience | +0.10 | WME:1221 | For sanctioned autocracies at war |
 | Peaceful dampening | 0.5x on negative delta | WME:1212 | Peacetime stability resilience |
@@ -2032,7 +2064,9 @@ No authorization check beyond existence
 | War tiredness cap | 10.0 | WME:2217 | Maximum |
 | Political support range | 5.0-85.0 | WME:1293 | Bounds |
 | Election AI/player weight | 50/50 | WME:1346 | Blend for final result |
-| Election crisis penalty | stressed:-5, crisis:-15, collapse:-25 | WME:1329-1334 | On AI incumbent score |
+| Election base | from political_support (F1-F104, was hardcoded 50) | WME:1329 | AI incumbent score starts from support |
+| Election Columbia midterms | 7+7 voters (F1-F104) | WME:new | 7 human + 7 AI voters |
+| Election Ruthenia | 3+2 voters, forced by any 2 players (F1-F104) | WME:new | 3 human + 2 AI voters |
 | Capital flight (democracy, stab<3) | 8% GDP | WME:1445 | Pass 2 adjustment |
 | Capital flight (autocracy, stab<3) | 3% GDP | WME:1445 | Pass 2 adjustment |
 | Ceasefire rally | +1.5 momentum | WME:1473 | Pass 2 adjustment |
@@ -2047,13 +2081,16 @@ No authorization check beyond existence
 | Assassination domestic | 60% hit | LAE:708 | No modifiers, raw probability (updated 2026-03-30) |
 | Assassination international | 20% default, Levantia 50%, Sarmatia 30% | LAE:708 | Per-country (updated 2026-03-30) |
 | Assassination survival | 50% (4-6 on d6) | LAE:727 | Even if assassination "succeeds" |
-| Coup base probability | 15% (two plotters) | LAE:791 | + protest +25%, + low stability/support (updated 2026-03-30) |
+| Coup base probability | 25% (F1-F104, was 15%) | LAE:791 | + protest +25%, + low stability/support |
 | Propaganda cap | +10 support max | LAE:661 | Before AI tech multiplier |
 | Propaganda AI L3+ multiplier | 1.5x | LAE:665 | 50% more effective |
-| Maintenance cost per unit | 0.3 coins | WS:206 | Default per-unit per-round |
-| Dollar credibility erosion | -2 per coin printed | WME:1876 | Per round |
-| Dollar credibility recovery | +1 per round (not printing) | WME:1879 | Slow recovery |
-| Dollar credibility floor | 20 | WME:1881 | Sanctions never fully useless |
+| Maintenance cost per unit | 0.3 coins × 3 = 0.9 effective (F1-F104) | WS:206 | ×3 multiplier applied |
+| Nuclear Persia start | 70% progress toward L1 (F1-F104) | WME:new | Near-threshold |
+| Nuclear sabotage | -15-20% progress (F1-F104) | WME:new | Sabotage reduces nuclear progress |
+| Nuclear bombing | -25% progress (F1-F104) | WME:new | Bombing reduces nuclear progress |
+| AI R&D restriction | Columbia + Cathay only (F1-F104) | WME:new | Others via tech transfer only |
+| AI Pass 2 stability | ±0.5 (F1-F104, new) | WME:Pass2 | AI holistic adjustment |
+| AI Pass 2 support | ±5pp (F1-F104, new) | WME:Pass2 | AI holistic adjustment |
 | Helmsman legacy penalty (pursuing) | -2 support/round | WME:1927 | After R4, if pursuing Formosa and failing |
 | Helmsman legacy penalty (passive) | -1 support/round | WME:1934 | After R6, if not pursuing at all |
 | Health event base probability | 3% + 1% per year over 70 | WME:2285 | Reduced by medical quality |

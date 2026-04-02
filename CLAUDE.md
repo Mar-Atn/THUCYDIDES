@@ -79,7 +79,7 @@ THUCYDIDES/
 
 ## 5. Design Heritage & Code Hierarchy
 
-**Stage-gate process (completed):** IDEA → CONCEPT ✅ → SEED ✅ → DETAILED DESIGN ✅ → BUILD ← here
+**Stage-gate process:** IDEA → CONCEPT ✅ → SEED ✅ → DETAILED DESIGN ✅ (2026-04-01) → BUILD ← here
 
 **BUILD combines:** iterative loops + waterfall discipline + mandatory documentation sync.
 

@@ -1,10 +1,12 @@
 # DET_C1 System Contracts
 ## Event Schemas, Real-Time Channels, Module Interface Contracts
 
-**Version:** 1.1 | **Date:** 2026-03-30
+**Version:** 1.2 | **Date:** 2026-04-03
 **Status:** Detailed Design
 **Sources:** SEED F2 (Data Architecture), F3 (Data Flows), F4 (API Contracts), G (Web App Spec), D8 (Engine Formulas), C7 (Time Structure), world_state.py
 **Naming authority:** [DET_NAMING_CONVENTIONS.md](DET_NAMING_CONVENTIONS.md) -- all field names, event types, and ID formats defined there
+
+> **Updated 2026-04-03 to reflect BUILD calibration (F1-F104). See CALIBRATION_CHANGE_LOG.md.**
 
 ---
 
@@ -444,7 +446,7 @@ Per-individual pool. Always returns an answer.
     "base_success_rate": 0.50,
     "result": {
       "success": true,
-      "effect": "market_index_reduction",
+      "effect": "market_indexes_reduction",
       "impact_value": -5,
       "duration_rounds": 1,
       "detection": {
@@ -1639,8 +1641,8 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
           "formosa_dependency": "float",
           "social_spending_baseline": "float",
           "economic_state": "string",
-          "momentum": "float",
-          "market_index": "int",
+          "momentum": "float (AI Pass 2 only -- not computed by deterministic engine)",
+          "market_indexes": { "wall_street": "int", "europa": "int", "dragon": "int" },
           "starting_inflation": "float"
         },
         "military": {
@@ -1794,17 +1796,18 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
 |------|-----------|-----------|---------|
 | 0 | `country_actions` | world_state | tariffs, sanctions, OPEC, rare earth, blockades |
 | 1 | OPEC, sanctions, chokepoints, wars, demand | Step 2, 3, 13 | oil_price |
-| 2 | oil_price, sanctions, tariffs, war, tech, momentum | Step 3, 10, 12, 13 | gdp, gdp_growth_rate |
+| 2 | oil_price, delta-only factors, sanctions/tariff coefficients | Step 3, 12, 13 | gdp, gdp_growth_rate |
 | 3 | gdp, tax_rate, oil_revenue, debt, inflation | Step 4 | revenue |
 | 4 | revenue, mandatory costs, player allocations | Step 5, 6, 7, 8 | treasury, social_spending, military_budget, tech_budget |
 | 5 | military_budget, production_capacity, costs | N/A | unit counts |
 | 6 | tech_budget, rare_earth, current_progress | N/A | nuclear_level/progress, ai_level/progress |
 | 7 | money_printed, gdp | Step 9 | inflation |
 | 8 | deficit | Step 9 | debt_burden |
-| 9 | all economic indicators | Step 10, 11, 12 | economic_state |
-| 10 | gdp_growth, economic_state, shocks | N/A | momentum |
-| 11 | economic_states, trade_weights | Step 12 | contagion effects on GDP |
-| 12 | gdp_growth, social, war, sanctions, inflation | Step 13 | stability |
+| 9 | all economic indicators | Step 11.5, 12 | economic_state |
+| 10 | ~~gdp_growth, economic_state, shocks~~ | ~~N/A~~ | ~~momentum~~ **AI Pass 2 only -- removed from deterministic engine** |
+| 11 | ~~economic_states, trade_weights~~ | ~~Step 12~~ | ~~contagion effects on GDP~~ **Delegated to AI Pass 2 -- no formula-based contagion** |
+| 11.5 | economic_state, component country health | Step 12 | **market_indexes** (3 regional: Wall Street, Europa, Dragon) |
+| 12 | gdp_growth, social, war, sanctions, inflation, market_indexes | Step 13 | stability |
 | 13 | gdp_growth, stability, casualties, crisis, oil | N/A | political_support |
 
 ---
@@ -1983,7 +1986,7 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
   "country_id": "string",
   "visible_state": {
     "own_country": {
-      "economic": { "gdp": "float", "treasury": "float", "inflation": "float", "debt_burden": "float", "economic_state": "string", "momentum": "float", "market_index": "int", "revenue_last_round": "float" },
+      "economic": { "gdp": "float", "treasury": "float", "inflation": "float", "debt_burden": "float", "economic_state": "string", "momentum": "float (AI Pass 2 only)", "market_indexes": { "wall_street": "int", "europa": "int", "dragon": "int" }, "revenue_last_round": "float" },
       "military": { "ground": "int", "naval": "int", "tactical_air": "int", "strategic_missile": "int", "air_defense": "int", "total": "int", "production_capacity": {} },
       "political": { "stability": "float", "political_support": "float", "war_tiredness": "float", "regime_status": "string" },
       "technology": { "nuclear_level": "int", "nuclear_rd_progress": "float", "ai_level": "int", "ai_rd_progress": "float" }
