@@ -105,6 +105,10 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._json_response(self._decide(body))
         elif path == "/api/agent/bilateral":
             self._json_response(self._bilateral(body))
+        elif path == "/api/sim/run":
+            self._json_response(self._run_sim(body))
+        elif path == "/api/sim/round":
+            self._json_response(self._run_single_round(body))
         else:
             self.send_error(404)
 
@@ -347,6 +351,95 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             },
         }
 
+    def _run_sim(self, body):
+        """Run a full unmanned simulation."""
+        from engine.agents.runner import run_full_sim
+
+        num_rounds = body.get("num_rounds", 1)
+        active_loop_ticks = body.get("active_loop_ticks", 1)
+        nous_intensity = body.get("nous_intensity", 0)
+
+        logger.info("Starting full SIM: %d rounds, %d ticks, NOUS=%d",
+                     num_rounds, active_loop_ticks, nous_intensity)
+
+        try:
+            result = asyncio.run(run_full_sim(
+                num_rounds=num_rounds,
+                active_loop_ticks=active_loop_ticks,
+                nous_intensity=nous_intensity,
+            ))
+            return {
+                "success": True,
+                "summary": result.summary(),
+                "num_rounds": result.num_rounds,
+                "total_duration": result.total_duration_seconds,
+                "rounds": [
+                    {
+                        "round_num": r.round_num,
+                        "summary": r.summary(),
+                        "duration": r.duration_seconds,
+                        "actions_count": sum(len(v) for v in r.actions_taken.values()),
+                        "conversations_count": len(r.conversations),
+                        "transactions_count": len(r.transactions),
+                        "log": r.log[-10:],  # last 10 log entries
+                    }
+                    for r in result.rounds
+                ],
+                "agents": result.agents,
+            }
+        except Exception as e:
+            logger.error("SIM run failed: %s", e, exc_info=True)
+            return {"error": str(e)}
+
+    def _run_single_round(self, body):
+        """Run a single round with existing or new agents."""
+        from engine.agents.runner import (
+            run_round, load_countries_from_csv, _build_default_world_state,
+        )
+
+        round_num = body.get("round_num", 1)
+        active_loop_ticks = body.get("active_loop_ticks", 1)
+        nous_intensity = body.get("nous_intensity", 0)
+
+        logger.info("Running single round %d", round_num)
+
+        # Use existing agents or initialize new ones
+        if not _agents:
+            # Initialize all heads of state
+            from engine.agents.profiles import load_heads_of_state
+            heads = load_heads_of_state()
+            for role_id in heads:
+                agent = LeaderAgent(role_id)
+                agent.initialize_sync()
+                _agents[role_id] = agent
+
+        countries = load_countries_from_csv()
+        world_state = _build_default_world_state(round_num)
+
+        try:
+            result = asyncio.run(run_round(
+                round_num=round_num,
+                agents=_agents,
+                countries=countries,
+                world_state=world_state,
+                active_loop_ticks=active_loop_ticks,
+                nous_intensity=nous_intensity,
+            ))
+            return {
+                "success": True,
+                "summary": result.summary(),
+                "round_num": result.round_num,
+                "duration": result.duration_seconds,
+                "actions_count": sum(len(v) for v in result.actions_taken.values()),
+                "conversations_count": len(result.conversations),
+                "transactions_count": len(result.transactions),
+                "mandatory_count": len(result.mandatory_inputs),
+                "log": result.log,
+            }
+        except Exception as e:
+            logger.error("Round failed: %s", e, exc_info=True)
+            return {"error": str(e)}
+
     def _get_agent_state(self, role_id):
         """Get current cognitive state."""
         if role_id not in _agents:
@@ -395,6 +488,8 @@ if __name__ == "__main__":
     print(f"  POST /api/agent/bilateral           — bilateral conversation between two agents")
     print(f"  GET  /api/agent/state?role_id=X     — get cognitive state")
     print(f"  GET  /api/agent/history?role_id=X   — get state history")
+    print(f"  POST /api/sim/round                 — run single round")
+    print(f"  POST /api/sim/run                   — run full unmanned simulation")
     print()
     try:
         server.serve_forever()

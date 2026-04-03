@@ -458,24 +458,146 @@ class LeaderAgent:
     # DET_C1 C6: evaluate_proposal()
     # ------------------------------------------------------------------
 
-    async def evaluate_proposal(self, proposal: dict, counterpart_context: dict) -> dict:
-        """Accept, reject, or counter a transaction proposal."""
-        # TODO: Phase 4B of build plan
-        return {"decision": "reject", "reasoning": "Not yet implemented"}
+    async def evaluate_proposal(self, proposal, counterpart_context: dict | None = None) -> dict:
+        """Accept, reject, or counter a transaction proposal.
+
+        Args:
+            proposal: TransactionProposal instance or dict.
+            counterpart_context: Optional additional context (unused — agent uses own blocks).
+
+        Returns:
+            {decision: "accept"|"reject"|"counter", counter_terms: dict|None, reasoning: str}
+        """
+        from engine.agents.transactions import evaluate_transaction, TransactionProposal
+
+        # Accept both dict and TransactionProposal
+        if isinstance(proposal, dict):
+            proposal = TransactionProposal(**proposal)
+
+        cognitive_blocks = self._get_cognitive_blocks()
+        result = await evaluate_transaction(
+            cognitive_blocks=cognitive_blocks,
+            agent_country=self.country,
+            agent_role=self.role,
+            proposal=proposal,
+        )
+
+        # Record in memory
+        self.cognitive.add_decision(
+            f"transaction_{result['decision']}",
+            f"{result['decision'].upper()} {proposal.type} from {proposal.proposer_role_id}: {result.get('reasoning', '')[:80]}",
+        )
+
+        return result
+
+    async def propose_transaction(self, counterpart, transaction_type: str | None = None,
+                                   world_state: dict | None = None) -> dict:
+        """Propose a transaction to another agent.
+
+        Args:
+            counterpart: LeaderAgent to propose to.
+            transaction_type: Optional type hint.
+            world_state: Current world state dict.
+
+        Returns:
+            TransactionProposal.to_dict()
+        """
+        from engine.agents.transactions import propose_transaction
+
+        cognitive_blocks = self._get_cognitive_blocks()
+        proposal = await propose_transaction(
+            cognitive_blocks=cognitive_blocks,
+            agent_country=self.country,
+            agent_role=self.role,
+            counterpart_country=counterpart.country,
+            counterpart_role=counterpart.role,
+            world_state=world_state or {},
+            transaction_type=transaction_type,
+        )
+
+        self.cognitive.add_decision(
+            "transaction_proposed",
+            f"Proposed {proposal.type} to {counterpart.role_id}: {proposal.reasoning[:80]}",
+        )
+
+        return proposal.to_dict()
 
     # ------------------------------------------------------------------
     # DET_C1 C6: start_round() / reflect_on_round()
     # ------------------------------------------------------------------
 
     async def start_round(self, round_num: int, world_state_visible: dict, events_since_last: list[dict]):
-        """Begin a new round. Update situational awareness."""
-        # TODO: Phase 5A of build plan
-        pass
+        """Begin a new round. Update situational awareness.
+
+        Args:
+            round_num: Current round number.
+            world_state_visible: World state visible to this agent.
+            events_since_last: Events that happened since last round.
+        """
+        self.status = "idle"
+
+        # Update immediate memory with round start info
+        oil_price = world_state_visible.get("oil_price", "?")
+        wars = world_state_visible.get("wars", [])
+        self.cognitive.update_immediate(
+            f"Round {round_num} starting. Oil: ${oil_price}. Wars: {len(wars)}."
+        )
+
+        # Add significant events to memory
+        for event in events_since_last:
+            summary = event.get("summary", str(event)[:100])
+            self.cognitive.add_decision("event_received", summary)
+
+        logger.info("Agent %s ready for round %d", self.role_id, round_num)
 
     async def reflect_on_round(self, round_results: dict):
-        """Update internal state after round results arrive."""
-        # TODO: Phase 5A of build plan
-        pass
+        """Update internal state after round results arrive.
+
+        Args:
+            round_results: Engine results for this round.
+        """
+        from engine.services.llm import call_llm
+        from engine.config.settings import LLMUseCase
+
+        country_id = self.role.get("country_id", "")
+        eco = round_results.get("economic_summary", {}).get(country_id, {})
+        stab = round_results.get("stability", {}).get(country_id, {})
+        supp = round_results.get("support", {}).get(country_id, {})
+        oil = round_results.get("oil_price", "?")
+
+        summary = (
+            f"GDP growth {eco.get('growth', 0):.1%}, inflation {eco.get('inflation', 0):.1f}%, "
+            f"stability {stab.get('new', '?')}, support {supp.get('new', '?')}%. Oil ${oil}."
+        )
+
+        try:
+            response = await call_llm(
+                use_case=LLMUseCase.AGENT_REFLECTION,
+                messages=[{"role": "user", "content": (
+                    f"Round results: {summary}\n\n"
+                    f"Write 3-5 bullet points on what this means for your strategy."
+                )}],
+                system=(
+                    f"You are {self.role.get('character_name', self.role_id)}. "
+                    f"Briefly reflect on these results."
+                ),
+                max_tokens=300,
+                temperature=0.5,
+            )
+            reflection = response.text
+        except Exception as e:
+            logger.warning("Reflection failed for %s: %s", self.role_id, e)
+            reflection = f"Round completed. {summary}"
+
+        # Update goals
+        current_goals = self.cognitive.get_goals_text()
+        self.cognitive.update_goals_text(
+            f"{current_goals}\n\n[Post-Round Assessment]:\n{reflection}",
+            reason="round_reflection",
+        )
+
+        self.status = "idle"
+        logger.info("Agent %s reflected on round results", self.role_id)
 
     # ------------------------------------------------------------------
     # Internal helpers
