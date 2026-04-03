@@ -39,12 +39,17 @@ JSON format:
   "transactions_executed": [],
   "elections": {},
   "narrative": "...",
-  "expert_panel": {
-    "keynes": [],
-    "clausewitz": [],
-    "machiavelli": [],
-    "applied": [],
-    "flags": []
+  "judgment": {
+    "mode": "automatic",
+    "crisis_declarations": [],
+    "contagion_effects": [],
+    "stability_adjustments": [],
+    "support_adjustments": [],
+    "market_index_nudges": [],
+    "capitulation_recommendations": [],
+    "flags": [],
+    "confidence": 0.82,
+    "reasoning_summary": "..."
   },
   "coherence_flags": []
 }
@@ -52,21 +57,31 @@ JSON format:
 
 #### Processing Timing
 Target: < 5 minutes per round.
-Heuristic version: < 1 second.
-LLM version: < 30 seconds (3 parallel API calls).
+Pass 1 (deterministic): < 1 second.
+Pass 2 (AI judgment): < 30 seconds.
+Pass 3 (coherence + narrative): < 60 seconds.
 
 #### Three-Pass Architecture
-1. **Deterministic** — formulas + feedback loops
-2. **Expert Panel** — 3 independent evaluations + majority-rule synthesis
-3. **Coherence Check** — plausibility scoring
+1. **Deterministic (Pass 1)** — 14 chained formula steps (see SEED_D8)
+2. **Judgment (Pass 2)** — LLM reviews outputs, applies bounded adjustments (see SEED_D10)
+3. **Coherence + Narrative (Pass 3)** — plausibility check + round summary
+
+#### Context Assembly
+All LLM consumers (judgment, leader agents, Argus, narrative) use the shared
+Context Assembly Service (see SEED_D9). Context is assembled from run-level
+data with visibility filtering. Methodology is DB-stored and moderator-editable.
+
+#### Judgment Modes
+- **Automatic**: adjustments applied and logged (unmanned runs)
+- **Manual**: adjustments presented to moderator for approve/modify/reject (live SIM)
 
 ### EVOLVING (can change freely):
 - Formula coefficients and thresholds
-- Expert panel check logic
-- Crisis ladder transition rules
-- Calibration parameters (80+ tunable values)
-- Pass 2 implementation (heuristic vs LLM)
+- Judgment methodology ("The Book" in sim_config table)
+- Calibration parameters (100+ tunable values)
+- Pass 2 prompt templates and bounds
 - Pass 3 implementation (rules vs LLM-as-judge)
+- Context block definitions and token budgets
 
 ### Three Engines
 1. **World Model Engine** — between-round batch processing
