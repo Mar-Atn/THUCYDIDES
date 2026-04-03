@@ -760,6 +760,46 @@ ALTER TABLE argus_event_memory ENABLE ROW LEVEL SECURITY;
 ALTER TABLE artefacts ENABLE ROW LEVEL SECURITY;
 
 -- -------------------------------------------------------
+-- Context Assembly: template-level configuration (methodology, prompts, rules)
+-- References: SEED_D9 (Context Assembly Service)
+-- -------------------------------------------------------
+
+CREATE TABLE sim_config (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    template_id UUID NOT NULL,
+    category TEXT NOT NULL CHECK (category IN ('methodology', 'prompt_template', 'judgment_rule', 'context_block')),
+    key TEXT NOT NULL,
+    content TEXT NOT NULL,
+    version INT NOT NULL DEFAULT 1,
+    is_active BOOLEAN DEFAULT true,
+    updated_by TEXT DEFAULT 'system',
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(template_id, key, version)
+);
+
+-- -------------------------------------------------------
+-- Engine Judgment: audit trail of Pass 2 recommendations and decisions
+-- References: SEED_D10 (Engine Judgment Layer)
+-- -------------------------------------------------------
+
+CREATE TABLE judgment_log (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sim_run_id UUID NOT NULL REFERENCES sim_runs(id),
+    round_num INT NOT NULL,
+    mode TEXT NOT NULL DEFAULT 'automatic' CHECK (mode IN ('automatic', 'manual')),
+    raw_recommendation JSONB NOT NULL,
+    applied_adjustments JSONB,
+    moderator_decision TEXT CHECK (moderator_decision IN ('approved', 'modified', 'rejected')),
+    moderator_notes TEXT,
+    llm_model TEXT,
+    llm_tokens_used INT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_judgment_log_sim_round ON judgment_log(sim_run_id, round_num);
+CREATE INDEX idx_sim_config_template ON sim_config(template_id, category, is_active);
+
+-- -------------------------------------------------------
 -- Helper functions for RLS
 -- -------------------------------------------------------
 

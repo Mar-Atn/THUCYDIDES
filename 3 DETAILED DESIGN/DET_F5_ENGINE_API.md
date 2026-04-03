@@ -1035,6 +1035,112 @@ After the facilitator reviews the round processing results (from 2.4), this endp
 
 ---
 
+## 2.11 POST /engine/judgment/review -- Get Judgment Recommendations
+
+Returns AI judgment recommendations for a processed round (manual mode). Called before applying adjustments so the moderator can review.
+
+### Request
+
+```json
+{
+  "sim_run_id": "sim_2026_04_15",
+  "round_num": 3
+}
+```
+
+### Response (200)
+
+```json
+{
+  "sim_run_id": "sim_2026_04_15",
+  "round_num": 3,
+  "mode": "manual",
+  "recommendations": [
+    {
+      "country_id": "concordia",
+      "domain": "economic",
+      "field": "momentum",
+      "current_value": 0.0,
+      "recommended_value": -0.3,
+      "reasoning": "Sanctions impact on trade routes not captured by deterministic engine"
+    }
+  ],
+  "llm_model": "claude-opus-4-20250514",
+  "llm_tokens_used": 4200
+}
+```
+
+### Notes
+
+- **Authorization:** Facilitator only.
+- **Requires Pass 1 complete.** Call after `POST /engine/round/process` returns.
+- **Context assembled via SEED_D9.** The judgment prompt is built from `sim_config` entries.
+
+---
+
+## 2.12 POST /engine/judgment/apply -- Apply Judgment Adjustments
+
+Applies moderator-approved adjustments from the judgment review. Logs the decision to `judgment_log`.
+
+### Request
+
+```json
+{
+  "sim_run_id": "sim_2026_04_15",
+  "round_num": 3,
+  "moderator_decision": "modified",
+  "applied_adjustments": [
+    { "country_id": "concordia", "domain": "economic", "field": "momentum", "value": -0.2 }
+  ],
+  "moderator_notes": "Reduced momentum penalty -- trade rerouted through neutral port"
+}
+```
+
+### Response (200)
+
+```json
+{
+  "status": "applied",
+  "adjustments_count": 1,
+  "judgment_log_id": "jdg_abc123"
+}
+```
+
+### Notes
+
+- **Authorization:** Facilitator only.
+- **Idempotent per round.** Re-calling overwrites the previous judgment for that round.
+
+---
+
+## 2.13 GET /engine/judgment/log/{sim_run_id}/{round_num} -- Judgment History
+
+Retrieves the judgment audit trail for a given round.
+
+### Response (200)
+
+```json
+{
+  "sim_run_id": "sim_2026_04_15",
+  "round_num": 3,
+  "mode": "manual",
+  "raw_recommendation": { "...": "..." },
+  "applied_adjustments": [ { "...": "..." } ],
+  "moderator_decision": "modified",
+  "moderator_notes": "Reduced momentum penalty",
+  "llm_model": "claude-opus-4-20250514",
+  "llm_tokens_used": 4200,
+  "created_at": "2026-04-15T12:35:00Z"
+}
+```
+
+### Notes
+
+- **Authorization:** Facilitator only.
+- **Returns 404 if no judgment exists** for the specified round.
+
+---
+
 # 3. ENGINE SERVER INTERNALS
 
 ## 3.1 State Management
