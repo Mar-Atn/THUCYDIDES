@@ -120,12 +120,12 @@ class WorldJudge:
             use_case=LLMUseCase.MODERATOR,
             messages=[{"role": "user", "content": f"{context}\n\n---\n\n{instruction}"}],
             system=SYSTEM_PROMPT,
-            max_tokens=2000,
+            max_tokens=4000,
             temperature=0.3,  # low temperature for consistent, analytical output
         )
 
         # Parse JSON response
-        result = _parse_judgment(response.content, round_num)
+        result = _parse_judgment(response.text, round_num)
 
         # Validate bounds + enforce intensity limits
         result, warnings = validate_and_clamp(result, intensity=self.intensity)

@@ -4,9 +4,17 @@ Runs the economic + political engines directly (no DB, no FastAPI).
 Loads starting data from countries.csv, applies scenario-specific actions each round,
 outputs results as markdown analysis.
 
-Usage: cd app && PYTHONPATH=. python3 tests/layer3/run_scenarios.py
+Supports two modes:
+  --no-judgment   Formula-only (Pass 1). Fast, deterministic. Default.
+  --judgment      Pass 1 + AI judgment (Pass 2). Requires LLM API keys.
+  --intensity N   Judgment intensity 0-5 (default 3).
+
+Usage:
+  cd app && PYTHONPATH=. python3 tests/layer3/run_scenarios.py
+  cd app && PYTHONPATH=. python3 tests/layer3/run_scenarios.py --judgment --intensity 3
 """
 
+import asyncio
 import csv
 import copy
 import os
@@ -434,8 +442,13 @@ def snapshot_countries(countries: dict, focus: list[str]) -> dict:
     return snap
 
 
-def run_scenario(scenario_fn) -> dict:
-    """Run one scenario: 6 rounds, return all snapshots."""
+def run_scenario(scenario_fn, *, use_judgment: bool = False, intensity: int = 3) -> dict:
+    """Run one scenario: 6 rounds, return all snapshots.
+
+    Args:
+        use_judgment: If True, run AI judgment (Pass 2) after each round.
+        intensity: Judgment intervention intensity (0-5).
+    """
     scenario = scenario_fn()
     countries = load_countries_from_csv()
     world_state = build_world_state(
@@ -455,6 +468,7 @@ def run_scenario(scenario_fn) -> dict:
         eco["tariff_coefficient"] = tar_coeff
 
     # Record R0 (starting state)
+    event_log: list[dict] = []
     snapshots = [("R0", snapshot_countries(countries, FOCUS_COUNTRIES), 80.0, None)]
 
     for rnd in range(1, 7):
@@ -486,10 +500,51 @@ def run_scenario(scenario_fn) -> dict:
                 world_state["active_blockades"][cp] = info
 
         result = process_full_round(countries, world_state, actions, rnd)
+
+        # --- PASS 2: AI Judgment (if enabled) ---
+        judgment_data = None
+        if use_judgment:
+            from engine.context.assembler import ContextAssembler
+            from engine.judgment.judge import WorldJudge, apply_judgment
+
+            assembler = ContextAssembler(
+                sim_run_id="test", template_id="default",
+                countries=countries, world_state=world_state,
+                round_results={"oil_price": result["oil_price"],
+                               "market_indexes": result.get("market_indexes")},
+                event_log=event_log,
+            )
+            judge = WorldJudge(assembler, intensity=intensity)
+
+            # Run async judgment
+            judgment_result, warnings = asyncio.run(judge.judge_round(rnd))
+
+            # Apply adjustments
+            jlog = []
+            apply_judgment(countries, world_state, judgment_result, jlog)
+            judgment_data = {
+                "adjustments": len(judgment_result.crisis_declarations)
+                    + len(judgment_result.contagion_effects)
+                    + len(judgment_result.stability_adjustments)
+                    + len(judgment_result.support_adjustments)
+                    + len(judgment_result.market_index_nudges),
+                "flags": judgment_result.flags,
+                "confidence": judgment_result.confidence,
+                "summary": judgment_result.reasoning_summary,
+                "log": jlog,
+            }
+
+        # Record events for history
+        event_log.append({
+            "round_num": rnd,
+            "summary": f"R{rnd}: Oil ${result['oil_price']:.0f}, judgment={'yes' if judgment_data else 'no'}",
+        })
+
         snap = snapshot_countries(countries, FOCUS_COUNTRIES)
         snapshots.append((
             f"R{rnd}", snap, result["oil_price"],
             result.get("market_indexes"), result.get("revolutions"),
+            judgment_data,
         ))
 
     return {
@@ -505,10 +560,15 @@ def run_scenario(scenario_fn) -> dict:
 
 def format_report(results: list[dict]) -> str:
     """Generate markdown analysis report."""
+    # Detect if judgment was used
+    has_judgment = any(
+        len(entry) > 5 and entry[5] is not None
+        for r in results for entry in r["snapshots"]
+    )
     lines = [
         f"# TTT Scenario Test Results",
         f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-        f"**Engine:** economic.py + political.py (direct, no DB)",
+        f"**Engine:** economic.py + political.py {'+ AI Judgment (Pass 2)' if has_judgment else '(deterministic only)'}",
         f"**Data:** countries.csv (D1-D18 calibration applied)",
         f"**Scenarios:** {len(results)} × 6 rounds",
         "",
@@ -584,6 +644,27 @@ def format_report(results: list[dict]) -> str:
         if all_revs:
             lines.append(f"\n**Revolutions:** " + ", ".join(f"{k}: {v}" for k, v in all_revs.items()))
 
+        # Judgment summary (if Pass 2 was active)
+        judgment_entries = []
+        for entry in sc["snapshots"]:
+            if len(entry) > 5 and entry[5]:
+                judgment_entries.append((entry[0], entry[5]))
+        if judgment_entries:
+            lines.append("\n### AI Judgment (Pass 2)\n")
+            for label, jdata in judgment_entries:
+                adj_count = jdata["adjustments"]
+                conf = jdata["confidence"]
+                flags = jdata.get("flags", [])
+                summary = jdata.get("summary", "")
+                lines.append(f"**{label}:** {adj_count} adjustments (confidence {conf:.0%})")
+                if flags:
+                    lines.append(f"  Flags: {', '.join(flags)}")
+                if summary:
+                    lines.append(f"  _{summary}_")
+                for log_line in jdata.get("log", []):
+                    lines.append(f"  - {log_line}")
+                lines.append("")
+
         lines.append("")
 
     # CROSS-SCENARIO ANALYSIS
@@ -647,16 +728,35 @@ def format_report(results: list[dict]) -> str:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description="TTT Scenario Test Runner")
+    parser.add_argument("--judgment", action="store_true", help="Enable AI judgment (Pass 2)")
+    parser.add_argument("--intensity", type=int, default=3, help="Judgment intensity 0-5 (default 3)")
+    parser.add_argument("--scenario", type=int, help="Run single scenario (1-5)")
+    args = parser.parse_args()
+
+    use_judgment = args.judgment
+    intensity = args.intensity
+
     print("Loading countries from CSV...")
-    print(f"CSV path: {CSV_PATH}")
     print(f"Countries loaded: {len(load_countries_from_csv())}")
+    print(f"Mode: {'Pass 1 + AI Judgment (intensity={intensity})' if use_judgment else 'Pass 1 only (deterministic)'}")
     print()
 
+    scenarios_to_run = SCENARIOS
+    if args.scenario:
+        idx = args.scenario - 1
+        if 0 <= idx < len(SCENARIOS):
+            scenarios_to_run = [SCENARIOS[idx]]
+        else:
+            print(f"Invalid scenario {args.scenario}. Must be 1-{len(SCENARIOS)}.")
+            sys.exit(1)
+
     results = []
-    for i, sc_fn in enumerate(SCENARIOS):
+    for sc_fn in scenarios_to_run:
         sc = sc_fn()
         print(f"Running {sc['name']}...")
-        result = run_scenario(sc_fn)
+        result = run_scenario(sc_fn, use_judgment=use_judgment, intensity=intensity)
         results.append(result)
         # Quick summary
         last = result["snapshots"][-1][1]
@@ -664,15 +764,23 @@ if __name__ == "__main__":
         print(f"  Columbia GDP: {last.get('columbia', {}).get('gdp', '?')}")
         print(f"  Cathay GDP:   {last.get('cathay', {}).get('gdp', '?')}")
         print(f"  Sarmatia GDP: {last.get('sarmatia', {}).get('gdp', '?')}")
+        # Judgment summary
+        last_entry = result["snapshots"][-1]
+        if len(last_entry) > 5 and last_entry[5]:
+            jdata = last_entry[5]
+            print(f"  Judgment: {jdata['adjustments']} adjustments, conf={jdata['confidence']:.2f}")
+            if jdata["flags"]:
+                print(f"  Flags: {', '.join(jdata['flags'])}")
         print()
 
     # Generate report
     report = format_report(results)
 
-    # Save
+    # Save — different run number based on mode
+    run_num = "010" if use_judgment else "009"
     out_dir = os.path.join(
         os.path.dirname(__file__), "..", "..", "..",
-        "10. TESTS", "BUILD TEST", "run_009",
+        "10. TESTS", "BUILD TEST", f"run_{run_num}",
     )
     os.makedirs(out_dir, exist_ok=True)
     report_path = os.path.join(out_dir, "RESULTS.md")
