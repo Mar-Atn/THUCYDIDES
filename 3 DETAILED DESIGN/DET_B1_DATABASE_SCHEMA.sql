@@ -800,6 +800,35 @@ CREATE INDEX idx_judgment_log_sim_round ON judgment_log(sim_run_id, round_num);
 CREATE INDEX idx_sim_config_template ON sim_config(template_id, category, is_active);
 
 -- -------------------------------------------------------
+-- AI Participant: cognitive blocks with versioning (pattern from KING ai_context)
+-- Each update creates a new row. is_current=true marks the latest version.
+-- Full audit trail of cognitive evolution per agent per SIM run.
+-- -------------------------------------------------------
+CREATE TABLE ai_context (
+    context_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    sim_run_id UUID NOT NULL REFERENCES sim_runs(id),
+    role_id TEXT NOT NULL,
+    version INT NOT NULL DEFAULT 1,
+    is_current BOOLEAN DEFAULT true,
+    block_1_fixed JSONB,           -- Rules + metacognitive architecture (cached)
+    block_2_identity JSONB,        -- Personality, values, style (rarely updated)
+    block_3_memory JSONB,          -- Conversations, decisions, relationships (updated continuously)
+    block_4_goals JSONB,           -- Objectives, strategy, priorities (updated per round)
+    updated_trigger TEXT,          -- What caused this update (e.g., 'conversation_with_helmsman')
+    updated_reason TEXT,           -- Human-readable explanation
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_context_current ON ai_context(sim_run_id, role_id, is_current) WHERE is_current = true;
+CREATE INDEX idx_ai_context_history ON ai_context(sim_run_id, role_id, version);
+
+-- NOTE: AI participant prompts (metacognitive architecture, conversation behavior,
+-- reflection prompts, intent note generation, meeting decisions) are stored in
+-- the sim_config table with category='prompt_template'. This is an architectural
+-- decision — one configuration table for all SIM configuration. No separate
+-- ai_prompts table.
+
+-- -------------------------------------------------------
 -- Helper functions for RLS
 -- -------------------------------------------------------
 

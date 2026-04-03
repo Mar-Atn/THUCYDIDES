@@ -2457,6 +2457,16 @@ AIParticipant
 
 Both implementations expose the same `get_cognitive_state()` interface. The test interface renders the appropriate view based on implementation type.
 
+### 5.6 Cognitive State Persistence
+
+Cognitive blocks are persisted in the `ai_context` table (DET_B1). Each update creates a new versioned row with `is_current=true` (previous version set to `is_current=false`). This provides:
+- Full audit trail of cognitive evolution
+- Version navigation for debugging (test interface)
+- Rollback capability if needed
+- Cross-session persistence for long-running SIMs
+
+AI participant prompts (identity generation, conversation behavior, reflection prompts, intent note generation, meeting decisions) are stored in `sim_config` with `category='prompt_template'`. This allows moderator editing between rounds without code deployment.
+
 ## 5.4 Action Validation Contract
 
 Every action produced by `decide_action()` or `submit_mandatory_inputs()` passes through the **Action Framework** before execution:

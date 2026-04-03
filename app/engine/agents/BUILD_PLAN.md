@@ -13,21 +13,21 @@ Build the AI module and test interface incrementally. Test each capability with 
 ## Phase 1: FOUNDATION
 
 ### 1A. Test Interface (web-based chat + inspector)
-- [ ] Select role to initialize (from SIM template/scenario)
-- [ ] Chat with agent (human ↔ AI in character)
-- [ ] View cognitive state (4 blocks, expandable)
-- [ ] View context supplied for each decision (expandable)
-- [ ] Navigate block version history
-- [ ] UX: Thucydides style guide (development tool, not permanent)
-- [ ] NOT part of main app (separate, standalone)
+- [x] Select role to initialize (from SIM template/scenario)
+- [x] Chat with agent (human ↔ AI in character)
+- [x] View cognitive state (4 blocks, expandable)
+- [ ] View context supplied for each decision (expandable) — not yet implemented
+- [x] Navigate block version history
+- [x] UX: Thucydides style guide
+- [x] NOT part of main app (separate, standalone)
 
 ### 1B. AI Module v1 (KING 4-block) — skeleton
-- [ ] `leader.py` — LeaderAgent class implementing abstract interface from DET_C1 C6
-- [ ] `profiles.py` — Load role data from CSV, generate Block 2 identity via LLM
-- [ ] `memory.py` — Block 3/4 management (create, read, update, version history)
-- [ ] `initialize()` — full agent initialization (all 4 blocks)
-- [ ] `get_cognitive_state()` / `get_state_history()` — for test interface inspection
-- [ ] `chat()` — debug conversation (human talks to agent in character)
+- [x] `leader.py` — LeaderAgent class implementing abstract interface from DET_C1 C6
+- [x] `profiles.py` — Load role data from CSV, generate Block 2 identity via LLM
+- [x] `memory.py` — Block 3/4 management (create, read, update, version history)
+- [x] `initialize()` — full agent initialization (all 4 blocks)
+- [x] `get_cognitive_state()` / `get_state_history()` — for test interface inspection
+- [x] `chat()` — debug conversation (human talks to agent in character)
 - [ ] **TEST:** Initialize 1 agent (Dealer/Columbia), chat with it, verify identity is coherent
 
 ---
@@ -174,6 +174,23 @@ Every 30 minutes of build time, ask:
 - [ ] Is the Context Assembly integration documented?
 - [ ] Are any engine interface changes captured?
 - [ ] Is the test interface approach documented?
+
+---
+
+## KING Patterns Adopted (from esplzaunxkehuankkwbx)
+
+| Pattern | KING Source | TTT Location | Status |
+|---------|-----------|-------------|--------|
+| Metacognitive architecture | ai_prompts.block_1_metacognitive_architecture | sim_config prompt_template | ✅ Seeded |
+| 4-block cognitive versioning | ai_context table | ai_context table (same pattern) | ✅ Created |
+| Conversation behavior prompt | ai_prompts.conversation_behavior | sim_config prompt_template | ✅ Seeded |
+| Intent notes | ai_prompts.generate_intent_note | sim_config prompt_template | ✅ Seeded |
+| Block reflection prompts | ai_prompts.reflection_update_block_N | sim_config prompt_template | ✅ Seeded |
+| Meeting decision prompt | ai_prompts.meeting_decision | sim_config prompt_template | ✅ Seeded |
+| Block size limits | ai_prompts.target_block_max_length | memory.py (to implement) | ☐ TODO |
+| Update queue (priority batching) | ai_update_queue table | agents/events.py (future) | ☐ TODO |
+| Per-run prompt overrides | sim_run_prompts table | sim_config per template (existing) | Partial |
+| Prompt management NOT in separate table | — | sim_config (category='prompt_template') | ✅ Decision |
 
 ---
 
