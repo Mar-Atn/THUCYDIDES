@@ -1,7 +1,7 @@
 # DET_C1 System Contracts
 ## Event Schemas, Real-Time Channels, Module Interface Contracts
 
-**Version:** 1.2 | **Date:** 2026-04-03
+**Version:** 1.3 | **Date:** 2026-04-04
 **Status:** Detailed Design
 **Sources:** SEED F2 (Data Architecture), F3 (Data Flows), F4 (API Contracts), G (Web App Spec), D8 (Engine Formulas), C7 (Time Structure), world_state.py
 **Naming authority:** [DET_NAMING_CONVENTIONS.md](DET_NAMING_CONVENTIONS.md) -- all field names, event types, and ID formats defined there
@@ -2168,11 +2168,429 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
 
 ---
 
-*This document defines the complete system contracts for TTT: event schemas (C1), real-time channel map (C2), and module interface contracts (C4). For the OpenAPI specification, see DET_C3_API_SPEC.yaml.*
+*This document defines the complete system contracts for TTT: event schemas (C1), real-time channel map (C2), module interface contracts (C4), orchestration (C5), and concurrency rules (C6). For the OpenAPI specification, see DET_C3_API_SPEC.yaml.*
+
+---
+
+# PART 4: MODULE ORCHESTRATION (C5)
+
+## 4.1 Round State Machine
+
+Every round follows this formal sequence. Transitions are managed by the orchestrator; no module may call another out of sequence.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    ROUND N LIFECYCLE                      │
+│                                                          │
+│  STATE 1: PHASE_A_ACTIVE                                 │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Duration: configurable (60-180s unmanned,          │  │
+│  │          60-120min real-time)                       │  │
+│  │                                                    │  │
+│  │ ACTIVE MODULES:                                    │  │
+│  │  • AI Participant Module (active loop, parallel)   │  │
+│  │  • Live Action Engine (on demand, per action)      │  │
+│  │  • Transaction Engine (on demand, per transaction) │  │
+│  │                                                    │  │
+│  │ HUMAN/AI ACTIONS: submitted any time               │  │
+│  │  → Validated by Edge Function / Action Framework   │  │
+│  │  → Resolved by Live Action or Transaction Engine   │  │
+│  │  → Events logged immediately                       │  │
+│  │  → Real-time broadcast to subscribers              │  │
+│  │                                                    │  │
+│  │ AI PARTICIPANT LOOP:                               │  │
+│  │  Every N seconds: check events → decide → act      │  │
+│  │  Conversations: bilateral, 8 turns, between agents │  │
+│  │  Memory updates: after each conversation/action    │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │ (timer expires OR moderator advances)        │
+│           ▼                                              │
+│  STATE 2: PHASE_A_SUBMISSION                             │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Duration: 30 seconds (automatic collection)        │  │
+│  │                                                    │  │
+│  │ COLLECT MANDATORY INPUTS from all HoS:             │  │
+│  │  • budget_submit (social, military, tech)          │  │
+│  │  • tariff_set (per target country)                 │  │
+│  │  • sanction_set (per target country)               │  │
+│  │  • opec_production (OPEC members)                  │  │
+│  │                                                    │  │
+│  │ AI agents: derive from current Block 4 strategy    │  │
+│  │ Human: submit via UI (or defaults applied)         │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │                                              │
+│           ▼                                              │
+│  STATE 3: PHASE_B_PROCESSING                             │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Duration: < 5 minutes                              │  │
+│  │                                                    │  │
+│  │ SEQUENTIAL EXECUTION (no parallelism):             │  │
+│  │  1. World Model Engine Pass 1 (deterministic)      │  │
+│  │     Oil → GDP → Revenue → Budget → Production →    │  │
+│  │     Tech → Inflation → Debt → Market Indexes →     │  │
+│  │     Stability → Support                            │  │
+│  │                                                    │  │
+│  │  2. NOUS Pass 2 (AI judgment)                      │  │
+│  │     Context assembled → LLM call → adjustments     │  │
+│  │     Mode: automatic (unmanned) or manual review    │  │
+│  │                                                    │  │
+│  │  3. Pass 3 (coherence + narrative)                 │  │
+│  │     Plausibility check → round summary             │  │
+│  │                                                    │  │
+│  │  4. Elections (if scheduled this round)             │  │
+│  │  5. Revolution checks                              │  │
+│  │  6. Health events                                  │  │
+│  │                                                    │  │
+│  │ OUTPUT: New world state snapshot + events           │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │                                              │
+│           ▼                                              │
+│  STATE 4: RESULTS_BROADCAST                              │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Duration: immediate                                │  │
+│  │                                                    │  │
+│  │ • Snapshot persisted (immutable)                    │  │
+│  │ • Events broadcast via real-time channels           │  │
+│  │ • Each recipient sees visibility-scoped results     │  │
+│  │ • AI agents: Priority 1 reflection (memory update)  │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │                                              │
+│           ▼                                              │
+│  STATE 5: PHASE_C_DEPLOYMENT                             │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ Duration: 60 seconds (unmanned) / 5 min (real-time)│  │
+│  │                                                    │  │
+│  │ • HoS deploys new/moved units to zones             │  │
+│  │ • Reserve movements executed                        │  │
+│  │ • No combat, no negotiations                        │  │
+│  └────────────────────────────────────────────────────┘  │
+│           │                                              │
+│           ▼                                              │
+│  → ROUND N+1 (loop to STATE 1)                          │
+│    OR                                                    │
+│  → GAME_END (if round_num == max_rounds)                 │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+## 4.2 Module Call Sequence (Phase B — formal)
+
+No module may be invoked out of this order during Phase B:
+
+| Step | Module | Input | Output | Depends on |
+|:----:|--------|-------|--------|-----------|
+| 1 | **World Model Engine Pass 1** | world_state + actions + events | updated state + formula results | All Phase A events collected |
+| 2 | **NOUS Pass 2** | Pass 1 output + methodology | judgment adjustments | Pass 1 complete |
+| 3 | **Apply NOUS adjustments** | judgment result | modified state | Pass 2 complete |
+| 4 | **Elections** (if scheduled) | political state | election results | Pass 2 applied |
+| 5 | **Revolution / health checks** | stability + support | regime events | Elections resolved |
+| 6 | **Pass 3 Narrative** | full round state | round summary | All above complete |
+| 7 | **Persist snapshot** | final state | immutable snapshot | Narrative generated |
+| 8 | **Broadcast results** | events + state deltas | WebSocket messages | Snapshot persisted |
+
+**Failure rule:** If any step fails, the round is marked FAILED. No partial results are committed. The moderator must intervene to retry or skip.
+
+## 4.3 Module Call Sequence (Phase A — concurrent)
+
+During Phase A, multiple modules operate **concurrently**:
+
+```
+AI Participant Loop ──→ submits action ──→ Action Framework
+                                               │
+Human UI ─────────────→ submits action ──→ Action Framework
+                                               │
+                                               ▼
+                                    ┌─ ROUTE BY TYPE ──┐
+                                    │                   │
+                                    ▼                   ▼
+                            Live Action Engine    Transaction Engine
+                            (combat, blockade)    (bilateral deals)
+                                    │                   │
+                                    ▼                   ▼
+                            Events generated      Events generated
+                                    │                   │
+                                    └─────┬─────────────┘
+                                          ▼
+                                    Event Log + Broadcast
+```
+
+All actions go through the same **Action Framework** regardless of source (human or AI). The Action Framework validates authorization, resources, and timing before routing to the appropriate engine.
+
+---
+
+# PART 5: AI PARTICIPANT ABSTRACT INTERFACE (C6)
+
+## 5.1 Purpose
+
+The AI Participant Module has a **stable abstract interface** that decouples the module's capabilities from its implementation. Multiple implementations can exist behind this interface:
+
+- **Implementation A (KING-style):** 4-block cognitive model with context caching, explicit memory management, Gemini/Claude LLM calls
+- **Implementation B (Anthropic persistent):** Long-running conversation with tool use, native memory, Claude Agent SDK
+- **Future implementations:** Fine-tuned models, hybrid approaches
+
+All implementations MUST conform to this interface. The test interface and the engine orchestrator interact with the AI Participant through this contract only.
+
+## 5.2 Abstract Interface
+
+```
+AIParticipant
+│
+├── initialize(role_id, sim_config, world_state) → ParticipantState
+│     Create and configure the agent. Load role data, generate identity.
+│     Called once per SIM run.
+│
+├── start_round(round_num, world_state_visible, events_since_last) → void
+│     Begin a new round. Update situational awareness.
+│     Called at STATE 1 (PHASE_A_ACTIVE) entry.
+│
+├── decide_action(time_remaining, new_events) → ActionDecision
+│     Proactive decision: what to do RIGHT NOW?
+│     Returns: action to take, or WAIT.
+│     Called repeatedly during active loop.
+│     ActionDecision: {action_type, details, reasoning} | WAIT
+│
+├── react_to_event(event) → ActionDecision | null
+│     Handle an incoming event (proposal, combat result, message).
+│     Returns: reaction action, or null (acknowledge only).
+│     Called when Priority 1 event arrives.
+│
+├── generate_conversation_message(conversation_context) → Message
+│     Produce next message in a conversation.
+│     Called during bilateral/multi-party conversations.
+│     Message: {text, proposals_made, end_conversation}
+│
+├── evaluate_proposal(proposal, counterpart_context) → ProposalResponse
+│     Accept, reject, or counter a transaction/deal proposal.
+│     ProposalResponse: {decision: accept|reject|counter, terms?, reasoning}
+│
+├── submit_mandatory_inputs(round_context) → MandatoryInputs
+│     Produce round-end mandatory decisions.
+│     Called at STATE 2 (PHASE_A_SUBMISSION).
+│     MandatoryInputs: {budget, tariffs, sanctions, opec, deployments}
+│
+├── reflect_on_round(round_results) → void
+│     Update internal state after round results arrive.
+│     Called at STATE 4 (RESULTS_BROADCAST).
+│
+├── get_cognitive_state() → CognitiveState
+│     Return current cognitive blocks (for inspection/debugging).
+│     CognitiveState: {block1_rules, block2_identity, block3_memory, block4_goals, version}
+│
+├── get_state_history() → list[CognitiveState]
+│     Return all past versions of cognitive state.
+│     For debugging and analysis.
+│
+└── chat(message, inspector_context) → ChatResponse
+      Debug interface: human talks to the agent outside the game.
+      The agent responds in character with full cognitive context.
+      ChatResponse: {text, blocks_referenced}
+```
+
+## 5.3 Data Contracts
+
+### ActionDecision
+
+```json
+{
+  "action_type": "string (from action catalog, or 'WAIT')",
+  "details": {
+    // Action-specific parameters matching DET_C1 Part 1.2 event payloads
+  },
+  "reasoning": "string (1-2 sentences, MODERATOR-only)",
+  "priority": "int (1=highest)"
+}
+```
+
+### MandatoryInputs
+
+```json
+{
+  "budget": {
+    "social_pct": "float (0.5-1.5, multiplier of baseline)",
+    "military_coins": "float",
+    "tech_coins": "float"
+  },
+  "tariffs": { "<country_id>": "int (0-3)" },
+  "sanctions": { "<country_id>": "int (0-3)" },
+  "opec_production": "string (min|low|normal|high|max) | null",
+  "deployments": [
+    { "unit_type": "string", "count": "int", "to_zone": "string" }
+  ]
+}
+```
+
+### CognitiveState (Implementation A — 4-block model)
+
+```json
+{
+  "version": "int (incremented on each update)",
+  "timestamp": "ISO 8601",
+  "block1_rules": "string (~3K tokens, cached)",
+  "block2_identity": "string (~500 tokens, cached, rarely updated)",
+  "block3_memory": {
+    "immediate": "string (last event)",
+    "round_history": [{ "round": "int", "summary": "string" }],
+    "strategic": "string (persistent key facts)",
+    "relationships": { "<role_id>": "float (-1 to +1)" }
+  },
+  "block4_goals": {
+    "objectives": [{ "name": "string", "urgency": "float", "status": "string" }],
+    "current_strategy": "string",
+    "contingencies": "string"
+  }
+}
+```
+
+### CognitiveState (Implementation B — Anthropic persistent agent)
+
+```json
+{
+  "version": "int",
+  "timestamp": "ISO 8601",
+  "conversation_id": "string (Anthropic conversation reference)",
+  "system_prompt": "string (identity + rules)",
+  "message_count": "int",
+  "last_summary": "string (periodic self-summary)",
+  "tools_available": ["string (registered tool names)"]
+}
+```
+
+Both implementations expose the same `get_cognitive_state()` interface. The test interface renders the appropriate view based on implementation type.
+
+## 5.4 Action Validation Contract
+
+Every action produced by `decide_action()` or `submit_mandatory_inputs()` passes through the **Action Framework** before execution:
+
+```
+AIParticipant.decide_action()
+    │
+    ▼
+Action Framework validates:
+    1. Authorization: role has power for this action_type
+    2. Resources: treasury/units/intel_pool sufficient
+    3. Timing: action allowed in current phase
+    4. Rules: action legal given current state
+    5. Co-signature: multi-role authorization if required
+    │
+    ├── VALID → route to Live Action / Transaction Engine
+    │           → execute → events generated → broadcast
+    │
+    └── INVALID → log rejection → notify agent
+                  → agent.react_to_event({type: "action_rejected", reason})
+```
+
+## 5.5 Conversation Protocol
+
+Conversations between AI participants (or AI ↔ human) use this protocol:
+
+```
+Initiator calls: decide_action() → {action_type: "request_conversation", target_role_id, intent}
+    │
+    ▼
+Action Framework:
+    1. Check initiator is IDLE
+    2. Check target is IDLE
+    3. Create conversation record
+    │
+    ▼
+Conversation Loop (max 8 turns per side):
+    Turn 1: initiator.generate_conversation_message(context) → message
+    Turn 2: responder.generate_conversation_message(context + msg1) → message
+    Turn 3: initiator.generate_conversation_message(context + msg1 + msg2) → message
+    ...
+    End: either side returns {end_conversation: true} OR max turns reached
+    │
+    ▼
+Post-conversation:
+    1. Transcript logged (visibility: ROLE for participants, MODERATOR for all)
+    2. Both agents: reflect immediately (Priority 1 memory update)
+    3. Any proposals made → logged as pending transactions
+    4. Both agents return to IDLE status
+```
+
+---
+
+# PART 6: CONCURRENCY & CONSISTENCY RULES (C7)
+
+## 6.1 Agent Concurrency During Phase A
+
+Multiple AI agents operate **simultaneously** during Phase A. Rules:
+
+| Rule | Description |
+|------|------------|
+| **Agent status lock** | Each agent has status: IDLE, DECIDING, ACTING, BUSY, REFLECTING. Only IDLE agents are polled in the active loop. |
+| **Conversation exclusivity** | An agent in a conversation (BUSY) cannot start another or take other actions until the conversation completes. |
+| **Action serialization per country** | Actions from the same country are serialized (processed one at a time). Actions from different countries can be parallel. |
+| **State read-then-act** | Agent reads state at decision time. If state changes between read and action execution, the Action Framework re-validates. |
+| **Event ordering** | Events within a round are ordered by timestamp. If two events have identical timestamps, country_id is used as tiebreaker. |
+
+## 6.2 Optimistic Concurrency
+
+The system uses **optimistic concurrency control** via `snapshot_version`:
+
+1. Agent reads state at version V
+2. Agent decides action based on version V state
+3. Action submitted with `snapshot_version: V`
+4. Action Framework checks: is current version still V?
+   - If yes: execute, increment to V+1
+   - If no: re-validate action against current version
+     - If still valid: execute
+     - If invalid (e.g., unit no longer exists): reject, notify agent
+
+## 6.3 Conversation Concurrency
+
+Two agents cannot be in the same conversation with a third simultaneously:
+
+```
+Agent A requests conversation with Agent C → starts (both BUSY)
+Agent B requests conversation with Agent C → QUEUED (C is BUSY)
+Agent A ↔ C conversation ends → both return to IDLE
+Agent B ↔ C conversation starts (if B still wants it)
+```
+
+Queued requests expire if not fulfilled within the round.
+
+## 6.4 Transaction Atomicity
+
+Transactions are **atomic** at the database level:
+
+1. Proposer creates pending transaction (state: PROPOSED)
+2. Counterpart evaluates → accepts (state: ACCEPTED)
+3. Execution: single database transaction updates both parties' state
+4. If execution fails: transaction rolled back, both parties notified
+
+No partial execution. Either both sides' state changes, or neither does.
+
+## 6.5 Phase Transition Safety
+
+When Phase A ends:
+1. All active conversations are force-ended (transcripts saved)
+2. All pending actions in queue are canceled
+3. All agents set to IDLE
+4. Mandatory inputs collected
+5. Only THEN does Phase B begin
+
+No action from Phase A can "leak" into Phase B processing.
 
 ---
 
 ## CHANGELOG (v1.1, 2026-03-30)
+
+Fixes applied per DET_VALIDATION_LEVEL1 + DET_VALIDATION_LEVEL3 findings:
+
+- **[HIGH] Standardized field names:** Event envelope `round` renamed to `round_num`. `event_id` format explicitly documented as ULID. All field names now reference DET_NAMING_CONVENTIONS.md as authority.
+- **[HIGH] Transaction type enum aligned:** Module contract 3.3 (Transaction Engine) updated from (transfer_coins, trade_deal, basing_rights, aid_package, personal_invest, bribe) to canonical engine names (coin_transfer, arms_transfer, tech_transfer, basing_rights, treaty, agreement, org_creation, personal_investment, bribe). Per DET_NAMING_CONVENTIONS 1.2.
+- **[MEDIUM] Live Action Engine contract expanded:** Module contract 3.2 action_type list now includes `impeachment`, `mobilization_order`, `militia_call`.
+- **[MEDIUM] Event type mapping:** Formal mapping from engine internal action_type to C1 event_type is documented in DET_NAMING_CONVENTIONS 1.3 (single source of truth).
+- **[LOW] Naming convention reference:** Header updated to reference DET_NAMING_CONVENTIONS.md as naming authority.
+
+## CHANGELOG (v1.3, 2026-04-04)
+
+- **[HIGH] PART 4 added: Module Orchestration (C5).** Formal round state machine. Phase B module call sequence formalized (7 steps, failure rule). Phase A concurrent module operation documented.
+- **[HIGH] PART 5 added: AI Participant Abstract Interface (C6).** Implementation-agnostic contract that both KING-style and Anthropic modules must implement. 10 methods defined (initialize, decide_action, react_to_event, generate_conversation_message, evaluate_proposal, submit_mandatory_inputs, reflect_on_round, get_cognitive_state, get_state_history, chat). Data contracts for ActionDecision, MandatoryInputs, CognitiveState (both implementations).
+- **[HIGH] PART 6 added: Concurrency & Consistency Rules (C7).** Agent status lifecycle, conversation exclusivity, action serialization per country, optimistic concurrency via snapshot_version, transaction atomicity, phase transition safety.
+- **[MEDIUM] Action validation contract added to Part 5.** 5-step validation (authorization, resources, timing, rules, co-signature) with rejection flow.
+- **[MEDIUM] Conversation protocol formalized in Part 5.** Initiation → turn loop → post-conversation reflection + transaction logging.
 
 Fixes applied per DET_VALIDATION_LEVEL1 + DET_VALIDATION_LEVEL3 findings:
 
