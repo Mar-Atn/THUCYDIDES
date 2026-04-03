@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT — AI Participant Test Interface</title>
+<style>
+  :root {
+    --bg: #0a0e17;
+    --surface: #141b2d;
+    --surface2: #1a2340;
+    --border: #2a3550;
+    --text: #c8d6e5;
+    --text-dim: #6b7b8d;
+    --accent: #4a9eff;
+    --accent2: #ff6b4a;
+    --green: #4aff8b;
+    --gold: #ffd700;
+    --font: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); display: flex; height: 100vh; }
+
+  /* LEFT PANEL — Role selector + Chat */
+  .left-panel { width: 50%; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+
+  .header { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .header h1 { font-size: 14px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; }
+  .header .subtitle { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  .role-selector { padding: 8px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .role-selector select { background: var(--surface); color: var(--text); border: 1px solid var(--border); padding: 6px 10px; font-family: var(--font); font-size: 12px; border-radius: 4px; }
+  .role-selector button { background: var(--accent); color: var(--bg); border: none; padding: 6px 14px; font-family: var(--font); font-size: 12px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+  .role-selector button:hover { opacity: 0.85; }
+  .role-selector .llm-toggle { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--text-dim); }
+  .role-selector input[type=checkbox] { accent-color: var(--accent); }
+
+  .agent-info { padding: 8px 16px; background: var(--surface); border-bottom: 1px solid var(--border); font-size: 11px; }
+  .agent-info .name { color: var(--gold); font-size: 13px; font-weight: bold; }
+  .agent-info .detail { color: var(--text-dim); }
+
+  .chat-area { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+  .chat-msg { max-width: 85%; padding: 8px 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .chat-msg.user { background: var(--surface2); align-self: flex-end; color: var(--accent); border: 1px solid var(--border); }
+  .chat-msg.agent { background: var(--surface); align-self: flex-start; border: 1px solid var(--border); }
+  .chat-msg.system { background: transparent; color: var(--text-dim); font-size: 11px; align-self: center; font-style: italic; }
+
+  .chat-input { padding: 8px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 8px; }
+  .chat-input input { flex: 1; background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; font-family: var(--font); font-size: 13px; border-radius: 4px; }
+  .chat-input input:focus { outline: none; border-color: var(--accent); }
+  .chat-input button { background: var(--accent); color: var(--bg); border: none; padding: 8px 16px; font-family: var(--font); cursor: pointer; border-radius: 4px; font-weight: bold; }
+
+  /* RIGHT PANEL — Cognitive blocks */
+  .right-panel { width: 50%; display: flex; flex-direction: column; overflow-y: auto; }
+  .right-header { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .right-header h2 { font-size: 13px; color: var(--green); letter-spacing: 1px; text-transform: uppercase; }
+  .version-nav { font-size: 11px; color: var(--text-dim); display: flex; gap: 8px; align-items: center; }
+  .version-nav button { background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 2px 8px; cursor: pointer; font-family: var(--font); font-size: 11px; border-radius: 3px; }
+
+  .block { margin: 8px 12px; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+  .block-header { padding: 8px 12px; background: var(--surface2); cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: bold; }
+  .block-header .label { color: var(--gold); }
+  .block-header .size { color: var(--text-dim); font-weight: normal; font-size: 10px; }
+  .block-header:hover { background: var(--surface); }
+  .block-content { padding: 8px 12px; font-size: 11px; line-height: 1.6; white-space: pre-wrap; display: none; max-height: 300px; overflow-y: auto; }
+  .block-content.open { display: block; }
+  .block-content .key { color: var(--accent); }
+  .block-content .val { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <div class="header">
+    <h1>Thucydides Trap — AI Test Interface</h1>
+    <div class="subtitle">Development tool — not part of main app</div>
+  </div>
+
+  <div class="role-selector">
+    <select id="roleSelect"><option value="">Select role...</option></select>
+    <button onclick="initAgent()">Initialize</button>
+    <label class="llm-toggle"><input type="checkbox" id="useLlm"> Use LLM</label>
+  </div>
+
+  <div class="agent-info" id="agentInfo">
+    <div class="detail">No agent initialized. Select a role above.</div>
+  </div>
+
+  <div class="chat-area" id="chatArea">
+    <div class="chat-msg system">Select and initialize a role to start chatting.</div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="chatInput" placeholder="Talk to the agent..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="right-header">
+    <h2>Cognitive State</h2>
+    <div class="version-nav">
+      <span id="versionLabel">v0</span>
+      <button onclick="prevVersion()">◀</button>
+      <button onclick="nextVersion()">▶</button>
+      <button onclick="latestVersion()">Latest</button>
+    </div>
+  </div>
+  <div id="blocksContainer">
+    <div class="block">
+      <div class="block-header" onclick="toggleBlock('b1')">
+        <span class="label">Block 1: Rules</span>
+        <span class="size" id="b1size">—</span>
+      </div>
+      <div class="block-content" id="b1">Not loaded</div>
+    </div>
+    <div class="block">
+      <div class="block-header" onclick="toggleBlock('b2')">
+        <span class="label">Block 2: Identity</span>
+        <span class="size" id="b2size">—</span>
+      </div>
+      <div class="block-content" id="b2">Not loaded</div>
+    </div>
+    <div class="block">
+      <div class="block-header" onclick="toggleBlock('b3')">
+        <span class="label">Block 3: Memory</span>
+        <span class="size" id="b3size">—</span>
+      </div>
+      <div class="block-content" id="b3">Not loaded</div>
+    </div>
+    <div class="block">
+      <div class="block-header" onclick="toggleBlock('b4')">
+        <span class="label">Block 4: Goals & Strategy</span>
+        <span class="size" id="b4size">—</span>
+      </div>
+      <div class="block-content" id="b4">Not loaded</div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentRoleId = '';
+let stateHistory = [];
+let viewingVersion = -1;
+
+// Load roles on startup
+fetch('/api/roles').then(r => r.json()).then(data => {
+  const sel = document.getElementById('roleSelect');
+  const group1 = document.createElement('optgroup');
+  group1.label = 'Heads of State (21)';
+  data.heads_of_state.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.name} — ${r.title} (${r.country})`;
+    group1.appendChild(opt);
+  });
+  sel.appendChild(group1);
+  const group2 = document.createElement('optgroup');
+  group2.label = 'Other Roles';
+  data.other_roles.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.name} — ${r.title} (${r.country})`;
+    group2.appendChild(opt);
+  });
+  sel.appendChild(group2);
+});
+
+function initAgent() {
+  const roleId = document.getElementById('roleSelect').value;
+  if (!roleId) return;
+  const useLlm = document.getElementById('useLlm').checked;
+
+  addChat('system', `Initializing ${roleId}${useLlm ? ' with LLM...' : '...'}`);
+
+  fetch('/api/agent/init', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role_id: roleId, use_llm: useLlm})
+  }).then(r => r.json()).then(data => {
+    currentRoleId = roleId;
+    updateAgentInfo(data.agent);
+    updateCognitiveState(data.cognitive_state);
+    addChat('system', `✓ ${data.agent.character_name} initialized (${data.agent.title} of ${data.agent.country})`);
+    loadHistory();
+  });
+}
+
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg || !currentRoleId) return;
+  input.value = '';
+
+  const useLlm = document.getElementById('useLlm').checked;
+  addChat('user', msg);
+
+  fetch('/api/agent/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role_id: currentRoleId, message: msg, use_llm: useLlm})
+  }).then(r => r.json()).then(data => {
+    addChat('agent', data.response);
+    updateCognitiveState(data.cognitive_state);
+    updateAgentInfo(data.agent);
+  });
+}
+
+function addChat(type, text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${type}`;
+  div.textContent = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function updateAgentInfo(agent) {
+  const info = document.getElementById('agentInfo');
+  info.innerHTML = `
+    <div class="name">${agent.character_name} — ${agent.title}</div>
+    <div class="detail">${agent.country} (${agent.parallel || ''}) | Status: ${agent.status} | Cognitive v${agent.cognitive_version}</div>
+    <div class="detail">Objectives: ${(agent.objectives || []).join(', ')}</div>
+  `;
+}
+
+function updateCognitiveState(state) {
+  if (!state) return;
+  document.getElementById('versionLabel').textContent = `v${state.version}`;
+
+  setBlock('b1', state.block1_rules);
+  setBlock('b2', state.block2_identity);
+  setBlock('b3', typeof state.block3_memory === 'string' ? state.block3_memory : JSON.stringify(state.block3_memory, null, 2));
+  setBlock('b4', typeof state.block4_goals === 'string' ? state.block4_goals : JSON.stringify(state.block4_goals, null, 2));
+}
+
+function setBlock(id, content) {
+  const el = document.getElementById(id);
+  const sizeEl = document.getElementById(id + 'size');
+  el.textContent = content || '(empty)';
+  const chars = (content || '').length;
+  sizeEl.textContent = `${chars} chars (~${Math.round(chars/4)} tokens)`;
+}
+
+function toggleBlock(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function loadHistory() {
+  fetch(`/api/agent/history?role_id=${currentRoleId}`).then(r => r.json()).then(data => {
+    stateHistory = data.history || [];
+    viewingVersion = stateHistory.length - 1;
+  });
+}
+
+function prevVersion() {
+  if (viewingVersion > 0) {
+    viewingVersion--;
+    updateCognitiveState(stateHistory[viewingVersion]);
+  }
+}
+
+function nextVersion() {
+  if (viewingVersion < stateHistory.length - 1) {
+    viewingVersion++;
+    updateCognitiveState(stateHistory[viewingVersion]);
+  }
+}
+
+function latestVersion() {
+  fetch(`/api/agent/state?role_id=${currentRoleId}`).then(r => r.json()).then(data => {
+    updateCognitiveState(data);
+    loadHistory();
+  });
+}
+</script>
+</body>
+</html>
