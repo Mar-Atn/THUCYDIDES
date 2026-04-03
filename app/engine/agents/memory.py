@@ -193,38 +193,28 @@ class CognitiveState:
     # Block 4: Goals
     # ------------------------------------------------------------------
 
-    def set_goals(self, objectives: list[dict], strategy: str = "", contingencies: str = ""):
-        """Set Block 4 goals."""
-        self.block4_goals["objectives"] = objectives
-        self.block4_goals["current_strategy"] = strategy
-        self.block4_goals["contingencies"] = contingencies
+    def set_goals_text(self, text: str):
+        """Set Block 4 as rich plain text (LLM-generated strategic brief)."""
+        self.block4_goals = {"_text": text}
         self.save_version("goals_set")
 
-    def update_strategy(self, new_strategy: str, priority_assessment: dict = None):
-        """Update strategic priorities."""
-        self.block4_goals["current_strategy"] = new_strategy
-        if priority_assessment:
-            self.block4_goals["priority_assessment"] = priority_assessment
-        self.save_version("strategy_updated")
+    def update_goals_text(self, new_text: str, reason: str = ""):
+        """Replace Block 4 text entirely (after reflection)."""
+        self.block4_goals = {"_text": new_text}
+        self.save_version(f"goals_updated:{reason}" if reason else "goals_updated")
 
     def get_goals_text(self) -> str:
-        """Build Block 4 as text for LLM context."""
-        lines = ["## Goals & Strategy\n"]
+        """Get Block 4 as text for LLM context."""
+        # Plain text mode (LLM-generated)
+        if "_text" in self.block4_goals:
+            return f"## Goals & Strategy\n\n{self.block4_goals['_text']}"
 
-        for obj in self.block4_goals["objectives"]:
+        # Legacy structured mode (fallback)
+        lines = ["## Goals & Strategy\n"]
+        for obj in self.block4_goals.get("objectives", []):
             urgency = obj.get("urgency", "normal")
             status = obj.get("status", "")
             lines.append(f"- **{obj['name']}** [{urgency}] {status}")
-
-        if self.block4_goals["current_strategy"]:
+        if self.block4_goals.get("current_strategy"):
             lines.append(f"\n**Current strategy:** {self.block4_goals['current_strategy']}")
-
-        if self.block4_goals["priority_assessment"]:
-            lines.append("\n**Priority assessment:**")
-            for k, v in self.block4_goals["priority_assessment"].items():
-                lines.append(f"- {k}: {v}")
-
-        if self.block4_goals["contingencies"]:
-            lines.append(f"\n**Contingencies:** {self.block4_goals['contingencies']}")
-
         return "\n".join(lines)

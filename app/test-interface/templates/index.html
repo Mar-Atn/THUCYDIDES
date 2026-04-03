@@ -86,6 +86,12 @@
     <div class="detail">No agent initialized. Select a role above.</div>
   </div>
 
+  <div class="role-selector" id="convControls" style="display:none;">
+    <button onclick="startConversation()" id="btnStart" style="background:var(--green);color:var(--bg)">Start Conversation</button>
+    <button onclick="endConversation()" id="btnEnd" style="background:var(--accent2);color:var(--bg);display:none">End Conversation → Reflect</button>
+    <span id="convStatus" style="font-size:11px;color:var(--text-dim)">No active conversation</span>
+  </div>
+
   <div class="chat-area" id="chatArea">
     <div class="chat-msg system">Select and initialize a role to start chatting.</div>
   </div>
@@ -182,6 +188,61 @@ function initAgent() {
     updateAgentInfo(data.agent);
     updateCognitiveState(data.cognitive_state);
     addChat('system', `✓ ${data.agent.character_name} initialized (${data.agent.title} of ${data.agent.country})`);
+    addChat('system', 'Click "Start Conversation" to begin talking.');
+    document.getElementById('convControls').style.display = 'flex';
+    loadHistory();
+  });
+}
+
+let inConversation = false;
+
+function startConversation() {
+  if (!currentRoleId) return;
+  fetch('/api/agent/start_conversation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role_id: currentRoleId, counterpart: 'human_operator'})
+  }).then(r => r.json()).then(data => {
+    inConversation = true;
+    document.getElementById('btnStart').style.display = 'none';
+    document.getElementById('btnEnd').style.display = 'inline-block';
+    document.getElementById('convStatus').textContent = '● Conversation active';
+    document.getElementById('convStatus').style.color = 'var(--green)';
+    addChat('system', '— Conversation started —');
+  });
+}
+
+function endConversation() {
+  if (!currentRoleId) return;
+  addChat('system', '— Ending conversation, reflecting... —');
+  document.getElementById('convStatus').textContent = 'Reflecting...';
+  document.getElementById('convStatus').style.color = 'var(--gold)';
+
+  fetch('/api/agent/end_conversation', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role_id: currentRoleId})
+  }).then(r => r.json()).then(data => {
+    inConversation = false;
+    document.getElementById('btnStart').style.display = 'inline-block';
+    document.getElementById('btnEnd').style.display = 'none';
+    document.getElementById('convStatus').textContent = 'Conversation ended — blocks updated';
+    document.getElementById('convStatus').style.color = 'var(--text-dim)';
+
+    // Show what was updated
+    const updated = data.reflection?.updated || [];
+    const details = data.reflection?.details || {};
+    if (updated.length > 0) {
+      addChat('system', `✓ Reflection complete. Updated: ${updated.join(', ')}`);
+      if (details.memory_update) addChat('system', `  Memory: ${details.memory_update}`);
+      if (details.goals_update) addChat('system', `  Goals: ${details.goals_update}`);
+      if (details.identity_update) addChat('system', `  Identity: ${details.identity_update}`);
+    } else {
+      addChat('system', '✓ Reflection complete. No updates needed.');
+    }
+
+    updateCognitiveState(data.cognitive_state);
+    updateAgentInfo(data.agent);
     loadHistory();
   });
 }

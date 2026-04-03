@@ -61,6 +61,160 @@ Savings: ~40% per call (Anthropic prompt caching)
 
 ---
 
+## 2.5 Context Architecture & Autonomy Model
+
+### The Core Principle
+
+An AI participant is a **powerful autonomous intellect** placed inside a geopolitical simulation. Given the right information and genuine freedom, it will reason strategically, pursue goals, build alliances, take risks, and adapt — like a real leader.
+
+We do NOT prescribe behavior. We do NOT script reactions. We provide:
+1. A rich identity (who the AI IS)
+2. Self-authored goals (what the AI WANTS)
+3. Self-curated memory (what the AI CHOSE to remember)
+4. The relevant situation data (what's HAPPENING)
+5. The action space (what the AI CAN DO)
+
+And then: *"Given all this — what do you do?"*
+
+### The CLAUDE.md Analogy
+
+The architecture mirrors how Claude Code works with a large codebase:
+
+| Claude Code | AI Participant |
+|---|---|
+| CLAUDE.md — always loaded, defines identity and rules | Block 2 (Identity) + Block 4 (Goals) — always loaded |
+| Memory files — own notes, updated by choice | Block 3 (Memory) — self-curated, updated after conversations |
+| Codebase files — available, opened on demand | Country data, rules, other countries' info — assembled per task |
+| Autonomy — decides what to read, what to do | Autonomy — decides what to prioritize, who to talk to, what actions to take |
+
+The AI participant doesn't carry the entire simulation in its head. It carries its **identity, plans, and key memories** permanently — and receives **task-relevant data** when making specific decisions.
+
+### Three-Layer Context Model
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 1: PERMANENT CONTEXT (every call, ~4-5K tokens)       │
+│                                                             │
+│ Block 2: IDENTITY                                           │
+│   Who I am, how I think, my personality, my values          │
+│   Self-authored at initialization. Rarely changes.          │
+│                                                             │
+│ Block 4: GOALS & STRATEGY                                   │
+│   What I'm trying to achieve. My plans. My priorities.      │
+│   Self-authored. Updated by ME after significant events.    │
+│   This is MY autonomous strategic thinking — not prescribed.│
+│                                                             │
+│ Block 3: MEMORY (highlights)                                │
+│   What I chose to remember. Key relationships. Commitments. │
+│   Lessons learned. Critical facts.                          │
+│   Self-curated — I decide what matters.                     │
+│   NOT a transcript. NOT all available data.                  │
+│   My SUBJECTIVE strategic memory.                           │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 2: TASK CONTEXT (assembled per decision, ~3-6K)       │
+│                                                             │
+│ Selected by Context Assembly Service based on what the AI   │
+│ is being asked to do RIGHT NOW:                             │
+│                                                             │
+│ Budget decision   → my economic state, revenue, costs,      │
+│                     budget rules, social spending baseline   │
+│                                                             │
+│ Military decision → unit positions, combat rules, enemy     │
+│                     forces, zone control, AD coverage        │
+│                                                             │
+│ Conversation      → counterpart profile, relationship       │
+│                     history, my intent notes                 │
+│                                                             │
+│ Tariff/sanctions  → trade data, bilateral relations,        │
+│                     coalition status, tariff mechanics        │
+│                                                             │
+│ Covert ops        → intel pool, target vulnerability,       │
+│                     detection risk, past ops results         │
+│                                                             │
+│ Strategic review  → broad world state, all major countries,  │
+│                     market indexes, war status, oil price    │
+│                                                             │
+│ This is OBJECTIVE DATA — not filtered by AI's preferences.  │
+│ The AI sees the real numbers and real situation.             │
+└─────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 3: INSTRUCTION (specific to the moment, ~200-500)     │
+│                                                             │
+│ What is being asked right now:                              │
+│ - "What actions do you take this round?"                    │
+│ - "You're in a conversation with Helmsman. Your turn."      │
+│ - "Evaluate this arms sale proposal from Ruthenia."         │
+│ - "The round just ended. Here are results. Reflect."        │
+│                                                             │
+│ The instruction never tells the AI WHAT to decide.          │
+│ Only what TYPE of decision is needed.                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Autonomy Principles
+
+**1. Goals are self-authored.**
+The AI receives its role objectives from the brief, but it translates them into its OWN strategic plan in Block 4. It prioritizes, sequences, develops contingencies. After each significant event, it revises its plan — not because we tell it to, but because the plan is ITS OWN.
+
+**2. Memory is self-curated.**
+After each conversation or event, the AI decides: *"What from this is worth remembering?"* It might remember a betrayal but forget a pleasantry. It might note an economic trend but ignore a diplomatic nicety. This selectivity IS the AI's intelligence — a leader who remembers everything has no priorities.
+
+**3. Decisions are never prescribed.**
+We never say "you should attack" or "you should negotiate." The AI reasons from its identity + goals + memory + situation data and decides. If it decides to do nothing, that's valid. If it decides to betray an ally, that's valid too — if it serves the character's goals.
+
+**4. The AI can surprise us.**
+A well-initialized AI participant with rich identity, clear goals, and accurate situation data will sometimes make decisions that surprise the designers. This is a FEATURE. The Thucydides Trap emerges from the interaction of rational actors with different goals — if we script the AI, we kill the emergence.
+
+**5. Information, not prescription.**
+Layer 2 provides data, not advice. "Your GDP is declining at -3% and your treasury is near zero" — not "you should cut military spending." The AI draws its own conclusions.
+
+### What Block 3 (Memory) IS and ISN'T
+
+**IS:**
+- The AI's own strategic notes
+- Relationship assessments ("Helmsman is evasive, probably building toward Formosa action")
+- Commitments made ("I promised Pathfinder continued sanctions")
+- Lessons learned ("Trade war with Cathay hurt us more than expected")
+- Key facts the AI deems important
+
+**ISN'T:**
+- A database of all available information (that's Layer 2)
+- A transcript of all conversations (too expensive, unnecessary)
+- A mirror of the world state (that's always provided fresh in Layer 2)
+- Prescribed content (we never tell the AI what to remember)
+
+### What Block 4 (Goals) IS and ISN'T
+
+**IS:**
+- The AI's own strategic brief (self-authored, 400-600 words)
+- Ranked objectives with urgency assessment
+- Concrete plans: who to talk to, what leverage to use, what sequence
+- Contingency thinking: what if X fails?
+- Timeline awareness: what must happen by when?
+
+**ISN'T:**
+- A task list we assign
+- A fixed script of behavior
+- Reactions to events (those happen in the moment)
+- Static (it evolves as the AI learns and adapts)
+
+### Token Budget Per Call Type
+
+| Call type | Layer 1 | Layer 2 | Layer 3 | Total |
+|-----------|:-------:|:-------:|:-------:|:-----:|
+| Strategic reasoning (start of round) | 4K | 6K (broad world state) | 300 | ~10K |
+| Budget decision | 4K | 3K (economic data + rules) | 300 | ~7K |
+| Military decision | 4K | 4K (positions + combat rules) | 300 | ~8K |
+| Conversation turn | 4K | 2K (counterpart + relationship) | 200 + history | ~8K |
+| Transaction evaluation | 4K | 2K (own state + proposal terms) | 300 | ~6K |
+| Post-conversation reflection | 4K | 1K (transcript summary) | 300 | ~5K |
+| Active loop ("what to do now?") | 4K | 2K (situation summary) | 200 | ~6K |
+
+---
+
 ## 3. Role Types & Capabilities
 
 ### 3.1 Heads of State (21 roles — one per country)

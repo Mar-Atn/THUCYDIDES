@@ -61,6 +61,8 @@ class LeaderAgent:
         self.cognitive = CognitiveState(role_id)
         self.status: str = "uninitialized"  # uninitialized → idle → deciding → acting → busy → reflecting
         self._initialized = False
+        self._conversation_history: list[dict] = []
+        self._conversation_counterpart: str = ""
 
     # ------------------------------------------------------------------
     # DET_C1 C6: initialize()
@@ -97,15 +99,9 @@ class LeaderAgent:
         # Block 3: Memory (initial relationships)
         self.cognitive.set_relationships(self._initial_relationships(world_state))
 
-        # Block 4: Goals (from role objectives)
-        objectives = [
-            {"name": obj, "urgency": "normal", "status": "initial"}
-            for obj in self.role["objectives"]
-        ]
-        self.cognitive.set_goals(
-            objectives=objectives,
-            strategy=f"Round 1: assess situation, establish key relationships, pursue {self.role['objectives'][0] if self.role['objectives'] else 'survival'}",
-        )
+        # Block 4: Goals & Strategy (LLM-generated — rich strategic thinking)
+        goals_text = await self._generate_goals()
+        self.cognitive.set_goals_text(goals_text)
 
         self.status = "idle"
         self._initialized = True
@@ -140,11 +136,15 @@ class LeaderAgent:
 
         self.cognitive.set_relationships(self._initial_relationships(world_state))
 
-        objectives = [
-            {"name": obj, "urgency": "normal", "status": "initial"}
-            for obj in self.role["objectives"]
-        ]
-        self.cognitive.set_goals(objectives=objectives)
+        # Block 4: simple default for sync (no LLM)
+        self.cognitive.set_goals_text(
+            f"OBJECTIVES:\n"
+            + "\n".join(f"- {obj}" for obj in self.role["objectives"])
+            + f"\n\nTICKING CLOCK: {self.role['ticking_clock']}\n\n"
+            f"INITIAL STRATEGY: Assess the situation. Establish key relationships. "
+            f"Prioritize {self.role['objectives'][0] if self.role['objectives'] else 'survival'}.\n\n"
+            f"PLANS: To be developed based on initial assessment."
+        )
 
         self.status = "idle"
         self._initialized = True
@@ -166,28 +166,155 @@ class LeaderAgent:
     # ------------------------------------------------------------------
 
     async def chat(self, message: str) -> str:
-        """Debug chat: human talks to agent in character.
+        """One message within an ongoing conversation.
 
-        The agent responds using its full cognitive context.
+        The conversation history is maintained in self._conversation_history.
+        Memory is NOT updated per message — only when end_conversation() is called.
         """
         from engine.services.llm import call_llm
         from engine.config.settings import LLMUseCase
 
+        # Build system prompt from cognitive blocks
         system = (
+            f"You are {self.role['character_name']}, {self.role['title']} of {self.country['sim_name']}. "
+            f"Respond in character. Be strategic, direct, and authentic to your personality.\n\n"
             f"{self.cognitive.block2_identity}\n\n"
             f"{self.cognitive.get_memory_text()}\n\n"
             f"{self.cognitive.get_goals_text()}"
         )
 
+        # Add to conversation history
+        self._conversation_history.append({"role": "user", "content": message})
+
         response = await call_llm(
             use_case=LLMUseCase.AGENT_DECISION,
-            messages=[{"role": "user", "content": message}],
-            system=f"You are {self.role['character_name']}, {self.role['title']} of {self.country['sim_name']}. "
-                   f"Respond in character. Be strategic, direct, and authentic to your personality.\n\n{system}",
+            messages=list(self._conversation_history),
+            system=system,
             max_tokens=500,
             temperature=0.7,
         )
-        return response.text
+        agent_response = response.text
+
+        # Add response to history (LLM sees full conversation next turn)
+        self._conversation_history.append({"role": "assistant", "content": agent_response})
+
+        return agent_response
+
+    def start_conversation(self, counterpart: str = "human_operator"):
+        """Begin a new conversation. Clears message history."""
+        self._conversation_history = []
+        self._conversation_counterpart = counterpart
+        self.status = "busy"
+        logger.info("Conversation started: %s with %s", self.role_id, counterpart)
+
+    async def end_conversation(self) -> dict:
+        """End conversation and reflect. Updates Blocks 2/3/4 as needed.
+
+        Returns dict with what was updated.
+        """
+        from engine.services.llm import call_llm
+        from engine.config.settings import LLMUseCase
+
+        if not self._conversation_history:
+            self.status = "idle"
+            return {"updated": []}
+
+        # Build transcript summary for reflection
+        transcript = "\n".join(
+            f"{'THEM' if m['role'] == 'user' else 'YOU'}: {m['content']}"
+            for m in self._conversation_history
+        )
+        counterpart = getattr(self, '_conversation_counterpart', 'unknown')
+
+        # Single reflection call — agent decides what to update
+        reflection_prompt = (
+            f"You just finished a conversation with {counterpart}.\n\n"
+            f"TRANSCRIPT:\n{transcript}\n\n"
+            f"YOUR CURRENT MEMORY (Block 3):\n{self.cognitive.get_memory_text()}\n\n"
+            f"YOUR CURRENT GOALS (Block 4):\n{self.cognitive.get_goals_text()}\n\n"
+            f"REFLECT on this conversation. Return a JSON object:\n"
+            f'{{\n'
+            f'  "memory_update": "What to add to your memory (1-3 sentences of what matters strategically. null if nothing worth remembering)",\n'
+            f'  "relationship_change": 0.0,  // -0.3 to +0.3 trust change with counterpart\n'
+            f'  "goals_update": "Any adjustment to your goals/priorities (null if no change)",\n'
+            f'  "identity_update": "Only if something fundamental changed about who you are (almost always null)"\n'
+            f'}}\n\n'
+            f"Be selective. Not every conversation is worth remembering in full. "
+            f"Return ONLY valid JSON."
+        )
+
+        try:
+            reflection = await call_llm(
+                use_case=LLMUseCase.AGENT_REFLECTION,
+                messages=[{"role": "user", "content": reflection_prompt}],
+                system=f"You are {self.role['character_name']}. Reflect on this conversation and decide what to update in your cognitive blocks. Return JSON only.",
+                max_tokens=500,
+                temperature=0.3,
+            )
+            updates = self._parse_reflection(reflection.text, counterpart)
+        except Exception as e:
+            logger.warning("Reflection failed for %s: %s", self.role_id, e)
+            updates = {
+                "memory_update": f"Spoke with {counterpart} about various matters.",
+                "relationship_change": 0.0,
+                "goals_update": None,
+                "identity_update": None,
+            }
+
+        # Apply updates
+        updated_blocks = []
+
+        if updates.get("memory_update"):
+            self.cognitive.add_conversation(
+                counterpart=counterpart,
+                summary=updates["memory_update"],
+                trust_change=updates.get("relationship_change", 0.0),
+            )
+            updated_blocks.append("block3_memory")
+
+        if updates.get("goals_update"):
+            current_goals = self.cognitive.get_goals_text()
+            new_goals = f"{current_goals}\n\n[Updated after conversation with {counterpart}]:\n{updates['goals_update']}"
+            self.cognitive.update_goals_text(new_goals, reason=f"conversation_with_{counterpart}")
+            updated_blocks.append("block4_goals")
+
+        if updates.get("identity_update"):
+            old_identity = self.cognitive.block2_identity
+            self.cognitive.block2_identity = f"{old_identity}\n\n[Updated]: {updates['identity_update']}"
+            self.cognitive.save_version(f"identity_shift_after_{counterpart}")
+            updated_blocks.append("block2_identity")
+
+        # Clear conversation history, return to idle
+        self._conversation_history = []
+        self.status = "idle"
+
+        logger.info("Reflection complete for %s: updated %s", self.role_id, updated_blocks)
+        return {
+            "updated": updated_blocks,
+            "details": updates,
+        }
+
+    def _parse_reflection(self, text: str, counterpart: str) -> dict:
+        """Parse LLM reflection JSON output."""
+        import json as _json
+        text = text.strip()
+        if text.startswith("```"):
+            text = text.split("\n", 1)[1] if "\n" in text else text[3:]
+        if text.endswith("```"):
+            text = text[:-3]
+        text = text.strip()
+        if text.startswith("json"):
+            text = text[4:].strip()
+
+        try:
+            return _json.loads(text)
+        except Exception:
+            return {
+                "memory_update": f"Spoke with {counterpart}.",
+                "relationship_change": 0.0,
+                "goals_update": None,
+                "identity_update": None,
+            }
 
     def chat_sync(self, message: str) -> str:
         """Synchronous chat (for testing without LLM)."""
@@ -267,6 +394,40 @@ class LeaderAgent:
     # ------------------------------------------------------------------
     # Internal helpers
     # ------------------------------------------------------------------
+
+    async def _generate_goals(self) -> str:
+        """Generate Block 4 goals & strategy via LLM."""
+        from engine.services.llm import call_llm
+        from engine.config.settings import LLMUseCase
+
+        prompt = (
+            f"You are {self.role['character_name']}, {self.role['title']} of {self.country['sim_name']} ({self.country['parallel']}).\n\n"
+            f"YOUR IDENTITY:\n{self.cognitive.block2_identity}\n\n"
+            f"YOUR OBJECTIVES (from role brief):\n"
+            + "\n".join(f"- {obj}" for obj in self.role["objectives"])
+            + f"\n\nYOUR TICKING CLOCK: {self.role['ticking_clock']}\n\n"
+            f"YOUR COUNTRY:\n"
+            f"- GDP: {self.country['gdp']} ({self.country['regime_type']})\n"
+            f"- Stability: {self.country['stability']}, Support: {self.country['political_support']}%\n"
+            f"- Military: {self.country['mil_ground']} ground, {self.country['mil_naval']} naval, {self.country['mil_tactical_air']} air\n"
+            f"- Nuclear L{self.country['nuclear_level']}, AI L{self.country['ai_level']}\n\n"
+            f"Create your STRATEGIC BRIEF (Block 4). Write as plain text, ~400-600 words:\n\n"
+            f"1. RANKED OBJECTIVES — your priorities in order, with urgency level and brief status assessment\n"
+            f"2. CURRENT STRATEGY — how you plan to pursue your top 2-3 objectives. Be specific: who to talk to, what leverage to use, what sequence of actions\n"
+            f"3. KEY RELATIONSHIPS — who are your allies, rivals, and unknowns? What do you need from each?\n"
+            f"4. RISKS & CONTINGENCIES — what could go wrong? What's your fallback?\n"
+            f"5. TIMELINE PRESSURE — what must happen by when? (relate to your ticking clock)\n\n"
+            f"Write as a leader thinks — concrete, strategic, action-oriented. Not abstract."
+        )
+
+        response = await call_llm(
+            use_case=LLMUseCase.AGENT_DECISION,
+            messages=[{"role": "user", "content": prompt}],
+            system="Generate a strategic goals brief for this leader. Write as plain text, structured but natural. Be specific and actionable.",
+            max_tokens=800,
+            temperature=0.7,
+        )
+        return response.text
 
     async def _generate_identity(self) -> str:
         """Generate Block 2 identity via LLM."""

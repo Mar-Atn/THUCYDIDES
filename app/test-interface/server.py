@@ -84,6 +84,10 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._json_response(self._init_agent(body))
         elif path == "/api/agent/chat":
             self._json_response(self._chat(body))
+        elif path == "/api/agent/start_conversation":
+            self._json_response(self._start_conversation(body))
+        elif path == "/api/agent/end_conversation":
+            self._json_response(self._end_conversation(body))
         else:
             self.send_error(404)
 
@@ -144,6 +148,37 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
 
         return {
             "response": response,
+            "agent": agent.info(),
+            "cognitive_state": agent.get_cognitive_state(),
+        }
+
+    def _start_conversation(self, body):
+        """Start a new conversation with an agent."""
+        role_id = body.get("role_id", "")
+        counterpart = body.get("counterpart", "human_operator")
+        agent = get_or_create_agent(role_id)
+        agent.start_conversation(counterpart)
+        return {
+            "success": True,
+            "status": agent.status,
+            "message": f"Conversation started with {agent.role.get('character_name', role_id)}",
+        }
+
+    def _end_conversation(self, body):
+        """End conversation and trigger reflection."""
+        role_id = body.get("role_id", "")
+        if role_id not in _agents:
+            return {"error": f"Agent {role_id} not initialized"}
+        agent = _agents[role_id]
+
+        try:
+            result = asyncio.run(agent.end_conversation())
+        except Exception as e:
+            result = {"updated": [], "error": str(e)}
+
+        return {
+            "success": True,
+            "reflection": result,
             "agent": agent.info(),
             "cognitive_state": agent.get_cognitive_state(),
         }
