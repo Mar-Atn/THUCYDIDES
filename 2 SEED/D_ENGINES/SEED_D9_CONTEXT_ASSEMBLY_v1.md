@@ -7,7 +7,7 @@
 
 ## 1. Purpose
 
-The Context Assembly Service is a **shared infrastructure module** that builds LLM-ready context from SIM run data. Every LLM consumer in the system (engine judgment, leader agents, Argus, narrative generation, election AI voters) requests context through this service rather than assembling it independently.
+The Context Assembly Service is a **shared infrastructure module** that builds LLM-ready context from SIM run data. Every LLM consumer in the system (NOUS, leader agents, Argus, narrative generation, election AI voters) requests context through this service rather than assembling it independently.
 
 **Why it exists:**
 - Eliminates duplication (5+ consumers need overlapping context)
@@ -80,14 +80,14 @@ When a consumer requests `world_state`, it must specify a visibility scope:
 
 ## 4. Consumer Profiles
 
-### 4.1 Engine Judgment (Pass 2)
+### 4.1 NOUS (Pass 2)
 **Frequency:** 1 call/round | **Token budget:** ~15K | **Visibility:** MODERATOR
 
 ```
 Blocks: sim_rules + methodology + sim_history + world_state + round_inputs + round_outputs
 ```
 
-The judgment module gets full visibility — it needs to see everything to make good assessments. Methodology block contains "The Book" (definitions, principles, historical examples, bounds).
+NOUS gets full visibility — it needs to see everything to make good assessments. Methodology block contains "The Book" (definitions, principles, historical examples, bounds).
 
 ### 4.2 Leader Agent Decision
 **Frequency:** 21 calls/round | **Token budget:** ~10K | **Visibility:** COUNTRY+ROLE
@@ -138,14 +138,14 @@ Blocks: world_state + round_outputs + judgment_recommendations + flags + compari
 
 | Consumer | Blocks | Estimated Tokens | Model |
 |----------|--------|-----------------|-------|
-| Engine Judgment | 6 blocks | ~15K | Claude Opus / Gemini Pro |
+| NOUS | 6 blocks | ~15K | Claude Opus / Gemini Pro |
 | Leader Agent | 6 blocks | ~10K | Claude Sonnet / Gemini Flash |
 | Argus | 5 blocks | ~12K | Claude Sonnet (voice: Gemini Flash) |
 | Narrative | 4 blocks | ~8K | Claude Sonnet |
 | Election voter | 3 blocks | ~4K | Gemini Flash |
 | Moderator brief | 5 blocks | ~12K | Claude Sonnet |
 
-**Cost control:** Leader agents (21×/round) and Argus (high frequency) use cheaper models. Judgment (1×/round) uses the best model for quality.
+**Cost control:** Leader agents (21×/round) and Argus (high frequency) use cheaper models. NOUS (1×/round) uses the best model for quality.
 
 ---
 
@@ -239,7 +239,7 @@ class ContextAssembler:
             ┌──────────┘   │   │   │   └──────────┐
             │              │   │   │              │
      ┌──────┴──────┐  ┌───┴───┴───┐  ┌───────┐  ┌┴──────────┐
-     │  Judgment    │  │  Leader   │  │ Argus │  │ Narrative  │
+     │  NOUS       │  │  Leader   │  │ Argus │  │ Narrative  │
      │  (Pass 2)   │  │  Agents   │  │       │  │ (Pass 3)   │
      └──────┬──────┘  └───────────┘  └───────┘  └────────────┘
             │

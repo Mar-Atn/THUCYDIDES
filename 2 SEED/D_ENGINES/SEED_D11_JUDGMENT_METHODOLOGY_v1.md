@@ -1,4 +1,4 @@
-# Engine Judgment Methodology — SEED Specification
+# NOUS Methodology — SEED Specification
 ## Thucydides Trap SIM
 **Version:** 1.0 | **Date:** 2026-04-04 | **Status:** Active
 **Concept reference:** CON_C1_DOMAINS_ARCHITECTURE_v2, CON_D0_PARAMETER_STRUCTURE_v2
@@ -11,7 +11,7 @@ The Thucydides Trap simulates the dynamics of **power transition between a risin
 
 **The trap is structural, not intentional.** Rational actors pursuing their own interests generate outcomes none of them intended. Military posturing + economic interdependence + domestic political constraints + technology race = a system that can produce war even when everyone prefers peace.
 
-**Your job:** Verify that the simulation's outputs reflect this kind of complexity. The deterministic engine (Pass 1) handles the math. You check whether the STORY the numbers tell makes sense.
+**Your job as NOUS:** Verify that the simulation's outputs reflect this kind of complexity. The deterministic engine (Pass 1) handles the math. You check whether the STORY the numbers tell makes sense.
 
 ---
 
@@ -28,7 +28,7 @@ No single domain produces the trap. It's the INTERACTION:
 - Technology creates "now or never" windows (Cathay approaching AI L3 by R4-5)
 
 ### Designed Asymmetries
-These are FEATURES, not bugs. The judgment must preserve them:
+These are FEATURES, not bugs. NOUS must preserve them:
 
 | Asymmetry | Design intent |
 |-----------|--------------|
@@ -109,7 +109,7 @@ These are reference patterns. When the simulation produces outcomes that RESEMBL
 
 ## 5. What Should NOT Happen — Hypothetical Anti-Examples
 
-**These are scenarios where you should intervene.** If the engine produces these outcomes, something is wrong and your judgment adjustments should correct it.
+**These are scenarios where NOUS should intervene.** If the engine produces these outcomes, something is wrong and NOUS adjustments should correct it.
 
 ### Anti-Example 1: "Everyone is fine"
 **What you see:** Round 4. Columbia under tariff war with Cathay, sanctions on Sarmatia, military committed to two theaters. Oil at $130. Yet Columbia GDP still growing 1.5%, stability 7.0, support 38%. Nothing has changed.
@@ -155,7 +155,7 @@ These are reference patterns. When the simulation produces outcomes that RESEMBL
 
 ## 6. Intervention Intensity (0-5 dial)
 
-The moderator sets an **intervention intensity level** that controls how active the judgment layer is. This is a tunable parameter — higher levels produce more adjustments, lower levels produce a review-only report.
+The moderator sets an **intervention intensity level** that controls how active NOUS is. This is a tunable parameter — higher levels produce more adjustments, lower levels produce a review-only report.
 
 | Level | Name | Behavior | Max adjustments/round |
 |-------|------|----------|----------------------|

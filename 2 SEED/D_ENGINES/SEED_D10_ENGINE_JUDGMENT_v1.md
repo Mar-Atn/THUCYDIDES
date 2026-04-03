@@ -1,6 +1,7 @@
-# Engine Judgment Layer (Pass 2) — SEED Specification
+# NOUS — Engine Judgment Layer (Pass 2) — SEED Specification
 ## Thucydides Trap SIM
 **Version:** 1.0 | **Date:** 2026-04-04 | **Status:** Active
+**NOUS** (νοῦς — Greek: cosmic mind, universal intellect) — the AI judgment layer that reviews deterministic outputs and ensures the world model produces coherent, realistic outcomes.
 **Concept reference:** CON_C1 E1 (World Model Engine, Step 7: Moderator Review)
 **Supersedes:** SEED_D_EXPERT_PANEL_TEST.md (rule-based heuristics → LLM judgment)
 
@@ -8,11 +9,11 @@
 
 ## 1. What This Is
 
-The Engine Judgment Layer is a **sub-module of the World Model Engine** that applies AI judgment after deterministic formulas (Pass 1) run. It is NOT Argus (participant assistant). It is NOT a character. It is the world model's quality control and judgment layer.
+NOUS is a **sub-module of the World Model Engine** that applies AI judgment after deterministic formulas (Pass 1) run. It is NOT Argus (participant assistant). It is NOT a character. It is the world model's quality control and judgment layer.
 
 **Position in the processing pipeline:**
 ```
-Pass 1 (Deterministic)  →  Pass 2 (Judgment)  →  Pass 3 (Coherence + Narrative)
+Pass 1 (Deterministic)  →  Pass 2 (NOUS)      →  Pass 3 (Coherence + Narrative)
    Formulas                 AI reviews &           Plausibility check
    14 chained steps         adjusts results        + round summary
    < 1 second               < 30 seconds           < 60 seconds
@@ -46,7 +47,7 @@ During the parameter review (Cal-1 through Cal-22), several mechanics were **exp
 
 ### 3.1 Input Assembly
 
-The judgment module requests context from the Context Assembly Service (SEED_D9):
+NOUS requests context from the Context Assembly Service (SEED_D9):
 
 ```
 Blocks requested: sim_rules + methodology + sim_history + world_state + round_inputs + round_outputs
@@ -65,7 +66,7 @@ Visibility: MODERATOR (full access to all country data)
 Single LLM call with structured output (JSON schema enforced):
 
 ```
-System: You are the World Model Judgment Layer for the Thucydides Trap simulation.
+System: You are NOUS — the World Model Judgment Layer for the Thucydides Trap simulation.
         You review deterministic engine outputs and apply bounded adjustments
         that formulas cannot capture. You are not a player or advisor.
         You are an analytical engine component.
@@ -212,7 +213,7 @@ Moderator can edit any entry between rounds. Changes are versioned. Old versions
 
 ## 7. Calibration Process
 
-Like formula calibration, judgment calibration uses test runs:
+Like formula calibration, NOUS calibration uses test runs:
 
 1. **Run** scenario with automatic mode
 2. **Review** judgment outputs — were adjustments reasonable?
@@ -226,8 +227,8 @@ The `judgment_log` table enables before/after comparison across methodology vers
 
 ## 8. Relationship to Other Modules
 
-- **Orchestrator** calls judgment after Pass 1, before Pass 3
-- **Context Assembler** provides all context (judgment never reads DB directly)
+- **Orchestrator** calls NOUS after Pass 1, before Pass 3
+- **Context Assembler** provides all context (NOUS never reads DB directly)
 - **LLM Service** handles the API call (dual-provider, failover)
-- **Moderator API** exposes judgment recommendations for manual mode
-- **Leader Agents** are NOT involved — judgment operates on world state, not player decisions
+- **Moderator API** exposes NOUS recommendations for manual mode
+- **Leader Agents** are NOT involved — NOUS operates on world state, not player decisions

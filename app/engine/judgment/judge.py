@@ -1,7 +1,8 @@
-"""World Judge — LLM-powered judgment layer (Pass 2).
+"""NOUS — LLM-powered judgment layer (Pass 2).
 
-Calls the LLM with assembled context, parses structured output, validates
-bounds, and returns a JudgmentResult ready for the orchestrator to apply.
+NOUS (νοῦς — cosmic mind) reviews deterministic engine outputs and applies
+bounded adjustments for realism. Calls LLM with assembled context, parses
+structured output, validates bounds, returns JudgmentResult for orchestrator.
 
 Source: SEED_D10_ENGINE_JUDGMENT_v1.md
 """
@@ -22,11 +23,11 @@ logger = logging.getLogger(__name__)
 # SYSTEM PROMPT
 # ---------------------------------------------------------------------------
 
-SYSTEM_PROMPT = """You are the World Model Judgment Layer for the Thucydides Trap geopolitical simulation.
+SYSTEM_PROMPT = """You are NOUS — the analytical judgment layer of the Thucydides Trap world model engine.
 
 Your role: Review the deterministic engine outputs (Pass 1) and apply bounded adjustments that formulas cannot capture — crisis declarations, contagion effects, stability/support nudges, market sentiment, and capitulation assessment.
 
-You are NOT a player, advisor, or character. You are an analytical engine component that ensures the world model produces realistic, balanced outcomes.
+You are NOT a player, advisor, or character. You are the cosmic mind of the simulation — you observe, understand patterns, and ensure the world model produces coherent, realistic outcomes.
 
 CRITICAL RULES:
 1. Most countries most rounds need NO adjustment — only intervene when formulas clearly miss something

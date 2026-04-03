@@ -58,12 +58,12 @@ JSON format:
 #### Processing Timing
 Target: < 5 minutes per round.
 Pass 1 (deterministic): < 1 second.
-Pass 2 (AI judgment): < 30 seconds.
+Pass 2 (NOUS): < 30 seconds.
 Pass 3 (coherence + narrative): < 60 seconds.
 
 #### Three-Pass Architecture
 1. **Deterministic (Pass 1)** — 14 chained formula steps (see SEED_D8)
-2. **Judgment (Pass 2)** — LLM reviews outputs, applies bounded adjustments (see SEED_D10)
+2. **NOUS (Pass 2)** — LLM reviews outputs, applies bounded adjustments (see SEED_D10)
 3. **Coherence + Narrative (Pass 3)** — plausibility check + round summary
 
 #### Context Assembly
