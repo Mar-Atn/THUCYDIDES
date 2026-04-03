@@ -1035,9 +1035,9 @@ After the facilitator reviews the round processing results (from 2.4), this endp
 
 ---
 
-## 2.11 POST /engine/judgment/review -- Get Judgment Recommendations
+## 2.11 POST /engine/nous/review -- Get NOUS Recommendations
 
-Returns AI judgment recommendations for a processed round (manual mode). Called before applying adjustments so the moderator can review.
+Returns NOUS recommendations for a processed round (manual mode). Called before applying adjustments so the moderator can review.
 
 ### Request
 
@@ -1074,13 +1074,13 @@ Returns AI judgment recommendations for a processed round (manual mode). Called 
 
 - **Authorization:** Facilitator only.
 - **Requires Pass 1 complete.** Call after `POST /engine/round/process` returns.
-- **Context assembled via SEED_D9.** The judgment prompt is built from `sim_config` entries.
+- **Context assembled via SEED_D9.** The NOUS prompt is built from `sim_config` entries.
 
 ---
 
-## 2.12 POST /engine/judgment/apply -- Apply Judgment Adjustments
+## 2.12 POST /engine/nous/apply -- Apply NOUS Adjustments
 
-Applies moderator-approved adjustments from the judgment review. Logs the decision to `judgment_log`.
+Applies moderator-approved adjustments from the NOUS review. Logs the decision to `judgment_log`.
 
 ### Request
 
@@ -1109,13 +1109,13 @@ Applies moderator-approved adjustments from the judgment review. Logs the decisi
 ### Notes
 
 - **Authorization:** Facilitator only.
-- **Idempotent per round.** Re-calling overwrites the previous judgment for that round.
+- **Idempotent per round.** Re-calling overwrites the previous NOUS assessment for that round.
 
 ---
 
-## 2.13 GET /engine/judgment/log/{sim_run_id}/{round_num} -- Judgment History
+## 2.13 GET /engine/nous/log/{sim_run_id}/{round_num} -- NOUS History
 
-Retrieves the judgment audit trail for a given round.
+Retrieves the NOUS audit trail for a given round.
 
 ### Response (200)
 
@@ -1137,7 +1137,7 @@ Retrieves the judgment audit trail for a given round.
 ### Notes
 
 - **Authorization:** Facilitator only.
-- **Returns 404 if no judgment exists** for the specified round.
+- **Returns 404 if no NOUS assessment exists** for the specified round.
 
 ---
 

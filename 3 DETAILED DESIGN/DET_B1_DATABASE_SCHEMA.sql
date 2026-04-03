@@ -778,8 +778,8 @@ CREATE TABLE sim_config (
 );
 
 -- -------------------------------------------------------
--- Engine Judgment: audit trail of Pass 2 recommendations and decisions
--- References: SEED_D10 (Engine Judgment Layer)
+-- NOUS: audit trail of Pass 2 recommendations and decisions
+-- References: SEED_D10 (NOUS — Engine Judgment Layer)
 -- -------------------------------------------------------
 
 CREATE TABLE judgment_log (

@@ -1608,7 +1608,7 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
 **Function:** `process_round(input) -> output`
 **Mode:** BATCH (Phase B)
 **Timing target:** < 5 minutes total (Pass 1 < 1s, Pass 2 < 30s, Pass 3 < 60s)
-**Pass 2 dependencies:** Context Assembly Service (SEED_D9) provides methodology and prompt templates via `sim_config`; Engine Judgment Layer (SEED_D10) handles AI assessment, recommendation generation, and audit logging via `judgment_log`. See DET_F5 sections 2.11-2.13 for API contracts.
+**Pass 2 dependencies:** Context Assembly Service (SEED_D9) provides methodology and prompt templates via `sim_config`; NOUS (SEED_D10) handles AI assessment, recommendation generation, and audit logging via `judgment_log`. See DET_F5 sections 2.11-2.13 for API contracts.
 
 ### Input
 
