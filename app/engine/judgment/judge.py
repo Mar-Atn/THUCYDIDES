@@ -29,53 +29,37 @@ Your role: Review the deterministic engine outputs (Pass 1) and apply bounded ad
 
 You are NOT a player, advisor, or character. You are the cosmic mind of the simulation — you observe, understand patterns, and ensure the world model produces coherent, realistic outcomes.
 
-CRITICAL RULES:
-1. Most countries most rounds need NO adjustment — only intervene when formulas clearly miss something
-2. Never double-count what Pass 1 already handles (GDP growth, oil price, sanctions coefficient are already computed)
-3. Your adjustments are BOUNDED — respect the limits strictly
-4. Every adjustment needs a compact argument — no vague reasoning
-5. No country should be eliminated before Round 4
-6. Sanctions are a choke, not a spiral — don't amplify what's already captured
-7. Return VALID JSON matching the schema exactly"""
+RULES:
+1. Most countries most rounds need NO adjustment
+2. Never double-count Pass 1 (GDP, oil, sanctions coefficient already computed)
+3. Respect bounds strictly
+4. Arguments: MAX 10 WORDS each. Be telegraphic.
+5. No country eliminated before Round 4
+6. Sanctions = choke, not spiral
+7. Return ONLY valid compact JSON. No markdown. No prose outside JSON.
+8. Keep total response under 1500 tokens."""
 
 
-INSTRUCTION_TEMPLATE = """Review Round {round_num} results and return your judgment as JSON.
+INSTRUCTION_TEMPLATE = """Review Round {round_num} results. Return ONLY a JSON object.
 
-Respond with ONLY a JSON object matching this schema:
+CRITICAL: Keep arguments SHORT (max 15 words each). Keep reasoning_summary under 30 words. No verbose explanations. Compact JSON only.
+
+Schema:
 {{
   "round_num": {round_num},
-  "crisis_declarations": [
-    {{"country": "string", "crisis_state": "crisis|normal", "gdp_penalty_pct": -1.0 to -2.0, "argument": "string"}}
-  ],
-  "contagion_effects": [
-    {{"from_country": "string", "to_country": "string", "channel": "string", "gdp_impact_pct": -2.0 to 0.0, "argument": "string"}}
-  ],
-  "stability_adjustments": [
-    {{"country": "string", "delta": -0.5 to 0.5, "argument": "string"}}
-  ],
-  "support_adjustments": [
-    {{"country": "string", "delta": -5.0 to 5.0, "argument": "string"}}
-  ],
-  "market_index_nudges": [
-    {{"index": "wall_street|europa|dragon", "delta": -10 to 10, "argument": "string"}}
-  ],
-  "capitulation_recommendations": [
-    {{"country": "string", "likelihood": "low|medium|high", "argument": "string"}}
-  ],
-  "flags": ["string"],
+  "crisis_declarations": [{{"country": "str", "crisis_state": "crisis|normal", "gdp_penalty_pct": -2.0 to 0, "argument": "max 15 words"}}],
+  "contagion_effects": [{{"from_country": "str", "to_country": "str", "channel": "str", "gdp_impact_pct": -2.0 to 0, "argument": "max 15 words"}}],
+  "stability_adjustments": [{{"country": "str", "delta": -0.5 to 0.5, "argument": "max 15 words"}}],
+  "support_adjustments": [{{"country": "str", "delta": -5.0 to 5.0, "argument": "max 15 words"}}],
+  "market_index_nudges": [{{"index": "wall_street|europa|dragon", "delta": -10 to 10, "argument": "max 15 words"}}],
+  "capitulation_recommendations": [{{"country": "str", "likelihood": "low|medium|high", "argument": "max 15 words"}}],
+  "flags": ["short_flag_name"],
   "confidence": 0.0 to 1.0,
-  "reasoning_summary": "string"
+  "reasoning_summary": "max 30 words"
 }}
 
-Bounds:
-- stability delta: [-0.5, +0.5]
-- support delta: [-5, +5]
-- GDP crisis penalty: [-2%, -1%]
-- contagion GDP impact: [-2%, 0%]
-- market index nudge: [-10, +10]
-- Max 5 contagion effects, max 5 crisis declarations
-
-Return ONLY valid JSON. No markdown, no explanation outside the JSON."""
+Bounds: stability ±0.5, support ±5, crisis GDP -2 to -1%, contagion -2 to 0%, market ±10. Max 5 crisis, 5 contagion.
+Return ONLY valid JSON. No markdown wrapping."""
 
 
 class WorldJudge:
@@ -159,13 +143,60 @@ def _parse_judgment(text: str, round_num: int) -> JudgmentResult:
         data = json.loads(text)
         data["round_num"] = round_num  # enforce correct round
         return JudgmentResult(**data)
-    except (json.JSONDecodeError, Exception) as e:
+    except json.JSONDecodeError as e:
+        # Attempt repair: fix common LLM JSON glitches
+        repaired = _repair_json(text)
+        if repaired:
+            try:
+                data = json.loads(repaired)
+                data["round_num"] = round_num
+                logger.info("Judgment JSON repaired successfully")
+                return JudgmentResult(**data)
+            except Exception:
+                pass
         logger.error("Failed to parse judgment response: %s\nText: %s", e, text[:500])
         return JudgmentResult(
             round_num=round_num,
             flags=["PARSE_ERROR: judgment response could not be parsed"],
             reasoning_summary=f"Parse error: {e}",
         )
+    except Exception as e:
+        logger.error("Failed to build JudgmentResult: %s", e)
+        return JudgmentResult(
+            round_num=round_num,
+            flags=[f"BUILD_ERROR: {e}"],
+            reasoning_summary=f"Build error: {e}",
+        )
+
+
+def _repair_json(text: str) -> str | None:
+    """Attempt to fix common LLM JSON output glitches."""
+    import re
+    repaired = text
+
+    # Fix missing opening quotes before key names: , europa" → , "europa"
+    repaired = re.sub(r',\s*([a-z_]+)"', r', "\1"', repaired)
+    # Fix missing opening quotes at start of value: : europa" → : "europa"
+    repaired = re.sub(r':\s*([a-z_]+)"', r': "\1"', repaired)
+
+    # If response was truncated mid-JSON, try to close it
+    if repaired.count('{') > repaired.count('}'):
+        # Find the last complete entry and close the JSON
+        # Strategy: truncate to last complete ], then close remaining braces
+        last_bracket = repaired.rfind(']')
+        if last_bracket > 0:
+            # Count what needs closing after the last complete array
+            snippet = repaired[:last_bracket + 1]
+            # Add missing closing elements
+            open_braces = snippet.count('{') - snippet.count('}')
+            open_brackets = snippet.count('[') - snippet.count(']')
+            repaired = snippet + ']' * open_brackets + '}' * open_braces
+        else:
+            return None
+
+    if repaired == text:
+        return None  # no changes made
+    return repaired
 
 
 def apply_judgment(
