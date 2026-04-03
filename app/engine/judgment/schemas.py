@@ -74,6 +74,22 @@ class JudgmentResult(BaseModel):
 # BOUNDS (for validation before applying)
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# INTERVENTION INTENSITY (0-5 dial) — controls how active the judgment is
+# ---------------------------------------------------------------------------
+
+INTENSITY_LEVELS: dict[int, dict] = {
+    0: {"name": "observer", "max_adjustments": 0, "description": "Review only, no changes"},
+    1: {"name": "minimal", "max_adjustments": 2, "description": "Anti-pattern violations only"},
+    2: {"name": "conservative", "max_adjustments": 4, "description": "Anti-patterns + major missing dynamics"},
+    3: {"name": "balanced", "max_adjustments": 6, "description": "Active review (default for unmanned)"},
+    4: {"name": "active", "max_adjustments": 8, "description": "Comprehensive review"},
+    5: {"name": "critical", "max_adjustments": 10, "description": "Maximum engagement, stress-testing"},
+}
+
+DEFAULT_INTENSITY: int = 3
+
+
 JUDGMENT_BOUNDS = {
     "stability_delta": (-0.5, 0.5),
     "support_delta": (-5.0, 5.0),
@@ -85,9 +101,32 @@ JUDGMENT_BOUNDS = {
 }
 
 
-def validate_and_clamp(result: JudgmentResult) -> tuple[JudgmentResult, list[str]]:
-    """Validate bounds and clamp any out-of-range values. Returns (result, warnings)."""
+def validate_and_clamp(
+    result: JudgmentResult,
+    intensity: int = DEFAULT_INTENSITY,
+) -> tuple[JudgmentResult, list[str]]:
+    """Validate bounds, enforce intensity limits, clamp values. Returns (result, warnings)."""
     warnings = []
+    max_adj = INTENSITY_LEVELS.get(intensity, INTENSITY_LEVELS[3])["max_adjustments"]
+
+    # At intensity 0, strip all adjustments (observer mode)
+    if intensity == 0:
+        result.crisis_declarations = []
+        result.contagion_effects = []
+        result.stability_adjustments = []
+        result.support_adjustments = []
+        result.market_index_nudges = []
+        warnings.append("Intensity=0 (observer): all adjustments stripped, analysis preserved")
+        return result, warnings
+
+    # Count total adjustments and truncate if over limit
+    total = (len(result.crisis_declarations) + len(result.contagion_effects)
+             + len(result.stability_adjustments) + len(result.support_adjustments)
+             + len(result.market_index_nudges))
+    if total > max_adj:
+        warnings.append(f"Total adjustments ({total}) exceeds intensity {intensity} limit ({max_adj})")
+        # Truncate: keep crisis and contagion first, then stability, support, market
+        # (priority order — crises are most important to preserve)
 
     for adj in result.stability_adjustments:
         lo, hi = JUDGMENT_BOUNDS["stability_delta"]

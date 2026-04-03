@@ -80,8 +80,9 @@ Return ONLY valid JSON. No markdown, no explanation outside the JSON."""
 class WorldJudge:
     """Calls LLM to review round results and produce bounded adjustments."""
 
-    def __init__(self, assembler: ContextAssembler):
+    def __init__(self, assembler: ContextAssembler, intensity: int = 3):
         self.assembler = assembler
+        self.intensity = intensity
 
     async def judge_round(self, round_num: int) -> tuple[JudgmentResult, list[str]]:
         """Run Pass 2 judgment on the current round.
@@ -89,6 +90,9 @@ class WorldJudge:
         Returns:
             (JudgmentResult, warnings) — result with validated bounds + any warnings.
         """
+        from engine.judgment.schemas import INTENSITY_LEVELS, DEFAULT_INTENSITY
+        level_info = INTENSITY_LEVELS.get(self.intensity, INTENSITY_LEVELS[DEFAULT_INTENSITY])
+
         # Build context
         context = self.assembler.build([
             "sim_rules",
@@ -99,7 +103,15 @@ class WorldJudge:
             "round_outputs",
         ])
 
-        instruction = INSTRUCTION_TEMPLATE.format(round_num=round_num)
+        intensity_instruction = (
+            f"\n\nINTERVENTION INTENSITY: {self.intensity}/5 ({level_info['name']}). "
+            f"Max {level_info['max_adjustments']} adjustments this round. "
+            f"{level_info['description']}."
+        )
+        if self.intensity == 0:
+            intensity_instruction += " Return empty adjustment arrays — analysis and flags only."
+
+        instruction = INSTRUCTION_TEMPLATE.format(round_num=round_num) + intensity_instruction
 
         # Call LLM (lazy import to avoid dependency chain at module level)
         from engine.services.llm import call_llm
@@ -115,8 +127,8 @@ class WorldJudge:
         # Parse JSON response
         result = _parse_judgment(response.content, round_num)
 
-        # Validate bounds
-        result, warnings = validate_and_clamp(result)
+        # Validate bounds + enforce intensity limits
+        result, warnings = validate_and_clamp(result, intensity=self.intensity)
 
         if warnings:
             for w in warnings:
@@ -126,7 +138,7 @@ class WorldJudge:
 
     def judge_round_sync(self, round_num: int) -> tuple[JudgmentResult, list[str]]:
         """Synchronous version for testing (no LLM call — returns empty result)."""
-        logger.info("Sync judgment for round %d — returning empty result (no LLM)", round_num)
+        logger.info("Sync judgment for round %d (intensity=%d) — no LLM", round_num, self.intensity)
         return JudgmentResult(round_num=round_num), []
 
 
