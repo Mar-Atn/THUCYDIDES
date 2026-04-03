@@ -427,17 +427,33 @@ def _is_chokepoint_blocked(active_blockades: dict, chokepoint_key: str) -> bool:
     return chokepoint_key in active_blockades
 
 
-def _is_gulf_gate_blocked(
+def _get_gulf_gate_level(
     chokepoint_status: dict[str, str],
     active_blockades: dict,
-) -> bool:
-    """Check if Gulf Gate / Hormuz is blocked."""
-    if _is_chokepoint_blocked(active_blockades, "gulf_gate"):
-        return True
-    for cp_name in ("hormuz", "gulf_gate_ground"):
-        if chokepoint_status.get(cp_name) == "blocked":
-            return True
-    return False
+) -> str:
+    """Determine Gulf Gate blockade level: 'none', 'partial', or 'full'.
+
+    Checks both active_blockades dict and chokepoint_status for any Gulf Gate
+    or Hormuz related keys.
+    """
+    level = "none"
+    # Check active_blockades (multiple possible key names)
+    for key in ("gulf_gate", "gulf_gate_ground", "hormuz", "cp_gulf_gate"):
+        if key in active_blockades:
+            bl = active_blockades[key]
+            bl_status = bl.get("status", bl.get("level", "full")) if isinstance(bl, dict) else "full"
+            if bl_status in ("blocked", "full"):
+                return "full"
+            if bl_status in ("contested", "partial"):
+                level = "partial"
+    # Check chokepoint_status
+    for cp_name in ("hormuz", "gulf_gate_ground", "cp_gulf_gate"):
+        status = chokepoint_status.get(cp_name, "")
+        if status == "blocked":
+            return "full"
+        if status == "contested":
+            level = "partial"
+    return level
 
 
 def _is_formosa_blocked(
@@ -586,16 +602,15 @@ def calc_oil_price(
     """
     base_price = OIL_BASE_PRICE
 
-    # --- SUPPLY SIDE (Cal-10: production-share weighted OPEC + blockade model) ---
-    # Calculate total oil production capacity (resource% × GDP for each producer)
+    # --- SUPPLY SIDE (Cal-10: mbpd-based production shares for OPEC + blockade) ---
     total_production = 0.0
     producer_output: dict[str, float] = {}
     for cid, c in countries.items():
         eco = c.get("economic", {})
-        if eco.get("oil_producer"):
-            output = eco["sectors"].get("resources", 0) / 100.0 * eco["gdp"]
-            producer_output[cid] = output
-            total_production += output
+        mbpd = eco.get("oil_production_mbpd", 0.0)
+        if eco.get("oil_producer") and mbpd > 0:
+            producer_output[cid] = mbpd
+            total_production += mbpd
 
     # OPEC production decisions (weighted by actual production share)
     # OPEC controls ~40-50% of global oil — their decisions move markets significantly
@@ -617,14 +632,7 @@ def calc_oil_price(
                 supply -= 0.10 * share  # L2+ sanctions reduce that producer's output by 10%
 
     # --- CHOKEPOINT BLOCKADES → ACTUAL SUPPLY REDUCTION (Cal-10) ---
-    gulf_gate_blocked = _is_gulf_gate_blocked(chokepoint_status, active_blockades)
-    gulf_gate_level = "full" if gulf_gate_blocked else "none"
-    # Check for partial blockade (contested status)
-    for cp_name, status in chokepoint_status.items():
-        if cp_name in ("hormuz", "gulf_gate_ground") and status == "contested":
-            gulf_gate_level = "partial"
-        elif cp_name in ("hormuz", "gulf_gate_ground") and status == "blocked":
-            gulf_gate_level = "full"
+    gulf_gate_level = _get_gulf_gate_level(chokepoint_status, active_blockades)
 
     if gulf_gate_level != "none" and total_production > 0:
         blockade_pct = OIL_BLOCKADE_FULL if gulf_gate_level == "full" else OIL_BLOCKADE_PARTIAL
@@ -738,12 +746,28 @@ def calc_oil_price(
 
     price = max(OIL_PRICE_FLOOR, price)
 
-    # --- OIL REVENUE TO PRODUCERS (F46: mbpd-based, not GDP-biased) ---
+    # --- OIL REVENUE TO PRODUCERS (F46: mbpd-based, blockade reduces exports) ---
     for cid, country in countries.items():
         eco = country["economic"]
         mbpd = eco.get("oil_production_mbpd", 0.0)
         if eco.get("oil_producer") and mbpd > 0:
-            oil_revenue = price * mbpd * 0.009
+            effective_mbpd = mbpd
+            # Gulf Gate blockade reduces Gulf producers' export revenue
+            if cid in GULF_GATE_PRODUCERS or (
+                cid == "persia" and gulf_gate_level != "none"
+                and active_blockades.get("gulf_gate_ground", active_blockades.get("cp_gulf_gate", {})).get("controller", "") != "persia"
+            ):
+                if gulf_gate_level == "full":
+                    effective_mbpd *= (1.0 - OIL_BLOCKADE_FULL)
+                elif gulf_gate_level == "partial":
+                    effective_mbpd *= (1.0 - OIL_BLOCKADE_PARTIAL)
+            # Caribe Passage blockade reduces Caribe export revenue
+            if cid in CARIBE_PASSAGE_PRODUCERS and caribe_blocked:
+                if caribe_level == "full":
+                    effective_mbpd *= (1.0 - OIL_BLOCKADE_FULL)
+                elif caribe_level == "partial":
+                    effective_mbpd *= (1.0 - OIL_BLOCKADE_PARTIAL)
+            oil_revenue = price * effective_mbpd * 0.009
             eco["oil_revenue"] = round(max(oil_revenue, 0.0), 2)
         else:
             eco["oil_revenue"] = 0.0

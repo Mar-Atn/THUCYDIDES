@@ -143,11 +143,12 @@ class TestOilPrice:
 
     def test_gulf_gate_blocked_raises_price(self):
         """Gulf Gate blocked -> supply reduction for Gulf producers -> price rises."""
-        # Need oil producers affected by Gulf Gate
         countries = {
             "solaria": {"economic": {"gdp": 11, "gdp_growth_rate": 3.5, "oil_producer": True,
+                         "oil_production_mbpd": 10.0,
                          "sectors": {"resources": 45}, "economic_state": "normal", "oil_revenue": 0}},
             "mirage": {"economic": {"gdp": 5, "gdp_growth_rate": 4.0, "oil_producer": True,
+                        "oil_production_mbpd": 3.5,
                         "sectors": {"resources": 30}, "economic_state": "normal", "oil_revenue": 0}},
         }
         result, _ = calc_oil_price(
@@ -161,11 +162,12 @@ class TestOilPrice:
 
     def test_high_opec_production_lowers_price(self):
         """High OPEC production (weighted by share) -> lower price."""
-        # Create countries with oil production
         countries = {
             "solaria": {"economic": {"gdp": 11, "gdp_growth_rate": 3.5, "oil_producer": True,
+                         "oil_production_mbpd": 10.0,
                          "sectors": {"resources": 45}, "economic_state": "normal", "oil_revenue": 0}},
             "sarmatia": {"economic": {"gdp": 20, "gdp_growth_rate": 1.0, "oil_producer": True,
+                          "oil_production_mbpd": 10.0,
                           "sectors": {"resources": 40}, "economic_state": "normal", "oil_revenue": 0}},
         }
         result_high, _ = calc_oil_price(
