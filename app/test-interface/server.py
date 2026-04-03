@@ -88,6 +88,8 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._json_response(self._start_conversation(body))
         elif path == "/api/agent/end_conversation":
             self._json_response(self._end_conversation(body))
+        elif path == "/api/agent/decide":
+            self._json_response(self._decide(body))
         else:
             self.send_error(404)
 
@@ -183,6 +185,86 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             "cognitive_state": agent.get_cognitive_state(),
         }
 
+    def _decide(self, body):
+        """Test a specific decision type for an agent."""
+        from engine.agents.decisions import (
+            decide_budget, decide_tariffs, decide_sanctions,
+            decide_opec, decide_military, decide_covert,
+            decide_political, decide_active_loop,
+        )
+
+        role_id = body.get("role_id", "")
+        decision_type = body.get("decision_type", "budget")
+        round_context = body.get("round_context", {})
+
+        if role_id not in _agents:
+            agent = get_or_create_agent(role_id)
+        else:
+            agent = _agents[role_id]
+
+        cognitive_blocks = agent._get_cognitive_blocks()
+
+        # Build minimal round_context from country data if not provided
+        if not round_context:
+            round_context = {
+                "economic": {
+                    "gdp": agent.country.get("gdp", 0),
+                    "treasury": agent.country.get("treasury", 0),
+                    "inflation": agent.country.get("inflation", 0),
+                    "debt_burden": agent.country.get("debt_burden", 0),
+                    "tax_rate": agent.country.get("tax_rate", 0.24),
+                    "social_baseline": agent.country.get("social_baseline", 0.30),
+                    "maintenance_cost": agent.country.get("maintenance_per_unit", 0.05),
+                },
+                "political": {
+                    "stability": agent.country.get("stability", 5),
+                    "political_support": agent.country.get("political_support", 50),
+                },
+                "oil_price": 80,
+                "bilateral": {"tariffs": {}, "sanctions": {}, "trade": {}},
+                "wars": [],
+                "military": {
+                    "units": {},
+                    "zones": {},
+                    "reserves": {},
+                    "enemy_visible": {},
+                },
+                "recent_events": [],
+                "pending_conversations": [],
+            }
+            # Add at_war info
+            at_war = agent.country.get("at_war_with", "")
+            if at_war:
+                round_context["wars"] = [{"belligerents_a": [agent.country["id"]], "belligerents_b": [at_war]}]
+
+        dispatch = {
+            "budget": lambda: decide_budget(cognitive_blocks, agent.country, round_context),
+            "tariffs": lambda: decide_tariffs(cognitive_blocks, agent.country, round_context),
+            "sanctions": lambda: decide_sanctions(cognitive_blocks, agent.country, round_context),
+            "opec": lambda: decide_opec(cognitive_blocks, agent.country, round_context),
+            "military": lambda: decide_military(cognitive_blocks, agent.country, round_context),
+            "covert": lambda: decide_covert(cognitive_blocks, agent.country, agent.role, round_context),
+            "political": lambda: decide_political(cognitive_blocks, agent.country, round_context),
+            "active_loop": lambda: decide_active_loop(cognitive_blocks, agent.country, agent.role, round_context),
+        }
+
+        if decision_type not in dispatch:
+            return {"error": f"Unknown decision type: {decision_type}. Valid: {list(dispatch.keys())}"}
+
+        try:
+            result = asyncio.run(dispatch[decision_type]())
+        except Exception as e:
+            logger.error("Decision failed: %s", e, exc_info=True)
+            return {"error": str(e), "decision_type": decision_type}
+
+        return {
+            "success": True,
+            "decision_type": decision_type,
+            "result": result,
+            "agent": agent.info(),
+            "cognitive_state": agent.get_cognitive_state(),
+        }
+
     def _get_agent_state(self, role_id):
         """Get current cognitive state."""
         if role_id not in _agents:
@@ -227,6 +309,7 @@ if __name__ == "__main__":
     print(f"  GET  /api/roles                    — list all roles")
     print(f"  POST /api/agent/init               — initialize agent")
     print(f"  POST /api/agent/chat               — chat with agent")
+    print(f"  POST /api/agent/decide              — test decision (budget/tariffs/sanctions/opec/military/covert/political/active_loop)")
     print(f"  GET  /api/agent/state?role_id=X     — get cognitive state")
     print(f"  GET  /api/agent/history?role_id=X   — get state history")
     print()

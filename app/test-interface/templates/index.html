@@ -92,6 +92,18 @@
     <span id="convStatus" style="font-size:11px;color:var(--text-dim)">No active conversation</span>
   </div>
 
+  <div class="role-selector" id="decisionControls" style="display:none;flex-wrap:wrap;">
+    <span style="font-size:11px;color:var(--text-dim);width:100%;margin-bottom:4px;">Decision Testing (LLM required):</span>
+    <button onclick="testDecision('budget')" style="background:var(--surface2);color:var(--gold);border:1px solid var(--border);">Budget</button>
+    <button onclick="testDecision('tariffs')" style="background:var(--surface2);color:var(--gold);border:1px solid var(--border);">Tariffs</button>
+    <button onclick="testDecision('sanctions')" style="background:var(--surface2);color:var(--gold);border:1px solid var(--border);">Sanctions</button>
+    <button onclick="testDecision('opec')" style="background:var(--surface2);color:var(--gold);border:1px solid var(--border);">OPEC</button>
+    <button onclick="testDecision('military')" style="background:var(--surface2);color:var(--accent2);border:1px solid var(--border);">Military</button>
+    <button onclick="testDecision('covert')" style="background:var(--surface2);color:var(--accent2);border:1px solid var(--border);">Covert</button>
+    <button onclick="testDecision('political')" style="background:var(--surface2);color:var(--accent2);border:1px solid var(--border);">Political</button>
+    <button onclick="testDecision('active_loop')" style="background:var(--surface2);color:var(--green);border:1px solid var(--border);">Active Loop</button>
+  </div>
+
   <div class="chat-area" id="chatArea">
     <div class="chat-msg system">Select and initialize a role to start chatting.</div>
   </div>
@@ -188,8 +200,9 @@ function initAgent() {
     updateAgentInfo(data.agent);
     updateCognitiveState(data.cognitive_state);
     addChat('system', `✓ ${data.agent.character_name} initialized (${data.agent.title} of ${data.agent.country})`);
-    addChat('system', 'Click "Start Conversation" to begin talking.');
+    addChat('system', 'Click "Start Conversation" to begin talking, or test a decision type below.');
     document.getElementById('convControls').style.display = 'flex';
+    document.getElementById('decisionControls').style.display = 'flex';
     loadHistory();
   });
 }
@@ -332,6 +345,28 @@ function latestVersion() {
   fetch(`/api/agent/state?role_id=${currentRoleId}`).then(r => r.json()).then(data => {
     updateCognitiveState(data);
     loadHistory();
+  });
+}
+
+function testDecision(decisionType) {
+  if (!currentRoleId) return;
+  addChat('system', `Testing ${decisionType} decision (calling LLM)...`);
+
+  fetch('/api/agent/decide', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({role_id: currentRoleId, decision_type: decisionType})
+  }).then(r => r.json()).then(data => {
+    if (data.error) {
+      addChat('system', `Error: ${data.error}`);
+      return;
+    }
+    const result = data.result;
+    addChat('agent', `[${decisionType.toUpperCase()} DECISION]\n${JSON.stringify(result, null, 2)}`);
+    if (data.cognitive_state) updateCognitiveState(data.cognitive_state);
+    if (data.agent) updateAgentInfo(data.agent);
+  }).catch(err => {
+    addChat('system', `Request failed: ${err}`);
   });
 }
 </script>

@@ -331,24 +331,49 @@ class LeaderAgent:
     # ------------------------------------------------------------------
 
     async def submit_mandatory_inputs(self, round_context: dict) -> dict:
-        """Produce round-end mandatory decisions (budget, tariffs, sanctions, OPEC, deployment)."""
-        # TODO: Phase 2A-2C of build plan
-        return {
-            "budget": {"social_pct": 1.0, "military_coins": 0, "tech_coins": 0},
-            "tariffs": {},
-            "sanctions": {},
-            "opec_production": None,
-            "deployments": [],
-        }
+        """Produce round-end mandatory decisions (budget, tariffs, sanctions, OPEC, deployment).
+
+        Uses decisions module to build task-specific context and call LLM for each decision type.
+        """
+        from engine.agents.decisions import submit_all_mandatory
+
+        cognitive_blocks = self._get_cognitive_blocks()
+        result = await submit_all_mandatory(cognitive_blocks, self.country, self.role, round_context)
+
+        # Record decisions in memory
+        self.cognitive.add_decision("budget", f"social={result['budget']['social_pct']:.2f}, mil={result['budget']['military_coins']:.0f}, tech={result['budget']['tech_coins']:.0f}")
+        if result["tariffs"]:
+            self.cognitive.add_decision("tariffs", f"changed: {result['tariffs']}")
+        if result["sanctions"]:
+            self.cognitive.add_decision("sanctions", f"changed: {result['sanctions']}")
+        if result["opec_production"]:
+            self.cognitive.add_decision("opec", f"production: {result['opec_production']}")
+
+        return result
 
     # ------------------------------------------------------------------
     # DET_C1 C6: decide_action()
     # ------------------------------------------------------------------
 
-    async def decide_action(self, time_remaining: float, new_events: list[dict]) -> dict | None:
-        """Proactive decision: what to do RIGHT NOW? Returns action or None (wait)."""
-        # TODO: Phase 2G of build plan
-        return None
+    async def decide_action(self, time_remaining: float, new_events: list[dict],
+                            round_context: dict | None = None) -> dict | None:
+        """Proactive decision: what to do RIGHT NOW? Returns action or None (wait).
+
+        Uses active loop to decide what to do, then dispatches to specific
+        decision type (military, covert, conversation request, etc.).
+        """
+        from engine.agents.decisions import decide_action_dispatch
+
+        cognitive_blocks = self._get_cognitive_blocks()
+        ctx = round_context or {}
+        result = await decide_action_dispatch(
+            cognitive_blocks, self.country, self.role, ctx, time_remaining, new_events,
+        )
+
+        if result:
+            self.cognitive.add_decision(result.get("type", "action"), result.get("detail", str(result)[:100]))
+
+        return result
 
     # ------------------------------------------------------------------
     # DET_C1 C6: react_to_event()
@@ -443,6 +468,15 @@ class LeaderAgent:
             temperature=0.85,
         )
         return response.text
+
+    def _get_cognitive_blocks(self) -> dict:
+        """Extract cognitive blocks as dict for decisions module."""
+        return {
+            "block1_rules": self.cognitive.block1_rules,
+            "block2_identity": self.cognitive.block2_identity,
+            "memory_text": self.cognitive.get_memory_text(),
+            "goals_text": self.cognitive.get_goals_text(),
+        }
 
     def _initial_relationships(self, world_state: dict | None) -> dict[str, float]:
         """Set initial relationships from world state."""
