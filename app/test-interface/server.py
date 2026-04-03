@@ -38,6 +38,10 @@ def get_or_create_agent(role_id: str) -> LeaderAgent:
     return _agents[role_id]
 
 
+# Live bilateral turn storage for polling
+_live_bilateral: dict = {"turns": [], "status": "idle", "phase": ""}
+
+
 def initialize_with_llm(role_id: str) -> LeaderAgent:
     """Initialize agent with LLM-generated identity."""
     agent = LeaderAgent(role_id)
@@ -61,6 +65,15 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._serve_html()
         elif path == "/api/roles":
             self._json_response(self._get_roles())
+        elif path == "/api/agent/bilateral/live":
+            params = parse_qs(parsed.query)
+            since = int(params.get("since", ["0"])[0])
+            self._json_response({
+                "status": _live_bilateral["status"],
+                "phase": _live_bilateral["phase"],
+                "turns": _live_bilateral["turns"][since:],
+                "total_turns": len(_live_bilateral["turns"]),
+            })
         elif path == "/api/agent/state":
             params = parse_qs(parsed.query)
             role_id = params.get("role_id", [""])[0]
@@ -293,11 +306,24 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         agent_a = _agents[role_a]
         agent_b = _agents[role_b]
 
+        # Reset live state for polling
+        _live_bilateral["turns"] = []
+        _live_bilateral["status"] = "running"
+        _live_bilateral["phase"] = "generating intent notes..."
+
+        def on_turn(turn_data):
+            _live_bilateral["turns"].append(turn_data)
+            _live_bilateral["phase"] = f"turn {turn_data['turn']}: {turn_data['speaker_name']}"
+
         engine = ConversationEngine()
         try:
+            _live_bilateral["phase"] = "generating intent notes..."
             result = asyncio.run(engine.run_bilateral(
                 agent_a, agent_b, max_turns=max_turns, topic=topic,
+                on_turn=on_turn,
             ))
+            _live_bilateral["status"] = "complete"
+            _live_bilateral["phase"] = "done"
         except Exception as e:
             logger.error("Bilateral failed: %s", e, exc_info=True)
             return {"error": str(e)}

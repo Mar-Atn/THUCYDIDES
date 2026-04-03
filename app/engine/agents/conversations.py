@@ -39,6 +39,8 @@ CONVERSATION_SYSTEM_TEMPLATE = """You are {character_name}, {title} of {country_
 
 YOU ARE IN A PRIVATE BILATERAL MEETING with {counterpart_name}, {counterpart_title} of {counterpart_country}.
 
+ABSOLUTE RULE: Use ONLY SIM names. Never real-world names. Columbia not USA, Cathay not China, Sarmatia not Russia, Teutonia not Germany, etc. Call leaders by character names (Dealer, Helmsman, Forge, etc.).
+
 HOW TO CONDUCT THIS MEETING:
 - You have a maximum of 4 messages. Plan accordingly — don't waste turns.
 - TURN 1: State your position or ask your key question. Get to the point.
@@ -161,6 +163,7 @@ class ConversationEngine:
         agent_a,  # LeaderAgent
         agent_b,  # LeaderAgent
         max_turns: int = 8,
+        on_turn: Any = None,  # async callback(turn_data) for live streaming
         topic: str = "",
     ) -> ConversationResult:
         """Run a full bilateral conversation between two agents.
@@ -218,12 +221,23 @@ class ConversationEngine:
                 extra_context=extra_context,
             )
 
-            transcript.append({
+            turn_data = {
                 "speaker_role_id": speaker.role_id,
                 "speaker_name": speaker.role["character_name"],
                 "text": turn["text"],
                 "turn": turn_num + 1,
-            })
+            }
+            transcript.append(turn_data)
+
+            # Live streaming callback
+            if on_turn is not None:
+                try:
+                    if asyncio.iscoroutinefunction(on_turn):
+                        await on_turn(turn_data)
+                    else:
+                        on_turn(turn_data)
+                except Exception:
+                    pass  # Don't break conversation if callback fails
 
             logger.info(
                 "Turn %d: %s (%d words)%s",

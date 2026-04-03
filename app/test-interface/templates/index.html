@@ -415,6 +415,9 @@ function _fillPartnerDropdown(excludeId) {
   });
 }
 
+let livePoller = null;
+let seenTurns = 0;
+
 function startBilateral() {
   if (!currentRoleId) return;
   const partnerId = document.getElementById('bilateralPartner').value;
@@ -424,11 +427,30 @@ function startBilateral() {
   const btn = document.getElementById('btnBilateral');
   btn.disabled = true;
   btn.textContent = 'Running...';
+  seenTurns = 0;
 
-  addChat('system', `--- BILATERAL CONVERSATION ---`);
-  addChat('system', `${currentRoleId} <-> ${partnerId}${topic ? ' | Topic: ' + topic : ''}`);
-  addChat('system', 'Generating intent notes and running conversation (this takes ~30-60s)...');
+  addChat('system', `━━━ BILATERAL CONVERSATION ━━━`);
+  addChat('system', `${currentRoleId} ↔ ${partnerId}${topic ? ' | Topic: ' + topic : ''}`);
+  addChat('system', '⏳ Generating intent notes...');
 
+  // Start polling for live turns
+  livePoller = setInterval(() => {
+    fetch(`/api/agent/bilateral/live?since=${seenTurns}`).then(r => r.json()).then(live => {
+      // Update phase status
+      if (live.phase && live.phase !== 'idle') {
+        btn.textContent = live.phase;
+      }
+      // Show new turns as they arrive
+      live.turns.forEach(turn => {
+        const isA = turn.speaker_role_id === currentRoleId;
+        const cls = isA ? 'bilateral-a' : 'bilateral-b';
+        addBilateralMsg(cls, turn.speaker_name, `[Turn ${turn.turn}] ${turn.text}`);
+        seenTurns++;
+      });
+    }).catch(() => {});
+  }, 2000);  // Poll every 2 seconds
+
+  // Fire the bilateral request (long-running)
   fetch('/api/agent/bilateral', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
@@ -440,6 +462,8 @@ function startBilateral() {
       use_llm: true
     })
   }).then(r => r.json()).then(data => {
+    // Stop polling
+    if (livePoller) { clearInterval(livePoller); livePoller = null; }
     btn.disabled = false;
     btn.textContent = 'Test Bilateral';
 
@@ -448,23 +472,24 @@ function startBilateral() {
       return;
     }
 
+    // Show any remaining turns not yet seen via polling
+    data.transcript.slice(seenTurns).forEach(entry => {
+      const isA = entry.speaker_role_id === currentRoleId;
+      const cls = isA ? 'bilateral-a' : 'bilateral-b';
+      addBilateralMsg(cls, entry.speaker_name, `[Turn ${entry.turn}] ${entry.text}`);
+    });
+
     // Show intent notes (moderator view)
     const intentA = data.intent_notes[currentRoleId] || '';
     const intentB = data.intent_notes[partnerId] || '';
     const nameA = data.agents[currentRoleId]?.info?.character_name || currentRoleId;
     const nameB = data.agents[partnerId]?.info?.character_name || partnerId;
 
+    addChat('system', `━━━ INTENT NOTES (private, moderator view) ━━━`);
     addIntentNote(nameA, intentA);
     addIntentNote(nameB, intentB);
 
-    // Show transcript
-    addChat('system', `--- TRANSCRIPT (${data.turns} turns, ended by: ${data.ended_by}) ---`);
-    data.transcript.forEach((entry, i) => {
-      const isA = entry.speaker_role_id === currentRoleId;
-      const cls = isA ? 'bilateral-a' : 'bilateral-b';
-      addBilateralMsg(cls, entry.speaker_name, `[Turn ${entry.turn}] ${entry.text}`);
-    });
-    addChat('system', '--- END TRANSCRIPT ---');
+    addChat('system', `━━━ END (${data.turns} turns, ended by: ${data.ended_by}) ━━━`);
 
     // Show reflections
     const refA = data.reflections[currentRoleId];
