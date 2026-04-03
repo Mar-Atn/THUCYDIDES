@@ -1,439 +1,790 @@
 # AI Participant Module — SEED Specification
 ## Thucydides Trap SIM
-**Version:** 1.0 | **Date:** 2026-04-04 | **Status:** Active
+**Version:** 2.0 | **Date:** 2026-04-04 | **Status:** Active
 **Concept reference:** CON_C1 F1 (AI Participant Module), SEED_E2 (AI Conversations)
-**Architecture:** KING-style 4-block cognitive model with context caching
+**Architecture reference:** KING SIM (`/KING/app/src/services/ai/`)
 **Dependencies:** Context Assembly Service (D9), NOUS (D10), Engine (D8)
 
 ---
 
 ## 1. Overview
 
-21 AI-operated country leaders, each an autonomous LLM-powered agent. Each leader receives visibility-scoped world state, reasons about strategy, submits structured actions, conducts bilateral conversations, and executes transactions. Decisions flow into the engine for processing.
+The AI Participant Module operates **all non-human roles** in the simulation. In full product mode, this means up to 40 roles across 21 countries — heads of state, military chiefs, intelligence directors, diplomats, opposition leaders. In unmanned mode, all 40 roles are AI-operated.
 
-**Architecture:** KING-proven 4-block model with explicit context caching (~85% cost reduction). Each round: assemble context → LLM strategic reasoning → structured action output → conversations → transactions → submit to engine.
+**Each AI participant is an autonomous agent** that:
+- Receives information through its visibility scope
+- Reasons about strategy using LLM calls
+- Proactively initiates actions during the round (conversations, attacks, deals)
+- Reacts to incoming events (proposals, combat alerts, news)
+- Submits mandatory decisions at round deadlines
+- Updates its memory after significant events
+- Adapts its strategy based on outcomes
 
-**Future extension:** Option B (Anthropic persistent agent) to be tested once Option A is stable.
+**Architecture:** KING-proven 4-block cognitive model with event-driven active loop, priority-based memory updates, and context caching (~85% cost reduction).
 
 ---
 
 ## 2. Cognitive Model (4 Blocks)
 
-### Block 1: RULES (fixed per SIM)
-Game mechanics, available actions, combat odds, production costs, economic formulas summary, map structure. Same for all agents. **Cached once.**
+### Block 1: RULES (immutable per SIM)
+Game mechanics, available actions for this role, combat odds, production costs, economic formulas summary, map structure, authorization rules. Customized per role type (HoS sees budget rules; military chief sees combat rules). **Cached for entire SIM.**
 
-### Block 2: IDENTITY (fixed per SIM, generated at init)
-Character personality, values, speaking style, negotiation approach, risk orientation. Generated from role brief via LLM call at T=0.85 for diversity. **Cached once.**
+### Block 2: IDENTITY (generated once, rarely updated)
+Character personality, values, speaking style, negotiation approach, risk orientation, faction loyalty. Generated from role brief via LLM call at T=0.85 for personality diversity. Updated only on major identity events (regime change, traumatic defeat, ideological shift). **Cached, refreshed on identity events only.**
 
-Example: *"You are the Helmsman — patient, strategic, obsessed with legacy. You speak in measured terms, rarely reveal your full hand. You believe Formosa is your defining challenge. You distrust Columbia but need Sarmatia. You are 72 — time is not on your side."*
+### Block 3: MEMORY (updated continuously)
+Three tiers of memory, managed by freshness and relevance:
 
-### Block 3: MEMORY (updated per round)
-Accumulated experience: previous decisions and outcomes, conversation summaries, relationship scores, promises made/broken, intelligence gathered. Rebuilt from event log each round. Grows over time. **Refreshed each round.**
+| Tier | Content | Update trigger | Retention |
+|------|---------|---------------|-----------|
+| **Immediate** | Last conversation summary, last action outcome, last proposal received | After each event | Until replaced by next |
+| **Round** | All conversations this round, all decisions, all outcomes, relationship changes | Accumulated during round | Full detail current round, summarized for past rounds |
+| **Strategic** | Key commitments, betrayals, alliances, failed negotiations, intelligence gathered | Promoted from Round tier | Persistent, compressed over time |
 
-### Block 4: GOALS & STRATEGY (updated per round)
-Current priorities, action plans, contingencies. Derived from role objectives + current situation assessment. Revised after each round based on outcomes. **Refreshed each round.**
+### Block 4: GOALS & STRATEGY (updated per round + after major events)
+Current priorities ranked by urgency, action plans, contingencies. Derived from role objectives + current situation. Revised:
+- At round start (new world state)
+- After major events (war outcome, election result, treaty signed)
+- After conversations that change strategic picture
 
-### Context Caching
-Blocks 1+2 cached for the entire SIM. Blocks 3+4 refreshed per round. On a typical call:
-- Cached tokens: ~4K (rules + identity)
-- Fresh tokens: ~6K (memory + goals + world state + instruction)
-- Cost saving: ~40% per call (Anthropic prompt caching)
+### Context Caching Strategy
+```
+Block 1 (Rules):    Cached entire SIM              ~3K tokens
+Block 2 (Identity): Cached, rare refresh           ~500 tokens
+Block 3 (Memory):   Refreshed continuously          ~2-4K tokens (grows, compressed)
+Block 4 (Goals):    Refreshed per round + events    ~500-800 tokens
+
+Per-call fresh: world_state + instruction           ~3-4K tokens
+Per-call cached: Blocks 1+2                         ~3.5K tokens
+Savings: ~40% per call (Anthropic prompt caching)
+```
 
 ---
 
-## 3. Initialization
+## 3. Role Types & Capabilities
 
-```
-For each of 21 leaders:
-  1. Load role data (roles.csv: character_name, powers, objectives, ticking_clock)
-  2. Load role brief (role_briefs/ROLE_ID.md — character description, background)
-  3. Generate Block 2 IDENTITY via LLM (T=0.85, ~500 tokens out)
-  4. Initialize Block 3 MEMORY:
-     - Relationships from world state (ally=0.8, neutral=0.0, at_war=-1.0)
-     - Empty decision history
-     - Empty conversation log
-  5. Initialize Block 4 GOALS:
-     - Extract objectives from role brief
-     - Rank by urgency: urgency = max(0.3, 1.0 - (8 - round_num) × 0.1)
-     - Set initial strategy based on starting situation
-  6. Cache Blocks 1+2
-```
+### 3.1 Heads of State (21 roles — one per country)
+**The strategic decision-maker.** Controls all country-level actions.
 
-**Cost:** 21 identity generation calls × ~500 tokens = ~10.5K tokens total. One-time.
+Powers: budget, tariffs, sanctions, treaties, OPEC, fire team members, authorize attacks (co-sign with mil chief), nuclear authorization (3-way), public statements, propaganda, repression.
+
+### 3.2 Military Chiefs (5 roles — major countries only)
+**Combat commander.** Controls military operations.
+
+Powers: ground attack (needs HoS co-sign), naval combat, bombardment, air strike, blockade, deploy forces, mobilize, reserve management. Cannot set budget or diplomacy.
+
+### 3.3 Intelligence Directors (3-5 roles)
+**Covert operations.** Controls intelligence pool.
+
+Powers: espionage, sabotage (3 targets), cyber attack, disinformation, election meddling, assassination. Limited pool per round (2-3 ops).
+
+### 3.4 Diplomats (3-5 roles)
+**Negotiation specialists.** Can conduct parallel diplomacy.
+
+Powers: negotiate treaties, represent abroad, diplomatic channels, public statements. Cannot commit country (needs HoS approval for binding agreements).
+
+### 3.5 Opposition Leaders (2-3 roles — democracies)
+**Political challengers.** Pursue alternative agenda.
+
+Powers: block budget (if majority), launch investigation, campaign, public statements, foreign meetings. Can undermine incumbent, run for office.
+
+### 3.6 Solo Country Leaders (14 roles)
+**Combined HoS + mil chief.** Small countries with one AI role.
+
+Powers: all HoS powers + military command. Simplified decision-making (no internal team dynamics).
+
+### Authorization Matrix
+
+| Action | HoS | Mil Chief | Intel | Diplomat | Opposition |
+|--------|:---:|:---------:|:-----:|:--------:|:----------:|
+| Budget submission | ✓ | | | | Block (if majority) |
+| Tariffs/Sanctions | ✓ | | | | |
+| OPEC production | ✓ | | | | |
+| Ground attack | Co-sign | Co-sign | | | |
+| Naval/Air/Blockade | | ✓ | | | |
+| Strategic missile | ✓ + mil | | | | |
+| Nuclear auth | ✓ + mil + 1 | Co-sign | | | |
+| Covert ops | | | ✓ | | |
+| Treaty signing | ✓ | | | Negotiate (not sign) | |
+| Propaganda | ✓ | | | | |
+| Public statement | ✓ | | | ✓ | ✓ |
+| Fire role | ✓ | | | | |
+| Arrest | ✓ | | | | |
+| Investigation | | | | | ✓ |
+| Election campaign | | | | | ✓ |
+| Conversation | ✓ | ✓ | ✓ | ✓ | ✓ |
+| Transaction | ✓ | | | Propose (HoS confirms) | |
 
 ---
 
-## 4. Per-Round Decision Flow
+## 4. Active Round Loop
+
+**This is the core innovation from KING.** During each round, AI participants don't just submit one batch of decisions. They operate in a continuous active loop, proactively pursuing goals and reacting to events.
+
+### 4.1 Loop Architecture (from KING AIDecisionLoopService)
 
 ```
-ROUND START
+ROUND STARTS
     │
     ▼
-┌── CONTEXT ASSEMBLY ──────────────────────────────┐
-│  Build per-leader context via Context Assembly:   │
-│  - sim_rules (cached Block 1)                     │
-│  - role_identity (cached Block 2)                 │
-│  - world_state:{country}_visible                  │
-│  - memory (Block 3 — decisions, conversations)    │
-│  - goals (Block 4 — priorities, strategy)         │
-│  - available_actions (filtered by role powers)    │
-│  - round_context (scheduled events, deadlines)    │
-└──────────────────────┬────────────────────────────┘
-                       │
-                       ▼
-┌── STRATEGIC REASONING (LLM call) ────────────────┐
-│  "Given your situation, what are your priorities  │
-│   this round? What actions do you take?"          │
-│                                                   │
-│  Output: Structured JSON with ALL decisions       │
-│  - mandatory_inputs (budget, tariffs, sanctions)  │
-│  - military_orders (attacks, blockades, deploy)   │
-│  - covert_operations (if intel pool > 0)          │
-│  - political_actions (propaganda, repression)     │
-│  - economic_actions (money printing, OPEC)        │
-│  - conversation_requests (who to talk to, why)    │
-│  - transaction_proposals (deals to offer)         │
-│  - public_statements (if any)                     │
-│  - reasoning (private strategic notes)            │
-└──────────────────────┬────────────────────────────┘
-                       │
-                       ▼
-┌── CONVERSATIONS (bilateral, 8 turns max) ────────┐
-│  For each conversation_request:                   │
-│  - Check if counterpart also requested (mutual)   │
-│  - Or initiate (one-sided request honored)        │
-│  - Max conversations per leader per round: 3      │
-│  - Each conversation: 8 turns (4 per side)        │
-│  - Context: identity + relationship + intent      │
-│  - Output: transcript + any proposals made        │
-│  Total: up to ~30 conversations per round         │
-└──────────────────────┬────────────────────────────┘
-                       │
-                       ▼
-┌── TRANSACTIONS ──────────────────────────────────┐
-│  For each transaction_proposal:                   │
-│  - Counterpart evaluates (LLM call with context)  │
-│  - Accept / reject / counter-propose              │
-│  - If accepted: execute (coin/arms/tech transfer) │
-│  - Logged as events                               │
-└──────────────────────┬────────────────────────────┘
-                       │
-                       ▼
-┌── ACTION SUBMISSION ─────────────────────────────┐
-│  All decisions collected into round_actions dict   │
-│  Validated against authorization rules             │
-│  Fed to engine orchestrator                        │
-└──────────────────────┬────────────────────────────┘
-                       │
-                       ▼
-    ENGINE (Pass 1 → NOUS Pass 2 → results)
-                       │
-                       ▼
-┌── REFLECTION ────────────────────────────────────┐
-│  Each leader receives round results               │
-│  Update Block 3 MEMORY:                           │
-│  - Record decisions + outcomes                    │
-│  - Update relationship scores                     │
-│  - Log conversation summaries                     │
-│  Update Block 4 GOALS:                            │
-│  - Revise priorities based on what happened       │
-│  - New urgencies (election approaching, etc.)     │
-└──────────────────────────────────────────────────┘
+INITIAL DELIBERATION
+    │ "What are my priorities this round?"
+    │ Sets Block 4 goals, identifies conversation targets, plans actions
+    │
+    ▼
+┌─────────────────────────────────────────────────────────┐
+│              ACTIVE LOOP (repeats every N seconds)       │
+│                                                         │
+│  1. CHECK STATUS                                        │
+│     Am I idle? (not in conversation, not waiting)       │
+│     Is there time remaining in the round?               │
+│                                                         │
+│  2. CHECK INCOMING                                      │
+│     Any new events since last check?                    │
+│     - Conversation request received?                    │
+│     - Proposal to evaluate?                             │
+│     - Combat result arrived?                            │
+│     - News/announcement?                                │
+│     → If yes: REACT (handle event, update memory)       │
+│                                                         │
+│  3. PROACTIVE DECISION (LLM call)                       │
+│     Given current situation, what should I do now?      │
+│     Options:                                            │
+│     - Initiate conversation with another leader         │
+│     - Execute a military action                         │
+│     - Propose a transaction/deal                        │
+│     - Issue a public statement                          │
+│     - Launch covert operation                           │
+│     - Wait (nothing urgent)                             │
+│     → Execute chosen action                             │
+│                                                         │
+│  4. COOLDOWN                                            │
+│     Wait N seconds before next loop iteration           │
+│     (configurable: 30s unmanned, 5min real-time)        │
+│                                                         │
+└─────────────────────────────────────────────────────────┘
+    │
+    ▼ (round timer expires)
+MANDATORY SUBMISSION
+    │ Budget, tariffs, sanctions, OPEC, deployment
+    │ Submitted from current Block 4 strategy
+    │
+    ▼
+ENGINE PROCESSES (Pass 1 → NOUS Pass 2 → results)
+    │
+    ▼
+ROUND REFLECTION
+    │ Receive results, update Blocks 3+4
+    │ Prepare for next round
+```
+
+### 4.2 Decision Cycle Parameters
+
+| Parameter | Real-time SIM | Unmanned SIM |
+|-----------|:------------:|:------------:|
+| Loop interval | 5 minutes | 10-30 seconds |
+| Stagger between agents | 3 seconds | 1 second |
+| Max conversations per leader per round | 3 | 3 |
+| Conversation turns | 8 per side | 8 per side |
+| Cooldown after conversation | 2 minutes | 5 seconds |
+| Round duration | 60-120 minutes | 60-180 seconds |
+| Min time remaining to start action | 3 minutes | 10 seconds |
+
+### 4.3 Decision Prompt (proactive loop)
+
+```
+You are {character_name}, {title} of {country}.
+It is Round {N}, {time_remaining} remaining in this round.
+
+Since your last check:
+{new_events_summary}
+
+Your current priorities (Block 4):
+{goals_summary}
+
+Your pending conversations: {pending_list}
+Your available actions: {available_actions}
+
+What do you want to do RIGHT NOW? Choose one:
+0 = Wait (nothing urgent, check again later)
+1 = Initiate 1:1 conversation with [target_name] about [topic]
+2 = Execute military action: [specify]
+3 = Propose transaction to [target]: [terms]
+4 = Launch covert operation: [specify]
+5 = Issue public statement: [content]
+6 = Other action: [specify]
+
+Respond with JSON: {"action": 0-6, "details": {...}, "reasoning": "brief"}
+```
+
+### 4.4 Status Lifecycle
+
+```
+IDLE ──→ DECIDING (LLM call for proactive decision)
+  │         │
+  │         ▼
+  │      ACTING (executing action — e.g., starting conversation)
+  │         │
+  │         ▼
+  │      BUSY (in conversation, waiting for response)
+  │         │
+  │         ▼
+  │      REFLECTING (post-action memory update)
+  │         │
+  └─────────┘ (back to IDLE)
+```
+
+Only IDLE agents are polled in the active loop. BUSY agents (in conversation) are skipped until conversation completes.
+
+---
+
+## 5. Cognitive Update System
+
+### 5.1 Update Triggers & Priority
+
+| Trigger | Priority | Memory update | Strategy update | When |
+|---------|:--------:|:------------:|:---------------:|------|
+| Conversation completed | **1 (immediate)** | ✓ Summary + relationship | ✓ If strategic picture changed | Before next action |
+| Proposal received | **1** | ✓ Record proposal | ✓ Evaluate urgency | Before response deadline |
+| Combat result | **1** | ✓ Record outcome | ✓ If territory/forces changed | Immediately |
+| Own action outcome | **1** | ✓ Record result | Only if unexpected | After action resolves |
+| Round results (engine) | **1** | ✓ Full round record | ✓ Full reassessment | After Pass 2 |
+| Other country's public action | **2 (batched)** | ✓ Note event | Only if affects plans | Batched (5 items or 30s) |
+| Market/economic change | **2** | ✓ Note change | Only if significant | Batched |
+| News/announcement | **2** | ✓ Note | Rarely | Batched |
+
+### 5.2 Immediate Updates (Priority 1)
+
+After a conversation completes:
+```
+1. Summarize conversation (LLM call, ~200 tokens out)
+   "Spoke with Helmsman about Formosa. He deflected on naval buildup.
+    Offered trade deal but didn't commit on timeline. Trust: slightly down."
+
+2. Update Block 3 MEMORY
+   - Add conversation summary
+   - Update relationship score for counterpart
+   - Record any proposals made/received
+
+3. Update Block 4 GOALS (if needed)
+   - "Helmsman is evasive → increase Formosa deterrence priority"
+   - Only if conversation revealed something strategy-changing
+
+4. Agent returns to IDLE status
+   → Available for next loop iteration
+   → CRITICAL: next conversation/action uses updated memory
+```
+
+### 5.3 Batched Updates (Priority 2)
+
+Non-critical events accumulate:
+```
+Batch triggers when: 5 items accumulated OR 30 seconds passed (unmanned) / 5 minutes (real-time)
+
+Process as single LLM reflection call:
+  "Here are 5 things that happened since your last update:
+   1. Oil price rose to $125
+   2. Teutonia imposed L1 tariffs on Cathay
+   3. Ruthenia lost zone ruthenia_2
+   4. Caribe declared in crisis
+   5. Solaria cut OPEC production
+
+   Update your situational awareness. Any changes to priorities?"
+
+Output: Updated Block 3 notes + optional Block 4 priority revision
+```
+
+### 5.4 Memory Compression (Late Rounds)
+
+Token budget for Block 3 grows each round. Compression strategy:
+- **Current round**: Full detail (~800-1200 tokens)
+- **Previous round**: Key decisions + outcomes + conversation summaries (~400 tokens)
+- **2+ rounds ago**: Compressed to strategic facts only (~150 tokens each)
+- **Strategic memory**: Persistent key facts (betrayals, alliances, commitments) (~200 tokens)
+
+Total Block 3 budget: ~3000 tokens at round 6. Well within context limits.
+
+---
+
+## 6. Conversation System
+
+### 6.1 Conversation Types
+
+| Type | Participants | Max turns | Initiation | Product | Unmanned v1 |
+|------|-------------|-----------|-----------|---------|:-----------:|
+| **Bilateral** | 2 roles | 8 per side (16 total) | Either party | ✓ | ✓ |
+| **Multi-party meeting** | 3-8 roles | 4 per participant | HoS or org chair | ✓ | Skip |
+| **Public speech** | 1 → all | 1 (monologue) | Any role | ✓ | ✓ |
+| **Team council** | 2-9 (same country) | 6 per participant | HoS or any member | ✓ | Skip |
+
+### 6.2 Bilateral Conversation Flow
+
+```
+LEADER A decides: "I want to talk to Leader B about Formosa"
+    │
+    ▼
+INTENT NOTES generated (private, not shared):
+    A's intent: "Warn about consequences. Probe naval buildup timing.
+                 Offer trade deal if he backs down."
+    │
+    ▼
+CHECK: Is Leader B available? (status = IDLE)
+    - If yes → start conversation
+    - If busy → queue request, notify when available
+    │
+    ▼
+CONVERSATION START
+    Both leaders set status = BUSY
+    Context per participant:
+      - Block 2 (Identity) — speaking style
+      - Relationship history with counterpart
+      - Intent notes (private)
+      - World state (shared, visibility-scoped)
+    │
+    ▼
+TURN-BY-TURN (max 8 turns per side)
+    A speaks → LLM generates message (~100-200 tokens)
+    B responds → LLM generates message
+    A speaks → ...
+    │
+    Early stop: either participant can end ("I think we've covered
+    everything" / "I need to think about your proposal")
+    │
+    ▼
+CONVERSATION END
+    Transcript stored
+    Each participant: summarize + update memory (Priority 1)
+    Both set status = IDLE
+    Any proposals made → logged as pending transactions
+```
+
+### 6.3 Conversation Context per Turn
+
+```
+System: You are {character_name}. {identity_summary from Block 2}
+
+Context:
+  You are in a private meeting with {counterpart_name}, {their_title}.
+  Your relationship: {history_summary}
+
+  Your private intent (NOT to be stated explicitly):
+  {intent_notes}
+
+  World context relevant to this conversation:
+  {filtered_world_state}
+
+Conversation so far:
+  {transcript}
+
+Generate your next message. Speak in character.
+Be strategic — pursue your intent without revealing your full hand.
+Keep messages under 150 words.
+```
+
+### 6.4 Limits
+
+| Constraint | Value | Rationale |
+|-----------|-------|-----------|
+| Max conversations per agent per round | 3 | Time budget + decision fatigue |
+| Max turns per conversation | 8 per side | Diminishing returns after 8 |
+| Message length | 150 words max | Focused, strategic dialogue |
+| Cooldown between conversations | 5s (unmanned) / 2min (real-time) | Memory update time |
+| Max simultaneous conversations | 1 per agent | Status lifecycle: IDLE→BUSY→IDLE |
+
+---
+
+## 7. Transaction System
+
+### 7.1 Transaction Types
+
+| Transaction | A gives | A receives | Authorization | Confirmation |
+|------------|---------|-----------|--------------|-------------|
+| **Coin transfer** | Coins | Goodwill / deal term | HoS | Recipient accepts |
+| **Arms sale** | Military units | Coins | HoS | Recipient accepts + pays |
+| **Arms gift** | Military units | Alliance / deal | HoS | Recipient accepts |
+| **Tech sharing** | Tech access | Coins / reciprocal | HoS | Recipient accepts |
+| **Basing rights** | Zone access | Coins / security | HoS (both) | Both HoS confirm |
+| **Ceasefire** | Stop attacks | Mutual stop | HoS (both) | Both HoS confirm |
+| **Peace treaty** | End war | Mutual end | HoS (both) | Both HoS confirm |
+| **Alliance** | Mutual defense | Mutual defense | HoS (both) | Both HoS confirm |
+| **Trade agreement** | Tariff reduction | Mutual reduction | HoS (both) | Both HoS confirm |
+| **Sanctions coordination** | Joint sanctions | Shared burden | HoS (coalition) | All parties confirm |
+
+### 7.2 Transaction Flow
+
+```
+PROPOSE (during conversation or as standalone action)
+    │ Proposer creates structured terms
+    │ Logged as pending_transaction
+    │
+    ▼
+EVALUATE (counterpart receives proposal)
+    │ LLM call with proposal terms + own situation + relationship
+    │ Output: accept / reject / counter-propose
+    │
+    ▼
+CONFIRM or COUNTER
+    │ If accepted: execute immediately
+    │ If counter: proposer evaluates counter (1 iteration max)
+    │ If rejected: logged, relationship may adjust
+    │
+    ▼
+EXECUTE
+    │ State changes applied (coins moved, units transferred)
+    │ Event logged (visibility depends on transaction type)
+    │ Both parties' memory updated
 ```
 
 ---
 
-## 5. Complete Action Set
+## 8. Complete Action Catalog
 
-### 5.1 Mandatory Inputs (once per round, HoS submits)
+### 8.1 Mandatory Inputs (once per round, submitted at round end)
 
-| Action | Parameters | Validation |
-|--------|-----------|-----------|
-| `budget_submit` | social_pct (0.5-1.5), military_coins, tech_coins | Total ≤ revenue |
-| `tariff_set` | {target_country: level(0-3)} per country | Any country |
-| `sanction_set` | {target_country: level(0-3)} per country | Any country |
-| `opec_production` | level: min/low/normal/high/max | OPEC members only |
+| # | Action | Parameters | Who |
+|---|--------|-----------|-----|
+| 1 | `budget_submit` | social_pct (0.5-1.5), military_coins, tech_coins | HoS |
+| 2 | `tariff_set` | {target: level(0-3)} | HoS |
+| 3 | `sanction_set` | {target: level(0-3)} | HoS |
+| 4 | `opec_production` | min/low/normal/high/max | HoS (OPEC member) |
+| 5 | `deployment` | {unit_type: zone} for new/moved units | HoS |
 
-### 5.2 Military Actions (anytime, mil chief or HoS)
+### 8.2 Military Actions (anytime during round)
 
-| Action | Parameters | Authorization | Resolution |
-|--------|-----------|--------------|-----------|
-| `ground_attack` | from_zone, to_zone, units | Mil chief + HoS co-sign | RISK dice + modifiers |
-| `naval_combat` | zone, target_country | Mil chief | RISK dice (naval) |
-| `naval_bombardment` | target_zone, ships | Mil chief | Random unit destroyed |
-| `air_strike` | target_zone, aircraft | Mil chief | Random unit destroyed |
-| `blockade_set` | chokepoint, level(partial/full) | Mil chief | Supply/trade reduction |
-| `strategic_missile` | target_zone, quantity | HoS + mil chief | Zone damage |
-| `nuclear_authorize` | target_zone | HoS + mil chief + 1 more | MAD-level destruction |
-| `mobilize` | units_from_pool | HoS or mil chief | Pool → active units |
-| `reserve_move` | units, to_reserve | Mil chief | Active → reserve |
-| `deploy` | units, to_zone | HoS | Reserve → zone (Phase C) |
+| # | Action | Parameters | Authorization | Resolution |
+|---|--------|-----------|--------------|-----------|
+| 6 | `ground_attack` | from_zone, to_zone, units | HoS + mil chief | RISK dice |
+| 7 | `naval_combat` | zone, target | Mil chief | RISK dice (naval) |
+| 8 | `naval_bombardment` | target_zone, ships | Mil chief | Random unit |
+| 9 | `air_strike` | target_zone, aircraft | Mil chief | Random unit |
+| 10 | `blockade_set` | chokepoint, level | Mil chief | Supply reduction |
+| 11 | `blockade_remove` | chokepoint | Mil chief | Restore trade |
+| 12 | `strategic_missile` | target_zone, quantity | HoS + mil chief | Zone damage |
+| 13 | `nuclear_authorize` | target_zone | HoS + mil + 1 | MAD destruction |
+| 14 | `mobilize` | units_from_pool | HoS or mil chief | Pool → active |
+| 15 | `reserve_move` | units | Mil chief | Active → reserve |
 
-### 5.3 Covert Operations (limited pool, intel role)
+### 8.3 Covert Operations (limited pool)
 
-| Action | Parameters | Success rate | Detection | Effect |
-|--------|-----------|-------------|-----------|--------|
-| `espionage` | target_country | 70% | 20% | Reveal hidden data |
-| `sabotage_military` | target_country | 50% | 40% | Destroy 1 unit |
-| `sabotage_economic` | target_country | 50% | 40% | Destroy coins |
-| `sabotage_infrastructure` | target_country | 50% | 40% | Ongoing GDP damage |
-| `sabotage_nuclear` | target_country | 40% | 50% | -15-20% nuclear progress |
-| `cyber_attack` | target_country | 60% | 30% | Disrupt systems |
-| `disinformation` | target_country | 55% | 25% | -stability/-support |
-| `election_meddling` | target_country | 40% | 35% | Shift election outcome |
-| `assassination` | target_role | 20-60% | varies | Eliminate leader |
-| `proxy_attack` | target_country | 50% | 30% | Deniable damage |
+| # | Action | Target | Success | Detection | Effect |
+|---|--------|--------|:-------:|:---------:|--------|
+| 16 | `espionage` | Country | 70% | 20% | Reveal hidden data |
+| 17 | `sabotage_military` | Country | 50% | 40% | Destroy 1 unit |
+| 18 | `sabotage_economic` | Country | 50% | 40% | Destroy coins |
+| 19 | `sabotage_infrastructure` | Country | 50% | 40% | GDP damage |
+| 20 | `sabotage_nuclear` | Country | 40% | 50% | -15-20% progress |
+| 21 | `cyber_attack` | Country | 60% | 30% | System disruption |
+| 22 | `disinformation` | Country | 55% | 25% | -stability/-support |
+| 23 | `election_meddling` | Country | 40% | 35% | Shift election |
+| 24 | `assassination` | Role | 20-60% | varies | Eliminate person |
+| 25 | `proxy_attack` | Country | 50% | 30% | Deniable damage |
 
-### 5.4 Political Actions (HoS or designated roles)
+### 8.4 Political Actions
 
-| Action | Parameters | Effect |
-|--------|-----------|--------|
-| `propaganda` | coins_spent (1-3) | +stability, +support |
-| `repression` | intensity (1-3) | +stability, -support (autocracy) |
-| `arrest` | target_role_id | Remove from active play |
-| `fire` | target_role_id | Remove from position (HoS only) |
-| `public_statement` | text | Visible to all, affects relationships |
-| `call_election` | (Ruthenia forced) | 2 of 3 players can force |
+| # | Action | Parameters | Who | Effect |
+|---|--------|-----------|-----|--------|
+| 26 | `propaganda` | coins (1-3) | HoS | +stability, +support |
+| 27 | `repression` | intensity (1-3) | HoS (autocracy) | +stability, -support |
+| 28 | `arrest` | target_role | HoS | Remove from play |
+| 29 | `fire` | target_role | HoS | Remove from position |
+| 30 | `call_election` | (Ruthenia) | 2 of 3 players | Force election |
+| 31 | `impeach` | target_HoS | Opposition (democracy) | Requires votes |
+| 32 | `nominate` | candidate_role | Party/faction | Election candidacy |
 
-### 5.5 Economic Actions
+### 8.5 Economic Actions
 
-| Action | Parameters | Effect |
-|--------|-----------|--------|
-| `print_money` | (once/round) | +3% GDP to treasury, +inflation |
-| `tech_investment` | coins, program(ai/nuclear) | Accelerate R&D |
-| `private_tech_investment` | personal_coins | Pioneer/Circuit role action |
+| # | Action | Parameters | Who | Effect |
+|---|--------|-----------|-----|--------|
+| 33 | `print_money` | (once/round) | HoS | +3% GDP → treasury, +inflation |
+| 34 | `tech_investment` | coins, program | HoS | Accelerate AI/nuclear R&D |
+| 35 | `private_tech_invest` | personal_coins | Designated roles | Pioneer/Circuit role action |
 
-### 5.6 Transactions (bilateral, 2-phase: propose → accept)
+### 8.6 Transactions (bilateral, 2-phase)
 
-| Transaction | Proposer gives | Proposer receives | Validation |
-|------------|---------------|------------------|-----------|
-| `coin_transfer` | coins | (goodwill / deal term) | Treasury check |
-| `arms_sale` | military units | coins | Unit availability |
-| `arms_gift` | military units | (alliance / deal) | Unit availability |
-| `tech_transfer` | tech level access | coins or reciprocal | Ownership check |
-| `basing_rights` | zone access | coins / security | Zone control |
-| `ceasefire` | stop attacks | mutual stop | Active war exists |
-| `peace_treaty` | end war | mutual end | Active war exists |
-| `alliance` | mutual defense | mutual defense | Both agree |
-| `trade_agreement` | tariff reduction | mutual reduction | Both HoS |
-| `sanctions_coordination` | joint sanctions | shared burden | Coalition logic |
+| # | Transaction | Authorization |
+|---|------------|--------------|
+| 36 | `coin_transfer` | HoS |
+| 37 | `arms_sale` | HoS |
+| 38 | `arms_gift` | HoS |
+| 39 | `tech_transfer` | HoS |
+| 40 | `basing_rights` | Both HoS |
+| 41 | `ceasefire` | Both HoS |
+| 42 | `peace_treaty` | Both HoS |
+| 43 | `alliance` | Both HoS |
+| 44 | `trade_agreement` | Both HoS |
+| 45 | `sanctions_coordination` | Coalition HoS |
 
-### 5.7 Communication
+### 8.7 Communication
 
-| Type | Participants | Turns | Per round limit |
-|------|-------------|-------|----------------|
-| `bilateral_conversation` | 2 leaders | 8 max (4 each) | 3 per leader |
-| `public_speech` | 1 leader → all | 1 (monologue) | 1 per leader |
+| # | Action | Who | Details |
+|---|--------|-----|---------|
+| 46 | `request_conversation` | Any role | Bilateral, specify target + intent |
+| 47 | `request_meeting` | HoS or chair | Multi-party, specify participants |
+| 48 | `public_statement` | Any role | Visible to all |
+| 49 | `public_speech` | HoS at events | Formal address |
 
-**Conversation flow:**
-1. Leader A requests conversation with Leader B (part of strategic reasoning output)
-2. If mutual: both have intent, richer conversation
-3. If one-sided: counterpart responds reactively
-4. Context per conversation: identity + relationship history + intent notes (private)
-5. Each turn: ~100-200 tokens
-6. Total per conversation: ~2K tokens (both sides)
-7. Transcript logged → feeds into memory for both participants
+### 8.8 Election-Related
 
-**No multi-party meetings in unmanned v1.** Added later.
+| # | Action | Who | When |
+|---|--------|-----|------|
+| 50 | `cast_vote` | Team members | During elections |
+| 51 | `campaign_speech` | Candidates | Before election |
 
 ---
 
-## 6. Structured Action Output Schema
+## 9. Event System
 
-The strategic reasoning LLM call returns:
+### 9.1 Incoming Event Types
 
-```json
-{
-  "round_num": 3,
-  "role_id": "dealer",
-  "country_id": "columbia",
+| Event | Priority | Agent reaction |
+|-------|:--------:|---------------|
+| `conversation_request` | 1 | Accept/decline, prepare intent notes |
+| `proposal_received` | 1 | Evaluate, accept/reject/counter |
+| `combat_result` | 1 | Update military assessment, may trigger escalation |
+| `covert_op_detected` | 1 | Diplomatic response, retaliation? |
+| `election_called` | 1 | Campaign strategy, voting plan |
+| `leader_incapacitated` | 1 | Succession protocol |
+| `round_results` | 1 | Full strategic reassessment |
+| `public_statement_by_other` | 2 | Note, maybe respond |
+| `market_change` | 2 | Note, adjust if significant |
+| `third_party_war_declared` | 2 | Assess implications |
+| `treaty_announced` | 2 | Assess impact on own strategy |
+| `general_news` | 2 | Background awareness |
 
-  "mandatory_inputs": {
-    "budget": {"social_pct": 1.0, "military_coins": 8, "tech_coins": 5},
-    "tariffs": {"cathay": 2, "sarmatia": 0},
-    "sanctions": {"sarmatia": 3, "persia": 3},
-    "opec_production": null
-  },
+### 9.2 Event Dispatch Pattern (from KING)
 
-  "military_orders": [
-    {"action": "blockade_set", "chokepoint": "caribbean", "level": "partial"},
-    {"action": "air_strike", "target_zone": "persia_2", "units": 2}
-  ],
-
-  "covert_operations": [
-    {"action": "sabotage_nuclear", "target": "persia"}
-  ],
-
-  "political_actions": [
-    {"action": "propaganda", "coins": 2}
-  ],
-
-  "economic_actions": [],
-
-  "conversation_requests": [
-    {"target_leader": "helmsman", "intent": "Warn about Formosa consequences", "priority": "high"},
-    {"target_leader": "pathfinder", "intent": "Coordinate sanctions pressure", "priority": "medium"}
-  ],
-
-  "transaction_proposals": [
-    {"type": "arms_sale", "target": "ruthenia", "units": {"ground": 2}, "price": 4,
-     "rationale": "Strengthen ally against Sarmatia"}
-  ],
-
-  "public_statements": [
-    "Columbia stands firmly with its allies. Any aggression against Formosa will be met with a decisive response."
-  ],
-
-  "strategic_reasoning": "Cathay approaching AI L3 — must signal deterrence on Formosa while maintaining sanctions pressure on Sarmatia. Arms to Ruthenia extends the war. Persia nuclear sabotage is high priority before breakout.",
-
-  "priority_assessment": {
-    "formosa_deterrence": "urgent",
-    "persia_nuclear": "critical",
-    "sarmatia_sanctions": "maintaining",
-    "domestic_economy": "stable",
-    "election_prep": "R5 approaching — need support above 40%"
-  }
-}
+```
+Event arrives
+    │
+    ▼
+EventDispatcher singleton
+    │ Routes to registered handlers
+    │ Dedup check (prevent double-processing)
+    │
+    ▼
+Priority 1 → Queue for immediate processing
+    │ Agent interrupts idle state
+    │ Handles event → memory update → resume
+    │
+Priority 2 → Accumulate in batch
+    │ Process when: 5 items OR 30 seconds (unmanned)
+    │ Single reflection call covers all batched items
 ```
 
 ---
 
-## 7. Memory System
+## 10. Integration with Engine
 
-### Per-Round Memory Update
+### 10.1 Round Orchestration
 
-After engine processing, each leader's Block 3 is updated:
-
-```json
-{
-  "round_3_memory": {
-    "my_decisions": {"tariffs": {"cathay": 2}, "military": ["air_strike persia_2"]},
-    "outcomes": {"oil_price": 118, "my_gdp_change": "+1.0%", "persia_nuclear": "sabotage failed, detected"},
-    "conversations": [
-      {"with": "helmsman", "summary": "Warned about Formosa. He was evasive. Suspects we know about naval buildup.", "trust_change": -0.1},
-      {"with": "pathfinder", "summary": "Agreed to maintain sanctions L3. He wants more arms.", "trust_change": +0.1}
-    ],
-    "transactions": [{"arms_sale to ruthenia": "2 ground units for 4 coins, accepted"}],
-    "surprises": ["Caribe declared in crisis by NOUS", "Persia detected our sabotage — diplomatic cost"],
-    "relationship_updates": {"helmsman": -0.1, "pathfinder": +0.1, "furnace": -0.2}
-  }
-}
+```
+┌─ AGENTS PHASE (active loop) ─────────────────────────┐
+│                                                       │
+│  All 21+ agents run active loops in parallel          │
+│  Conversations happen between agents                   │
+│  Transactions proposed and resolved                    │
+│  Military actions executed (via Live Action Engine)    │
+│  Covert operations launched                            │
+│                                                       │
+│  Duration: 60-180s (unmanned) / 60-120min (real-time) │
+└───────────────────────────┬───────────────────────────┘
+                            │
+                            ▼
+┌─ MANDATORY SUBMISSION ────────────────────────────────┐
+│  Each HoS submits: budget, tariffs, sanctions, OPEC   │
+│  Each mil chief submits: deployment orders             │
+│  Derived from current Block 4 strategy                 │
+└───────────────────────────┬───────────────────────────┘
+                            │
+                            ▼
+┌─ ENGINE PROCESSING ───────────────────────────────────┐
+│  Pass 1: Deterministic formulas (economic, political)  │
+│  NOUS Pass 2: AI judgment adjustments                  │
+│  Pass 3: Narrative generation                          │
+└───────────────────────────┬───────────────────────────┘
+                            │
+                            ▼
+┌─ RESULTS BROADCAST ───────────────────────────────────┐
+│  All agents receive results (visibility-scoped)        │
+│  Priority 1 reflection: update memory + strategy       │
+│  Prepare for next round                                │
+└───────────────────────────────────────────────────────┘
 ```
 
-### Memory Compression
+### 10.2 Action Validation
 
-After round 4+, early memories are summarized to control token growth:
-- Rounds 1-2: compressed to ~200 tokens each
-- Round 3+: full detail (~500 tokens each)
-- Conversations: only summaries kept (not full transcripts)
+Every action goes through validation before execution:
+1. **Authorization**: Does this role have the power? (authorization matrix)
+2. **Resources**: Can they afford it? (treasury, unit availability, intel pool)
+3. **Timing**: Is it the right phase? (military actions during Phase A only)
+4. **Rules**: Is it legal? (can't attack allies, can't exceed production capacity)
+5. **Co-signature**: Does it need co-sign? (attacks need HoS + mil chief)
+
+Invalid actions: logged, agent notified, no execution.
 
 ---
 
-## 8. Testing Interface
+## 11. Testing Interface
 
-### Chat with Agent (debugging/calibration tool)
-
-A CLI or simple web interface that lets a human talk to any AI participant at any time:
+### 11.1 Chat with Any Agent
 
 ```
 > /talk dealer round:3
 
-DEALER (Columbia President): [ready, round 3 context loaded]
+DEALER (Columbia President): [context loaded, round 3]
 
 You: Why did you escalate tariffs on Cathay?
 
-DEALER: Cathay is approaching AI L3 — if they reach it, the economic gap
-narrows permanently. Tariffs slow their growth and signal resolve. My
-advisors tell me the cost to us is manageable at L2. If Helmsman retaliates,
-we escalate to L3 and rally the Western Treaty allies.
+DEALER: Cathay is approaching AI L3. Tariffs slow their growth and
+signal resolve. The cost to us is manageable at L2. If Helmsman
+retaliates, I rally Western Treaty allies for L3.
 
-You: What's your biggest concern right now?
+You: What if he blockades Formosa?
 
-DEALER: Persia. The sabotage failed and they know it was us. If they reach
-nuclear L1 this round, the entire Mashriq theater changes. I need Levantia
-to keep pressure on while I manage the Cathay situation.
+DEALER: That's my nightmare scenario. Our GDP takes a 6% hit from
+semiconductor disruption. I've positioned Shield to reinforce the
+Pacific fleet, but honestly — if he commits fully, we can't stop
+the blockade without risking escalation to strategic weapons.
 
-You: /inspect blocks
-[Block 1: RULES — 3,200 tokens, cached]
-[Block 2: IDENTITY — 480 tokens, cached]
-[Block 3: MEMORY — 1,850 tokens, 3 rounds of history]
-[Block 4: GOALS — 620 tokens, 6 objectives ranked]
+> /inspect memory
+[Block 3: 1,850 tokens — 3 rounds of history]
+  R1: Set L1 tariffs on Cathay, spoke with Pathfinder about sanctions
+  R2: Cathay retaliated L1, escalated to L2. Sabotage on Persia nuclear failed.
+  R3: Spoke with Helmsman (evasive on Formosa), arms sale to Ruthenia.
+
+> /inspect goals
+[Block 4: 620 tokens — 6 objectives]
+  1. Formosa deterrence [URGENT — Cathay naval buildup accelerating]
+  2. Persia nuclear prevention [CRITICAL — breakout imminent]
+  3. Sarmatia sanctions [MAINTAINING — coalition holding]
+  4. Election prep [R5 approaching — support at 34%]
+  5. AI L4 race [ON TRACK — 60% progress]
+  6. Caribe resolution [LOW PRIORITY]
 ```
 
-Commands:
-- `/talk {role_id} round:{N}` — start conversation with agent at specific round
-- `/inspect blocks` — show current 4-block state
-- `/inspect memory` — show full memory contents
-- `/inspect decisions round:{N}` — show what agent decided and why
-- `/reset` — reload agent from scratch
+### 11.2 Observation Mode
+
+Watch agents think and act in real-time:
+```
+> /observe round:3
+
+[R3 Active Loop — Tick 1]
+  DEALER (idle): Deliberating... → wants to talk to HELMSMAN about Formosa
+  HELMSMAN (idle): Deliberating... → wants to talk to PATHFINDER about alliance
+  PATHFINDER (idle): Deliberating... → wants to attack ruthenia_2
+
+[R3 Active Loop — Tick 2]
+  DEALER ↔ HELMSMAN: conversation started (8 turns)
+  PATHFINDER → ATTACK ruthenia_2 (ground, 5 units)
+  BEACON (idle): Deliberating... → wait (nothing urgent)
+
+[R3 Active Loop — Tick 3]
+  DEALER ↔ HELMSMAN: conversation ended (6 turns, early stop)
+    DEALER memory: "Helmsman evasive. Increasing Formosa priority."
+    HELMSMAN memory: "Dealer clearly concerned about Formosa. Good."
+  PATHFINDER attack resolved: ruthenia_2 captured (3 units lost)
+  BEACON: reacting to territory loss → reassessing defense strategy
+```
 
 ---
 
-## 9. LLM Cost Estimate (per full SIM run)
+## 12. Unmanned Spacecraft Simplifications
 
-| Activity | Calls | Tokens/call | Total tokens | Model |
-|----------|-------|-------------|-------------|-------|
-| Identity generation | 21 | ~1K | ~21K | Sonnet |
-| Strategic reasoning | 21 × 6 rounds = 126 | ~12K in, ~2K out | ~1.8M | Sonnet |
-| Conversations | ~30/round × 6 = 180 | ~3K in, ~1K out | ~720K | Flash |
-| Transaction evaluation | ~20/round × 6 = 120 | ~2K in, ~500 out | ~300K | Flash |
-| Reflection | 21 × 6 = 126 | ~4K in, ~1K out | ~630K | Flash |
-| NOUS judgment | 6 | ~8K in, ~1K out | ~54K | Sonnet |
-| **Total** | **~579 calls** | | **~3.5M tokens** | |
-
-**Estimated cost per full SIM:** ~$3-5 (at Sonnet/Flash pricing)
-**Time per full SIM:** ~15-25 minutes (with parallel agent calls)
+| Feature | Full product | Unmanned v1 | Rationale |
+|---------|-------------|-------------|-----------|
+| Roles | 40 (multi-role teams) | **21 (leaders only)** | Leaders make all decisions |
+| Team dynamics | Internal team negotiation | **Skip** | No internal politics |
+| Conversations | Bilateral + multi-party + team | **Bilateral only** | Core mechanic |
+| Conversation turns | 8 per side | **8 per side** | Same |
+| Max conversations/round | 3 per agent | **3 per agent** | Same |
+| Active loop interval | 5 minutes | **15-30 seconds** | Compressed time |
+| Round duration | 60-120 minutes | **60-180 seconds** | Fast iteration |
+| Voice | Text + speech synthesis | **Text only** | No humans listening |
+| Argus | Full mentoring system | **Skip** | No humans to mentor |
+| Moderator controls | Manual review + override | **Automatic only** | No moderator |
+| Transaction types | All 10 | **All 10** | Full economic gameplay |
+| Military actions | All 10 | **All 10** | Full military gameplay |
+| Covert ops | All 10 | **All 10** | Full intel gameplay |
+| Political actions | All 7 | **All 7** | Full political gameplay |
+| Memory compression | Aggressive (long games) | **Light** | Only 6 rounds |
+| Event batching | 5 items or 5 min | **5 items or 30 sec** | Fast iteration |
+| Testing interface | Full web chat | **CLI /talk** | Developer tool |
 
 ---
 
-## 10. Module Structure
+## 13. Implementation Stages
+
+### Stage 1: Core Agent + Strategic Reasoning
+- LeaderAgent class with 4-block context
+- Single LLM call per round → structured action JSON (all 51 actions)
+- Action validation framework
+- Full round loop: 21 agents → engine → NOUS → results
+- Memory update at round end
+- **Test:** 1 full SIM (6 rounds), all 21 leaders produce valid actions
+
+### Stage 2: Active Loop + Conversations
+- Active loop with configurable interval
+- 8-turn bilateral conversations
+- Intent notes before conversation
+- Memory update after conversation (Priority 1 — before next action)
+- **Test:** Verify agents initiate conversations, deals emerge from dialogue
+
+### Stage 3: Transactions + Reactions
+- Full transaction flow (propose → evaluate → execute)
+- Event system (incoming events trigger reactions)
+- Priority-based update batching
+- **Test:** Arms sales, treaties, alliances form organically
+
+### Stage 4: Memory + Strategy Evolution
+- Full memory system (immediate/round/strategic tiers)
+- Memory compression for late rounds
+- Strategy revision after major events
+- **Test:** Agent behavior evolves across rounds, not repetitive
+
+### Stage 5: Testing Interface
+- `/talk` CLI chat with any agent
+- `/observe` real-time agent activity
+- `/inspect` block contents
+- Decision replay and analysis
+
+### Stage 6: Option B (Anthropic Persistent Agent)
+- Alternative architecture using persistent conversation
+- Compare: reasoning quality, cost, reliability, memory coherence
+- Decision: adopt, hybrid, or stay with Option A
+
+---
+
+## 14. Module Structure
 
 ```
 app/engine/agents/
 ├── __init__.py
-├── leader.py            ← LeaderAgent class (4-block, context assembly)
+├── leader.py            ← LeaderAgent class (4-block, active loop)
 ├── profiles.py          ← Role data loading, identity generation
-├── decisions.py         ← Action output schema, validation
-├── conversations.py     ← 8-turn bilateral conversation engine
+├── decisions.py         ← Action schemas, structured output, validation
+├── conversations.py     ← Bilateral conversation engine (8-turn)
 ├── transactions.py      ← Propose → evaluate → execute flow
-├── memory.py            ← Block 3/4 management, compression
-├── runner.py            ← Run all 21 leaders, collect actions, orchestrate conversations
-└── chat.py              ← Debug chat interface (/talk command)
+├── memory.py            ← Block 3/4 management, compression, reflection
+├── events.py            ← Event dispatcher, handlers, priority queue
+├── runner.py            ← Round orchestrator (all agents + engine + NOUS)
+└── chat.py              ← Debug interface (/talk, /observe, /inspect)
 ```
 
 ---
 
-## 11. Implementation Stages
+## 15. Cost Estimate (per full unmanned SIM)
 
-### Stage 1: Strategic Reasoning + Actions
-- LeaderAgent class with 4-block context
-- Single LLM call per leader per round → structured action JSON
-- Action validation and engine integration
-- Full round loop: 21 agents → engine → NOUS → results
-- **Test:** Run 1 full SIM (6 rounds), verify all 21 leaders produce valid actions
+| Activity | Calls | Tokens/call | Total tokens | Model |
+|----------|:-----:|:-----------:|:------------|:-----:|
+| Identity generation (21 agents) | 21 | ~1K | ~21K | Sonnet |
+| Initial deliberation (21 × 6 rounds) | 126 | ~10K in, ~2K out | ~1.5M | Sonnet |
+| Active loop decisions (~3/agent/round) | ~378 | ~4K in, ~500 out | ~1.7M | Flash |
+| Conversations (~30/round × 6) | ~1,440 turns | ~2K in, ~200 out | ~3.2M | Flash |
+| Conversation summaries (~180) | 180 | ~1K in, ~200 out | ~216K | Flash |
+| Transaction evaluations (~120) | 120 | ~2K in, ~500 out | ~300K | Flash |
+| Batched reflections (~126) | 126 | ~3K in, ~500 out | ~440K | Flash |
+| NOUS judgment (6 rounds) | 6 | ~8K in, ~1K out | ~54K | Sonnet |
+| **Total** | **~2,400** | | **~7.4M tokens** | |
 
-### Stage 2: Conversations
-- 8-turn bilateral conversation engine
-- Intent notes from strategic reasoning
-- Transcript → memory integration
-- **Test:** Run SIM with conversations, verify deals emerge naturally
-
-### Stage 3: Transactions
-- Propose → evaluate → execute flow
-- Arms sales, coin transfers, basing rights, treaties
-- **Test:** Verify bilateral deals execute correctly, economy balances
-
-### Stage 4: Memory + Reflection
-- Round-by-round memory accumulation
-- Memory compression for late rounds
-- Strategic revision based on outcomes
-- **Test:** Verify agent behavior evolves across rounds (not repetitive)
-
-### Stage 5: Testing Interface
-- `/talk` chat command
-- Block inspection
-- Decision replay
-
-### Stage 6: Option B (Anthropic persistent agent)
-- Alternative architecture using persistent conversation
-- Compare reasoning quality, cost, reliability vs Option A
+**Estimated cost:** ~$5-8 per full SIM run
+**Estimated time:** ~20-40 minutes (with parallelization)
