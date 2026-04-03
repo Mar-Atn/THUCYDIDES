@@ -90,6 +90,8 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._json_response(self._end_conversation(body))
         elif path == "/api/agent/decide":
             self._json_response(self._decide(body))
+        elif path == "/api/agent/bilateral":
+            self._json_response(self._bilateral(body))
         else:
             self.send_error(404)
 
@@ -265,6 +267,60 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             "cognitive_state": agent.get_cognitive_state(),
         }
 
+    def _bilateral(self, body):
+        """Run a bilateral conversation between two agents."""
+        from engine.agents.conversations import ConversationEngine
+
+        role_a = body.get("role_a", "")
+        role_b = body.get("role_b", "")
+        max_turns = body.get("max_turns", 8)
+        topic = body.get("topic", "")
+        use_llm = body.get("use_llm", True)
+
+        if not role_a or not role_b:
+            return {"error": "Both role_a and role_b are required"}
+        if role_a == role_b:
+            return {"error": "Cannot have bilateral conversation with self"}
+        if not use_llm:
+            return {"error": "Bilateral conversations require LLM (use_llm must be true)"}
+
+        # Initialize agents if needed (with LLM for bilateral)
+        if role_a not in _agents:
+            _agents[role_a] = initialize_with_llm(role_a)
+        if role_b not in _agents:
+            _agents[role_b] = initialize_with_llm(role_b)
+
+        agent_a = _agents[role_a]
+        agent_b = _agents[role_b]
+
+        engine = ConversationEngine()
+        try:
+            result = asyncio.run(engine.run_bilateral(
+                agent_a, agent_b, max_turns=max_turns, topic=topic,
+            ))
+        except Exception as e:
+            logger.error("Bilateral failed: %s", e, exc_info=True)
+            return {"error": str(e)}
+
+        return {
+            "success": True,
+            "transcript": result.transcript,
+            "turns": result.turns,
+            "ended_by": result.ended_by,
+            "intent_notes": result.intent_notes,
+            "reflections": result.reflections,
+            "agents": {
+                role_a: {
+                    "info": agent_a.info(),
+                    "cognitive_state": agent_a.get_cognitive_state(),
+                },
+                role_b: {
+                    "info": agent_b.info(),
+                    "cognitive_state": agent_b.get_cognitive_state(),
+                },
+            },
+        }
+
     def _get_agent_state(self, role_id):
         """Get current cognitive state."""
         if role_id not in _agents:
@@ -310,6 +366,7 @@ if __name__ == "__main__":
     print(f"  POST /api/agent/init               — initialize agent")
     print(f"  POST /api/agent/chat               — chat with agent")
     print(f"  POST /api/agent/decide              — test decision (budget/tariffs/sanctions/opec/military/covert/political/active_loop)")
+    print(f"  POST /api/agent/bilateral           — bilateral conversation between two agents")
     print(f"  GET  /api/agent/state?role_id=X     — get cognitive state")
     print(f"  GET  /api/agent/history?role_id=X   — get state history")
     print()

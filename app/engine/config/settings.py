@@ -39,8 +39,8 @@ class LLMModelConfig:
             "max_tokens": 2048,
         },
         LLMUseCase.AGENT_CONVERSATION: {
-            "primary": {"provider": LLMProvider.GEMINI, "model": "gemini-2.5-flash"},
-            "fallback": {"provider": LLMProvider.ANTHROPIC, "model": "claude-haiku-4-5-20251001"},
+            "primary": {"provider": LLMProvider.ANTHROPIC, "model": "claude-sonnet-4-20250514"},
+            "fallback": {"provider": LLMProvider.GEMINI, "model": "gemini-2.5-flash"},
             "max_tokens": 1024,
         },
         LLMUseCase.AGENT_REFLECTION: {

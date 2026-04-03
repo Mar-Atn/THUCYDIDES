@@ -44,6 +44,13 @@
   .chat-msg.user { background: var(--surface2); align-self: flex-end; color: var(--accent); border: 1px solid var(--border); }
   .chat-msg.agent { background: var(--surface); align-self: flex-start; border: 1px solid var(--border); }
   .chat-msg.system { background: transparent; color: var(--text-dim); font-size: 11px; align-self: center; font-style: italic; }
+  .chat-msg.bilateral-a { background: var(--surface2); align-self: flex-start; border: 1px solid var(--accent); border-left: 3px solid var(--accent); }
+  .chat-msg.bilateral-b { background: var(--surface2); align-self: flex-end; border: 1px solid var(--gold); border-right: 3px solid var(--gold); }
+  .chat-msg .speaker-label { font-size: 10px; font-weight: bold; margin-bottom: 4px; }
+  .chat-msg.bilateral-a .speaker-label { color: var(--accent); }
+  .chat-msg.bilateral-b .speaker-label { color: var(--gold); }
+  .intent-note { background: var(--surface); border: 1px dashed var(--border); padding: 8px 12px; margin: 4px 0; font-size: 11px; line-height: 1.5; border-radius: 6px; max-width: 90%; }
+  .intent-note .intent-label { font-size: 10px; font-weight: bold; color: var(--accent2); margin-bottom: 4px; }
 
   .chat-input { padding: 8px 16px; background: var(--surface); border-top: 1px solid var(--border); display: flex; gap: 8px; }
   .chat-input input { flex: 1; background: var(--surface2); color: var(--text); border: 1px solid var(--border); padding: 8px 12px; font-family: var(--font); font-size: 13px; border-radius: 4px; }
@@ -90,6 +97,15 @@
     <button onclick="startConversation()" id="btnStart" style="background:var(--green);color:var(--bg)">Start Conversation</button>
     <button onclick="endConversation()" id="btnEnd" style="background:var(--accent2);color:var(--bg);display:none">End Conversation → Reflect</button>
     <span id="convStatus" style="font-size:11px;color:var(--text-dim)">No active conversation</span>
+  </div>
+
+  <div class="role-selector" id="bilateralControls" style="display:none;flex-wrap:wrap;">
+    <span style="font-size:11px;color:var(--text-dim);width:100%;margin-bottom:4px;">Bilateral Conversation (LLM required):</span>
+    <select id="bilateralPartner" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px;border-radius:4px;flex:1;">
+      <option value="">Select counterpart...</option>
+    </select>
+    <input type="text" id="bilateralTopic" placeholder="Topic (optional)" style="background:var(--surface);color:var(--text);border:1px solid var(--border);padding:6px 10px;font-family:var(--font);font-size:12px;border-radius:4px;width:160px;">
+    <button onclick="startBilateral()" id="btnBilateral" style="background:var(--gold);color:var(--bg);border:none;padding:6px 14px;font-family:var(--font);font-size:12px;cursor:pointer;border-radius:4px;font-weight:bold;">Test Bilateral</button>
   </div>
 
   <div class="role-selector" id="decisionControls" style="display:none;flex-wrap:wrap;">
@@ -199,10 +215,12 @@ function initAgent() {
     currentRoleId = roleId;
     updateAgentInfo(data.agent);
     updateCognitiveState(data.cognitive_state);
-    addChat('system', `✓ ${data.agent.character_name} initialized (${data.agent.title} of ${data.agent.country})`);
+    addChat('system', `${data.agent.character_name} initialized (${data.agent.title} of ${data.agent.country})`);
     addChat('system', 'Click "Start Conversation" to begin talking, or test a decision type below.');
     document.getElementById('convControls').style.display = 'flex';
     document.getElementById('decisionControls').style.display = 'flex';
+    document.getElementById('bilateralControls').style.display = 'flex';
+    populateBilateralPartner(roleId);
     loadHistory();
   });
 }
@@ -368,6 +386,131 @@ function testDecision(decisionType) {
   }).catch(err => {
     addChat('system', `Request failed: ${err}`);
   });
+}
+
+// --- Bilateral Conversation ---
+
+let allRoles = [];
+
+function populateBilateralPartner(excludeId) {
+  // Fetch roles if not cached
+  if (allRoles.length === 0) {
+    fetch('/api/roles').then(r => r.json()).then(data => {
+      allRoles = [...data.heads_of_state, ...data.other_roles];
+      _fillPartnerDropdown(excludeId);
+    });
+  } else {
+    _fillPartnerDropdown(excludeId);
+  }
+}
+
+function _fillPartnerDropdown(excludeId) {
+  const sel = document.getElementById('bilateralPartner');
+  sel.innerHTML = '<option value="">Select counterpart...</option>';
+  allRoles.filter(r => r.id !== excludeId).forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.id;
+    opt.textContent = `${r.name} — ${r.title} (${r.country})`;
+    sel.appendChild(opt);
+  });
+}
+
+function startBilateral() {
+  if (!currentRoleId) return;
+  const partnerId = document.getElementById('bilateralPartner').value;
+  if (!partnerId) { addChat('system', 'Select a counterpart first.'); return; }
+  const topic = document.getElementById('bilateralTopic').value.trim();
+
+  const btn = document.getElementById('btnBilateral');
+  btn.disabled = true;
+  btn.textContent = 'Running...';
+
+  addChat('system', `--- BILATERAL CONVERSATION ---`);
+  addChat('system', `${currentRoleId} <-> ${partnerId}${topic ? ' | Topic: ' + topic : ''}`);
+  addChat('system', 'Generating intent notes and running conversation (this takes ~30-60s)...');
+
+  fetch('/api/agent/bilateral', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      role_a: currentRoleId,
+      role_b: partnerId,
+      max_turns: 8,
+      topic: topic,
+      use_llm: true
+    })
+  }).then(r => r.json()).then(data => {
+    btn.disabled = false;
+    btn.textContent = 'Test Bilateral';
+
+    if (data.error) {
+      addChat('system', `Error: ${data.error}`);
+      return;
+    }
+
+    // Show intent notes (moderator view)
+    const intentA = data.intent_notes[currentRoleId] || '';
+    const intentB = data.intent_notes[partnerId] || '';
+    const nameA = data.agents[currentRoleId]?.info?.character_name || currentRoleId;
+    const nameB = data.agents[partnerId]?.info?.character_name || partnerId;
+
+    addIntentNote(nameA, intentA);
+    addIntentNote(nameB, intentB);
+
+    // Show transcript
+    addChat('system', `--- TRANSCRIPT (${data.turns} turns, ended by: ${data.ended_by}) ---`);
+    data.transcript.forEach((entry, i) => {
+      const isA = entry.speaker_role_id === currentRoleId;
+      const cls = isA ? 'bilateral-a' : 'bilateral-b';
+      addBilateralMsg(cls, entry.speaker_name, `[Turn ${entry.turn}] ${entry.text}`);
+    });
+    addChat('system', '--- END TRANSCRIPT ---');
+
+    // Show reflections
+    const refA = data.reflections[currentRoleId];
+    const refB = data.reflections[partnerId];
+    if (refA) {
+      addChat('system', `Reflection (${nameA}): updated=${(refA.updated||[]).join(',') || 'none'} | ${refA.details?.assessment || refA.details?.memory_update || ''}`);
+    }
+    if (refB) {
+      addChat('system', `Reflection (${nameB}): updated=${(refB.updated||[]).join(',') || 'none'} | ${refB.details?.assessment || refB.details?.memory_update || ''}`);
+    }
+
+    // Update cognitive state display for current agent
+    if (data.agents[currentRoleId]) {
+      updateCognitiveState(data.agents[currentRoleId].cognitive_state);
+      updateAgentInfo(data.agents[currentRoleId].info);
+    }
+    loadHistory();
+  }).catch(err => {
+    btn.disabled = false;
+    btn.textContent = 'Test Bilateral';
+    addChat('system', `Request failed: ${err}`);
+  });
+}
+
+function addBilateralMsg(cls, speakerName, text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = `chat-msg ${cls}`;
+  div.innerHTML = `<div class="speaker-label">${speakerName}</div>${escapeHtml(text)}`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function addIntentNote(agentName, text) {
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'intent-note';
+  div.innerHTML = `<div class="intent-label">INTENT NOTES: ${escapeHtml(agentName)}</div>${escapeHtml(text)}`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 </script>
 </body>

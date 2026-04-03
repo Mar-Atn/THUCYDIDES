@@ -389,9 +389,62 @@ class LeaderAgent:
     # ------------------------------------------------------------------
 
     async def generate_conversation_message(self, conversation_context: dict) -> dict:
-        """Produce next message in a conversation."""
-        # TODO: Phase 3A of build plan
-        return {"text": "...", "proposals_made": [], "end_conversation": False}
+        """Produce next message in a bilateral conversation.
+
+        Args:
+            conversation_context: dict with keys:
+                - counterpart_name, counterpart_title, counterpart_country
+                - intent_notes: str (private)
+                - transcript: list of {speaker_role_id, speaker_name, text}
+                - extra_context: str (optional)
+
+        Returns:
+            dict with 'text', 'end_conversation'.
+        """
+        from engine.agents.conversations import ConversationEngine, _transcript_to_messages, CONVERSATION_SYSTEM_TEMPLATE, END_MARKER
+        from engine.services.llm import call_llm
+        from engine.config.settings import LLMUseCase
+
+        system = CONVERSATION_SYSTEM_TEMPLATE.format(
+            character_name=self.role["character_name"],
+            title=self.role["title"],
+            country_name=self.country["sim_name"],
+            block_2_identity=self.cognitive.block2_identity,
+            counterpart_name=conversation_context["counterpart_name"],
+            counterpart_title=conversation_context["counterpart_title"],
+            counterpart_country=conversation_context["counterpart_country"],
+            intent_notes=conversation_context.get("intent_notes", ""),
+            memory_highlights=self.cognitive.get_memory_text(),
+            goals_highlights=self.cognitive.get_goals_text(),
+        )
+
+        extra = conversation_context.get("extra_context", "")
+        if extra:
+            system += extra
+
+        messages = _transcript_to_messages(
+            conversation_context.get("transcript", []), self.role_id,
+        )
+        if not messages:
+            messages = [{"role": "user", "content": (
+                f"You are starting a private bilateral meeting with "
+                f"{conversation_context['counterpart_name']}. "
+                f"Open the conversation. Be direct and purposeful."
+            )}]
+
+        response = await call_llm(
+            use_case=LLMUseCase.AGENT_CONVERSATION,
+            messages=messages,
+            system=system,
+            max_tokens=300,
+            temperature=0.8,
+        )
+
+        text = response.text.strip()
+        end_conversation = END_MARKER in text
+        clean_text = text.replace(END_MARKER, "").strip()
+
+        return {"text": clean_text, "end_conversation": end_conversation}
 
     # ------------------------------------------------------------------
     # DET_C1 C6: evaluate_proposal()
