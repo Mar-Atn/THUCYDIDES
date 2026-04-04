@@ -1072,6 +1072,159 @@ Raised during Pass 3 coherence check.
 
 ---
 
+### 1.3.b Round Runner Events
+
+*Added 2026-04-04 for AI Participant round runner integration. These events are emitted by `app/engine/agents/runner.py` (RoundReport / SimReport flow) and supplement the Engine Events above. `engine.round_start` payload below extends the existing `engine.round_start` schema with runner-specific fields (`active_agents`, `world_state_summary`).*
+
+#### `engine.round_start` (runner variant)
+Emitted by the round runner at the beginning of a round to announce active AI agents and snapshot world state.
+
+```json
+{
+  "event_type": "engine.round_start",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "PUBLIC",
+  "payload": {
+    "round_num": 3,
+    "active_agents": ["columbia_head", "persia_head", "ruthenia_head"],
+    "world_state_summary": "Round 3 H2 2027: 1 active war (Mashriq), oil $112/bbl, 20 countries active"
+  }
+}
+```
+
+#### `engine.round_complete`
+Emitted by the round runner when a round finishes (distinct from `engine.round_end` which marks snapshot freeze). Reports aggregate runner metrics.
+
+```json
+{
+  "event_type": "engine.round_complete",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "PUBLIC",
+  "payload": {
+    "round_num": 3,
+    "duration_seconds": 187.4,
+    "actions_count": 42,
+    "conversations_count": 11,
+    "transactions_count": 6,
+    "summary": "Round 3 complete: 42 actions, 11 conversations, 6 transactions"
+  }
+}
+```
+
+#### `engine.active_loop_tick`
+Emitted on each iteration of the active loop during Phase A.
+
+```json
+{
+  "event_type": "engine.active_loop_tick",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "MODERATOR",
+  "payload": {
+    "round_num": 3,
+    "tick_num": 4,
+    "agents_decided": 7,
+    "actions_taken": 3,
+    "conversations_matched": 2
+  }
+}
+```
+
+#### `engine.conversation_matched`
+Emitted when two agents are paired for a bilateral conversation.
+
+```json
+{
+  "event_type": "engine.conversation_matched",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "MODERATOR",
+  "payload": {
+    "role_a": "columbia_head",
+    "role_b": "persia_head",
+    "round_num": 3,
+    "tick_num": 4
+  }
+}
+```
+
+#### `engine.transaction_proposed`
+Emitted when an agent proposes a transaction (deal) to a counterpart.
+
+```json
+{
+  "event_type": "engine.transaction_proposed",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "MODERATOR",
+  "payload": {
+    "transaction_type": "arms_sale",
+    "proposer_role_id": "columbia_head",
+    "counterpart_role_id": "persia_head",
+    "terms": { "coins": 12.0, "units": { "ground": 3 } },
+    "reasoning": "Strengthen Persia to balance Ruthenia expansion"
+  }
+}
+```
+
+#### `engine.transaction_resolved`
+Emitted when a proposed transaction is evaluated by the counterpart.
+
+```json
+{
+  "event_type": "engine.transaction_resolved",
+  "actor_role_id": "engine",
+  "actor_country_id": "global",
+  "visibility": "MODERATOR",
+  "payload": {
+    "transaction_id": "txn_<ulid>",
+    "decision": "accept",
+    "reasoning": "Terms align with defense posture; accept to secure supply line"
+  }
+}
+```
+
+#### `engine.mandatory_submitted`
+Emitted when an agent submits round-end mandatory inputs (budget, tariffs, sanctions, OPEC production).
+
+```json
+{
+  "event_type": "engine.mandatory_submitted",
+  "actor_role_id": "engine",
+  "actor_country_id": "columbia",
+  "visibility": "COUNTRY",
+  "payload": {
+    "role_id": "columbia_head",
+    "country_id": "columbia",
+    "budget": { "social_allocation": 30.0, "military_allocation": 15.0, "technology_allocation": 8.0 },
+    "tariffs": { "persia": 10.0, "ruthenia": 25.0 },
+    "sanctions": ["ruthenia"],
+    "opec_production": null
+  }
+}
+```
+
+#### `engine.agent_reflection`
+Emitted when an agent completes post-round reflection updating its 4-block memory.
+
+```json
+{
+  "event_type": "engine.agent_reflection",
+  "actor_role_id": "engine",
+  "actor_country_id": "columbia",
+  "visibility": "MODERATOR",
+  "payload": {
+    "role_id": "columbia_head",
+    "blocks_updated": ["situation", "strategy", "relationships"],
+    "summary": "Updated strategy to prioritize Mashriq de-escalation; flagged Ruthenia as hostile"
+  }
+}
+```
+
+---
+
 ## 1.4 System Events
 
 #### `system.player_login`
@@ -1362,6 +1515,13 @@ Complete list of all event types for validation and schema registry.
 | | `engine.production_complete` | COUNTRY |
 | | `engine.tech_advance` | PUBLIC |
 | | `engine.coherence_flag` | MODERATOR |
+| **Engine: Runner** (2026-04-04) | `engine.round_complete` | PUBLIC |
+| | `engine.active_loop_tick` | MODERATOR |
+| | `engine.conversation_matched` | MODERATOR |
+| | `engine.transaction_proposed` | MODERATOR |
+| | `engine.transaction_resolved` | MODERATOR |
+| | `engine.mandatory_submitted` | COUNTRY |
+| | `engine.agent_reflection` | MODERATOR |
 | **System** | `system.player_login` | MODERATOR |
 | | `system.role_assigned` | MODERATOR |
 | | `system.phase_change` | PUBLIC |

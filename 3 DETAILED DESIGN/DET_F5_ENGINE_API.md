@@ -1318,6 +1318,342 @@ serve(async (req) => {
 
 ---
 
+# 3. TEST INTERFACE API (DEVELOPMENT TOOL)
+
+The Test Interface is a **DEVELOPMENT TOOL**, not part of the production API. It runs as a standalone HTTP server (default port 8888) for testing AI participant capabilities. See DET_F5 Section 2 for the production Engine API (FastAPI on Railway).
+
+**Server:** `app/test-interface/server.py` (stdlib `http.server`, not FastAPI)
+**Base URL:** `http://localhost:8888`
+**Auth:** None (localhost-only development tool)
+**Response envelope:** Flat JSON (no `success`/`data`/`events` wrapper). Errors return `{"error": "<message>"}`.
+
+## 3.1 Agent Endpoints
+
+### 3.1.1 GET /api/roles -- List All Roles
+
+Returns all roles defined in the role registry, split into heads of state and other roles.
+
+**Response (200):**
+```json
+{
+  "heads_of_state": [
+    {"id": "dealer", "name": "...", "title": "...", "country": "columbia", "parallel": "..."}
+  ],
+  "other_roles": [
+    {"id": "...", "name": "...", "title": "...", "country": "..."}
+  ]
+}
+```
+
+**Notes:** Loads from `engine/agents/profiles.py::load_all_roles()`. No side effects.
+
+---
+
+### 3.1.2 POST /api/agent/init -- Initialize Agent
+
+Creates and initializes a `LeaderAgent` for the given role. Subsequent calls for the same `role_id` return the existing cached agent.
+
+**Request:**
+```json
+{"role_id": "dealer", "use_llm": false}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier from `/api/roles` |
+| `use_llm` | bool | No | If true, calls LLM to generate identity block (slow, expensive). Defaults to false (sync init with static identity). |
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "agent": {"role_id": "...", "character_name": "...", "country_id": "...", ...},
+  "cognitive_state": {"identity": {...}, "beliefs": {...}, "priorities": {...}, "memory": {...}}
+}
+```
+
+**Notes:** LLM init falls back to sync init on failure. Agents are stored in the module-level `_agents` dict for the lifetime of the server process.
+
+---
+
+### 3.1.3 POST /api/agent/chat -- Chat With Agent
+
+Sends a free-form message to an agent and returns its response.
+
+**Request:**
+```json
+{"role_id": "dealer", "message": "What are your priorities?", "use_llm": true}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier |
+| `message` | string | Yes | User message to send |
+| `use_llm` | bool | No | If true, uses async LLM chat. If false, uses deterministic `chat_sync()` stub. |
+
+**Response (200):**
+```json
+{
+  "response": "...",
+  "agent": {...},
+  "cognitive_state": {...}
+}
+```
+
+**Notes:** Auto-initializes the agent if not already present (sync init). LLM errors fall back to sync response with error prefix.
+
+---
+
+### 3.1.4 POST /api/agent/start_conversation -- Begin Conversation Session
+
+Marks the agent as entering a conversation. Used to bracket reflection triggers.
+
+**Request:**
+```json
+{"role_id": "dealer", "counterpart": "human_operator"}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier |
+| `counterpart` | string | No | Counterpart identifier. Defaults to `"human_operator"`. |
+
+**Response (200):**
+```json
+{"success": true, "status": "in_conversation", "message": "Conversation started with ..."}
+```
+
+---
+
+### 3.1.5 POST /api/agent/end_conversation -- End Conversation, Trigger Reflection
+
+Closes the conversation session and triggers the agent's cognitive-state reflection (may update beliefs, priorities, memory).
+
+**Request:**
+```json
+{"role_id": "dealer"}
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "reflection": {"updated": ["beliefs", "priorities"], ...},
+  "agent": {...},
+  "cognitive_state": {...}
+}
+```
+
+**Notes:** Requires LLM for reflection. Returns `{"error": ...}` if agent not initialized. Expensive call (LLM reflection pass over cognitive blocks).
+
+---
+
+### 3.1.6 POST /api/agent/decide -- Test Specific Decision Type
+
+Invokes a single decision function from `engine/agents/decisions.py` and returns the structured decision output.
+
+**Request:**
+```json
+{"role_id": "dealer", "decision_type": "budget", "round_context": {}}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier |
+| `decision_type` | string | Yes | One of: `budget`, `tariffs`, `sanctions`, `opec`, `military`, `covert`, `political`, `active_loop` |
+| `round_context` | object | No | World-state context. If omitted, a minimal default context is built from the agent's country data. |
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "decision_type": "budget",
+  "result": {...},
+  "agent": {...},
+  "cognitive_state": {...}
+}
+```
+
+**Notes:** Requires LLM. Each decision type dispatches to the corresponding `decide_*()` function. Auto-initializes agent if needed. Returns `{"error": ...}` on unknown decision type or execution failure.
+
+---
+
+### 3.1.7 POST /api/agent/bilateral -- Run Bilateral Conversation
+
+Runs a full bilateral conversation between two agents via `ConversationEngine.run_bilateral()`, including intent notes, turn-by-turn exchange, and post-reflection.
+
+**Request:**
+```json
+{
+  "role_a": "dealer",
+  "role_b": "dragon",
+  "max_turns": 8,
+  "topic": "trade tensions",
+  "use_llm": true
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_a` | string | Yes | First participant |
+| `role_b` | string | Yes | Second participant (must differ from role_a) |
+| `max_turns` | int | No | Max turns. Defaults to 8. |
+| `topic` | string | No | Conversation topic seed. Defaults to empty. |
+| `use_llm` | bool | No | Must be true. Defaults to true. |
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "transcript": "...",
+  "turns": [{"turn": 1, "speaker": "...", "speaker_name": "...", "text": "..."}, ...],
+  "ended_by": "natural|max_turns|...",
+  "intent_notes": {...},
+  "reflections": {...},
+  "agents": {"<role_a>": {...}, "<role_b>": {...}}
+}
+```
+
+**Notes:** Expensive call (multiple LLM turns + reflections). Both agents are initialized with LLM identity if not already present. Live turns are streamed to `_live_bilateral` for polling via `/api/agent/bilateral/live`. Returns `{"error": ...}` if roles are invalid or use_llm is false.
+
+---
+
+### 3.1.8 GET /api/agent/bilateral/live -- Poll Live Bilateral Turns
+
+Returns turns from the currently running (or most recent) bilateral conversation, supporting incremental polling.
+
+**Query params:**
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `since` | int | No | Return only turns with index >= `since`. Defaults to 0. |
+
+**Response (200):**
+```json
+{
+  "status": "idle|running|complete",
+  "phase": "turn 3: dragon",
+  "turns": [{"turn": 4, "speaker_name": "...", "text": "..."}, ...],
+  "total_turns": 8
+}
+```
+
+**Notes:** Reads module-level `_live_bilateral` state (single-run; a new bilateral resets it). Safe polling endpoint.
+
+---
+
+### 3.1.9 GET /api/agent/state -- Get Current Cognitive State
+
+Returns the agent's current cognitive blocks (identity, beliefs, priorities, memory).
+
+**Query params:**
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier |
+
+**Response (200):**
+```json
+{"identity": {...}, "beliefs": {...}, "priorities": {...}, "memory": {...}}
+```
+
+**Notes:** Returns `{"error": ...}` if agent not initialized.
+
+---
+
+### 3.1.10 GET /api/agent/history -- Get Cognitive State Version History
+
+Returns the versioned history of cognitive-state snapshots for an agent.
+
+**Query params:**
+| Param | Type | Required | Description |
+|-------|------|----------|-------------|
+| `role_id` | string | Yes | Role identifier |
+
+**Response (200):**
+```json
+{"history": [{"version": 1, "timestamp": "...", "state": {...}}, ...]}
+```
+
+**Notes:** Returns `{"error": ...}` if agent not initialized.
+
+---
+
+## 3.2 SIM Endpoints
+
+### 3.2.1 POST /api/sim/round -- Run Single Round
+
+Executes one round of the unmanned SIM using currently loaded agents (auto-initializes all heads of state if `_agents` is empty).
+
+**Request:**
+```json
+{"round_num": 1, "active_loop_ticks": 1, "nous_intensity": 0}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `round_num` | int | No | Round number. Defaults to 1. |
+| `active_loop_ticks` | int | No | Number of active-loop ticks in the round. Defaults to 1. |
+| `nous_intensity` | int | No | NOUS disruption intensity (0 = none). Defaults to 0. |
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "summary": "...",
+  "round_num": 1,
+  "duration": 123.4,
+  "actions_count": 42,
+  "conversations_count": 5,
+  "transactions_count": 3,
+  "mandatory_count": 10,
+  "log": ["...", "..."]
+}
+```
+
+**Notes:** Expensive call (many LLM calls per round). Loads countries from CSV via `load_countries_from_csv()` and builds default world state. Returns `{"error": ...}` on failure.
+
+---
+
+### 3.2.2 POST /api/sim/run -- Run Full Unmanned SIM
+
+Executes a complete multi-round unmanned SIM via `run_full_sim()`.
+
+**Request:**
+```json
+{"num_rounds": 6, "active_loop_ticks": 1, "nous_intensity": 0}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `num_rounds` | int | No | Number of rounds to run. Defaults to 1. |
+| `active_loop_ticks` | int | No | Ticks per round. Defaults to 1. |
+| `nous_intensity` | int | No | NOUS disruption intensity. Defaults to 0. |
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "summary": "...",
+  "num_rounds": 6,
+  "total_duration": 1834.2,
+  "rounds": [
+    {
+      "round_num": 1,
+      "summary": "...",
+      "duration": 123.4,
+      "actions_count": 42,
+      "conversations_count": 5,
+      "transactions_count": 3,
+      "log": ["last 10 log entries..."]
+    }
+  ],
+  "agents": {...}
+}
+```
+
+**Notes:** Very expensive call (full SIM can take 2-40 minutes depending on tier and round count). Per-round log is truncated to last 10 entries for transport. Returns `{"error": ...}` on failure.
+
+---
+
 *This document specifies the complete API surface between the TTT web application and the Python engine server. For the participant-facing REST API (what the frontend calls directly via Supabase), see [F4 API Contracts](../2%20SEED/F_DATA_ARCHITECTURE/SEED_F4_API_CONTRACTS_v1.md). For engine formula details, see [D8 Engine Formulas](../2%20SEED/D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md). For the Edge Function middleware, see [DET_EDGE_FUNCTIONS.md](DET_EDGE_FUNCTIONS.md).*
 
 ---

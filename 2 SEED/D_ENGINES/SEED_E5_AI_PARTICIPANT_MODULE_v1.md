@@ -926,6 +926,245 @@ app/engine/agents/
 
 ---
 
+## 14a. Implementation Files (Current State, 2026-04-04)
+
+The module lives at `app/engine/agents/`. This section documents what exists in code
+right now (as opposed to the design vision in sections 1–14). Line counts are approximate.
+
+### `leader.py` (~690 lines) — `LeaderAgent` class
+
+The main class implementing the DET_C1 C6 abstract interface for heads of state.
+
+**Constructor:** `__init__(role_id: str)` — creates an empty agent with a `CognitiveState`,
+status `"uninitialized"`, and empty conversation history. No LLM calls here.
+
+**`initialize(sim_config, world_state)` (async):**
+1. Loads role from `roles.csv` and country from `countries.csv` via `profiles.load_role()` / `load_country_context()`.
+2. Populates Block 1 (rules) by formatting the `RULES_TEMPLATE` constant with the role's powers, objectives, intelligence pool, and ticking clock. The template enforces the **SIM-names-only** rule (Columbia, Cathay, Sarmatia, etc.) directly in the prompt.
+3. Generates Block 2 (identity) via `_generate_identity()` — a T=0.85 LLM call using the identity-generation prompt from `profiles.build_identity_prompt()`.
+4. Sets Block 3 relationships from `world_state["relationships"]` mapped to numeric trust scores (allied=0.8, hostile=-0.6, at_war=-1.0, etc.).
+5. Generates Block 4 (goals & strategy) via `_generate_goals()` — a T=0.7 LLM call producing a ~400–600-word strategic brief (ranked objectives, strategy, relationships, risks, timeline).
+
+**`initialize_sync(identity_text, world_state)`:** Synchronous variant — no LLM calls, identity either passed in or filled with a stub. Used by tests.
+
+**4-block cognitive model integration:** All four blocks live in `self.cognitive: CognitiveState`. `_get_cognitive_blocks()` bundles them as a dict for the `decisions` and `transactions` modules.
+
+**DET_C1 C6 abstract interface — 10 methods implemented:**
+
+| Method | Implementation |
+|---|---|
+| `initialize()` | Above — async, with LLM |
+| `get_cognitive_state()` | Delegates to `self.cognitive.snapshot()` |
+| `get_state_history()` | Delegates to `self.cognitive.get_history()` |
+| `chat(message)` | One message within a live conversation; appends to `_conversation_history`; calls LLM with system = identity + memory + goals |
+| `start_conversation(counterpart)` / `end_conversation()` | Open/close the conversation; `end_conversation()` runs a single reflection LLM call (T=0.3) that returns JSON with `memory_update`, `relationship_change`, `goals_update`, `identity_update`; the agent self-curates what to remember |
+| `submit_mandatory_inputs(round_context)` | Calls `decisions.submit_all_mandatory()` to produce budget / tariffs / sanctions / OPEC / deployment; records each in memory |
+| `decide_action(time_remaining, new_events, round_context)` | Proactive active-loop dispatch to `decisions.decide_action_dispatch()`; returns an action dict or `None` (wait) |
+| `react_to_event(event)` | **STUB** — returns `None`; flagged as TODO Phase 3B |
+| `generate_conversation_message(conversation_context)` | Produces next bilateral turn; uses `conversations.CONVERSATION_SYSTEM_TEMPLATE` + `_transcript_to_messages`; T=0.8, 300 tokens; detects `[END CONVERSATION]` marker |
+| `evaluate_proposal(proposal, counterpart_context)` | Delegates to `transactions.evaluate_transaction()`; accepts dict or `TransactionProposal`; records accept/reject/counter in memory |
+| `propose_transaction(counterpart, transaction_type, world_state)` | Delegates to `transactions.propose_transaction()`; records in memory |
+| `start_round(round_num, world_state_visible, events_since_last)` | Updates immediate memory with oil price and war count, ingests events |
+| `reflect_on_round(round_results)` | LLM reflection (T=0.5) on GDP/inflation/stability/support/oil; appends to Block 4 goals |
+
+**Module dependencies:**
+- `profiles.py` — `load_role()`, `load_country_context()`, `build_identity_prompt()`
+- `memory.py` — `CognitiveState` (4 blocks + versioning)
+- `decisions.py` — `submit_all_mandatory()`, `decide_action_dispatch()`
+- `conversations.py` — `CONVERSATION_SYSTEM_TEMPLATE`, `_transcript_to_messages`, `END_MARKER`
+- `transactions.py` — `propose_transaction()`, `evaluate_transaction()`, `TransactionProposal`
+
+### `profiles.py` (~150 lines) — Role data loading + identity prompt
+
+Pure CSV loader, no LLM or DB. Points at `2 SEED/C_MECHANICS/C4_DATA/roles.csv` and `countries.csv`.
+
+- `load_role(role_id) -> dict` — single role lookup; raises `ValueError` if missing.
+- `load_all_roles() -> dict[str, dict]` — all 40+ roles.
+- `load_heads_of_state() -> dict[str, dict]` — filter to `is_head_of_state=true` (21 leaders).
+- `load_country_context(country_id) -> dict` — full country starting data (GDP, treasury, stability, oil producer flags, military units, nuclear/AI level, at_war_with, etc.).
+- `_parse_role(row)` — parses semicolon-separated `powers`, `objectives`, plus cards (sabotage, cyber, disinfo, election_meddling, assassination).
+- `IDENTITY_GENERATION_PROMPT` constant — 4-element template (personality traits, communication style, emotional drivers, strategic tendency) generating 3–4 sentence second-person identity.
+- `build_identity_prompt(role, country) -> str` — fills the template.
+
+### `memory.py` (~230 lines) — `CognitiveState` (4 blocks + versioning)
+
+Pure in-memory cognitive state; no DB writes. Version history kept in `_history: list[dict]`.
+
+- `__init__(role_id)` — initializes all 4 blocks empty, `version=0`.
+- `snapshot() -> dict` — returns a deep-copied view of current state with timestamp.
+- `save_version(reason)` — appends snapshot to `_history`, increments `version`.
+- `get_history() -> list[dict]` / `get_version(version) -> dict | None` — historical inspection.
+
+**Block 1 (Rules):** `set_rules(text)` — called once at init.
+
+**Block 2 (Identity):** `set_identity(text)` — called once, saves version tagged `"identity_generated"`.
+
+**Block 3 (Memory):** structured dict with keys `immediate`, `round_history`, `strategic`, `relationships`, `conversations_this_round`, `decisions_this_round`.
+- `update_immediate(text)` — overwrites "just now" slot.
+- `add_conversation(counterpart, summary, trust_change)` — appends to this-round list, clamps relationship trust to [-1,1], saves version.
+- `add_decision(action_type, summary)` — appends to this-round decisions.
+- `end_round(round_num, round_summary)` — archives conversations + decisions into `round_history`, resets round accumulators, saves version.
+- `set_relationships(dict)` — initial seed from world_state.
+
+**Block 4 (Goals):** plain-text-first design (LLM-generated strategic brief).
+- `set_goals_text(text)` / `update_goals_text(text, reason)` — overwrites Block 4 as `{"_text": text}`.
+
+**Context builders for LLM:**
+- `get_memory_text()` — formats Block 3 as markdown: "Just now", "This round conversations", "My decisions this round", last 3 rounds in detail + older rounds compressed, relationships with ally/friendly/neutral/tense/hostile labels, strategic facts.
+- `get_goals_text()` — returns Block 4 as `"## Goals & Strategy\n\n{text}"` (or legacy structured fallback).
+
+### `decisions.py` (~1013 lines) — 8 decision types
+
+Implements the Three-Layer Context Model: Layer 1 = cognitive blocks (identity + memory + goals), Layer 2 = task-specific context built here, Layer 3 = concise decision instruction.
+
+**Utility:** `_parse_json(text)` — robust JSON extractor from LLM output (strips markdown fences, finds matching braces/brackets, recovers from malformed output).
+
+**Layer 2 context builders** (one per decision type):
+- `build_budget_context(country, round_context)` — GDP, revenue estimate, treasury, inflation, debt, stability, maintenance cost, current budget allocation.
+- `build_tariff_context(country, round_context)` — current tariff levels to all partners, trade volumes, economic impact guidance.
+- `build_sanction_context(country, round_context)` — coalition dynamics, current sanctions matrix, cost-to-imposer (30–50%).
+- `build_opec_context(country, round_context)` — oil price, production quotas, OPEC cohesion (members only).
+- `build_military_context(country, round_context)` — ground/naval/air inventory, mobilization pool, ongoing wars, blockades, combat odds.
+- `build_covert_context(country, role, round_context)` — intelligence pool remaining, cards available (sabotage/cyber/disinfo/election/assassination), target candidates.
+- `build_political_context(country, round_context)` — stability/support trends, regime type actions (propaganda/repression/arrests), election calendar.
+- `build_active_loop_context(country, role, round_context)` — time remaining, new events, open proposals, relationship snapshots (for the proactive decide_action loop).
+
+**8 decision functions** (all async; each calls the matching context builder, composes system prompt via `_build_system_prompt(cognitive_blocks, layer2_context)`, calls LLM with JSON-structured output, and parses via `_parse_json`):
+
+| # | Function | Output schema |
+|---|---|---|
+| 1 | `decide_budget` | `{social_pct: 0.5-1.5, military_coins: float, tech_coins: float, reasoning: str}` |
+| 2 | `decide_tariffs` | `{changes: {country_id: level_0_to_3}, reasoning: str}` |
+| 3 | `decide_sanctions` | `{changes: {country_id: level_0_to_3}, reasoning: str}` |
+| 4 | `decide_opec` | `{production: "min"\|"low"\|"normal"\|"high"\|"max", reasoning: str}` |
+| 5 | `decide_military` | `{actions: [{type, from_zone, to_zone, units, ...}], reasoning: str}` |
+| 6 | `decide_covert` | `{ops: [{type, target, cards_used}], reasoning: str}` |
+| 7 | `decide_political` | `{actions: [propaganda\|repression\|arrest\|public_statement], reasoning: str}` |
+| 8 | `decide_active_loop` | `{action_type, target, content, reasoning}` — for the proactive in-round loop |
+
+**Entry points used by `LeaderAgent`:**
+- `submit_all_mandatory(cognitive_blocks, country, role, round_context)` — runs decisions 1–4 (and 5 in stub form) in sequence.
+- `decide_action_dispatch(cognitive_blocks, country, role, round_context, time_remaining, new_events)` — uses `decide_active_loop`, then may fan out to `decide_military`, `decide_covert`, conversation-request dispatch, etc.
+
+**System prompt composer:** `_build_system_prompt(cognitive_blocks, layer2_context)` stacks `block1_rules` → `block2_identity` → memory text → goals text → layer2_context → "Return JSON only."
+
+### `conversations.py` (~500 lines) — Bilateral conversation engine
+
+**`ConversationResult` dataclass** — `transcript: list[{speaker_role_id, text}]`, `turns`, `ended_by`, `intent_notes: {role_a, role_b}` (moderator-only), `reflections: {role_a, role_b}`.
+
+**`ConversationEngine` class:**
+
+- `generate_intent_note(agent, counterpart) -> str` — one LLM call using `INTENT_NOTE_PROMPT` (5-point private plan: objectives / what to share vs. withhold / approach / red lines / what to learn). Private to the agent, never revealed in dialogue. Uses the agent's Block 2 identity + memory + goals + current relationship score.
+
+- `run_bilateral(agent_a, agent_b, max_turns=8, on_turn=None, extra_context=None) -> ConversationResult`:
+  1. Generate intent notes for both agents (parallel).
+  2. Loop up to `max_turns`, alternating speakers. Each turn calls `_generate_turn(...)`.
+  3. Each produced turn is appended to the transcript; if an `on_turn` callback is provided (sync or async), it is invoked with the turn data for **live streaming** (Public Display integration).
+  4. If an agent emits `[END CONVERSATION]` (or `[END]`), the loop stops and `ended_by` is set to that role_id; otherwise `ended_by = "max_turns"`.
+  5. Finally calls `_reflect_both(...)` to update each agent's blocks.
+
+- `_generate_turn(agent, counterpart, transcript, intent_notes, extra_context)` — builds system prompt from `CONVERSATION_SYSTEM_TEMPLATE` (identity + counterpart identification + 4-turn budget + speaking rules + intent notes + memory + goals). Enforces "Use ONLY SIM names" and "Don't use assistant language". Temperature 0.8, max 300 tokens, <100 words per turn.
+
+- `_reflect_both(agent_a, agent_b, transcript)` — parallel reflection calls. Each agent independently decides what to remember (memory update, trust change, goals update, identity update) via `agent.cognitive.add_conversation(...)` and goal-text append.
+
+**Helpers:**
+- `_transcript_to_messages(transcript, speaker_role_id)` — converts shared transcript into `[{role: "user"|"assistant", content}]` from the perspective of the current speaker.
+- `_format_transcript`, `_trust_label`.
+
+### `transactions.py` (~585 lines) — Transaction system
+
+**`TransactionProposal` dataclass** — `id` (auto `txn_<uuid8>`), `type`, `proposer_role_id`, `proposer_country_id`, `counterpart_role_id`, `counterpart_country_id`, `terms: dict`, `status: "proposed"|"accepted"|"rejected"|"countered"|"executed"`, `reasoning`, `counter_terms`, `evaluation_reasoning`. `to_dict()` serializes to DET_C1 event schema.
+
+**10 transaction types** (`TRANSACTION_TYPES` set): `coin_transfer`, `arms_sale`, `arms_gift`, `tech_transfer`, `basing_rights`, `ceasefire`, `peace_treaty`, `alliance`, `trade_agreement`, `sanctions_coordination`. Flags: `REQUIRES_WAR = {ceasefire, peace_treaty}`, `RESOURCE_TRANSACTIONS = {coin_transfer, arms_sale, arms_gift, tech_transfer}`.
+
+**Core flow:**
+
+- `propose_transaction(cognitive_blocks, agent_country, agent_role, counterpart_country, counterpart_role, world_state, transaction_type=None) -> TransactionProposal` — async LLM call. Uses `_build_propose_context()` to describe the relationship, what both sides have, and what's plausible. Agent picks type (or uses hint) and terms. Returns a `TransactionProposal` with `status="proposed"`.
+
+- `evaluate_transaction(cognitive_blocks, agent_country, agent_role, proposal) -> dict` — async. Uses `_build_evaluate_context(proposal)` to explain the offer from the counterpart's POV. LLM returns `{decision: "accept"|"reject"|"counter", counter_terms: dict|None, reasoning: str}`. Sets `proposal.status` accordingly.
+
+- `execute_transaction(proposal, countries_state, wars) -> dict` — **synchronous, simplified state mutation**. Handles:
+  - `coin_transfer` — moves treasury from proposer to counterpart.
+  - `arms_sale` / `arms_gift` — adjusts military unit counts via `_transfer_units()`, and treasury for sales.
+  - `tech_transfer` — nuclear/AI level deltas.
+  - `ceasefire` / `peace_treaty` — checked against `_are_at_war(country_a, country_b, wars)` and removes from `wars` list.
+  - `basing_rights`, `alliance`, `trade_agreement`, `sanctions_coordination` — recorded as agreements (no deep state mutation yet).
+  Returns `{executed: bool, changes: list[str], error: str|None}` and sets `proposal.status="executed"`.
+
+- `run_transaction_flow(proposer_agent, counterpart_agent, world_state, transaction_type=None) -> TransactionProposal` — convenience: propose → evaluate → (if accepted) execute, returning the final proposal object.
+
+**CURRENT LIMITATION:** `execute_transaction()` performs **simplified in-memory state mutations only**. It does not model downstream effects (trade flow changes from `trade_agreement`, stability impact of `alliance`, basing-rights influence on force projection, etc.). A future **Transaction Engine** (separate module) will replace this with proper effect propagation through the economic/military/political engines.
+
+### `runner.py` (~1084 lines) — Round runner + Full SIM
+
+The unmanned-mode orchestrator. **No database**; everything is in-memory, mirroring `tests/layer3/run_scenarios.py`.
+
+**Data models:**
+- `RoundReport` — `round_num`, `actions_taken: {role_id: [actions]}`, `conversations`, `transactions`, `mandatory_inputs`, `engine_results`, `nous_adjustments`, `agent_reflections`, `log`, `duration_seconds`. Has `summary()` text.
+- `SimReport` — `rounds: [RoundReport]`, `num_rounds`, `agents: {role_id: final_info}`, `total_duration_seconds`.
+
+**Data loading:** `load_countries_from_csv()` reads `2 SEED/C_MECHANICS/C4_DATA/countries.csv` and returns the same flat-dict format as `profiles.load_country_context()` but for all 21 countries at once. `_build_engine_countries(flat)` reshapes into the structured form the economic/political engines expect. `_build_default_world_state(round_num)` seeds oil price, wars, relationships, and round metadata.
+
+**`run_round(round_num, agents, countries_flat, wars, round_state, nous) -> RoundReport` (6 phases):**
+1. **Start round** (`_start_round`) — builds per-round context via `_build_round_context`, calls `agent.start_round()` on every agent (parallel).
+2. **Active loop** (`_active_loop`) — time-boxed proactive phase. Agents call `decide_action()`; actions include conversation requests (dispatched to `conversations.ConversationEngine.run_bilateral`), transaction proposals (dispatched to `transactions.run_transaction_flow`), military/covert/political actions.
+3. **Mandatory submission** (`_mandatory_submission`) — every HoS submits budget/tariffs/sanctions/OPEC via `agent.submit_mandatory_inputs()`. `_default_mandatory()` provides a safe fallback if an agent fails.
+4. **Engine processing** (`_run_engines`) — calls the **economic engine** and **political engine** with the assembled state, receives GDP/inflation/stability/support updates, reshapes outputs for agent consumption. Applies sanctions, tariffs, OPEC production, budget effects.
+5. **NOUS judgment** (`_run_nous`) — passes round_state + engine output to the **NOUS** meta-judge for adjustments (narrative coherence, cascade effects, random events).
+6. **Reflection** (`_reflect`) — all agents call `reflect_on_round()` in parallel; each updates its own Block 4. `_sync_to_flat_countries()` writes engine deltas back to the flat country dict for next round.
+
+**`run_full_sim(num_rounds=6, tier=1, use_real_llm=True) -> SimReport`:**
+- Loads `countries.csv`, calls `load_heads_of_state()` for all 21 HoS roles.
+- Instantiates 21 `LeaderAgent`s and runs `initialize()` for each (parallel).
+- Builds initial `wars`, `round_state`, NOUS instance.
+- Loops `run_round` for `num_rounds` rounds.
+- Returns `SimReport` with cumulative stats.
+
+**Integration with engines and NOUS:**
+- Imports are **lazy** (inside `_run_engines`, `_run_nous`) to avoid module-load-time dependencies.
+- Economic engine: `engine.engines.economic` via dict-based API (state-in → state-out).
+- Political engine: `engine.engines.political` — stability/support/election dynamics.
+- NOUS: `engine.services.nous` — narrative judge layer.
+
+### Module-wide implementation notes
+
+- **All LLM imports are lazy** (inside functions): `from engine.services.llm import call_llm` and `from engine.config.settings import LLMUseCase` are not imported at module top, to avoid pulling `pydantic_settings` (and its env-validation chain) at module load time. Tests and CSV-only paths can import `leader.py` / `runner.py` without a live environment.
+- **SIM names only** — the RULES_TEMPLATE and CONVERSATION_SYSTEM_TEMPLATE both explicitly list the 20 country SIM names (Columbia not USA, Cathay not China, etc.) and character-name references, enforced in prompts at every LLM call.
+- **No direct DB dependency** anywhere in `app/engine/agents/`. Profile data comes from CSVs. Cognitive state lives in memory. This matches the Layer 3 test runner architecture and enables fast unmanned runs without Supabase.
+
+---
+
+## 14b. Prompts in `sim_config` (Database-Seeded)
+
+Seven prompt templates are seeded into the `sim_config` table (per-SIM configurable, overridable per run). These live in the database so SIM designers can tune them without code changes. The agent module currently references them indirectly via the prompts embedded in code; full DB-driven loading is a Sprint 3 task.
+
+| Key | Purpose | When Used | Temp | Max Tokens |
+|---|---|---|:---:|:---:|
+| `metacognitive_architecture` | Component of Block 1 (Rules). Describes the 4-block cognitive model to the agent so it can reason about its own memory and goal updates (metacognition). | Loaded into Block 1 at `initialize()`. | n/a | n/a |
+| `identity_generation` | Template for generating Block 2 (Identity) from role brief — 4 elements: personality, communication style, emotional drivers, strategic tendency. | Once, at `initialize()` → `_generate_identity()`. | 0.85 | 300 |
+| `conversation_behavior` | Speaking rules for bilateral turns: 4-message budget, direct style, no assistant language, concrete proposals, SIM names only. | Every conversation turn, as system prompt. | 0.8 | 300 |
+| `intent_note_generation` | 5-point private plan before a meeting (objectives, share/withhold, approach, red lines, what to learn). | Once per agent at the start of each bilateral conversation. | 0.7 | 400 |
+| `reflection_block_3` | Post-conversation reflection: what to remember in memory, trust delta with counterpart. | After each conversation ends. | 0.3 | 500 |
+| `reflection_block_4` | Per-round goal revision: ranked objectives, strategy adjustment, timeline pressure. | After each round's engine results arrive (`reflect_on_round`). | 0.5 | 300 |
+| `meeting_decision` | Active-loop decision: should the agent request a conversation now, with whom, with what intent? | During `decide_active_loop`, multiple times per round. | 0.7 | 500 |
+
+**Note:** These templates are currently mirrored in Python constants (`RULES_TEMPLATE`, `IDENTITY_GENERATION_PROMPT`, `CONVERSATION_SYSTEM_TEMPLATE`, `INTENT_NOTE_PROMPT`, reflection prompts in `leader.py`, goal prompt in `_generate_goals()`). A Sprint 3 refactor will load them from `sim_config` at runtime to enable per-SIM tuning without redeploys.
+
+---
+
+## 14c. Current Limitations
+
+The module is functional end-to-end for unmanned runs but has known gaps:
+
+- **Block 1 (Rules) is minimal.** It currently contains the role's own powers, objectives, and a paragraph of mechanics. It **lacks**: the full participant roster (who else is in the SIM, their countries and titles), the map (zones, chokepoints, borders), the SIM structure (round flow, phase ordering, event timeline), and the metacognitive awareness prompt (how to reason about its own 4 blocks). This is a **critical gap** — agents currently reason in a partial vacuum about the broader simulation.
+- **Military decisions lack map integration.** `decide_military` produces action intents (attack, blockade, air strike) but has no zones, no unit deployment graph, no supply-line model. The military engine is not yet wired to a map module.
+- **Covert operations produce no real outcomes.** `decide_covert` selects ops and consumes cards, but there is no Live Action Engine to resolve success/detection/effect. Sabotage, espionage, cyber, and disinformation are currently intent-only.
+- **Transactions execute simplified state changes.** `execute_transaction()` mutates treasury and unit counts directly; it does not propagate effects through the economic/political engines (e.g., a `trade_agreement` doesn't actually change trade flows; an `alliance` doesn't change force-projection calculations). A dedicated **Transaction Engine** is needed.
+- **Nothing persists to DB during runs.** Cognitive state, conversation transcripts, transactions, and round reports all live in memory only. Crash = loss. DB writes are a Sprint 3/4 task (tables already exist per DET_B1).
+- **Not yet tested at scale.** The target is 21 agents × 6 rounds × full active loop. Current validation is on small subsets (2-3 agents, 1-2 rounds). Expected duration at full scale: ~20–40 min per run, ~$5–8 per run — see Section 15 cost estimate, but not yet empirically confirmed.
+
+---
+
 ## 15. Cost Estimate (per full unmanned SIM)
 
 | Activity | Calls | Tokens/call | Total tokens | Model |
