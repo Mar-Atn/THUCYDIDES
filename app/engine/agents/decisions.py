@@ -561,13 +561,19 @@ Return ONLY valid JSON."""
 
 ACTIVE_LOOP_INSTRUCTION = """What should you do RIGHT NOW?
 
+CRITICAL RULES:
+- Target MUST be a specific leader by character name (from the roster in Block 1): dealer, helmsman, pathfinder, beacon, forge, lumiere, sentinel, mariner, ponte_role, wellspring, furnace, spire, pyro, sakura, vanguard, chip, scales, citadel, havana, vizier
+- For conversation: target is ONE character name (e.g., "forge", not "europe" or "EU")
+- For military: target is a specific zone from your country's zones
+- NEVER use group names like "Europe", "NATO", "Middle East" — always a specific leader or zone
+
 Return a JSON object:
 {
   "action": "<wait|request_conversation|military_action|covert_op|public_statement|other>",
-  "target": "<who/what — e.g., country_id for conversation, zone for military>",
+  "target": "<specific character name OR zone name — NOT a group>",
   "detail": "<brief description>",
   "urgency": "<low|medium|high>",
-  "reasoning": "<1-2 sentences>"
+  "reasoning": "<1-2 sentences why this person/zone specifically>"
 }
 
 If nothing urgent, return {"action": "wait", "target": null, "detail": "monitoring situation", "urgency": "low", "reasoning": "..."}.

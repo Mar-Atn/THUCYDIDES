@@ -18,6 +18,7 @@ from engine.agents.profiles import (
     load_role, load_country_context, build_identity_prompt,
 )
 from engine.agents.memory import CognitiveState
+from engine.agents.world_context import build_rich_block1
 
 logger = logging.getLogger(__name__)
 
@@ -87,16 +88,13 @@ class LeaderAgent:
         self.role = load_role(self.role_id)
         self.country = load_country_context(self.role["country_id"])
 
-        # Block 1: Rules
-        rules = RULES_TEMPLATE.format(
-            title=self.role["title"],
-            country_name=self.country["sim_name"],
-            parallel=self.country["parallel"],
-            character_name=self.role["character_name"],
-            powers_list="\n".join(f"- {p}" for p in self.role["powers"]),
-            intel_pool=self.role["intelligence_pool"],
-            objectives_list="\n".join(f"- {o}" for o in self.role["objectives"]),
-            ticking_clock=self.role["ticking_clock"],
+        # Block 1: Rich SIM world context (roster, structure, geography, situation)
+        metacog_override = (sim_config or {}).get("metacognitive_architecture") if sim_config else None
+        rules = build_rich_block1(
+            self.role_id,
+            countries=None,
+            world_state=world_state,
+            metacognitive_override=metacog_override,
         )
         self.cognitive.set_rules(rules)
 
@@ -122,15 +120,10 @@ class LeaderAgent:
         self.role = load_role(self.role_id)
         self.country = load_country_context(self.role["country_id"])
 
-        rules = RULES_TEMPLATE.format(
-            title=self.role["title"],
-            country_name=self.country["sim_name"],
-            parallel=self.country["parallel"],
-            character_name=self.role["character_name"],
-            powers_list="\n".join(f"- {p}" for p in self.role["powers"]),
-            intel_pool=self.role["intelligence_pool"],
-            objectives_list="\n".join(f"- {o}" for o in self.role["objectives"]),
-            ticking_clock=self.role["ticking_clock"],
+        rules = build_rich_block1(
+            self.role_id,
+            countries=None,
+            world_state=world_state,
         )
         self.cognitive.set_rules(rules)
 
