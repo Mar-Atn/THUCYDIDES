@@ -221,6 +221,20 @@ def build_geography_summary() -> str:
     return GEOGRAPHY_TEMPLATE.strip()
 
 
+def build_theater_map(country_id: str) -> str:
+    """Theater overview — key zones this country cares about.
+
+    Delegates to map_context.build_theater_map. Returns empty string on failure
+    or when no zone data is available for the country.
+    """
+    try:
+        from engine.agents import map_context as _map_ctx
+        return _map_ctx.build_theater_map(country_id)
+    except Exception as exc:  # pragma: no cover — defensive
+        logger.warning("build_theater_map failed for %s: %s", country_id, exc)
+        return ""
+
+
 def build_starting_situation(countries: dict | None = None,
                               world_state: dict | None = None) -> str:
     """Current starting situation (Round 1): wars, sanctions, blockades, tensions.
@@ -428,6 +442,7 @@ def build_rich_block1(
         build_sim_structure(),
         build_starting_situation(countries, world_state),
         build_geography_summary(),
+        build_theater_map(role["country_id"]),
         _build_powers(role),
         _build_mechanics(role),
         _build_objectives(role),

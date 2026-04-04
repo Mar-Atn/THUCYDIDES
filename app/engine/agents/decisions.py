@@ -261,11 +261,15 @@ def build_opec_context(country: dict, round_context: dict) -> str:
 
 def build_military_context(country: dict, round_context: dict) -> str:
     """Build Layer 2 context for military decisions."""
+    # Lazy import to avoid circular/startup overhead
+    from engine.agents import map_context as _map_ctx
+
     military = round_context.get("military", {})
     units = military.get("units", {})
     zones = military.get("zones", {})
     wars = round_context.get("wars", [])
     at_war = country.get("at_war_with", "")
+    country_id = country.get("id") or country.get("country_id") or ""
 
     lines = ["# Military Situation\n"]
 
@@ -313,6 +317,32 @@ def build_military_context(country: dict, round_context: dict) -> str:
             force_str = ", ".join(f"{k}:{v}" for k, v in forces.items() if v > 0)
             lines.append(f"- {zone}: {force_str}")
 
+    # ---- REAL MAP CONTEXT (from CSV: zones, deployments, adjacency) ----
+    if country_id:
+        try:
+            map_text = _map_ctx.build_country_military_context(country_id)
+            lines.append("")
+            lines.append(map_text)
+        except Exception as exc:  # don't fail whole decision on map issue
+            logger.warning("map_context failed for %s: %s", country_id, exc)
+
+        try:
+            attackable = _map_ctx.get_attackable_zones(country_id)
+            if attackable:
+                lines.append("")
+                lines.append("## Legal Attack Targets (zone ids)")
+                lines.append(", ".join(f"`{z}`" for z in attackable))
+        except Exception as exc:
+            logger.warning("attackable_zones failed for %s: %s", country_id, exc)
+
+        try:
+            home = _map_ctx.get_country_home_zones(country_id)
+            if home:
+                lines.append("")
+                lines.append(f"## Home Territory (defend these): {', '.join(home)}")
+        except Exception as exc:
+            logger.warning("home_zones failed for %s: %s", country_id, exc)
+
     lines.append("""
 ## Military Actions Available
 - **attack**: Order ground/naval/air attack on enemy zone. Requires sufficient forces.
@@ -328,6 +358,13 @@ def build_military_context(country: dict, round_context: dict) -> str:
 - Air superiority grants +1 to ground combat.
 - Naval blockades cut off supply and trade through chokepoints.
 - Mobilization is permanent — once spent, never comes back.
+
+## ZONE TARGETING RULES (read carefully)
+- When you attack/move/deploy, `target_zone` MUST be a concrete zone id from the
+  Attackable Zones list above (e.g., `ruthenia_2`, `cp_hormuz`).
+- NEVER use abstract names like "Ukraine border", "the front", or a country name.
+- `from_zone` (if applicable) must be one of your deployment zones that is
+  adjacent to the target.
 """)
 
     return "\n".join(lines)
@@ -518,15 +555,24 @@ Return a JSON object:
 {
   "actions": [
     {"type": "<attack|blockade|mobilize|deploy|move|missile_strike|fortify>",
-     "target_zone": "<zone_id>",
-     "units": {"ground": 0, "naval": 0, "air": 0},
+     "target_zone": "<zone_id — MUST match one in the Legal Attack Targets or your own zones>",
+     "from_zone": "<zone_id you are attacking/moving from — MUST be a zone where you have units and that is adjacent to target_zone>",
+     "units": {"ground": 0, "naval": 0, "tactical_air": 0},
      "detail": "<brief description>"}
   ],
   "reasoning": "<1-2 sentences on overall military strategy>"
 }
 
+HARD RULES:
+- `target_zone` MUST be a concrete zone id (e.g., `ruthenia_2`, `nord_w2`, `cp_hormuz`).
+- NEVER use country names, region names, or phrases like "the border" as targets.
+- For `attack`: `target_zone` must be in the Legal Attack Targets list; `from_zone`
+  must be one of your deployment zones adjacent to it.
+- For `move`/`deploy`/`fortify`: `target_zone` is where units go; `from_zone` is
+  where they come from (omit `from_zone` for mobilize).
+- Unit counts in `units` cannot exceed what you have in `from_zone`.
+
 If no military actions needed, return {"actions": [], "reasoning": "no military action needed"}.
-Be specific about zones and unit counts. Don't commit more units than you have.
 Return ONLY valid JSON."""
 
 COVERT_INSTRUCTION = """Decide whether to launch a covert operation this round.
@@ -564,8 +610,8 @@ ACTIVE_LOOP_INSTRUCTION = """What should you do RIGHT NOW?
 CRITICAL RULES:
 - Target MUST be a specific leader by character name (from the roster in Block 1): dealer, helmsman, pathfinder, beacon, forge, lumiere, sentinel, mariner, ponte_role, wellspring, furnace, spire, pyro, sakura, vanguard, chip, scales, citadel, havana, vizier
 - For conversation: target is ONE character name (e.g., "forge", not "europe" or "EU")
-- For military: target is a specific zone from your country's zones
-- NEVER use group names like "Europe", "NATO", "Middle East" — always a specific leader or zone
+- For military: target is a specific **zone id** (e.g., `ruthenia_2`, `nord_w2`, `cp_hormuz`) — see your Theater Map in Block 1. Use the exact zone id, not a country or region.
+- NEVER use group names like "Europe", "NATO", "Middle East" — always a specific leader or zone id
 
 Return a JSON object:
 {
