@@ -381,8 +381,27 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     logger.warning("[resolve R%d] tariff lift failed %s->%s: %s",
                                    round_num, cc, target, e)
 
-        # Budget and OPEC: log event (state stored in country_states_per_round
-        # by the engine tick or via dedicated columns if available)
+        # --- Inject budget into country_state dict (persisted via snapshot) ---
+        elif atype == "set_budget":
+            if cc in country_state:
+                if payload.get("social_pct") is not None:
+                    country_state[cc]["budget_social_pct"] = float(payload["social_pct"])
+                if payload.get("military_coins") is not None:
+                    country_state[cc]["budget_military_coins"] = float(payload["military_coins"])
+                if payload.get("tech_coins") is not None:
+                    country_state[cc]["budget_tech_coins"] = float(payload["tech_coins"])
+                logger.info("[resolve R%d] %s budget injected: social=%.1f mil=%.0f tech=%.0f",
+                            round_num, cc,
+                            country_state[cc].get("budget_social_pct", 1.0),
+                            country_state[cc].get("budget_military_coins", 0),
+                            country_state[cc].get("budget_tech_coins", 0))
+
+        # --- Inject OPEC production into country_state dict ---
+        elif atype == "set_opec":
+            if cc in country_state:
+                country_state[cc]["opec_production"] = payload.get("production_level", "normal")
+                logger.info("[resolve R%d] %s OPEC -> %s", round_num, cc,
+                            country_state[cc]["opec_production"])
 
         # Log all economic actions as observatory events
         events.append({
@@ -1276,6 +1295,7 @@ _COUNTRY_COLS = {
     "scenario_id", "round_num", "country_code", "gdp", "treasury", "inflation",
     "stability", "political_support", "war_tiredness",
     "nuclear_level", "nuclear_rd_progress", "ai_level", "ai_rd_progress",
+    "budget_social_pct", "budget_military_coins", "budget_tech_coins", "opec_production",
 }
 
 
