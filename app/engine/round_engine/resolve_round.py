@@ -124,6 +124,7 @@ def _load_unit_state(
 def _load_country_state(
     client, scenario_id: str, round_num: int
 ) -> dict[str, dict]:
+    """Load country state for this round, falling back to previous round if not yet created."""
     res = (
         client.table("country_states_per_round")
         .select("*")
@@ -131,7 +132,21 @@ def _load_country_state(
         .eq("round_num", round_num)
         .execute()
     )
-    return {row["country_code"]: dict(row) for row in (res.data or [])}
+    if res.data:
+        return {row["country_code"]: dict(row) for row in res.data}
+    # Fall back to previous round (current round snapshot not yet written)
+    prev = (
+        client.table("country_states_per_round")
+        .select("*")
+        .eq("scenario_id", scenario_id)
+        .eq("round_num", round_num - 1)
+        .execute()
+    )
+    if prev.data:
+        logger.info("[resolve] No state for R%d, falling back to R%d (%d rows)",
+                     round_num, round_num - 1, len(prev.data))
+        return {row["country_code"]: dict(row) for row in prev.data}
+    return {}
 
 
 def _load_decisions(
@@ -1296,6 +1311,7 @@ _COUNTRY_COLS = {
     "stability", "political_support", "war_tiredness",
     "nuclear_level", "nuclear_rd_progress", "ai_level", "ai_rd_progress",
     "budget_social_pct", "budget_military_coins", "budget_tech_coins", "opec_production",
+    "sanctions_coefficient", "tariff_coefficient",
 }
 
 
