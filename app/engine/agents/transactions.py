@@ -497,6 +497,47 @@ def _transfer_units(
         changes.append(f"{from_id} transferred {amount} {give_key} to {to_id}")
 
 
+def validate_assets(country: dict, gives: dict) -> tuple[bool, list[str]]:
+    """Validate that a country has enough assets to fulfill a transaction.
+
+    Pure function — no DB calls.
+
+    Args:
+        country: Country state dict (treasury, mil_ground, etc.).
+        gives: Dict of resources the country is giving away.
+
+    Returns:
+        (True, []) if valid, (False, ["insufficient X", ...]) if not.
+    """
+    errors: list[str] = []
+
+    # Coins
+    coins_needed = float(gives.get("coins", 0))
+    if coins_needed > 0 and country.get("treasury", 0) < coins_needed:
+        errors.append(f"insufficient coins: need {coins_needed:.1f}, have {country.get('treasury', 0):.1f}")
+
+    # Ground units
+    ground_needed = int(gives.get("ground_units", 0))
+    if ground_needed > 0 and country.get("mil_ground", 0) < ground_needed:
+        errors.append(f"insufficient ground_units: need {ground_needed}, have {country.get('mil_ground', 0)}")
+
+    # Naval units
+    naval_needed = int(gives.get("naval_units", 0))
+    if naval_needed > 0 and country.get("mil_naval", 0) < naval_needed:
+        errors.append(f"insufficient naval_units: need {naval_needed}, have {country.get('mil_naval', 0)}")
+
+    # Air units
+    air_needed = int(gives.get("air_units", 0))
+    if air_needed > 0 and country.get("mil_tactical_air", 0) < air_needed:
+        errors.append(f"insufficient air_units: need {air_needed}, have {country.get('mil_tactical_air', 0)}")
+
+    # Tech/basing: always valid (replicable, no depletion)
+
+    if errors:
+        return (False, errors)
+    return (True, [])
+
+
 def _are_at_war(country_a: str, country_b: str, wars: list[dict]) -> bool:
     """Check if two countries are on opposite sides of any war."""
     for w in wars:
@@ -547,6 +588,20 @@ async def run_transaction_flow(
                 proposal.proposer_role_id, proposal.counterpart_role_id,
                 proposal.type, proposal.reasoning)
 
+    # Validate proposer has the assets to give
+    if proposal.type in RESOURCE_TRANSACTIONS:
+        valid, asset_errors = validate_assets(
+            proposer_agent.country, proposal.terms.get("gives", {}))
+        if not valid:
+            proposal.status = "failed_validation"
+            proposal.evaluation_reasoning = f"Proposer asset check failed: {'; '.join(asset_errors)}"
+            logger.warning("Transaction %s failed validation: %s", proposal.id, asset_errors)
+            proposer_agent.cognitive.add_decision(
+                "transaction_failed_validation",
+                f"Proposal {proposal.type} failed: {'; '.join(asset_errors)[:80]}",
+            )
+            return proposal
+
     # Record in proposer memory
     proposer_agent.cognitive.add_decision(
         "transaction_proposed",
@@ -562,7 +617,9 @@ async def run_transaction_flow(
         proposal=proposal,
     )
 
-    proposal.status = evaluation["decision"]
+    decision = evaluation["decision"]
+    # Normalize: LLM returns "accept" but execution gate checks "accepted"
+    proposal.status = "accepted" if decision == "accept" else decision
     proposal.evaluation_reasoning = evaluation.get("reasoning", "")
     proposal.counter_terms = evaluation.get("counter_terms")
 
@@ -576,9 +633,54 @@ async def run_transaction_flow(
         f"{proposal.status.upper()} {proposal.type} from {proposal.proposer_role_id}: {proposal.evaluation_reasoning[:80]}",
     )
 
-    # Step 3: Execute if accepted
+    # Step 2b: Handle counter-offer (1 counter max per spec)
+    if proposal.status == "counter" and proposal.counter_terms:
+        counter_proposal = TransactionProposal(
+            type=proposal.type,
+            proposer_role_id=proposal.counterpart_role_id,
+            proposer_country_id=proposal.counterpart_country_id,
+            counterpart_role_id=proposal.proposer_role_id,
+            counterpart_country_id=proposal.proposer_country_id,
+            terms=proposal.counter_terms,
+            status="proposed",
+            reasoning=proposal.evaluation_reasoning,
+        )
+        counter_eval = await evaluate_transaction(
+            cognitive_blocks=proposer_blocks,
+            agent_country=proposer_agent.country,
+            agent_role=proposer_agent.role,
+            proposal=counter_proposal,
+        )
+        if counter_eval["decision"] == "accept":
+            proposal.status = "accepted"
+            proposal.terms = proposal.counter_terms  # execute with counter terms
+        else:
+            proposal.status = "declined"
+
+        # Record in proposer memory
+        proposer_agent.cognitive.add_decision(
+            f"counter_{counter_eval['decision']}",
+            f"Counter from {proposal.counterpart_role_id}: {counter_eval['decision'].upper()} — {counter_eval.get('reasoning', '')[:80]}",
+        )
+
+    # Step 3: Validate both sides before execution
     exec_result = {"success": False, "changes": [], "errors": []}
     if proposal.status == "accepted":
+        if proposal.type in RESOURCE_TRANSACTIONS:
+            # Validate proposer's gives
+            p_valid, p_errors = validate_assets(
+                proposer_agent.country, proposal.terms.get("gives", {}))
+            # Validate counterpart's gives (what they receive from proposer's perspective)
+            c_valid, c_errors = validate_assets(
+                counterpart_agent.country, proposal.terms.get("receives", {}))
+            if not p_valid or not c_valid:
+                all_errors = p_errors + c_errors
+                proposal.status = "failed_validation"
+                proposal.evaluation_reasoning = f"Pre-exec validation failed: {'; '.join(all_errors)}"
+                logger.warning("Transaction %s failed pre-exec validation: %s",
+                               proposal.id, all_errors)
+                return proposal
+
         exec_result = execute_transaction(proposal, countries)
         logger.info("Transaction executed: %s", exec_result["changes"])
 

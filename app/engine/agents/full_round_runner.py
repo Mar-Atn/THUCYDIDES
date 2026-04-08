@@ -216,7 +216,428 @@ def _run_leader_sync(cc: str, name: str, title: str, round_num: int) -> dict:
 # Round resolver handoff (graceful if resolver not yet built)
 # ---------------------------------------------------------------------------
 
-def _try_run_conversations(
+# ---------------------------------------------------------------------------
+# Mandatory decisions phase — orchestrator-driven economic settings
+# ---------------------------------------------------------------------------
+
+OPEC_MEMBERS = {"solaria", "persia", "mirage", "caribe"}
+
+
+def _load_current_economic_state(
+    scenario_code: str, country_code: str, round_num: int,
+) -> dict:
+    """Load budget/tariff/sanction/OPEC state from authoritative state tables.
+
+    Reads from ``country_states_per_round``, ``sanctions``, and ``tariffs``
+    instead of ``agent_decisions``.  Falls back to sensible defaults when
+    columns are missing or null.
+    """
+    from engine.services.supabase import get_client
+    from engine.config.settings import Settings
+
+    client = get_client()
+    settings = Settings()
+    sim_run_id = settings.default_sim_id
+
+    scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
+    if not scen.data:
+        return {}
+    scenario_id = scen.data[0]["id"]
+
+    state: dict[str, Any] = {}
+
+    # --- Budget: from country_states_per_round ---
+    cs = (
+        client.table("country_states_per_round")
+        .select("budget_social_pct, budget_military_coins, budget_tech_coins, opec_production")
+        .eq("scenario_id", scenario_id)
+        .eq("country_code", country_code)
+        .eq("round_num", round_num)
+        .limit(1)
+        .execute()
+    )
+    if cs.data:
+        row = cs.data[0]
+        social = row.get("budget_social_pct")
+        mil = row.get("budget_military_coins")
+        tech = row.get("budget_tech_coins")
+        state["set_budget"] = {
+            "social_pct": social if social is not None else 1.0,
+            "military_coins": mil if mil is not None else 0,
+            "tech_coins": tech if tech is not None else 0,
+        }
+        # --- OPEC: from same row ---
+        opec_val = row.get("opec_production")
+        if opec_val and opec_val != "na":
+            state["set_opec"] = {"production_level": opec_val}
+    else:
+        state["set_budget"] = {"social_pct": 1.0, "military_coins": 0, "tech_coins": 0}
+
+    # --- Sanctions imposed BY this country ---
+    try:
+        sanctions_rows = (
+            client.table("sanctions")
+            .select("target_country_id, level")
+            .eq("sim_run_id", sim_run_id)
+            .eq("imposer_country_id", country_code)
+            .gt("level", 0)
+            .execute()
+        )
+        sanction_list = [
+            {"target": s["target_country_id"], "level": s.get("level", 1)}
+            for s in (sanctions_rows.data or [])
+        ]
+        if sanction_list:
+            state["set_sanction"] = {"sanctions": sanction_list}
+    except Exception as e:
+        logger.warning("Failed to load sanctions for %s: %s", country_code, e)
+
+    # --- Tariffs imposed BY this country ---
+    try:
+        tariffs_rows = (
+            client.table("tariffs")
+            .select("target_country_id, level")
+            .eq("sim_run_id", sim_run_id)
+            .eq("imposer_country_id", country_code)
+            .gt("level", 0)
+            .execute()
+        )
+        tariff_list = [
+            {"target": t["target_country_id"], "level": t.get("level", 1)}
+            for t in (tariffs_rows.data or [])
+        ]
+        if tariff_list:
+            state["set_tariff"] = {"tariffs": tariff_list}
+    except Exception as e:
+        logger.warning("Failed to load tariffs for %s: %s", country_code, e)
+
+    return state
+
+
+def _load_situation_context(scenario_code: str, country_code: str, round_num: int) -> str:
+    """Load key situation data for the mandatory decisions prompt."""
+    try:
+        from engine.services.supabase import get_client
+        client = get_client()
+        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
+        if not scen.data:
+            return ""
+        scenario_id = scen.data[0]["id"]
+
+        lines = []
+
+        # Country economic state
+        cs = client.table("country_states_per_round").select("*") \
+            .eq("scenario_id", scenario_id).eq("round_num", round_num) \
+            .eq("country_code", country_code).limit(1).execute()
+        if cs.data:
+            s = cs.data[0]
+            lines.append(f"GDP: {s.get('gdp', '?')}, Treasury: {s.get('treasury', '?')} coins, "
+                         f"Inflation: {s.get('inflation', '?')}, Stability: {s.get('stability', '?')}/10, "
+                         f"Political support: {s.get('political_support', '?')}%, "
+                         f"War tiredness: {s.get('war_tiredness', 0)}")
+
+        # Relationships — wars, alliances
+        rels = client.table("relationships").select("from_country_id, to_country_id, status, relationship") \
+            .or_(f"from_country_id.eq.{country_code},to_country_id.eq.{country_code}").execute()
+        wars = []
+        allies = []
+        for r in (rels.data or []):
+            other = r["to_country_id"] if r["from_country_id"] == country_code else r["from_country_id"]
+            status = r.get("status") or r.get("relationship") or ""
+            if "conflict" in status.lower() or "war" in status.lower():
+                wars.append(other)
+            elif status.lower() in ("allied", "friendly", "alliance"):
+                allies.append(other)
+        if wars:
+            lines.append(f"AT WAR with: {', '.join(wars)}")
+        if allies:
+            lines.append(f"Allies/friendly: {', '.join(allies)}")
+
+        # Sanctions received — read from sanctions state table
+        from engine.config.settings import Settings
+        sim_run_id = Settings().default_sim_id
+        sanctions_on_me = client.table("sanctions").select("imposer_country_id, level") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("target_country_id", country_code) \
+            .gt("level", 0).execute()
+        sanctions_against = []
+        for s in (sanctions_on_me.data or []):
+            sanctions_against.append(f"{s['imposer_country_id']} L{s.get('level', '?')}")
+        if sanctions_against:
+            lines.append(f"Sanctions against you: {', '.join(sanctions_against)}")
+
+        # Recent key events (last round)
+        events = client.table("observatory_events").select("event_type, summary") \
+            .eq("scenario_id", scenario_id).eq("round_num", round_num) \
+            .eq("country_code", country_code).limit(5).execute()
+        if events.data:
+            evt_lines = [e["summary"][:80] for e in events.data]
+            lines.append(f"Your recent actions: {'; '.join(evt_lines)}")
+
+        return "\n".join(lines)
+    except Exception as e:
+        logger.warning("_load_situation_context failed for %s: %s", country_code, e)
+        return ""
+
+
+def _build_mandatory_prompt(
+    agent: dict, country_code: str, round_num: int, eco_state: dict,
+    situation: str = "",
+) -> str:
+    """Build the focused prompt for one agent's mandatory economic decisions."""
+    character_name = agent["character_name"]
+    title = agent["title"]
+    country_name = agent.get("country_name", country_code)
+
+    # Budget
+    budget = eco_state.get("set_budget", {})
+    social_pct = budget.get("social_pct", 1.0)
+    mil_coins = budget.get("military_coins", 0)
+    tech_coins = budget.get("tech_coins", 0)
+
+    # Sanctions
+    sanctions = eco_state.get("set_sanction", {})
+    sanction_list = sanctions.get("sanctions", [])
+    if sanction_list:
+        sanction_lines = "\n".join(
+            f"  - {s.get('target', '?')}: level {s.get('level', '?')}" for s in sanction_list
+        )
+    else:
+        sanction_lines = "  (none)"
+
+    # Tariffs
+    tariffs = eco_state.get("set_tariff", {})
+    tariff_list = tariffs.get("tariffs", [])
+    if tariff_list:
+        tariff_lines = "\n".join(
+            f"  - {t.get('target', '?')}: level {t.get('level', '?')}" for t in tariff_list
+        )
+    else:
+        tariff_lines = "  (none)"
+
+    # OPEC
+    is_opec = country_code in OPEC_MEMBERS
+    opec_section = ""
+    if is_opec:
+        opec = eco_state.get("set_opec", {})
+        opec_level = opec.get("production_level", "normal")
+        opec_section = f"""- OPEC production: {opec_level} (options: min, low, normal, high, max)"""
+
+    objectives = agent.get("objectives", [])
+    obj_summary = "; ".join(objectives) if isinstance(objectives, list) else str(objectives)
+
+    # Situation context block
+    situation_block = ""
+    if situation:
+        situation_block = f"""
+## Your Current Situation
+{situation}
+"""
+
+    prompt = f"""You are {character_name}, {title} of {country_name}.
+{situation_block}
+## Your Objectives
+{obj_summary}
+
+## End-of-Round Economic Decisions
+
+Your current settings (from previous round):
+- Budget: social spending {social_pct}x baseline, military {mil_coins} coins, tech {tech_coins} coins
+- Sanctions imposed by you:
+{sanction_lines}
+- Tariffs imposed by you:
+{tariff_lines}
+{opec_section}
+
+Based on your situation and objectives, decide whether to change any economic settings.
+If no changes needed, respond with "no_changes".
+
+If you want to make changes, respond with ONLY a JSON object:
+{{
+  "budget": {{"social_pct": 1.0, "military_coins": 2, "tech_coins": 1}},
+  "sanctions": [{{"target": "caribe", "level": 2}}],
+  "tariffs": [{{"target": "ruthenia", "level": 1}}],
+  "opec": {{"production_level": "cut"}}
+}}
+
+Rules: social_pct range 0.5-1.5. Military/tech coins: 0-10 each. Sanction/tariff levels: 0 (none) to 3 (heavy). Only include fields you want to CHANGE.
+Round: {round_num}.
+"""
+    return prompt
+
+
+async def _run_one_mandatory(
+    agent: dict,
+    scenario_code: str,
+    round_num: int,
+    semaphore: asyncio.Semaphore,
+) -> dict | None:
+    """Run mandatory decisions for one agent. Returns inserted decision info or None."""
+    cc = agent["country_code"]
+    try:
+        async with semaphore:
+            if _GLOBAL_STOP:
+                return None
+
+            eco_state = _load_current_economic_state(scenario_code, cc, round_num)
+            situation = _load_situation_context(scenario_code, cc, round_num)
+            prompt = _build_mandatory_prompt(agent, cc, round_num, eco_state, situation=situation)
+
+            from engine.services.llm import call_llm
+            from engine.config.settings import LLMUseCase
+
+            response = await call_llm(
+                use_case=LLMUseCase.AGENT_DECISION,
+                messages=[{"role": "user", "content": prompt}],
+                system="You are an AI leader in a geopolitical simulation. Respond concisely with JSON or 'no_changes'.",
+                max_tokens=512,
+                temperature=0.4,
+            )
+
+            text = response.text.strip()
+
+            # Check for no-change responses
+            if "no_change" in text.lower() or text.lower() in ("no_changes", "no changes", "none"):
+                logger.info("[R%d %s] mandatory: no changes", round_num, cc)
+                return None
+
+            # Parse JSON
+            from engine.agents.decisions import _parse_json
+            parsed = _parse_json(text)
+            if not parsed or not isinstance(parsed, dict):
+                logger.warning("[R%d %s] mandatory: unparseable response: %s", round_num, cc, text[:200])
+                return None
+
+            # Insert decisions into agent_decisions
+            from engine.services.supabase import get_client
+            client = get_client()
+            scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
+            if not scen.data:
+                return None
+            scenario_id = scen.data[0]["id"]
+
+            inserted = []
+
+            # Budget
+            if parsed.get("budget"):
+                budget_payload = parsed["budget"]
+                # Ensure required fields have defaults
+                budget_payload.setdefault("social_pct", 1.0)
+                budget_payload.setdefault("military_coins", 0)
+                budget_payload.setdefault("tech_coins", 0)
+                client.table("agent_decisions").insert({
+                    "scenario_id": scenario_id,
+                    "country_code": cc,
+                    "action_type": "set_budget",
+                    "action_payload": budget_payload,
+                    "rationale": "mandatory_decisions_phase",
+                    "validation_status": "passed",
+                    "round_num": round_num,
+                }).execute()
+                inserted.append("set_budget")
+
+            # Sanctions
+            if parsed.get("sanctions") is not None:
+                sanction_payload = {"sanctions": parsed["sanctions"]}
+                client.table("agent_decisions").insert({
+                    "scenario_id": scenario_id,
+                    "country_code": cc,
+                    "action_type": "set_sanction",
+                    "action_payload": sanction_payload,
+                    "rationale": "mandatory_decisions_phase",
+                    "validation_status": "passed",
+                    "round_num": round_num,
+                }).execute()
+                inserted.append("set_sanction")
+
+            # Tariffs
+            if parsed.get("tariffs") is not None:
+                tariff_payload = {"tariffs": parsed["tariffs"]}
+                client.table("agent_decisions").insert({
+                    "scenario_id": scenario_id,
+                    "country_code": cc,
+                    "action_type": "set_tariff",
+                    "action_payload": tariff_payload,
+                    "rationale": "mandatory_decisions_phase",
+                    "validation_status": "passed",
+                    "round_num": round_num,
+                }).execute()
+                inserted.append("set_tariff")
+
+            # OPEC (only for OPEC members)
+            if parsed.get("opec") is not None and cc in OPEC_MEMBERS:
+                opec_payload = parsed["opec"]
+                client.table("agent_decisions").insert({
+                    "scenario_id": scenario_id,
+                    "country_code": cc,
+                    "action_type": "set_opec",
+                    "action_payload": opec_payload,
+                    "rationale": "mandatory_decisions_phase",
+                    "validation_status": "passed",
+                    "round_num": round_num,
+                }).execute()
+                inserted.append("set_opec")
+
+            if inserted:
+                logger.info("[R%d %s] mandatory: inserted %s", round_num, cc, inserted)
+                return {"country_code": cc, "decisions": inserted}
+            return None
+
+    except Exception as e:
+        logger.warning("[R%d %s] mandatory decision failed: %s", round_num, cc, e)
+        return None
+
+
+async def _run_mandatory_decisions_phase(
+    scenario_code: str,
+    round_num: int,
+    hos_agents: list[dict],
+    agent_results: list[dict],
+) -> list[dict]:
+    """Orchestrator-driven mandatory decisions phase.
+
+    After free actions, each agent is presented with their current
+    economic settings and given the opportunity to change them.
+    Status quo carries forward if agent doesn't change.
+
+    Mandatory decision types: set_budget, set_tariff, set_sanction, set_opec
+    """
+    # Only run for agents that successfully committed in the free action phase
+    committed_codes = {
+        r["country_code"] for r in agent_results if r.get("committed")
+    }
+    eligible_agents = [a for a in hos_agents if a["country_code"] in committed_codes]
+
+    if not eligible_agents:
+        logger.info("[R%d] mandatory: no eligible agents (none committed)", round_num)
+        return []
+
+    logger.info("[R%d] mandatory decisions phase: %d eligible agents",
+                round_num, len(eligible_agents))
+
+    semaphore = asyncio.Semaphore(MAX_CONCURRENCY)
+
+    tasks = [
+        _run_one_mandatory(agent, scenario_code, round_num, semaphore)
+        for agent in eligible_agents
+    ]
+    raw_results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    results = []
+    for agent, res in zip(eligible_agents, raw_results):
+        if isinstance(res, BaseException):
+            logger.warning("[R%d %s] mandatory exception: %s",
+                           round_num, agent["country_code"], res)
+        elif res is not None:
+            results.append(res)
+
+    logger.info("[R%d] mandatory decisions complete: %d agents changed settings",
+                round_num, len(results))
+    return results
+
+
+async def _try_run_conversations(
     scenario_code: str, round_num: int,
     hos_agents: list[dict], agent_results: list[dict],
 ) -> list[dict]:
@@ -239,6 +660,9 @@ def _try_run_conversations(
         logger.info("[R%d] no conversation pairs identified", round_num)
         return []
 
+    # Load world state once for all conversations in this round
+    world_state = _build_world_state(scenario_code)
+
     results = []
     for agent_a_info, agent_b_info, topic in pairs:
         if _GLOBAL_STOP:
@@ -247,8 +671,9 @@ def _try_run_conversations(
             logger.info("[R%d] bilateral: %s <-> %s (%s)",
                         round_num, agent_a_info["country_code"],
                         agent_b_info["country_code"], topic)
-            result = asyncio.run(_run_one_conversation(
-                agent_a_info, agent_b_info, round_num, topic))
+            result = await _run_one_conversation(
+                agent_a_info, agent_b_info, round_num, topic,
+                world_state=world_state)
             results.append(result)
             # Persist transcript to observatory_events
             try:
@@ -277,6 +702,24 @@ def _try_run_conversations(
                            round_num, agent_a_info["country_code"],
                            agent_b_info["country_code"], e)
     return results
+
+
+def _build_world_state(scenario_code: str) -> dict:
+    """Load war status from relationships table for transaction validation."""
+    try:
+        from engine.services.supabase import get_client
+        client = get_client()
+        rels = client.table("relationships").select("country_a, country_b, status").eq("status", "military_conflict").execute()
+        wars = []
+        for r in (rels.data or []):
+            wars.append({
+                "belligerents_a": [r["country_a"]],
+                "belligerents_b": [r["country_b"]],
+            })
+        return {"wars": wars}
+    except Exception as e:
+        logger.warning("_build_world_state failed: %s", e)
+        return {"wars": []}
 
 
 def _identify_conversation_pairs(
@@ -315,6 +758,7 @@ def _identify_conversation_pairs(
 
 async def _run_one_conversation(
     agent_a_info: dict, agent_b_info: dict, round_num: int, topic: str,
+    world_state: dict | None = None,
 ) -> dict:
     """Run one bilateral conversation + transaction flow between two agents.
 
@@ -356,7 +800,7 @@ async def _run_one_conversation(
             proposal = await run_transaction_flow(
                 proposer_agent=leader_a,
                 counterpart_agent=leader_b,
-                world_state={},  # simplified — full world_state wiring in Sprint C
+                world_state=world_state or {},
                 countries={
                     agent_a_info["country_code"]: leader_a.country,
                     agent_b_info["country_code"]: leader_b.country,
@@ -424,28 +868,87 @@ async def _run_one_conversation(
             except Exception as e:
                 logger.warning("conversation memory persist failed for %s: %s", cc, e)
 
-    # Persist transaction result to DB if executed
-    if transaction_result and transaction_result.get("status") == "accepted":
+    # Persist transaction result to DB — ALWAYS record when topic was propose_transaction
+    if "propose_transaction" in topic:
+        # Determine status from transaction flow result
+        if transaction_result and not transaction_result.get("error"):
+            final_status = transaction_result.get("status", "declined")
+            if final_status in ("executed", "accepted"):
+                db_status = "executed"
+            elif final_status in ("failed_validation",):
+                db_status = "failed_validation"
+            elif final_status in ("counter", "countered"):
+                db_status = "countered"
+            else:
+                db_status = "declined"
+        else:
+            # Transaction flow failed or wasn't attempted — record as proposed
+            db_status = "proposed"
+
         try:
             from engine.services.supabase import get_client
             client = get_client()
             scen = client.table("sim_scenarios").select("id").eq("code", "start_one").limit(1).execute()
             if scen.data:
-                client.table("exchange_transactions").insert({
-                    "scenario_id": scen.data[0]["id"],
+                scenario_id = scen.data[0]["id"]
+
+                # Build offer/request from transaction result if available
+                if transaction_result and not transaction_result.get("error"):
+                    offer = (transaction_result.get("terms") or {}).get("gives") or {}
+                    request = (transaction_result.get("terms") or {}).get("receives") or {}
+                else:
+                    offer = {}
+                    request = {}
+
+                txn_payload = {
+                    "scenario_id": scenario_id,
                     "round_num": round_num,
                     "proposer": agent_a_info["country_code"],
                     "counterpart": agent_b_info["country_code"],
-                    "offer": transaction_result.get("terms", {}).get("gives", {}),
-                    "request": transaction_result.get("terms", {}).get("receives", {}),
-                    "status": "executed",
-                }).execute()
-                _emit_event("start_one", round_num, "transaction_executed", agent_a_info["country_code"],
-                           f"💰 {agent_a_info['country_code']} ↔ {agent_b_info['country_code']}: "
-                           f"{transaction_result.get('type', '?')} executed",
-                           transaction_result)
+                    "offer": offer,
+                    "request": request,
+                    "status": db_status,
+                }
+
+                # Try update existing row first (resolve_round may have inserted "proposed")
+                existing = client.table("exchange_transactions") \
+                    .select("id") \
+                    .eq("scenario_id", scenario_id) \
+                    .eq("round_num", round_num) \
+                    .eq("proposer", agent_a_info["country_code"]) \
+                    .eq("counterpart", agent_b_info["country_code"]) \
+                    .limit(1).execute()
+
+                if existing.data:
+                    client.table("exchange_transactions") \
+                        .update({"status": db_status,
+                                 "offer": txn_payload["offer"],
+                                 "request": txn_payload["request"]}) \
+                        .eq("id", existing.data[0]["id"]).execute()
+                else:
+                    client.table("exchange_transactions").insert(txn_payload).execute()
+
+                logger.info("[R%d] exchange_transaction persisted: %s->%s status=%s",
+                            round_num, agent_a_info["country_code"],
+                            agent_b_info["country_code"], db_status)
+
+                if db_status == "executed":
+                    _emit_event("start_one", round_num, "transaction_executed",
+                                agent_a_info["country_code"],
+                                f"{agent_a_info['country_code']} <-> {agent_b_info['country_code']}: "
+                                f"{transaction_result.get('type', '?')} executed",
+                                transaction_result)
+
+                    # Persist state changes to country_states_per_round
+                    _persist_transaction_state_changes(
+                        "start_one", round_num,
+                        agent_a_info["country_code"],
+                        agent_b_info["country_code"],
+                        leader_a.country,
+                        leader_b.country,
+                    )
         except Exception as e:
-            logger.warning("transaction DB persist failed: %s", e)
+            logger.error("transaction DB persist failed: %s", e)
 
     return {
         "participants": [agent_a_info["country_code"], agent_b_info["country_code"]],
@@ -456,6 +959,75 @@ async def _run_one_conversation(
         "reflections": {k: v.get("details", {}) for k, v in result.reflections.items()},
         "transaction": transaction_result,
     }
+
+
+def _persist_transaction_state_changes(
+    scenario_code: str,
+    round_num: int,
+    proposer_cc: str,
+    counterpart_cc: str,
+    proposer_country: dict,
+    counterpart_country: dict,
+) -> None:
+    """Write transaction-modified treasury/tech values to country_states_per_round.
+
+    Follows the same update pattern as round_tick.py.
+
+    NOTE: Military unit transfers (arms_sale, arms_gift) require updating
+    unit_states_per_round, not country_states_per_round. Unit ownership
+    persistence is a Sprint C task (unit-level tracking).
+    Columns that exist: treasury, nuclear_rd_progress, ai_rd_progress.
+    """
+    try:
+        from engine.services.supabase import get_client
+        client = get_client()
+        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
+        if not scen.data:
+            return
+        scenario_id = scen.data[0]["id"]
+
+        # Only persist columns that exist in country_states_per_round
+        PERSISTABLE_FIELDS = {"treasury", "nuclear_rd_progress", "ai_rd_progress"}
+
+        for cc, country_data in [(proposer_cc, proposer_country), (counterpart_cc, counterpart_country)]:
+            row = client.table("country_states_per_round") \
+                .select("id") \
+                .eq("scenario_id", scenario_id) \
+                .eq("round_num", round_num) \
+                .eq("country_code", cc) \
+                .limit(1).execute()
+
+            if not row.data:
+                # No row for this round yet — clone previous round
+                prev = client.table("country_states_per_round") \
+                    .select("*") \
+                    .eq("scenario_id", scenario_id) \
+                    .eq("round_num", round_num - 1) \
+                    .eq("country_code", cc) \
+                    .limit(1).execute()
+                if prev.data:
+                    new_row = {k: v for k, v in prev.data[0].items() if k != "id"}
+                    new_row["round_num"] = round_num
+                    new_row["treasury"] = round(country_data.get("treasury", new_row.get("treasury", 0)), 2)
+                    new_row["nuclear_rd_progress"] = round(country_data.get("nuclear_rd_progress", new_row.get("nuclear_rd_progress", 0)), 4)
+                    new_row["ai_rd_progress"] = round(country_data.get("ai_rd_progress", new_row.get("ai_rd_progress", 0)), 4)
+                    client.table("country_states_per_round").insert(new_row).execute()
+                continue
+
+            row_id = row.data[0]["id"]
+            payload = {
+                "treasury": round(country_data.get("treasury", 0), 2),
+            }
+            for fld in ["nuclear_rd_progress", "ai_rd_progress"]:
+                if fld in country_data:
+                    payload[fld] = round(country_data[fld], 4)
+
+            client.table("country_states_per_round").update(payload).eq("id", row_id).execute()
+
+        logger.info("Persisted transaction state changes for %s <-> %s (R%d)",
+                     proposer_cc, counterpart_cc, round_num)
+    except Exception as e:
+        logger.warning("_persist_transaction_state_changes failed: %s", e)
 
 
 def _resolve_role_id(country_code: str) -> str:
@@ -592,10 +1164,19 @@ async def run_full_round(
     )
     _emit_event(SCENARIO_CODE_DEFAULT, round_num, "round_resolving", None, f"⚙ Round {round_num}: {successes}/{len(normalized)} agents committed, resolving actions...")
 
+    # ---- MANDATORY DECISIONS PHASE ----
+    try:
+        mandatory_results = await _run_mandatory_decisions_phase(
+            scenario_code, round_num, hos_agents, normalized)
+        if mandatory_results:
+            _emit_event(SCENARIO_CODE_DEFAULT, round_num, "mandatory_decisions_complete", None,
+                        f"📋 {len(mandatory_results)} mandatory decisions submitted")
+    except Exception as e:
+        logger.warning("[R%d] mandatory decisions phase failed: %s", round_num, e)
+
     # ---- CONVERSATION PHASE (Sprint B2) ----
     try:
-        conversation_results = await asyncio.to_thread(
-            _try_run_conversations, scenario_code, round_num, hos_agents, normalized)
+        conversation_results = await _try_run_conversations(scenario_code, round_num, hos_agents, normalized)
         if conversation_results:
             _emit_event(SCENARIO_CODE_DEFAULT, round_num, "conversations_complete", None,
                         f"💬 {len(conversation_results)} bilateral conversations completed")
@@ -603,12 +1184,10 @@ async def run_full_round(
         logger.warning("[R%d] conversation phase failed: %s", round_num, e)
 
     # ---- handoff to round resolver (combat, movement, trophies) ----
-    resolution = await asyncio.to_thread(
-        _try_resolve_round, scenario_code, round_num)
+    resolution = _try_resolve_round(scenario_code, round_num)
 
     # ---- engine tick: economic + political + technology ----
-    engine_tick = await asyncio.to_thread(
-        _try_engine_tick, scenario_code, round_num)
+    engine_tick = _try_engine_tick(scenario_code, round_num)
 
     res_result = (resolution or {}).get("result") or {}
     combats = res_result.get("combats", 0)

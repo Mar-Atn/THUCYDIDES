@@ -1871,6 +1871,33 @@ Revocation: host calls revoke_basing_rights (unilateral, no confirmation needed)
 
 ---
 
+#### 5a. Bilateral Relationship Status — 8-State Model (added 2026-04-08)
+
+The `relationships` table tracks bilateral state with two columns:
+- **`relationship`** — starting/reference value (frozen per template)
+- **`status`** — live engine state (updated during play). Engine reads `status` for all war/peace checks.
+
+**Canonical 8-state enum for `status`:**
+
+| State | Meaning | Transitions |
+|---|---|---|
+| **allied** | Formal alliance, mutual defense | → friendly (dissolved) |
+| **friendly** | Positive, no formal treaty | → allied (treaty), → neutral (drift) |
+| **neutral** | No alignment | → friendly (cooperation), → tense (friction) |
+| **tense** | Friction, pressure | → hostile (escalation), → neutral (de-escalation) |
+| **hostile** | Antagonism, sanctions | → military_conflict (attack), → tense (de-escalation) |
+| **military_conflict** | Active combat — STICKY | → armistice (ceasefire), → peace (treaty) ONLY |
+| **armistice** | Ceasefire signed | → peace (treaty), → military_conflict (breach) |
+| **peace** | War formally ended | → friendly (over time), → neutral |
+
+**Key rules:**
+- `military_conflict` is STICKY — only exits via signed agreement.
+- Armistice breach → auto-return to `military_conflict` + global notification.
+- War is DETECTED from combat, not declared.
+- Ceasefire/peace agreements (§5 above) update `status` from `military_conflict` → `armistice` or `peace`.
+
+---
+
 #### 6. Organization Creation
 
 **Properties:** Not exclusive. No balance required. Authorization: head of state.

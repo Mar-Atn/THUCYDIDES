@@ -57,6 +57,19 @@ Chokepoints are specific water hexes with blockade mechanics. Template v1.0:
 
 Gulf Gate also serves as the Mashriq theater-link for sea cells in rows 7-10 of the theater (see §1.5).
 
+### 1.3a Nuclear site hexes (added 2026-04-08)
+
+Physical map locations of nuclear programs that can be targeted/destroyed:
+
+| Country | global_row | global_col | Notes |
+|---|:---:|:---:|---|
+| Persia | 7 | 13 | Enrichment facility on Mashriq theater-link hex |
+| Choson | 3 | 18 | Nuclear complex on global map (no theater) |
+
+Other nuclear-armed countries (Columbia, Sarmatia, Cathay, Gallia, Albion) have abstract nuclear capability — no single targetable hex on the map.
+
+**Canonical storage:** `sim_templates.map_config.nuclear_sites` (JSONB in DB) + `app/engine/config/map_config.py::NUCLEAR_SITES`.
+
 ### 1.4 Coordinate convention (LOCKED)
 
 **`(row, col)` — row first, col second. Both 1-indexed.**
@@ -336,6 +349,46 @@ When a Template version advances, all saved scenario layouts from the old Templa
 
 ---
 
+## 5a. Bilateral Relationship Model — 8 States (added 2026-04-08)
+
+Every pair of countries has a bilateral relationship tracked in the `relationships` table with two columns:
+
+- **`relationship`** — the STARTING/REFERENCE value, frozen per template. Uses legacy labels from CSV (`alliance`, `close_ally`, `friendly`, `neutral`, `tense`, `hostile`, `at_war`, `strategic_rival`).
+- **`status`** — the LIVE engine state, updated during play. Uses the canonical 8-state model below.
+
+### Canonical 8-State Model
+
+| State | Meaning | Transitions |
+|---|---|---|
+| **allied** | Formal alliance, mutual defense commitment | → friendly (alliance dissolved) |
+| **friendly** | Positive relations, cooperation, no formal treaty | → allied (treaty signed), → neutral (drift) |
+| **neutral** | No strong alignment either way | → friendly (cooperation), → tense (friction) |
+| **tense** | Friction, diplomatic pressure, not hostile | → hostile (escalation), → neutral (de-escalation) |
+| **hostile** | Active antagonism, sanctions, not shooting | → military_conflict (attack), → tense (de-escalation) |
+| **military_conflict** | Active combat — STICKY, does not auto-resolve | → armistice (ceasefire signed), → peace (treaty signed) ONLY |
+| **armistice** | Ceasefire signed, combat stopped, territory frozen | → peace (treaty), → military_conflict (breach) |
+| **peace** | War formally ended via peace treaty | → friendly (over time), → neutral |
+
+### Key Rules
+
+1. **`military_conflict` is STICKY** — only transitions via signed agreement (armistice or peace treaty). No automatic cooling. No time-based decay.
+2. **Breach of armistice** (attacking after signing) → automatic return to `military_conflict` + all countries notified.
+3. **War is DETECTED, not declared** — if country A attacks country B, status becomes `military_conflict`. Public war declarations are political theater, not a game mechanic.
+4. Engine reads `status` column for all war/peace checks. The `relationship` column is preserved as the template starting point for reference and resets.
+
+### Mapping: `relationship` → initial `status`
+
+| `relationship` (template/CSV) | → initial `status` |
+|---|---|
+| `alliance`, `close_ally` | `allied` |
+| `friendly` | `friendly` |
+| `neutral` | `neutral` |
+| `tense` | `tense` |
+| `hostile`, `strategic_rival` | `hostile` |
+| `at_war` | `military_conflict` |
+
+---
+
 ## 6. Q1 2026 Canonical Starting Conditions
 
 ### 6.0 Authority chain (locked 2026-04-05)
@@ -388,6 +441,27 @@ Deployments informed by publicly reported Q1 2026 posture:
 - **US Caribbean residual** following Maduro capture (3 Jan).
 - **Germany 45th Brigade** operational in Lithuania (Feb).
 - **THAAD/Patriot layered** across Gulf states.
+
+### 6.2a Starting basing rights (added 2026-04-08)
+
+Reflects real-world military base parallels at game start. Stored in `relationships` table (`basing_rights_a_to_b = true` means from_country hosts to_country's forces).
+
+| Host country | Guest country | Real-world parallel |
+|---|---|---|
+| Yamato | Columbia | Okinawa, Yokosuka |
+| Hanguk | Columbia | Camp Humphreys |
+| Teutonia | Columbia | Ramstein, Stuttgart |
+| Albion | Columbia | RAF Lakenheath, Menwith Hill |
+| Phrygia | Columbia | Incirlik |
+| Formosa | Columbia | Informal military presence |
+| Mirage | Columbia | Al Dhafra |
+| Ponte | Columbia | Aviano, Sigonella |
+| Freeland | Columbia | Redzikowo BMD site |
+| Choson | Sarmatia | Advisory + logistics presence |
+| Sarmatia | Choson | Training + diplomatic presence |
+| Mirage | Gallia | Djibouti (Camp Lemonnier parallel) |
+
+**12 basing records total.** Basing rights are tradeable assets during play (grant/revoke via transactions or agreements).
 
 ### 6.3 Design principles applied
 

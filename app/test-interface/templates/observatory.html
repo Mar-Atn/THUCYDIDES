@@ -132,13 +132,12 @@
     <div class="obs-global-chart-wrap">
       <svg id="globalChart" class="obs-global-chart"></svg>
     </div>
-    <div class="obs-dash-controls">
-      <span class="label">Sort:</span>
-      <button class="obs-dash-sort-btn active" data-sort="code">Country</button>
-      <button class="obs-dash-sort-btn" data-sort="gdp">GDP</button>
-      <button class="obs-dash-sort-btn" data-sort="stability">Stability</button>
-      <button class="obs-dash-sort-btn" data-sort="units">Forces</button>
-      <button class="obs-dash-sort-btn" data-sort="nuclear">Nuclear</button>
+    <div class="obs-dash-controls obs-focus-bar">
+      <span class="label">Focus:</span>
+      <button class="obs-focus-btn active" data-focus="economy">Economy</button>
+      <button class="obs-focus-btn" data-focus="military">Military</button>
+      <button class="obs-focus-btn" data-focus="political">Political</button>
+      <button class="obs-focus-btn" data-focus="technology">Technology</button>
     </div>
     <div class="obs-panel-body obs-dash-body" id="countryGrid">
       <!-- Country tiles injected by observatory.js -->

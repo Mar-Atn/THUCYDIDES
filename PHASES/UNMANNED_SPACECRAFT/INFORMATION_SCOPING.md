@@ -90,6 +90,12 @@
 
 Updates automatically at end of each round based on events (combat → military_conflict, agreement signed → armistice/peace, sanctions → tense/hostile). Rule-based, no LLM needed.
 
+**Dual-column semantics (2026-04-08):** The `relationships` table has two columns:
+- `relationship` = STARTING/REFERENCE value (frozen per template, legacy labels from CSV)
+- `status` = LIVE engine state (canonical 8-state model above, updated during play)
+
+Engine reads `status` for all war/peace checks. Participants see `status` values in the public relationship display.
+
 ---
 
 ## HISTORY RULE

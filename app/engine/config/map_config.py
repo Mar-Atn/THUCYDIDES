@@ -70,6 +70,16 @@ UNIT_TYPES: list[str] = [
 ]
 UNIT_STATUSES: list[str] = ["active", "reserve", "embarked", "destroyed"]
 
+# ---------------------------------------------------------------------------
+# NUCLEAR SITES — physical hex locations on global map
+# Only countries with map-located nuclear programs. Others are abstract.
+# Canonical source: sim_templates.map_config.nuclear_sites (DB)
+# ---------------------------------------------------------------------------
+NUCLEAR_SITES: dict[str, tuple[int, int]] = {
+    "persia": (7, 13),
+    "choson": (3, 18),
+}
+
 
 # ---------------------------------------------------------------------------
 # THEATER <-> GLOBAL LINKAGE (canonical mapping, Marat-approved 2026-04-05)
@@ -203,6 +213,7 @@ __all__ = [
     "COUNTRY_CODES",
     "UNIT_TYPES",
     "UNIT_STATUSES",
+    "NUCLEAR_SITES",
     "global_hex_for_theater_cell",
     "theater_link_hexes",
     "is_theater_link_hex",

@@ -193,11 +193,20 @@ class OrgMembership(BaseModel):
 
 
 class Relationship(BaseModel):
-    """relationships table."""
+    """relationships table.
+
+    Dual-column semantics (2026-04-08):
+      relationship = STARTING/REFERENCE value (frozen per template, legacy labels)
+      status       = LIVE engine state (canonical 8-state model, updated during play)
+    Engine reads `status` for all war/peace checks.
+    """
     sim_run_id: str
     from_country_id: str
     to_country_id: str
     relationship: str  # close_ally | alliance | friendly | neutral | tense | hostile | at_war | strategic_rival
+    status: str = "neutral"  # allied | friendly | neutral | tense | hostile | military_conflict | armistice | peace
+    basing_rights_a_to_b: bool = False
+    basing_rights_b_to_a: bool = False
     dynamic: str = ""
 
 

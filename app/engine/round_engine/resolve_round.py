@@ -13,7 +13,7 @@ Resolution order (per OBSERVATORY_SPEC §Combat Engine):
     4. Ground combat
     5. Naval engagements
     6. R&D increments
-    7. Sanctions/tariffs  (log only for now)
+    7. Sanctions/tariffs  (upsert to state tables + log events)
 
 NOTE: The table originally named ``combat_results`` already existed in
 the DB with a different schema. The Observatory uses
@@ -182,6 +182,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
     events: list[dict] = []
     combats: list[dict] = []
     narratives: list[str] = []
+    exchange_txns: list[dict] = []  # collected here, batch-written at end
 
     # --- 1. Public statements + org meetings (logged, visible to all) ------
     for d in decisions:
@@ -295,18 +296,102 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             })
 
     # --- 7. Economic actions (sanctions/tariffs/budget/OPEC) ---------------
-    # These are LOGGED and PERSISTED for round_tick.py engine to read.
-    # round_tick extracts them from agent_decisions and feeds into
-    # process_economy. No direct state mutation here.
+    # ARCHITECTURE (2026-04-08): Write to DB STATE TABLES so engine reads
+    # from canonical state, not from agent_decisions.
+    # Flow: Participant -> resolve_round WRITES state table -> engine READS state table.
+    from engine.config.settings import Settings
+    _sim_run_id = Settings().default_sim_id
+
     for d in decisions:
-        if d["action_type"] in ECONOMIC_ACTIONS:
-            events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
-                "event_type": d["action_type"],
-                "country_code": d["country_code"],
-                "summary": f"{d['country_code']} -> {d['action_type']}",
-                "payload": d.get("action_payload"),
-            })
+        if d["action_type"] not in ECONOMIC_ACTIONS:
+            continue
+        cc = d["country_code"]
+        payload = d.get("action_payload") or {}
+        atype = d["action_type"]
+
+        # --- Upsert sanctions state table ---
+        if atype in ("set_sanction", "impose_sanction"):
+            target = payload.get("target_country", "")
+            level = payload.get("level", 1)
+            if target:
+                try:
+                    client.table("sanctions").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "imposer_country_id": cc,
+                        "target_country_id": target,
+                        "level": level,
+                        "notes": f"Set by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    logger.info("[resolve R%d] %s sanctions on %s -> level %d (state table updated)",
+                                round_num, cc, target, level)
+                except Exception as e:
+                    logger.warning("[resolve R%d] sanctions upsert failed %s->%s: %s",
+                                   round_num, cc, target, e)
+
+        elif atype == "lift_sanction":
+            target = payload.get("target_country", "")
+            if target:
+                try:
+                    client.table("sanctions").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "imposer_country_id": cc,
+                        "target_country_id": target,
+                        "level": 0,
+                        "notes": f"Lifted by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    logger.info("[resolve R%d] %s lifts sanctions on %s (state table updated)",
+                                round_num, cc, target)
+                except Exception as e:
+                    logger.warning("[resolve R%d] sanctions lift failed %s->%s: %s",
+                                   round_num, cc, target, e)
+
+        # --- Upsert tariffs state table ---
+        elif atype in ("set_tariff", "impose_tariff"):
+            target = payload.get("target_country", "")
+            level = payload.get("level", 1)
+            if target:
+                try:
+                    client.table("tariffs").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "imposer_country_id": cc,
+                        "target_country_id": target,
+                        "level": level,
+                        "notes": f"Set by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    logger.info("[resolve R%d] %s tariff on %s -> level %d (state table updated)",
+                                round_num, cc, target, level)
+                except Exception as e:
+                    logger.warning("[resolve R%d] tariff upsert failed %s->%s: %s",
+                                   round_num, cc, target, e)
+
+        elif atype == "lift_tariff":
+            target = payload.get("target_country", "")
+            if target:
+                try:
+                    client.table("tariffs").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "imposer_country_id": cc,
+                        "target_country_id": target,
+                        "level": 0,
+                        "notes": f"Lifted by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    logger.info("[resolve R%d] %s lifts tariff on %s (state table updated)",
+                                round_num, cc, target)
+                except Exception as e:
+                    logger.warning("[resolve R%d] tariff lift failed %s->%s: %s",
+                                   round_num, cc, target, e)
+
+        # Budget and OPEC: log event (state stored in country_states_per_round
+        # by the engine tick or via dedicated columns if available)
+
+        # Log all economic actions as observatory events
+        events.append({
+            "scenario_id": scenario_id, "round_num": round_num,
+            "event_type": atype,
+            "country_code": cc,
+            "summary": f"{cc} -> {atype}",
+            "payload": payload,
+        })
 
     # --- 8. Blockade declarations (CARD_ACTIONS 1.10) -----------------------
     for d in decisions:
@@ -317,11 +402,42 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             action = payload.get("action", "establish")
             level = payload.get("level", "full")
 
-            # Update blockade state in observatory_events for round_tick to read
+            # Upsert blockade state table (like sanctions/tariffs)
             if action == "lift":
                 summary = f"{cc} lifts blockade at {zone_id}"
+                try:
+                    client.table("blockades").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "zone_id": zone_id,
+                        "imposer_country_id": cc,
+                        "status": "lifted",
+                        "level": level,
+                        "established_round": round_num,
+                        "lifted_round": round_num,
+                        "notes": f"Lifted by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,zone_id,imposer_country_id").execute()
+                    logger.info("[resolve R%d] %s lifts blockade at %s (state table updated)",
+                                round_num, cc, zone_id)
+                except Exception as e:
+                    logger.warning("[resolve R%d] blockade lift upsert failed %s at %s: %s",
+                                   round_num, cc, zone_id, e)
             else:
                 summary = f"{cc} {'establishes' if action == 'establish' else action} {level} blockade at {zone_id}"
+                try:
+                    client.table("blockades").upsert({
+                        "sim_run_id": _sim_run_id,
+                        "zone_id": zone_id,
+                        "imposer_country_id": cc,
+                        "status": "active",
+                        "level": level,
+                        "established_round": round_num,
+                        "notes": f"Established by {cc} in round {round_num}",
+                    }, on_conflict="sim_run_id,zone_id,imposer_country_id").execute()
+                    logger.info("[resolve R%d] %s establishes %s blockade at %s (state table updated)",
+                                round_num, cc, level, zone_id)
+                except Exception as e:
+                    logger.warning("[resolve R%d] blockade upsert failed %s at %s: %s",
+                                   round_num, cc, zone_id, e)
 
             events.append({
                 "scenario_id": scenario_id, "round_num": round_num,
@@ -468,19 +584,17 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     "payload": payload,
                 })
             else:
-                # Exchange transaction — write to exchange_transactions table
-                try:
-                    client.table("exchange_transactions").insert({
-                        "scenario_id": scenario_id,
-                        "round_num": round_num,
-                        "proposer": cc,
-                        "counterpart": counterpart,
-                        "offer": payload.get("offer", {}),
-                        "request": payload.get("request", {}),
-                        "status": "proposed",
-                    }).execute()
-                except Exception as e:
-                    logger.warning("exchange_transaction insert failed: %s", e)
+                # Exchange transaction — collect for batch write at end of resolve
+                exchange_txns.append({
+                    "scenario_id": scenario_id,
+                    "round_num": round_num,
+                    "proposer": cc,
+                    "counterpart": counterpart,
+                    "offer": payload.get("offer") or {},
+                    "request": payload.get("request") or {},
+                    "terms": payload.get("terms", ""),
+                    "status": "proposed",
+                })
 
                 events.append({
                     "scenario_id": scenario_id, "round_num": round_num,
@@ -585,6 +699,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
     _write_country_snapshot(client, scenario_id, round_num, country_state)
     _write_combats(client, combats)
     _write_events(client, events)
+    _write_exchange_transactions(client, exchange_txns)
 
     # Mark round complete
     client.table("round_states").upsert(
@@ -602,6 +717,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
         "decisions_processed": len(decisions),
         "combats": len(combats),
         "events": len(events),
+        "exchange_transactions": len(exchange_txns),
         "narratives": narratives,
     }
 
@@ -1205,3 +1321,45 @@ def _write_events(client, events):
     if not events:
         return
     client.table("observatory_events").insert(events).execute()
+
+
+def _write_exchange_transactions(client, txns: list[dict]):
+    """Batch-write exchange_transactions rows, deduplicating against existing."""
+    if not txns:
+        return
+    # Dedup: check which proposer+counterpart pairs already exist for this round
+    sample = txns[0]
+    scenario_id = sample["scenario_id"]
+    round_num = sample["round_num"]
+    try:
+        existing = client.table("exchange_transactions") \
+            .select("proposer, counterpart") \
+            .eq("scenario_id", scenario_id) \
+            .eq("round_num", round_num) \
+            .execute()
+        existing_pairs = {(r["proposer"], r["counterpart"]) for r in (existing.data or [])}
+    except Exception as e:
+        logger.warning("exchange_transactions dedup query failed: %s", e)
+        existing_pairs = set()
+
+    to_insert = [t for t in txns
+                 if (t["proposer"], t["counterpart"]) not in existing_pairs]
+    if not to_insert:
+        logger.info("exchange_transactions: all %d already exist, skipping", len(txns))
+        return
+
+    try:
+        client.table("exchange_transactions").insert(to_insert).execute()
+        logger.info("exchange_transactions: inserted %d rows", len(to_insert))
+    except Exception as e:
+        logger.error("exchange_transactions batch insert failed: %s", e)
+        # Fallback: insert one-by-one so partial success is possible
+        inserted = 0
+        for t in to_insert:
+            try:
+                client.table("exchange_transactions").insert(t).execute()
+                inserted += 1
+            except Exception as e2:
+                logger.error("exchange_transaction single insert failed for %s->%s: %s",
+                             t["proposer"], t["counterpart"], e2)
+        logger.info("exchange_transactions: fallback inserted %d/%d", inserted, len(to_insert))

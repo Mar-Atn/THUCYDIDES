@@ -656,13 +656,22 @@ class LeaderAgent:
 
     def _initial_relationships(self, world_state: dict | None) -> dict[str, float]:
         """Set initial relationships from world state."""
+        # Canonical 8-state model (status column) + legacy labels (relationship column)
         rel_map = {
-            "allied": 0.8, "close_ally": 0.8,
-            "friendly": 0.3, "alliance": 0.5,
+            # 8-state canonical (from status column)
+            "allied": 0.8,
+            "friendly": 0.3,
             "neutral": 0.0,
             "tense": -0.3,
             "hostile": -0.6,
+            "military_conflict": -1.0,
+            "armistice": -0.4,
+            "peace": 0.1,
+            # Legacy labels (from relationship column, for backwards compat)
+            "close_ally": 0.8,
+            "alliance": 0.5,
             "at_war": -1.0,
+            "strategic_rival": -0.5,
         }
         relationships = {}
         if world_state and "relationships" in world_state:

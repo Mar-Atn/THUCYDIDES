@@ -65,7 +65,7 @@ TEMPLATE (the game itself — evolves over months)
 ### Roles (40)
 | Data | Location | Notes |
 |---|---|---|
-| Character sheets | `roles` table (Supabase) | character_name, title, age, faction, powers[], objectives[], ticking_clock |
+| Character sheets | `roles` table (Supabase) | character_name, title, age, faction, powers[], objectives[], ticking_clock, public_bio |
 | Covert op card pools | `roles` table columns | intelligence_pool (per round), sabotage_cards, disinfo_cards, election_meddling_cards, assassination_cards (per SIM) |
 | Personal assets | `roles` table | personal_coins, fatherland_appeal (bool) |
 | Permitted actions | `roles` table | permitted_actions[] (list of action_types this role can invoke) |
@@ -85,9 +85,33 @@ TEMPLATE (the game itself — evolves over months)
 | Data | Location | Notes |
 |---|---|---|
 | Martial law mobilization pool | `countries` table | Ground units available via martial law. Sarmatia: 10, Ruthenia: 6, Persia: 8, Cathay: 10. Others: 0. |
-| Nuclear site hex | `countries` table or Template rules | Physical hex on map. Persia: (TBD), Choson: (TBD). Others: abstract (no map hex). |
+| Nuclear site hex | `sim_templates.map_config.nuclear_sites` + `map_config.py::NUCLEAR_SITES` | Physical hex on map. Persia: (7,13), Choson: (3,18). Others: abstract (no map hex). Canonical since 2026-04-08. |
 | Initial basing rights | `relationships` table | Reflects real alliance map (Western Treaty members host Columbia, Asian allies). |
 | Nuclear level confirmed | `countries` table | Pre-set countries (Columbia T3, Sarmatia T3, Cathay T3, etc.) are confirmed by default. Others start unconfirmed. |
+
+### Starting Relationships & Basing Rights (added 2026-04-08)
+
+**Relationship status distribution (380 bilateral pairs):**
+| Status | Count | Examples |
+|---|---|---|
+| neutral | 128 | Most non-aligned pairs |
+| friendly | 126 | Western-aligned pairs, trade partners |
+| hostile | 43 | Choson vs most countries, Persia adversaries + strategic_rival (Columbia-Cathay) |
+| allied | 42 | Columbia hub: 11 allies; EU bloc mutual |
+| tense | 35 | Border disputes, regional competition |
+| military_conflict | 6 | Sarmatia-Ruthenia, Persia-Columbia, Persia-Levantia |
+
+**Column semantics:** `relationship` column = the qualitative label (8 values). `status` column = the engine-readable state (8 values, derived from relationship). Engine code checks `status` for war/peace logic.
+
+**Basing rights (12 records):**
+| Host | Guest | Parallel |
+|---|---|---|
+| Yamato, Hanguk, Teutonia, Albion, Phrygia, Formosa, Mirage, Ponte, Freeland | Columbia | Global US base network |
+| Choson | Sarmatia | Advisory presence |
+| Sarmatia | Choson | Training presence |
+| Mirage | Gallia | Djibouti |
+
+Basing rights are tradeable during play. `basing_rights_a_to_b = true` means from_country_id (a) hosts to_country_id (b).
 
 ### Formula Coefficients
 See CARD_FORMULAS.md. Key per-country values stored in `countries` table:

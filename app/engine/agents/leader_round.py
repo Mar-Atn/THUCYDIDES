@@ -111,19 +111,33 @@ def _build_tool_dispatcher(
 ) -> dict[str, Callable[[dict], Any]]:
     base = {
         "get_my_identity": lambda a: agent_tools.get_my_identity(country_code=country_code),
-        "get_my_forces": lambda a: agent_tools.get_my_forces(country_code=country_code),
+        "get_my_forces": lambda a: agent_tools.get_my_forces(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
         "get_hex_info": lambda a: agent_tools.get_hex_info(
             row=a["row"], col=a["col"], scope=a.get("scope", "global"),
+            scenario_code=scenario_code, round_num=round_num,
         ),
         "get_enemy_forces": lambda a: agent_tools.get_enemy_forces(
             country_code=country_code, enemy_country_code=a["enemy_country_code"],
+            scenario_code=scenario_code, round_num=round_num,
         ),
-        "get_strategic_context": lambda a: agent_tools.get_strategic_context(country_code=country_code),
-        "get_economic_state": lambda a: agent_tools.get_economic_state(country_code=country_code),
-        "get_political_state": lambda a: agent_tools.get_political_state(country_code=country_code),
-        "get_tech_state": lambda a: agent_tools.get_tech_state(country_code=country_code),
+        "get_strategic_context": lambda a: agent_tools.get_strategic_context(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
+        "get_economic_state": lambda a: agent_tools.get_economic_state(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
+        "get_political_state": lambda a: agent_tools.get_political_state(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
+        "get_tech_state": lambda a: agent_tools.get_tech_state(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
         "get_template_info": lambda a: agent_tools.get_template_info(),
-        "get_relationships": lambda a: agent_tools.get_relationships(country_code=country_code),
+        "get_relationships": lambda a: agent_tools.get_relationships(
+            country_code=country_code, scenario_code=scenario_code, round_num=round_num,
+        ),
         "get_organization_memberships": lambda a: agent_tools.get_organization_memberships(country_code=country_code),
         "get_country_codes_list": lambda a: agent_tools.get_country_codes_list(),
     }

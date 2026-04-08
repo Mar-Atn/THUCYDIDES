@@ -1,17 +1,16 @@
-"""Stage 1 lookup tools for AI participants.
+"""Domain lookup tools for AI participants.
 
-Each tool queries the Supabase Template v1.0 tables (READ-ONLY) and returns
-a dict. Errors are returned in the response rather than raised, so the
-calling agent can reason about failures.
+Each tool queries live game state (``unit_states_per_round`` /
+``country_states_per_round``) when ``scenario_code`` and ``round_num`` are
+provided, falling back to seed tables (``layout_units``, ``sim_templates``,
+``countries``) when no live snapshot exists (e.g. round 0 or before the
+first engine tick).
 
-All tools expect:
-  - layout_code (default 'template_v1_0_default') -> resolves to layout_id
-  - template_code (default 'ttt_v1_0')            -> template + default stats
-
-Design note: ``country_code`` is passed explicitly at the Python API level.
-In the Anthropic tool-use wrapper (see ``stage1_test.py``) it is bound as a
-closure based on the calling agent's identity, so the LLM does not need to
-pass it.
+Design note: ``country_code``, ``scenario_code``, and ``round_num`` are
+passed explicitly at the Python API level. In the tool-use wrapper
+(see ``leader_round.py``) they are bound as closures based on the calling
+agent's identity and the current round, so the LLM does not need to supply
+them.
 """
 from __future__ import annotations
 
@@ -32,6 +31,72 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+def _resolve_scenario_id_cached(scenario_code: str) -> Optional[str]:
+    """Map scenario code -> scenario_id UUID. Used by live-state queries."""
+    client = get_client()
+    result = (
+        client.table("sim_scenarios")
+        .select("id")
+        .eq("code", scenario_code)
+        .limit(1)
+        .execute()
+    )
+    if not result.data:
+        return None
+    return result.data[0]["id"]
+
+
+def _load_live_units(
+    scenario_code: str, round_num: int, *, country_code: Optional[str] = None,
+) -> Optional[list[dict]]:
+    """Load unit rows from unit_states_per_round for the given round.
+
+    Returns None if no live snapshot exists (caller should fall back to seed).
+    If ``country_code`` is given, filters to that country only.
+    """
+    scenario_id = _resolve_scenario_id_cached(scenario_code)
+    if not scenario_id:
+        return None
+    client = get_client()
+    q = (
+        client.table("unit_states_per_round")
+        .select("*")
+        .eq("scenario_id", scenario_id)
+        .eq("round_num", round_num)
+    )
+    if country_code:
+        q = q.eq("country_code", country_code)
+    res = q.execute()
+    if res.data:
+        return res.data
+    return None
+
+
+def _load_live_country_state(
+    scenario_code: str, round_num: int, country_code: str,
+) -> Optional[dict]:
+    """Load a single country row from country_states_per_round.
+
+    Returns None if no live snapshot exists (caller should fall back to seed).
+    """
+    scenario_id = _resolve_scenario_id_cached(scenario_code)
+    if not scenario_id:
+        return None
+    client = get_client()
+    res = (
+        client.table("country_states_per_round")
+        .select("*")
+        .eq("scenario_id", scenario_id)
+        .eq("round_num", round_num)
+        .eq("country_code", country_code)
+        .limit(1)
+        .execute()
+    )
+    if res.data:
+        return res.data[0]
+    return None
+
 
 def _resolve_layout_id(layout_code: str) -> Optional[str]:
     """Map human-readable layout code -> layout_id UUID."""
@@ -69,28 +134,45 @@ def _unit_to_dict(row: dict) -> dict:
 
 def get_my_forces(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     layout_code: str = "template_v1_0_default",
 ) -> dict:
     """Return the country's complete force disposition.
+
+    Reads from ``unit_states_per_round`` (live state) when scenario_code
+    and round_num are provided. Falls back to ``layout_units`` (seed) if
+    no live snapshot exists.
 
     Returns:
         dict with total_units, by_status, by_type, by_global_hex, by_theater_cell,
         and a ``units`` list containing every unit.
     """
     try:
-        layout_id = _resolve_layout_id(layout_code)
-        if not layout_id:
-            return {"error": f"Unknown layout code: {layout_code}"}
+        rows = None
+        source = "seed"
 
-        client = get_client()
-        result = (
-            client.table("layout_units")
-            .select("*")
-            .eq("layout_id", layout_id)
-            .eq("country_code", country_code)
-            .execute()
-        )
-        rows = result.data or []
+        # Try live state first
+        if round_num is not None and scenario_code:
+            live = _load_live_units(scenario_code, round_num, country_code=country_code)
+            if live:
+                rows = live
+                source = "live"
+
+        # Fallback to seed layout_units
+        if rows is None:
+            layout_id = _resolve_layout_id(layout_code)
+            if not layout_id:
+                return {"error": f"Unknown layout code: {layout_code}"}
+            client = get_client()
+            result = (
+                client.table("layout_units")
+                .select("*")
+                .eq("layout_id", layout_id)
+                .eq("country_code", country_code)
+                .execute()
+            )
+            rows = result.data or []
 
         by_status: dict[str, int] = {}
         by_type: dict[str, int] = {}
@@ -115,7 +197,8 @@ def get_my_forces(
 
         return {
             "country": country_code,
-            "layout": layout_code,
+            "source": source,
+            "round_num": round_num,
             "total_units": len(rows),
             "by_status": by_status,
             "by_type": by_type,
@@ -136,39 +219,60 @@ def get_hex_info(
     row: int,
     col: int,
     scope: str = "global",
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     layout_code: str = "template_v1_0_default",
 ) -> dict:
     """Return info about a specific hex: who is there, any theater link.
+
+    Reads from ``unit_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to ``layout_units`` (seed).
 
     Args:
         row, col: 1-indexed coordinates.
         scope: 'global' or a theater name (e.g. 'mashriq', 'eastern_ereb').
     """
     try:
-        layout_id = _resolve_layout_id(layout_code)
-        if not layout_id:
-            return {"error": f"Unknown layout code: {layout_code}"}
+        all_rows = None
+        source = "seed"
 
-        client = get_client()
+        # Try live state first
+        if round_num is not None and scenario_code:
+            live = _load_live_units(scenario_code, round_num)
+            if live:
+                all_rows = live
+                source = "live"
 
         if scope == "global":
             if not in_global_bounds(row, col):
                 return {"error": f"({row},{col}) is out of global bounds (1..10 x 1..20)"}
 
-            result = (
-                client.table("layout_units")
-                .select("*")
-                .eq("layout_id", layout_id)
-                .eq("global_row", row)
-                .eq("global_col", col)
-                .execute()
-            )
-            units = [_unit_to_dict(r) for r in (result.data or [])]
+            if all_rows is not None:
+                # Filter live rows by global coords
+                matching = [r for r in all_rows
+                            if r.get("global_row") == row and r.get("global_col") == col]
+            else:
+                # Fallback to seed
+                layout_id = _resolve_layout_id(layout_code)
+                if not layout_id:
+                    return {"error": f"Unknown layout code: {layout_code}"}
+                client = get_client()
+                result = (
+                    client.table("layout_units")
+                    .select("*")
+                    .eq("layout_id", layout_id)
+                    .eq("global_row", row)
+                    .eq("global_col", col)
+                    .execute()
+                )
+                matching = result.data or []
 
+            units = [_unit_to_dict(r) for r in matching]
             linked_theater = theater_for_global_hex(row, col)
             return {
                 "coords": {"row": row, "col": col},
                 "scope": "global",
+                "source": source,
                 "units_present": units,
                 "unit_count": len(units),
                 "is_theater_link_hex": is_theater_link_hex(row, col),
@@ -179,19 +283,32 @@ def get_hex_info(
         if not in_theater_bounds(scope, row, col):
             return {"error": f"({row},{col}) is out of bounds for theater {scope}"}
 
-        result = (
-            client.table("layout_units")
-            .select("*")
-            .eq("layout_id", layout_id)
-            .eq("theater", scope)
-            .eq("theater_row", row)
-            .eq("theater_col", col)
-            .execute()
-        )
-        units = [_unit_to_dict(r) for r in (result.data or [])]
+        if all_rows is not None:
+            matching = [r for r in all_rows
+                        if r.get("theater") == scope
+                        and r.get("theater_row") == row
+                        and r.get("theater_col") == col]
+        else:
+            layout_id = _resolve_layout_id(layout_code)
+            if not layout_id:
+                return {"error": f"Unknown layout code: {layout_code}"}
+            client = get_client()
+            result = (
+                client.table("layout_units")
+                .select("*")
+                .eq("layout_id", layout_id)
+                .eq("theater", scope)
+                .eq("theater_row", row)
+                .eq("theater_col", col)
+                .execute()
+            )
+            matching = result.data or []
+
+        units = [_unit_to_dict(r) for r in matching]
         return {
             "coords": {"row": row, "col": col},
             "scope": scope,
+            "source": source,
             "units_present": units,
             "unit_count": len(units),
         }
@@ -207,9 +324,14 @@ def get_hex_info(
 def get_enemy_forces(
     country_code: str,
     enemy_country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     layout_code: str = "template_v1_0_default",
 ) -> dict:
     """Return observable forces of ``enemy_country_code``.
+
+    Reads from ``unit_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to ``layout_units`` (seed).
 
     SCOPING: Only returns data for countries the requester is at war with
     or that are publicly observable (full map visibility, no fog of war).
@@ -224,20 +346,33 @@ def get_enemy_forces(
         return {"error": "Cannot spy on your own forces — use get_my_forces()"}
 
     try:
-        layout_id = _resolve_layout_id(layout_code)
-        if not layout_id:
-            return {"error": f"Unknown layout code: {layout_code}"}
+        rows = None
+        source = "seed"
 
-        client = get_client()
-        result = (
-            client.table("layout_units")
-            .select("*")
-            .eq("layout_id", layout_id)
-            .eq("country_code", enemy_country_code)
-            .in_("status", ["active", "embarked"])
-            .execute()
-        )
-        rows = result.data or []
+        # Try live state first
+        if round_num is not None and scenario_code:
+            live = _load_live_units(scenario_code, round_num, country_code=enemy_country_code)
+            if live:
+                # Filter to active + embarked only (reserves not observable)
+                rows = [r for r in live if r.get("status") in ("active", "embarked")]
+                source = "live"
+
+        # Fallback to seed
+        if rows is None:
+            layout_id = _resolve_layout_id(layout_code)
+            if not layout_id:
+                return {"error": f"Unknown layout code: {layout_code}"}
+            client = get_client()
+            result = (
+                client.table("layout_units")
+                .select("*")
+                .eq("layout_id", layout_id)
+                .eq("country_code", enemy_country_code)
+                .in_("status", ["active", "embarked"])
+                .execute()
+            )
+            rows = result.data or []
+
         units = [_unit_to_dict(r) for r in rows]
 
         by_type: dict[str, int] = {}
@@ -256,6 +391,7 @@ def get_enemy_forces(
         return {
             "observer": country_code,
             "target": enemy_country_code,
+            "source": source,
             "observable_units": len(units),
             "note": "Active + embarked only. Reserves are not observable.",
             "by_type": by_type,
@@ -274,12 +410,19 @@ def get_enemy_forces(
 
 def get_strategic_context(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     template_code: str = "ttt_v1_0",
 ) -> dict:
-    """Return strategic context: regime, GDP, treasury, wars, stability."""
+    """Return strategic context: regime, GDP, treasury, wars, stability.
+
+    Reads from ``country_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to seed tables.
+    """
     try:
         client = get_client()
-        # Template JSONB has canonical strategic posture (including at_war_with)
+
+        # Always load template for at_war_with and metadata
         tpl_result = (
             client.table("sim_templates")
             .select("default_country_stats")
@@ -292,7 +435,15 @@ def get_strategic_context(
         if not stats_blob:
             return {"error": f"No stats for country {country_code} in template {template_code}"}
 
-        # countries table has richer economic indicators
+        # Try live state first
+        live = None
+        source = "seed"
+        if round_num is not None and scenario_code:
+            live = _load_live_country_state(scenario_code, round_num, country_code)
+            if live:
+                source = "live"
+
+        # countries table for sim_name / parallel (static metadata)
         c_result = (
             client.table("countries")
             .select("sim_name,parallel,regime_type,gdp,treasury,stability,war_tiredness,inflation,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,nuclear_level")
@@ -301,17 +452,27 @@ def get_strategic_context(
         )
         country_row = c_result.data[0] if c_result.data else {}
 
+        # Priority: live > country_row > stats_blob
+        def pick(key, default=0):
+            if live and live.get(key) is not None:
+                return live[key]
+            v = country_row.get(key)
+            if v is not None:
+                return v
+            return stats_blob.get(key, default)
+
         at_war_with = stats_blob.get("at_war_with", []) or []
         return {
             "country": country_code,
+            "source": source,
             "name": country_row.get("sim_name"),
             "parallel": country_row.get("parallel"),
-            "regime_type": country_row.get("regime_type") or stats_blob.get("regime_type"),
-            "gdp": float(country_row.get("gdp") or stats_blob.get("gdp") or 0),
-            "treasury": float(country_row.get("treasury") or stats_blob.get("treasury") or 0),
-            "inflation": float(country_row.get("inflation") or stats_blob.get("inflation") or 0),
-            "stability": float(country_row.get("stability") or stats_blob.get("stability") or 0),
-            "war_tiredness": float(country_row.get("war_tiredness") or 0),
+            "regime_type": pick("regime_type", None),
+            "gdp": float(pick("gdp") or 0),
+            "treasury": float(pick("treasury") or 0),
+            "inflation": float(pick("inflation") or 0),
+            "stability": float(pick("stability") or 0),
+            "war_tiredness": float(pick("war_tiredness") or 0),
             "at_war_with": at_war_with,
             "at_war": len(at_war_with) > 0,
             "military_totals": {
@@ -321,7 +482,7 @@ def get_strategic_context(
                 "strategic_missiles": country_row.get("mil_strategic_missiles") or stats_blob.get("mil_strategic_missiles"),
                 "air_defense": country_row.get("mil_air_defense") or stats_blob.get("mil_air_defense"),
             },
-            "nuclear_level": country_row.get("nuclear_level") if country_row.get("nuclear_level") is not None else stats_blob.get("nuclear_level"),
+            "nuclear_level": pick("nuclear_level", None),
         }
     except Exception as e:
         logger.exception("get_strategic_context failed")
@@ -374,16 +535,51 @@ def get_template_info(template_code: str = "ttt_v1_0") -> dict:
 
 def get_relationships(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     template_code: str = "ttt_v1_0",
 ) -> dict:
     """Return bilateral relationships for this country.
 
-    Simple output for Stage 2: who they're at war with, and the reverse
-    lookup (who is at war with them). Full bilateral tension matrix is
-    deferred — see relationships.csv.
+    Reads from the live ``relationships`` table (status column) first.
+    Falls back to ``sim_templates.default_country_stats`` if no
+    relationships rows exist.
     """
     try:
         client = get_client()
+
+        # Try live relationships table first
+        rels = (
+            client.table("relationships")
+            .select("from_country_id, to_country_id, status, relationship")
+            .or_(f"from_country_id.eq.{country_code},to_country_id.eq.{country_code}")
+            .execute()
+        )
+        if rels.data:
+            at_war_with: list[str] = []
+            at_war_from: list[str] = []
+            allies: list[str] = []
+            for r in rels.data:
+                status = r.get("status", "")
+                frm = r.get("from_country_id", "")
+                to = r.get("to_country_id", "")
+                other = to if frm == country_code else frm
+                if status == "military_conflict":
+                    if frm == country_code:
+                        at_war_with.append(other)
+                    else:
+                        at_war_from.append(other)
+                elif status in ("alliance", "allied"):
+                    allies.append(other)
+            return {
+                "country": country_code,
+                "source": "live",
+                "at_war_with": at_war_with,
+                "at_war_from": at_war_from,
+                "allies": allies,
+            }
+
+        # Fallback to seed data from sim_templates
         tpl_result = (
             client.table("sim_templates")
             .select("default_country_stats")
@@ -399,19 +595,19 @@ def get_relationships(
             return {"error": f"No stats for country {country_code} in template {template_code}"}
 
         at_war_with = list(self_stats.get("at_war_with") or [])
-        at_war_from: list[str] = []
+        at_war_from_list: list[str] = []
         for other_code, other_stats in all_stats.items():
             if other_code == country_code:
                 continue
             other_wars = (other_stats or {}).get("at_war_with") or []
             if country_code in other_wars:
-                at_war_from.append(other_code)
+                at_war_from_list.append(other_code)
 
         return {
             "country": country_code,
+            "source": "seed",
             "at_war_with": at_war_with,
-            "at_war_from": at_war_from,
-            "note": "Full bilateral tension matrix deferred — see relationships.csv",
+            "at_war_from": at_war_from_list,
         }
     except Exception as e:
         logger.exception("get_relationships failed")
@@ -532,9 +728,15 @@ def get_country_codes_list(template_code: str = "ttt_v1_0") -> dict:
 
 def get_economic_state(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     template_code: str = "ttt_v1_0",
 ) -> dict:
-    """Return economic state with annotations for risks and constraints."""
+    """Return economic state with annotations for risks and constraints.
+
+    Reads from ``country_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to seed tables.
+    """
     try:
         client = get_client()
         tpl_result = (
@@ -549,6 +751,14 @@ def get_economic_state(
         if not stats:
             return {"error": f"No stats for country {country_code}"}
 
+        # Try live state first
+        live = None
+        source = "seed"
+        if round_num is not None and scenario_code:
+            live = _load_live_country_state(scenario_code, round_num, country_code)
+            if live:
+                source = "live"
+
         c_result = (
             client.table("countries")
             .select(
@@ -561,7 +771,10 @@ def get_economic_state(
         )
         row = c_result.data[0] if c_result.data else {}
 
+        # Priority: live > country_row > stats_blob
         def pick(key, default=0):
+            if live and live.get(key) is not None:
+                return live[key]
             v = row.get(key)
             if v is None:
                 v = stats.get(key, default)
@@ -592,6 +805,7 @@ def get_economic_state(
 
         return {
             "country": country_code,
+            "source": source,
             "gdp": gdp,
             "treasury": treasury,
             "inflation": inflation,
@@ -621,9 +835,15 @@ def get_economic_state(
 
 def get_political_state(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     template_code: str = "ttt_v1_0",
 ) -> dict:
-    """Return political state with annotations for fragility and vulnerability."""
+    """Return political state with annotations for fragility and vulnerability.
+
+    Reads from ``country_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to seed tables.
+    """
     try:
         client = get_client()
         tpl_result = (
@@ -638,6 +858,14 @@ def get_political_state(
         if not stats:
             return {"error": f"No stats for country {country_code}"}
 
+        # Try live state first
+        live = None
+        source = "seed"
+        if round_num is not None and scenario_code:
+            live = _load_live_country_state(scenario_code, round_num, country_code)
+            if live:
+                source = "live"
+
         c_result = (
             client.table("countries")
             .select(
@@ -649,7 +877,10 @@ def get_political_state(
         )
         row = c_result.data[0] if c_result.data else {}
 
+        # Priority: live > country_row > stats_blob
         def pick(key, default=None):
+            if live and live.get(key) is not None:
+                return live[key]
             v = row.get(key)
             if v is None:
                 v = stats.get(key, default)
@@ -675,6 +906,7 @@ def get_political_state(
 
         return {
             "country": country_code,
+            "source": source,
             "stability": stability,
             "political_support": support,
             "war_tiredness": war_tiredness,
@@ -699,9 +931,15 @@ def get_political_state(
 
 def get_tech_state(
     country_code: str,
+    scenario_code: str = "start_one",
+    round_num: Optional[int] = None,
     template_code: str = "ttt_v1_0",
 ) -> dict:
-    """Return tech state (nuclear, AI, missiles) with tier annotations."""
+    """Return tech state (nuclear, AI, missiles) with tier annotations.
+
+    Reads from ``country_states_per_round`` (live) when scenario_code and
+    round_num are provided. Falls back to seed tables.
+    """
     try:
         client = get_client()
         tpl_result = (
@@ -716,6 +954,14 @@ def get_tech_state(
         if not stats:
             return {"error": f"No stats for country {country_code}"}
 
+        # Try live state first
+        live = None
+        source = "seed"
+        if round_num is not None and scenario_code:
+            live = _load_live_country_state(scenario_code, round_num, country_code)
+            if live:
+                source = "live"
+
         c_result = (
             client.table("countries")
             .select(
@@ -727,7 +973,10 @@ def get_tech_state(
         )
         row = c_result.data[0] if c_result.data else {}
 
+        # Priority: live > country_row > stats_blob
         def pick(key, default=0):
+            if live and live.get(key) is not None:
+                return live[key]
             v = row.get(key)
             if v is None:
                 v = stats.get(key, default)
@@ -748,6 +997,7 @@ def get_tech_state(
 
         return {
             "country": country_code,
+            "source": source,
             "nuclear_level": nuc_level,
             "nuclear_rd_progress": float(pick("nuclear_rd_progress") or 0),
             "ai_level": ai_level,

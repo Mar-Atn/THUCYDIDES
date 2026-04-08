@@ -210,12 +210,19 @@ def build_theater_map(country_id: str) -> str:
 
 
 def build_starting_situation(countries: dict | None = None,
-                              world_state: dict | None = None) -> str:
-    """Current starting situation (Round 1): wars, sanctions, blockades, tensions.
+                              world_state: dict | None = None,
+                              country_code: str = "") -> str:
+    """Current starting situation — PUBLIC information only.
+
+    INFORMATION SCOPING (2026-04-08): All data here is PUBLIC per
+    INFORMATION_SCOPING.md. GDP, stability, sanctions, tariffs,
+    relationships are all public. Wars visible from map.
+    No private data leaked.
 
     Args:
         countries: Optional dict of country_id → country dict (live state).
         world_state: Optional world state with oil_price, wars, etc.
+        country_code: The agent's country (for context framing, not filtering).
     """
     countries = countries or {}
     world_state = world_state or {}

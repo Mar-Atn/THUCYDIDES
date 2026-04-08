@@ -178,6 +178,7 @@ CREATE TABLE roles (
     powers                  TEXT[] NOT NULL DEFAULT '{}',
     objectives              TEXT[] NOT NULL DEFAULT '{}',
     ticking_clock           TEXT NOT NULL DEFAULT '',
+    public_bio              TEXT NOT NULL DEFAULT '',   -- 2026-04-08: public-facing biography (2-3 sentences, no secrets)
     -- Status (changes during play)
     status                  TEXT NOT NULL DEFAULT 'active'
                             CHECK (status IN ('active', 'fired', 'arrested', 'incapacitated', 'dead', 'exiled')),
@@ -291,6 +292,19 @@ CREATE INDEX idx_org_mem_org ON org_memberships(sim_run_id, org_id);
 
 -- ---------------------------------------------------------------------------
 -- 1.11 RELATIONSHIPS — Bilateral country relationships (from relationships.csv)
+--
+-- Dual-column semantics (2026-04-08):
+--   relationship = STARTING/REFERENCE value (frozen per template, legacy labels)
+--   status       = LIVE engine state (8-state model, updated during play)
+--
+-- Canonical 8-state model for `status`:
+--   allied → friendly → neutral → tense → hostile → military_conflict → armistice → peace
+--   military_conflict is STICKY — only exits via armistice or peace treaty.
+--   Armistice breach → auto-return to military_conflict + all countries notified.
+--
+-- Mapping relationship → initial status:
+--   alliance/close_ally → allied, friendly → friendly, neutral → neutral,
+--   tense → tense, hostile/strategic_rival → hostile, at_war → military_conflict
 -- ---------------------------------------------------------------------------
 CREATE TABLE relationships (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -300,6 +314,14 @@ CREATE TABLE relationships (
     relationship    TEXT NOT NULL DEFAULT 'neutral'
                     CHECK (relationship IN ('alliance', 'close_ally', 'friendly',
                            'neutral', 'tense', 'hostile', 'at_war', 'strategic_rival')),
+    -- status: canonical 8-state model (2026-04-08)
+    -- Engine reads THIS column for war/peace checks, not `relationship`.
+    status          TEXT NOT NULL DEFAULT 'neutral'
+                    CHECK (status IN ('allied', 'friendly', 'neutral', 'tense',
+                           'hostile', 'military_conflict', 'armistice', 'peace')),
+    -- basing_rights: from_country (a) HOSTS bases of to_country (b) (2026-04-08)
+    basing_rights_a_to_b BOOLEAN NOT NULL DEFAULT FALSE,
+    basing_rights_b_to_a BOOLEAN NOT NULL DEFAULT FALSE,
     dynamic         TEXT NOT NULL DEFAULT '',
 
     UNIQUE(sim_run_id, from_country_id, to_country_id)
@@ -342,6 +364,29 @@ CREATE TABLE tariffs (
 );
 
 CREATE INDEX idx_tariffs_sim ON tariffs(sim_run_id);
+
+-- ---------------------------------------------------------------------------
+-- 1.14 BLOCKADES — Zone blockade state (mutable, written by resolve_round)
+-- ---------------------------------------------------------------------------
+CREATE TABLE blockades (
+    id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    sim_run_id          UUID NOT NULL REFERENCES sim_runs(id) ON DELETE CASCADE,
+    zone_id             TEXT NOT NULL,
+    imposer_country_id  TEXT NOT NULL,
+    status              TEXT NOT NULL DEFAULT 'active'
+                        CHECK (status IN ('active', 'lifted')),
+    level               TEXT DEFAULT 'full'
+                        CHECK (level IN ('partial', 'full')),
+    established_round   INT NOT NULL,
+    lifted_round        INT,
+    notes               TEXT,
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE(sim_run_id, zone_id, imposer_country_id)
+);
+
+CREATE INDEX idx_blockades_sim ON blockades(sim_run_id);
+CREATE INDEX idx_blockades_status ON blockades(sim_run_id, status);
 
 -- =============================================================================
 -- SECTION 2: STATE TABLES (per-round snapshots)

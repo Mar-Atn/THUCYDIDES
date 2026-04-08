@@ -99,6 +99,7 @@ This matrix is **immutable per template version.** Changing it = new template ve
 │  ├── sim_templates           (template with map + rules)         │
 │  ├── layout_units            (unit placement layouts)            │
 │  ├── sim_config              (methodology + prompt templates)    │
+│  ├── blockades                 (zone blockade state)              │
 │  └── global_state_per_round  (market data)                       │
 └────────────────────────────────────────────────────────────────┘
      ▲
@@ -133,7 +134,7 @@ This matrix is **immutable per template version.** Changing it = new template ve
 | **Input** | `scenario_code`, `round_num` |
 | **Output** | `dict` with decisions_processed, combats, events, narratives |
 | **Reads from** | `agent_decisions`, `unit_states_per_round` (prev round), `country_states_per_round` (prev round) |
-| **Writes to** | `unit_states_per_round` (new), `country_states_per_round` (new), `observatory_combat_results`, `observatory_events`, `round_states` |
+| **Writes to** | `unit_states_per_round` (new), `country_states_per_round` (new), `observatory_combat_results`, `observatory_events`, `round_states`, `sanctions` (state table), `tariffs` (state table), `blockades` (state table) |
 | **Calls** | `round_engine/combat.*`, `round_engine/movement.*`, `round_engine/rd.*` |
 
 ### Engine Tick (`engines/round_tick.py`)
@@ -141,9 +142,10 @@ This matrix is **immutable per template version.** Changing it = new template ve
 |---|---|
 | **Input** | `scenario_code`, `round_num` |
 | **Output** | `dict` with success, countries_updated, oil_price |
-| **Reads from** | `countries` (base structural), `country_states_per_round` (current), `agent_decisions` (sanctions/tariffs/budgets), `observatory_combat_results` (losses), `relationships` (war state) |
-| **Writes to** | `country_states_per_round` (updated GDP/stability/treasury), `global_state_per_round` (oil/stock/bond/gold) |
+| **Reads from** | `countries` (base structural), `country_states_per_round` (current), `sanctions` (state table), `tariffs` (state table), `blockades` (state table), `relationships` (war state), `observatory_combat_results` (losses) |
+| **Writes to** | `country_states_per_round` (updated GDP/stability/treasury), `global_state_per_round` (oil/stock) |
 | **Calls** | `engines/economic.process_economy()`, `engines/political.calc_stability()`, `engines/political.calc_political_support()`, `engines/political.update_war_tiredness()` |
+| **NEVER reads** | `agent_decisions` — engine is agnostic to decision source (human or AI) |
 
 ### Economic Engine (`engines/economic.py`)
 | | |
@@ -174,6 +176,35 @@ This matrix is **immutable per template version.** Changing it = new template ve
 | **Output** | `ToolLLMResponse` with content blocks, stop_reason, usage |
 | **Adapters** | Anthropic SDK (native) ↔ Gemini SDK (translated) |
 | **Failover** | On error, tries opposite provider if configured + healthy |
+
+---
+
+## ENGINE STATE ISOLATION (2026-04-08)
+
+**Architectural invariant:** The engine (round_tick.py + economic/political/military engines) NEVER reads from `agent_decisions`. It reads from **DB state tables** only.
+
+```
+CORRECT flow:
+  Participant (human or AI) -> agent_decisions table
+  resolve_round -> reads agent_decisions -> WRITES to state tables (sanctions, tariffs, relationships, etc.)
+  round_tick -> reads state tables -> runs engines -> writes updated state
+
+WRONG (eliminated 2026-04-08):
+  round_tick -> reads agent_decisions directly
+```
+
+**State tables the engine reads:**
+| Table | What | Written by |
+|---|---|---|
+| `sanctions` | Bilateral sanction levels (imposer, target, level) | resolve_round (upsert on set_sanction/impose_sanction/lift_sanction) |
+| `tariffs` | Bilateral tariff levels (imposer, target, level) | resolve_round (upsert on set_tariff/impose_tariff/lift_tariff) |
+| `blockades` | Zone blockade state (zone, imposer, level, status) | resolve_round (upsert on declare_blockade/lift) |
+| `relationships` | Bilateral diplomatic status (war/peace/allied) | resolve_round (on declare_war/ceasefire/etc.) |
+| `country_states_per_round` | Per-country economic/political snapshot | round_tick (writes back after engine runs) |
+| `global_state_per_round` | Oil price, stock index | round_tick (writes back after engine runs) |
+| `observatory_combat_results` | Combat losses per round | resolve_round (combat resolution) |
+
+**Why:** The engine must be agnostic to whether a human or AI made the decision. Starting data (36 sanctions, 29 tariffs loaded at SIM start) flows through the same path as mid-game changes. This enables the "unmanned spacecraft" to run identically whether participants are AI agents or humans.
 
 ---
 
@@ -249,10 +280,12 @@ Sequential, deterministic. No player input.
 
 **Unmanned mode difference:** Phase A compressed (agents run in parallel, ~30-60s per agent instead of 45-80 min). Phase B identical.
 
-### Round flow sequence (target architecture)
+### Round flow sequence (target architecture) — Updated 2026-04-08
 
 ```
-DURING ROUND (real-time, agent active loop):
+ROUND N FLOW:
+
+PHASE A — Free Actions (agents submit actions, conversations, transactions):
   ├── Bilateral conversations (initiate/accept/decline, 8-turn)
   ├── Public statements
   ├── Exchange transactions (propose/accept/counter)
@@ -260,14 +293,18 @@ DURING ROUND (real-time, agent active loop):
   ├── Covert operations (intelligence, sabotage, propaganda, election meddling)
   ├── Domestic political actions (arrest, fire, coup — AUTOMATIC execution in unmanned mode)
   ├── Military actions (attack, air strike, missile launch, blockade, bombardment)
-  └── All resolved immediately by engine, results visible in Observatory
+  ├── All resolved immediately by engine, results visible in Observatory
+  │
+  └── Mandatory decision prompt: ~2 min before deadline
+      → Agents MUST submit: budget, sanctions, tariffs, OPEC before round closes
+      → Default: previous round values if not submitted
+      → In unmanned mode: agent explicitly prompted to submit before committing other actions
 
-BETWEEN ROUNDS (batch processing):
+PHASE B — Batch Processing (between rounds):
   1. Budget submissions processed (mandatory, status quo if not submitted)
   2. Tariff/sanction/OPEC changes applied
-  3. Movement/deployment phase (move_unit, deploy from reserve, withdraw)
-  4. Martial law (if declared)
-  5. Engine tick:
+  3. Martial law (if declared)
+  4. Engine tick:
      ├── Economic engine (oil → GDP → revenue → budget → production → inflation → debt → state)
      ├── Political engine (stability → support → war tiredness → threshold flags)
      ├── Technology engine (R&D advancement)
@@ -275,8 +312,16 @@ BETWEEN ROUNDS (batch processing):
      ├── Revolution check (if stability ≤ 2)
      ├── Health events (elderly leaders)
      └── Capitulation check
-  6. Snapshot: unit_states, country_states, global_state persisted
-  7. Observatory updated
+  5. Snapshot: unit_states, country_states, global_state persisted
+  6. Observatory updated
+
+INTER-ROUND PHASE — Relocation (added 2026-04-08):
+  → Responsible actors: military chiefs (multi-role) or HoS (20-role mode)
+  → Deploy/redeploy troops (move_unit, deploy from reserve, withdraw)
+  → Strategic repositioning — separate from in-round tactical actions
+  → Processed BEFORE next round's engine tick begins
+
+ROUND N+1 begins...
 ```
 
 ### Current implementation (simplified)
@@ -359,19 +404,29 @@ UNIQUE(scenario_id, round_num)
 -- NOTE: bond_yield and gold_price removed (Marat 2026-04-08 — not part of SIM)
 ```
 
-### relationships (bilateral state)
+### relationships (bilateral state — updated 2026-04-08)
 ```sql
-id uuid PK, scenario_id FK,
-country_a text, country_b text, status text,  -- peace | war | armistice
-basing_rights_a_to_b bool,  -- A grants basing to B
-basing_rights_b_to_a bool,  -- B grants basing to A
-tariff_a_to_b int,   -- 0-3
-tariff_b_to_a int,   -- 0-3
-sanction_a_to_b int, -- 0-3
-sanction_b_to_a int, -- 0-3
-updated_at timestamptz
-UNIQUE(scenario_id, country_a, country_b)
+id uuid PK, sim_run_id FK,
+from_country_id text, to_country_id text,
+relationship text,  -- alliance | close_ally | friendly | neutral | tense | hostile | at_war | strategic_rival
+status text,        -- allied | friendly | neutral | tense | hostile | military_conflict | armistice | peace
+basing_rights_a_to_b bool,  -- from_country (a) HOSTS bases of to_country (b)
+basing_rights_b_to_a bool,  -- to_country (b) HOSTS bases of from_country (a)
+dynamic text,       -- narrative description
+UNIQUE(sim_run_id, from_country_id, to_country_id)
 ```
+
+**Dual-column semantics (2026-04-08):**
+- `relationship` = STARTING/REFERENCE value (frozen per template, legacy labels from CSV)
+- `status` = LIVE engine state (canonical 8-state model, updated during play)
+- Engine reads `status` for all war/peace checks, never `relationship`
+
+**8-state model for `status`:**
+`allied` → `friendly` → `neutral` → `tense` → `hostile` → `military_conflict` → `armistice` → `peace`
+- `military_conflict` is STICKY — only exits via signed armistice or peace treaty
+- Armistice breach (attack after signing) → auto-return to `military_conflict` + all countries notified
+
+**Starting basing rights (12 records):** Columbia hosted in 9 allied countries (Yamato, Hanguk, Teutonia, Albion, Phrygia, Formosa, Mirage, Ponte, Freeland). Sarmatia-Choson mutual. Gallia in Mirage.
 
 ### agreements
 ```sql

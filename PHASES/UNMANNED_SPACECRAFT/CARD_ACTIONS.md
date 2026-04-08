@@ -402,6 +402,8 @@ All values Template-customizable.
 
 ## 2. ECONOMIC ACTIONS
 
+> **Mandatory Decisions (added 2026-04-08):** Budget, tariffs, sanctions, and OPEC production are MANDATORY per-round decisions, not optional. Each participant must submit these before the round ends. The system prompts participants ~2 minutes before deadline. If not submitted by deadline, previous round's values carry forward as defaults. In unmanned mode, AI agents are explicitly prompted to submit these before committing other actions.
+
 ### 2.1 Set Budget
 | Field | Value |
 |---|---|

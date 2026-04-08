@@ -346,7 +346,7 @@ html, body { height: 100%; overflow: hidden; }
 }
 .obs-global-chart {
   width: 100%;
-  height: 120px;
+  height: 200px;
   display: block;
 }
 .obs-global-chart .grid-line { stroke: var(--border); stroke-width: 0.5; }
@@ -399,6 +399,36 @@ html, body { height: 100%; overflow: hidden; }
 }
 .obs-dash-sort-btn:hover { color: var(--action); border-color: var(--action); }
 .obs-dash-sort-btn.active { color: var(--accent); border-color: var(--accent); background: var(--card); }
+
+/* Focus mode buttons */
+.obs-focus-bar {
+  gap: 6px;
+}
+.obs-focus-btn {
+  background: var(--base);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 5px 14px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all .15s ease;
+}
+.obs-focus-btn:hover {
+  color: var(--action);
+  border-color: var(--action);
+  background: var(--card-2);
+}
+.obs-focus-btn.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--card);
+  box-shadow: 0 0 6px rgba(91, 155, 213, 0.15);
+}
 
 .obs-dash-body {
   padding: 8px;
@@ -880,6 +910,6 @@ html, body { height: 100%; overflow: hidden; }
 /* -------------------- DASHBOARD & ACTIVITY SCREENS (use full panel) -------------------- */
 .obs-screen-dashboard .obs-panel, .obs-screen-activity .obs-panel { flex: 1; min-height: 0; }
 .obs-screen-dashboard .obs-dash-body {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 

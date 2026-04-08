@@ -177,6 +177,9 @@ See the reference documents (10 files in this directory):
 
 ### Sprint B: Active Loop + Conversations (~3-4 days)
 - ✅ B1: Multi-action per round (up to 3 commits per agent, prompt guides quality)
+- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **NOT STARTED** *(added 2026-04-08)*
+- B7: Inter-round relocation phase (deploy/redeploy between rounds, separate from in-round): **NOT STARTED** *(added 2026-04-08)*
+- B8: Scripted battery testing (pre-scripted decisions, no LLM, full engine chain validation in `app/tests/layer2/`): **IN PROGRESS** *(added 2026-04-08)*
 - B2: Bilateral conversations — THE core feature:
   - Orchestrator pairs two agents for 8-turn exchange
   - Both generate intent notes before, reflect after

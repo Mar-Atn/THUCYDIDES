@@ -1136,32 +1136,32 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             return {"rounds": [], "source": "error", "error": str(e), "scenario": scenario}
 
     def _observatory_blockades(self, round_num: str, scenario: str):
-        """Return declared blockades for a round.
+        """Return active blockades from the `blockades` state table.
 
-        Currently reads `declare_blockade` agent_decisions. Until the
-        action is wired into the agent catalog, this will return an
-        empty list → observatory draws no blockade contours.
+        Reads from the canonical `blockades` table (not agent_decisions).
+        Architecture fix: V-7 (2026-04-08).
         """
         sb = _supabase_or_none()
         if sb is None:
             return {"blockades": [], "source": "none", "scenario": scenario}
         try:
-            scen = sb.table("sim_scenarios").select("id").eq("code", scenario).limit(1).execute()
-            if not scen.data:
-                return {"blockades": [], "source": "no_scenario", "scenario": scenario}
-            scenario_id = scen.data[0]["id"]
-            q = sb.table("agent_decisions").select("*") \
-                .eq("scenario_id", scenario_id) \
-                .eq("action_type", "declare_blockade")
-            try:
-                rnd_int = int(round_num) if round_num not in ("", None) else None
-                if rnd_int is not None:
-                    q = q.eq("round_num", rnd_int)
-            except ValueError:
-                pass
-            res = q.execute()
+            from engine.config.settings import Settings
+            sim_run_id = Settings().default_sim_id
+            res = sb.table("blockades").select("*") \
+                .eq("sim_run_id", sim_run_id) \
+                .eq("status", "active").execute()
+            blockades = []
+            for row in (res.data or []):
+                blockades.append({
+                    "zone_id": row.get("zone_id", ""),
+                    "imposer_country_id": row.get("imposer_country_id", ""),
+                    "level": row.get("level", "full"),
+                    "status": row.get("status", "active"),
+                    "established_round": row.get("established_round"),
+                    "notes": row.get("notes", ""),
+                })
             return {
-                "blockades": res.data or [],
+                "blockades": blockades,
                 "source": "db",
                 "scenario": scenario,
                 "round": round_num,

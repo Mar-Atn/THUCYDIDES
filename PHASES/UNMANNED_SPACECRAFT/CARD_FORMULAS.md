@@ -406,18 +406,35 @@ Crisis triggers (≥2 = crisis): oil>200 & importer, inflation>baseline+30,
 Down: fast (immediate on trigger count). Up: slow (2-3 consecutive rounds clear).
 ```
 
-**Diplomatic state** (per bilateral relationship):
+**Diplomatic state** — canonical 8-state bilateral relationship model (updated 2026-04-08):
+
+| State | Meaning | Transitions |
+|---|---|---|
+| **allied** | Formal alliance, mutual defense | → friendly (dissolved) |
+| **friendly** | Positive, cooperation | → allied (treaty), → neutral (drift) |
+| **neutral** | No alignment | → friendly (cooperation), → tense (friction) |
+| **tense** | Friction, diplomatic pressure | → hostile (escalation), → neutral (de-escalation) |
+| **hostile** | Antagonism, sanctions | → military_conflict (attack), → tense (de-escalation) |
+| **military_conflict** | Active combat — STICKY | → armistice (ceasefire), → peace (treaty) ONLY |
+| **armistice** | Ceasefire signed | → peace (treaty), → military_conflict (breach) |
+| **peace** | War formally ended | → friendly (over time), → neutral |
+
 ```
-           one side attacks the other          armistice signed         peace treaty
-PEACE ─────────────────────────────→ AT WAR ────────────────→ ARMISTICE ──────────→ PEACE
-  ↑                                    │                         │
-  │                                    │     breach (attack)     │
-  │                                    ←────────────────────────←┘ (auto + all notified)
-  │                                    │
-  │          capitulation              │
-  └────────────────────────────────────┘
+           one side attacks the other             ceasefire signed           peace treaty
+... ──→ hostile ────────────────────→ military_conflict ─────────→ armistice ──────────→ peace
+                                           ↑                         │
+                                           │     breach (attack)     │
+                                           ←────────────────────────←┘ (auto + all notified)
+                                           │
+                                           │    capitulation
+                                           └──────────────────→ peace
 ```
-No formal war declaration required. War state is DETECTED from combat history — if country A attacks country B, they are at war. Public statements ("we declare war") are optional political theater, not a game mechanic.
+
+**Key rules:**
+- `military_conflict` is STICKY — only exits via signed agreement (armistice or peace treaty). No automatic cooling.
+- Armistice breach → auto-return to `military_conflict` + global notification.
+- War is DETECTED from combat, not declared. Public war declarations are optional political theater, not a game mechanic.
+- DB dual-column: `relationship` = starting/reference value (template); `status` = live engine state (8-state model above). Engine reads `status`.
 
 **Political stability thresholds** (triggers domestic events):
 ```
@@ -598,6 +615,7 @@ On hit:
   50% of ALL military on target hex destroyed (including own if present)
   30% × (1 / target_country_hex_count) of target GDP destroyed
   If hex has nuclear site → site automatically destroyed (100%)
+  Canonical nuclear site hexes: Persia (7,13), Choson (3,18). Source: sim_templates.map_config.nuclear_sites + map_config.py::NUCLEAR_SITES.
 
 T3 salvo aggregate (if ≥1 nuclear hit in salvo of 3+ missiles):
   Global stability: -1.5

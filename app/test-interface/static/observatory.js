@@ -36,7 +36,7 @@
     events: [],         // most recent first
     combats: [],        // current round combats
     blockades: [],      // declared blockades for current round
-    globalSeries: [],   // [{round_num, oil_price, stock_index, bond_yield, gold_price}, ...]
+    globalSeries: [],   // [{round_num, oil_price, stock_index}, ...]
     viewRound: null,    // round selected in scrubber (null = current)
     chartMetric: 'oil_price',  // which metric to chart
     lastEventId: null,
@@ -53,8 +53,8 @@
     roundStartedAt: null,
     currentScreen: 'maps',
 
-    // Dashboard sort / prev-round cache for deltas
-    dashSort: 'code',       // 'code'|'gdp'|'stability'|'units'|'nuclear'
+    // Dashboard focus mode + prev-round cache for deltas
+    focusMode: 'economy',   // 'economy'|'military'|'political'|'technology'
     prevCountryStates: {},  // country_code -> last seen snapshot
     decisionsByCountry: {}, // country_code -> last action committed this round
 
@@ -181,7 +181,13 @@
   }
 
   function applyGlobalSeries(gs) {
-    state.globalSeries = gs.rounds || [];
+    var allRounds = gs.rounds || [];
+    // Fix: only show rounds up to state.round (the current run progress).
+    // Old runs may leave stale data at higher round numbers in the DB.
+    var maxRound = state.round || 0;
+    state.globalSeries = allRounds.filter(function (r) {
+      return r.round_num <= maxRound;
+    });
     renderGlobalStrip();
     renderGlobalChart();
   }
@@ -346,19 +352,19 @@
   // Country Dashboard
   // ================================================================
   function renderCountryGrid() {
-    wireDashSort();
+    wireFocusMode();
     updateCountryTiles();
   }
 
-  function wireDashSort() {
-    var btns = document.querySelectorAll('.obs-dash-sort-btn');
+  function wireFocusMode() {
+    var btns = document.querySelectorAll('.obs-focus-btn');
     if (!btns.length || btns[0]._wired) return;
     btns.forEach(function (b) {
       b._wired = true;
       b.addEventListener('click', function () {
         btns.forEach(function (x) { x.classList.remove('active'); });
         b.classList.add('active');
-        state.dashSort = b.getAttribute('data-sort');
+        state.focusMode = b.getAttribute('data-focus');
         updateCountryTiles();
       });
     });
@@ -373,48 +379,91 @@
       var code = cs.country_code || cs.country_id || cs.id;
       if (code) byCode[code] = cs;
     });
+    // Compute unit counts by country and by branch
     var activeByCountry = {}, reserveByCountry = {};
+    var groundByCountry = {}, navalByCountry = {}, airByCountry = {};
     state.units.forEach(function (u) {
       var c = u.country_code || u.country_id;
       if (!c) return;
       var s = u.status || 'active';
-      if (s === 'active' || s === 'embarked') activeByCountry[c] = (activeByCountry[c] || 0) + 1;
-      else if (s === 'reserve') reserveByCountry[c] = (reserveByCountry[c] || 0) + 1;
+      if (s === 'active' || s === 'embarked') {
+        activeByCountry[c] = (activeByCountry[c] || 0) + 1;
+        var br = (u.branch || u.unit_type || '').toLowerCase();
+        if (br.indexOf('ground') >= 0 || br.indexOf('army') >= 0 || br.indexOf('infantry') >= 0 || br.indexOf('armor') >= 0) {
+          groundByCountry[c] = (groundByCountry[c] || 0) + 1;
+        } else if (br.indexOf('naval') >= 0 || br.indexOf('navy') >= 0 || br.indexOf('fleet') >= 0 || br.indexOf('carrier') >= 0 || br.indexOf('submarine') >= 0) {
+          navalByCountry[c] = (navalByCountry[c] || 0) + 1;
+        } else if (br.indexOf('air') >= 0 || br.indexOf('fighter') >= 0 || br.indexOf('bomber') >= 0 || br.indexOf('tactical') >= 0) {
+          airByCountry[c] = (airByCountry[c] || 0) + 1;
+        } else {
+          groundByCountry[c] = (groundByCountry[c] || 0) + 1; // default to ground
+        }
+      } else if (s === 'reserve') {
+        reserveByCountry[c] = (reserveByCountry[c] || 0) + 1;
+      }
     });
 
-    // Build enriched rows for sorting
+    var focus = FOCUS_CONFIGS[state.focusMode] || FOCUS_CONFIGS.economy;
+
+    // Build enriched rows
     var rows = codes.map(function (code) {
       var cs = byCode[code] || {};
       var country = state.countries[code] || { name: code };
-      return {
+      var active = activeByCountry[code] || 0;
+      var reserve = reserveByCountry[code] || 0;
+      var row = {
         code: code,
         name: country.name || code,
         colors: country.colors || state.palette[code] || {},
         atWar: (country.at_war_with || []).length > 0,
+        // Economy
         gdp: numOr(cs.gdp, 0),
         treasury: numOr(cs.treasury, 0),
-        inflation: numOr(cs.inflation, 0),
+        inflation: cs.inflation,
+        revenue: cs.revenue,
+        debt_ratio: cs.debt_ratio,
+        sanctions_received: cs.sanctions_received,
+        tariff_level: cs.tariff_level,
+        // Military (computed from units)
+        _totalForces: active + reserve,
+        mil_ground: groundByCountry[code] || 0,
+        mil_naval: navalByCountry[code] || 0,
+        mil_air: airByCountry[code] || 0,
+        mil_reserve: reserve,
+        nuclear_level: intOr(cs.nuclear_level, 0),
+        _atWar: (country.at_war_with || []).length > 0,
+        // Political
         stability: intOr(cs.stability, 5),
-        polSupport: intOr(cs.political_support, 5),
-        warTired: intOr(cs.war_tiredness, 0),
-        nuclear: intOr(cs.nuclear_level, 0),
-        aiLevel: intOr(cs.ai_level, 0),
-        active: activeByCountry[code] || 0,
-        reserve: reserveByCountry[code] || 0,
+        political_support: intOr(cs.political_support, 5),
+        war_tiredness: intOr(cs.war_tiredness, 0),
+        regime: cs.regime || cs.regime_type || null,
+        election_status: cs.election_status || null,
+        faction_balance: cs.faction_balance || null,
+        // Technology
+        ai_level: intOr(cs.ai_level, 0),
+        ai_rd_progress: cs.ai_rd_progress,
+        nuclear_rd_progress: cs.nuclear_rd_progress,
+        rd_investment: cs.rd_investment,
+        tech_sector_share: cs.tech_sector_share,
+        // Active/reserve for summary
+        active: active,
+        reserve: reserve,
         prev: state.prevCountryStates[code] || null,
+        prevCs: state.prevCountryStates[code] || null,
         action: state.decisionsByCountry[code] || null,
       };
+      return row;
     });
 
-    // Sort
-    var sortKey = state.dashSort || 'code';
+    // Sort by focus config
+    var sortKey = focus.sortKey || 'gdp';
+    var sortDesc = focus.sortDesc !== false;
     rows.sort(function (a, b) {
-      if (sortKey === 'code') return a.code.localeCompare(b.code);
-      if (sortKey === 'gdp') return b.gdp - a.gdp;
-      if (sortKey === 'stability') return b.stability - a.stability;
-      if (sortKey === 'units') return (b.active + b.reserve) - (a.active + a.reserve);
-      if (sortKey === 'nuclear') return b.nuclear - a.nuclear || b.aiLevel - a.aiLevel;
-      return 0;
+      var va = a[sortKey], vb = b[sortKey];
+      if (va == null) va = -Infinity;
+      if (vb == null) vb = -Infinity;
+      if (typeof va === 'string') return sortDesc ? vb.localeCompare(va) : va.localeCompare(vb);
+      return sortDesc ? vb - va : va - vb;
     });
 
     grid.innerHTML = '';
@@ -429,10 +478,42 @@
       tile.setAttribute('data-status', status);
       tile.addEventListener('click', function () { showCountryDetail(r.code); });
 
-      var stabCls = r.stability <= 2 ? 'crit' : (r.stability <= 4 ? 'lo' : '');
-      var gdpDelta = r.prev ? delta(r.gdp, r.prev.gdp) : '';
-      var stabDelta = r.prev ? deltaInt(r.stability, r.prev.stability) : '';
-      var treasDelta = r.prev ? delta(r.treasury, r.prev.treasury) : '';
+      // Build metrics HTML from focus config
+      var metricsHtml = '';
+      focus.metrics.forEach(function (m) {
+        var v = r[m.key];
+        var displayVal;
+        if (v == null) {
+          displayVal = '\u2014';
+        } else {
+          try { displayVal = m.fmt(v); } catch(e) { displayVal = String(v); }
+        }
+        // Color-code stability
+        var valCls = '';
+        if (m.colorCode && v != null) {
+          valCls = v <= 2 ? ' crit' : (v <= 4 ? ' lo' : (v >= 8 ? ' hi' : ''));
+        }
+        // At-war coloring for military
+        if (m.key === '_atWar' && v) {
+          valCls = ' crit';
+        }
+        // Delta
+        var dHtml = '';
+        if (m.delta && r.prevCs) {
+          var prevVal = r.prevCs[m.key];
+          if (prevVal != null && v != null) {
+            if (typeof v === 'number' && typeof prevVal === 'number') {
+              if (Number.isInteger(v) && Number.isInteger(prevVal)) {
+                dHtml = deltaInt(v, prevVal);
+              } else {
+                dHtml = delta(v, prevVal);
+              }
+            }
+          }
+        }
+        metricsHtml += '<div class="obs-tile-metric"><span class="k">' + m.label + '</span> <span class="v' + valCls + '">' + displayVal + '</span>' + dHtml + '</div>';
+      });
+
       var actionHtml;
       if (r.action) {
         var aType = (r.action.action_type || 'action').replace(/_/g, ' ');
@@ -440,7 +521,7 @@
                      actionEmoji(r.action.action_type) + '</span> ' +
                      '<span class="action-name">' + escapeHtml(aType) + '</span></div>';
       } else {
-        actionHtml = '<div class="obs-tile-action no-action">— no action committed —</div>';
+        actionHtml = '<div class="obs-tile-action no-action">\u2014 no action committed \u2014</div>';
       }
 
       tile.innerHTML =
@@ -448,16 +529,7 @@
           '<span class="obs-tile-flag" style="background:' + (r.colors.ui || '#555') + '"></span>' +
           '<span class="obs-tile-name">' + escapeHtml(r.name) + '</span>' +
         '</div>' +
-        '<div class="obs-tile-metrics">' +
-          '<div class="obs-tile-metric"><span class="k">GDP</span> <span class="v">$' + fmtNum(r.gdp) + '</span>' + gdpDelta + '</div>' +
-          '<div class="obs-tile-metric"><span class="k">Treas</span> <span class="v">$' + fmtNum(r.treasury) + '</span>' + treasDelta + '</div>' +
-          '<div class="obs-tile-metric"><span class="k">Stab</span> <span class="v ' + stabCls + '">' + r.stability + '</span>' + stabDelta + '</div>' +
-          '<div class="obs-tile-metric"><span class="k">Infl</span> <span class="v">' + fmtPct(r.inflation) + '</span></div>' +
-          '<div class="obs-tile-metric"><span class="k">Forces</span> <span class="v">' + r.active + (r.reserve ? '+' + r.reserve : '') + '</span></div>' +
-          '<div class="obs-tile-metric"><span class="k">PolSup</span> <span class="v">' + r.polSupport + '</span></div>' +
-          '<div class="obs-tile-metric"><span class="k">Nuc</span> <span class="v">' + r.nuclear + '</span></div>' +
-          '<div class="obs-tile-metric"><span class="k">AI</span> <span class="v">' + r.aiLevel + '</span></div>' +
-        '</div>' +
+        '<div class="obs-tile-metrics">' + metricsHtml + '</div>' +
         actionHtml;
       grid.appendChild(tile);
     });
@@ -466,11 +538,71 @@
   }
 
   var GLOBAL_METRICS = [
-    { key: 'oil_price',   label: 'Oil $/bbl',  fmt: function(v){return '$'+v.toFixed(2);} },
-    { key: 'stock_index', label: 'Stock Idx',  fmt: function(v){return v.toFixed(1);} },
-    { key: 'bond_yield',  label: 'Bond Yield', fmt: function(v){return v.toFixed(2)+'%';} },
-    { key: 'gold_price',  label: 'Gold $/oz',  fmt: function(v){return '$'+v.toFixed(0);} },
+    { key: 'oil_price',          label: 'Oil $/bbl',     fmt: function(v){return '$'+v.toFixed(2);} },
+    { key: 'stock_index',        label: 'Global Idx',    fmt: function(v){return v.toFixed(1);} },
+    { key: 'stock_index_west',   label: 'Western Idx',   fmt: function(v){return v.toFixed(1);} },
+    { key: 'stock_index_east',   label: 'Eastern Idx',   fmt: function(v){return v.toFixed(1);} },
   ];
+
+  // ================================================================
+  // Focus Mode Configurations
+  // ================================================================
+  var FOCUS_CONFIGS = {
+    economy: {
+      label: 'Economy',
+      metrics: [
+        { key: 'gdp',               label: 'GDP',       fmt: function(v){return '$'+fmtNum(v);}, delta: true },
+        { key: 'treasury',          label: 'Treas',     fmt: function(v){return '$'+fmtNum(v);}, delta: true },
+        { key: 'inflation',         label: 'Infl',      fmt: function(v){return v!=null?(v*100).toFixed(1)+'%':'\u2014';} },
+        { key: 'revenue',           label: 'Revenue',   fmt: function(v){return '$'+fmtNum(v);} },
+        { key: 'debt_ratio',        label: 'Debt',      fmt: function(v){return v!=null?(v*100).toFixed(0)+'%':'\u2014';} },
+        { key: 'sanctions_received',label: 'Sanct',     fmt: function(v){return v||0;} },
+        { key: 'tariff_level',      label: 'Tariff',    fmt: function(v){return v!=null?v+'%':'\u2014';} },
+      ],
+      sortKey: 'gdp',
+      sortDesc: true,
+    },
+    military: {
+      label: 'Military',
+      metrics: [
+        { key: '_totalForces', label: 'Forces',   fmt: function(v){return v;}, computed: true },
+        { key: 'mil_ground',   label: 'Ground',   fmt: function(v){return v;} },
+        { key: 'mil_naval',    label: 'Naval',     fmt: function(v){return v;} },
+        { key: 'mil_air',      label: 'Air',       fmt: function(v){return v;} },
+        { key: 'nuclear_level',label: 'Nuclear',   fmt: function(v){return 'L'+v;} },
+        { key: 'mil_reserve',  label: 'Reserve',   fmt: function(v){return v;} },
+        { key: '_atWar',       label: 'At War',    fmt: function(v){return v?'YES':'no';}, computed: true },
+      ],
+      sortKey: '_totalForces',
+      sortDesc: true,
+    },
+    political: {
+      label: 'Political',
+      metrics: [
+        { key: 'stability',         label: 'Stab',      fmt: function(v){return v;}, colorCode: true, delta: true },
+        { key: 'political_support',  label: 'PolSup',    fmt: function(v){return v;}, delta: true },
+        { key: 'war_tiredness',      label: 'WarTired',  fmt: function(v){return v;} },
+        { key: 'regime',             label: 'Regime',    fmt: function(v){return v||'\u2014';} },
+        { key: 'election_status',    label: 'Election',  fmt: function(v){return v||'\u2014';} },
+        { key: 'faction_balance',    label: 'Factions',  fmt: function(v){return v||'\u2014';} },
+      ],
+      sortKey: 'stability',
+      sortDesc: true,
+    },
+    technology: {
+      label: 'Technology',
+      metrics: [
+        { key: 'ai_level',          label: 'AI Lvl',    fmt: function(v){return 'L'+v;} },
+        { key: 'ai_rd_progress',    label: 'AI R&D',    fmt: function(v){return v!=null?(v*100).toFixed(0)+'%':'\u2014';} },
+        { key: 'nuclear_level',     label: 'Nuc Lvl',   fmt: function(v){return 'L'+v;} },
+        { key: 'nuclear_rd_progress',label: 'Nuc R&D',  fmt: function(v){return v!=null?(v*100).toFixed(0)+'%':'\u2014';} },
+        { key: 'rd_investment',     label: 'R&D $',     fmt: function(v){return v!=null?fmtNum(v):'\u2014';} },
+        { key: 'tech_sector_share', label: 'Tech %',    fmt: function(v){return v!=null?(v*100).toFixed(0)+'%':'\u2014';} },
+      ],
+      sortKey: 'ai_level',
+      sortDesc: true,
+    },
+  };
 
   function renderGlobalStrip() {
     var el = document.getElementById('globalStrip');
@@ -491,6 +623,14 @@
       var v = row[m.key];
       var pv = prevRow ? prevRow[m.key] : null;
       var d = '';
+      // Gracefully handle missing data (new index columns not yet in DB)
+      if (v == null) {
+        var sel = state.chartMetric === m.key ? ' selected' : '';
+        html += '<div class="obs-global-item' + sel + '" data-metric="' + m.key + '">' +
+                '<span class="k">' + m.label + '</span>' +
+                '<span class="v" style="color:var(--text-muted)">\u2014</span></div>';
+        return;
+      }
       if (pv != null) {
         var diff = v - pv;
         var cls = Math.abs(diff) < 0.01 ? 'flat' : (diff > 0 ? 'up' : 'down');
@@ -543,13 +683,19 @@
     var svg = document.getElementById('globalChart');
     if (!svg) return;
     svg.innerHTML = '';
-    var series = state.globalSeries || [];
-    if (series.length < 2) return;
+    var rawSeries = state.globalSeries || [];
     var key = state.chartMetric || 'oil_price';
     var meta = GLOBAL_METRICS.find(function (m) { return m.key === key; }) || GLOBAL_METRICS[0];
 
+    // Filter to only rounds with actual data for the selected metric
+    var series = rawSeries.filter(function (r) {
+      var v = r[key];
+      return v != null && v !== 0;
+    });
+    if (series.length < 2) return;
+
     var W = svg.clientWidth || 600;
-    var H = 120;
+    var H = 200;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     var pad = { l: 48, r: 18, t: 16, b: 20 };
     var chartW = W - pad.l - pad.r;
@@ -598,8 +744,10 @@
     poly.setAttribute('points', points);
     svg.appendChild(poly);
 
-    // points — highlight the selected view round
+    // viewR — the round being viewed (scrubbed or latest)
     var viewR = state.viewRound != null ? state.viewRound : series[series.length - 1].round_num;
+
+    // points — highlight the selected view round
     series.forEach(function (r, i) {
       var pt = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       pt.setAttribute('class', 'series-point' + (r.round_num === viewR ? ' current' : ''));
@@ -608,12 +756,16 @@
       svg.appendChild(pt);
     });
 
-    // title
+    // title — show viewed round when scrubbing
+    var titleText = meta.label + ' — R' + series[0].round_num + ' → R' + series[series.length - 1].round_num;
+    if (state.viewRound != null) {
+      titleText += ' (viewing R' + viewR + ')';
+    }
     var title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     title.setAttribute('class', 'title-label');
     title.setAttribute('x', pad.l);
     title.setAttribute('y', pad.t - 4);
-    title.textContent = meta.label + ' — Round 0 → ' + series[series.length - 1].round_num;
+    title.textContent = titleText;
     svg.appendChild(title);
   }
 

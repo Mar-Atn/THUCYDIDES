@@ -10,10 +10,12 @@ flat across rounds.
 
 Called by ``full_round_runner`` after combat/movement resolution.
 
-Design note: the long-term target is full orchestrator integration
-(``engines/orchestrator.process_round``). This module is the bridge step
-that reuses the designed engine functions without requiring the
-orchestrator's sim_runs-based DB model.
+ARCHITECTURE (2026-04-08): Engine reads from DB STATE TABLES, never from
+agent_decisions. The flow is:
+    Participant -> Communication Layer -> DB state tables -> Engine reads state
+Sanctions come from ``sanctions`` table, tariffs from ``tariffs`` table,
+relationships/war state from ``relationships`` table. The engine is agnostic
+to whether a human or AI made the decision.
 """
 from __future__ import annotations
 
@@ -71,8 +73,10 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
             rs = round_by_cc.get(cc, {})
             countries[cc] = _merge_to_engine_dict(base, rs)
 
-        # 4. Build REAL world_state from agent decisions + relationships
-        actions = _extract_actions_from_decisions(client, scenario_id, round_num)
+        # 4. Build REAL world_state from DB STATE TABLES (not agent_decisions)
+        from engine.config.settings import Settings
+        sim_run_id = Settings().default_sim_id
+        actions = _load_state_from_tables(client, sim_run_id, scenario_id, round_num)
         war_countries = _extract_war_state(client, scenario_id)
         combat_losses = _count_combat_losses(client, scenario_id, round_num)
         world_state = _build_world_state(round_num, base_countries, actions, war_countries)
@@ -200,8 +204,6 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
                     "round_num": round_num,
                     "oil_price": round(new_oil, 2),
                     "stock_index": round(100 + round_num * 1.2, 2),
-                    "bond_yield": round(4.20 + round_num * 0.05, 2),
-                    "gold_price": round(2400 + round_num * 30, 2),
                     "notes": f"Engine tick round {round_num}",
                 },
                 on_conflict="scenario_id,round_num",
@@ -221,8 +223,12 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
         return {"success": False, "error": str(e)}
 
 
-def _extract_actions_from_decisions(client, scenario_id: str, round_num: int) -> dict:
-    """Extract tariff/sanction/blockade/budget actions from agent_decisions.
+def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num: int) -> dict:
+    """Load engine inputs from DB STATE TABLES (not agent_decisions).
+
+    Architecture: Participant -> Communication Layer -> DB state tables -> Engine reads state.
+    The engine is STATELESS — it reads current world state from canonical tables,
+    computes effects, writes updated state back. It never reads agent_decisions.
 
     Returns dict in the format process_economy expects:
       {tariff_changes: {imposer: {target: level}},
@@ -232,67 +238,99 @@ def _extract_actions_from_decisions(client, scenario_id: str, round_num: int) ->
        tech_rd: {country: {nuclear: float, ai: float}},
        opec_production: {country: level_str}}
     """
-    try:
-        res = client.table("agent_decisions") \
-            .select("country_code, action_type, action_payload") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
-    except Exception as e:
-        logger.warning("Failed to load decisions for engine: %s", e)
-        return {}
-
-    tariff_changes: dict = {}
+    # --- Sanctions: read from `sanctions` state table ---
     sanction_changes: dict = {}
+    try:
+        res = client.table("sanctions").select("imposer_country_id, target_country_id, level") \
+            .eq("sim_run_id", sim_run_id).execute()
+        for row in (res.data or []):
+            imposer = row.get("imposer_country_id", "")
+            target = row.get("target_country_id", "")
+            level = row.get("level", 0)
+            if imposer and target and level != 0:
+                sanction_changes.setdefault(imposer, {})[target] = level
+        logger.info("[state] Loaded %d sanction pairs from sanctions table",
+                    sum(len(v) for v in sanction_changes.values()))
+    except Exception as e:
+        logger.warning("Failed to load sanctions state: %s", e)
+
+    # --- Tariffs: read from `tariffs` state table ---
+    tariff_changes: dict = {}
+    try:
+        res = client.table("tariffs").select("imposer_country_id, target_country_id, level") \
+            .eq("sim_run_id", sim_run_id).execute()
+        for row in (res.data or []):
+            imposer = row.get("imposer_country_id", "")
+            target = row.get("target_country_id", "")
+            level = row.get("level", 0)
+            if imposer and target and level != 0:
+                tariff_changes.setdefault(imposer, {})[target] = level
+        logger.info("[state] Loaded %d tariff pairs from tariffs table",
+                    sum(len(v) for v in tariff_changes.values()))
+    except Exception as e:
+        logger.warning("Failed to load tariffs state: %s", e)
+
+    # --- Blockades: read from `blockades` state table ---
     blockade_changes: dict = {}
-    tech_rd: dict = {}
-    budgets: dict = {}
-    opec_prod: dict = {}
-
-    for row in (res.data or []):
-        cc = row.get("country_code", "")
-        atype = row.get("action_type", "")
-        payload = row.get("action_payload") or {}
-        if isinstance(payload, str):
-            try:
-                import json as _json
-                payload = _json.loads(payload)
-            except Exception:
-                payload = {}
-
-        if atype == "set_tariff":
-            target = payload.get("target_country", "")
-            level = payload.get("level", 0)
-            if target:
-                tariff_changes.setdefault(cc, {})[target] = level
-
-        elif atype == "set_sanction":
-            target = payload.get("target_country", "")
-            level = payload.get("level", 0)
-            if target:
-                sanction_changes.setdefault(cc, {})[target] = level
-
-        elif atype == "declare_blockade":
-            zone = payload.get("zone_id") or payload.get("chokepoint", "")
+    try:
+        res = client.table("blockades").select("*") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("status", "active").execute()
+        for row in (res.data or []):
+            zone = row.get("zone_id", "")
             if zone:
-                blockade_changes[zone] = {"status": "active", "imposer": cc, **payload}
+                blockade_changes[zone] = {
+                    "status": "active",
+                    "imposer": row.get("imposer_country_id", ""),
+                    "level": row.get("level", "full"),
+                    "zone_id": zone,
+                }
+        logger.info("[state] Loaded %d active blockades from blockades table",
+                    len(blockade_changes))
+    except Exception as e:
+        logger.warning("Failed to load blockade state: %s", e)
 
-        elif atype == "rd_investment":
-            domain = payload.get("domain", "ai")
-            amount = _safe_float(payload.get("amount"), 1.0)
-            rd = tech_rd.setdefault(cc, {"nuclear": 0.0, "ai": 0.0})
-            if domain == "nuclear":
-                rd["nuclear"] += amount
-            else:
-                rd["ai"] += amount
+    # --- Budgets: read from country_states_per_round (budget columns) ---
+    # Budget decisions are persisted as columns on country_states_per_round
+    # by resolve_round. If not present, engine uses defaults.
+    budgets: dict = {}
+    try:
+        res = client.table("country_states_per_round") \
+            .select("country_code, budget_social_pct, budget_military_coins, budget_tech_coins") \
+            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+        for row in (res.data or []):
+            cc = row.get("country_code", "")
+            social = row.get("budget_social_pct")
+            mil = row.get("budget_military_coins")
+            tech = row.get("budget_tech_coins")
+            if cc and any(v is not None for v in [social, mil, tech]):
+                budgets[cc] = {
+                    "social_pct": _safe_float(social, 1.0),
+                    "military_coins": _safe_float(mil, 0),
+                    "tech_coins": _safe_float(tech, 0),
+                }
+    except Exception as e:
+        # Budget columns may not exist yet — fall back gracefully
+        logger.debug("Budget columns not available in country_states: %s", e)
 
-        elif atype == "set_budget":
-            budgets[cc] = {
-                "social_pct": _safe_float(payload.get("social_pct"), 1.0),
-                "military_coins": _safe_float(payload.get("military_coins"), 0),
-                "tech_coins": _safe_float(payload.get("tech_coins"), 0),
-            }
+    # --- Tech R&D: read from country_states_per_round tech progress ---
+    # R&D investments are applied by resolve_round and reflected in
+    # nuclear_rd_progress / ai_rd_progress. Engine reads current state.
+    tech_rd: dict = {}
 
-        elif atype == "set_opec":
-            opec_prod[cc] = payload.get("production", "maintain")
+    # --- OPEC production: read from country_states_per_round ---
+    opec_prod: dict = {}
+    try:
+        res = client.table("country_states_per_round") \
+            .select("country_code, opec_production") \
+            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+        for row in (res.data or []):
+            cc = row.get("country_code", "")
+            prod = row.get("opec_production")
+            if cc and prod:
+                opec_prod[cc] = prod
+    except Exception as e:
+        logger.debug("OPEC production column not available: %s", e)
 
     return {
         "tariff_changes": tariff_changes,
@@ -307,19 +345,19 @@ def _extract_actions_from_decisions(client, scenario_id: str, round_num: int) ->
 def _extract_war_state(client, scenario_id: str) -> set[str]:
     """Return set of country_codes that are currently at war.
 
-    Reads from relationships table (bilateral_tension >= war threshold)
-    OR from agent_decisions with declare_war action type.
-    For now: reads from observatory_events with war-related types.
+    Reads from state tables only:
+    - ``relationships`` table (status == 'war')
+    - ``observatory_combat_results`` (countries involved in combat)
     """
     at_war: set[str] = set()
     try:
-        # Check relationships for war state
+        # Check relationships state table — status='military_conflict' means at war
         res = client.table("relationships") \
-            .select("country_a, country_b, status") \
-            .eq("status", "war").execute()
+            .select("from_country_id, to_country_id, status") \
+            .eq("status", "military_conflict").execute()
         for r in (res.data or []):
-            at_war.add(r.get("country_a", ""))
-            at_war.add(r.get("country_b", ""))
+            at_war.add(r.get("from_country_id", ""))
+            at_war.add(r.get("to_country_id", ""))
     except Exception:
         pass
     # Also check for countries involved in combat this sim
@@ -401,24 +439,19 @@ def _flatten_bilateral(changes: dict) -> dict:
 def _detect_formosa_blockade(client, scenario_id: str, round_num: int) -> str | None:
     """Check if Formosa Strait is blockaded this round.
 
-    Reads blockade_declared events from observatory_events.
+    Reads from `blockades` state table (canonical source).
     Returns 'partial' | 'full' | None.
     """
     try:
-        res = client.table("observatory_events") \
-            .select("payload") \
-            .eq("scenario_id", scenario_id) \
-            .eq("round_num", round_num) \
-            .eq("event_type", "blockade_declared") \
-            .execute()
+        from engine.config.settings import Settings
+        sim_run_id = Settings().default_sim_id
+        res = client.table("blockades").select("zone_id, level, status") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("status", "active").execute()
         for row in (res.data or []):
-            payload = row.get("payload") or {}
-            zone = payload.get("zone_id", "")
+            zone = row.get("zone_id", "")
             if "formosa" in zone.lower() or "taiwan" in zone.lower():
-                action = payload.get("action", "establish")
-                if action == "lift":
-                    return None
-                return payload.get("level", "partial")
+                return row.get("level", "partial")
     except Exception as e:
         logger.warning("formosa blockade detection failed: %s", e)
     return None

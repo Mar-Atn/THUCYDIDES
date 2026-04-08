@@ -63,6 +63,20 @@ Every event in the system conforms to this envelope. The `payload` field varies 
 
 ---
 
+### 1.1a Typed Enums — Relationship Status (added 2026-04-08)
+
+```
+RelationshipStatus = 'allied' | 'friendly' | 'neutral' | 'tense' | 'hostile' | 'military_conflict' | 'armistice' | 'peace'
+```
+
+Used in: `relationships.status` column (live engine state), agent context `visible_state.relationships`, event payloads.
+
+**Dual-column semantics:** `relationship` column = starting/reference value (legacy labels from template CSV). `status` column = live 8-state engine value updated during play. Engine reads `status` for all war/peace logic.
+
+**Sticky rule:** `military_conflict` only transitions via signed agreement → `armistice` or `peace`. Armistice breach → auto-return to `military_conflict`.
+
+---
+
 ## 1.2 Action Events (32 Types)
 
 ### Regular Inputs (Phase A deadline)
@@ -2168,7 +2182,7 @@ All real-time communication uses Supabase Realtime (WebSocket). Channels follow 
       "own_forces": { "<zone_id>": { "<unit_type>": "int" } },
       "visible_forces": { "<zone_id>": { "<country_id>": { "<unit_type>": "int" } } }
     },
-    "relationships": { "<country_id>": "allied | friendly | neutral | tense | hostile | at_war" },
+    "relationships": { "<country_id>": "allied | friendly | neutral | tense | hostile | military_conflict | armistice | peace" },
     "bilateral": {
       "tariffs_imposed_by_us": { "<country_id>": "int" },
       "tariffs_imposed_on_us": { "<country_id>": "int" },

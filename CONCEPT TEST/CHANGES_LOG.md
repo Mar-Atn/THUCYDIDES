@@ -896,3 +896,100 @@ Version tag for everything delivered this session: **Template v1.0 candidate**
 - Columbia forward deployment: 12
 
 **Verification:** Regex scan of DB for real-world/equipment/sub-type terms (F-35, Iskander, Patriot, Russian, Ukrainian, Kursk, Okinawa, Pentagon, Kremlin, CONUS, brigade, corps, artillery, ICBM, squadron, Operation, Bakhmut, Tehran, Minuteman, Tomahawk, S-400, marines) → **0 matches**. No real-world names, equipment, or sub-type language remains.
+
+---
+
+## DATA ENRICHMENT — Nuclear Sites + Public Bios (2026-04-08)
+
+### Nuclear site hex coordinates — canonical storage confirmed
+
+Verified that `sim_templates.map_config.nuclear_sites` already contains correct values:
+- Persia: `{global_row: 7, global_col: 13}` (Mashriq theater-link hex)
+- Choson: `{global_row: 3, global_col: 18}` (global map, no theater)
+
+Added `NUCLEAR_SITES` constant to `app/engine/config/map_config.py` for code-level access. Documented in SEED_C_MAP_UNITS_MASTER_v1.md section 1.3a. Updated CARD_FORMULAS.md and CARD_TEMPLATE.md with canonical references.
+
+### `public_bio` column added to roles table
+
+**Migration:** `ALTER TABLE roles ADD COLUMN IF NOT EXISTS public_bio text NOT NULL DEFAULT '';`
+
+**40 bios written** — 2-3 sentences each, public-facing only:
+- Who the person is, their title, age
+- Known policy positions and public reputation
+- NO secret objectives, NO ticking clocks, NO hidden agendas
+
+These bios serve as the "world knowledge" that all participants and AI agents can reference about each character. Updated DET_B1_DATABASE_SCHEMA.sql, CARD_TEMPLATE.md, and STARTING_DATA_AUDIT.md (M4 + M5 marked FIXED).
+
+---
+
+## DATA FIX — Relationship Status Column + Basing Rights (2026-04-08)
+
+### C1 FIXED: `status` column corrected from all-"peace" to proper 8-state values
+
+All 380 rows in `relationships` had `status = 'peace'` regardless of actual relationship. Updated via mapping from `relationship` column:
+
+| relationship value | status value |
+|---|---|
+| close_ally, alliance | allied |
+| friendly | friendly |
+| neutral | neutral |
+| tense | tense |
+| hostile, strategic_rival | hostile |
+| at_war | military_conflict |
+
+**Result:** neutral 128, friendly 126, hostile 43, allied 42, tense 35, military_conflict 6.
+
+Engine code reading `status = 'military_conflict'` now correctly identifies 6 at-war pairs (Sarmatia-Ruthenia, Persia-Columbia, Persia-Levantia).
+
+### C2 FIXED: Starting basing rights seeded (12 records)
+
+Set `basing_rights_a_to_b = true` for 12 host-guest pairs reflecting real-world military base parallels:
+
+**Columbia bases abroad (9 hosts):**
+- Yamato (Okinawa), Hanguk (Camp Humphreys), Teutonia (Ramstein), Albion (RAF bases), Phrygia (Incirlik), Formosa (informal), Mirage (Al Dhafra), Ponte (Aviano/Sigonella), Freeland (Redzikowo)
+
+**Sarmatia-Choson mutual (2 records):**
+- Choson hosts Sarmatia, Sarmatia hosts Choson
+
+**Gallia abroad (1 host):**
+- Mirage hosts Gallia (Djibouti parallel)
+
+Column semantics: `basing_rights_a_to_b = true` means `from_country_id` (a) is the HOST granting basing to `to_country_id` (b).
+
+### Schema documentation updated
+- DET_B1_DATABASE_SCHEMA.sql: added `status` and `basing_rights_*` columns with CHECK constraints and comments
+- CARD_ARCHITECTURE.md: relationships table description updated
+- CARD_TEMPLATE.md: starting relationships and basing rights documented
+- SEED_C_MAP_UNITS_MASTER_v1.md: basing rights section added
+- STARTING_DATA_AUDIT.md: C1 and C2 marked FIXED
+
+---
+
+## 8-STATE BILATERAL RELATIONSHIP MODEL — Cross-Document Embedding (2026-04-08)
+
+**Scope:** Canonical 8-state bilateral relationship model embedded across all SEED, DET, PHASE, and code documents.
+
+**Dual-column semantics established:**
+- `relationship` column = STARTING/REFERENCE value (frozen per template, legacy CSV labels)
+- `status` column = LIVE engine state (8-state model: allied, friendly, neutral, tense, hostile, military_conflict, armistice, peace)
+- Engine reads `status` for all war/peace checks
+
+**Key rule:** `military_conflict` is STICKY — only transitions via signed armistice or peace treaty. Armistice breach → auto-return to `military_conflict` + global notification.
+
+### Documents updated:
+| Document | Change |
+|---|---|
+| `2 SEED/C_MECHANICS/SEED_C_MAP_UNITS_MASTER_v1.md` | Added section 5a with full 8-state table, transition rules, dual-column semantics, relationship→status mapping |
+| `2 SEED/D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md` | Added section 5a (after agreement spec) with 8-state enum and key rules |
+| `3 DETAILED DESIGN/DET_B1_DATABASE_SCHEMA.sql` | Enhanced comment block on relationships table with full 8-state documentation |
+| `3 DETAILED DESIGN/DET_C1_SYSTEM_CONTRACTS.md` | Added typed enum `RelationshipStatus`, updated agent context shape from 6 to 8 states |
+| `PHASES/UNMANNED_SPACECRAFT/INFORMATION_SCOPING.md` | Added dual-column note to existing 8-state section |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_ARCHITECTURE.md` | Added dual-column semantics + 8-state summary to relationships table |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md` | Replaced simplified AT WAR/PEACE diagram with full 8-state table + transition diagram |
+| `app/engine/models/db.py` | Added `status`, `basing_rights_a_to_b`, `basing_rights_b_to_a` fields to Relationship Pydantic model |
+| `app/engine/agents/leader.py` | Extended `_initial_relationships()` rel_map with all 8 canonical states + legacy labels |
+
+### Code alignment check:
+- `at_war` usage in engine code (`engines/economic.py`, `engines/political.py`, `engines/round_tick.py`) refers to a boolean `_at_war` flag derived from combat/relationship status — NOT the `status` column value. This is consistent with the model (the engine detects war state from events, which drives the `status` column update).
+- Legacy `at_war` string values in CSV data files and template JSONB (`at_war_with` field) are starting data that maps to `military_conflict` in the `status` column.
+- `stage*_results/` JSON files contain `at_war` boolean fields — these are test fixtures, not production data. No change needed.
