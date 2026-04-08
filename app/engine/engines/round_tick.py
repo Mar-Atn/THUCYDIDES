@@ -151,7 +151,7 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
                     at_war=at_war,
                     war_tiredness=pol.get("war_tiredness", 0),
                     market_stress=0.0,
-                    social_spending_ratio=eco.get("social_spending_baseline", 0.20),
+                    social_spending_ratio=eco.get("_actual_social_ratio", eco.get("social_spending_baseline", 0.20)),
                     social_spending_baseline=eco.get("social_spending_baseline", 0.20),
                     gdp=eco.get("gdp", 10),
                 ))
