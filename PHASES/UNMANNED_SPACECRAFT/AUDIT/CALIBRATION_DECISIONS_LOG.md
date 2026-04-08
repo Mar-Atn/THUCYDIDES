@@ -83,6 +83,42 @@
 - Nuclear test → global stability impact magnitude
 - Formosa semiconductor cascade magnitude
 - OPEC production → oil price sensitivity
-- War tiredness accumulation rate
 - Election trigger thresholds
 - Debt accumulation under deficit spending
+
+---
+
+## COMBAT DISCREPANCIES (found 2026-04-09, from test_calibration_combat.py)
+
+### DISC-1: Missile base hit rate — CARD says 70%, code uses 80%
+**CARD_FORMULAS D.5:** "conventional missile: 70% hit"
+**Code (combat.py):** uses 80% probability
+**Decision needed:** Align to 70% (CARD) or keep 80% (code)?
+
+### DISC-2: Air attacker downed by AD — CARD says 15%, code doesn't implement
+**CARD_FORMULAS D.2:** "15% downed by AD per strike"
+**Code:** No attacker-downed mechanic in resolve_air_strike
+**Decision needed:** Implement 15% downed, or defer?
+
+### DISC-3: Naval fleet model — CARD says 1v1, code supports fleet batching
+**CARD_ACTIONS 1.5:** "1v1 only, no fleet advantage"
+**Code:** Has fleet advantage bonus logic
+**Decision needed:** Remove fleet bonus (match CARD) or keep?
+
+### DISC-4: Missile AD interception — CARD says 50% per AD unit, code uses flat 30%
+**CARD_FORMULAS D.5:** "AD intercepts missiles at 50% per unit"
+**Code:** Uses flat 30% interception rate regardless of AD count
+**Decision needed:** Implement per-unit 50% roll, or keep simplified?
+
+---
+
+## POLITICAL CALIBRATION (verified 2026-04-09, 38 tests pass)
+
+- Stability: peaceful democracy holds, war causes -0.08/round, austerity -2/round, generous +2/round ✓
+- GDP crash: stability drops (capped -0.30 per round) ✓
+- High inflation: stability penalty (capped -0.50 per round) ✓
+- Support: war erodes, high stability helps, low stability hurts ✓
+- War tiredness: +0.20 defender, +0.15 attacker, +0.10 ally, halved after 3+ rounds, 20% peace decay ✓
+- Thresholds: stable/unstable/protest/crisis zones correctly triggered ✓
+- Revolution: triggers at stability ≤ 2 AND support < 20% ✓
+- Coup: base 15%, modifiers for protest/stability/support, needs 2 plotters ✓
