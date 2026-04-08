@@ -62,6 +62,15 @@ app/
     └── layer3/            ← AI simulation tests
 ```
 
+## Centralized Configuration Pattern
+
+Cross-cutting structural constants (map dimensions, theater linkage, country lists, coord conventions) live in **`app/<layer>/config/`** modules — one per language layer, kept in lock-step:
+
+- Python: `app/engine/config/map_config.py` — THE source for map grids + theater linkage for engines.
+- JS: `app/test-interface/static/map_config.js` — THE source for the same constants in the viewer/editor.
+
+Rule: **never hardcode a dimension, coord mapping, or enum list at a call site**. Import from the config module. When a constant changes, both layers must be updated in the same commit (Principle Zero — fight entropy).
+
 ## Dependency Management
 
 - **Python:** `requirements.txt` (pinned versions). Update via `pip-compile`.

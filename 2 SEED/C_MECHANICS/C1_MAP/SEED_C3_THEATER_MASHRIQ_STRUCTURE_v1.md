@@ -111,3 +111,41 @@ Unlike the Eastern Ereb theater (which shows the Sarmatia-Ruthenia front), the M
 | `SEED_C3_THEATER_MASHRIQ_STATE_v1.json` | Hex map state (from map editor) |
 | `SEED_C3_THEATER_MASHRIQ_v1.svg` | Visual map export |
 | `SEED_C3_THEATER_MASHRIQ_STRUCTURE_v1.md` | This document |
+
+---
+
+## Addendum: Template v1.0 — 2026-04-05
+
+**Canonical source:** `SEED_C_MAP_UNITS_MASTER_v1.md`
+
+### Canonical Global Linkage (replaces the provisional §"Global-to-Local Mapping" above)
+
+All coordinates below are **`(row, col)`, 1-indexed, global grid 10×20**. Theater rows below are also 1-indexed (previous text used 0-indexed row 0..9; canonical is 1..10).
+
+| Theater cell condition | Global hex (row, col) |
+|---|:---:|
+| `owner = phrygia` | (6, 11) |
+| `owner = solaria` | (7, 11) |
+| `owner = mirage` | (8, 11) |
+| `owner = persia`, theater row 1-3 | (6, 12) |
+| `owner = persia`, theater row 4-6 | (7, 13) |
+| `owner = persia`, theater row 7-10 | (8, 13) |
+| `owner = sea`, theater row 3-6 | (7, 12) |
+| `owner = sea`, theater row 7-10 | (8, 12) |
+
+### Persia row split rationale
+
+Persia has 10 rows of depth on this theater. Splitting by row bands gives three distinct global hexes for invading-force progress tracking:
+- **rows 1-3 → (6,12):** Northern Persia (mountainous, defensible — approaches from Phrygia).
+- **rows 4-6 → (7,13):** Central Persia (nuclear sites, industrial — the prize).
+- **rows 7-10 → (8,13):** Southern Persia (Gulf coast, blockade zone, Hormuz).
+
+### Sea split rationale
+
+Mashriq sea cells represent Gulf waters. Northern half (rows 3-6) aggregates to (7,12) = the "mid-Gulf" global hex. Southern half (rows 7-10) aggregates to (8,12) = the Gulf Gate chokepoint hex.
+
+### JSON state file update
+
+The companion `SEED_C3_THEATER_MASHRIQ_STATE_v1.json` has been updated to carry a `global_link: "row,col"` field on every cell per the table above (backup preserved as `.bak_pre_global_link`).
+
+Addendum: Template v1.0 — 2026-04-05

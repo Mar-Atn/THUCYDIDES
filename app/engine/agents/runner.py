@@ -917,6 +917,7 @@ async def run_round(
     world_state: dict,
     active_loop_ticks: int = 3,
     nous_intensity: int = 3,
+    sim_run_id: str | None = None,
 ) -> RoundReport:
     """Orchestrate a complete simulation round.
 
@@ -927,6 +928,9 @@ async def run_round(
         world_state: Current world state dict — mutable.
         active_loop_ticks: How many active loop iterations.
         nous_intensity: NOUS judgment intensity (0 = skip).
+        sim_run_id: Optional sim_runs row id. If provided, the completed
+            RoundReport (and its children) are persisted to Supabase.
+            DB errors are logged but do not fail the round.
 
     Returns:
         RoundReport with all round data.
@@ -988,6 +992,16 @@ async def run_round(
     log.append(f"=== ROUND {round_num} COMPLETE ({report.duration_seconds:.1f}s) ===")
 
     logger.info(report.summary())
+
+    # Optional DB persistence
+    if sim_run_id:
+        try:
+            from engine.agents.persistence import save_round_report
+            save_round_report(sim_run_id, report)
+        except Exception as e:
+            logger.error("Persistence failed for round %d (sim_run=%s): %s",
+                         round_num, sim_run_id, e)
+
     return report
 
 
@@ -1011,6 +1025,7 @@ async def run_full_sim(
     num_rounds: int = 6,
     active_loop_ticks: int = 3,
     nous_intensity: int = 3,
+    sim_run_id: str | None = None,
 ) -> SimReport:
     """Run a complete unmanned simulation.
 
@@ -1020,6 +1035,9 @@ async def run_full_sim(
         num_rounds: Number of rounds to simulate (default 6).
         active_loop_ticks: Active loop iterations per round (default 3).
         nous_intensity: NOUS judgment intensity 0-5 (default 3).
+        sim_run_id: Optional sim_runs row id. If provided, every round
+            is persisted to Supabase and the run is marked complete at
+            the end.
 
     Returns:
         SimReport with all round reports.
@@ -1072,6 +1090,7 @@ async def run_full_sim(
             world_state=world_state,
             active_loop_ticks=active_loop_ticks,
             nous_intensity=nous_intensity,
+            sim_run_id=sim_run_id,
         )
         sim_report.rounds.append(round_report)
         logger.info("Round %d complete: %s", round_num, round_report.summary())
@@ -1079,6 +1098,13 @@ async def run_full_sim(
     # Final agent info
     sim_report.agents = {rid: agent.info() for rid, agent in agents.items()}
     sim_report.total_duration_seconds = time.time() - t0
+
+    if sim_run_id:
+        try:
+            from engine.agents.persistence import mark_sim_run_complete
+            mark_sim_run_complete(sim_run_id, current_round=num_rounds)
+        except Exception as e:
+            logger.error("Failed to mark sim_run complete: %s", e)
 
     logger.info("=== UNMANNED SIM COMPLETE: %s ===", sim_report.summary())
     return sim_report

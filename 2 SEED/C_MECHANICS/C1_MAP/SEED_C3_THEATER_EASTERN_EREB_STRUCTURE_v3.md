@@ -106,3 +106,27 @@
 | Name | Row | Col |
 |------|-----|-----|
 | Die Hard | 6 | 6 |
+
+---
+
+## Addendum: Template v1.0 — 2026-04-05
+
+**Canonical source:** `SEED_C_MAP_UNITS_MASTER_v1.md`
+
+### Canonical Global Linkage (replaces the `global_link` column in the registry above)
+
+All coordinates below are **`(row, col)`, 1-indexed**, per the locked TTT convention. The registry above stores `global_link` in legacy `(col, row)` string form (frozen data); the canonical mapping for runtime use is the following table.
+
+| Theater cell condition | Global hex (row, col) |
+|---|:---:|
+| `owner = sarmatia`, theater row 1-4 | (3, 12) |
+| `owner = sarmatia`, theater row 5+ | (4, 12) |
+| `owner = ruthenia` (any row, free or occupied) | (4, 11) |
+| `owner = sea` (any) | (5, 12) |
+
+### Notes
+
+- Ruthenia free cells AND Ruthenia cells with `occupied_by = sarmatia` both aggregate to global (4, 11). The free-vs-occupied distinction is preserved at the theater-cell level via the `occupied_by` field.
+- One prior data bug (cell at theater row=5, col=8 marked `occupied_by=sarmatia` on its own Sarmatian soil) was fixed 2026-04-05; see master doc §7.2.
+
+Addendum: Template v1.0 — 2026-04-05

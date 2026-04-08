@@ -14,6 +14,13 @@ Author: ATLAS (World Model Engineer)
 Version: 2.0 (SEED)
 """
 
+# RECONCILIATION NOTE (2026-04-07):
+# This is the SEED reference implementation. Probabilities in this file
+# reflect the ORIGINAL design values, NOT the current calibrated values.
+# Current canonical values: PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md
+# Key changes: air_strike 15% → 12%, assassination 60% → 30% domestic,
+# naval combat fleet-based → 1v1, nuclear L1/L2 → binary warhead + T1-T3 tiers.
+
 import random
 import math
 from typing import Dict, List, Optional, Tuple, Any

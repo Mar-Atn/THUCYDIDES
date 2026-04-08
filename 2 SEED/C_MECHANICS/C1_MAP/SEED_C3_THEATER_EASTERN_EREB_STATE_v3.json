@@ -304,7 +304,7 @@
       },
       {
         "owner": "sarmatia",
-        "occupied_by": "sarmatia",
+        "occupied_by": null,
         "global_link": "12,4"
       },
       {

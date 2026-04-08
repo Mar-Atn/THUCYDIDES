@@ -1,5 +1,12 @@
 # TTT SEED D8 -- Engine Formula Documentation v1
 
+> **RECONCILIATION NOTE (2026-04-07):** This document is the SEED formula specification.
+> 98% of formulas match the implemented code exactly (verified 2026-04-06).
+> For CURRENT canonical values including BUILD calibration changes, see:
+> `PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md`
+> Key deltas: AI_LEVEL_TECH_FACTOR L2-L3 given small GDP boosts (deliberate deviation).
+> Combat probabilities recalibrated (air strike 12%/6%, assassination 30%/20%).
+
 > **Calibration History:** Updated 2026-04-03 to reflect 104 formula changes from supervised parameter review (F1-F104). Code in `app/engine/engines/` is the authoritative source.
 
 ## AUDIT REFERENCE SPECIFICATION
@@ -621,7 +628,9 @@ PERSONAL TECH INVESTMENT (G13):
       ai_rd_progress += progress_boost
 ```
 
-**Plain English:** R&D investment is converted to progress proportional to investment divided by GDP, multiplied by the R&D multiplier (0.8) and rare earth factor. Only Columbia and Cathay compete in AI R&D; other countries can receive tech transfers. Countries can accelerate R&D at 2x or 3x cost for proportionally faster progress. For AI technology specifically, private sector investment automatically matches government spending -- a hidden mechanic that doubles AI progress (discoverable via espionage). L4 is achievable by R7-8 with sustained private investment. AI levels L0-L3 provide NO GDP boost; L4 provides a probabilistic boost determined by AI Pass 2. Persia starts nuclear R&D at 70% progress toward L1. Sabotage reduces nuclear progress by 15-20%, bombing by 25%. Rare earth restrictions from Cathay reduce R&D efficiency. Technology levels advance when accumulated progress crosses a HIDDEN threshold, then progress resets.
+**Plain English:** R&D investment is converted to progress proportional to investment divided by GDP, multiplied by the R&D multiplier (0.8) and rare earth factor. Only Columbia and Cathay compete in AI R&D; other countries can receive tech transfers. Countries can accelerate R&D at 2x or 3x cost for proportionally faster progress. For AI technology specifically, private sector investment automatically matches government spending -- a hidden mechanic that doubles AI progress (discoverable via espionage). L4 is achievable by R7-8 with sustained private investment. AI levels L0-L3 provide NO GDP boost; L4 provides a probabilistic boost determined by AI Pass 2.
+
+> **BUILD DEVIATION:** Code implements L2: +0.5%, L3: +1.5%, L4: +3.0% fixed. SEED spec said L0-L3 = 0. Kept as deliberate decision (Marat 2026-04-07) because NOUS/Pass 2 not yet available. Persia starts nuclear R&D at 70% progress toward L1. Sabotage reduces nuclear progress by 15-20%, bombing by 25%. Rare earth restrictions from Cathay reduce R&D efficiency. Technology levels advance when accumulated progress crosses a HIDDEN threshold, then progress resets.
 
 **Output:** Updated `nuclear_level`, `nuclear_rd_progress`, `ai_level`, `ai_rd_progress`
 

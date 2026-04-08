@@ -1,4 +1,10 @@
 # Thucydides Trap SIM — Action System
+> **RECONCILIATION NOTE (2026-04-07):** This document is the original CONCEPT design.
+> Mechanics, probabilities, and action counts have been calibrated during BUILD.
+> For CURRENT canonical values, see: `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md` + `CARD_FORMULAS.md`
+> Changes: 51 actions consolidated to 32. Nuclear model simplified (binary warhead + T1-T3 tiers).
+> Combat probabilities recalibrated. "Espionage" renamed to "Intelligence" throughout.
+
 **Code:** C2 | **Version:** 3.0 | **Date:** 2026-03-21 | **Status:** Aligned with E1 Engine Architecture v0.7
 
 ---
@@ -49,6 +55,7 @@ Chokepoint/zone status changes on map immediately. Trade flow disruption flag ra
 **Timing:** Real-time (Live Action Engine). Universal resolution mechanic.
 **Initiator:** Head of state. **Confirms:** Military chief.
 Disposable — consumed on use. Can target any zone adjacent to own forces, bases, or naval units. Can target naval units in adjacent waters. Air defense in target zone absorbs up to 3 (configurable) incoming strikes per air defense unit before remaining strikes resolve.
+> **BUILD UPDATE:** Air strike hit probability calibrated to 12% base / 6% with AD. 15% chance attacker downed by AD. See CARD_ACTIONS 1.4 + CARD_FORMULAS D.2.
 
 ### 1.7 Strategic missile launch
 **Timing:** Real-time (Live Action Engine). GLOBAL ALERT triggered.
@@ -58,6 +65,7 @@ Can target ANY zone on the global map. Disposable — consumed on use. Warhead t
 **Nuclear warhead (L1 tactical):** 50% troops in zone destroyed. Economy -2 coins. Air defense CAN intercept.
 **Nuclear warhead (L2 strategic):** 30% economic capacity destroyed. 50% military destroyed. Leader survival 1/6. Air defense reduces but cannot guarantee block.
 5-minute retaliation window. Global stability shock.
+> **BUILD UPDATE:** Nuclear warhead types simplified to binary (conventional | nuclear). Tier system (T1 midrange / T2 strategic / T3 salvo) replaces L1/L2. See CARD_ACTIONS 1.8-1.9.
 
 ### 1.8 Nuclear test
 **Timing:** Real-time (Live Action Engine). Universal resolution mechanic.
@@ -132,6 +140,7 @@ Bilateral. Both parties confirm. Immediate. Irreversible (except basing rights).
 | 4.2 | **Fire / reassign** | Real-time | Instant. Target loses powers, stays in game. |
 | 4.3 | **Propaganda** | Real-time | Coins spent. Diminishing/negative returns if overused. AI tech L3+ auto-boosts. |
 | 4.4 | **Assassination** | Real-time | Universal mechanic. 50% ± modifiers. Detection 60-80%. Survival dice for human targets. |
+> **BUILD UPDATE:** Probabilities recalibrated: domestic 30%, international 20%, Levantia 50%. Detection 100%, attribution 50%. See CARD_ACTIONS 6.2.
 | 4.5 | **Coup attempt** | Real-time | Multi-step: X-min window, >30% team independently submit, AI probability, fortune wheel. |
 
 **Elections** (scheduled, processed by World Model Engine):

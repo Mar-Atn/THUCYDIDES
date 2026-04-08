@@ -81,6 +81,8 @@
   <div class="header">
     <h1>Thucydides Trap — AI Test Interface</h1>
     <div class="subtitle">Development tool — not part of main app</div>
+    <a href="/map" target="_blank" style="display:inline-block;margin-top:6px;margin-right:6px;padding:4px 10px;background:var(--gold);color:var(--bg);font-size:11px;font-weight:bold;text-decoration:none;border-radius:3px;letter-spacing:0.5px;">🗺 Open Map Viewer</a>
+    <a href="/observatory" target="_blank" style="display:inline-block;margin-top:6px;padding:4px 10px;background:var(--green);color:var(--bg);font-size:11px;font-weight:bold;text-decoration:none;border-radius:3px;letter-spacing:0.5px;">🛰 Open Observatory</a>
   </div>
 
   <div class="role-selector">
@@ -135,6 +137,10 @@
       <option value="2">2 ticks</option>
       <option value="3" selected>3 ticks</option>
     </select>
+    <label style="display:flex;align-items:center;gap:6px;color:var(--text);font-size:12px;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;cursor:pointer;">
+      <input type="checkbox" id="simPersist" style="cursor:pointer;" />
+      Persist to DB
+    </label>
   </div>
 
   <div class="chat-area" id="chatArea">
@@ -558,21 +564,23 @@ function escapeHtml(str) {
 
 function runSingleRound() {
   const ticks = parseInt(document.getElementById('simTicks').value);
-  addChat('system', `Running single round (${ticks} ticks, no NOUS)... This will take a while.`);
+  const persist = document.getElementById('simPersist').checked;
+  addChat('system', `Running single round (${ticks} ticks, no NOUS${persist ? ', persist=ON' : ''})... This will take a while.`);
   document.getElementById('btnRound').disabled = true;
   document.getElementById('btnRound').textContent = 'Running...';
 
   fetch('/api/sim/round', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({round_num: 1, active_loop_ticks: ticks, nous_intensity: 0})
+    body: JSON.stringify({round_num: 1, active_loop_ticks: ticks, nous_intensity: 0, persist: persist})
   }).then(r => r.json()).then(data => {
     document.getElementById('btnRound').disabled = false;
     document.getElementById('btnRound').textContent = 'Run Full Round';
     if (data.error) {
       addChat('system', `Round error: ${data.error}`);
     } else {
-      addChat('agent', `[ROUND COMPLETE]\n${data.summary}\n\nDuration: ${data.duration?.toFixed(1)}s\nActions: ${data.actions_count}, Conversations: ${data.conversations_count}, Transactions: ${data.transactions_count}\n\nLog (last entries):\n${(data.log || []).slice(-15).join('\n')}`);
+      const simRunLine = data.sim_run_id ? `\nsim_run_id: ${data.sim_run_id}` : '';
+      addChat('agent', `[ROUND COMPLETE]\n${data.summary}${simRunLine}\n\nDuration: ${data.duration?.toFixed(1)}s\nActions: ${data.actions_count}, Conversations: ${data.conversations_count}, Transactions: ${data.transactions_count}\n\nLog (last entries):\n${(data.log || []).slice(-15).join('\n')}`);
     }
   }).catch(err => {
     document.getElementById('btnRound').disabled = false;
@@ -584,21 +592,23 @@ function runSingleRound() {
 function runFullSim() {
   const numRounds = parseInt(document.getElementById('simRounds').value);
   const ticks = parseInt(document.getElementById('simTicks').value);
-  addChat('system', `Running full SIM: ${numRounds} rounds, ${ticks} ticks/round... This is expensive!`);
+  const persist = document.getElementById('simPersist').checked;
+  addChat('system', `Running full SIM: ${numRounds} rounds, ${ticks} ticks/round${persist ? ', persist=ON' : ''}... This is expensive!`);
   document.getElementById('btnSim').disabled = true;
   document.getElementById('btnSim').textContent = 'Running SIM...';
 
   fetch('/api/sim/run', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({num_rounds: numRounds, active_loop_ticks: ticks, nous_intensity: 0})
+    body: JSON.stringify({num_rounds: numRounds, active_loop_ticks: ticks, nous_intensity: 0, persist: persist})
   }).then(r => r.json()).then(data => {
     document.getElementById('btnSim').disabled = false;
     document.getElementById('btnSim').textContent = `Run Full SIM (${numRounds} rounds)`;
     if (data.error) {
       addChat('system', `SIM error: ${data.error}`);
     } else {
-      let summary = `[SIM COMPLETE]\n${data.summary}\nDuration: ${data.total_duration?.toFixed(1)}s\n\n`;
+      const simRunLine = data.sim_run_id ? `\nsim_run_id: ${data.sim_run_id}` : '';
+      let summary = `[SIM COMPLETE]\n${data.summary}${simRunLine}\nDuration: ${data.total_duration?.toFixed(1)}s\n\n`;
       (data.rounds || []).forEach(r => {
         summary += `Round ${r.round_num}: ${r.summary} (${r.duration?.toFixed(1)}s)\n`;
       });

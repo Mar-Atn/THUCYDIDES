@@ -141,7 +141,10 @@ def build_metacognitive_architecture(override: str | None = None) -> str:
 def build_participant_roster() -> str:
     """Formatted roster of all 20 heads of state.
 
-    Each line: Character (Title) — regime, GDP, classification, key fact.
+    INFORMATION SCOPING (2026-04-08): Only shows PUBLIC information —
+    character name, title, country, regime type. Does NOT leak GDP,
+    war status, power tier, or ticking clock. Agents discover strategic
+    details through gameplay (conversations, intelligence, domain tools).
     """
     heads = _load_heads_of_state()
     countries_by_id = _load_countries_by_id()
@@ -152,42 +155,13 @@ def build_participant_roster() -> str:
         country = countries_by_id.get(country_id, {})
         sim_name = country.get("sim_name", country_id)
         regime = country.get("regime_type", "?")
-        try:
-            gdp = float(country.get("gdp", 0))
-            gdp_str = f"GDP {gdp:g}"
-        except (ValueError, TypeError):
-            gdp_str = "GDP ?"
 
-        # Classify by GDP tier
-        try:
-            gdp_val = float(country.get("gdp", 0))
-            if gdp_val >= 100:
-                tier = "major power"
-            elif gdp_val >= 30:
-                tier = "middle power"
-            else:
-                tier = "small power"
-        except (ValueError, TypeError):
-            tier = "?"
-
-        # War status
-        at_war = country.get("at_war_with", "").strip()
-        war_note = ""
-        if at_war:
-            war_targets = [countries_by_id.get(c.strip(), {}).get("sim_name", c.strip())
-                           for c in at_war.split(";") if c.strip()]
-            war_note = f", at war with {', '.join(war_targets)}"
-
-        # Short flavor from ticking_clock (first clause)
-        clock = role.get("ticking_clock", "").split(".")[0].strip()
-        flavor = f" — {clock}" if clock else ""
-
-        line = (f"- **{role['character_name']}** ({role['title']}) — "
-                f"{regime}, {gdp_str}, {tier}{war_note}{flavor}")
+        # PUBLIC only: name, title, country, regime. No GDP, no wars, no clock.
+        line = f"- **{role['character_name']}** ({role['title']} of {sim_name}) — {regime}"
         lines.append(line)
 
     lines.append("")
-    lines.append(f"Total: {len(heads)} heads of state. Each has their own agenda, timeline, and ticking clock.")
+    lines.append(f"Total: {len(heads)} heads of state. Use domain tools to learn more about specific countries.")
     return "\n".join(lines)
 
 

@@ -103,322 +103,422 @@
   "grid": [
     [
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       }
     ],
     [
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       }
     ],
     [
       {
-        "owner": "phrygia"
+        "owner": "phrygia",
+        "global_link": "6,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "6,12"
       }
     ],
     [
       {
-        "owner": "solaria"
+        "owner": "solaria",
+        "global_link": "7,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       }
     ],
     [
       {
-        "owner": "solaria"
+        "owner": "solaria",
+        "global_link": "7,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       }
     ],
     [
       {
-        "owner": "solaria"
+        "owner": "solaria",
+        "global_link": "7,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "7,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "7,13"
       }
     ],
     [
       {
-        "owner": "solaria"
+        "owner": "solaria",
+        "global_link": "7,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       }
     ],
     [
       {
-        "owner": "solaria"
+        "owner": "solaria",
+        "global_link": "7,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       }
     ],
     [
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       }
     ],
     [
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "mirage"
+        "owner": "mirage",
+        "global_link": "8,11"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "sea"
+        "owner": "sea",
+        "global_link": "8,12"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       },
       {
-        "owner": "persia"
+        "owner": "persia",
+        "global_link": "8,13"
       }
     ]
   ],

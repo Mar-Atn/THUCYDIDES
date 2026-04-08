@@ -140,9 +140,26 @@ MISSILE_AD_MAX_ATTEMPTS: int = 5  # max intercept attempts per missile
 # ===========================================================================
 
 class WarheadType(str, Enum):
+    """Binary warhead classification (Marat 2026-04-06 — simplified).
+
+    Damage depends on warhead + attack-type-tier (see StrategicAttackTier).
+    Legacy NUCLEAR_L1 / NUCLEAR_L2 removed — damage profile is now
+    derived from the attack tier + salvo context.
+    """
     CONVENTIONAL = "conventional"
-    NUCLEAR_L1 = "nuclear_l1"
-    NUCLEAR_L2 = "nuclear_l2"
+    NUCLEAR = "nuclear"
+
+
+class StrategicAttackTier(str, Enum):
+    """Launcher's strategic-attack capability (derived from country nuclear_level).
+
+    * T1_MIDRANGE — ≤3 hex range, single missile, AD-in-zone halves hit
+    * T2_STRATEGIC_SINGLE — global range, single missile, intercepted by T3+
+    * T3_STRATEGIC_SALVO — global range, 3+ missiles, intercepted by T3+
+    """
+    T1_MIDRANGE = "t1_midrange"
+    T2_STRATEGIC_SINGLE = "t2_strategic_single"
+    T3_STRATEGIC_SALVO = "t3_strategic_salvo"
 
 
 class BlockadeLevel(str, Enum):
@@ -1837,4 +1854,826 @@ def resolve_nuclear_test(inp: NuclearTestInput) -> NuclearTestResult:
         tester_stability_loss=tester_loss,
         tester_support_boost=5.0,
         note=note,
+    )
+
+
+# ===========================================================================
+# UNIT-LEVEL COMBAT (v2, 2026-04-06) — CALIBRATED, CANONICAL
+# ===========================================================================
+#
+# This subsystem replaces the zone+count combat model (resolve_attack,
+# resolve_air_strike, resolve_missile_strike, resolve_naval_combat,
+# resolve_naval_bombardment) with unit-level functions that operate on
+# UnitSnapshot instances and match the calibration decisions Marat made
+# during Observatory testing (2026-04-05 / 2026-04-06).
+#
+# CALIBRATED RULES (see CHANGES_LOG 2026-04-05 / 2026-04-06 sections):
+#   * Ground combat: iterative RISK dice (3 att vs 2 def), ties defender,
+#     loop until one side zero. Defenders = ground on target hex +
+#     naval on adjacent sea hexes (naval equal strength).
+#   * Trophy capture: on ground-attack win, all non-ground non-naval
+#     enemy units on the target hex flip to attacker's reserve
+#     (tactical_air, air_defense, strategic_missile).
+#   * Source minimum: 1+ ground stays on captured foreign hex before
+#     chaining (caller enforces — pure combat only computes).
+#   * Air strike: 12% base hit if no AD covers zone, 6% (halved) if
+#     AD present. +2% per air-superiority unit, cap +4%.
+#     Clamp [3%, 20%]. Range: hex distance ≤ 2 from launcher.
+#   * Missile strike: 80% base, 30% if AD present. Missile is CONSUMED
+#     on fire (disposable). Nuclear L1/L2 warheads preserved from
+#     designed model.
+#   * AD coverage zone: the global hex PLUS all theater hexes linked
+#     to it (per map_config.theater_link_hexes).
+#
+# STATELESS DISCIPLINE: these functions MUTATE NOTHING. They read
+# inputs and return typed results. The orchestrator applies state
+# changes (flip ownership for trophies, move units forward, destroy
+# consumed missiles, etc).
+#
+# Port origin: engine/round_engine/combat.py (round_engine to be
+# decommissioned in Phase 4 of reunification).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# CALIBRATION CONSTANTS
+# ---------------------------------------------------------------------------
+
+AIR_STRIKE_BASE_HIT_PROB_V2: float = 0.12          # was 0.15 in v1
+AIR_STRIKE_AD_MULTIPLIER: float = 0.50              # halving
+AIR_STRIKE_SUPERIORITY_BONUS: float = 0.02          # per unit
+AIR_STRIKE_SUPERIORITY_CAP: float = 0.04
+AIR_STRIKE_CLAMP_LOW: float = 0.03
+AIR_STRIKE_CLAMP_HIGH: float = 0.20
+AIR_STRIKE_MAX_RANGE: int = 2                       # hex distance
+
+MISSILE_BASE_HIT_PROB_V2: float = 0.80
+MISSILE_AD_HIT_PROB_V2: float = 0.30
+
+GROUND_COMBAT_MAX_EXCHANGES: int = 50               # safety bound
+
+
+# ---------------------------------------------------------------------------
+# UNIT-LEVEL INPUT / RESULT MODELS
+# ---------------------------------------------------------------------------
+
+class UnitSnapshot(BaseModel):
+    """One unit's state at combat time (read-only input).
+
+    Mirrors the shape of unit_states_per_round rows.
+    """
+    unit_code: str
+    country_code: str
+    unit_type: str                     # ground|naval|tactical_air|strategic_missile|air_defense
+    status: str = "active"             # active|reserve|embarked|destroyed
+    global_row: Optional[int] = None
+    global_col: Optional[int] = None
+    theater: Optional[str] = None
+    theater_row: Optional[int] = None
+    theater_col: Optional[int] = None
+    embarked_on: Optional[str] = None
+
+
+class UnitGroundAttackInput(BaseModel):
+    """Ground attack on a target hex (unit-level)."""
+    attacker_country: str
+    defender_country: str
+    target_global_row: int
+    target_global_col: int
+    attacker_units: list[UnitSnapshot]    # ground units committed
+    defender_ground_units: list[UnitSnapshot]    # enemy ground on target hex
+    adjacent_naval_defenders: list[UnitSnapshot] = Field(default_factory=list)
+    trophies_on_hex: list[UnitSnapshot] = Field(default_factory=list)  # non-ground non-naval
+    # Optional modifiers
+    air_superiority: bool = False
+    amphibious_3to1: bool = False
+    die_hard_terrain: bool = False
+
+
+class UnitGroundAttackResult(BaseModel):
+    """Ground attack outcome (unit-level, caller applies state)."""
+    attacker_country: str
+    defender_country: str
+    target_global_row: int
+    target_global_col: int
+    success: bool                                  # attacker captured the hex
+    exchanges: int                                 # number of dice rounds
+    attacker_losses: list[str] = Field(default_factory=list)   # unit_codes
+    defender_losses: list[str] = Field(default_factory=list)
+    attacker_rolls: list[int] = Field(default_factory=list)    # all rolls flattened
+    defender_rolls: list[int] = Field(default_factory=list)
+    attackers_move_forward: list[str] = Field(default_factory=list)   # survivors to move
+    trophies_captured: list[str] = Field(default_factory=list)         # unit_codes
+    narrative: str = ""
+
+
+class UnitAirStrikeInput(BaseModel):
+    """Tactical air strike on a target hex (unit-level)."""
+    attacker_unit: UnitSnapshot
+    target_global_row: int
+    target_global_col: int
+    defender_units: list[UnitSnapshot]            # units on target hex (ground + AD + etc.)
+    ad_units_covering_zone: list[UnitSnapshot] = Field(default_factory=list)
+    air_superiority_count: int = 0
+
+
+class UnitAirStrikeResult(BaseModel):
+    attacker_unit_code: str
+    target_global_row: int
+    target_global_col: int
+    success: bool
+    probability: float
+    roll: float
+    ad_present: bool
+    defender_losses: list[str] = Field(default_factory=list)
+    out_of_range: bool = False
+    distance: Optional[int] = None
+    narrative: str = ""
+
+
+class UnitMissileStrikeInput(BaseModel):
+    """Per-missile strike input (unit-level). One call per missile.
+
+    Tier semantics (Marat 2026-04-06):
+      * T1_MIDRANGE: intercepted by AD-in-zone halving (handled here)
+      * T2_STRATEGIC_SINGLE / T3_STRATEGIC_SALVO: intercepted by T3+
+        nations via resolve_nuclear_interceptions_salvo() BEFORE this
+        function is called. Surviving missiles call this per hex.
+        No AD-in-zone halving applied.
+
+    For nuclear warheads, caller provides ``target_country`` +
+    ``target_country_hex_count`` so the engine can report economic
+    damage as a % of GDP (pro-rated by the target hex's share).
+    """
+    missile_unit: UnitSnapshot
+    target_global_row: int
+    target_global_col: int
+    warhead_type: WarheadType = WarheadType.CONVENTIONAL
+    attack_tier: StrategicAttackTier = StrategicAttackTier.T1_MIDRANGE
+    defender_units: list[UnitSnapshot]            # all units on target hex
+    ad_units_covering_zone: list[UnitSnapshot] = Field(default_factory=list)
+    # For nuclear warheads (damage scaling):
+    target_country: str = ""                      # owner of the target hex
+    target_country_hex_count: int = 0              # total land hexes owned (>=1)
+
+
+class UnitMissileStrikeResult(BaseModel):
+    missile_unit_code: str                         # consumed on fire
+    target_global_row: int
+    target_global_col: int
+    warhead_type: str
+    success: bool
+    probability: float
+    roll: float
+    ad_present: bool
+    defender_losses: list[str] = Field(default_factory=list)
+    missile_consumed: bool = True                  # always True (disposable)
+    # Nuclear-only fields (per-missile/per-hex):
+    nuclear_used: bool = False
+    nuclear_level: int = 0
+    target_country: str = ""                       # owner of the hit hex
+    economic_damage_pct: float = 0.0               # of target country GDP
+    military_destroyed_pct: float = 0.0            # fraction of units on hex killed
+    narrative: str = ""
+
+
+class UnitNavalCombatInput(BaseModel):
+    """Ship vs ship combat at a sea hex (unit-level)."""
+    attacker_country: str
+    defender_country: str
+    sea_global_row: int
+    sea_global_col: int
+    attacker_fleet: list[UnitSnapshot]
+    defender_fleet: list[UnitSnapshot]
+
+
+class UnitNavalCombatResult(BaseModel):
+    attacker_country: str
+    defender_country: str
+    sea_global_row: int
+    sea_global_col: int
+    exchanges: int
+    attacker_losses: list[str] = Field(default_factory=list)
+    defender_losses: list[str] = Field(default_factory=list)
+    attacker_rolls: list[int] = Field(default_factory=list)
+    defender_rolls: list[int] = Field(default_factory=list)
+    success: bool = False
+    narrative: str = ""
+
+
+class UnitNavalBombardmentInput(BaseModel):
+    """Naval units shelling a land hex (unit-level)."""
+    attacker_country: str
+    defender_country: str
+    target_global_row: int
+    target_global_col: int
+    naval_units: list[UnitSnapshot]                # each bombards once per round
+    defender_ground_units: list[UnitSnapshot]
+
+
+class UnitNavalBombardmentResult(BaseModel):
+    attacker_country: str
+    defender_country: str
+    target_global_row: int
+    target_global_col: int
+    shots_fired: int
+    defender_losses: list[str] = Field(default_factory=list)
+    rolls: list[float] = Field(default_factory=list)
+    narrative: str = ""
+
+
+# ---------------------------------------------------------------------------
+# HELPERS (hex geometry + AD zone + naval-adjacent)
+# ---------------------------------------------------------------------------
+
+def _hex_distance_v2(r1: int, c1: int, r2: int, c2: int) -> int:
+    """Hex distance on pointy-top odd-r offset grid (1-indexed)."""
+    def _to_cube(row: int, col: int) -> tuple[int, int, int]:
+        is_odd_row_0idx = ((row - 1) % 2) == 1
+        x = (col - 1) - ((row - 1) - (1 if is_odd_row_0idx else 0)) // 2
+        z = row - 1
+        y = -x - z
+        return (x, y, z)
+    a = _to_cube(r1, c1)
+    b = _to_cube(r2, c2)
+    return (abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])) // 2
+
+
+def _hex_neighbors_v2(row: int, col: int) -> list[tuple[int, int]]:
+    """6 pointy-top odd-r offset neighbors (1-indexed)."""
+    even_row = (row % 2 == 0)   # 1-indexed even == 0-indexed odd
+    deltas = (
+        [(-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0), (1, 1)] if even_row
+        else [(-1, -1), (-1, 0), (0, -1), (0, 1), (1, -1), (1, 0)]
+    )
+    return [(row + dr, col + dc) for dr, dc in deltas]
+
+
+def collect_ad_units_in_zone(
+    all_units: list[UnitSnapshot],
+    defender_country: str,
+    tgt_global_row: int,
+    tgt_global_col: int,
+) -> list[UnitSnapshot]:
+    """Return active AD units of ``defender_country`` covering the zone.
+
+    Zone = the global hex + every theater hex that links back to it
+    (per canonical theater↔global linkage table in map_config).
+    """
+    from engine.config.map_config import (
+        global_hex_for_theater_cell, theater_for_global_hex,
+    )
+    zone_key = (tgt_global_row, tgt_global_col)
+    linked_theater = theater_for_global_hex(tgt_global_row, tgt_global_col)
+    out: list[UnitSnapshot] = []
+    for u in all_units:
+        if u.country_code != defender_country:
+            continue
+        if u.unit_type != "air_defense":
+            continue
+        if u.status == "destroyed":
+            continue
+        # Case A: AD on target global hex
+        if (u.global_row, u.global_col) == zone_key:
+            out.append(u); continue
+        # Case B: AD on theater hex that maps to target zone
+        if u.theater and u.theater_row is not None and u.theater_col is not None:
+            mapped = global_hex_for_theater_cell(
+                u.theater, u.theater_row, u.theater_col, defender_country,
+            )
+            if mapped == zone_key:
+                out.append(u); continue
+            # Case C safety-net: AD in the SAME linked theater
+            if linked_theater and u.theater == linked_theater:
+                out.append(u)
+    return out
+
+
+def collect_adjacent_naval_defenders(
+    all_units: list[UnitSnapshot],
+    defender_country: str,
+    tgt_global_row: int,
+    tgt_global_col: int,
+) -> list[UnitSnapshot]:
+    """Active enemy naval in the 6 hex-neighbors of target land hex."""
+    neighbors = set(_hex_neighbors_v2(tgt_global_row, tgt_global_col))
+    out: list[UnitSnapshot] = []
+    for u in all_units:
+        if u.country_code != defender_country:
+            continue
+        if u.unit_type != "naval":
+            continue
+        if u.status == "destroyed":
+            continue
+        if (u.global_row, u.global_col) in neighbors:
+            out.append(u)
+    return out
+
+
+# ---------------------------------------------------------------------------
+# GROUND ATTACK (unit-level, iterative RISK + naval-adjacent + trophies)
+# ---------------------------------------------------------------------------
+
+def _roll_dice(n: int) -> list[int]:
+    rolls = [random.randint(1, 6) for _ in range(n)]
+    rolls.sort(reverse=True)
+    return rolls
+
+
+def resolve_ground_attack_units(inp: UnitGroundAttackInput) -> UnitGroundAttackResult:
+    """Iterative RISK ground combat, unit-level.
+
+    Defenders in combat = ``defender_ground_units`` + ``adjacent_naval_defenders``.
+    Continues until one side has 0 units remaining.
+
+    Dice: attacker min(3, N_attackers_alive), defender min(2, N_defenders_alive).
+    Highest-vs-highest; ties defender wins. Modifiers +1 to highest die on each
+    side as applicable.
+
+    Returns losses (unit_codes) + the trophies to capture if won + the
+    attackers to move forward. Caller mutates state.
+    """
+    # Validate
+    if not inp.attacker_units:
+        return UnitGroundAttackResult(
+            attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+            target_global_row=inp.target_global_row, target_global_col=inp.target_global_col,
+            success=False, exchanges=0,
+            narrative="No attackers — cannot resolve.",
+        )
+
+    defenders_pool = list(inp.defender_ground_units) + list(inp.adjacent_naval_defenders)
+
+    # Unopposed occupation (no ground + no adjacent naval)
+    if not defenders_pool:
+        return UnitGroundAttackResult(
+            attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+            target_global_row=inp.target_global_row, target_global_col=inp.target_global_col,
+            success=True, exchanges=0,
+            attackers_move_forward=[u.unit_code for u in inp.attacker_units],
+            trophies_captured=[u.unit_code for u in inp.trophies_on_hex],
+            narrative=(
+                f"Unopposed occupation at ({inp.target_global_row},{inp.target_global_col}): "
+                f"{len(inp.trophies_on_hex)} trophies captured."
+            ),
+        )
+
+    attacker_bonus = 0
+    if inp.air_superiority: attacker_bonus += 1
+    if inp.amphibious_3to1: attacker_bonus += 1
+    defender_bonus = 1 if inp.die_hard_terrain else 0
+
+    attackers = list(inp.attacker_units)
+    defenders = list(defenders_pool)
+    att_losses: list[str] = []
+    def_losses: list[str] = []
+    all_a_rolls: list[int] = []
+    all_d_rolls: list[int] = []
+    exchanges = 0
+
+    while attackers and defenders and exchanges < GROUND_COMBAT_MAX_EXCHANGES:
+        exchanges += 1
+        a_n = min(len(attackers), 3)
+        d_n = min(len(defenders), 2)
+        a_rolls = _roll_dice(a_n)
+        d_rolls = _roll_dice(d_n)
+        a_mod = a_rolls.copy()
+        d_mod = d_rolls.copy()
+        if a_mod and attacker_bonus:
+            a_mod[0] = min(6, a_mod[0] + attacker_bonus); a_mod.sort(reverse=True)
+        if d_mod and defender_bonus:
+            d_mod[0] = min(6, d_mod[0] + defender_bonus); d_mod.sort(reverse=True)
+        pairs = min(len(a_mod), len(d_mod))
+        for i in range(pairs):
+            if a_mod[i] > d_mod[i]:
+                lost = defenders.pop()
+                def_losses.append(lost.unit_code)
+            else:
+                lost = attackers.pop()
+                att_losses.append(lost.unit_code)
+        all_a_rolls.extend(a_rolls)
+        all_d_rolls.extend(d_rolls)
+
+    won = (len(defenders) == 0)
+    move_forward: list[str] = []
+    trophies: list[str] = []
+    if won:
+        move_forward = [u.unit_code for u in attackers]
+        trophies = [u.unit_code for u in inp.trophies_on_hex]
+
+    narrative = (
+        f"Ground combat ({exchanges} exchanges): "
+        f"attackers -{len(att_losses)}, defenders -{len(def_losses)}. "
+        f"{'Attacker wins.' if won else 'Defender holds.'}"
+    )
+    if won and trophies:
+        narrative += f" Trophies: {trophies}."
+
+    return UnitGroundAttackResult(
+        attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+        target_global_row=inp.target_global_row, target_global_col=inp.target_global_col,
+        success=won, exchanges=exchanges,
+        attacker_losses=att_losses, defender_losses=def_losses,
+        attacker_rolls=all_a_rolls, defender_rolls=all_d_rolls,
+        attackers_move_forward=move_forward, trophies_captured=trophies,
+        narrative=narrative,
+    )
+
+
+# ---------------------------------------------------------------------------
+# AIR STRIKE (unit-level, halving + range)
+# ---------------------------------------------------------------------------
+
+def resolve_air_strike_units(inp: UnitAirStrikeInput) -> UnitAirStrikeResult:
+    """Tactical air strike, halving AD rule, range ≤ AIR_STRIKE_MAX_RANGE."""
+    au = inp.attacker_unit
+    # Range check
+    distance = None
+    if au.global_row is not None and au.global_col is not None:
+        distance = _hex_distance_v2(
+            au.global_row, au.global_col, inp.target_global_row, inp.target_global_col,
+        )
+        if distance > AIR_STRIKE_MAX_RANGE:
+            return UnitAirStrikeResult(
+                attacker_unit_code=au.unit_code,
+                target_global_row=inp.target_global_row,
+                target_global_col=inp.target_global_col,
+                success=False, probability=0.0, roll=0.0, ad_present=False,
+                out_of_range=True, distance=distance,
+                narrative=(
+                    f"{au.unit_code} OUT OF RANGE ({distance} hexes, "
+                    f"max {AIR_STRIKE_MAX_RANGE})"
+                ),
+            )
+
+    ad_present = any(ad.status != "destroyed" for ad in inp.ad_units_covering_zone)
+    p = AIR_STRIKE_BASE_HIT_PROB_V2
+    p += min(AIR_STRIKE_SUPERIORITY_CAP,
+             AIR_STRIKE_SUPERIORITY_BONUS * inp.air_superiority_count)
+    if ad_present:
+        p *= AIR_STRIKE_AD_MULTIPLIER
+    p = max(AIR_STRIKE_CLAMP_LOW, min(AIR_STRIKE_CLAMP_HIGH, p))
+
+    roll = random.random()
+    success = roll < p
+    losses: list[str] = []
+    if success and inp.defender_units:
+        target = next(
+            (u for u in inp.defender_units if u.unit_type != "air_defense"),
+            inp.defender_units[0],
+        )
+        losses.append(target.unit_code)
+
+    return UnitAirStrikeResult(
+        attacker_unit_code=au.unit_code,
+        target_global_row=inp.target_global_row,
+        target_global_col=inp.target_global_col,
+        success=success, probability=p, roll=roll, ad_present=ad_present,
+        defender_losses=losses, distance=distance,
+        narrative=(
+            f"Air strike {au.unit_code}: AD={'yes' if ad_present else 'no'}, "
+            f"p={p:.2f}, roll={roll:.2f} -> {'HIT' if success else 'MISS'}"
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# MISSILE STRIKE (unit-level, 80/30, disposable + Nuclear L1/L2)
+# ---------------------------------------------------------------------------
+
+def resolve_missile_strike_units(inp: UnitMissileStrikeInput) -> UnitMissileStrikeResult:
+    """Per-missile strike resolution (unit-level).
+
+    Accuracy (Marat 2026-04-06):
+      * Base hit probability: 80% (missile accuracy)
+      * T1_MIDRANGE attacks: halved to 30% if AD covers target zone
+      * T2/T3 STRATEGIC attacks: no AD-in-zone halving (strategic missiles
+        are intercepted by T3+ nations in the pre-flight salvo phase)
+
+    Missile is CONSUMED on fire (``missile_consumed=True`` always).
+    Caller must mark the missile unit destroyed.
+
+    Nuclear damage (per hit, Marat 2026-04-06):
+      * 50% of military units on target hex destroyed
+      * 30% of target country's hex-share of GDP destroyed
+        (= 0.30 / target_country_hex_count)
+      * T3 salvo aggregate effects (global stab + leader roll) applied
+        by caller via resolve_nuclear_salvo_aggregate(), NOT here.
+    """
+    ad_present = any(ad.status != "destroyed" for ad in inp.ad_units_covering_zone)
+    if inp.attack_tier == StrategicAttackTier.T1_MIDRANGE:
+        p = MISSILE_AD_HIT_PROB_V2 if ad_present else MISSILE_BASE_HIT_PROB_V2
+    else:
+        # T2/T3 strategic: no AD-halving at target zone
+        p = MISSILE_BASE_HIT_PROB_V2
+    roll = random.random()
+    success = roll < p
+
+    result = UnitMissileStrikeResult(
+        missile_unit_code=inp.missile_unit.unit_code,
+        target_global_row=inp.target_global_row,
+        target_global_col=inp.target_global_col,
+        warhead_type=inp.warhead_type.value,
+        success=success, probability=p, roll=roll, ad_present=ad_present,
+        missile_consumed=True,
+        narrative="",
+    )
+
+    if not success:
+        result.narrative = (
+            f"Missile {inp.missile_unit.unit_code} -> "
+            f"({inp.target_global_row},{inp.target_global_col}): "
+            f"AD={'yes' if ad_present else 'no'}, p={p:.2f}, roll={roll:.2f} MISS"
+        )
+        return result
+
+    # --- Apply damage by warhead type (Marat 2026-04-06 simplified) ---
+    if inp.warhead_type == WarheadType.CONVENTIONAL:
+        # Destroy one defender unit (prefer non-AD, non-own)
+        target = None
+        for u in inp.defender_units:
+            if u.country_code == inp.missile_unit.country_code:
+                continue
+            if u.unit_type != "air_defense":
+                target = u; break
+        if target is None and inp.defender_units:
+            target = inp.defender_units[0]
+        if target:
+            result.defender_losses.append(target.unit_code)
+        result.narrative = (
+            f"Missile {inp.missile_unit.unit_code} HIT conventional "
+            f"({inp.attack_tier.value}): 1 unit destroyed at "
+            f"({inp.target_global_row},{inp.target_global_col})."
+        )
+    else:
+        # NUCLEAR warhead — uniform damage profile (simplified binary model)
+        # Marat 2026-04-06:
+        #   * 50% of ALL military units on target hex destroyed (incl. own)
+        #   * 30% × (1/country_hex_count) of target country GDP
+        #   * T3 salvo aggregate (global stab, leader roll) is applied
+        #     externally by resolve_nuclear_salvo_aggregate().
+        result.nuclear_used = True
+        result.nuclear_level = 1   # kept for back-compat; no longer meaningful
+        result.target_country = inp.target_country
+        military = [u for u in inp.defender_units
+                    if u.unit_type in ("ground", "naval", "tactical_air",
+                                        "strategic_missile", "air_defense")]
+        kill_count = len(military) // 2
+        if military and kill_count == 0:
+            kill_count = 1   # at least 1 destroyed if any present
+        kill_list = [u.unit_code for u in military[:kill_count]]
+        result.defender_losses = kill_list
+        result.military_destroyed_pct = (len(kill_list) / len(military)) if military else 0.0
+        hex_count = max(1, inp.target_country_hex_count)
+        result.economic_damage_pct = 0.30 / hex_count
+        result.narrative = (
+            f"NUCLEAR detonation ({inp.attack_tier.value}) at "
+            f"({inp.target_global_row},{inp.target_global_col}): "
+            f"{len(kill_list)}/{len(military)} military destroyed, "
+            f"economic loss {result.economic_damage_pct*100:.1f}% of "
+            f"{inp.target_country or '?'} GDP."
+        )
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# T3 NUCLEAR SALVO AGGREGATE (applied ONCE per salvo if ≥1 nuclear hit)
+# ---------------------------------------------------------------------------
+
+class NuclearSalvoAggregateInput(BaseModel):
+    """Inputs for the once-per-T3-salvo aggregate effects."""
+    target_country: str               # country with the most nuclear hits
+    missiles_launched: int            # must be >= 3 for T3 salvo to be valid
+    nuclear_hits_landed: int          # successful nuclear hits across salvo
+
+
+class NuclearSalvoAggregateResult(BaseModel):
+    target_country: str
+    valid: bool                       # False if fewer than 3 missiles launched
+    global_stability_loss: float = 0.0
+    target_stability_loss: float = 0.0
+    leader_killed: bool = False
+    leader_roll: int = 0              # 1-6 d6 result; 1 = killed
+    narrative: str = ""
+
+
+def resolve_nuclear_salvo_aggregate(inp: NuclearSalvoAggregateInput) -> NuclearSalvoAggregateResult:
+    """Apply the once-per-T3-salvo effects: global stab, target stab, leader roll.
+
+    Requires ≥3 missiles launched in the salvo. If fewer, marked invalid.
+    No aggregate effects applied if no nuclear hits landed (all missiles
+    intercepted or missed their targets).
+    """
+    if inp.missiles_launched < 3:
+        return NuclearSalvoAggregateResult(
+            target_country=inp.target_country, valid=False,
+            narrative=(
+                f"T3 salvo INVALID — only {inp.missiles_launched} "
+                f"missile(s) launched (min 3 required)."
+            ),
+        )
+    if inp.nuclear_hits_landed == 0:
+        return NuclearSalvoAggregateResult(
+            target_country=inp.target_country, valid=True,
+            narrative="T3 salvo: all missiles intercepted/missed — no aggregate effects.",
+        )
+    roll = random.randint(1, 6)
+    killed = (roll == 1)   # 1/6 chance
+    return NuclearSalvoAggregateResult(
+        target_country=inp.target_country, valid=True,
+        global_stability_loss=1.5,
+        target_stability_loss=2.5,
+        leader_killed=killed, leader_roll=roll,
+        narrative=(
+            f"T3 STRATEGIC aftermath vs {inp.target_country}: "
+            f"global stability -1.5, target stability -2.5, "
+            f"leader roll={roll} -> {'KILLED' if killed else 'survives'}."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# T3+ NUCLEAR INTERCEPTION (salvo-level, all T3+ nations roll)
+# ---------------------------------------------------------------------------
+
+class NuclearSalvoInterceptionInput(BaseModel):
+    """Interception attempt against an incoming T2/T3 strategic salvo.
+
+    For each T3+ nation (except launcher), each active AD unit they own
+    grants 1 interception roll at 25% success. Each success destroys
+    one missile from the salvo.
+    """
+    launcher_country: str
+    missiles_in_salvo: int
+    t3_nations: list[dict]   # [{country_code, nuclear_level, ad_unit_count}, ...]
+
+
+class InterceptorReport(BaseModel):
+    country: str
+    ad_units: int
+    rolls: list[float] = Field(default_factory=list)
+    intercepts_made: int = 0
+
+
+class NuclearSalvoInterceptionResult(BaseModel):
+    launcher_country: str
+    missiles_in_salvo: int
+    missiles_intercepted: int
+    missiles_surviving: int
+    interceptor_reports: list[InterceptorReport] = Field(default_factory=list)
+    narrative: str = ""
+
+
+NUCLEAR_INTERCEPTION_PROB: float = 0.25   # Marat 2026-04-06 calibration
+
+
+def resolve_nuclear_salvo_interception(
+    inp: NuclearSalvoInterceptionInput,
+) -> NuclearSalvoInterceptionResult:
+    """Run all T3+ nations' interception attempts against an incoming salvo.
+
+    Each T3+ nation (≠ launcher) rolls 1 d(25%) per active AD unit.
+    Each success cancels one missile. Missiles cancelled are capped at
+    the salvo size.
+
+    Caller must ensure ``t3_nations`` excludes the launcher and only
+    contains countries with nuclear_level >= 3.
+    """
+    total_intercepts = 0
+    reports: list[InterceptorReport] = []
+    for nation in inp.t3_nations:
+        cc = nation.get("country_code", "?")
+        if cc == inp.launcher_country:
+            continue
+        level = int(nation.get("nuclear_level", 0))
+        if level < 3:
+            continue
+        ad = int(nation.get("ad_unit_count", 0))
+        if ad <= 0:
+            reports.append(InterceptorReport(country=cc, ad_units=0))
+            continue
+        rolls: list[float] = []
+        intercepts = 0
+        for _ in range(ad):
+            r = random.random()
+            rolls.append(r)
+            if r < NUCLEAR_INTERCEPTION_PROB:
+                intercepts += 1
+        total_intercepts += intercepts
+        reports.append(InterceptorReport(
+            country=cc, ad_units=ad, rolls=rolls, intercepts_made=intercepts,
+        ))
+    missiles_intercepted = min(total_intercepts, inp.missiles_in_salvo)
+    surviving = inp.missiles_in_salvo - missiles_intercepted
+    return NuclearSalvoInterceptionResult(
+        launcher_country=inp.launcher_country,
+        missiles_in_salvo=inp.missiles_in_salvo,
+        missiles_intercepted=missiles_intercepted,
+        missiles_surviving=surviving,
+        interceptor_reports=reports,
+        narrative=(
+            f"T3+ interception vs {inp.launcher_country}: "
+            f"{missiles_intercepted}/{inp.missiles_in_salvo} missiles "
+            f"intercepted by {sum(1 for r in reports if r.intercepts_made > 0)} nation(s)."
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# NAVAL COMBAT (unit-level)
+# ---------------------------------------------------------------------------
+
+def resolve_naval_combat_units(inp: UnitNavalCombatInput) -> UnitNavalCombatResult:
+    """Ship-vs-ship iterative combat (same iterative RISK as ground)."""
+    if not inp.attacker_fleet or not inp.defender_fleet:
+        return UnitNavalCombatResult(
+            attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+            sea_global_row=inp.sea_global_row, sea_global_col=inp.sea_global_col,
+            exchanges=0, success=False,
+            narrative="No combat: one side has zero ships.",
+        )
+    attackers = list(inp.attacker_fleet)
+    defenders = list(inp.defender_fleet)
+    att_losses: list[str] = []
+    def_losses: list[str] = []
+    all_a_rolls: list[int] = []
+    all_d_rolls: list[int] = []
+    exchanges = 0
+    # Advantage bonus: larger fleet +1 on highest die, cap ±3
+    advantage = len(attackers) - len(defenders)
+    adv_bonus = max(-3, min(3, advantage))
+
+    while attackers and defenders and exchanges < GROUND_COMBAT_MAX_EXCHANGES:
+        exchanges += 1
+        a_n = min(len(attackers), 3)
+        d_n = min(len(defenders), 3)
+        a_rolls = _roll_dice(a_n)
+        d_rolls = _roll_dice(d_n)
+        a_mod = a_rolls.copy(); d_mod = d_rolls.copy()
+        if adv_bonus > 0 and a_mod:
+            a_mod[0] = min(6, a_mod[0] + adv_bonus); a_mod.sort(reverse=True)
+        elif adv_bonus < 0 and d_mod:
+            d_mod[0] = min(6, d_mod[0] + abs(adv_bonus)); d_mod.sort(reverse=True)
+        pairs = min(len(a_mod), len(d_mod))
+        for i in range(pairs):
+            if a_mod[i] > d_mod[i]:
+                lost = defenders.pop()
+                def_losses.append(lost.unit_code)
+            else:
+                lost = attackers.pop()
+                att_losses.append(lost.unit_code)
+        all_a_rolls.extend(a_rolls)
+        all_d_rolls.extend(d_rolls)
+
+    won = (len(defenders) == 0)
+    return UnitNavalCombatResult(
+        attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+        sea_global_row=inp.sea_global_row, sea_global_col=inp.sea_global_col,
+        exchanges=exchanges, success=won,
+        attacker_losses=att_losses, defender_losses=def_losses,
+        attacker_rolls=all_a_rolls, defender_rolls=all_d_rolls,
+        narrative=(
+            f"Naval combat ({exchanges} exchanges): "
+            f"attackers -{len(att_losses)}, defenders -{len(def_losses)}. "
+            f"{'Attacker wins.' if won else 'Defender holds.'}"
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
+# NAVAL BOMBARDMENT (unit-level, 10% per shot per CON_C2)
+# ---------------------------------------------------------------------------
+
+NAVAL_BOMBARDMENT_HIT_PROB: float = 0.10
+
+
+def resolve_naval_bombardment_units(inp: UnitNavalBombardmentInput) -> UnitNavalBombardmentResult:
+    """Each naval unit bombards once per round at 10% chance to kill one
+    random ground unit on the target hex.
+
+    (No AD halving for bombardment per current design — decision deferred.)
+    """
+    rolls: list[float] = []
+    losses: list[str] = []
+    targets = list(inp.defender_ground_units)
+    for _ in inp.naval_units:
+        if not targets:
+            break
+        r = random.random()
+        rolls.append(r)
+        if r < NAVAL_BOMBARDMENT_HIT_PROB:
+            # Destroy one random ground unit
+            idx = random.randint(0, len(targets) - 1)
+            killed = targets.pop(idx)
+            losses.append(killed.unit_code)
+    return UnitNavalBombardmentResult(
+        attacker_country=inp.attacker_country, defender_country=inp.defender_country,
+        target_global_row=inp.target_global_row,
+        target_global_col=inp.target_global_col,
+        shots_fired=len(inp.naval_units),
+        defender_losses=losses, rolls=rolls,
+        narrative=(
+            f"Naval bombardment: {len(inp.naval_units)} shots, "
+            f"{len(losses)} units destroyed."
+        ),
     )

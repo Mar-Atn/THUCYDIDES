@@ -44,6 +44,13 @@ Port from `2 SEED/D_ENGINES/*.py`. These files contain the validated engine logi
 | DET_B1 | Database schema — what gets persisted |
 | SEED engine code | Reference implementation to port from |
 
+## Map + Units: Source of Truth
+
+- **`app/engine/config/map_config.py` is THE source** for global/theater grid dimensions and the canonical theater↔global linkage table. Any new engine code touching map grids, theater linkage, or coord conversions MUST import from this module — never hardcode dimensions, link mappings, or coord tables elsewhere.
+- JS counterpart: `app/test-interface/static/map_config.js`. Keep the two in lock-step.
+- Unit entity contract: see `3 DETAILED DESIGN/DET_UNIT_MODEL_v1.md`. Pydantic model lives in `app/engine/models/unit.py` (to be created). Validation library: `app/engine/services/unit_validator.py` (to be created).
+- Coord convention: `(row, col)`, row first, 1-indexed. Global: [1..10]×[1..20]. Theater: [1..10]×[1..10]. Never deviate.
+
 ## Architecture Rules
 
 - **No direct engine-to-engine calls.** The orchestrator mediates all inter-engine communication. Economic engine does not import military engine.
@@ -58,26 +65,50 @@ Port from `2 SEED/D_ENGINES/*.py`. These files contain the validated engine logi
 - **Atomic updates:** How KING ensures DB consistency during multi-step operations
 - Location: `/Users/marat/CODING/KING/app/`
 
-## File Structure
+## File Structure (updated 2026-04-06 — post-reunification)
 
 ```
 engine/
-├── CLAUDE.md           ← THIS FILE
-├── main.py             ← FastAPI app, route registration
+├── CLAUDE.md              ← THIS FILE
+├── main.py                ← FastAPI app, route registration
 ├── config/
-│   ├── settings.py     ← Environment-based configuration
-│   └── llm_config.py   ← LLM provider configuration
-├── engines/
-│   ├── economic.py     ← GDP, trade, sanctions, tariffs
-│   ├── military.py     ← Combat, deterrence, force projection
-│   ├── political.py    ← Stability, elections, alliances
-│   ├── technology.py   ← R&D, tech transfer
-│   └── orchestrator.py ← Round resolution, domain integration
-├── models/
-│   ├── game_state.py   ← Core game state model
-│   ├── actions.py      ← Player/AI action schemas
-│   └── results.py      ← Engine output models
-└── services/
-    ├── ai_service.py   ← Provider-agnostic LLM interface
-    └── db_service.py   ← Supabase client operations
+│   ├── settings.py        ← Environment + LLM model config (dual-provider)
+│   └── map_config.py      ← Map grids, theater linkage, hex topology
+├── engines/               ← CANONICAL — all engine work goes here
+│   ├── economic.py        ← GDP, trade, sanctions, tariffs (2K lines, pure)
+│   ├── military.py        ← Combat (unit-level v2 + zone-deprecated v1) (2.5K lines)
+│   ├── political.py       ← Stability, elections, alliances (836 lines, pure)
+│   ├── technology.py      ← R&D, tech transfer (357 lines, pure)
+│   ├── orchestrator.py    ← Designed orchestrator (sim_runs-based, 543 lines)
+│   └── round_tick.py      ← NEW: per-round engine tick bridge (scenario-based)
+├── agents/                ← AI participant code
+│   ├── leader.py          ← CANONICAL LeaderAgent (4-block cognitive model)
+│   ├── leader_round.py    ← CANONICAL single-agent round runner (tool-use)
+│   ├── full_round_runner.py ← 20-agent parallel runner (Observatory)
+│   ├── profiles.py        ← Role + country data loaders
+│   ├── memory.py          ← CognitiveState persistent memory
+│   ├── decisions.py       ← Per-category decision functions (budget, tariff, etc.)
+│   ├── tools.py           ← Domain tools (get_my_forces, commit_action, etc.)
+│   ├── stage*_test.py     ← DEPRECATED — replaced by leader_round.py
+│   └── runner.py          ← DESIGNED full-sim runner (in-memory, for later)
+├── context/               ← Context Assembly Service (SEED D9)
+│   ├── assembler.py       ← Block-based context builder
+│   └── blocks.py          ← Block registry + builders
+├── round_engine/          ← DEPRECATED — being replaced by engines/*
+│   ├── resolve_round.py   ← Decision processor (still used for combat/movement)
+│   ├── combat.py          ← DEPRECATED — use engines/military.py v2
+│   └── movement.py        ← DEPRECATED — will merge into engines/
+├── services/
+│   ├── llm.py             ← Dual-provider plain-text LLM calls
+│   ├── llm_tools.py       ← Dual-provider tool-use adapter (Anthropic ↔ Gemini)
+│   └── supabase.py        ← Supabase client operations
+└── models/
+    └── db.py              ← Pydantic models for DB tables
 ```
+
+## Deprecation rules (2026-04-06)
+
+- **NEVER add new logic to `round_engine/`** — all combat/movement work goes in `engines/military.py` (unit-level v2 section)
+- **NEVER add new agent test stages** — use `agents/leader_round.py` for tool-use agent loops
+- **NEVER bypass `services/llm_tools.py`** for tool-use calls — it handles dual-provider routing
+- **All engine functions are PURE** (no DB calls). DB access lives in orchestrator/round_tick/services only.

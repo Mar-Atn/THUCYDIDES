@@ -1,8 +1,18 @@
 # CLAUDE.md — Thucydides Trap (TTT) Project
 
-**Version:** 2.0 | **Date:** 2026-04-01 | **Phase:** BUILD
+**Version:** 2.1 | **Date:** 2026-04-06 | **Phase:** BUILD — UNMANNED SPACECRAFT
 **Owner:** Marat Atn (marat@metagames.org)
 **Any change to this file must be confirmed by Marat.**
+
+---
+
+## CURRENT PHASE: UNMANNED SPACECRAFT
+
+**Start here:** `PHASES/UNMANNED_SPACECRAFT/PHASE.md` — scope, plan, definition of done.
+**Reference cards:** `PHASES/UNMANNED_SPACECRAFT/CARD_*.md` — actions, formulas, architecture, template.
+**All pointers:** `PHASES/UNMANNED_SPACECRAFT/REFERENCES.md` — DB tables, code entry points, heritage docs.
+
+Every session: check PHASE.md first. Validate every implementation against the reference cards. Do not invent — look up.
 
 ---
 
@@ -135,6 +145,25 @@ Five sprints (~11 weeks):
 
 TESTER is independent. Never modifies source. Detailed protocol in `/app/tests/CLAUDE.md`
 
+### Acceptance Gate (mandatory before reporting DONE)
+
+Before any feature is reported as DONE or COMPLETE to Marat:
+
+1. **Verify end-to-end:** The feature must produce the CLAIMED result in the DB/UI. Not "code exists" — actually works.
+2. **Independent validation:** Run an L2 integration test OR query the DB to confirm the feature's output is real. If the feature claims "29 transactions executed" — verify at least 1 transaction actually changed asset ownership in the DB.
+3. **Honest status reporting:**
+   - **DONE** = feature works end-to-end, verified by test
+   - **WIRED** = code path exists, events logged, but outcome not yet verified or incomplete
+   - **STUB** = placeholder, logged only, no real processing
+   - NEVER report WIRED as DONE. NEVER report counts of logged-but-unprocessed events as if they were successful outcomes.
+4. **Quality checklist before DONE claim:**
+   - [ ] L1 tests pass
+   - [ ] Feature produces real DB state change (not just event log)
+   - [ ] At least 1 concrete example verified in DB
+   - [ ] Edge cases considered (what if counterpart doesn't respond? what if asset insufficient?)
+
+Violation of this protocol erodes trust and creates false progress signals.
+
 ---
 
 ## 9. Integrity Protocol
@@ -158,6 +187,8 @@ TEMPLATE (master SIM design — evolves over months)
   └── SCENARIO (configured for event — limited customization)
         └── SIM-RUN (one execution — immutable once started)
 ```
+
+**Template v1.0 milestone reached 2026-04-05.** Canonical map + units spec: `2 SEED/C_MECHANICS/SEED_C_MAP_UNITS_MASTER_v1.md`. DB schema draft: `CONCEPT TEST/db_schema_v1.sql`. Unit engineering contract: `3 DETAILED DESIGN/DET_UNIT_MODEL_v1.md`. Reconciliation status: `CONCEPT TEST/CHANGES_LOG.md`.
 
 ---
 

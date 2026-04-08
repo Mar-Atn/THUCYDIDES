@@ -1,0 +1,346 @@
+unit_id,country_id,unit_type,global_row,global_col,theater,theater_row,theater_col,embarked_on,status,notes
+col_g_01,columbia,ground,,,,,,col_n_06,embarked,Columbia embarked
+col_g_02,columbia,ground,,,,,,col_n_03,embarked,Columbia embarked
+col_g_03,columbia,ground,,,,,,col_n_03,embarked,Columbia embarked
+col_g_04,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_05,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_06,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_07,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_08,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_09,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_10,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_11,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_12,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_13,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_14,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_15,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_16,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_17,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_18,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_19,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_20,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_21,columbia,ground,,,,,,,reserve,Columbia reserve
+col_g_22,columbia,ground,,,,,,,reserve,Columbia reserve
+col_a_01,columbia,tactical_air,,,,,,col_n_r1,embarked,Columbia embarked
+col_a_02,columbia,tactical_air,,,,,,col_n_10,embarked,Columbia embarked
+col_a_03,columbia,tactical_air,,,,,,col_n_05,embarked,Columbia embarked
+col_a_04,columbia,tactical_air,,,,,,col_n_04,embarked,Columbia embarked
+col_a_05,columbia,tactical_air,8,11,mashriq,10,5,,active,Columbia forward deployment
+col_a_06,columbia,tactical_air,8,11,mashriq,10,4,,active,Columbia forward deployment
+col_a_07,columbia,tactical_air,8,11,mashriq,10,5,,active,Columbia forward deployment
+col_a_08,columbia,tactical_air,7,11,mashriq,4,1,,active,Columbia forward deployment
+col_a_09,columbia,tactical_air,7,11,mashriq,4,1,,active,Columbia forward deployment
+col_a_10,columbia,tactical_air,,,,,,col_n_03,embarked,Columbia embarked
+col_a_11,columbia,tactical_air,,,,,,col_n_07,embarked,Columbia embarked
+col_a_12,columbia,tactical_air,,,,,,col_n_08,embarked,Columbia embarked
+col_a_13,columbia,tactical_air,,,,,,col_n_09,embarked,Columbia embarked
+col_a_r1,columbia,tactical_air,,,,,,,reserve,Columbia reserve
+col_a_r2,columbia,tactical_air,,,,,,,reserve,Columbia reserve
+col_m_01,columbia,strategic_missile,3,3,,,,,active,Columbia forward deployment
+col_m_02,columbia,strategic_missile,3,3,,,,,active,Columbia forward deployment
+col_m_03,columbia,strategic_missile,5,5,,,,,active,Columbia forward deployment
+col_m_04,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_05,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_06,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_07,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_08,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_09,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_10,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_11,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_m_12,columbia,strategic_missile,,,,,,,reserve,Columbia reserve
+col_d_01,columbia,air_defense,5,4,,,,,active,Columbia forward deployment
+col_d_02,columbia,air_defense,4,2,,,,,active,Columbia home garrison
+col_d_03,columbia,air_defense,7,4,,,,,active,Columbia forward deployment
+col_d_04,columbia,air_defense,8,11,mashriq,10,4,,active,Columbia forward deployment
+col_d_05,columbia,air_defense,,,,,,,reserve,Columbia reserve
+col_d_06,columbia,air_defense,,,,,,,reserve,Columbia reserve
+col_n_01,columbia,naval,8,4,,,,,active,Columbia forward deployment
+col_n_02,columbia,naval,9,6,,,,,active,Columbia fleet
+col_n_03,columbia,naval,10,12,,,,,active,Columbia home garrison
+col_n_04,columbia,naval,9,12,,,,,active,Columbia fleet
+col_n_05,columbia,naval,9,13,,,,,active,Columbia fleet
+col_n_06,columbia,naval,4,5,,,,,active,Columbia fleet
+col_n_07,columbia,naval,9,18,,,,,active,Columbia fleet
+col_n_08,columbia,naval,8,18,,,,,active,Columbia fleet
+col_n_09,columbia,naval,5,20,,,,,active,Columbia home garrison
+col_n_10,columbia,naval,8,12,mashriq,10,7,,active,Columbia fleet
+col_n_r1,columbia,naval,8,12,mashriq,7,4,,active,Columbia fleet
+cat_g_01,cathay,ground,6,16,,,,,active,Cathay forward deployment
+cat_g_02,cathay,ground,7,16,,,,,active,Cathay forward deployment
+cat_g_03,cathay,ground,5,17,,,,,active,Cathay forward deployment
+cat_g_04,cathay,ground,5,15,,,,,active,Cathay home garrison
+cat_g_05,cathay,ground,6,15,,,,,active,Cathay home garrison
+cat_g_06,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_07,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_08,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_09,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_10,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_11,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_12,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_13,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_14,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_15,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_16,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_17,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_18,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_19,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_20,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_21,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_r1,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_r2,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_r3,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_g_r4,cathay,ground,,,,,,,reserve,Cathay reserve
+cat_a_01,cathay,tactical_air,,,,,,cat_n_02,embarked,Cathay embarked
+cat_a_02,cathay,tactical_air,,,,,,cat_n_06,embarked,Cathay embarked
+cat_a_03,cathay,tactical_air,,,,,,cat_n_01,embarked,Cathay embarked
+cat_a_04,cathay,tactical_air,,,,,,cat_n_01,embarked,Cathay embarked
+cat_a_05,cathay,tactical_air,7,16,,,,,active,Cathay forward deployment
+cat_a_06,cathay,tactical_air,6,16,,,,,active,Cathay forward deployment
+cat_a_07,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_a_08,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_a_09,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_a_10,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_a_11,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_a_r1,cathay,tactical_air,,,,,,,reserve,Cathay reserve
+cat_m_01,cathay,strategic_missile,6,15,,,,,active,Cathay home garrison
+cat_m_02,cathay,strategic_missile,6,15,,,,,active,Cathay home garrison
+cat_m_03,cathay,strategic_missile,,,,,,,reserve,Cathay reserve
+cat_m_r1,cathay,strategic_missile,,,,,,,reserve,Cathay reserve
+cat_d_01,cathay,air_defense,6,15,,,,,active,Cathay home garrison
+cat_d_02,cathay,air_defense,5,17,,,,,active,Cathay forward deployment
+cat_d_03,cathay,air_defense,,,,,,,reserve,Cathay reserve
+cat_n_01,cathay,naval,7,17,,,,,active,Cathay fleet
+cat_n_02,cathay,naval,6,17,,,,,active,Cathay forward deployment
+cat_n_03,cathay,naval,,,,,,,reserve,Cathay reserve
+cat_n_04,cathay,naval,,,,,,,reserve,Cathay reserve
+cat_n_05,cathay,naval,7,17,,,,,active,Cathay fleet
+cat_n_06,cathay,naval,8,16,,,,,active,Cathay fleet
+cat_n_r1,cathay,naval,,,,,,,reserve,Cathay reserve
+sar_g_01,sarmatia,ground,4,11,eastern_ereb,4,5,,active,Sarmatia forward deployment
+sar_g_02,sarmatia,ground,4,11,eastern_ereb,5,6,,active,Sarmatia forward deployment
+sar_g_03,sarmatia,ground,4,11,eastern_ereb,5,7,,active,Sarmatia forward deployment
+sar_g_04,sarmatia,ground,4,11,eastern_ereb,6,7,,active,Sarmatia forward deployment
+sar_g_05,sarmatia,ground,4,11,eastern_ereb,7,8,,active,Sarmatia forward deployment
+sar_g_06,sarmatia,ground,4,11,eastern_ereb,7,7,,active,Sarmatia forward deployment
+sar_g_07,sarmatia,ground,4,11,eastern_ereb,6,7,,active,Sarmatia forward deployment
+sar_g_08,sarmatia,ground,4,11,eastern_ereb,7,6,,active,Sarmatia forward deployment
+sar_g_09,sarmatia,ground,4,11,eastern_ereb,8,5,,active,Sarmatia forward deployment
+sar_g_10,sarmatia,ground,4,11,eastern_ereb,8,5,,active,Sarmatia forward deployment
+sar_g_11,sarmatia,ground,4,11,eastern_ereb,5,6,,active,Sarmatia forward deployment
+sar_g_12,sarmatia,ground,4,11,eastern_ereb,7,7,,active,Sarmatia forward deployment
+sar_g_13,sarmatia,ground,4,12,eastern_ereb,6,8,,active,Sarmatia forward deployment
+sar_g_14,sarmatia,ground,4,16,,,,,active,Sarmatia forward deployment
+sar_g_15,sarmatia,ground,2,11,,,,,active,Sarmatia home garrison
+sar_g_16,sarmatia,ground,4,13,,,,,active,Sarmatia forward deployment
+sar_g_17,sarmatia,ground,,,,,,,reserve,Sarmatia reserve
+sar_g_r1,sarmatia,ground,,,,,,,reserve,Sarmatia reserve
+sar_a_01,sarmatia,tactical_air,4,11,eastern_ereb,5,6,,active,Sarmatia forward deployment
+sar_a_02,sarmatia,tactical_air,4,11,eastern_ereb,5,7,,active,Sarmatia forward deployment
+sar_a_03,sarmatia,tactical_air,4,11,eastern_ereb,4,5,,active,Sarmatia forward deployment
+sar_a_04,sarmatia,tactical_air,4,11,eastern_ereb,7,6,,active,Sarmatia forward deployment
+sar_a_05,sarmatia,tactical_air,4,11,eastern_ereb,7,7,,active,Sarmatia forward deployment
+sar_a_06,sarmatia,tactical_air,4,11,eastern_ereb,9,5,,active,Sarmatia forward deployment
+sar_a_07,sarmatia,tactical_air,,,,,,,reserve,Sarmatia reserve
+sar_a_r1,sarmatia,tactical_air,,,,,,,reserve,Sarmatia reserve
+sar_m_01,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_02,sarmatia,strategic_missile,2,16,,,,,active,Sarmatia forward deployment
+sar_m_03,sarmatia,strategic_missile,2,12,,,,,active,Sarmatia home garrison
+sar_m_04,sarmatia,strategic_missile,2,12,,,,,active,Sarmatia home garrison
+sar_m_05,sarmatia,strategic_missile,2,16,,,,,active,Sarmatia forward deployment
+sar_m_06,sarmatia,strategic_missile,2,12,,,,,active,Sarmatia home garrison
+sar_m_07,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_08,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_09,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_10,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_11,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_m_r1,sarmatia,strategic_missile,,,,,,,reserve,Sarmatia reserve
+sar_d_01,sarmatia,air_defense,3,12,eastern_ereb,1,5,,active,Sarmatia home garrison
+sar_d_02,sarmatia,air_defense,3,12,eastern_ereb,4,9,,active,Sarmatia home garrison
+sar_d_03,sarmatia,air_defense,3,16,,,,,active,Sarmatia forward deployment
+sar_n_01,sarmatia,naval,5,12,eastern_ereb,8,4,,active,Sarmatia forward deployment
+sar_n_02,sarmatia,naval,2,17,,,,,active,Sarmatia forward deployment
+rut_g_01,ruthenia,ground,4,11,eastern_ereb,6,6,,active,Ruthenia forward deployment
+rut_g_02,ruthenia,ground,4,11,eastern_ereb,6,6,,active,Ruthenia forward deployment
+rut_g_05,ruthenia,ground,4,11,eastern_ereb,5,5,,active,Ruthenia forward deployment
+rut_g_06,ruthenia,ground,4,11,eastern_ereb,4,4,,active,Ruthenia forward deployment
+rut_g_07,ruthenia,ground,4,11,eastern_ereb,5,5,,active,Ruthenia forward deployment
+rut_g_08,ruthenia,ground,4,11,eastern_ereb,7,5,,active,Ruthenia forward deployment
+rut_g_09,ruthenia,ground,4,11,eastern_ereb,6,5,,active,Ruthenia forward deployment
+rut_g_10,ruthenia,ground,4,11,eastern_ereb,3,3,,active,Ruthenia forward deployment
+rut_a_01,ruthenia,tactical_air,4,11,eastern_ereb,6,6,,active,Ruthenia forward deployment
+rut_a_02,ruthenia,tactical_air,4,11,eastern_ereb,5,5,,active,Ruthenia forward deployment
+rut_a_03,ruthenia,tactical_air,4,11,eastern_ereb,7,5,,active,Ruthenia forward deployment
+rut_d_01,ruthenia,air_defense,4,11,eastern_ereb,6,2,,active,Ruthenia forward deployment
+per_g_01,persia,ground,6,12,mashriq,2,4,,active,Persia home garrison
+per_g_02,persia,ground,6,12,mashriq,3,5,,active,Persia home garrison
+per_g_03,persia,ground,7,13,mashriq,5,7,,active,Persia forward deployment
+per_g_04,persia,ground,7,13,mashriq,4,5,,active,Persia forward deployment
+per_g_05,persia,ground,7,13,mashriq,6,8,,active,Persia forward deployment
+per_g_06,persia,ground,8,13,mashriq,8,6,,active,Persia forward deployment
+per_g_07,persia,ground,8,13,mashriq,9,9,,active,Persia forward deployment
+per_g_r1,persia,ground,8,13,mashriq,7,8,,active,Persia forward deployment
+per_a_01,persia,tactical_air,8,13,mashriq,8,6,,active,Persia forward deployment
+per_a_02,persia,tactical_air,8,13,mashriq,8,6,,active,Persia forward deployment
+per_a_03,persia,tactical_air,6,12,mashriq,2,4,,active,Persia home garrison
+per_a_04,persia,tactical_air,6,12,mashriq,3,5,,active,Persia home garrison
+per_a_05,persia,tactical_air,8,13,mashriq,9,9,,active,Persia forward deployment
+per_a_r1,persia,tactical_air,8,13,mashriq,8,6,,active,Persia forward deployment
+per_d_01,persia,air_defense,8,13,mashriq,7,7,,active,Persia forward deployment
+gal_g_01,gallia,ground,5,10,,,,,active,Gallia forward deployment
+gal_g_02,gallia,ground,,,,,,,reserve,Gallia reserve
+gal_g_03,gallia,ground,,,,,,,reserve,Gallia reserve
+gal_g_04,gallia,ground,,,,,,,reserve,Gallia reserve
+gal_g_05,gallia,ground,,,,,,,reserve,Gallia reserve
+gal_g_r1,gallia,ground,,,,,,,reserve,Gallia reserve
+gal_a_01,gallia,tactical_air,,,,,,gal_n_01,embarked,Gallia embarked
+gal_a_02,gallia,tactical_air,5,10,,,,,active,Gallia forward deployment
+gal_a_03,gallia,tactical_air,,,,,,,reserve,Gallia reserve
+gal_a_04,gallia,tactical_air,,,,,,,reserve,Gallia reserve
+gal_m_01,gallia,strategic_missile,5,9,,,,,active,Gallia forward deployment
+gal_m_r1,gallia,strategic_missile,,,,,,,reserve,Gallia reserve
+gal_d_01,gallia,air_defense,,,,,,,reserve,Gallia reserve
+gal_n_01,gallia,naval,6,9,,,,,active,Gallia fleet
+teu_g_01,teutonia,ground,4,10,,,,,active,Teutonia forward deployment
+teu_g_02,teutonia,ground,4,10,,,,,active,Teutonia forward deployment
+teu_g_03,teutonia,ground,,,,,,,reserve,Teutonia reserve
+teu_g_04,teutonia,ground,,,,,,,reserve,Teutonia reserve
+teu_g_05,teutonia,ground,,,,,,,reserve,Teutonia reserve
+teu_g_r1,teutonia,ground,,,,,,,reserve,Teutonia reserve
+teu_a_01,teutonia,tactical_air,4,10,,,,,active,Teutonia forward deployment
+teu_a_02,teutonia,tactical_air,4,10,,,,,active,Teutonia forward deployment
+teu_a_03,teutonia,tactical_air,,,,,,,reserve,Teutonia reserve
+teu_d_01,teutonia,air_defense,4,9,,,,,active,Teutonia forward deployment
+fre_g_01,freeland,ground,2,10,,,,,active,Freeland forward deployment
+fre_g_02,freeland,ground,2,10,,,,,active,Freeland forward deployment
+fre_g_03,freeland,ground,2,10,,,,,active,Freeland forward deployment
+fre_g_04,freeland,ground,,,,,,,reserve,Freeland reserve
+fre_g_r1,freeland,ground,,,,,,,reserve,Freeland reserve
+fre_a_01,freeland,tactical_air,2,10,,,,,active,Freeland forward deployment
+fre_a_02,freeland,tactical_air,,,,,,,reserve,Freeland reserve
+fre_d_01,freeland,air_defense,3,10,,,,,active,Freeland forward deployment
+pon_g_01,ponte,ground,7,9,,,,,active,Ponte forward deployment
+pon_g_02,ponte,ground,,,,,,,reserve,Ponte reserve
+pon_g_03,ponte,ground,,,,,,,reserve,Ponte reserve
+pon_g_r1,ponte,ground,,,,,,,reserve,Ponte reserve
+pon_a_01,ponte,tactical_air,7,9,,,,,active,Ponte forward deployment
+pon_a_02,ponte,tactical_air,,,,,,,reserve,Ponte reserve
+alb_g_01,albion,ground,4,7,,,,,active,Albion forward deployment
+alb_g_02,albion,ground,,,,,,alb_n_02,embarked,Albion embarked
+alb_g_03,albion,ground,,,,,,,reserve,Albion reserve
+alb_g_04,albion,ground,,,,,,,reserve,Albion reserve
+alb_a_01,albion,tactical_air,3,8,,,,,active,Albion forward deployment
+alb_a_02,albion,tactical_air,,,,,,alb_n_02,embarked,Albion embarked
+alb_a_03,albion,tactical_air,,,,,,alb_n_01,embarked,Albion embarked
+alb_m_01,albion,strategic_missile,,,,,,,reserve,Albion reserve
+alb_m_02,albion,strategic_missile,,,,,,,reserve,Albion reserve
+alb_d_01,albion,air_defense,3,8,,,,,active,Albion forward deployment
+alb_n_01,albion,naval,7,10,,,,,active,Albion forward deployment
+alb_n_02,albion,naval,9,11,,,,,active,Albion fleet
+bha_g_01,bharata,ground,8,14,,,,,active,Bharata home garrison
+bha_g_02,bharata,ground,7,14,,,,,active,Bharata home garrison
+bha_g_03,bharata,ground,7,14,,,,,active,Bharata home garrison
+bha_g_04,bharata,ground,7,15,,,,,active,Bharata forward deployment
+bha_g_05,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_06,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_07,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_08,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_09,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_10,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_r1,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_g_r2,bharata,ground,,,,,,,reserve,Bharata reserve
+bha_a_01,bharata,tactical_air,,,,,,bha_n_01,embarked,Bharata embarked
+bha_a_02,bharata,tactical_air,8,14,,,,,active,Bharata home garrison
+bha_a_03,bharata,tactical_air,,,,,,,reserve,Bharata reserve
+bha_a_04,bharata,tactical_air,,,,,,,reserve,Bharata reserve
+bha_d_01,bharata,air_defense,7,15,,,,,active,Bharata forward deployment
+bha_d_02,bharata,air_defense,9,15,,,,,active,Bharata forward deployment
+bha_n_01,bharata,naval,9,14,,,,,active,Bharata fleet
+bha_n_02,bharata,naval,10,17,,,,,active,Bharata home garrison
+lev_g_01,levantia,ground,6,10,,,,,active,Levantia forward deployment
+lev_g_02,levantia,ground,6,10,,,,,active,Levantia forward deployment
+lev_g_03,levantia,ground,6,10,,,,,active,Levantia forward deployment
+lev_g_04,levantia,ground,,,,,,,reserve,Levantia reserve
+lev_g_05,levantia,ground,,,,,,,reserve,Levantia reserve
+lev_g_06,levantia,ground,,,,,,,reserve,Levantia reserve
+lev_a_01,levantia,tactical_air,6,10,,,,,active,Levantia forward deployment
+lev_a_02,levantia,tactical_air,6,10,,,,,active,Levantia forward deployment
+lev_a_03,levantia,tactical_air,6,10,,,,,active,Levantia forward deployment
+lev_a_04,levantia,tactical_air,,,,,,,reserve,Levantia reserve
+lev_d_01,levantia,air_defense,6,10,,,,,active,Levantia forward deployment
+lev_d_02,levantia,air_defense,6,10,,,,,active,Levantia forward deployment
+lev_d_03,levantia,air_defense,,,,,,,reserve,Levantia reserve
+for_g_01,formosa,ground,7,18,,,,,active,Formosa forward deployment
+for_g_02,formosa,ground,7,18,,,,,active,Formosa forward deployment
+for_g_03,formosa,ground,,,,,,,reserve,Formosa reserve
+for_g_04,formosa,ground,,,,,,,reserve,Formosa reserve
+for_a_01,formosa,tactical_air,7,18,,,,,active,Formosa forward deployment
+for_a_02,formosa,tactical_air,7,18,,,,,active,Formosa forward deployment
+for_a_03,formosa,tactical_air,,,,,,,reserve,Formosa reserve
+for_d_01,formosa,air_defense,7,18,,,,,active,Formosa forward deployment
+for_d_02,formosa,air_defense,7,18,,,,,active,Formosa forward deployment
+phr_g_01,phrygia,ground,6,11,mashriq,2,2,,active,Phrygia forward deployment
+phr_g_02,phrygia,ground,6,11,mashriq,1,3,,active,Phrygia forward deployment
+phr_g_03,phrygia,ground,6,11,mashriq,2,2,,active,Phrygia forward deployment
+phr_g_04,phrygia,ground,6,11,mashriq,2,1,,active,Phrygia forward deployment
+phr_g_05,phrygia,ground,,,,,,,reserve,Phrygia reserve
+phr_g_06,phrygia,ground,,,,,,,reserve,Phrygia reserve
+phr_a_01,phrygia,tactical_air,6,11,mashriq,1,3,,active,Phrygia forward deployment
+phr_a_02,phrygia,tactical_air,6,11,mashriq,2,2,,active,Phrygia forward deployment
+phr_a_03,phrygia,tactical_air,,,,,,,reserve,Phrygia reserve
+phr_d_01,phrygia,air_defense,6,11,mashriq,1,1,,active,Phrygia forward deployment
+phr_n_01,phrygia,naval,7,12,mashriq,4,2,,active,Phrygia forward deployment
+yam_g_01,yamato,ground,,,,,,,reserve,Yamato reserve
+yam_g_02,yamato,ground,,,,,,,reserve,Yamato reserve
+yam_g_03,yamato,ground,,,,,,,reserve,Yamato reserve
+yam_a_01,yamato,tactical_air,,,,,,,reserve,Yamato reserve
+yam_a_02,yamato,tactical_air,,,,,,yam_n_01,embarked,Yamato embarked
+yam_a_03,yamato,tactical_air,5,19,,,,,active,Yamato forward deployment
+yam_d_01,yamato,air_defense,5,19,,,,,active,Yamato forward deployment
+yam_d_02,yamato,air_defense,,,,,,,reserve,Yamato reserve
+yam_n_01,yamato,naval,6,19,,,,,active,Yamato fleet
+yam_n_02,yamato,naval,,,,,,,reserve,Yamato reserve
+sol_g_01,solaria,ground,7,11,mashriq,5,1,,active,Solaria forward deployment
+sol_g_02,solaria,ground,7,11,mashriq,7,1,,active,Solaria forward deployment
+sol_g_03,solaria,ground,,,,,,,reserve,Solaria reserve
+sol_a_01,solaria,tactical_air,7,11,mashriq,6,1,,active,Solaria forward deployment
+sol_a_02,solaria,tactical_air,7,11,mashriq,6,1,,active,Solaria forward deployment
+sol_a_03,solaria,tactical_air,,,,,,,reserve,Solaria reserve
+sol_d_01,solaria,air_defense,7,11,mashriq,7,1,,active,Solaria forward deployment
+cho_g_01,choson,ground,3,18,,,,,active,Choson forward deployment
+cho_g_02,choson,ground,3,18,,,,,active,Choson forward deployment
+cho_g_03,choson,ground,3,18,,,,,active,Choson forward deployment
+cho_g_04,choson,ground,3,12,eastern_ereb,3,4,,active,Choson forward deployment
+cho_g_05,choson,ground,3,12,eastern_ereb,3,5,,active,Choson forward deployment
+cho_g_06,choson,ground,3,12,eastern_ereb,2,3,,active,Choson forward deployment
+cho_g_07,choson,ground,,,,,,,reserve,Choson reserve
+cho_g_r1,choson,ground,,,,,,,reserve,Choson reserve
+cho_a_01,choson,tactical_air,3,18,,,,,active,Choson forward deployment
+cho_m_01,choson,strategic_missile,3,18,,,,,active,Choson forward deployment
+cho_d_01,choson,air_defense,,,,,,,reserve,Choson reserve
+han_g_01,hanguk,ground,4,17,,,,,active,Hanguk forward deployment
+han_g_02,hanguk,ground,4,17,,,,,active,Hanguk forward deployment
+han_g_03,hanguk,ground,,,,,,,reserve,Hanguk reserve
+han_g_04,hanguk,ground,,,,,,,reserve,Hanguk reserve
+han_g_05,hanguk,ground,,,,,,,reserve,Hanguk reserve
+han_a_01,hanguk,tactical_air,4,17,,,,,active,Hanguk forward deployment
+han_a_02,hanguk,tactical_air,4,17,,,,,active,Hanguk forward deployment
+han_a_03,hanguk,tactical_air,,,,,,,reserve,Hanguk reserve
+han_d_01,hanguk,air_defense,4,17,,,,,active,Hanguk forward deployment
+han_d_02,hanguk,air_defense,4,17,,,,,active,Hanguk forward deployment
+han_n_01,hanguk,naval,4,18,,,,,active,Hanguk forward deployment
+car_g_01,caribe,ground,9,5,,,,,active,Caribe forward deployment
+car_g_02,caribe,ground,9,5,,,,,active,Caribe forward deployment
+car_g_r1,caribe,ground,,,,,,,reserve,Caribe reserve
+mir_g_01,mirage,ground,8,11,mashriq,10,3,,active,Mirage forward deployment
+mir_g_02,mirage,ground,8,11,mashriq,9,3,,active,Mirage forward deployment
+mir_a_01,mirage,tactical_air,,,,,,,reserve,Mirage reserve
+mir_a_02,mirage,tactical_air,,,,,,,reserve,Mirage reserve
+mir_d_02,mirage,air_defense,,,,,,,reserve,Mirage reserve
+alb_d_02,albion,air_defense,4,7,,,,,active,Albion forward deployment
+cho_m_02,choson,strategic_missile,,,,,,,reserve,Choson reserve
+rut_g_11,ruthenia,ground,4,11,eastern_ereb,4,3,,active,Ruthenia forward deployment
+rut_g_12,ruthenia,ground,4,11,eastern_ereb,6,5,,active,Ruthenia forward deployment
+lev_m_01,levantia,strategic_missile,6,10,,,,,active,Levantia forward deployment
+lev_m_02,levantia,strategic_missile,,,,,,,reserve,Levantia reserve
+lev_m_03,levantia,strategic_missile,,,,,,,reserve,Levantia reserve
+rut_g_13,ruthenia,ground,3,11,,,,,active,Ruthenia forward deployment

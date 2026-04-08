@@ -5,6 +5,12 @@
 **Architecture reference:** KING SIM (`/KING/app/src/services/ai/`)
 **Dependencies:** Context Assembly Service (D9), NOUS (D10), Engine (D8)
 
+> **RECONCILIATION NOTE (2026-04-07):** This remains the VISION document for AI participants.
+> Implementation progress tracked in `PHASES/UNMANNED_SPACECRAFT/PHASE.md`
+> 4-block cognitive model: implemented. Active loop: not yet wired.
+> Bilateral conversations: code exists, not in round flow. Multi-role (40 roles): planned Sprint C.
+> Action catalog: 32 actions (consolidated from 51). See CARD_ACTIONS.md.
+
 ---
 
 ## 1. Overview

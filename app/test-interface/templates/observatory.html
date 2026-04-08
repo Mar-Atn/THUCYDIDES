@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT — Observatory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/map.css">
+<link rel="stylesheet" href="/static/observatory.css">
+</head>
+<body class="obs-body">
+
+<!-- Inline SVG defs for unit icons (shared with map viewer) -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+  <defs>
+    <symbol id="unit-naval" viewBox="0 0 24 24">
+      <path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="unit-ground-right" viewBox="0 0 24 24">
+      <path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="currentColor"/>
+      <path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="currentColor"/>
+      <path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="unit-ground-left" viewBox="0 0 24 24">
+      <path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="currentColor"/>
+      <path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="currentColor"/>
+      <path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="currentColor"/>
+    </symbol>
+    <symbol id="unit-tactical-air" viewBox="0 0 24 24">
+      <path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="currentColor"/>
+      <circle cx="12" cy="5" r="2" fill="currentColor"/>
+    </symbol>
+    <symbol id="unit-air-defense" viewBox="0 0 24 24">
+      <path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="currentColor"/>
+      <rect x="11" y="9" width="2" height="11" fill="currentColor"/>
+      <rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/>
+    </symbol>
+    <symbol id="unit-strategic-missile" viewBox="0 0 24 24">
+      <path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<!-- Top bar: round counter + controls (persists across all screens) -->
+<header class="obs-topbar">
+  <div class="obs-topbar-left">
+    <h1 class="obs-title">TTT <span class="obs-title-sub">Observatory</span></h1>
+    <div class="obs-round-badge">
+      ROUND <span id="roundCurrent">0</span><span class="obs-round-sep">/</span><span id="roundTotal">6</span>
+    </div>
+    <div class="obs-status-badge" id="runStatusBadge" data-status="idle">IDLE</div>
+    <div class="obs-timer-badge" id="runTimer" title="Total elapsed time since run start">⏱ 00:00</div>
+    <div class="obs-timer-badge obs-timer-round" id="roundTimer" title="Current round elapsed">◷ 00:00</div>
+    <div class="obs-runname-badge" id="runName" title="Current run name"></div>
+  </div>
+  <div class="obs-topbar-center">
+    <button class="obs-ctrl-btn obs-ctrl-reset"  id="btnNewRun" title="Wipe data + start fresh from Template v1.0">🆕 New Run</button>
+    <button class="obs-ctrl-btn obs-ctrl-start"  id="btnStart"  title="Start or resume auto-advance">▶ Start</button>
+    <button class="obs-ctrl-btn obs-ctrl-pause"  id="btnPause"  title="Pause after current round">⏸ Pause</button>
+    <button class="obs-ctrl-btn obs-ctrl-resume" id="btnResume" title="Resume">▶ Resume</button>
+    <button class="obs-ctrl-btn obs-ctrl-stop"   id="btnStop"   title="Stop — finish current agent then halt">⏹ Stop</button>
+    <button class="obs-ctrl-btn obs-ctrl-rewind" id="btnRewind" title="Rewind to previous round">⏮ Rewind</button>
+    <label class="obs-speed-label">
+      Speed:
+      <select id="speedSelect" class="obs-speed-select">
+        <option value="5">5s</option>
+        <option value="15" selected>15s</option>
+        <option value="30">30s</option>
+        <option value="0">manual</option>
+      </select>
+    </label>
+  </div>
+  <div class="obs-topbar-right">
+    <span class="status-pill" id="obsStatusPill">Loading…</span>
+    <a href="/" class="home-link">&larr; Test Interface</a>
+  </div>
+</header>
+
+<!-- Screen navigation tabs -->
+<nav class="obs-screen-nav">
+  <button class="obs-nav-tab active" data-screen="maps">🗺 MAPS</button>
+  <button class="obs-nav-tab" data-screen="dashboard">📊 DASHBOARD</button>
+  <button class="obs-nav-tab" data-screen="activity">📜 ACTIVITY</button>
+</nav>
+
+<!-- ==================== SCREEN: MAPS ==================== -->
+<main class="obs-screen obs-screen-maps active" id="screen-maps">
+  <section class="obs-panel obs-panel-map-full">
+    <div class="obs-panel-head">
+      <h2>Live Map <span id="mapSubtitle" class="obs-map-subtitle">— Global</span></h2>
+      <div class="obs-panel-head-right">
+        <button class="obs-ctrl-btn obs-back-btn" id="btnMapBack" style="display:none">← Back to Global</button>
+        <span class="obs-meta" id="mapMeta">—</span>
+      </div>
+    </div>
+    <div class="obs-panel-body obs-map-body">
+      <svg id="obsMapSvg" class="obs-map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="obs-map-error" id="mapError" style="display:none"></div>
+    </div>
+  </section>
+  <!-- Combat ticker (below map) -->
+  <section class="obs-panel obs-panel-combats">
+    <div class="obs-panel-head">
+      <h2>Combat This Round</h2>
+      <div class="obs-panel-head-right">
+        <span class="obs-meta" id="combatMeta">0 combats</span>
+      </div>
+    </div>
+    <div class="obs-panel-body obs-combats-body" id="combatTicker">
+      <div class="obs-feed-empty">No combats this round.</div>
+    </div>
+  </section>
+</main>
+
+<!-- ==================== SCREEN: DASHBOARD ==================== -->
+<main class="obs-screen obs-screen-dashboard" id="screen-dashboard">
+  <section class="obs-panel">
+    <div class="obs-panel-head">
+      <h2>Dashboard</h2>
+      <div class="obs-panel-head-right">
+        <span class="obs-meta" id="dashMeta">20 countries</span>
+      </div>
+    </div>
+    <div class="obs-global-strip" id="globalStrip">
+      <!-- Oil price + financial indexes + round scrubber -->
+    </div>
+    <div class="obs-dash-summary" id="dashSummary">
+      <!-- Totals injected by observatory.js -->
+    </div>
+    <div class="obs-global-chart-wrap">
+      <svg id="globalChart" class="obs-global-chart"></svg>
+    </div>
+    <div class="obs-dash-controls">
+      <span class="label">Sort:</span>
+      <button class="obs-dash-sort-btn active" data-sort="code">Country</button>
+      <button class="obs-dash-sort-btn" data-sort="gdp">GDP</button>
+      <button class="obs-dash-sort-btn" data-sort="stability">Stability</button>
+      <button class="obs-dash-sort-btn" data-sort="units">Forces</button>
+      <button class="obs-dash-sort-btn" data-sort="nuclear">Nuclear</button>
+    </div>
+    <div class="obs-panel-body obs-dash-body" id="countryGrid">
+      <!-- Country tiles injected by observatory.js -->
+    </div>
+  </section>
+</main>
+
+<!-- ==================== SCREEN: ACTIVITY ==================== -->
+<main class="obs-screen obs-screen-activity" id="screen-activity">
+  <section class="obs-panel">
+    <div class="obs-panel-head">
+      <h2>Activity</h2>
+      <div class="obs-panel-head-right">
+        <span class="obs-meta" id="feedMeta">0</span>
+      </div>
+    </div>
+    <div class="obs-feed-toolbar">
+      <div class="obs-feed-chips" id="feedChips"></div>
+      <div class="obs-feed-filters-row">
+        <select class="obs-feed-select" id="feedCountry"><option value="">All countries</option></select>
+        <select class="obs-feed-select" id="feedRound"><option value="">All rounds</option></select>
+        <input class="obs-feed-search" id="feedSearch" type="text" placeholder="Search…" />
+      </div>
+    </div>
+    <div class="obs-panel-body obs-feed-body" id="activityFeed">
+      <div class="obs-feed-empty">
+        No events yet. Press Start to begin the simulation.
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Click-to-inspect overlay panel (country detail / unit detail / hex detail) -->
+<div class="obs-detail-panel" id="detailPanel" style="display:none">
+  <button class="obs-detail-close" id="detailClose">×</button>
+  <div class="obs-detail-content" id="detailContent"></div>
+</div>
+
+<script src="/static/map_config.js"></script>
+<script src="/static/observatory.js"></script>
+</body>
+</html>

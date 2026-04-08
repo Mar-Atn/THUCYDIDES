@@ -6,6 +6,11 @@
 **Sources:** SEED F2 (Data Architecture), F3 (Data Flows), F4 (API Contracts), G (Web App Spec), D8 (Engine Formulas), C7 (Time Structure), world_state.py
 **Naming authority:** [DET_NAMING_CONVENTIONS.md](DET_NAMING_CONVENTIONS.md) -- all field names, event types, and ID formats defined there
 
+> **RECONCILIATION NOTE (2026-04-07):** System contracts partially updated during BUILD.
+> Current canonical contracts: `PHASES/UNMANNED_SPACECRAFT/CARD_ARCHITECTURE.md`
+> Coordinate contract locked: dual-space (global + local), see CARD_ARCHITECTURE.
+> Action catalog consolidated from 51 to 32 actions, see CARD_ACTIONS.md.
+
 > **Updated 2026-04-03 to reflect BUILD calibration (F1-F104). See CALIBRATION_CHANGE_LOG.md.**
 
 ---

@@ -10,7 +10,8 @@ Gives AI agents real spatial awareness when making military decisions:
 Sources (CSV):
 - 2 SEED/C_MECHANICS/C4_DATA/zones.csv
 - 2 SEED/C_MECHANICS/C4_DATA/zone_adjacency.csv
-- 2 SEED/C_MECHANICS/C4_DATA/deployments.csv
+- 2 SEED/C_MECHANICS/C4_DATA/units.csv          (individual unit entities)
+- 2 SEED/C_MECHANICS/C4_DATA/deployments.csv    (DEPRECATED aggregate counts)
 - 2 SEED/C_MECHANICS/C4_DATA/countries.csv
 
 Feeds into:
@@ -32,6 +33,19 @@ import logging
 import os
 from typing import Any, Optional
 
+from engine.config.map_config import (
+    GLOBAL_ROWS,
+    GLOBAL_COLS,
+    THEATERS,
+    THEATER_NAMES,
+    UNIT_TYPES,
+    global_hex_for_theater_cell,
+    theater_for_global_hex,
+    is_theater_link_hex,
+    in_global_bounds,
+    in_theater_bounds,
+)
+
 logger = logging.getLogger(__name__)
 
 _DATA_DIR = os.path.join(
@@ -41,12 +55,14 @@ _DATA_DIR = os.path.join(
 ZONES_CSV = os.path.join(_DATA_DIR, "zones.csv")
 ADJACENCY_CSV = os.path.join(_DATA_DIR, "zone_adjacency.csv")
 DEPLOYMENTS_CSV = os.path.join(_DATA_DIR, "deployments.csv")
+UNITS_CSV = os.path.join(_DATA_DIR, "units.csv")
 COUNTRIES_CSV = os.path.join(_DATA_DIR, "countries.csv")
 
 # Module-level caches (lazy)
 _zones_cache: Optional[dict[str, dict]] = None
 _adjacency_cache: Optional[dict[str, list[str]]] = None
 _deployments_cache: Optional[dict[str, dict[str, dict[str, int]]]] = None
+_units_cache: Optional[list[dict]] = None
 _countries_cache: Optional[dict[str, dict]] = None
 
 
@@ -120,6 +136,12 @@ def load_adjacency() -> dict[str, list[str]]:
 def load_deployments() -> dict[str, dict[str, dict[str, int]]]:
     """Load starting unit deployments.
 
+    DEPRECATED: This function reads the legacy aggregate-count deployments.csv.
+    New code should use `load_units()` and the `units_by_global_hex()` /
+    `units_by_theater_cell()` / `units_by_country()` aggregators which work
+    with individual unit entities on the coordinate schema.
+    Retained for backwards compatibility while callers are migrated.
+
     Returns nested dict: {country_id: {zone_id: {unit_type: count}}}
     """
     global _deployments_cache
@@ -152,6 +174,148 @@ def load_deployments() -> dict[str, dict[str, dict[str, int]]]:
     return result
 
 
+def _to_int(s: Any) -> Optional[int]:
+    try:
+        v = str(s).strip()
+        if not v:
+            return None
+        return int(v)
+    except (ValueError, TypeError):
+        return None
+
+
+def load_units() -> list[dict]:
+    """Load individual military units from units.csv (coordinate schema).
+
+    Each unit is a discrete entity with a unique unit_id. Units may be
+    deployed on the global map (active), afloat on a ship (embarked),
+    held in reserve (no coords, not on a ship), or destroyed.
+
+    Returns a list of dicts with keys:
+      unit_id, country_id, unit_type,
+      global_row, global_col (ints or None),
+      theater, theater_row, theater_col (ints or None),
+      embarked_on, status, notes.
+    """
+    global _units_cache
+    if _units_cache is not None:
+        return _units_cache
+
+    units: list[dict] = []
+    try:
+        with open(UNITS_CSV) as f:
+            for row in csv.DictReader(f):
+                unit_id = (row.get("unit_id") or "").strip()
+                if not unit_id:
+                    continue
+                units.append({
+                    "unit_id": unit_id,
+                    "country_id": (row.get("country_id") or "").strip(),
+                    "unit_type": (row.get("unit_type") or "").strip(),
+                    "global_row": _to_int(row.get("global_row")),
+                    "global_col": _to_int(row.get("global_col")),
+                    "theater": (row.get("theater") or "").strip(),
+                    "theater_row": _to_int(row.get("theater_row")),
+                    "theater_col": _to_int(row.get("theater_col")),
+                    "embarked_on": (row.get("embarked_on") or "").strip(),
+                    "status": (row.get("status") or "active").strip(),
+                    "notes": (row.get("notes") or "").strip(),
+                })
+    except FileNotFoundError:
+        logger.warning("units.csv not found at %s", UNITS_CSV)
+        return []
+    _units_cache = units
+    return units
+
+
+def units_by_global_hex(
+    units: Optional[list[dict]] = None,
+) -> dict[tuple[int, int], list[dict[str, Any]]]:
+    """Aggregate active units by (global_row, global_col).
+
+    Returns {(row,col): [{country, type, count}, ...]}. Only active units
+    with both global coords set are included (reserves and embarked skipped).
+    """
+    if units is None:
+        units = load_units()
+    agg: dict[tuple[int, int], dict[tuple[str, str], int]] = {}
+    for u in units:
+        if u.get("status") != "active":
+            continue
+        gr = u.get("global_row")
+        gc = u.get("global_col")
+        if gr is None or gc is None:
+            continue
+        key = (u.get("country_id") or "", u.get("unit_type") or "")
+        cell = (int(gr), int(gc))
+        agg.setdefault(cell, {})
+        agg[cell][key] = agg[cell].get(key, 0) + 1
+    out: dict[tuple[int, int], list[dict[str, Any]]] = {}
+    for cell, counts in agg.items():
+        out[cell] = [
+            {"country": c, "type": t, "count": n}
+            for (c, t), n in sorted(counts.items())
+        ]
+    return out
+
+
+def units_by_theater_cell(
+    theater: str,
+    units: Optional[list[dict]] = None,
+) -> dict[tuple[int, int], list[dict[str, Any]]]:
+    """Aggregate active units in a specific theater by (theater_row, theater_col).
+
+    Returns {(theater_row,theater_col): [{country, type, count}, ...]}.
+    Only includes active units whose `theater` field matches and which
+    have both theater coords set.
+    """
+    if units is None:
+        units = load_units()
+    agg: dict[tuple[int, int], dict[tuple[str, str], int]] = {}
+    for u in units:
+        if u.get("status") != "active":
+            continue
+        if (u.get("theater") or "") != theater:
+            continue
+        tr = u.get("theater_row")
+        tc = u.get("theater_col")
+        if tr is None or tc is None:
+            continue
+        key = (u.get("country_id") or "", u.get("unit_type") or "")
+        cell = (int(tr), int(tc))
+        agg.setdefault(cell, {})
+        agg[cell][key] = agg[cell].get(key, 0) + 1
+    out: dict[tuple[int, int], list[dict[str, Any]]] = {}
+    for cell, counts in agg.items():
+        out[cell] = [
+            {"country": c, "type": t, "count": n}
+            for (c, t), n in sorted(counts.items())
+        ]
+    return out
+
+
+def units_by_country(
+    units: Optional[list[dict]] = None,
+) -> dict[str, dict[str, int]]:
+    """Aggregate unit counts by country and unit_type.
+
+    Returns {country_id: {unit_type: count}}. Includes ALL units
+    (active, embarked, reserve, damaged) — callers that want to filter
+    should do so on the raw list.
+    """
+    if units is None:
+        units = load_units()
+    out: dict[str, dict[str, int]] = {}
+    for u in units:
+        c = u.get("country_id") or ""
+        t = u.get("unit_type") or ""
+        if not c or not t:
+            continue
+        out.setdefault(c, {})
+        out[c][t] = out[c].get(t, 0) + 1
+    return out
+
+
 def _load_countries() -> dict[str, dict]:
     """Load countries.csv keyed by id."""
     global _countries_cache
@@ -173,10 +337,11 @@ def _load_countries() -> dict[str, dict]:
 
 def clear_cache() -> None:
     """Clear all module caches (useful for tests)."""
-    global _zones_cache, _adjacency_cache, _deployments_cache, _countries_cache
+    global _zones_cache, _adjacency_cache, _deployments_cache, _units_cache, _countries_cache
     _zones_cache = None
     _adjacency_cache = None
     _deployments_cache = None
+    _units_cache = None
     _countries_cache = None
 
 
@@ -245,12 +410,13 @@ def get_country_theaters(country_id: str) -> list[str]:
 def _format_units(units: dict[str, int]) -> str:
     """Compact unit count formatting."""
     parts = []
-    for ut in ("ground", "naval", "tactical_air", "strategic_missile", "air_defense"):
+    known = set(UNIT_TYPES)
+    for ut in UNIT_TYPES:
         if units.get(ut):
             parts.append(f"{ut}:{units[ut]}")
-    # include any other unit types not in preferred order
+    # include any other unit types not in the canonical list
     for ut, n in units.items():
-        if n and ut not in {"ground", "naval", "tactical_air", "strategic_missile", "air_defense"}:
+        if n and ut not in known:
             parts.append(f"{ut}:{n}")
     return ", ".join(parts) if parts else "(none)"
 

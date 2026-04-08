@@ -1,0 +1,345 @@
+unit_id,country_id,unit_type,global_row,global_col,theater,theater_row,theater_col,embarked_on,status,notes
+col_g_01,columbia,ground,4,3,,,,,active,CONUS central - Ft Campbell/Pentagon
+col_g_02,columbia,ground,5,4,,,,,active,CONUS east coast - Ft Liberty
+col_g_03,columbia,ground,5,3,,,,,active,CONUS south central - Ft Hood/Cavazos
+col_g_04,columbia,ground,6,4,,,,,active,CONUS southeast - Ft Stewart
+col_g_05,columbia,ground,3,3,,,,,active,Pacific NW - JBLM I Corps
+col_g_06,columbia,ground,4,2,,,,,active,California - MCB Pendleton
+col_g_07,columbia,ground,7,4,,,,,active,CONUS south - Ft Bliss
+col_g_08,columbia,ground,4,3,,,,,active,CONUS central reserve brigade forward
+col_g_09,columbia,ground,2,10,,,,,active,Poland V Corps HQ forward
+col_g_10,columbia,ground,2,10,,,,,active,Poland ABCT rotational
+col_g_11,columbia,ground,2,10,,,,,active,Poland CAB rotational
+col_g_12,columbia,ground,4,9,,,,,active,Germany Grafenwoehr/Ramstein
+col_g_13,columbia,ground,4,9,,,,,active,Germany 2CR Vilseck
+col_g_14,columbia,ground,6,10,,,,,active,Israel coordination element/THAAD crew
+col_g_15,columbia,ground,4,17,,,,,active,USFK Camp Humphreys 2ID
+col_g_16,columbia,ground,4,17,,,,,active,USFK 2nd ABCT rotational
+col_g_17,columbia,ground,5,19,,,,,active,Okinawa III MEF
+col_g_18,columbia,ground,7,18,,,,,active,Formosa advise-assist element
+col_g_19,columbia,ground,9,5,,,,,active,SOUTHCOM JTF-Bravo presence
+col_g_20,columbia,ground,7,11,mashriq,4,1,,active,Gulf basing Saudi/Kuwait Op Epic Fury logistics
+col_g_21,columbia,ground,,,,,,col_n_04,embarked,Marines ARG Red Sea - Iran crisis
+col_g_22,columbia,ground,8,11,mashriq,9,1,,active,UAE basing small footprint
+col_a_01,columbia,tactical_air,4,3,,,,,active,CONUS central air
+col_a_02,columbia,tactical_air,5,4,,,,,active,CONUS east coast air
+col_a_03,columbia,tactical_air,5,3,,,,,active,CONUS south central air
+col_a_04,columbia,tactical_air,3,3,,,,,active,Alaska/PACAF air defense
+col_a_05,columbia,tactical_air,2,10,,,,,active,Poland F-16/F-35 rotations
+col_a_06,columbia,tactical_air,4,9,,,,,active,Ramstein/Spangdahlem
+col_a_07,columbia,tactical_air,7,11,mashriq,4,1,,active,Prince Sultan Al Udeid
+col_a_08,columbia,tactical_air,8,11,mashriq,9,1,,active,Al-Dhafra UAE
+col_a_09,columbia,tactical_air,6,10,,,,,active,Israel joint air coordination
+col_a_10,columbia,tactical_air,5,19,,,,,active,Kadena Okinawa
+col_a_11,columbia,tactical_air,4,17,,,,,active,Osan/Kunsan
+col_a_12,columbia,tactical_air,7,18,,,,,active,Formosa air advisory
+col_a_13,columbia,tactical_air,,,,,,col_n_01,embarked,CVW embarked on CVN CENTCOM
+col_a_r1,columbia,tactical_air,,,,,,,reserve,ANG/AFRC surge reserve
+col_a_r2,columbia,tactical_air,,,,,,,reserve,CONUS training/surge reserve
+col_m_01,columbia,strategic_missile,4,3,,,,,active,ICBM silo Minuteman III Warren/Malmstrom
+col_m_02,columbia,strategic_missile,4,3,,,,,active,ICBM silo Minuteman III Minot field
+col_m_03,columbia,strategic_missile,5,4,,,,,active,Atlantic SSBN patrol
+col_m_04,columbia,strategic_missile,5,3,,,,,active,Pacific strategic strike
+col_m_05,columbia,strategic_missile,6,4,,,,,active,Southeast B-2/B-21 strategic
+col_m_06,columbia,strategic_missile,3,3,,,,,active,Pacific SSBN bastion
+col_m_07,columbia,strategic_missile,4,2,,,,,active,Pacific SSBN Bangor
+col_m_08,columbia,strategic_missile,7,4,,,,,active,Texas B-52 strategic
+col_m_09,columbia,strategic_missile,2,10,,,,,active,B61 tactical nuclear forward Europe
+col_m_10,columbia,strategic_missile,5,19,,,,,active,Pacific theater deterrent
+col_m_11,columbia,strategic_missile,5,19,,,,,active,Pacific theater second
+col_m_12,columbia,strategic_missile,7,11,mashriq,4,1,,active,Gulf theater strategic strike
+col_d_01,columbia,air_defense,4,3,,,,,active,CONUS central Patriot NCR
+col_d_02,columbia,air_defense,5,3,,,,,active,CONUS south Patriot
+col_d_03,columbia,air_defense,3,3,,,,,active,Pacific NW GBI Ft Greely homeland
+col_d_04,columbia,air_defense,2,10,,,,,active,Patriot Poland forward Europe
+col_d_05,columbia,air_defense,5,19,,,,,active,PAC-3/THAAD Pacific forward
+col_d_06,columbia,air_defense,7,11,mashriq,4,1,,active,Patriot Gulf forward ME
+col_n_01,columbia,naval,9,13,,,,,active,CVN CSG Arabian Sea CENTCOM Lincoln
+col_n_02,columbia,naval,9,13,,,,,active,CVN CSG Arabian Sea CENTCOM Ford
+col_n_03,columbia,naval,9,13,,,,,active,DDG/SSN CENTCOM escort
+col_n_04,columbia,naval,8,12,mashriq,,,,active,ARG Tripoli+Boxer Red Sea amphib
+col_n_05,columbia,naval,8,12,mashriq,,,,active,DDG Red Sea strike support
+col_n_06,columbia,naval,5,18,,,,,active,7th Fleet WestPac Formosa patrol
+col_n_07,columbia,naval,5,18,,,,,active,7th Fleet WestPac CSG
+col_n_08,columbia,naval,2,4,,,,,active,Caribbean SOUTHCOM
+col_n_09,columbia,naval,1,6,,,,,active,Atlantic Norfolk home
+col_n_10,columbia,naval,7,10,,,,,active,6th Fleet Med
+col_n_r1,columbia,naval,,,,,,,reserve,Naval reserve refit
+cat_g_01,cathay,ground,7,16,,,,,active,ETC Taiwan-facing Nanjing MR
+cat_g_02,cathay,ground,7,16,,,,,active,ETC Taiwan-facing Nanjing MR
+cat_g_03,cathay,ground,7,16,,,,,active,ETC Taiwan-facing Nanjing MR
+cat_g_04,cathay,ground,7,16,,,,,active,ETC Taiwan-facing Nanjing MR
+cat_g_05,cathay,ground,6,15,,,,,active,ETC South Cathay coastal
+cat_g_06,cathay,ground,6,15,,,,,active,ETC South Cathay coastal
+cat_g_07,cathay,ground,5,16,,,,,active,WTC India/Tibet border
+cat_g_08,cathay,ground,5,16,,,,,active,WTC India/Tibet border
+cat_g_09,cathay,ground,5,16,,,,,active,WTC India/Tibet border
+cat_g_10,cathay,ground,5,15,,,,,active,WTC Xinjiang northwest
+cat_g_11,cathay,ground,5,15,,,,,active,WTC Xinjiang northwest
+cat_g_12,cathay,ground,6,15,,,,,active,NTC Choson/Russia border
+cat_g_13,cathay,ground,6,15,,,,,active,NTC Choson/Russia border
+cat_g_14,cathay,ground,6,15,,,,,active,NTC Choson/Russia border
+cat_g_15,cathay,ground,3,18,,,,,active,NTC forward Choson border QRF
+cat_g_16,cathay,ground,6,16,,,,,active,STC South China Sea staging
+cat_g_17,cathay,ground,6,16,,,,,active,STC South China Sea staging
+cat_g_18,cathay,ground,6,16,,,,,active,STC SCS staging
+cat_g_19,cathay,ground,5,17,,,,,active,CTC Beijing central
+cat_g_20,cathay,ground,5,17,,,,,active,CTC Beijing central
+cat_g_21,cathay,ground,5,17,,,,,active,CTC Beijing central
+cat_g_r1,cathay,ground,,,,,,,reserve,CTC strategic reserve
+cat_g_r2,cathay,ground,,,,,,,reserve,CTC strategic reserve
+cat_g_r3,cathay,ground,,,,,,,reserve,WTC strategic reserve
+cat_g_r4,cathay,ground,,,,,,,reserve,Airborne strategic reserve
+cat_a_01,cathay,tactical_air,7,16,,,,,active,ETC aviation Taiwan strike
+cat_a_02,cathay,tactical_air,7,16,,,,,active,ETC aviation Taiwan strike
+cat_a_03,cathay,tactical_air,7,16,,,,,active,ETC aviation Taiwan strike
+cat_a_04,cathay,tactical_air,6,15,,,,,active,ETC southern air
+cat_a_05,cathay,tactical_air,5,16,,,,,active,WTC western aviation
+cat_a_06,cathay,tactical_air,6,16,,,,,active,STC SCS air
+cat_a_07,cathay,tactical_air,6,16,,,,,active,STC SCS air
+cat_a_08,cathay,tactical_air,6,15,,,,,active,NTC northern air
+cat_a_09,cathay,tactical_air,5,17,,,,,active,CTC central air
+cat_a_10,cathay,tactical_air,5,15,,,,,active,WTC Xinjiang air
+cat_a_11,cathay,tactical_air,,,,,,cat_n_02,embarked,Carrier air wing Shandong/Fujian
+cat_a_r1,cathay,tactical_air,,,,,,,reserve,Hardened air reserve
+cat_m_01,cathay,strategic_missile,7,16,,,,,active,DF-21/DF-26 carrier killer coast
+cat_m_02,cathay,strategic_missile,6,15,,,,,active,SSBN SCS bastion
+cat_m_03,cathay,strategic_missile,5,16,,,,,active,DF-41 mobile interior
+cat_m_r1,cathay,strategic_missile,,,,,,,reserve,Silo ICBM reserve
+cat_d_01,cathay,air_defense,7,16,,,,,active,HQ-9 ETC coastal
+cat_d_02,cathay,air_defense,5,17,,,,,active,HQ-9 Beijing
+cat_d_03,cathay,air_defense,5,16,,,,,active,HQ-9 western
+cat_n_01,cathay,naval,5,18,,,,,active,East Sea Fleet Formosa north
+cat_n_02,cathay,naval,7,19,,,,,active,East Sea Fleet carrier
+cat_n_03,cathay,naval,8,17,,,,,active,South Sea Fleet SCS north
+cat_n_04,cathay,naval,6,15,,,,,active,South Sea Fleet Hainan home
+cat_n_05,cathay,naval,6,15,,,,,active,North Sea Fleet Qingdao
+cat_n_06,cathay,naval,10,14,,,,,active,Distant water Indian Ocean
+cat_n_r1,cathay,naval,,,,,,,reserve,Fleet reserve refit
+sar_g_01,sarmatia,ground,4,11,eastern_ereb,6,6,,active,Pokrovsk/Donetsk axis
+sar_g_02,sarmatia,ground,4,11,eastern_ereb,6,7,,active,Pokrovsk/Donetsk axis
+sar_g_03,sarmatia,ground,4,11,eastern_ereb,7,6,,active,Pokrovsk/Donetsk axis
+sar_g_04,sarmatia,ground,4,11,eastern_ereb,7,7,,active,Luhansk/Lyman occupation
+sar_g_05,sarmatia,ground,5,12,eastern_ereb,8,6,,active,Luhansk/Lyman occupation
+sar_g_06,sarmatia,ground,5,12,eastern_ereb,8,7,,active,Bakhmut/Chasiv Yar
+sar_g_07,sarmatia,ground,4,11,eastern_ereb,5,6,,active,Zaporizhzhia front west
+sar_g_08,sarmatia,ground,4,12,eastern_ereb,6,8,,active,Zaporizhzhia front east
+sar_g_09,sarmatia,ground,4,11,eastern_ereb,6,6,,active,Kherson occupation lower Dnipro
+sar_g_10,sarmatia,ground,4,11,eastern_ereb,6,7,,active,Crimea/occupied south
+sar_g_11,sarmatia,ground,3,12,eastern_ereb,3,8,,active,Northern Grouping Kursk
+sar_g_12,sarmatia,ground,3,12,eastern_ereb,4,8,,active,Northern Grouping Belgorod
+sar_g_13,sarmatia,ground,3,12,eastern_ereb,4,9,,active,Northern Grouping Voronezh
+sar_g_14,sarmatia,ground,3,12,eastern_ereb,1,1,,active,Kaliningrad exclave defense
+sar_g_15,sarmatia,ground,3,13,,,,,active,Moscow VO garrison
+sar_g_16,sarmatia,ground,2,11,,,,,active,Arctic/Kola
+sar_g_17,sarmatia,ground,4,16,,,,,active,Far East/Cathay border
+sar_g_r1,sarmatia,ground,,,,,,,reserve,VDV strategic reserve
+sar_a_01,sarmatia,tactical_air,3,12,eastern_ereb,3,8,,active,Front-area Russia-side airbase glide bombs
+sar_a_02,sarmatia,tactical_air,3,12,eastern_ereb,4,8,,active,Front-area Russia-side airbase glide bombs
+sar_a_03,sarmatia,tactical_air,3,12,eastern_ereb,4,9,,active,Front-area Russia-side airbase drones
+sar_a_04,sarmatia,tactical_air,3,12,eastern_ereb,3,8,,active,Front-area Russia-side airbase
+sar_a_05,sarmatia,tactical_air,3,13,,,,,active,Homeland air defense Moscow VO
+sar_a_06,sarmatia,tactical_air,3,13,,,,,active,Homeland air defense Moscow VO
+sar_a_07,sarmatia,tactical_air,3,12,eastern_ereb,2,1,,active,Kaliningrad strike aviation
+sar_a_r1,sarmatia,tactical_air,,,,,,,reserve,Strategic aviation reserve
+sar_m_01,sarmatia,strategic_missile,3,13,,,,,active,Strategic ICBM silo Moscow VO
+sar_m_02,sarmatia,strategic_missile,3,13,,,,,active,Strategic ICBM silo Moscow VO
+sar_m_03,sarmatia,strategic_missile,3,13,,,,,active,Strategic ICBM silo Moscow VO
+sar_m_04,sarmatia,strategic_missile,3,13,,,,,active,Strategic ICBM silo Moscow VO
+sar_m_05,sarmatia,strategic_missile,4,13,,,,,active,Mobile launcher south central
+sar_m_06,sarmatia,strategic_missile,4,16,,,,,active,Mobile launcher Pacific
+sar_m_07,sarmatia,strategic_missile,2,11,,,,,active,SSBN Northern Fleet bastion
+sar_m_08,sarmatia,strategic_missile,4,11,eastern_ereb,7,6,,active,Iskander front-line (occupied zone)
+sar_m_09,sarmatia,strategic_missile,4,11,eastern_ereb,7,7,,active,Iskander front-line (occupied zone)
+sar_m_10,sarmatia,strategic_missile,5,12,eastern_ereb,8,6,,active,Iskander front-line (occupied zone)
+sar_m_11,sarmatia,strategic_missile,3,12,eastern_ereb,1,2,,active,Kaliningrad Iskander
+sar_m_r1,sarmatia,strategic_missile,,,,,,,reserve,Strategic missile reserve
+sar_d_01,sarmatia,air_defense,3,13,,,,,active,S-400 Moscow central
+sar_d_02,sarmatia,air_defense,5,12,eastern_ereb,8,7,,active,S-400 Crimea/occupied zone
+sar_d_03,sarmatia,air_defense,3,12,eastern_ereb,1,1,,active,S-400 Kaliningrad
+sar_n_01,sarmatia,naval,3,12,eastern_ereb,2,1,,active,Black Sea Fleet
+sar_n_02,sarmatia,naval,2,11,,,,,active,Northern Fleet Arctic
+rut_g_01,ruthenia,ground,4,11,eastern_ereb,6,5,,active,Die Hard core - Fortress Belt Kramatorsk
+rut_g_02,ruthenia,ground,4,11,eastern_ereb,6,5,,active,Die Hard core - Fortress Belt Sloviansk
+rut_g_03,ruthenia,ground,4,11,eastern_ereb,6,5,,active,Die Hard core - Fortress Belt Kostiantynivka
+rut_g_04,ruthenia,ground,4,11,eastern_ereb,7,5,,active,Fortress Belt southern wing Pokrovsk
+rut_g_05,ruthenia,ground,4,11,eastern_ereb,7,4,,active,Fortress Belt northern wing Lyman
+rut_g_06,ruthenia,ground,4,11,eastern_ereb,6,4,,active,Fortress Belt Chasiv Yar
+rut_g_07,ruthenia,ground,4,11,eastern_ereb,8,5,,active,Kharkiv-Kupyansk northern axis
+rut_g_08,ruthenia,ground,4,11,eastern_ereb,5,5,,active,Zaporizhzhia counter-offensive
+rut_g_09,ruthenia,ground,3,11,,,,,active,Sumy border north
+rut_g_10,ruthenia,ground,3,11,,,,,active,Strategic reserve Dnipro rear
+rut_a_01,ruthenia,tactical_air,4,11,eastern_ereb,6,5,,active,Die Hard CAS close air support
+rut_a_02,ruthenia,tactical_air,3,11,,,,,active,Western dispersal bases
+rut_a_03,ruthenia,tactical_air,3,11,,,,,active,Central Kyiv area
+rut_d_01,ruthenia,air_defense,4,11,eastern_ereb,6,5,,active,Patriot/NASAMS Die Hard protection
+per_g_01,persia,ground,6,12,mashriq,1,7,,active,Kermanshah Iraq-facing IRGC
+per_g_02,persia,ground,6,12,mashriq,2,5,,active,Hamadan western defense
+per_g_03,persia,ground,6,12,mashriq,3,5,,active,Tehran central
+per_g_04,persia,ground,7,13,mashriq,4,6,,active,Nuclear sites central defense
+per_g_05,persia,ground,7,13,mashriq,5,6,,active,Central-south depth
+per_g_06,persia,ground,8,13,mashriq,7,9,,active,Gulf coast Bushehr
+per_g_07,persia,ground,8,13,mashriq,10,9,,active,Hormuz tip Bandar Abbas
+per_g_r1,persia,ground,,,,,,,reserve,Hardened reserves dispersed
+per_a_01,persia,tactical_air,6,12,mashriq,2,3,,active,Western dispersal
+per_a_02,persia,tactical_air,6,12,mashriq,3,10,,active,Central Isfahan
+per_a_03,persia,tactical_air,7,13,mashriq,4,9,,active,Central Shiraz
+per_a_04,persia,tactical_air,7,13,mashriq,6,6,,active,Central-south dispersal
+per_a_05,persia,tactical_air,8,12,mashriq,8,7,,active,Eastern dispersal
+per_a_r1,persia,tactical_air,,,,,,,reserve,Hardened aviation reserve
+per_d_01,persia,air_defense,7,13,mashriq,4,6,,active,S-300/S-400 nuclear sites central
+gal_g_01,gallia,ground,5,9,,,,,active,Metropolitan France west
+gal_g_02,gallia,ground,5,9,,,,,active,Metropolitan France west
+gal_g_03,gallia,ground,5,10,,,,,active,Metropolitan France east
+gal_g_04,gallia,ground,4,10,,,,,active,Romania NATO eFP
+gal_g_05,gallia,ground,9,10,,,,,active,Djibouti overseas
+gal_g_r1,gallia,ground,,,,,,,reserve,Metropolitan reserve
+gal_a_01,gallia,tactical_air,5,9,,,,,active,Rafale Saint-Dizier
+gal_a_02,gallia,tactical_air,5,9,,,,,active,Rafale Mont-de-Marsan
+gal_a_03,gallia,tactical_air,,,,,,gal_n_01,embarked,Rafale M on Charles de Gaulle
+gal_a_04,gallia,tactical_air,8,11,mashriq,9,1,,active,UAE deployment
+gal_m_01,gallia,strategic_missile,5,9,,,,,active,SSBN Le Triomphant class
+gal_m_r1,gallia,strategic_missile,,,,,,,reserve,ASMPA air-launched reserve
+gal_d_01,gallia,air_defense,5,9,,,,,active,SAMP/T metropolitan
+gal_n_01,gallia,naval,7,10,,,,,active,Charles de Gaulle CSG Eastern Med
+teu_g_01,teutonia,ground,4,9,,,,,active,Bundeswehr north
+teu_g_02,teutonia,ground,4,9,,,,,active,Bundeswehr north
+teu_g_03,teutonia,ground,4,10,,,,,active,Bundeswehr south
+teu_g_04,teutonia,ground,2,10,,,,,active,45th Brigade Lithuania via Poland
+teu_g_05,teutonia,ground,2,10,,,,,active,eFP rotations Baltic
+teu_g_r1,teutonia,ground,,,,,,,reserve,Operational reserve
+teu_a_01,teutonia,tactical_air,4,9,,,,,active,Eurofighter north
+teu_a_02,teutonia,tactical_air,4,10,,,,,active,Eurofighter south
+teu_a_03,teutonia,tactical_air,2,10,,,,,active,Baltic air policing
+teu_d_01,teutonia,air_defense,4,9,,,,,active,Patriot Germany central
+fre_g_01,freeland,ground,2,10,,,,,active,Eastern border defense
+fre_g_02,freeland,ground,2,10,,,,,active,Eastern border defense
+fre_g_03,freeland,ground,2,10,,,,,active,Eastern border defense
+fre_g_04,freeland,ground,2,10,,,,,active,Central homeland Warsaw
+fre_g_r1,freeland,ground,,,,,,,reserve,Territorial reserve
+fre_a_01,freeland,tactical_air,2,10,,,,,active,F-35 eastern bases
+fre_a_02,freeland,tactical_air,2,10,,,,,active,FA-50 southern bases
+fre_d_01,freeland,air_defense,2,10,,,,,active,Patriot Warsaw/east
+pon_g_01,ponte,ground,6,8,,,,,active,Metropolitan Italy
+pon_g_02,ponte,ground,6,8,,,,,active,Metropolitan Italy
+pon_g_03,ponte,ground,6,10,,,,,active,Lebanon UNIFIL rotation
+pon_g_r1,ponte,ground,,,,,,,reserve,Alpini reserve
+pon_a_01,ponte,tactical_air,6,8,,,,,active,Eurofighter Italy
+pon_a_02,ponte,tactical_air,6,8,,,,,active,F-35 Italy
+alb_g_01,albion,ground,3,8,,,,,active,UK home brigades
+alb_g_02,albion,ground,3,8,,,,,active,UK home brigades
+alb_g_03,albion,ground,4,9,,,,,active,Estonia eFP via Germany staging
+alb_g_04,albion,ground,6,10,,,,,active,Cyprus overseas
+alb_a_01,albion,tactical_air,3,8,,,,,active,RAF Typhoon home
+alb_a_02,albion,tactical_air,3,8,,,,,active,RAF F-35B home
+alb_a_03,albion,tactical_air,,,,,,alb_n_01,embarked,F-35B on Prince of Wales
+alb_m_01,albion,strategic_missile,3,8,,,,,active,Trident SSBN CASD
+alb_m_02,albion,strategic_missile,3,8,,,,,active,Conventional strike reserve
+alb_d_01,albion,air_defense,3,8,,,,,active,Sky Sabre UK
+alb_n_01,albion,naval,7,10,,,,,active,HMS Prince of Wales CSG Eastern Med
+alb_n_02,albion,naval,4,8,,,,,active,Atlantic/Gulf deployer
+bha_g_01,bharata,ground,7,15,,,,,active,LAC China border
+bha_g_02,bharata,ground,7,15,,,,,active,LAC China border
+bha_g_03,bharata,ground,7,15,,,,,active,LAC China border
+bha_g_04,bharata,ground,7,15,,,,,active,LAC China border
+bha_g_05,bharata,ground,8,14,,,,,active,Pakistan border western
+bha_g_06,bharata,ground,8,14,,,,,active,Pakistan border western
+bha_g_07,bharata,ground,8,14,,,,,active,Pakistan border western
+bha_g_08,bharata,ground,8,14,,,,,active,Pakistan border western
+bha_g_09,bharata,ground,7,15,,,,,active,Internal security northern
+bha_g_10,bharata,ground,7,14,,,,,active,Southern command
+bha_g_r1,bharata,ground,,,,,,,reserve,Strategic reserve
+bha_g_r2,bharata,ground,,,,,,,reserve,Strategic reserve
+bha_a_01,bharata,tactical_air,7,15,,,,,active,Northern Su-30MKI
+bha_a_02,bharata,tactical_air,7,15,,,,,active,Northern Rafale
+bha_a_03,bharata,tactical_air,8,14,,,,,active,Western Pakistan facing
+bha_a_04,bharata,tactical_air,7,14,,,,,active,Central Tejas
+bha_d_01,bharata,air_defense,7,15,,,,,active,S-400 Delhi/Punjab
+bha_d_02,bharata,air_defense,8,14,,,,,active,Akash northern
+bha_n_01,bharata,naval,10,14,,,,,active,Arabian Sea fleet
+bha_n_02,bharata,naval,10,14,,,,,active,Bay of Bengal fleet
+lev_g_01,levantia,ground,6,10,,,,,active,Lebanon northern front
+lev_g_02,levantia,ground,6,10,,,,,active,Lebanon northern front
+lev_g_03,levantia,ground,6,10,,,,,active,Gaza southern front
+lev_g_04,levantia,ground,6,10,,,,,active,West Bank
+lev_g_05,levantia,ground,6,10,,,,,active,Northern home defense
+lev_g_06,levantia,ground,6,10,,,,,active,Southern home Persia-facing
+lev_a_01,levantia,tactical_air,6,10,,,,,active,F-35I all committed
+lev_a_02,levantia,tactical_air,6,10,,,,,active,F-15I all committed
+lev_a_03,levantia,tactical_air,6,10,,,,,active,F-16I strike
+lev_a_04,levantia,tactical_air,6,10,,,,,active,UAV/drone wing
+lev_d_01,levantia,air_defense,6,10,,,,,active,Iron Dome northern
+lev_d_02,levantia,air_defense,6,10,,,,,active,David's Sling central
+lev_d_03,levantia,air_defense,6,10,,,,,active,Arrow southern
+for_g_01,formosa,ground,7,18,,,,,active,Western coast anti-invasion
+for_g_02,formosa,ground,7,18,,,,,active,Western coast anti-invasion
+for_g_03,formosa,ground,7,18,,,,,active,Northern defense
+for_g_04,formosa,ground,7,18,,,,,active,Outlying islands reserves
+for_a_01,formosa,tactical_air,7,18,,,,,active,F-16V western bases
+for_a_02,formosa,tactical_air,7,18,,,,,active,F-16V western bases
+for_a_03,formosa,tactical_air,7,18,,,,,active,Eastern dispersal Hualien
+for_d_01,formosa,air_defense,7,18,,,,,active,Patriot PAC-3 northern
+for_d_02,formosa,air_defense,7,18,,,,,active,Tien Kung southern
+phr_g_01,phrygia,ground,6,11,mashriq,1,1,,active,Syria occupation zone
+phr_g_02,phrygia,ground,6,11,mashriq,1,1,,active,Syria occupation zone
+phr_g_03,phrygia,ground,6,11,mashriq,1,1,,active,Iraq operations
+phr_g_04,phrygia,ground,5,11,,,,,active,Eastern Anatolia
+phr_g_05,phrygia,ground,5,11,,,,,active,Western Anatolia
+phr_g_06,phrygia,ground,,,,,,phr_n_01,embarked,Naval infantry on TCG Anadolu
+phr_a_01,phrygia,tactical_air,5,11,,,,,active,F-16 central
+phr_a_02,phrygia,tactical_air,5,11,,,,,active,Bayraktar central
+phr_a_03,phrygia,tactical_air,6,11,mashriq,1,1,,active,Eastern air
+phr_d_01,phrygia,air_defense,5,11,,,,,active,S-400 Ankara
+phr_n_01,phrygia,naval,7,10,,,,,active,TCG Anadolu LHD Eastern Med
+yam_g_01,yamato,ground,5,19,,,,,active,Southwestern Okinawa
+yam_g_02,yamato,ground,5,19,,,,,active,Kyushu central
+yam_g_03,yamato,ground,4,19,,,,,active,Northern Hokkaido
+yam_a_01,yamato,tactical_air,5,19,,,,,active,F-35 southwestern
+yam_a_02,yamato,tactical_air,5,19,,,,,active,F-15J southwestern
+yam_a_03,yamato,tactical_air,4,19,,,,,active,Central/Northern air
+yam_d_01,yamato,air_defense,5,19,,,,,active,PAC-3 central Okinawa
+yam_d_02,yamato,air_defense,4,19,,,,,active,Aegis Ashore northern
+yam_n_01,yamato,naval,5,20,,,,,active,Sasebo western fleet
+yam_n_02,yamato,naval,5,20,,,,,active,Yokosuka eastern fleet
+sol_g_01,solaria,ground,7,11,mashriq,4,1,,active,Yemen border southern
+sol_g_02,solaria,ground,7,11,mashriq,4,1,,active,Northern/Central
+sol_g_03,solaria,ground,8,10,,,,,active,Eastern Province Gulf
+sol_a_01,solaria,tactical_air,8,10,,,,,active,Eastern Iran-facing
+sol_a_02,solaria,tactical_air,7,11,mashriq,4,1,,active,Southern Yemen
+sol_a_03,solaria,tactical_air,7,11,mashriq,4,1,,active,Northern F-15/Typhoon
+sol_d_01,solaria,air_defense,8,10,,,,,active,Patriot Eastern Province
+sol_d_02,solaria,air_defense,7,11,mashriq,4,1,,active,Patriot southern
+cho_g_01,choson,ground,3,18,,,,,active,DMZ forward artillery
+cho_g_02,choson,ground,3,18,,,,,active,DMZ forward artillery
+cho_g_03,choson,ground,3,18,,,,,active,DMZ forward artillery
+cho_g_04,choson,ground,3,18,,,,,active,DMZ forward artillery
+cho_g_05,choson,ground,3,18,,,,,active,DMZ forward artillery
+cho_g_06,choson,ground,3,18,,,,,active,Pyongyang garrison
+cho_g_07,choson,ground,3,18,,,,,active,Northeast border
+cho_g_r1,choson,ground,,,,,,,reserve,Strategic reserve
+cho_a_01,choson,tactical_air,3,18,,,,,active,Southern bases
+cho_a_02,choson,tactical_air,3,18,,,,,active,Northern hardened
+cho_m_01,choson,strategic_missile,3,18,,,,,active,Dispersed TEL Hwasong
+cho_d_01,choson,air_defense,3,18,,,,,active,Pyongyang layered defense
+han_g_01,hanguk,ground,4,17,,,,,active,DMZ western-central
+han_g_02,hanguk,ground,4,17,,,,,active,DMZ western-central
+han_g_03,hanguk,ground,4,17,,,,,active,Eastern DMZ
+han_g_04,hanguk,ground,4,17,,,,,active,Capital defense
+han_g_05,hanguk,ground,4,17,,,,,active,Southern + reserves
+han_a_01,hanguk,tactical_air,4,17,,,,,active,Central F-35
+han_a_02,hanguk,tactical_air,4,17,,,,,active,Central F-15K
+han_a_03,hanguk,tactical_air,4,17,,,,,active,Southern KF-21
+han_d_01,hanguk,air_defense,4,17,,,,,active,Northern Patriot
+han_d_02,hanguk,air_defense,4,17,,,,,active,THAAD central/southern
+han_n_01,hanguk,naval,5,20,,,,,active,Eastern fleet
+han_n_02,hanguk,naval,6,19,,,,,active,Western/southern fleet
+car_g_01,caribe,ground,9,5,,,,,active,Venezuela fragmented
+car_g_02,caribe,ground,9,5,,,,,active,Cuba
+car_g_r1,caribe,ground,,,,,,,reserve,Residual reserve
+car_a_01,caribe,tactical_air,9,5,,,,,active,Cuba+Venezuela residual
+mir_g_01,mirage,ground,8,11,mashriq,9,1,,active,Northern
+mir_g_02,mirage,ground,8,11,mashriq,9,1,,active,Southern
+mir_a_01,mirage,tactical_air,8,11,mashriq,9,1,,active,Al-Dhafra
+mir_a_02,mirage,tactical_air,8,11,mashriq,9,1,,active,Al-Minhad
+mir_d_01,mirage,air_defense,8,11,mashriq,9,1,,active,THAAD Northern Iran-facing
+mir_d_02,mirage,air_defense,8,11,mashriq,9,1,,active,Patriot Southern Houthi

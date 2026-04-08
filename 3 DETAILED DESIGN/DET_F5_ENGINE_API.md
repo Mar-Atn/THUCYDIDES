@@ -4,6 +4,11 @@
 **Owner:** NOVA (Backend) + ATLAS (Engine)
 **Cross-references:** [D1 Tech Stack](DET_D1_TECH_STACK.md) | [F4 API Contracts](../2%20SEED/F_DATA_ARCHITECTURE/SEED_F4_API_CONTRACTS_v1.md) | [D Engine Interface](../2%20SEED/D_ENGINES/SEED_D_ENGINE_INTERFACE_v1.md) | [D8 Engine Formulas](../2%20SEED/D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md) | [Naming Conventions](DET_NAMING_CONVENTIONS.md) | [Edge Functions](DET_EDGE_FUNCTIONS.md)
 
+> **RECONCILIATION NOTE (2026-04-07):** Engine API contracts partially superseded by BUILD implementation.
+> Current canonical architecture: `PHASES/UNMANNED_SPACECRAFT/CARD_ARCHITECTURE.md`
+> Key changes: round_engine/ deprecated. round_tick.py bridges per-round snapshots to designed engines.
+> Combat uses RISK iterative dice (not single-pass). Naval is 1v1 (not fleet-based).
+
 > **Updated 2026-04-03 to reflect BUILD calibration (F1-F104). See CALIBRATION_CHANGE_LOG.md.**
 
 ---

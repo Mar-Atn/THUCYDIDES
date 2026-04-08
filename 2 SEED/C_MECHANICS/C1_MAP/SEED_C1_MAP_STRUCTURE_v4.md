@@ -117,3 +117,41 @@ No named sea zones exist. Every water hex on the global map is a valid naval pos
 
 **Coordinate format:** `w(col,row)` where col and row are visual grid numbers from the global map.
 Example: `w(13,9)` = water hex at column 13, row 9 (Gulf waters near Persia coast)
+
+---
+
+## Addendum: Template v1.0 — 2026-04-05
+
+**Canonical source:** `SEED_C_MAP_UNITS_MASTER_v1.md`
+
+### Canonical Global Linkage (replaces the provisional §"Global-Theater Link" above)
+
+All coordinates below are **`(row, col)`, 1-indexed, global grid 10×20**. This supersedes any earlier linkage table in this file.
+
+#### Eastern Ereb theater → global
+
+| Theater cell condition | Global hex (row, col) |
+|---|:---:|
+| `owner = sarmatia`, theater row 1-4 | (3, 12) |
+| `owner = sarmatia`, theater row 5+ | (4, 12) |
+| `owner = ruthenia` (any row, free or occupied) | (4, 11) |
+| `owner = sea` (any) | (5, 12) |
+
+#### Mashriq theater → global
+
+| Theater cell condition | Global hex (row, col) |
+|---|:---:|
+| `owner = phrygia` | (6, 11) |
+| `owner = solaria` | (7, 11) |
+| `owner = mirage` | (8, 11) |
+| `owner = persia`, theater row 1-3 | (6, 12) |
+| `owner = persia`, theater row 4-6 | (7, 13) |
+| `owner = persia`, theater row 7-10 | (8, 13) |
+| `owner = sea`, theater row 3-6 | (7, 12) |
+| `owner = sea`, theater row 7-10 | (8, 12) |
+
+### Coordinate convention (LOCKED)
+
+`(row, col)`, row first, 1-indexed, row measured from top. Any legacy `(col, row)` references in the older text above are historical; use the canonical source for all new work.
+
+Addendum: Template v1.0 — 2026-04-05
