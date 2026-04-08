@@ -292,21 +292,15 @@ def calc_stability(inp: StabilityInput) -> StabilityResult:
         # Cap GDP contraction stability penalty at -0.30/round
         delta += max(gdp_growth * 0.15, -0.30)
 
-    # --- SOCIAL SPENDING (decision-based: penalty for CUTS, bonus for full funding) ---
+    # --- SOCIAL SPENDING (linear model, 2026-04-09) ---
     # social_pct = actual spending as fraction of baseline (1.0 = 100% = normal)
+    # Linear: delta_from_normal_pct / 25. So 50% cut → -2, 50% increase → +2.
+    # This gives meaningful stability impact from budget decisions.
     social_ratio = inp.social_spending_ratio
     baseline = inp.social_spending_baseline
     social_pct = social_ratio / max(baseline, 0.01) if baseline > 0 else 1.0
-    if social_pct >= 1.0:
-        delta += 0.05  # full funding = small stability bonus
-        if social_pct >= 1.1:
-            delta += 0.05  # generous spending = extra bonus
-    elif social_pct >= 0.85:
-        pass  # minor cut (85-99%) = belt-tightening, no penalty
-    elif social_pct >= 0.70:
-        delta -= 0.15  # significant cut = moderate penalty
-    else:
-        delta -= 0.30  # severe austerity (<70%) = heavy penalty
+    social_delta_pct = (social_pct - 1.0) * 100  # e.g., 0.5 → -50, 1.5 → +50
+    delta += social_delta_pct / 25.0  # -50% → -2.0, +50% → +2.0
 
     # --- WAR FRICTION (v4: reduced, with democratic resilience) ---
     if at_war:

@@ -188,6 +188,9 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
                 "stability": int(round(pol.get("stability", rs.get("stability", 5)))),
                 "political_support": int(round(pol.get("political_support", rs.get("political_support", 5)))),
                 "war_tiredness": int(round(pol.get("war_tiredness", rs.get("war_tiredness", 0)))),
+                # Persist computed coefficients so next round uses ratio (one-time shock, not repeated)
+                "sanctions_coefficient": round(eco.get("sanctions_coefficient", 1.0), 6),
+                "tariff_coefficient": round(eco.get("tariff_coefficient", 1.0), 6),
             }
             try:
                 client.table("country_states_per_round") \
@@ -528,8 +531,10 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
             "sanctions_rounds": 0,
             "sanctions_recovery_rounds": int(base.get("sanctions_recovery_rounds") or 0),
             "sanctions_adaptation_rounds": int(base.get("sanctions_adaptation_rounds") or 0),
-            "sanctions_coefficient": _safe_float(base.get("sanctions_coefficient"), 0.05),
-            "tariff_coefficient": _safe_float(base.get("tariff_coefficient"), 0.015),
+            # Read COMPUTED coefficients from previous round state (not base structural data)
+            # These are the GDP modifiers (0.5-1.0 range), NOT the per-country vulnerability factors
+            "sanctions_coefficient": _safe_float(rs.get("sanctions_coefficient"), 1.0),
+            "tariff_coefficient": _safe_float(rs.get("tariff_coefficient"), 1.0),
             "formosa_disruption_rounds": 0,
             "economic_state": "normal",
             "momentum": 0.0,
