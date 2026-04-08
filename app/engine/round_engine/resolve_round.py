@@ -1298,8 +1298,14 @@ def _write_unit_snapshot(client, scenario_id, round_num, unit_state):
 
 def _write_country_snapshot(client, scenario_id, round_num, country_state):
     rows = []
+    # Integer columns in country_states_per_round — must be int, not float
+    INT_COLS = {"stability", "political_support", "war_tiredness", "nuclear_level", "ai_level"}
     for cc, c in country_state.items():
         row = {k: c.get(k) for k in _COUNTRY_COLS if k in c}
+        # Ensure integer columns are actually int (engine may produce floats)
+        for col in INT_COLS:
+            if col in row and row[col] is not None:
+                row[col] = int(round(float(row[col])))
         row["scenario_id"] = scenario_id
         row["round_num"] = round_num
         row["country_code"] = cc
