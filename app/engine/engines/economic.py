@@ -806,14 +806,13 @@ def calc_sanctions_coefficient(
     ~0.88 = full world sanctions on resources-heavy country (12% GDP loss).
     ~0.65 = full world sanctions on tech/services-heavy country (35% GDP loss).
 
-    Uses STARTING GDP values (from seed data, via gdp_growth_base as proxy for
-    relative economic weight) to prevent coefficient drift from round-to-round
-    GDP changes.
+    Uses STARTING GDP (stored as _starting_gdp in eco dict) for market share
+    calculation to prevent coefficient drift from round-to-round GDP changes.
+    If _starting_gdp not available, falls back to current GDP.
     """
-    # Step 1: Total world economic weight (use starting GDP for stability)
-    # Approximate starting GDP from gdp_growth_base: larger base_rate ≈ larger economy
-    # is wrong. Just use current GDP — we only call this when sanctions change.
-    total_gdp = sum(c["economic"]["gdp"] for c in countries.values())
+    # Step 1: Total world economic weight — use STARTING GDP for stability
+    # This ensures the coefficient is deterministic when sanctions don't change.
+    total_gdp = sum(c["economic"].get("_starting_gdp", c["economic"]["gdp"]) for c in countries.values())
     if total_gdp <= 0:
         return 1.0
 
@@ -825,7 +824,8 @@ def calc_sanctions_coefficient(
         level = targets.get(target_id, 0)
         if level <= 0:
             continue
-        sanctioner_gdp = countries.get(sanctioner_id, {}).get("economic", {}).get("gdp", 0)
+        s_eco = countries.get(sanctioner_id, {}).get("economic", {})
+        sanctioner_gdp = s_eco.get("_starting_gdp", s_eco.get("gdp", 0))
         coverage += (sanctioner_gdp / total_gdp) * (level / 3.0)
 
     coverage = clamp(coverage, 0.0, 1.0)
@@ -886,9 +886,10 @@ def calc_tariff_coefficient(
     """
     my_c = countries.get(country_id, {})
     my_eco = my_c.get("economic", {})
-    my_gdp = max(my_eco.get("gdp", 1), 1)
+    my_gdp = max(my_eco.get("_starting_gdp", my_eco.get("gdp", 1)), 1)
     my_exposure = _trade_exposure(my_eco)
-    total_gdp = sum(c["economic"]["gdp"] for c in countries.values())
+    # Use STARTING GDP for market share to prevent coefficient drift
+    total_gdp = sum(c["economic"].get("_starting_gdp", c["economic"]["gdp"]) for c in countries.values())
     if total_gdp <= 0:
         return 1.0, 0.0, 0.0
 
@@ -934,7 +935,7 @@ def calc_tariff_coefficient(
         if level <= 0:
             continue
         imposer_eco = countries.get(imposer_id, {}).get("economic", {})
-        imposer_gdp = max(imposer_eco.get("gdp", 1), 1)
+        imposer_gdp = max(imposer_eco.get("_starting_gdp", imposer_eco.get("gdp", 1)), 1)
         imposer_market_share = imposer_gdp / total_gdp
         intensity = level / 3.0
 

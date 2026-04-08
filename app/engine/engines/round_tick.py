@@ -501,6 +501,7 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
         "regime_type": base.get("regime_type", "democratic"),
         "economic": {
             "gdp": gdp,
+            "_starting_gdp": _safe_float(base.get("gdp"), 10),  # R0 GDP for stable coefficient calc
             "gdp_growth_rate": _safe_float(base.get("gdp_growth_base"), 0.02),
             "gdp_growth_base": _safe_float(base.get("gdp_growth_base"), 0.02),
             "sectors": {
