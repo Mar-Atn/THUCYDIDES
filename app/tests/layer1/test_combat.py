@@ -143,8 +143,71 @@ class TestNavalCombat:
 class TestMissileStrike:
 
     def test_conventional_hit_rate_approximately_70pct(self):
-        """Conventional missile: ~70% hit without AD."""
-        # Note: current resolve_missile_strike uses 80% base (nuclear-era code)
-        # This test documents what the code ACTUALLY does; update when
-        # resolve_missile_strike is split into conventional vs nuclear
-        pass  # TODO: implement after missile action split
+        """Conventional missile: ~70% hit without AD (CARD_FORMULAS D.5)."""
+        hits = 0
+        N = 2000
+        random.seed(99)
+        m = {"unit_code": "m1", "unit_type": "strategic_missile"}
+        t = {"unit_code": "t1", "unit_type": "ground"}
+        for _ in range(N):
+            r = resolve_missile_strike(m, t, active_ad_units=[])
+            if r.success:
+                hits += 1
+        rate = hits / N
+        assert 0.60 < rate < 0.80, f"Expected ~70%, got {rate*100:.1f}%"
+
+    def test_missile_ad_interception_per_unit(self):
+        """AD intercepts missiles at 50% per unit (CARD_FORMULAS D.5).
+        1 AD = 50%, 2 AD = 75%, 3 AD = 87.5%.
+        """
+        N = 1000
+        random.seed(42)
+        m = {"unit_code": "m1", "unit_type": "strategic_missile"}
+        t = {"unit_code": "t1", "unit_type": "ground"}
+
+        # 1 AD unit — ~50% interception
+        intercepted_1 = 0
+        for _ in range(N):
+            ad = [{"unit_code": "ad1", "unit_type": "air_defense", "status": "active"}]
+            r = resolve_missile_strike(m, t, active_ad_units=ad)
+            if r.absorbed_by_ad is not None:
+                intercepted_1 += 1
+        rate_1 = intercepted_1 / N
+        assert 0.40 < rate_1 < 0.60, f"1 AD intercept: expected ~50%, got {rate_1*100:.1f}%"
+
+        # 2 AD units — ~75% interception
+        intercepted_2 = 0
+        for _ in range(N):
+            ad = [
+                {"unit_code": "ad1", "unit_type": "air_defense", "status": "active"},
+                {"unit_code": "ad2", "unit_type": "air_defense", "status": "active"},
+            ]
+            r = resolve_missile_strike(m, t, active_ad_units=ad)
+            if r.absorbed_by_ad is not None:
+                intercepted_2 += 1
+        rate_2 = intercepted_2 / N
+        assert 0.65 < rate_2 < 0.85, f"2 AD intercept: expected ~75%, got {rate_2*100:.1f}%"
+
+    def test_missile_no_ad_no_interception(self):
+        """Without AD, missiles are never intercepted."""
+        m = {"unit_code": "m1", "unit_type": "strategic_missile"}
+        t = {"unit_code": "t1", "unit_type": "ground"}
+        random.seed(1)
+        for _ in range(100):
+            r = resolve_missile_strike(m, t, active_ad_units=[])
+            assert r.absorbed_by_ad is None
+
+    def test_air_attacker_downed_by_ad(self):
+        """Air strike: 15% chance attacker downed by AD (CARD_FORMULAS D.2)."""
+        downed = 0
+        N = 2000
+        random.seed(42)
+        au = {"unit_code": "a1", "unit_type": "tactical_air"}
+        defs = [{"unit_code": "d1", "unit_type": "ground"}]
+        ad = [{"unit_code": "ad1", "unit_type": "air_defense", "status": "active"}]
+        for _ in range(N):
+            r = resolve_air_strike(au, defs, active_ad_units=ad)
+            if r.attacker_losses:
+                downed += 1
+        rate = downed / N
+        assert 0.10 < rate < 0.20, f"Expected ~15% downed, got {rate*100:.1f}%"

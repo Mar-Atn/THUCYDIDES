@@ -256,12 +256,7 @@ class TestAirStrikeCalibration:
     CARD_FORMULAS D.2:
       - 12% base hit (no AD)
       - 6% hit (AD present, halved)
-      - 15% attacker downed by AD (NOT YET in code — documented as gap)
-
-    NOTE: Current resolve_air_strike does NOT implement the 15% downed
-    mechanic (CARD_ACTIONS 1.4 status: "needs attacker-downed mechanic
-    added"). Tests 4 and 5 verify the probability model that IS implemented.
-    Test 6 documents the missing mechanic.
+      - 15% attacker downed by AD (implemented 2026-04-09, DISC-2 fixed)
     """
 
     TRIALS = 500
@@ -340,11 +335,6 @@ class TestAirStrikeCalibration:
             f"AD rate ({rate_ad:.2%}) should be lower than no-AD ({rate_no_ad:.2%})"
         )
 
-    @pytest.mark.skip(reason=(
-        "CARD_ACTIONS 1.4: 15% attacker downed by AD NOT YET IMPLEMENTED. "
-        "resolve_air_strike does not model attacker losses. "
-        "Remove skip when mechanic is added."
-    ))
     def test_attacker_downed_by_ad_15pct(self):
         """Air unit downed by AD: expected 15%.
 
@@ -428,25 +418,17 @@ class TestNavalCalibration:
 class TestMissileCalibration:
     """Statistical tests for conventional missile strikes.
 
-    CARD_FORMULAS quick-ref: MISSILE_CONV hit = 70%.
-    Code (resolve_missile_strike): base 80% without AD, 30% with AD.
-
-    NOTE: Code uses 80% base, CARD_FORMULAS quick-ref says 70%.
-    This is a KNOWN DISCREPANCY — documented here. The test verifies what
-    the code ACTUALLY does (80%). When code is updated to 70%, update
-    the test bounds accordingly.
-
-    CARD_FORMULAS D.5 also describes per-AD-unit 50% intercept rolls,
-    which is a different model than the flat 30% currently in code.
+    CARD_FORMULAS D.5: MISSILE_CONV hit = 70% base.
+    AD intercept: per-unit 50% roll (1 AD = 50%, 2 AD = 75%, 3 AD = 87.5%).
+    Code aligned to CARD as of 2026-04-09 (DISC-1 + DISC-4 fixed).
     """
 
     TRIALS = 200
 
     def test_conventional_no_ad_hit_rate(self):
-        """Conventional missile, no AD: code uses 80% base.
+        """Conventional missile, no AD: 70% base (CARD_FORMULAS D.5).
 
-        Bounds: [70%, 90%] (centered on 80%).
-        CARD_FORMULAS quick-ref says 70% — see class docstring.
+        Bounds: [60%, 80%] (centered on 70%).
         """
         hits = 0
         missile = {"unit_code": "m1", "unit_type": "strategic_missile"}
@@ -460,16 +442,17 @@ class TestMissileCalibration:
         rate = hits / self.TRIALS
         print(f"\n--- Missile conventional NO AD ({self.TRIALS} trials) ---")
         print(_pct("Hit rate", hits, self.TRIALS))
-        print(f"  Code base: 80%  CARD_FORMULAS: 70%  Bounds: [70%, 90%]")
+        print(f"  Code base: 70%  Bounds: [60%, 80%]")
 
-        assert 0.70 <= rate <= 0.90, (
-            f"Missile hit rate {rate:.2%} outside [70%, 90%] (code base=80%)"
+        assert 0.60 <= rate <= 0.80, (
+            f"Missile hit rate {rate:.2%} outside [60%, 80%] (code base=70%)"
         )
 
-    def test_conventional_with_ad_hit_rate(self):
-        """Conventional missile with AD: code uses 30%.
+    def test_conventional_with_1ad_hit_rate(self):
+        """Conventional missile with 1 AD: per-unit 50% intercept, then 70% hit.
 
-        Bounds: [20%, 40%].
+        Expected hit rate: 50% pass intercept * 70% hit = 35%.
+        Bounds: [25%, 45%].
         """
         hits = 0
         missile = {"unit_code": "m1", "unit_type": "strategic_missile"}
@@ -482,16 +465,47 @@ class TestMissileCalibration:
                 hits += 1
 
         rate = hits / self.TRIALS
-        print(f"\n--- Missile conventional WITH AD ({self.TRIALS} trials) ---")
+        print(f"\n--- Missile conventional WITH 1 AD ({self.TRIALS} trials) ---")
         print(_pct("Hit rate", hits, self.TRIALS))
-        print(f"  Code base: 30%  Bounds: [20%, 40%]")
+        print(f"  Expected: ~35% (50% pass * 70% hit)  Bounds: [25%, 45%]")
 
-        assert 0.20 <= rate <= 0.40, (
-            f"Missile hit rate with AD {rate:.2%} outside [20%, 40%]"
+        assert 0.25 <= rate <= 0.45, (
+            f"Missile hit rate with 1 AD {rate:.2%} outside [25%, 45%]"
+        )
+
+    def test_conventional_with_2ad_hit_rate(self):
+        """Conventional missile with 2 AD: intercept_prob = 75%, then 70% hit.
+
+        Expected hit rate: 25% pass intercept * 70% hit = 17.5%.
+        Bounds: [10%, 25%].
+        """
+        hits = 0
+        missile = {"unit_code": "m1", "unit_type": "strategic_missile"}
+        target = {"unit_code": "t1", "unit_type": "ground"}
+        ad = [
+            {"unit_code": "d_ad1", "unit_type": "air_defense", "status": "active"},
+            {"unit_code": "d_ad2", "unit_type": "air_defense", "status": "active"},
+        ]
+
+        for _ in range(self.TRIALS):
+            r = resolve_missile_strike(missile, target, active_ad_units=ad)
+            if r.success:
+                hits += 1
+
+        rate = hits / self.TRIALS
+        print(f"\n--- Missile conventional WITH 2 AD ({self.TRIALS} trials) ---")
+        print(_pct("Hit rate", hits, self.TRIALS))
+        print(f"  Expected: ~17.5% (25% pass * 70% hit)  Bounds: [10%, 25%]")
+
+        assert 0.10 <= rate <= 0.25, (
+            f"Missile hit rate with 2 AD {rate:.2%} outside [10%, 25%]"
         )
 
     def test_ad_reduces_missile_effectiveness(self):
-        """AD should substantially reduce missile hit rate."""
+        """AD should substantially reduce missile hit rate.
+
+        With per-unit 50% intercept model, 1 AD should roughly halve.
+        """
         hits_no_ad = 0
         hits_ad = 0
         missile = {"unit_code": "m1", "unit_type": "strategic_missile"}
@@ -509,10 +523,10 @@ class TestMissileCalibration:
         rate_no = hits_no_ad / self.TRIALS
         rate_ad = hits_ad / self.TRIALS
         print(f"\n--- Missile AD reduction ({self.TRIALS} trials) ---")
-        print(f"  No AD: {rate_no:.2%}   With AD: {rate_ad:.2%}")
+        print(f"  No AD: {rate_no:.2%}   With 1 AD: {rate_ad:.2%}")
 
-        assert rate_ad < rate_no * 0.6, (
-            f"AD ({rate_ad:.2%}) should be <60% of no-AD ({rate_no:.2%})"
+        assert rate_ad < rate_no * 0.70, (
+            f"1 AD ({rate_ad:.2%}) should be <70% of no-AD ({rate_no:.2%})"
         )
 
 
@@ -574,31 +588,10 @@ class TestGroundAdvance:
 
 
 # ===========================================================================
-# DISCREPANCY LOG
+# DISCREPANCY LOG (all resolved 2026-04-09 — CARD prevails on all 4)
 # ===========================================================================
 #
-# The following discrepancies between CARD_FORMULAS and code are documented
-# by these tests. TESTER does not modify source — these are reported to LEAD.
-#
-# 1. MISSILE BASE HIT RATE:
-#    CARD_FORMULAS quick-ref: 70%. Code: 80%.
-#    Test: test_conventional_no_ad_hit_rate uses [70%, 90%] bounds.
-#    Action needed: LEAD/BACKEND to reconcile.
-#
-# 2. AIR STRIKE — ATTACKER DOWNED BY AD:
-#    CARD_FORMULAS D.2: 15% chance attacker is downed when AD present.
-#    Code: NOT IMPLEMENTED. resolve_air_strike never populates attacker_losses.
-#    Test: test_attacker_downed_by_ad_15pct is SKIPPED.
-#    Action needed: BACKEND to implement downed mechanic.
-#
-# 3. NAVAL — 1v1 vs FLEET MODEL:
-#    CARD_FORMULAS D.3 + CARD_ACTIONS 1.5: "One ship vs one ship."
-#    Code: resolve_naval accepts fleet lists, rolls up to 3 dice per side
-#    with fleet-advantage bonus. 1v1 test works correctly but the fleet
-#    batching model is not aligned with the 1v1-only spec.
-#    Action needed: LEAD/BACKEND to decide if fleet model stays or goes.
-#
-# 4. MISSILE AD MODEL:
-#    CARD_FORMULAS D.5: "Each AD covering target hex rolls 50% to stop."
-#    Code: flat 30% rate if any AD present (no per-unit rolls).
-#    Action needed: LEAD/BACKEND to reconcile AD interception model.
+# 1. MISSILE BASE HIT RATE: FIXED — code aligned to 70% (was 80%).
+# 2. AIR STRIKE ATTACKER DOWNED: FIXED — 15% downed mechanic implemented.
+# 3. NAVAL FLEET BONUS: FIXED — fleet advantage removed, pure 1v1 dice.
+# 4. MISSILE AD MODEL: FIXED — per-unit 50% intercept rolls (was flat 30%).

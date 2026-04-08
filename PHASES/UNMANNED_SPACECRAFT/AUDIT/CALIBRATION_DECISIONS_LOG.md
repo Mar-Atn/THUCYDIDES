@@ -88,27 +88,27 @@
 
 ---
 
-## COMBAT DISCREPANCIES (found 2026-04-09, from test_calibration_combat.py)
+## COMBAT DISCREPANCIES (found 2026-04-09, DECIDED 2026-04-09 — CARD prevails on all 4)
 
-### DISC-1: Missile base hit rate — CARD says 70%, code uses 80%
+### DISC-1: Missile base hit rate — DECIDED + FIXED (2026-04-09)
 **CARD_FORMULAS D.5:** "conventional missile: 70% hit"
-**Code (combat.py):** uses 80% probability
-**Decision needed:** Align to 70% (CARD) or keep 80% (code)?
+**Was:** Code used 80% probability
+**Decision:** CARD prevails. Code aligned to 70%.
 
-### DISC-2: Air attacker downed by AD — CARD says 15%, code doesn't implement
+### DISC-2: Air attacker downed by AD — DECIDED + FIXED (2026-04-09)
 **CARD_FORMULAS D.2:** "15% downed by AD per strike"
-**Code:** No attacker-downed mechanic in resolve_air_strike
-**Decision needed:** Implement 15% downed, or defer?
+**Was:** No attacker-downed mechanic in resolve_air_strike
+**Decision:** CARD prevails. 15% downed mechanic implemented. attacker_losses populated when downed.
 
-### DISC-3: Naval fleet model — CARD says 1v1, code supports fleet batching
+### DISC-3: Naval fleet model — DECIDED + FIXED (2026-04-09)
 **CARD_ACTIONS 1.5:** "1v1 only, no fleet advantage"
-**Code:** Has fleet advantage bonus logic
-**Decision needed:** Remove fleet bonus (match CARD) or keep?
+**Was:** Fleet advantage bonus logic (+1 per unit, capped +3)
+**Decision:** CARD prevails. Fleet bonus removed. Pure 1v1 dice — paired off sequentially, ties to defender.
 
-### DISC-4: Missile AD interception — CARD says 50% per AD unit, code uses flat 30%
+### DISC-4: Missile AD interception — DECIDED + FIXED (2026-04-09)
 **CARD_FORMULAS D.5:** "AD intercepts missiles at 50% per unit"
-**Code:** Uses flat 30% interception rate regardless of AD count
-**Decision needed:** Implement per-unit 50% roll, or keep simplified?
+**Was:** Flat 30% interception if any AD present
+**Decision:** CARD prevails. Per-unit 50% roll: intercept_prob = 1 - (0.5 ^ num_ad_units). 1 AD = 50%, 2 AD = 75%, 3 AD = 87.5%.
 
 ---
 

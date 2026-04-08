@@ -212,6 +212,11 @@ def resolve_air_strike(
     coverage flag.
 
     On success: one defender unit is destroyed (prefer non-AD target).
+
+    Attacker downed (Marat 2026-04-09 — CARD prevails):
+      If AD covers the target zone, 15% chance the attacking air unit is
+      DOWNED (destroyed). This is rolled independently of the strike
+      success/failure — the attacker can hit AND be downed.
     """
     active_ad_units = active_ad_units or []
     ad_present = any(ad.get("status") != "destroyed" for ad in active_ad_units)
@@ -234,10 +239,18 @@ def resolve_air_strike(
         )
         defender_losses.append(target["unit_code"])
 
+    # DISC-2: 15% chance attacker is downed by AD (CARD_FORMULAS D.2)
+    attacker_losses: list[str] = []
+    attacker_downed = False
+    if ad_present and random.random() < 0.15:
+        attacker_downed = True
+        attacker_losses.append(attacker_unit["unit_code"])
+
     narrative = (
         f"Air strike by {attacker_unit['unit_code']}: "
         f"AD={'yes' if ad_present else 'no'}, p={p:.2f}, roll={roll:.2f} -> "
         f"{'HIT' if success else 'MISS'}"
+        f"{' | ATTACKER DOWNED by AD' if attacker_downed else ''}"
     )
 
     return StrikeResult(
@@ -246,6 +259,7 @@ def resolve_air_strike(
         probability=p,
         roll=roll,
         absorbed_by_ad=None,
+        attacker_losses=attacker_losses,
         defender_losses=defender_losses,
         narrative=narrative,
     )
@@ -263,17 +277,45 @@ def resolve_missile_strike(
 ) -> StrikeResult:
     """Resolve a strategic_missile strike (conventional warhead).
 
-    Probability model (Marat 2026-04-06 final):
-      * **80% base** if no AD covers the target zone (ballistic missiles
+    Probability model (Marat 2026-04-09 — CARD prevails):
+      * **70% base** if no AD covers the target zone (ballistic missiles
         are very accurate, few defenses stop them outright)
-      * **30%** if AD covers the zone
+      * AD intercepts via per-unit 50% roll: ``intercept_prob = 1 - (0.5 ^ num_ad_units)``
+        1 AD = 50%, 2 AD = 75%, 3 AD = 87.5%
+      * If intercepted, strike fails.
       * Ballistic missiles are CONSUMED on firing (disposable). The
         caller is responsible for marking the missile unit destroyed.
     """
     active_ad_units = active_ad_units or []
-    ad_present = any(ad.get("status") != "destroyed" for ad in active_ad_units)
+    live_ad = [ad for ad in active_ad_units if ad.get("status") != "destroyed"]
+    num_ad = len(live_ad)
 
-    p = 0.30 if ad_present else 0.80
+    # Per-unit 50% interception (CARD_FORMULAS D.5)
+    intercepted = False
+    intercepting_ad: Optional[str] = None
+    if num_ad > 0:
+        for ad in live_ad:
+            if random.random() < 0.50:
+                intercepted = True
+                intercepting_ad = ad.get("unit_code")
+                break
+
+    if intercepted:
+        return StrikeResult(
+            combat_type="missile_strike",
+            success=False,
+            probability=0.70,
+            roll=0.0,
+            absorbed_by_ad=intercepting_ad,
+            defender_losses=[],
+            narrative=(
+                f"Missile strike by {missile_unit['unit_code']} -> {target['unit_code']}: "
+                f"INTERCEPTED by AD {intercepting_ad} ({num_ad} AD units, "
+                f"intercept_prob={1 - 0.5 ** num_ad:.2f})"
+            ),
+        )
+
+    p = 0.70
 
     roll = random.random()
     success = roll < p
@@ -283,7 +325,7 @@ def resolve_missile_strike(
 
     narrative = (
         f"Missile strike by {missile_unit['unit_code']} -> {target['unit_code']}: "
-        f"AD={'yes' if ad_present else 'no'}, p={p:.2f}, roll={roll:.2f} -> "
+        f"AD={num_ad} units, p={p:.2f}, roll={roll:.2f} -> "
         f"{'HIT' if success else 'MISS'}"
     )
 
@@ -307,49 +349,42 @@ def resolve_naval(
     attacker_fleet: list[dict],
     defender_fleet: list[dict],
 ) -> CombatResult:
-    """Resolve ship-vs-ship naval combat.
+    """Resolve ship-vs-ship naval combat — pure 1v1 dice (CARD prevails 2026-04-09).
 
-    Dice-based. Larger fleet gets +1 per unit advantage, capped at +3.
+    Rules (CARD_ACTIONS 1.5 + CARD_FORMULAS D.3):
+      * One ship vs one ship. Each rolls 1d6.
+      * Higher roll wins. Ties go to defender.
+      * No fleet size modifier — pure 1v1.
+      * If multiple ships on each side, pair them off sequentially.
+        Unpaired ships survive unscathed.
     """
-    a_n = min(len(attacker_fleet), 3)
-    d_n = min(len(defender_fleet), 3)
-    if a_n == 0 or d_n == 0:
+    if not attacker_fleet or not defender_fleet:
         return CombatResult(
             combat_type="naval",
             narrative="No naval combat: one side has zero ships.",
             success=False,
         )
 
-    a_rolls = _roll(a_n)
-    d_rolls = _roll(d_n)
+    pairs = min(len(attacker_fleet), len(defender_fleet))
+    attacker_losses: list[str] = []
+    defender_losses: list[str] = []
+    a_rolls: list[int] = []
+    d_rolls: list[int] = []
 
-    advantage = len(attacker_fleet) - len(defender_fleet)
-    bonus = max(-3, min(3, advantage))
-    a_mod = a_rolls.copy()
-    d_mod = d_rolls.copy()
-    if bonus > 0 and a_mod:
-        a_mod[0] = min(6, a_mod[0] + bonus)
-        a_mod.sort(reverse=True)
-    elif bonus < 0 and d_mod:
-        d_mod[0] = min(6, d_mod[0] + abs(bonus))
-        d_mod.sort(reverse=True)
-
-    pairs = min(len(a_mod), len(d_mod))
-    atk_losses_n = 0
-    def_losses_n = 0
     for i in range(pairs):
-        if a_mod[i] > d_mod[i]:
-            def_losses_n += 1
+        a_roll = random.randint(1, 6)
+        d_roll = random.randint(1, 6)
+        a_rolls.append(a_roll)
+        d_rolls.append(d_roll)
+        if a_roll > d_roll:
+            defender_losses.append(defender_fleet[i]["unit_code"])
         else:
-            atk_losses_n += 1
-
-    attacker_losses = [u["unit_code"] for u in attacker_fleet[:atk_losses_n]]
-    defender_losses = [u["unit_code"] for u in defender_fleet[:def_losses_n]]
+            # Ties go to defender — attacker loses
+            attacker_losses.append(attacker_fleet[i]["unit_code"])
 
     narrative = (
-        f"Naval combat: attacker {a_rolls} (mod {a_mod}), "
-        f"defender {d_rolls} (mod {d_mod}). "
-        f"Attacker loses {atk_losses_n}, defender loses {def_losses_n}."
+        f"Naval combat ({pairs} duels): attacker {a_rolls}, defender {d_rolls}. "
+        f"Attacker loses {len(attacker_losses)}, defender loses {len(defender_losses)}."
     )
 
     return CombatResult(
@@ -358,6 +393,6 @@ def resolve_naval(
         defender_rolls=d_rolls,
         attacker_losses=attacker_losses,
         defender_losses=defender_losses,
-        modifiers_applied={"fleet_advantage": bonus},
+        modifiers_applied={},
         narrative=narrative,
     )
