@@ -7,11 +7,11 @@
 
 ## ACTIVE ITEMS
 
-### CAL-1: R0→R1 GDP drop for Columbia (-4%)
-**Finding:** Columbia GDP drops 280→268.7 (-4%) in first round with no new actions.
-**Cause:** Starting sanctions (36 records) and tariffs (29 records) now correctly flow through the engine for the first time. The R0 GDP is the "template ideal" without sanctions/tariffs applied. R1 is "reality with starting conditions."
-**Decision needed:** Accept R0→R1 as "settling-in round" (recommended), or pre-adjust R0 GDP for starting conditions?
-**Recommendation:** Accept. Compare R1→R2+ for real gameplay deltas.
+### ~~CAL-1: R0→R1 GDP drop for Columbia (-4%)~~ RESOLVED (2026-04-09)
+**Finding:** Columbia GDP drops 280→268.6 (-4%) in R1, then GROWS +1.2% in R2+.
+**Root cause found:** Sanctions/tariff coefficients work as designed "choke" — one-time level adjustment in R1, then stable. The -4% is the tariff war shock (Columbia L3 on Cathay + Cathay L2 retaliatory). R2+ resumes +1.2% growth.
+**Fixes applied:** (1) Starting GDP used for coefficient calculation (no drift). (2) Coefficients persisted between rounds (ratio = 1.0 when unchanged).
+**Status:** Working as designed. R0→R1 = settling round. R1+ = gameplay.
 
 ### CAL-2: Budget social spending has no visible stability effect in 1 round
 **Finding:** Columbia stability stays at 7 whether social_pct is 0.5, 1.0, or 1.5.
