@@ -173,9 +173,31 @@ COUNTRY_PRIMARY_INDEX: dict[str, str] = {
 MARKET_INDEX_STRESS_THRESHOLD: float = 70.0   # below = stress
 MARKET_INDEX_CRISIS_THRESHOLD: float = 40.0   # below = crisis
 
-# Production tiers
+# Production tiers (legacy string-keyed — kept for backward compat with military.py)
 PRODUCTION_TIER_COST: dict[str, float] = {"normal": 1.0, "accelerated": 2.0, "maximum": 4.0}
 PRODUCTION_TIER_OUTPUT: dict[str, float] = {"normal": 1.0, "accelerated": 2.0, "maximum": 3.0}
+
+# Budget contract v1.1 — production level multipliers (int-keyed)
+# Level 0 = none, 1 = normal, 2 = accelerated, 3 = maximum
+PRODUCTION_COST_MULT: dict[int, float] = {0: 0.0, 1: 1.0, 2: 2.0, 3: 4.0}
+PRODUCTION_OUTPUT_MULT: dict[int, float] = {0: 0.0, 1: 1.0, 2: 2.0, 3: 3.0}
+
+# Standard unit costs (normal tier, 1 unit base cost) — per CONTRACT_BUDGET v1.1 §2.5
+BRANCH_UNIT_COST: dict[str, int] = {
+    "ground":            3,
+    "naval":             6,
+    "tactical_air":      5,
+    "strategic_missile": 8,
+    "air_defense":       4,
+}
+
+BUDGET_PRODUCTION_BRANCHES: tuple[str, ...] = (
+    "ground", "naval", "tactical_air", "strategic_missile", "air_defense",
+)
+
+# Political side-effects of social spending (per CONTRACT_BUDGET v1.1 §6.4)
+SOCIAL_STABILITY_MULT: float = 4.0   # (social_pct - 1.0) * 4.0 → stability delta
+SOCIAL_SUPPORT_MULT: float = 6.0     # (social_pct - 1.0) * 6.0 → support delta
 
 # R&D
 RD_MULTIPLIER: float = 0.8
@@ -256,22 +278,31 @@ class RevenueResult(BaseModel):
 
 
 class BudgetResult(BaseModel):
-    """Per-country budget execution result."""
+    """Per-country budget execution result (per CONTRACT_BUDGET v1.1 §8)."""
     revenue: float
     mandatory: float
     maintenance: float
     social_baseline_cost: float
     discretionary: float
     social_spending: float
-    military_budget: float
-    tech_budget: float
-    deficit: float
-    money_printed: float
-    new_treasury: float
+    # New v1.1 fields
+    military_spending: float = 0.0          # sum of per-branch coins
+    research_spending: float = 0.0          # nuclear + ai coins
+    total_spending: float = 0.0             # social + military + research + maintenance
+    treasury_drawn: float = 0.0             # coins drawn from treasury to cover deficit
+    coins_by_branch: dict[str, int] = Field(default_factory=dict)
+    stability_delta: float = 0.0
+    political_support_delta: float = 0.0
+    # Legacy aliases (kept for backward compat during transition)
+    military_budget: float = 0.0            # == military_spending
+    tech_budget: float = 0.0                # == research_spending
+    deficit: float = 0.0
+    money_printed: float = 0.0
+    new_treasury: float = 0.0
 
 
 class MilitaryProductionResult(BaseModel):
-    """Per-country military production result."""
+    """Per-country military production result (all 5 branches, per CONTRACT_BUDGET v1.1)."""
     produced: dict[str, int] = Field(default_factory=dict)
 
 
@@ -1171,14 +1202,73 @@ def calc_revenue(
     )
 
 
+def _compute_production_from_levels(
+    country: dict, production_levels: dict
+) -> dict[str, dict]:
+    """Expand per-branch production levels into coins + units.
+
+    Per CONTRACT_BUDGET v1.1 §6.2:
+
+        coins = BRANCH_UNIT_COST[branch] × prod_capacity[branch] × PRODUCTION_COST_MULT[level]
+        units = prod_capacity[branch] × PRODUCTION_OUTPUT_MULT[level]
+
+    Returns:
+        {
+          "ground":            {"coins": int, "units": int, "level": int},
+          "naval":             {...},
+          "tactical_air":      {...},
+          "strategic_missile": {...},
+          "air_defense":       {...},
+        }
+
+    For strategic_missile and air_defense, capacity is 0 for all countries at
+    start — both coins and units will be 0 regardless of level.
+    """
+    mil = country.get("military", {}) or {}
+    cap = mil.get("production_capacity", {}) or {}
+    result: dict[str, dict] = {}
+
+    for branch in BUDGET_PRODUCTION_BRANCHES:
+        raw_level = production_levels.get(branch, 0)
+        try:
+            level = int(raw_level)
+        except (TypeError, ValueError):
+            level = 0
+        if level < 0 or level > 3:
+            level = 0  # defensive clamp; validator should have caught this
+
+        branch_cap = int(cap.get(branch, 0) or 0)
+        unit_cost = BRANCH_UNIT_COST.get(branch, 3)
+
+        coins = int(round(unit_cost * branch_cap * PRODUCTION_COST_MULT[level]))
+        units = int(round(branch_cap * PRODUCTION_OUTPUT_MULT[level]))
+
+        result[branch] = {"coins": coins, "units": units, "level": level}
+
+    return result
+
+
 def calc_budget_execution(
     country_id: str,
     countries: dict[str, dict],
     budget: dict,
     revenue: float,
     log: list[str],
-) -> BudgetResult:
-    """Budget execution with deficit -> money printing -> inflation chain."""
+) -> tuple[BudgetResult, dict[str, dict]]:
+    """Budget execution per CONTRACT_BUDGET v1.1 §6.
+
+    Consumes the new budget schema:
+
+        budget = {
+            "social_pct":  float 0.5-1.5,
+            "production":  {ground, naval, tactical_air, strategic_missile, air_defense},
+            "research":    {nuclear_coins, ai_coins},
+        }
+
+    Returns (BudgetResult, production_result) — the production_result dict is
+    passed forward to calc_military_production so levels are expanded exactly
+    once per round.
+    """
     c = countries[country_id]
     mil = c["military"]
     eco = c["economic"]
@@ -1188,36 +1278,77 @@ def calc_budget_execution(
     total_units = sum(mil.get(ut, 0) for ut in UNIT_TYPES)
     maintenance = total_units * maint_rate * MAINTENANCE_MULTIPLIER
 
-    # --- Social spending: flat coins/round, decision is % of baseline ---
-    # social_spending_baseline is a % of GDP, but actual coins = baseline% × revenue
-    # (governments spend from revenue, not GDP — this ensures budget balance)
+    # --- Social spending: continuous slider in [0.5, 1.5] ---
     social_baseline_pct = eco.get("social_spending_baseline", 0.25)
     social_base_coins = social_baseline_pct * max(revenue, 0)
-    # Player/AI sets spending level (default 100% = normal). Range: 50%-150%.
-    social_pct = budget.get("social_pct", 1.0)  # 1.0 = 100% of baseline
+    raw_social = budget.get("social_pct", 1.0)
+    try:
+        social_pct = float(raw_social)
+    except (TypeError, ValueError):
+        social_pct = 1.0
+    # Clamp defensively (validator should have caught out-of-range)
+    social_pct = clamp(social_pct, 0.5, 1.5)
     social_spending = social_base_coins * social_pct
 
-    # --- Discretionary allocation (military production, tech R&D) ---
-    remaining_after_fixed = revenue - maintenance - social_spending
-    mil_budget = budget.get("military_total", max(remaining_after_fixed * 0.4, 0))
-    mil_budget = max(0, min(mil_budget, max(remaining_after_fixed, 0)))
-    remaining_after_mil = max(remaining_after_fixed - mil_budget, 0)
-    tech_budget = budget.get("tech_total", remaining_after_mil * 0.3)
-    tech_budget = max(0, min(tech_budget, remaining_after_mil))
+    # --- Military production (compute from per-branch levels) ---
+    production_levels = budget.get("production", {}) or {}
+    production_result = _compute_production_from_levels(c, production_levels)
+    mil_budget = float(sum(b["coins"] for b in production_result.values()))
+
+    # --- Research (direct coin allocation) ---
+    research = budget.get("research", {}) or {}
+    try:
+        nuclear_coins = int(research.get("nuclear_coins", 0) or 0)
+    except (TypeError, ValueError):
+        nuclear_coins = 0
+    try:
+        ai_coins = int(research.get("ai_coins", 0) or 0)
+    except (TypeError, ValueError):
+        ai_coins = 0
+    if nuclear_coins < 0:
+        nuclear_coins = 0
+    if ai_coins < 0:
+        ai_coins = 0
+    tech_budget = float(nuclear_coins + ai_coins)
+
+    # --- Cap enforcement per CONTRACT_BUDGET §6.3 ---
+    # Military cap: ≤ 40% of discretionary (revenue - mandatory).
+    # R&D cap:      ≤ 30% of discretionary after military.
+    remaining_after_fixed = max(revenue - maintenance - social_spending, 0.0)
+    mil_cap_limit = remaining_after_fixed * 0.4
+
+    if mil_budget > mil_cap_limit and mil_budget > 0:
+        scale = mil_cap_limit / mil_budget
+        for b in production_result.values():
+            b["coins"] = int(round(b["coins"] * scale))
+            b["units"] = int(round(b["units"] * scale))
+        mil_budget = float(sum(b["coins"] for b in production_result.values()))
+
+    remaining_after_mil = max(remaining_after_fixed - mil_budget, 0.0)
+    tech_cap_limit = remaining_after_mil * 0.3
+
+    if tech_budget > tech_cap_limit and tech_budget > 0:
+        scale = tech_cap_limit / tech_budget
+        nuclear_coins = int(round(nuclear_coins * scale))
+        ai_coins = int(round(ai_coins * scale))
+        tech_budget = float(nuclear_coins + ai_coins)
 
     total_spending = maintenance + social_spending + mil_budget + tech_budget
 
     # --- Deficit / surplus handling ---
     money_printed = 0.0
     deficit = 0.0
+    treasury_drawn = 0.0
 
     if total_spending > revenue:
         deficit = total_spending - revenue
 
         if eco["treasury"] >= deficit:
             eco["treasury"] -= deficit
+            treasury_drawn = deficit
         else:
-            money_printed = deficit - eco["treasury"]
+            treasury_drawn = max(eco["treasury"], 0.0)
+            money_printed = deficit - treasury_drawn
             eco["treasury"] = 0
 
             if eco["gdp"] > 0:
@@ -1233,63 +1364,84 @@ def calc_budget_execution(
         surplus = revenue - total_spending
         eco["treasury"] += surplus
 
-    # Track social spending ratio for stability formula
-    # Cal-5 fix: pass baseline * decision_pct so stability compares apples-to-apples.
-    # Previously this was social_spending/gdp, but social_spending is funded from
-    # REVENUE (a fraction of GDP), so the ratio was always < baseline, falsely
-    # triggering severe austerity penalties for fully-funded social programs.
-    gdp = eco["gdp"]
+    # Track social spending for political engine (stability formula reads _social_pct)
     actual_social_ratio = social_baseline_pct * social_pct
     eco["_actual_social_ratio"] = round(actual_social_ratio, 4)
-    eco["_social_pct"] = social_pct  # for stability formula to read
+    eco["_social_pct"] = social_pct
+    stability_delta = (social_pct - 1.0) * SOCIAL_STABILITY_MULT
+    support_delta = (social_pct - 1.0) * SOCIAL_SUPPORT_MULT
+    eco["_stability_delta_from_social"] = round(stability_delta, 4)
+    eco["_support_delta_from_social"] = round(support_delta, 4)
+
+    # Stash research coin breakdown so the caller can build rd_investment dict
+    eco["_research_nuclear_coins"] = nuclear_coins
+    eco["_research_ai_coins"] = ai_coins
 
     mandatory_total = maintenance + social_spending
     discretionary_total = max(revenue - mandatory_total, 0)
 
-    return BudgetResult(
+    coins_by_branch = {
+        b: production_result[b]["coins"] for b in BUDGET_PRODUCTION_BRANCHES
+    }
+
+    result = BudgetResult(
         revenue=revenue,
         mandatory=round(mandatory_total, 2),
         maintenance=round(maintenance, 2),
         social_baseline_cost=round(social_base_coins, 2),
         discretionary=round(discretionary_total, 2),
         social_spending=round(social_spending, 2),
+        military_spending=round(mil_budget, 2),
+        research_spending=round(tech_budget, 2),
+        total_spending=round(total_spending, 2),
+        treasury_drawn=round(treasury_drawn, 2),
+        coins_by_branch=coins_by_branch,
+        stability_delta=round(stability_delta, 4),
+        political_support_delta=round(support_delta, 4),
+        # Legacy aliases
         military_budget=round(mil_budget, 2),
         tech_budget=round(tech_budget, 2),
         deficit=round(deficit, 2),
         money_printed=round(money_printed, 2),
         new_treasury=round(eco["treasury"], 2),
     )
+    return result, production_result
 
 
 def calc_military_production(
     country_id: str,
     countries: dict[str, dict],
-    military_alloc: dict,
+    production_result: dict,
     round_num: int,
     log: list[str],
 ) -> MilitaryProductionResult:
-    """Produce units. Includes naval auto-production fix."""
+    """Produce units per CONTRACT_BUDGET v1.1 §6.2.
+
+    Expects ``production_result`` as returned by ``_compute_production_from_levels``
+    (and cap-enforced by ``calc_budget_execution``):
+
+        {
+          "ground":            {"coins": int, "units": int, "level": int},
+          ...
+        }
+
+    Walks all 5 branches and credits the country with the pre-computed units.
+    strategic_missile and air_defense will currently always be 0 because their
+    production_capacity is 0 for all countries at start — the code path is
+    preserved so raising capacities later is a pure data change.
+    """
     c = countries[country_id]
     mil = c["military"]
-    cap = mil.get("production_capacity", {})
-    costs = mil.get("production_costs", {})
     produced: dict[str, int] = {}
 
-    for utype in ("ground", "naval", "tactical_air"):
-        alloc = military_alloc.get(utype, {})
-        coins = alloc.get("coins", 0)
-        tier = alloc.get("tier", "normal")
-        if coins <= 0:
-            produced[utype] = 0
-            continue
-
-        unit_cost = costs.get(utype, 3) * PRODUCTION_TIER_COST.get(tier, 1.0)
-        max_cap = cap.get(utype, 0) * PRODUCTION_TIER_OUTPUT.get(tier, 1.0)
-
-        units = min(int(coins / unit_cost), int(max_cap)) if unit_cost > 0 else 0
-        units = max(units, 0)
-        mil[utype] = mil.get(utype, 0) + units
-        produced[utype] = units
+    for branch in BUDGET_PRODUCTION_BRANCHES:
+        entry = production_result.get(branch, {}) if production_result else {}
+        units = int(entry.get("units", 0) or 0)
+        if units < 0:
+            units = 0
+        if units > 0:
+            mil[branch] = mil.get(branch, 0) + units
+        produced[branch] = units
 
     # Naval auto-production: 1 per 2 rounds for countries with naval >= 5
     if mil.get("naval", 0) >= 5 and round_num % 2 == 0:
@@ -1919,16 +2071,32 @@ def process_economy(
         # STEP 3: Revenue
         rev_result = calc_revenue(cid, countries, wars, sanctions, trade_weights, log)
 
-        # STEP 4: Budget execution
+        # STEP 4: Budget execution (per CONTRACT_BUDGET v1.1)
         budget = actions.get("budgets", {}).get(cid, {})
-        bud_result = calc_budget_execution(cid, countries, budget, rev_result.total, log)
+        bud_result, production_result = calc_budget_execution(
+            cid, countries, budget, rev_result.total, log
+        )
 
-        # STEP 5: Military production
-        mil_alloc = budget.get("military", {})
-        prod_result = calc_military_production(cid, countries, mil_alloc, round_num, log)
+        # STEP 5: Military production (reuses pre-computed production_result)
+        prod_result = calc_military_production(
+            cid, countries, production_result, round_num, log
+        )
 
-        # STEP 6: Technology advancement
-        rd = actions.get("tech_rd", {}).get(cid, {"nuclear": 0, "ai": 0})
+        # STEP 6: Technology advancement — build rd_investment from v1.1 research dict
+        # Prefer the cap-enforced values stashed on the economic state by
+        # calc_budget_execution; fall back to any explicit actions["tech_rd"] for
+        # callers that haven't migrated yet.
+        eco_now = countries[cid]["economic"]
+        rd = {
+            "nuclear": eco_now.get(
+                "_research_nuclear_coins",
+                actions.get("tech_rd", {}).get(cid, {}).get("nuclear", 0),
+            ),
+            "ai": eco_now.get(
+                "_research_ai_coins",
+                actions.get("tech_rd", {}).get(cid, {}).get("ai", 0),
+            ),
+        }
         tech_result = calc_tech_advancement(cid, countries, rd, rare_earth_restrictions, log)
 
         # STEP 7: Inflation update
