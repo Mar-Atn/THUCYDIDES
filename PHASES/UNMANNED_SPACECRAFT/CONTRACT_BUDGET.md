@@ -160,7 +160,7 @@ Where `RD_MULTIPLIER = 0.8` and `rare_earth_factor` depends on Cathay's rare ear
 
 **R&D locked once maxed:** Nuclear T3 and AI L4 are the ceiling. Investment at max level = wasted coins. Context warns when applicable.
 
-**Research cap:** Total R&D spending (`nuclear_coins + ai_coins`) capped at 30% of discretionary budget after mandatory + military. If exceeded → scaled down proportionally.
+**No research cap:** Participants can allocate any amount to R&D. Over-spending feeds the deficit cascade (§6.3).
 
 ---
 
@@ -210,8 +210,8 @@ MANDATORY COSTS (auto-deducted before discretionary)
 
 DISCRETIONARY BUDGET
   Available:           <revenue - mandatory>
-  Military cap:        <40% of discretionary>
-  R&D cap:             <30% of remaining after military>
+  (No percentage caps. You can allocate freely. Over-spending triggers
+   treasury drawdown, money printing, and inflation.)
 
 CURRENT MILITARY STATE
   Ground units:        <active> active, <reserve> reserve
@@ -421,11 +421,19 @@ RD_MULTIPLIER = 0.8   # per SEED_D8
 4. **Sum all coins** → `total_spending`
 5. **Apply cap checks and deficit cascade** (see §6.3)
 
-### 6.3 Cap enforcement
+### 6.3 No percentage caps — only deficit cascade
 
-- **Military cap:** total military production coins ≤ 40% of discretionary. If over → scale all production branches down proportionally (reduce by ratio, not drop branches).
-- **R&D cap:** total R&D coins ≤ 30% of discretionary after military. Same scale-down rule.
-- **Deficit:** if (social + military + R&D + maintenance) > revenue → draw from treasury → if insufficient → print money → inflation increases.
+**Removed 2026-04-10:** Earlier versions of the engine enforced hard caps (military ≤ 40% of discretionary, R&D ≤ 30%). These had no basis in SEED_D8 and were removed.
+
+Participants can allocate up to the full discretionary budget to any category. The only natural constraints are:
+1. Mandatory costs (maintenance + social) are deducted first
+2. Strategic missile and air defense branches have capacity 0 for now (no spending possible regardless of level)
+3. If `(social + military + R&D + maintenance) > revenue` → **deficit cascade**:
+   - First draw from treasury
+   - If insufficient → print money → inflation rises (money printed × 60 / GDP)
+   - Excess also increases debt (× 0.15)
+
+**This is intentional and important:** the participant should be free to make bold, risky budget choices. A maximum-pace military buildup that drains the treasury is a valid strategic choice — the consequences (inflation, debt) punish bad allocations naturally without hardcoded bureaucratic caps.
 
 ### 6.4 Political side-effects
 

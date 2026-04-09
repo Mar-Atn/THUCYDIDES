@@ -1311,27 +1311,11 @@ def calc_budget_execution(
         ai_coins = 0
     tech_budget = float(nuclear_coins + ai_coins)
 
-    # --- Cap enforcement per CONTRACT_BUDGET §6.3 ---
-    # Military cap: ≤ 40% of discretionary (revenue - mandatory).
-    # R&D cap:      ≤ 30% of discretionary after military.
-    remaining_after_fixed = max(revenue - maintenance - social_spending, 0.0)
-    mil_cap_limit = remaining_after_fixed * 0.4
-
-    if mil_budget > mil_cap_limit and mil_budget > 0:
-        scale = mil_cap_limit / mil_budget
-        for b in production_result.values():
-            b["coins"] = int(round(b["coins"] * scale))
-            b["units"] = int(round(b["units"] * scale))
-        mil_budget = float(sum(b["coins"] for b in production_result.values()))
-
-    remaining_after_mil = max(remaining_after_fixed - mil_budget, 0.0)
-    tech_cap_limit = remaining_after_mil * 0.3
-
-    if tech_budget > tech_cap_limit and tech_budget > 0:
-        scale = tech_cap_limit / tech_budget
-        nuclear_coins = int(round(nuclear_coins * scale))
-        ai_coins = int(round(ai_coins * scale))
-        tech_budget = float(nuclear_coins + ai_coins)
+    # No percentage caps on military or R&D spending — participants can
+    # allocate up to full discretionary budget to either. The only constraint
+    # is the discretionary pool itself (revenue - mandatory). Over-spending
+    # triggers the deficit cascade below (treasury drawdown → money printing).
+    # Per SEED_D8 §4 and CONTRACT_BUDGET v1.1 (2026-04-10: caps removed).
 
     total_spending = maintenance + social_spending + mil_budget + tech_budget
 

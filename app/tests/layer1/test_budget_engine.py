@@ -254,33 +254,35 @@ class TestResearchProgress:
 # ===========================================================================
 
 
-class TestCapEnforcement:
-    def test_cap_enforcement_military_40pct(self):
-        """Military coins > 40% discretionary → scaled down proportionally."""
-        # cap=20 for ground → level 3 = 3×20×4 = 240 coins. Discretionary = 100
-        # (revenue) - 0 maint - 25 social = 75. 40% = 30 coins. So scaled.
+class TestNoCaps:
+    """No percentage caps per SEED_D8 and CONTRACT_BUDGET v1.1 (2026-04-10).
+
+    Participants can allocate up to full discretionary budget. Over-spending
+    triggers the deficit cascade (treasury → money printing → inflation).
+    """
+
+    def test_no_military_cap(self):
+        """Full level-3 military allocation spent in full, no scaling."""
+        # cap=20 for ground → level 3 = 3×20×4 = 240 coins requested.
+        # Treasury high enough (500) to cover via deficit cascade.
         countries = {"alpha": _country(
             gdp=280, treasury=500, production_capacity={"ground": 20},
         )}
         budget = _budget(production={"ground": 3})
-        # No maintenance (set zero above), baseline 25%, revenue 100 → social=25.
         result, prod = calc_budget_execution("alpha", countries, budget, revenue=100.0, log=[])
-        # Discretionary: 100 - 0 - 25 = 75. Mil cap = 30.
-        print(f"military_spending={result.military_spending} (cap should be 30)")
-        assert result.military_spending <= 30.1
-        # Units should be scaled down too
-        assert prod["ground"]["units"] < 60  # original level 3 × 20 = 60
+        print(f"military_spending={result.military_spending} (no cap, full spend)")
+        # Full level 3: 20 cap × 3 cost × 4 mult = 240 coins, 60 units
+        assert result.military_spending == pytest.approx(240.0, rel=1e-3)
+        assert prod["ground"]["units"] == 60
 
-    def test_cap_enforcement_research_30pct(self):
-        """Research > 30% of (discretionary - military) → scaled down."""
-        # revenue=100, social_pct=1.0 → social=25. No military. Remaining=75.
-        # R&D cap = 30% × 75 = 22.5. Request 50 → should scale to 22.
+    def test_no_research_cap(self):
+        """Large R&D allocation spent in full, no scaling."""
         countries = {"alpha": _country(gdp=280, treasury=500)}
         budget = _budget(ai_coins=50)
         result, _ = calc_budget_execution("alpha", countries, budget, revenue=100.0, log=[])
-        print(f"research_spending={result.research_spending} (cap should be ~22)")
-        assert result.research_spending <= 23.0
-        assert result.research_spending >= 21.0
+        print(f"research_spending={result.research_spending} (no cap, full 50)")
+        # Full 50 coins spent on AI research
+        assert result.research_spending == pytest.approx(50.0, rel=1e-3)
 
 
 # ===========================================================================
