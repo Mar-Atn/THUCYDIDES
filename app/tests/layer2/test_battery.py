@@ -127,11 +127,29 @@ def _build_scripted_decisions(client, scenario_id: str) -> list[dict]:
     # ECONOMIC decisions (mandatory — the ones agents tend to skip)
     # =====================================================================
     decisions.append(_d("columbia", "set_budget", {
-        "social_pct": 1.0, "military_coins": 2, "tech_coins": 1,
+        "decision": "change",
+        "rationale": "BATTERY test: standard budget allocation for Columbia",
+        "changes": {
+            "social_pct": 1.0,
+            "production": {
+                "ground": 1, "naval": 0, "tactical_air": 0,
+                "strategic_missile": 0, "air_defense": 0,
+            },
+            "research": {"nuclear_coins": 0, "ai_coins": 1},
+        },
     }, "BATTERY: Columbia budget allocation"))
 
     decisions.append(_d("cathay", "set_budget", {
-        "social_pct": 0.8, "military_coins": 3, "tech_coins": 2,
+        "decision": "change",
+        "rationale": "BATTERY test: reduced social, focus on production for Cathay",
+        "changes": {
+            "social_pct": 0.8,
+            "production": {
+                "ground": 1, "naval": 1, "tactical_air": 0,
+                "strategic_missile": 0, "air_defense": 0,
+            },
+            "research": {"nuclear_coins": 1, "ai_coins": 1},
+        },
     }, "BATTERY: Cathay budget allocation"))
 
     decisions.append(_d("sarmatia", "set_tariff", {

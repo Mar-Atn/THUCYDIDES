@@ -396,20 +396,82 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     logger.warning("[resolve R%d] tariff lift failed %s->%s: %s",
                                    round_num, cc, target, e)
 
-        # --- Inject budget into country_state dict (persisted via snapshot) ---
+        # --- set_budget: validate via CONTRACT_BUDGET v1.1 validator, then
+        # inject the new schema (social_pct, production, research) into the
+        # country_state dict so the snapshot writer persists it on this round.
         elif atype == "set_budget":
-            if cc in country_state:
-                if payload.get("social_pct") is not None:
-                    country_state[cc]["budget_social_pct"] = float(payload["social_pct"])
-                if payload.get("military_coins") is not None:
-                    country_state[cc]["budget_military_coins"] = float(payload["military_coins"])
-                if payload.get("tech_coins") is not None:
-                    country_state[cc]["budget_tech_coins"] = float(payload["tech_coins"])
-                logger.info("[resolve R%d] %s budget injected: social=%.1f mil=%.0f tech=%.0f",
-                            round_num, cc,
-                            country_state[cc].get("budget_social_pct", 1.0),
-                            country_state[cc].get("budget_military_coins", 0),
-                            country_state[cc].get("budget_tech_coins", 0))
+            from engine.services.budget_validator import validate_budget_decision
+
+            full_payload = {
+                "action_type": "set_budget",
+                "country_code": cc,
+                "round_num": round_num,
+                "decision": payload.get("decision", "change"),
+                "rationale": payload.get(
+                    "rationale",
+                    "no rationale provided — legacy format placeholder for "
+                    "backward compatibility with pre-v1.1 set_budget payloads",
+                ),
+            }
+            if "changes" in payload:
+                full_payload["changes"] = payload["changes"]
+            elif full_payload["decision"] == "change":
+                # Backward-compat: fields directly on payload (only if they
+                # match the new schema). If only legacy fields are present
+                # (military_coins/tech_coins), we cannot construct a valid
+                # new-schema payload — validation will fail and the decision
+                # is logged as rejected. Callers should migrate to v1.1.
+                inferred: dict = {}
+                for k in ("social_pct", "production", "research"):
+                    if k in payload:
+                        inferred[k] = payload[k]
+                if inferred:
+                    full_payload["changes"] = inferred
+
+            result = validate_budget_decision(full_payload)
+            if not result["valid"]:
+                logger.warning(
+                    "[resolve R%d] invalid budget from %s: %s",
+                    round_num, cc, result["errors"],
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "budget_rejected",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} budget decision rejected: "
+                        f"{result['errors'][0] if result['errors'] else 'invalid'}"
+                    ),
+                    "payload": {
+                        "errors": result["errors"],
+                        "original": payload,
+                    },
+                })
+                continue
+
+            normalized = result["normalized"]
+            if normalized["decision"] == "no_change":
+                # Carry forward last round's budget. country_state[cc] was
+                # loaded from prev_round by _load_country_state, so the
+                # values are already present and will be persisted by the
+                # snapshot writer via _COUNTRY_COLS.
+                logger.info(
+                    "[resolve R%d] %s budget: no_change (carry forward)",
+                    round_num, cc,
+                )
+            else:
+                changes = normalized["changes"]
+                if cc in country_state:
+                    country_state[cc]["budget_social_pct"] = changes["social_pct"]
+                    country_state[cc]["budget_production"] = changes["production"]
+                    country_state[cc]["budget_research"] = changes["research"]
+                    logger.info(
+                        "[resolve R%d] %s budget: social=%.2f prod=%s research=%s",
+                        round_num, cc,
+                        changes["social_pct"],
+                        changes["production"],
+                        changes["research"],
+                    )
 
         # --- Inject OPEC production into country_state dict ---
         elif atype == "set_opec":
@@ -1310,7 +1372,9 @@ _COUNTRY_COLS = {
     "scenario_id", "round_num", "country_code", "gdp", "treasury", "inflation",
     "stability", "political_support", "war_tiredness",
     "nuclear_level", "nuclear_rd_progress", "ai_level", "ai_rd_progress",
-    "budget_social_pct", "budget_military_coins", "budget_tech_coins", "opec_production",
+    "budget_social_pct", "budget_production", "budget_research",
+    "budget_military_coins", "budget_tech_coins",  # deprecated, kept for migration
+    "opec_production",
     "sanctions_coefficient", "tariff_coefficient",
 }
 

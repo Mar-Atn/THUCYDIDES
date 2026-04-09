@@ -237,7 +237,7 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
       {tariff_changes: {imposer: {target: level}},
        sanction_changes: {imposer: {target: level}},
        blockade_changes: {chokepoint: {status, ...}},
-       budgets: {country: {social_pct, military_coins, tech_coins}},
+       budgets: {country: {social_pct, production: {...5 branches}, research: {nuclear_coins, ai_coins}}},
        tech_rd: {country: {nuclear: float, ai: float}},
        opec_production: {country: level_str}}
     """
@@ -293,25 +293,39 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     except Exception as e:
         logger.warning("Failed to load blockade state: %s", e)
 
-    # --- Budgets: read from country_states_per_round (budget columns) ---
-    # Budget decisions are persisted as columns on country_states_per_round
-    # by resolve_round. If not present, engine uses defaults.
+    # --- Budgets: read from country_states_per_round (CONTRACT_BUDGET v1.1) ---
+    # Budget decisions are persisted as columns on country_states_per_round by
+    # resolve_round: budget_social_pct (numeric), budget_production (jsonb),
+    # budget_research (jsonb). If a country has none set, it is omitted from
+    # the dict and the economic engine uses its default.
     budgets: dict = {}
     try:
         res = client.table("country_states_per_round") \
-            .select("country_code, budget_social_pct, budget_military_coins, budget_tech_coins") \
+            .select("country_code, budget_social_pct, budget_production, budget_research") \
             .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
         for row in (res.data or []):
             cc = row.get("country_code", "")
-            social = row.get("budget_social_pct")
-            mil = row.get("budget_military_coins")
-            tech = row.get("budget_tech_coins")
-            if cc and any(v is not None for v in [social, mil, tech]):
-                budgets[cc] = {
-                    "social_pct": _safe_float(social, 1.0),
-                    "military_coins": _safe_float(mil, 0),
-                    "tech_coins": _safe_float(tech, 0),
-                }
+            if not cc:
+                continue
+            social_pct = row.get("budget_social_pct")
+            production = row.get("budget_production")
+            research = row.get("budget_research")
+            if social_pct is None and not production and not research:
+                continue
+            budgets[cc] = {
+                "social_pct": _safe_float(social_pct, 1.0),
+                "production": production or {
+                    "ground": 0,
+                    "naval": 0,
+                    "tactical_air": 0,
+                    "strategic_missile": 0,
+                    "air_defense": 0,
+                },
+                "research": research or {
+                    "nuclear_coins": 0,
+                    "ai_coins": 0,
+                },
+            }
     except Exception as e:
         # Budget columns may not exist yet — fall back gracefully
         logger.debug("Budget columns not available in country_states: %s", e)
