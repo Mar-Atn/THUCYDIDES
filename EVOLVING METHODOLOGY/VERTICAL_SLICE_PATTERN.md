@@ -2,8 +2,34 @@
 
 ## How to ship a polished mandatory-decision feature end-to-end
 
-**Version:** 1.0 | **Date:** 2026-04-10 | **Status:** Proven (budget slice, 2026-04-10)
+**Version:** 1.1 | **Date:** 2026-04-10 | **Status:** Proven (budget slice, 2026-04-10) | Boundary statement added (2026-04-10)
 **Derived from:** The budget vertical slice (see `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_BUDGET.md`)
+
+---
+
+## ⚠️ Boundary statement (added 2026-04-10) — READ FIRST
+
+This pattern covers **ONE decision** at a time: **contract + validator + engine + DB + decision-specific context + persistence + tests**.
+
+**It does NOT cover the AI Participant Module** (cognitive blocks, self-managed memory, goal evolution, agent rehydration, persistence of `block1_rules` / `block2_identity` / `block3_memory` / `block4_goals`). That module is built **after** all decision slices land, on top of a complete and tested substrate.
+
+**The boundary is strict:**
+
+| Layer | Provided by | Built when |
+|---|---|---|
+| Engines, validators, DB schema, decision-specific context, persistence | THIS slice pattern | Now (one slice at a time) |
+| Identity / personality / character / authority | AI Participant Module (future) | After all decision slices ship |
+| Self-curated memory / interpreted history | AI Participant Module (future) | After all decision slices ship |
+| Self-authored goals / strategic objectives | AI Participant Module (future) | After all decision slices ship |
+| World rules / general SIM mechanics knowledge (Block 1) | AI Participant Module (future) | After all decision slices ship |
+
+**Decision-specific context = what the system serves the participant about THIS decision.** Own country state. Counterparties. Current state of the dimension being decided. Decision rules + schema reminder. Instruction. Nothing more.
+
+**Cognitive context = what the participant brings to the decision.** Who they are, what they remember, what they want, how they think. The system does not assemble this for the participant.
+
+**Until the AI Participant Module v1.0 ships, L3 tests emulate the cognitive layer with a hand-crafted persona stub** (a few sentences of character + objectives stapled to the LLM system prompt). This stub lives in the test harness, **NOT** in the context builder. When the AI Participant Module ships, the stub is replaced by `agent.get_cognitive_state()` and the context builder is unchanged.
+
+**Strategic rationale (per Marat 2026-04-10):** Build the engine + contract + DB substrate completely, one decision at a time, with full focus. Then build the AI Participant Module on top of a known-good foundation in a clear context of "what and when." Avoid the anti-pattern where each slice patches one piece of the AI module — that path leads to a Frankenstein.
 
 ---
 
@@ -100,29 +126,44 @@ The pure formulas that consume a valid decision and produce outputs. Engine func
 
 ---
 
-### Step 5 — Context builder + dry-run (L2)
+### Step 5 — Decision-specific context builder (L2)
 
 **Deliverable:** `app/engine/services/{domain}_context.py` + `app/tests/layer2/test_{domain}_context.py`
 
-Two pure-ish functions (DB reads allowed, no writes):
+A read-only function that assembles the **decision-specific** context per CONTRACT §3:
 
 ```python
 def build_{domain}_context(country_code, scenario_code, round_num) -> dict:
-    """Read-only: assemble the full context package per CONTRACT §3."""
+    """Assemble decision-specific context for the {domain} decision.
 
-def dry_run_{domain}(country_code, scenario_code, round_num, decision_override=None) -> dict:
-    """Deep-copy the engine dict, run the relevant engine chain, capture deltas,
-    discard. Used to show 'what happens if you don't change anything' AND
-    'what happens if you make this specific change' — the single source of
-    truth is the same engine code that runs the real round."""
+    Returns a structured dict containing what the SYSTEM supplies to the
+    participant about THIS decision: own country state, counterparties,
+    current state of the dimension being decided, decision rules + schema
+    reminder, instruction.
+
+    Does NOT include cognitive blocks (identity / memory / goals / world
+    rules) — those belong to the AI Participant Module (future). See
+    the boundary statement at the top of this document.
+    """
 ```
 
 **Rules:**
-- **Single source of truth.** The dry-run MUST call the real engine functions on a deep copy of the state. Never duplicate formulas. If the real engine is wrong, the preview should also be wrong — consistency > correctness at this layer.
-- **Deep copy, not reference.** A bug here can silently mutate the real game state. Use `copy.deepcopy` on the country dict before running.
-- **Returns structured dict.** Not a rendered string. The AI prompt builder and the human UI both format it differently from the same structured data.
+- **Decision-specific only.** Own country snapshot, counterparties, current state of the dimension, rules+schema reminder, instruction. Stop there.
+- **Read-only.** No writes, no engine mutation. Pure DB reads + computed structure.
+- **Returns structured dict.** Not a rendered string. The skill harness (for AI testing) and the human UI both format it differently from the same structured data.
+- **Optional dry-run helper.** SOME decisions benefit from a "what happens if you do nothing" forecast (budget did, because the deficit cascade is direct and immediate). Most decisions don't (tariffs, sanctions, OPEC — consequences are diplomatically and economically emergent). Default = no dry-run. Add one only if the contract justifies it explicitly.
+- **NEVER assemble cognitive context.** Do not stitch memory from `observatory_events` + `agreements` + `relationships`. Do not derive goals from role profiles. Do not include identity. Those are the AI Participant Module's responsibility, not the context builder's.
 
-**L2 tests:** verify the context reads the right country state, the revenue forecast is right, mandatory costs are computed correctly, the dry-run with an override produces different outputs, the dry-run with no change matches the actual round outcome, and deficit warnings fire when appropriate.
+**L2 tests verify:**
+- All decision-specific context blocks are present and non-empty
+- The full counterparty roster is included (e.g., all 20 countries for tariffs/sanctions, the 4 OPEC members for OPEC, etc.)
+- The current state of the dimension is read correctly from the DB
+- The decision rules + schema reminder + no_change reminder are present
+- The structure matches CONTRACT §3 layout
+
+**L2 tests must NOT verify cognitive content** — there isn't any.
+
+**Optional dry-run tests** only when the contract specifies a dry-run (e.g., budget): verify it deep-copies state, runs the real engine functions, and produces deltas that match a hand-computed expected.
 
 ---
 

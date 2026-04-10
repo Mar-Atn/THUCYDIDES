@@ -111,24 +111,46 @@ Result: 1.0 = no sanctions, 0.50 = maximum damage (50% GDP suppression).
 
 ---
 
-### A.3 TARIFF COEFFICIENT
+### A.3 TARIFF COEFFICIENT (CONTRACT_TARIFFS v1.0, 🔒 locked 2026-04-10)
 
-**Key constants:** TARIFF_K = 0.54, IMPOSER_FRACTION = 0.50
+**Authoritative spec:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_TARIFFS.md` v1.0.
+**Engine math UNCHANGED** — the tariff slice locks a contract around existing behavior and pins the constants as regression guards in `app/tests/layer1/test_tariff_engine.py`.
 
-**Formula:**
+**Key constants:** TARIFF_K = 0.54, TARIFF_IMPOSER_FRACTION = 0.50, TARIFF_REVENUE_RATE = 0.075, TARIFF_INFLATION_RATE = 12.5, coefficient floor = 0.80.
+
+**Decision schema** (set by participant):
 ```
-For each bilateral tariff:
-  intensity = level / 3.0
-  target_market_share = their_GDP / world_GDP
-  my_exposure = (|trade_balance| + 0.25×GDP) / GDP
+set_tariffs: {
+  decision: "change" | "no_change",
+  changes: { tariffs: { <target>: int 0..3 } }  // SPARSE — only changed targets
+}
+```
 
-  Self-damage (I imposed): target_share × my_exposure × intensity × 0.54 × 0.50
-  Target-damage (imposed on me): imposer_share × my_exposure × intensity × 0.54
-  Customs revenue: target_GDP × target_exposure × intensity × 0.075
-  Inflation add: intensity × target_share × 12.5
+Level 0 means lift. Untouched targets carry forward via the `tariffs` state table. `no_change` is a legitimate explicit choice.
+
+**Formula (per country, per round):**
+```
+For each bilateral tariff I impose (target_id, level > 0):
+  intensity            = level / 3.0
+  target_market_share  = target_starting_gdp / total_starting_gdp
+  my_exposure          = (|my_trade_balance| + 0.25 × my_gdp) / my_gdp
+  target_exposure      = (|target_trade_balance| + 0.25 × target_gdp) / target_gdp
+
+  self_damage          = target_share × my_exposure × intensity × 0.54 × 0.50
+  customs_revenue     += target_gdp × target_exposure × intensity × 0.075
+  inflation_add       += intensity × target_share × 12.5
+  total_gdp_hit       += self_damage
+
+For each bilateral tariff imposed on me by imposer_id (level > 0):
+  intensity            = level / 3.0
+  imposer_share        = imposer_starting_gdp / total_starting_gdp
+  target_damage        = imposer_share × my_exposure × intensity × 0.54
+  total_gdp_hit       += target_damage
 
 coefficient = max(0.80, 1.0 - total_gdp_hit)
 ```
+
+**Asymmetry:** target eats ~2× the damage the imposer eats (via `TARIFF_IMPOSER_FRACTION = 0.5`). Regression-tested in `test_tariff_engine.py::TestImposerVsTargetAsymmetry`.
 
 ---
 

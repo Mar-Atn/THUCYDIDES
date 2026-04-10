@@ -466,25 +466,63 @@ See CARD_FORMULAS.md A.6 (Budget Execution) + A.7 (Military Production) for the 
 | Engine | `engines/economic.calc_budget_execution()` + `calc_military_production()` + `calc_tech_advancement()` |
 | Status | ✅ **DONE** end-to-end (CONTRACT v1.1, validator, context+dry-run, persistence, AI acceptance gate). See `CHECKPOINT_BUDGET.md`. |
 
-### 2.2 Set Tariff
+### 2.2 Set Tariffs — CONTRACT_TARIFFS v1.0 (🔒 locked 2026-04-10)
 | Field | Value |
 |---|---|
-| action_type | `set_tariff` |
-| Fields | `target_country`, `level` (0–3) |
-| Who | HoS or PM. Can change any time during round. |
-| Timing | Takes effect at next between-rounds engine tick. Previous settings carry forward if unchanged. |
+| action_type | `set_tariffs` (plural — one submission carries the country's full intent for the round) |
+| Who | HoS or PM. Columbia: PM can override, HoS can override PM. |
+| Timing | Mandatory each round (submitted between rounds). **`no_change` is a legitimate explicit choice; if no decision is submitted at all, previous round's tariffs carry forward via the state table.** |
+| Spec | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_TARIFFS.md` v1.0 — single source of truth for schema, validation, persistence, engine behavior |
 
-| Level | Meaning | Effect |
+**Decision schema:**
+
+```json
+{
+  "action_type": "set_tariffs",
+  "country_code": "columbia",
+  "round_num": 3,
+  "decision": "change",
+  "rationale": "string, ≥30 chars, required even on no_change",
+  "changes": {
+    "tariffs": {
+      "cathay": 3,
+      "caribe": 1
+    }
+  }
+}
+```
+
+**The participant sets:**
+
+| Field | Shape | Semantics |
 |---|---|---|
-| L0 | Free trade | No tariff |
-| L1 | Light | Mild GDP drag on both sides, small customs revenue for imposer |
-| L2 | Moderate | Significant bilateral trade disruption + inflation pressure |
-| L3 | Heavy / embargo | Near trade cutoff. Hurts both sides asymmetrically (target more, imposer less). |
+| `decision` | `"change"` or `"no_change"` | Explicit choice. `no_change` is legitimate. |
+| `rationale` | string ≥30 chars | Required in BOTH branches. Forces explicit reasoning. |
+| `changes.tariffs` | sparse dict `{target_code: int 0..3}` | Only name targets you want to change. All untouched targets carry forward from the `tariffs` state table. |
 
-**Key:** Tariffs are BILATERAL — set per target country individually. A country can have L0 with allies and L3 with rivals simultaneously. Imposer gets customs revenue but also self-damage (50% of target damage). Target's vulnerability depends on trade openness + sector mix. See CARD_FORMULAS.md → A.3 Tariff Coefficient.
+**Tariff level scale:**
 
-| Engine | `engines/economic.calc_tariff_coefficient()` |
-| Status | **LIVE** |
+| Level | Meaning | Effect (CARD_FORMULAS A.3) |
+|---|---|---|
+| 0 | none / lift | Engine treats as no tariff. Level=0 lifts an existing row. |
+| 1 | light | `intensity = 0.33`. Mild GDP drag both sides, small customs revenue. |
+| 2 | moderate | `intensity = 0.67`. Significant bilateral disruption + inflation pressure. |
+| 3 | heavy / near-embargo | `intensity = 1.00`. Near trade cutoff. Hurts both sides asymmetrically (target ~2× imposer via `TARIFF_IMPOSER_FRACTION = 0.5`). |
+
+**Key:** Tariffs are BILATERAL — set per target country individually. A country can have L0 with allies and L3 with rivals simultaneously. Imposer gets customs revenue but also self-damage (~50% of target damage). Target's vulnerability depends on trade openness + sector mix + imposer's market share.
+
+**Validation:** all submissions go through `app/engine/services/tariff_validator.py` which returns `{valid, errors, warnings, normalized}` with 11 error codes (per CONTRACT §4). Invalid submissions emit a `tariff_rejected` observatory event and the round still completes using previous round's tariffs.
+
+**Persistence:**
+- Canonical world state → `tariffs` state table (existing, unchanged)
+- Per-round decision audit → `country_states_per_round.tariff_decision` JSONB (new 2026-04-10)
+
+**Context package** (assembled by `app/engine/services/tariff_context.py`): every decision-maker (AI or human) gets the country's economic state, ALL 20 countries with trade rank from `derive_trade_weights()`, current bilateral tariffs in both directions, decision rules with no_change reminder, and the instruction. **Decision-specific context only — cognitive context (identity/memory/goals/world rules) is provided by the AI Participant Module (future), not by this contract.** See `PHASES/UNMANNED_SPACECRAFT/CONTRACT_TARIFFS.md` §3.
+
+**Legacy compatibility:** the singular `set_tariff` and `lift_tariff` actions still work in parallel. New code should use `set_tariffs` (plural).
+
+| Engine | `engines/economic.calc_tariff_coefficient()` — UNCHANGED, behavior locked by L1 regression tests |
+| Status | ✅ **DONE** end-to-end (CONTRACT v1.0, validator, context, persistence, AI acceptance gate). See `CHECKPOINT_TARIFFS.md`. |
 
 ### 2.3 Set Sanction
 | Field | Value |

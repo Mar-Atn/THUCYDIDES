@@ -1051,3 +1051,80 @@ Column semantics: `basing_rights_a_to_b = true` means `from_country_id` (a) is t
 - Unified mandatory-decision base contract — same reason
 - CONCEPT/SEED frozen documents — no changes during mid-phase work
 - Schema cleanup of stale `budget_military_coins` / `budget_tech_coins` columns — separate ticket
+
+---
+
+## TARIFFS VERTICAL SLICE — DONE end-to-end (2026-04-10)
+
+**Scope:** Second of the mandatory end-of-round decisions shipped as a fully polished vertical slice. CONTRACT_TARIFFS v1.0 is now 🔒 LOCKED. **First slice shipped under the corrected "decision-specific context only" boundary** — cognitive blocks (identity/memory/goals/world rules) are provided by the AI Participant Module (future work), not by decision context builders.
+
+### Strategy directive (Marat 2026-04-10)
+
+Complete engines + contracts + DB + decision-specific context for ALL SIM activities, one slice at a time, with full focus. Order: budget ✅ → tariffs ✅ → sanctions → oil (OPEC) → military actions (standard/blockade/nuclear) → military movements → nuclear decisions → transactions → agreements → other actions. Then reconcile up to CONCEPT and SEED in a single coherent pass. Then build the AI Participant Module v1.0 on a known-good substrate. Do not patch the AI module inside decision slices. Tests emulate the cognitive layer with a persona stub in the harness only.
+
+### Design decisions locked
+
+| # | Decision | Why |
+|---|---|---|
+| 1 | Action is `set_tariffs` (plural) | One submission carries country's full intent for the round |
+| 2 | `changes.tariffs` is sparse dict `{target: level}` | Name only changed targets; untouched carry forward via state table |
+| 3 | Level 0 means lift (no separate action) | Uniform schema |
+| 4 | Self-tariff and unknown-target are hard rejections | `SELF_TARIFF` / `UNKNOWN_TARGET` validator errors |
+| 5 | Rationale ≥30 chars required for both change and no_change | Forces explicit reasoning |
+| 6 | `no_change` must OMIT `changes` field entirely | Structurally distinct |
+| 7 | Empty `changes.tariffs = {}` on a change is invalid | Use `no_change` instead |
+| 8 | No forecast/dry-run in context | Tariff consequences are emergent |
+| 9 | **Decision-specific context only, NO cognitive blocks** | Boundary rule for all slices going forward |
+| 10 | Engine math UNCHANGED | Slice locks contract around existing `calc_tariff_coefficient`; constants pinned in L1 regression tests |
+
+### Documents updated
+
+| Document | Change |
+|---|---|
+| `PHASES/UNMANNED_SPACECRAFT/CONTRACT_TARIFFS.md` | NEW — 🔒 LOCKED v1.0 (with v1.0-rev2 boundary correction) |
+| `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_TARIFFS.md` | NEW — durable record of the slice |
+| `PHASES/UNMANNED_SPACECRAFT/PHASE.md` | Added tariffs DONE status + strategic directive block |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md` | A.3 rewritten with locked constants, contract pointer, regression test reference |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md` | 2.2 rewritten with v1.0 schema, sparse changes semantics, validator ref, context ref |
+| `EVOLVING METHODOLOGY/VERTICAL_SLICE_PATTERN.md` | v1.1 — added "⚠️ Boundary statement — READ FIRST" section + Step 5 rewrite (decision-specific only, no cognitive assembly) |
+
+### Code changed
+
+- `app/engine/services/tariff_validator.py` — NEW pure validator, 11 error codes, `CANONICAL_COUNTRIES` frozenset (20 countries)
+- `app/engine/services/tariff_context.py` — NEW decision-specific context builder (economic state, full 20-country roster with trade rank, bilateral tariffs both directions, decision rules with no_change reminder). NO cognitive blocks.
+- `app/engine/round_engine/resolve_round.py` — added `set_tariffs` (plural) handler: validate, write audit JSONB, upsert state table for each sparse entry
+- `app/engine/engines/economic.py` — UNCHANGED (engine math is the contract)
+
+### DB migration
+
+- `add_tariff_decision_country_states_per_round` — added `tariff_decision` JSONB column to `country_states_per_round` for the per-round decision audit record. Canonical world state remains in the `tariffs` state table (unchanged).
+
+### Tests
+
+- L1: 41 in `test_tariff_validator.py`, 22 in `test_tariff_engine.py` (regression lock)
+- L2: 4 in `test_tariff_persistence.py`, 6 in `test_tariff_context.py`
+- L3: 10 LLM decisions in `test_skill_mandatory_decisions.py` D3 portion + 1 acceptance gate in `test_tariffs_full_chain_ai.py`
+- **Total: 84 tests green**
+
+### Concrete demo (2026-04-10 acceptance gate)
+
+Columbia R85→R86, real LLM decision:
+```json
+{
+  "decision": "change",
+  "rationale": "Escalating pressure on Persia during active war.",
+  "changes": { "tariffs": { "persia": 2 } }
+}
+```
+Result: `tariff_decision` JSONB matches, `(columbia, persia).level` upserted to 2, `tariff_coefficient` moved 1.0 → 0.997538 (matches contract's small self-damage at L2).
+
+### Out of scope (deferred)
+
+- Any change to `calc_tariff_coefficient` or its constants (locked by regression tests)
+- Trade agreement actions (separate slice)
+- Multilateral coalition logic (emergent from individual decisions)
+- Legacy singular `set_tariff` / `lift_tariff` removal (kept in parallel for migration)
+- Forecast/dry-run preview (deferred — learning by doing or future intelligence skill)
+- Backport of 4-block cognitive context to budget — **superseded by the new boundary**; no backport needed
+- Cognitive persistence (cognitive_states table, self-curated memory, goal evolution) — AI Participant Module v1.0, separate phase block
+- CONCEPT/SEED reconciliation — waits until ALL decision slices ship

@@ -106,8 +106,14 @@ See the reference documents (10 files in this directory):
 
 ## Current Status (2026-04-10)
 
+### 🟢 Tariffs vertical slice — DONE end-to-end (2026-04-10)
+Second mandatory-decision slice complete and locked. **First slice shipped under the new "decision-specific context only" boundary** (cognitive blocks deferred to AI Participant Module v1.0). CONTRACT_TARIFFS v1.0, validator (11 error codes), engine UNCHANGED with regression lock, DB migration (`tariff_decision` JSONB audit column), decision-specific context builder (all 20 countries + trade rank + bilateral both directions, no cognitive blocks), AI skill harness D3 rewrite, full-chain acceptance gate. 84 tests green (L1 63 / L2 10 / L3 11). See `CHECKPOINT_TARIFFS.md`.
+
 ### 🟢 Budget vertical slice — DONE end-to-end (2026-04-10)
 First mandatory-decision slice complete and locked. CONTRACT_BUDGET v1.1, validator, engine v1.1 (caps removed, level scale, social slider), DB migration (5 mil_* columns), context+dry-run service, AI skill harness, full-chain acceptance gate. All gaps closed (units now persist, R&D progress now persists). 37 L1+L2 tests passing, L3 AI acceptance gate passing. See `CHECKPOINT_BUDGET.md` for the durable record. The 7-step methodology used to ship this is documented as the template for sanctions/tariffs/OPEC in `EVOLVING METHODOLOGY/VERTICAL_SLICE_PATTERN.md`.
+
+### 🎯 Strategic directive (2026-04-10)
+Complete engines + contracts + DB + decision-specific context for ALL activities, one slice at a time, with full focus. Then reconcile up to CONCEPT and SEED. Then build the AI Participant Module v1.0 on a known-good substrate. Do not patch the AI module inside decision slices — that's how Frankenstein architectures happen. Order: **tariffs → sanctions → oil (OPEC) → military actions (standard/blockade/nuclear) → military movements → nuclear decisions → transactions → agreements → other actions (fire/reassign, assassination, arrest, propaganda, sabotage, private investments)**. Tests emulate the cognitive layer with a persona stub in the harness only. See `EVOLVING METHODOLOGY/VERTICAL_SLICE_PATTERN.md` "Boundary statement."
 
 
 
@@ -182,7 +188,7 @@ First mandatory-decision slice complete and locked. CONTRACT_BUDGET v1.1, valida
 
 ### Sprint B: Active Loop + Conversations (~3-4 days)
 - ✅ B1: Multi-action per round (up to 3 commits per agent, prompt guides quality)
-- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **BUDGET DONE** ✅ 2026-04-10 (CONTRACT v1.1, full vertical slice, AI acceptance gate green — see CHECKPOINT_BUDGET.md). Sanctions/tariffs/OPEC remaining — follow VERTICAL_SLICE_PATTERN.md.
+- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **BUDGET DONE** ✅ 2026-04-10 · **TARIFFS DONE** ✅ 2026-04-10 (CONTRACT_TARIFFS v1.0 locked, engine unchanged with regression lock, decision-specific context only, 84 tests green — see CHECKPOINT_TARIFFS.md). Sanctions/OPEC remaining — follow VERTICAL_SLICE_PATTERN.md v1.1 (with the decision-specific-only boundary).
 - B7: Inter-round relocation phase (deploy/redeploy between rounds, separate from in-round): **NOT STARTED** *(added 2026-04-08)*
 - B8: Scripted battery testing (pre-scripted decisions, no LLM, full engine chain validation in `app/tests/layer2/`): **IN PROGRESS** *(added 2026-04-08)*
 - B2: Bilateral conversations — THE core feature:

@@ -45,6 +45,7 @@ from engine.services.budget_validator import (
     REQUIRED_PRODUCTION_BRANCHES,
     validate_budget_decision,
 )
+from engine.services.tariff_validator import validate_tariffs_decision
 from engine.services.llm import call_llm
 
 logger = logging.getLogger(__name__)
@@ -64,9 +65,11 @@ SYSTEM_SANCTIONS = (
     "change and no_change."
 )
 SYSTEM_TARIFFS = (
-    "You are an AI head of state reviewing your trade and tariff policy. "
-    "Return ONLY JSON. Every field required. Rationale mandatory on both "
-    "change and no_change."
+    "You are an AI head of state reviewing your trade and tariff policy "
+    "per CONTRACT_TARIFFS v1.0. Return ONLY JSON matching the set_tariffs "
+    "schema. Rationale >= 30 chars mandatory on both change and no_change. "
+    "On no_change: OMIT the changes field entirely. "
+    "On change: include changes.tariffs as a flat dict of {target: level}."
 )
 SYSTEM_OPEC = (
     "You are an AI head of state reviewing OPEC production posture. "
@@ -143,9 +146,13 @@ class LeaderScenario:
     sanctions_imposed: list[dict] = field(default_factory=list)
     sanctions_against: list[dict] = field(default_factory=list)
     tariffs_imposed: list[dict] = field(default_factory=list)
+    tariffs_against: list[dict] = field(default_factory=list)
 
     # Trade partners (for tariff call)
     major_trade_partners: list[dict] = field(default_factory=list)
+
+    # Country roster summary (for tariff call — top trade partners + all 20)
+    country_roster: list[dict] = field(default_factory=list)
 
     # OPEC-specific
     opec_level: str | None = None
@@ -364,63 +371,115 @@ Rules:
 # ---------------------------------------------------------------------------
 
 def _build_tariffs_prompt(s: LeaderScenario) -> str:
-    partners_lines = []
-    for p in s.major_trade_partners:
-        partners_lines.append(
-            f"  - {p.get('country', '?')}: {p.get('type', 'trade')} "
-            f"(volume {p.get('volume', '?')}, notes: {p.get('note', '')})"
-        )
-    partners_block = "\n".join(partners_lines) if partners_lines else "  (no detailed partner data)"
+    # Country roster — all 19 other countries
+    roster_lines = []
+    if s.country_roster:
+        for r in s.country_roster:
+            roster_lines.append(
+                f"  {r.get('code', '?'):<12s} GDP {r.get('gdp', '?'):>7} "
+                f"  {r.get('sector_profile', 'mixed'):<22s}  "
+                f"{r.get('relationship', 'neutral'):<16s}  #{r.get('trade_rank', '?')}"
+            )
+    if not roster_lines:
+        # Fallback — build minimal roster from major_trade_partners
+        for p in s.major_trade_partners:
+            roster_lines.append(
+                f"  {p.get('country', '?'):<12s}  {p.get('type', 'trade'):<16s} "
+                f"(volume {p.get('volume', '?')})"
+            )
+    roster_block = "\n".join(roster_lines) if roster_lines else "  (roster data unavailable)"
 
-    tariffs_block = _fmt_entries(
-        s.tariffs_imposed,
-        "  (none) — you impose no tariffs today.",
-    )
+    # Tariffs I impose
+    my_tariffs_lines = []
+    for t in s.tariffs_imposed:
+        tgt = t.get("target", "?")
+        lvl = t.get("level", "?")
+        note = t.get("note", "")
+        suffix = f' — "{note}"' if note else ""
+        my_tariffs_lines.append(f"  {tgt}   L{lvl}{suffix}")
+    my_tariffs_block = "\n".join(my_tariffs_lines) if my_tariffs_lines else "  (none — you currently impose no tariffs)"
+
+    # Tariffs on me
+    on_me_lines = []
+    for t in s.tariffs_against:
+        imp = t.get("imposer", "?")
+        lvl = t.get("level", "?")
+        note = t.get("note", "")
+        suffix = f' — "{note}"' if note else ""
+        on_me_lines.append(f"  {imp}   L{lvl}{suffix}")
+    on_me_block = "\n".join(on_me_lines) if on_me_lines else "  (none — no country currently tariffs you)"
 
     return f"""You are {s.character_name}, {s.title} of {s.country_name}.
 
 ## D3 — TRADE AND TARIFF REVIEW (Round {ROUND_NUM})
 
-This is the TRADE POLICY review. Focus only on tariffs and trade posture. Do
-NOT address budget, sanctions, or OPEC in this call.
+This is the TRADE POLICY review per CONTRACT_TARIFFS v1.0. Focus only on
+tariffs and trade posture. Do NOT address budget, sanctions, or OPEC here.
 
-## Economic context (brief)
-- GDP: {s.gdp:.0f}, treasury {s.treasury:.0f}, inflation {s.inflation:.1f}%
+## Economic state
+- GDP: {s.gdp:.0f}
+- Treasury: {s.treasury:.0f} coins
+- Inflation: {s.inflation:.1f}%
+- Stability: {s.stability:.1f}/10
+- Political support: {s.political_support:.0f}%
 
-## Major trade partners
-{partners_block}
+## ALL 20 COUNTRIES (the full roster — anyone is a possible target)
 
-## Tariffs you currently impose
-{tariffs_block}
+  code          GDP    sector profile          relationship        trade-rank
+  ----         ----    ------------------      ------------        ----------
+{roster_block}
+
+## CURRENT TARIFFS — IMPOSED BY ME (you can change these)
+{my_tariffs_block}
+
+## CURRENT TARIFFS — IMPOSED ON ME (informational only — you cannot change these)
+{on_me_block}
+
+## HOW TARIFFS WORK (mechanically)
+- Bilateral. Set a level (0-3) for any subset of the other 19 countries.
+- Levels: 0 = none / lift, 1 = light, 2 = moderate, 3 = heavy / near-embargo.
+- As imposer you get: customs revenue + small self-damage + inflation pressure.
+- As target you get: GDP hit proportional to imposer's market share.
+- Setting a target to 0 LIFTS the tariff. No separate "lift" action.
+- Untouched targets keep their previous level (carry-forward).
+
+## DECISION RULES
+- decision="change"    -> must include changes.tariffs with >=1 (target, level) entry
+- decision="no_change" -> must OMIT the changes field entirely
+- rationale >=30 chars REQUIRED in both cases
+- self-tariff and unknown-target are validation errors
+
+REMINDER — no_change is a legitimate choice. If your current posture still
+serves your goals, no_change is the right answer with a clear rationale.
+Do not invent changes for the sake of action.
 
 ## Your relevant objectives
 {_objectives_block(s.objectives)}
 
 ## INSTRUCTIONS
-Decide whether to CHANGE your tariff policy or keep it NO_CHANGE. Either way
-you MUST provide a rationale of at least one sentence (>20 chars) explaining
-WHY.
+Decide whether to CHANGE your tariff posture or keep it NO_CHANGE.
+Either way you MUST provide a rationale of at least 30 characters explaining WHY.
 
-Consider:
-- Strategic rivals with deep trade exposure → tariffs may coerce or decouple
-- Critical import dependencies → raising tariffs hurts you
-- Retaliatory pressure from ongoing trade wars
-- Restraint is valid if existing tariffs already match strategy
-
-Respond with JSON ONLY, matching this EXACT schema:
+Respond with JSON ONLY, matching this EXACT schema (CONTRACT_TARIFFS v1.0 §2):
 
 {{
-  "decision": "change" | "no_change",
-  "rationale": "string, >= 20 characters",
-  "changes": [
-    {{ "target": "country_code", "level": 0, "action": "impose|lift|adjust" }}
-  ]
+  "action_type": "set_tariffs",
+  "country_code": "{s.country_code}",
+  "round_num": {ROUND_NUM},
+  "decision": "change",
+  "rationale": "string, >= 30 characters",
+  "changes": {{
+    "tariffs": {{
+      "target_country": 2
+    }}
+  }}
 }}
 
 Rules:
-- level: 0 (none) to 3 (heavy)
-- action must be one of: impose, lift, adjust
-- Include "changes" ONLY when decision == "change"
+- changes.tariffs is a flat dict mapping target country code to integer level (0-3)
+- It is SPARSE — only include targets you want to CHANGE this round
+- On decision="no_change", OMIT the "changes" field entirely (do not send null)
+- On decision="change", include "changes" with a "tariffs" dict with at least 1 entry
 """
 
 
@@ -506,7 +565,16 @@ SCENARIOS: list[LeaderScenario] = [
         production_capacity={"ground": 5, "naval": 4, "tactical_air": 5, "strategic_missile": 0, "air_defense": 0},
         current_research={"nuclear_coins": 0, "ai_coins": 6},
         sanctions_imposed=[{"target": "persia", "level": 3, "note": "wartime"}],
-        tariffs_imposed=[{"target": "cathay", "level": 2, "note": "ongoing trade war"}],
+        tariffs_imposed=[
+            {"target": "cathay", "level": 2, "note": "ongoing trade war"},
+            {"target": "sarmatia", "level": 2, "note": "sanctions-aligned"},
+            {"target": "caribe", "level": 3, "note": "energy blockade"},
+        ],
+        tariffs_against=[
+            {"imposer": "cathay", "level": 2, "note": "retaliatory"},
+            {"imposer": "caribe", "level": 1, "note": "counter-sanctions symbolic"},
+            {"imposer": "persia", "level": 2, "note": "counter-sanctions"},
+        ],
         major_trade_partners=[
             {"country": "cathay", "type": "rival", "volume": "high", "note": "trade war ongoing"},
             {"country": "teutonia", "type": "ally", "volume": "high", "note": "NATO partner"},
@@ -539,6 +607,10 @@ SCENARIOS: list[LeaderScenario] = [
         current_research={"nuclear_coins": 0, "ai_coins": 10},
         sanctions_imposed=[],
         tariffs_imposed=[{"target": "columbia", "level": 2, "note": "retaliatory"}],
+        tariffs_against=[
+            {"imposer": "columbia", "level": 2, "note": "ongoing trade war"},
+            {"imposer": "bharata", "level": 1, "note": "strategic hedging"},
+        ],
         major_trade_partners=[
             {"country": "columbia", "type": "rival", "volume": "high", "note": "trade war"},
             {"country": "bharata", "type": "neutral", "volume": "medium"},
@@ -775,6 +847,7 @@ SCENARIOS: list[LeaderScenario] = [
         current_research={"nuclear_coins": 2, "ai_coins": 2},
         sanctions_imposed=[],
         tariffs_imposed=[{"target": "cathay", "level": 1, "note": "strategic hedging"}],
+        tariffs_against=[],
         major_trade_partners=[
             {"country": "columbia", "type": "friendly", "volume": "high"},
             {"country": "cathay", "type": "rival", "volume": "high", "note": "border issue"},
@@ -922,24 +995,44 @@ def _assert_budget_payload(parsed: dict, cc: str) -> None:
     )
 
 
-def _assert_sanction_or_tariff_payload(domain: str, parsed: dict, cc: str) -> None:
+def _assert_sanctions_payload(parsed: dict, cc: str) -> None:
+    """D2 sanctions: legacy list-of-dicts format (not yet migrated to contract)."""
     if parsed.get("decision") != "change":
         return
     changes = parsed.get("changes")
-    assert isinstance(changes, list), f"{cc} {domain}: changes must be list on change"
+    assert isinstance(changes, list), f"{cc} sanctions: changes must be list on change"
     for entry in changes:
-        assert isinstance(entry, dict), f"{cc} {domain}: entry must be dict: {entry}"
+        assert isinstance(entry, dict), f"{cc} sanctions: entry must be dict: {entry}"
         target = entry.get("target")
         assert isinstance(target, str) and target, (
-            f"{cc} {domain}: target must be non-empty string: {entry}"
+            f"{cc} sanctions: target must be non-empty string: {entry}"
         )
         if "level" in entry:
             lvl = int(entry["level"])
-            assert 0 <= lvl <= 3, f"{cc} {domain}: level out of range: {lvl}"
+            assert 0 <= lvl <= 3, f"{cc} sanctions: level out of range: {lvl}"
         if "action" in entry:
             assert entry["action"] in {"impose", "lift", "adjust"}, (
-                f"{cc} {domain}: invalid action: {entry['action']}"
+                f"{cc} sanctions: invalid action: {entry['action']}"
             )
+
+
+def _assert_tariff_payload(parsed: dict, cc: str) -> None:
+    """D3 tariffs: full CONTRACT_TARIFFS v1.0 validation via production validator.
+
+    The harness auto-fills action_type/country_code/round_num if the LLM
+    omitted them — these are envelope fields the communication layer would
+    normally inject, not decision content.
+    """
+    payload = dict(parsed)
+    payload.setdefault("action_type", "set_tariffs")
+    payload.setdefault("country_code", cc)
+    payload.setdefault("round_num", ROUND_NUM)
+
+    report = validate_tariffs_decision(payload)
+    assert report["valid"], (
+        f"{cc} tariffs: validator rejected decision: {report['errors']}\n"
+        f"payload: {payload}"
+    )
 
 
 def _assert_opec_payload(parsed: dict, cc: str) -> None:
@@ -1063,7 +1156,7 @@ def test_d2_sanctions(scenario: LeaderScenario, decision_cache) -> None:
     decisions = _get_leader_decisions(decision_cache, scenario)
     parsed = decisions.get("sanctions")
     _assert_base_shape("sanctions", parsed, scenario.country_code)
-    _assert_sanction_or_tariff_payload("sanctions", parsed, scenario.country_code)
+    _assert_sanctions_payload(parsed, scenario.country_code)
 
 
 @pytest.mark.llm
@@ -1073,7 +1166,7 @@ def test_d3_tariffs(scenario: LeaderScenario, decision_cache) -> None:
     decisions = _get_leader_decisions(decision_cache, scenario)
     parsed = decisions.get("tariffs")
     _assert_base_shape("tariffs", parsed, scenario.country_code)
-    _assert_sanction_or_tariff_payload("tariffs", parsed, scenario.country_code)
+    _assert_tariff_payload(parsed, scenario.country_code)
 
 
 OPEC_SCENARIOS = [s for s in SCENARIOS if s.is_opec]
@@ -1146,12 +1239,22 @@ def test_sanctions_prompt_has_relationships_focus():
 
 
 def test_tariffs_prompt_has_trade_focus():
-    """D3 prompt: trade partners visible."""
-    s = next(x for x in SCENARIOS if x.major_trade_partners)
+    """D3 prompt: CONTRACT_TARIFFS v1.0 schema — roster, both tariff directions, decision rules."""
+    s = next(x for x in SCENARIOS if x.tariffs_imposed)
     p = _build_tariffs_prompt(s)
     assert "TRADE AND TARIFF REVIEW" in p
-    assert "Major trade partners" in p
-    assert "Tariffs you currently impose" in p
+    assert "CONTRACT_TARIFFS v1.0" in p
+    assert "IMPOSED BY ME" in p
+    assert "IMPOSED ON ME" in p
+    assert "no_change" in p
+    assert '"action_type": "set_tariffs"' in p
+    assert "changes" in p
+    assert "tariffs" in p
+    # Schema teaches sparse dict, not list of entries
+    assert "target_country" in p
+    # Decision rules present
+    assert "carry-forward" in p
+    assert "legitimate" in p.lower()
 
 
 def test_opec_prompt_only_for_members():

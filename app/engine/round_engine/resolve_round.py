@@ -48,7 +48,7 @@ MOVEMENT_ACTIONS = {"move_unit"}
 MOBILIZATION_ACTIONS = {"mobilize_reserve"}
 RD_ACTIONS = {"rd_investment"}
 ECONOMIC_ACTIONS = {
-    "set_sanction", "set_tariff", "set_budget", "set_opec",
+    "set_sanction", "set_tariff", "set_tariffs", "set_budget", "set_opec",
     "impose_sanction", "impose_tariff", "lift_sanction", "lift_tariff",
 }
 BLOCKADE_ACTIONS = {"declare_blockade"}
@@ -395,6 +395,90 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 except Exception as e:
                     logger.warning("[resolve R%d] tariff lift failed %s->%s: %s",
                                    round_num, cc, target, e)
+
+        # --- set_tariffs (plural): CONTRACT_TARIFFS v1.0 — validate, persist
+        # decision audit, upsert tariffs state table for each (target, level)
+        # in the sparse changes.tariffs dict.
+        elif atype == "set_tariffs":
+            from engine.services.tariff_validator import validate_tariffs_decision
+
+            full_payload = {
+                "action_type": "set_tariffs",
+                "country_code": cc,
+                "round_num": round_num,
+                "decision": payload.get("decision", "change"),
+                "rationale": payload.get(
+                    "rationale",
+                    "no rationale provided — placeholder for backward "
+                    "compatibility with pre-v1.0 set_tariffs payloads",
+                ),
+            }
+            if "changes" in payload:
+                full_payload["changes"] = payload["changes"]
+
+            result = validate_tariffs_decision(full_payload)
+            if not result["valid"]:
+                logger.warning(
+                    "[resolve R%d] invalid set_tariffs from %s: %s",
+                    round_num, cc, result["errors"],
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "tariff_rejected",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} tariff decision rejected: "
+                        f"{result['errors'][0] if result['errors'] else 'invalid'}"
+                    ),
+                    "payload": {
+                        "errors": result["errors"],
+                        "original": payload,
+                    },
+                })
+                continue
+
+            normalized = result["normalized"]
+
+            # 1. Always write the per-round audit record (incl. no_change)
+            try:
+                client.table("country_states_per_round").update({
+                    "tariff_decision": normalized,
+                }).eq("scenario_id", scenario_id) \
+                  .eq("round_num", round_num) \
+                  .eq("country_code", cc).execute()
+            except Exception as e:
+                logger.warning(
+                    "[resolve R%d] tariff_decision write failed for %s: %s",
+                    round_num, cc, e,
+                )
+
+            # 2. On change, upsert the tariffs state table for each entry.
+            #    Carry-forward for untouched targets is implicit.
+            if normalized["decision"] == "change":
+                tariffs_dict = normalized.get("changes", {}).get("tariffs", {})
+                for target, level in tariffs_dict.items():
+                    try:
+                        client.table("tariffs").upsert({
+                            "sim_run_id": _sim_run_id,
+                            "imposer_country_id": cc,
+                            "target_country_id": target,
+                            "level": int(level),
+                            "notes": f"set_tariffs by {cc} in round {round_num}",
+                        }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    except Exception as e:
+                        logger.warning(
+                            "[resolve R%d] set_tariffs upsert failed %s->%s: %s",
+                            round_num, cc, target, e,
+                        )
+                logger.info(
+                    "[resolve R%d] %s set_tariffs change (%d targets, audit persisted)",
+                    round_num, cc, len(tariffs_dict),
+                )
+            else:
+                logger.info(
+                    "[resolve R%d] %s set_tariffs no_change (audit persisted)",
+                    round_num, cc,
+                )
 
         # --- set_budget: validate via CONTRACT_BUDGET v1.1 validator, then
         # inject the new schema (social_pct, production, research) into the
