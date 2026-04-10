@@ -79,7 +79,7 @@ class StabilityInput(BaseModel):
     economic_state: str  # normal | stressed | crisis | collapse
     inflation: float
     starting_inflation: float
-    sanctions_rounds: int = 0
+    sanctions_rounds: int = 0  # DEPRECATED 2026-04-10 — unused, retained only for backward compat with old callers
 
     # War context
     at_war: bool = False
@@ -321,10 +321,12 @@ def calc_stability(inp: StabilityInput) -> StabilityResult:
             delta += 0.15
 
     # --- SANCTIONS FRICTION ---
+    # (2026-04-10 CONTRACT_SANCTIONS v1.0: "diminishing returns after 4 rounds"
+    #  adaptation REMOVED for consistency with the new stateless sanctions model.
+    #  sanctions_rounds counter is no longer populated; the full friction applies
+    #  whenever sanctions_level > 0.)
     if inp.sanctions_level > 0:
-        # Diminishing returns after 4 rounds
-        sanc_multiplier = 0.70 if inp.sanctions_rounds > 4 else 1.0
-        delta -= 0.1 * inp.sanctions_level * sanc_multiplier
+        delta -= 0.1 * inp.sanctions_level
 
     if under_heavy_sanctions:
         sanc_hit = inp.sanctions_pain

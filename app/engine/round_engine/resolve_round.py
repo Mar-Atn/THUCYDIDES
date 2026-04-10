@@ -48,7 +48,8 @@ MOVEMENT_ACTIONS = {"move_unit"}
 MOBILIZATION_ACTIONS = {"mobilize_reserve"}
 RD_ACTIONS = {"rd_investment"}
 ECONOMIC_ACTIONS = {
-    "set_sanction", "set_tariff", "set_tariffs", "set_budget", "set_opec",
+    "set_sanction", "set_sanctions", "set_tariff", "set_tariffs",
+    "set_budget", "set_opec",
     "impose_sanction", "impose_tariff", "lift_sanction", "lift_tariff",
 }
 BLOCKADE_ACTIONS = {"declare_blockade"}
@@ -359,6 +360,92 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 except Exception as e:
                     logger.warning("[resolve R%d] sanctions lift failed %s->%s: %s",
                                    round_num, cc, target, e)
+
+        # --- set_sanctions (plural): CONTRACT_SANCTIONS v1.0 — validate, persist
+        # decision audit, upsert sanctions state table for each (target, level)
+        # in the sparse changes.sanctions dict. Levels are signed [-3, +3]:
+        # negative levels = evasion support.
+        elif atype == "set_sanctions":
+            from engine.services.sanction_validator import validate_sanctions_decision
+
+            full_payload = {
+                "action_type": "set_sanctions",
+                "country_code": cc,
+                "round_num": round_num,
+                "decision": payload.get("decision", "change"),
+                "rationale": payload.get(
+                    "rationale",
+                    "no rationale provided — placeholder for backward "
+                    "compatibility with pre-v1.0 set_sanctions payloads",
+                ),
+            }
+            if "changes" in payload:
+                full_payload["changes"] = payload["changes"]
+
+            result = validate_sanctions_decision(full_payload)
+            if not result["valid"]:
+                logger.warning(
+                    "[resolve R%d] invalid set_sanctions from %s: %s",
+                    round_num, cc, result["errors"],
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "sanction_rejected",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} sanctions decision rejected: "
+                        f"{result['errors'][0] if result['errors'] else 'invalid'}"
+                    ),
+                    "payload": {
+                        "errors": result["errors"],
+                        "original": payload,
+                    },
+                })
+                continue
+
+            normalized = result["normalized"]
+
+            # 1. Always write the per-round audit record (incl. no_change)
+            try:
+                client.table("country_states_per_round").update({
+                    "sanction_decision": normalized,
+                }).eq("scenario_id", scenario_id) \
+                  .eq("round_num", round_num) \
+                  .eq("country_code", cc).execute()
+            except Exception as e:
+                logger.warning(
+                    "[resolve R%d] sanction_decision write failed for %s: %s",
+                    round_num, cc, e,
+                )
+
+            # 2. On change, upsert the sanctions state table for each entry.
+            #    Signed levels: negative = evasion support. Carry-forward for
+            #    untouched targets is implicit.
+            if normalized["decision"] == "change":
+                sanctions_dict = normalized.get("changes", {}).get("sanctions", {})
+                for target, level in sanctions_dict.items():
+                    try:
+                        client.table("sanctions").upsert({
+                            "sim_run_id": _sim_run_id,
+                            "imposer_country_id": cc,
+                            "target_country_id": target,
+                            "level": int(level),
+                            "notes": "",  # CONTRACT_SANCTIONS v1.0 §5: notes cleared
+                        }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    except Exception as e:
+                        logger.warning(
+                            "[resolve R%d] set_sanctions upsert failed %s->%s: %s",
+                            round_num, cc, target, e,
+                        )
+                logger.info(
+                    "[resolve R%d] %s set_sanctions change (%d targets, audit persisted)",
+                    round_num, cc, len(sanctions_dict),
+                )
+            else:
+                logger.info(
+                    "[resolve R%d] %s set_sanctions no_change (audit persisted)",
+                    round_num, cc,
+                )
 
         # --- Upsert tariffs state table ---
         elif atype in ("set_tariff", "impose_tariff"):

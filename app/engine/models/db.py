@@ -60,8 +60,8 @@ class Country(BaseModel):
     oil_production_mbpd: float = 0.0  # D5: million barrels per day
 
     # Calibration baselines (persisted for delta-only calculations)
-    sanctions_recovery_rounds: int = 0
-    sanctions_adaptation_rounds: int = 0
+    # (sanctions_recovery_rounds + sanctions_adaptation_rounds DROPPED 2026-04-10
+    #  per CONTRACT_SANCTIONS v1.0 — temporal adaptation removed entirely)
     sanctions_coefficient: float = 1.0
     tariff_coefficient: float = 1.0
 

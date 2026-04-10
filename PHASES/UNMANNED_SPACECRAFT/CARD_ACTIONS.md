@@ -524,25 +524,89 @@ See CARD_FORMULAS.md A.6 (Budget Execution) + A.7 (Military Production) for the 
 | Engine | `engines/economic.calc_tariff_coefficient()` — UNCHANGED, behavior locked by L1 regression tests |
 | Status | ✅ **DONE** end-to-end (CONTRACT v1.0, validator, context, persistence, AI acceptance gate). See `CHECKPOINT_TARIFFS.md`. |
 
-### 2.3 Set Sanction
+### 2.3 Set Sanctions — CONTRACT_SANCTIONS v1.0 (🔒 locked 2026-04-10)
 | Field | Value |
 |---|---|
-| action_type | `set_sanction` |
-| Fields | `target_country`, `level` (0–3) |
-| Who | HoS. Can change any time during round. |
-| Timing | Takes effect at next engine tick. Previous settings carry forward if unchanged. |
+| action_type | `set_sanctions` (plural — one submission carries the country's full intent for the round) |
+| Who | HoS. |
+| Timing | Mandatory each round (submitted between rounds). **`no_change` is a legitimate explicit choice; if no decision is submitted at all, previous round's sanctions carry forward via the state table.** |
+| Spec | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_SANCTIONS.md` v1.0 — single source of truth for schema, validation, persistence, engine behavior |
+
+**Decision schema:**
+
+```json
+{
+  "action_type": "set_sanctions",
+  "country_code": "columbia",
+  "round_num": 3,
+  "decision": "change",
+  "rationale": "string, ≥30 chars, required even on no_change",
+  "changes": {
+    "sanctions": {
+      "persia":  3,
+      "choson":  3,
+      "bharata": 0
+    }
+  }
+}
+```
+
+**The participant sets:**
+
+| Field | Shape | Semantics |
+|---|---|---|
+| `decision` | `"change"` or `"no_change"` | Explicit choice. `no_change` is legitimate. |
+| `rationale` | string ≥30 chars | Required in BOTH branches. |
+| `changes.sanctions` | sparse dict `{target_code: int [-3, +3]}` | Only name targets you want to change. Untouched targets carry forward. |
+
+**Level scale (signed for evasion support):**
 
 | Level | Meaning | Effect |
 |---|---|---|
-| L0 | None | No sanctions |
-| L1 | Targeted | Mild GDP suppression on target |
-| L2 | Broad | Significant damage. Oil producers lose export access. |
-| L3 | Maximum | Near-total economic isolation. Devastating if coalition is large. |
+| **+3** | Maximum sanctions | Full intensity — imposer contributes `own_gdp_share × 1.0` to coverage |
+| **+2** | Broad sanctions | Strong intensity — contributes `own_gdp_share × 0.67` to coverage |
+| **+1** | Targeted sanctions | Mild intensity — contributes `own_gdp_share × 0.33` to coverage |
+| **0** | None / lift | No contribution; level=0 lifts any existing row |
+| **−1** | Light evasion support | Negative contribution: `−own_gdp_share × 0.33` — reduces coalition coverage |
+| **−2** | Moderate evasion support | `−own_gdp_share × 0.67` |
+| **−3** | Full evasion support | `−own_gdp_share × 1.0` — Cathay-backing-Sarmatia scenario |
 
-**Key:** Sanctions are COALITION-BASED — effectiveness depends on what fraction of world GDP is sanctioning the target (S-curve: 40% coverage → 40% effectiveness, 80% → 80%). Imposing countries also suffer (trade disruption, lost export markets — cost depends on bilateral trade weight). Target adapts over time (diminishing returns after 4 rounds). Tech/services economies more vulnerable than resource economies. See CARD_FORMULAS.md → A.2 Sanctions Coefficient.
+**Coverage formula:**
+```
+coverage = Σ (actor_gdp_share × level / 3)   for all actors with sanctions on target
+coverage = clamp(coverage, 0, 1)             # evasion can cancel but cannot bonus
+```
 
-| Engine | `engines/economic.calc_sanctions_coefficient()` |
-| Status | **LIVE** |
+**Per-target max damage ceiling** (sector-derived):
+```
+max_damage = tec% × 0.25 + svc% × 0.25 + ind% × 0.125 + res% × 0.05
+```
+- Tech/services-heavy economies top out ~22% one-time GDP loss
+- Resource-heavy economies top out ~13-14% one-time GDP loss
+- Industrial economies in between
+
+**Final GDP impact:** `damage = max_damage × S_curve(coverage)`. **One-time shock** at imposition, not a recurring drain. Lifting sanctions produces immediate recovery via the same ratio mechanism. See `CARD_FORMULAS.md` A.2 for the full formula and S-curve shape.
+
+**Key strategic dynamics:**
+- **Solo action is noise** — at <10% coverage, the S-curve is in its flat tail (Teutonia alone L3 on Sarmatia = 0.40% damage)
+- **Coalition tipping point at 0.5-0.6** — crossing from "half the world" to "three quarters" doubles effectiveness
+- **Evasion support is strategic** — a country like Cathay (24% of world GDP) can single-handedly cancel or activate a coalition by choosing to evade or join
+- **Sanctioning a big rival is free** — no imposer cost in v1.0 (no trade friction, no political cost). The strategic cost is diplomatic, not mechanical.
+- **Resource economies are structurally resilient** — oil/gas/minerals find gray-market buyers, max damage capped low by sector weights
+- **Target adaptation is NOT modeled** — sanctions produce one-time shocks, not recurring drains; the "sanctions_rounds > 4 diminishing returns" mechanism was dropped 2026-04-10
+
+**Validation:** all submissions go through `app/engine/services/sanction_validator.py` with 11+ error codes including `INVALID_LEVEL` (outside [-3, +3]), `SELF_SANCTION`, `UNKNOWN_TARGET`, etc. Invalid submissions emit `sanction_rejected` observatory events.
+
+**Persistence:**
+- Canonical world state → `sanctions` state table (existing, unchanged)
+- Per-round decision audit → `country_states_per_round.sanction_decision` JSONB (new 2026-04-10)
+
+**Context package** (assembled by `app/engine/services/sanction_context.py`): economic state, ALL 20 countries with current coalition coverage computed per potential target, current bilateral sanctions both directions, decision rules with no_change reminder, instruction. **Decision-specific context only — cognitive context is provided by the AI Participant Module (future), not by this contract.**
+
+**Legacy compatibility:** the singular `set_sanction` / `impose_sanction` / `lift_sanction` actions still work in parallel. New code should use `set_sanctions` (plural).
+
+| Engine | `engines/economic.calc_sanctions_coefficient()` — REWRITTEN 2026-04-10, regression-locked by L1 tests |
+| Status | 🟡 **IN PROGRESS** — Engine + L1 tests DONE; contract / validator / persistence / context / L3 still to ship. See `CHECKPOINT_SANCTIONS.md` when complete. |
 
 ### 2.4 Set OPEC Production
 | Field | Value |

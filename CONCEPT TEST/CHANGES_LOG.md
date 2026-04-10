@@ -1128,3 +1128,107 @@ Result: `tariff_decision` JSONB matches, `(columbia, persia).level` upserted to 
 - Backport of 4-block cognitive context to budget — **superseded by the new boundary**; no backport needed
 - Cognitive persistence (cognitive_states table, self-curated memory, goal evolution) — AI Participant Module v1.0, separate phase block
 - CONCEPT/SEED reconciliation — waits until ALL decision slices ship
+
+---
+
+## SANCTIONS VERTICAL SLICE — DONE end-to-end (2026-04-10)
+
+**Scope:** Third of the mandatory end-of-round decisions shipped as a fully polished vertical slice. CONTRACT_SANCTIONS v1.0 is now 🔒 LOCKED. **First slice with a real engine rewrite** — the sanctions math was redesigned with Marat during calibration (vs. budget/tariffs which locked contracts around existing behavior).
+
+### Key difference from budget/tariffs slices
+
+Budget and tariffs both used the "lock the engine around existing math" pattern. Sanctions required a real rewrite because the existing engine had:
+- Global `SANCTIONS_MAX_DAMAGE = 0.87` constant (inverted semantics — meant "floor 0.13")
+- Redundant `trade_openness` factor
+- Hand-wavy `sector_vulnerability` multiplier
+- Contradictory floor values (SEED_D8 said 0.13, CARD_FORMULAS/engine said 0.50)
+- Dead adaptation code (4 constants + `update_sanctions_rounds()` counter not read by anyone)
+- Documented-but-unimplemented imposer cost
+- L=−1 evasion rows in seed data that the engine silently ignored
+
+Rather than lock the broken math, we rewrote it into a cleaner 3-step formula with Marat's new design.
+
+### Design decisions locked
+
+| # | Gap | Decision |
+|---|---|---|
+| G1 | Floor discrepancy (SEED 0.13 vs engine 0.50) | **Floor = 0.15** canonical everywhere |
+| G2 | Imposer cost prose without formula | **Dropped** — target-damage-only model for now |
+| G3 | Temporal adaptation: dead code + contradictory specs | **Dropped entirely.** Stateless recomputation. Also removed political.py's `sanctions_rounds > 4 ? 0.70 : 1.0` multiplier. |
+| G4 | L=−1 anti-sanctions in seed data, no mechanism | **Signed coverage** `[-3, +3]`. Negative contributes negatively, clamped at 0 |
+| G5 | Sector carve-outs (financial / tech / energy) | **Dropped.** Single integer level only. Sectoral nuance implicit via per-country max_damage ceiling |
+| G6 | Mirage ±20% routing prose in DET_A1 | **Deleted** from DET_A1. No special role mechanic |
+| G7 | Missing contract / validator / context / mandatory-decision flow | **Slice work** — all built |
+
+### Canonical new formula (v1.0)
+
+```
+max_damage  = tec × 0.25 + svc × 0.25 + ind × 0.125 + res × 0.05    # per-country sector ceiling
+coverage    = Σ (actor_gdp_share × level / 3)                         # level ∈ [-3, +3]
+coverage    = clamp(coverage, 0, 1)
+effectiveness = S_curve(coverage)                                     # new 11-knot steeper curve
+damage      = max_damage × effectiveness
+coefficient = max(0.15, 1.0 - damage)
+```
+
+Per-country sector-derived ceilings: Levantia 22.5% (services+tech), Columbia 21.9%, Cathay 17.5% (industrial), Sarmatia 13.9% (resources), Caribe 12.5% (pure resource).
+
+New steeper S-curve with tipping point at coverage 0.5 → 0.6 (+0.20 effectiveness jump).
+
+### Canonical calibration anchors (Sarmatia, locked in L1 tests)
+
+| Scenario | GDP loss |
+|---|---|
+| Clean world | 0.00% |
+| Teutonia alone L3 | 0.40% |
+| Columbia alone L3 | 2.86% |
+| **Real DB starting (12 actors incl. Cathay L−1 evasion)** | **5.10%** |
+| Starting + Cathay flips L−1 → L+2 | 9.72% |
+
+### Documents updated
+
+| Document | Change |
+|---|---|
+| `PHASES/UNMANNED_SPACECRAFT/CONTRACT_SANCTIONS.md` | NEW — 🔒 LOCKED v1.0 |
+| `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_SANCTIONS.md` | NEW — durable record of the slice |
+| `PHASES/UNMANNED_SPACECRAFT/PHASE.md` | Added sanctions DONE status block |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md` | A.2 rewritten with new 3-step formula + constants + canonical anchors |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md` | 2.3 rewritten with set_sanctions (plural) + signed level range + removed false "imposer cost" and "adaptation" claims |
+| `2 SEED/D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md` | §Sanctions Hit rewritten to match new canonical formula; Pass 2 adaptation line struck |
+| `3 DETAILED DESIGN/DET_C1_SYSTEM_CONTRACTS.md` | §MandatoryInputs sanctions schema updated to reference CONTRACT_SANCTIONS v1.0 |
+
+### Code changed
+
+- `app/engine/engines/economic.py` — `calc_sanctions_coefficient` rewritten, `_sanctions_max_damage` helper added, new constants, dead constants removed, `update_sanctions_rounds()` deleted
+- `app/engine/engines/political.py` — removed `sanctions_rounds > 4 ? 0.70 : 1.0` adaptation multiplier; `StabilityInput.sanctions_rounds` field left deprecated for backward compat
+- `app/engine/engines/round_tick.py` — cleaned `_merge_to_engine_dict` (dead column refs removed)
+- `app/engine/engines/orchestrator.py` — cleaned engine dict construction + result persistence
+- `app/engine/agents/runner.py` — cleaned agent runner state init
+- `app/engine/models/db.py` — removed dropped fields from Country Pydantic model
+- `app/engine/round_engine/resolve_round.py` — added `set_sanctions` (plural) handler
+- `app/engine/services/sanction_validator.py` — NEW pure validator (11 error codes, signed `[-3, +3]` level range)
+- `app/engine/services/sanction_context.py` — NEW decision-specific context builder (economic state + all 20 countries with coalition coverage per target + my_sanctions + sanctions_on_me + decision rules). No cognitive blocks.
+
+### DB migration
+
+- `sanctions_v1_canonical_schema` — added `sanction_decision` JSONB column to `country_states_per_round`; dropped `sanctions_adaptation_rounds` and `sanctions_recovery_rounds` from `countries`; cleared sectoral text from all 36 `sanctions.notes` rows (column kept); Cathay → Sarmatia L=−1 row preserved (now canonically valid under signed-coverage model).
+
+### Tests
+
+- L1: 27 in `test_sanctions_engine.py` (regression lock + calibration anchors + signed coverage), 44 in `test_sanction_validator.py` (11 error codes + signed level range), S-curve tests in `test_engines.py` updated for new 11-knot curve
+- L2: 4 in `test_sanction_persistence.py` (change, no_change, **negative level evasion persists**, invalid rejected), 7 in `test_sanction_context.py` (economic state + all 20 countries + **coalition coverage per target** + my_sanctions + sanctions_on_me + decision rules + **negative level display**)
+- L3: 10 LLM D2 decisions via updated `test_skill_mandatory_decisions.py` (sanctions prompt rewritten to v1.0 schema with signed levels + persona stub) + 1 full-chain acceptance gate in `test_sanctions_full_chain_ai.py`
+- **Total: 83 sanctions-specific tests green.** Full L1 suite: 295 green.
+
+### Concrete demo (2026-04-10 acceptance gate run)
+
+Columbia R75→R76, real LLM decision: `set_sanctions change {cathay: 3}` with rationale "Adding maximum sanctions against Cathay to contain strategic rival". Chain: validator ✓ → agent_decisions ✓ → resolve_round (audit JSONB + state table upsert) ✓ → run_engine_tick (coefficient recomputed) ✓. Result: Cathay's `sanctions_coefficient` moved 1.0 → 0.9639 (−3.61% one-time GDP shock). Matches hand-calculated prediction.
+
+### Out of scope (deferred)
+
+- Imposer cost / evasion benefit formulas — dropped per G2 "no negative impact for now"
+- Full Pass 2 / NOUS architectural layer — separate phase block
+- Cognitive persistence (cognitive_states table) — AI Participant Module v1.0
+- CONCEPT/SEED architectural re-synthesis — waits until all decision slices ship
+- Cleanup of `StabilityInput.sanctions_rounds` deprecated field — future cleanup pass
+- OPEC slice — next in the sequence per Marat's strategy directive

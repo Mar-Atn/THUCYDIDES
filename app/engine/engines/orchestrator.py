@@ -88,9 +88,7 @@ def _country_to_dict(c: Country) -> dict[str, Any]:
             "formosa_dependency": c.formosa_dependency, "debt_burden": c.debt_burden,
             "social_spending_baseline": c.social_baseline,
             "oil_revenue": 0.0, "inflation_revenue_erosion": 0.0,
-            "sanctions_rounds": 0,
-            "sanctions_recovery_rounds": c.sanctions_recovery_rounds,
-            "sanctions_adaptation_rounds": c.sanctions_adaptation_rounds,
+            # sanctions_rounds / adaptation / recovery removed 2026-04-10 per CONTRACT_SANCTIONS v1.0
             "sanctions_coefficient": c.sanctions_coefficient,
             "tariff_coefficient": c.tariff_coefficient,
             "formosa_disruption_rounds": 0,
@@ -205,8 +203,7 @@ def _country_update_payload(c: dict[str, Any]) -> dict[str, Any]:
         "treasury": round(eco.get("treasury", 0), 2),
         "inflation": round(eco["inflation"], 2),
         "debt_burden": round(eco["debt_burden"], 4),
-        "sanctions_recovery_rounds": eco.get("sanctions_recovery_rounds", 0),
-        "sanctions_adaptation_rounds": eco.get("sanctions_adaptation_rounds", 0),
+        # sanctions_recovery_rounds / sanctions_adaptation_rounds removed 2026-04-10 per CONTRACT_SANCTIONS v1.0
         "sanctions_coefficient": round(eco.get("sanctions_coefficient", 1.0), 4),
         "tariff_coefficient": round(eco.get("tariff_coefficient", 1.0), 4),
         "stability": round(pol["stability"], 2),

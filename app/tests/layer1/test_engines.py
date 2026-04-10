@@ -259,17 +259,42 @@ class TestGdpGrowth:
 # ===========================================================================
 
 class TestSanctionsSCurve:
-    """Sanctions S-curve: low coverage = low effect, high coverage = high effect."""
+    """Sanctions S-curve (CONTRACT_SANCTIONS v1.0, locked 2026-04-10):
 
-    @pytest.mark.parametrize("coverage,expected_min,expected_max", [
-        (0.3, 0.13, 0.17),
-        (0.7, 0.68, 0.72),
-        (0.9, 0.88, 0.92),
+    Steeper shape with tipping point around 0.5-0.6 coverage. Knots:
+    (0.0, 0.00) (0.1, 0.05) (0.2, 0.10) (0.3, 0.15) (0.4, 0.25) (0.5, 0.35)
+    (0.6, 0.55) (0.7, 0.65) (0.8, 0.75) (0.9, 0.90) (1.0, 1.00)
+    """
+
+    @pytest.mark.parametrize("coverage,expected", [
+        (0.0, 0.00),
+        (0.1, 0.05),
+        (0.3, 0.15),
+        (0.5, 0.35),
+        (0.6, 0.55),   # the big tipping-point jump
+        (0.7, 0.65),
+        (0.9, 0.90),
+        (1.0, 1.00),
     ])
-    def test_s_curve_interpolation(self, coverage, expected_min, expected_max):
-        """S-curve produces expected effectiveness at key coverage points."""
+    def test_s_curve_knot_values(self, coverage, expected):
+        """Effectiveness at each S-curve knot matches exactly (piecewise-linear)."""
         effectiveness = interpolate_s_curve(coverage, SANCTIONS_S_CURVE)
-        assert expected_min <= effectiveness <= expected_max
+        assert effectiveness == pytest.approx(expected, abs=1e-6)
+
+    def test_s_curve_monotonic(self):
+        """Effectiveness never decreases as coverage increases."""
+        prev = 0.0
+        for i in range(101):
+            cov = i / 100.0
+            eff = interpolate_s_curve(cov, SANCTIONS_S_CURVE)
+            assert eff >= prev - 1e-9, f"non-monotonic at cov={cov}"
+            prev = eff
+
+    def test_s_curve_tipping_point_is_steep(self):
+        """The 0.5 → 0.6 region is the steepest: 0.20 increase in effectiveness."""
+        at_05 = interpolate_s_curve(0.5, SANCTIONS_S_CURVE)
+        at_06 = interpolate_s_curve(0.6, SANCTIONS_S_CURVE)
+        assert at_06 - at_05 == pytest.approx(0.20, abs=1e-6)
 
     def test_zero_coverage_zero_effect(self):
         assert interpolate_s_curve(0.0, SANCTIONS_S_CURVE) == 0.0

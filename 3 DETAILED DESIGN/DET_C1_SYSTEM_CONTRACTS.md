@@ -2582,21 +2582,31 @@ AIParticipant
 
 ### MandatoryInputs
 
+**Legacy summary shape** (kept for reference — the canonical per-domain contracts are the CONTRACT_*.md files in PHASES/UNMANNED_SPACECRAFT/):
+
 ```json
 {
-  "budget": {
-    "social_pct": "float (0.5-1.5, multiplier of baseline)",
-    "military_coins": "float",
-    "tech_coins": "float"
-  },
-  "tariffs": { "<country_id>": "int (0-3)" },
-  "sanctions": { "<country_id>": "int (0-3)" },
+  "budget":   "see CONTRACT_BUDGET v1.1",
+  "tariffs":  "see CONTRACT_TARIFFS v1.0",
+  "sanctions": "see CONTRACT_SANCTIONS v1.0",
   "opec_production": "string (min|low|normal|high|max) | null",
   "deployments": [
     { "unit_type": "string", "count": "int", "to_zone": "string" }
   ]
 }
 ```
+
+**Canonical schemas** (each is a separate mandatory decision with its own `set_*` action):
+- `set_budget`   — CONTRACT_BUDGET v1.1   🔒 LOCKED 2026-04-10
+- `set_tariffs`  — CONTRACT_TARIFFS v1.0  🔒 LOCKED 2026-04-10
+- `set_sanctions` — CONTRACT_SANCTIONS v1.0 (engine rewritten 2026-04-10; contract finalization in progress)
+- `set_opec`    — (pending slice)
+
+**Sanctions schema (CONTRACT_SANCTIONS v1.0):**
+- Action: `set_sanctions` (plural)
+- Levels: int in `[-3, +3]` (negative = evasion support)
+- Sparse changes dict: `{ "<target_country_code>": int }`
+- Full decision envelope with rationale ≥30 chars, `decision` ∈ `{"change", "no_change"}`, sparse `changes.sanctions` only when `decision=="change"`
 
 ### CognitiveState (Implementation A — 4-block model)
 

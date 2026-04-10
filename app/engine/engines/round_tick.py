@@ -559,11 +559,10 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
             "social_spending_baseline": _safe_float(base.get("social_baseline"), 0.20),
             "oil_revenue": 0.0,
             "inflation_revenue_erosion": 0.0,
-            "sanctions_rounds": 0,
-            "sanctions_recovery_rounds": int(base.get("sanctions_recovery_rounds") or 0),
-            "sanctions_adaptation_rounds": int(base.get("sanctions_adaptation_rounds") or 0),
-            # Read COMPUTED coefficients from previous round state (not base structural data)
-            # These are the GDP modifiers (0.5-1.0 range), NOT the per-country vulnerability factors
+            # sanctions_rounds / sanctions_adaptation_rounds / sanctions_recovery_rounds
+            # fields REMOVED 2026-04-10 per CONTRACT_SANCTIONS v1.0 (no temporal
+            # adaptation — sanctions are stateless per-round recomputation).
+            # Read COMPUTED coefficient from previous round state (GDP modifier 0.15-1.0).
             "sanctions_coefficient": _safe_float(rs.get("sanctions_coefficient"), 1.0),
             "tariff_coefficient": _safe_float(rs.get("tariff_coefficient"), 1.0),
             "formosa_disruption_rounds": 0,

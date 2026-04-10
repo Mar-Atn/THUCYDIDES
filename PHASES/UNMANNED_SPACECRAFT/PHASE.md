@@ -106,6 +106,9 @@ See the reference documents (10 files in this directory):
 
 ## Current Status (2026-04-10)
 
+### 🟢 Sanctions vertical slice — DONE end-to-end (2026-04-10)
+Third mandatory-decision slice complete and locked. **First slice with a real engine rewrite** (vs. budget/tariffs which locked contracts around existing math). The sanctions engine was redesigned with Marat during the slice — simpler 3-step formula (per-country sector-derived ceiling × coverage × S-curve), signed coverage for evasion support (levels [-3, +3], Cathay L=-1 row now canonically valid), steeper S-curve with tipping point at 0.5-0.6, floor 0.15 canonical. **Dead code removed:** 4 constants, `update_sanctions_rounds()` function, `sanctions_rounds` counter, political.py adaptation multiplier. DB migration: `sanction_decision` JSONB audit column added, 2 dead columns dropped, `sanctions.notes` cleared (column kept). 83 tests green (L1 71: 27 engine + 44 validator / L2 11: 4 persistence + 7 context / L3 1 acceptance gate). See `CHECKPOINT_SANCTIONS.md`.
+
 ### 🟢 Tariffs vertical slice — DONE end-to-end (2026-04-10)
 Second mandatory-decision slice complete and locked. **First slice shipped under the new "decision-specific context only" boundary** (cognitive blocks deferred to AI Participant Module v1.0). CONTRACT_TARIFFS v1.0, validator (11 error codes), engine UNCHANGED with regression lock, DB migration (`tariff_decision` JSONB audit column), decision-specific context builder (all 20 countries + trade rank + bilateral both directions, no cognitive blocks), AI skill harness D3 rewrite, full-chain acceptance gate. 84 tests green (L1 63 / L2 10 / L3 11). See `CHECKPOINT_TARIFFS.md`.
 
@@ -188,7 +191,7 @@ Complete engines + contracts + DB + decision-specific context for ALL activities
 
 ### Sprint B: Active Loop + Conversations (~3-4 days)
 - ✅ B1: Multi-action per round (up to 3 commits per agent, prompt guides quality)
-- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **BUDGET DONE** ✅ 2026-04-10 · **TARIFFS DONE** ✅ 2026-04-10 (CONTRACT_TARIFFS v1.0 locked, engine unchanged with regression lock, decision-specific context only, 84 tests green — see CHECKPOINT_TARIFFS.md). Sanctions/OPEC remaining — follow VERTICAL_SLICE_PATTERN.md v1.1 (with the decision-specific-only boundary).
+- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **BUDGET DONE** ✅ 2026-04-10 · **TARIFFS DONE** ✅ 2026-04-10 · **SANCTIONS DONE** ✅ 2026-04-10 (CONTRACT_SANCTIONS v1.0 locked, engine rewritten with new sector-derived ceiling model + signed coverage for evasion + steeper S-curve, 83 tests green — see CHECKPOINT_SANCTIONS.md). **OPEC remaining** — follow VERTICAL_SLICE_PATTERN.md v1.1.
 - B7: Inter-round relocation phase (deploy/redeploy between rounds, separate from in-round): **NOT STARTED** *(added 2026-04-08)*
 - B8: Scripted battery testing (pre-scripted decisions, no LLM, full engine chain validation in `app/tests/layer2/`): **IN PROGRESS** *(added 2026-04-08)*
 - B2: Bilateral conversations — THE core feature:

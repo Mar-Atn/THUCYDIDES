@@ -92,22 +92,74 @@ oil_revenue = price × effective_mbpd × 0.009
 
 ---
 
-### A.2 SANCTIONS COEFFICIENT
+### A.2 SANCTIONS COEFFICIENT (CONTRACT_SANCTIONS v1.0, 🔒 locked 2026-04-10)
 
-**Key constants:** S-curve shape, MAX_DAMAGE = 0.87
+**Authoritative spec:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_SANCTIONS.md` v1.0.
+**Engine math rewritten 2026-04-10** — the old model (with trade_openness + global 0.87 ceiling + sector_vulnerability multiplier) is replaced by a simpler sector-derived ceiling model. Regression guards in `app/tests/layer1/test_sanctions_engine.py`.
 
-**Formula (simplified):**
+**Key constants:**
+- `SANCTIONS_WEIGHT_TEC = 0.25` (technology sector max vulnerability)
+- `SANCTIONS_WEIGHT_SVC = 0.25` (services sector max vulnerability)
+- `SANCTIONS_WEIGHT_IND = 0.125` (industry sector max vulnerability)
+- `SANCTIONS_WEIGHT_RES = 0.05` (resources sector max vulnerability — structurally resilient)
+- `SANCTIONS_FLOOR = 0.15` (safety rail on coefficient; mostly unreachable given sector weights cap max_damage ≈ 0.22)
+- S-curve: see below
+
+**Per-country max damage ceiling (derived from sector mix):**
 ```
-coverage = Σ(sanctioner_GDP / world_GDP × level/3)   [0-1]
-effectiveness = S_curve(coverage)   [non-linear: 40% at 0.5 coverage]
-sector_vulnerability = 0.5 + (services+tech)×0.8 - resources×0.6   [0.3-1.2]
-trade_openness = |trade_balance|/GDP + 0.3   [0-1]
-
-damage = 0.87 × effectiveness × trade_openness × sector_vulnerability
-coefficient = max(0.50, 1.0 - damage)
+max_damage = tec% × 0.25  +  svc% × 0.25  +  ind% × 0.125  +  res% × 0.05
 ```
 
-Result: 1.0 = no sanctions, 0.50 = maximum damage (50% GDP suppression).
+Tech/services-heavy economies top out ~22% GDP loss. Resource-heavy economies top out ~13-14%. Industrial economies in between. No global constant — each country has its own ceiling.
+
+**Coverage — signed for evasion support:**
+```
+coverage = Σ (actor_gdp_share × level / 3)   where level ∈ [-3, +3]
+           # positive level = sanctioning, negative level = evasion support
+coverage = clamp(coverage, 0, 1)
+           # evasion can cancel sanctions but cannot produce a GDP bonus
+```
+
+**S-curve (new steeper shape with tipping point at 0.5-0.6 coverage):**
+
+| coverage | effectiveness |
+|---|---|
+| 0.0 | 0.00 |
+| 0.1 | 0.05 |
+| 0.2 | 0.10 |
+| 0.3 | 0.15 |
+| 0.4 | 0.25 |
+| 0.5 | 0.35 |
+| 0.6 | 0.55 ← tipping-point jump |
+| 0.7 | 0.65 |
+| 0.8 | 0.75 |
+| 0.9 | 0.90 |
+| 1.0 | 1.00 |
+
+**Final formula:**
+```
+damage      = max_damage × effectiveness
+coefficient = max(SANCTIONS_FLOOR, 1.0 - damage)
+```
+
+**Semantics:**
+- `coefficient = 1.0` — no sanctions active
+- `coefficient < 1.0` — multiplies target GDP via ratio rule in `calc_gdp_growth` (one-time shock at imposition, not recurring drain)
+- No temporal adaptation, no compounding, no imposer cost, no evasion benefit (all dropped 2026-04-10 per CONTRACT_SANCTIONS v1.0)
+- Lifting sanctions = immediate recovery via the same ratio rule
+
+**Canonical calibration anchors** (Sarmatia under various coalitions, locked in L1 tests):
+| Scenario | coefficient | GDP loss |
+|---|---|---|
+| Clean world | 1.0000 | 0.00% |
+| Teutonia alone L3 | 0.9960 | 0.40% |
+| Columbia alone L3 | 0.9714 | 2.86% |
+| Real DB starting (12 actors incl. Cathay L-1 evasion) | 0.9490 | 5.10% |
+| Starting + Cathay flips L-1 → L+2 | 0.9028 | 9.72% |
+
+**Related effects (separate mechanisms, unchanged):**
+- Target revenue cost (calc_revenue): `Σ level × bilateral_weight × 0.015 × gdp` subtracted from target's revenue per round
+- Oil producer supply effect (calc_oil_price): L2+ sanctions on oil producers reduce effective world supply by 10% × producer's share
 
 ---
 

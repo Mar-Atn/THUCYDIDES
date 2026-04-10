@@ -94,19 +94,23 @@ MAJOR_ECONOMY_THRESHOLD: float = 30.0
 # Cal-8: L3=1%, L4=probabilistic 1.5-3.5% (rolled once when achieved)
 AI_LEVEL_TECH_FACTOR: dict[int, float] = {0: 0.0, 1: 0.0, 2: 0.003, 3: 0.010, 4: 0.025}  # L4 is avg; actual is rolled
 
-# Sanctions
-# Cal-11: Reshaped S-curve. ~40% at 0.50 coverage (current Sarmatia coalition)
-# ~80% at 0.80 (Cathay joins), ~95% at 0.95 (full world)
+# Sanctions (CONTRACT_SANCTIONS v1.0 — locked 2026-04-10)
+# Per-country max_damage is derived from sector mix (no global MAX_DAMAGE cap).
+# Coverage accepts signed levels [-3, +3]: positive = sanction, negative = evasion
+# support. Total coverage is clamped to [0, 1] — evasion can cancel sanctions
+# but cannot produce a positive GDP bonus.
+SANCTIONS_WEIGHT_TEC: float = 0.25   # Tech sector max vulnerability
+SANCTIONS_WEIGHT_SVC: float = 0.25   # Services sector max vulnerability
+SANCTIONS_WEIGHT_IND: float = 0.125  # Industry sector max vulnerability
+SANCTIONS_WEIGHT_RES: float = 0.05   # Resources sector max vulnerability (least affected)
+SANCTIONS_FLOOR: float = 0.15        # Safety rail on coefficient (mostly unreachable given sector weights)
+
+# Steeper S-curve — coalition tipping point around 0.5-0.6 coverage.
 SANCTIONS_S_CURVE: list[tuple[float, float]] = [
-    (0.0, 0.0), (0.2, 0.05), (0.4, 0.25),
-    (0.5, 0.40), (0.7, 0.70), (0.8, 0.80),
-    (0.9, 0.90), (1.0, 1.0),
+    (0.0, 0.00), (0.1, 0.05), (0.2, 0.10), (0.3, 0.15),
+    (0.4, 0.25), (0.5, 0.35), (0.6, 0.55), (0.7, 0.65),
+    (0.8, 0.75), (0.9, 0.90), (1.0, 1.00),
 ]
-SANCTIONS_MAX_DAMAGE: float = 0.87  # Cal-11b: 1.5× from 0.58. Full world: ~18% Sarmatia, ~45% tech economies
-SANCTIONS_ADAPTATION_RATE: float = 0.10  # 10% recovery per round toward adaptation
-SANCTIONS_PERMANENT_FRACTION: float = 0.60  # 60% of damage is permanent, 40% recoverable
-SANCTIONS_DIMINISHING_THRESHOLD: int = 4  # rounds before diminishing returns
-SANCTIONS_DIMINISHING_FACTOR: float = 0.60  # Cal-2 v3: 40% reduction after threshold
 
 # Budget
 MONEY_PRINTING_INFLATION_MULTIPLIER: float = 60.0  # F57: was 80, reduced 25%
@@ -825,6 +829,28 @@ def calc_oil_price(
     return result, oil_above_150_rounds
 
 
+def _sanctions_max_damage(target_eco: dict) -> float:
+    """Per-country sanctions ceiling, derived from sector mix.
+
+    CONTRACT_SANCTIONS v1.0: resource economies are structurally resilient,
+    services/tech economies are highly vulnerable. Industry in between.
+
+        max_damage = tec × 0.25 + svc × 0.25 + ind × 0.125 + res × 0.05
+
+    Sarmatia (res40 ind25 svc25 tec10) → ~13.9% max GDP loss.
+    Columbia (res8 ind18 svc55 tec22) → ~21.9% max GDP loss.
+    """
+    sectors = target_eco.get("sectors", {})
+    res = sectors.get("resources", 0) / 100.0
+    ind = sectors.get("industry", 0) / 100.0
+    svc = sectors.get("services", 0) / 100.0
+    tec = sectors.get("technology", 0) / 100.0
+    return (tec * SANCTIONS_WEIGHT_TEC
+            + svc * SANCTIONS_WEIGHT_SVC
+            + ind * SANCTIONS_WEIGHT_IND
+            + res * SANCTIONS_WEIGHT_RES)
+
+
 def calc_sanctions_coefficient(
     target_id: str,
     countries: dict[str, dict],
@@ -832,57 +858,64 @@ def calc_sanctions_coefficient(
 ) -> float:
     """Calculate the GDP sanctions coefficient for a target country.
 
-    Returns a value between 0.50 and 1.0.
-    1.0 = no sanctions. Lower = more GDP suppression.
-    ~0.88 = full world sanctions on resources-heavy country (12% GDP loss).
-    ~0.65 = full world sanctions on tech/services-heavy country (35% GDP loss).
+    CONTRACT_SANCTIONS v1.0 (locked 2026-04-10):
+
+        max_damage    = sector-weighted ceiling per target country
+        coverage      = Σ (actor_gdp_share × level / 3)   # level ∈ [-3, +3]
+                        # positive level = sanctioning, negative = evasion support
+                        # clamped to [0, 1] (cannot go negative)
+        effectiveness = S_curve(coverage)
+        damage        = max_damage × effectiveness
+        coefficient   = max(SANCTIONS_FLOOR, 1.0 - damage)
+
+    Engine mutates NOTHING on actor side (no imposer cost, no evasion benefit
+    for now — target-damage model only). Target revenue cost (calc_revenue)
+    and oil-producer supply effect (calc_oil_price) remain as separate, already-
+    calibrated mechanisms.
 
     Uses STARTING GDP (stored as _starting_gdp in eco dict) for market share
     calculation to prevent coefficient drift from round-to-round GDP changes.
     If _starting_gdp not available, falls back to current GDP.
+
+    Returns coefficient ∈ [SANCTIONS_FLOOR, 1.0]. 1.0 = no damage.
     """
     # Step 1: Total world economic weight — use STARTING GDP for stability
-    # This ensures the coefficient is deterministic when sanctions don't change.
-    total_gdp = sum(c["economic"].get("_starting_gdp", c["economic"]["gdp"]) for c in countries.values())
+    total_gdp = sum(
+        c["economic"].get("_starting_gdp", c["economic"]["gdp"])
+        for c in countries.values()
+    )
     if total_gdp <= 0:
         return 1.0
 
-    # Step 2: Coverage = fraction of world economy sanctioning the target
+    # Step 2: Signed coverage (positive = sanction, negative = evasion support)
+    # Accumulate raw, then clamp to [0, 1] at the end.
     coverage = 0.0
-    for sanctioner_id, targets in sanctions.items():
-        if sanctioner_id.startswith("_"):
+    for actor_id, targets in sanctions.items():
+        if actor_id.startswith("_"):
             continue
         level = targets.get(target_id, 0)
-        if level <= 0:
+        if level == 0:
             continue
-        s_eco = countries.get(sanctioner_id, {}).get("economic", {})
-        sanctioner_gdp = s_eco.get("_starting_gdp", s_eco.get("gdp", 0))
-        coverage += (sanctioner_gdp / total_gdp) * (level / 3.0)
+        a_eco = countries.get(actor_id, {}).get("economic", {})
+        actor_gdp = a_eco.get("_starting_gdp", a_eco.get("gdp", 0))
+        if actor_gdp <= 0:
+            continue
+        coverage += (actor_gdp / total_gdp) * (level / 3.0)
 
+    # Clamp: evasion can cancel sanctions (drive coverage toward 0) but cannot
+    # produce a negative coverage / positive GDP bonus. Also clamp at 1.0.
     coverage = clamp(coverage, 0.0, 1.0)
 
-    # Step 3: S-curve — non-linear effectiveness
+    # Step 3: S-curve — non-linear effectiveness (tipping point ~0.5-0.6)
     effectiveness = interpolate_s_curve(coverage, SANCTIONS_S_CURVE)
 
-    # Step 4: Target vulnerability (sector-based)
+    # Step 4: Per-country sector-derived max damage ceiling
     target_eco = countries.get(target_id, {}).get("economic", {})
-    resource_pct = target_eco.get("sectors", {}).get("resources", 0) / 100.0
-    tech_pct = target_eco.get("sectors", {}).get("technology", 0) / 100.0
-    services_pct = target_eco.get("sectors", {}).get("services", 0) / 100.0
-    sector_vulnerability = clamp(
-        0.5 + (services_pct + tech_pct) * 0.8 - resource_pct * 0.6,
-        0.3, 1.2,
-    )
+    max_damage = _sanctions_max_damage(target_eco)
 
-    # Step 5: Trade openness
-    trade_bal = abs(target_eco.get("trade_balance", 0))
-    target_gdp = max(target_eco.get("gdp", 1), 1)
-    trade_openness = clamp(trade_bal / target_gdp + 0.3, 0.0, 1.0)
-
-    # Step 6: Compute coefficient
-    damage = SANCTIONS_MAX_DAMAGE * effectiveness * trade_openness * sector_vulnerability
-    damage = min(damage, SANCTIONS_MAX_DAMAGE)
-    coefficient = max(0.50, 1.0 - damage)
+    # Step 5: Damage and final coefficient
+    damage = max_damage * effectiveness
+    coefficient = max(SANCTIONS_FLOOR, 1.0 - damage)
 
     return coefficient
 
@@ -1890,17 +1923,9 @@ def get_market_stress_for_country(
     return 0.0
 
 
-def update_sanctions_rounds(
-    countries: dict[str, dict],
-    sanctions: dict[str, dict],
-) -> None:
-    """Track how many consecutive rounds each country is under L2+ sanctions."""
-    for cid, c in countries.items():
-        level = _get_sanctions_on(sanctions, cid)
-        if level >= 2:
-            c["economic"]["sanctions_rounds"] = c["economic"].get("sanctions_rounds", 0) + 1
-        else:
-            c["economic"]["sanctions_rounds"] = 0
+# update_sanctions_rounds() REMOVED 2026-04-10 per CONTRACT_SANCTIONS v1.0.
+# The "adaptation after 4 rounds" mechanic was dropped — sanctions are now
+# purely stateless per-round recomputation. See CHECKPOINT_SANCTIONS.md §2.
 
 
 def update_formosa_disruption_rounds(
@@ -1992,7 +2017,8 @@ def process_economy(
     trade_weights = derive_trade_weights(countries)
 
     # Update duration trackers
-    update_sanctions_rounds(countries, sanctions)
+    # (sanctions_rounds tracker removed 2026-04-10 per CONTRACT_SANCTIONS v1.0 —
+    #  sanctions are now purely stateless per-round recomputation)
     formosa_disrupted = _is_formosa_disrupted(
         wars,
         world_state.get("chokepoint_status", {}),

@@ -181,9 +181,7 @@ def _build_engine_countries(countries_flat: dict[str, dict]) -> dict[str, dict]:
                 "social_spending_baseline": c["social_baseline"],
                 "oil_revenue": 0.0,
                 "inflation_revenue_erosion": 0.0,
-                "sanctions_rounds": 0,
-                "sanctions_recovery_rounds": 0,
-                "sanctions_adaptation_rounds": 0,
+                # sanctions_rounds / adaptation / recovery removed 2026-04-10 per CONTRACT_SANCTIONS v1.0
                 "sanctions_coefficient": 1.0,
                 "tariff_coefficient": 1.0,
                 "formosa_disruption_rounds": 0,

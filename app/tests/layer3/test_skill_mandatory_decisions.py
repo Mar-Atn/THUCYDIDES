@@ -45,6 +45,7 @@ from engine.services.budget_validator import (
     REQUIRED_PRODUCTION_BRANCHES,
     validate_budget_decision,
 )
+from engine.services.sanction_validator import validate_sanctions_decision
 from engine.services.tariff_validator import validate_tariffs_decision
 from engine.services.llm import call_llm
 
@@ -60,9 +61,13 @@ SYSTEM_BUDGET = (
     "change and no_change."
 )
 SYSTEM_SANCTIONS = (
-    "You are an AI head of state reviewing your sanctions policy. "
-    "Return ONLY JSON. Every field required. Rationale mandatory on both "
-    "change and no_change."
+    "You are an AI head of state reviewing your sanctions policy per "
+    "CONTRACT_SANCTIONS v1.0. Return ONLY JSON matching the set_sanctions "
+    "schema. Rationale >= 30 chars mandatory on both change and no_change. "
+    "On no_change: OMIT the changes field entirely. "
+    "On change: include changes.sanctions as a flat dict of {target: level} "
+    "where level is a signed integer in [-3, +3] (positive = sanctioner, "
+    "negative = evasion support, 0 = lift)."
 )
 SYSTEM_TARIFFS = (
     "You are an AI head of state reviewing your trade and tariff policy "
@@ -305,64 +310,140 @@ def _build_sanctions_prompt(s: LeaderScenario) -> str:
         f"Key threats: {', '.join(s.threats)}" if s.threats else "No acute external threats."
     )
 
-    imposed_block = _fmt_entries(
-        s.sanctions_imposed,
-        "  (none) — you currently sanction no one.",
+    # All 20 countries roster — synthetic coalition_coverage hint derived
+    # from the scenario's known sanctions_imposed/sanctions_against entries.
+    # Real system uses sanction_context.build_sanction_context; this harness
+    # emulates the persona layer with hand-crafted data only.
+    roster_lines = []
+    if s.country_roster:
+        for r in s.country_roster:
+            coverage_hint = r.get("coalition_coverage", "n/a")
+            roster_lines.append(
+                f"  {r.get('code', '?'):<12s} GDP {r.get('gdp', '?'):>7} "
+                f"  {r.get('sector_profile', 'mixed'):<22s}  "
+                f"{r.get('relationship', 'neutral'):<16s}  "
+                f"coverage={coverage_hint}"
+            )
+    roster_block = (
+        "\n".join(roster_lines)
+        if roster_lines
+        else "  (roster data unavailable — use allies/threats lists)"
     )
-    against_block = _fmt_entries(
-        s.sanctions_against,
-        "  (none) — no country currently sanctions you.",
+
+    # Current sanctions imposed BY me (both signs)
+    my_sanc_lines = []
+    for entry in s.sanctions_imposed:
+        target = entry.get("target", "?")
+        level = entry.get("level", "?")
+        note = entry.get("note", "")
+        suffix = f' — "{note}"' if note else ""
+        my_sanc_lines.append(f"  {target}   L{level}{suffix}")
+    my_sanc_block = (
+        "\n".join(my_sanc_lines)
+        if my_sanc_lines
+        else "  (none — you currently sanction no one)"
+    )
+
+    # Sanctions imposed ON me
+    on_me_lines = []
+    for entry in s.sanctions_against:
+        imposer = entry.get("imposer", "?")
+        level = entry.get("level", "?")
+        note = entry.get("note", "")
+        suffix = f' — "{note}"' if note else ""
+        on_me_lines.append(f"  {imposer}   L{level}{suffix}")
+    on_me_block = (
+        "\n".join(on_me_lines)
+        if on_me_lines
+        else "  (none — no country currently sanctions you)"
     )
 
     return f"""You are {s.character_name}, {s.title} of {s.country_name}.
 
 ## D2 — SANCTIONS REVIEW (Round {ROUND_NUM})
 
-This is the SANCTIONS committee. Focus only on coercive economic measures
-against hostile countries. Do NOT address budget, tariffs, or OPEC here.
+This is the SANCTIONS committee per CONTRACT_SANCTIONS v1.0. Focus only on
+coercive economic measures (and evasion support) against hostile or
+strategically relevant countries. Do NOT address budget, tariffs, or OPEC
+in this call.
+
+## Economic state
+- GDP: {s.gdp:.0f}
+- Treasury: {s.treasury:.0f} coins
+- Inflation: {s.inflation:.1f}%
+- Stability: {s.stability:.1f}/10
+- Political support: {s.political_support:.0f}%
 
 ## Relationships and threats
 - {war_line}
 - {allies_line}
 - {threats_line}
 
-## Sanctions you currently impose
-{imposed_block}
+## ALL 20 COUNTRIES (the full roster — anyone is a possible target)
 
-## Sanctions currently imposed against you
-{against_block}
-Note: You cannot change these (they are imposed by others).
+  code          GDP    sector profile          relationship       coverage-hint
+  ----         ----    ------------------      ------------       -------------
+{roster_block}
+
+## CURRENT SANCTIONS — IMPOSED BY ME (you can change these)
+{my_sanc_block}
+
+## CURRENT SANCTIONS — IMPOSED ON ME (informational only — you cannot change these)
+{on_me_block}
+
+## HOW SANCTIONS WORK (mechanically)
+- Levels are signed integers in [-3, +3]. Positive = active sanctioner.
+  Negative = evasion support (buying discounted exports, workarounds).
+- Coverage = sum over all actors of (actor_gdp_share x level/3), clamped [0,1].
+  Evasion can cancel a coalition but cannot produce a GDP bonus.
+- Effectiveness = S-curve(coverage). Flat below 0.4, steep tipping point at
+  0.5 - 0.6, saturates near 1.0. SOLO ACTION IS NOISE; COALITIONS MATTER.
+- Per-target damage ceiling derived from sector mix:
+    max_damage = tec x 0.25 + svc x 0.25 + ind x 0.125 + res x 0.05
+  (tech/services economies up to ~22%; resource economies ~13%)
+- Setting a target to 0 LIFTS any existing sanction (or evasion support).
+- Untouched targets keep their previous level (carry-forward).
+- No imposer cost, no evasion benefit — you do not pay a mechanical fee.
+
+## DECISION RULES
+- decision="change"    -> must include changes.sanctions with >=1 (target, level) entry
+- decision="no_change" -> must OMIT the changes field entirely
+- rationale >=30 chars REQUIRED in both cases
+- self-sanction and unknown-target are validation errors
+- levels must be integers in the signed range [-3, +3]
+
+REMINDER — no_change is a legitimate choice. Sanctions are a possibility,
+not an obligation. If your current posture still serves your goals,
+no_change is the right answer with a clear rationale. Do not churn sanctions
+for the sake of action.
 
 ## Your relevant objectives
 {_objectives_block(s.objectives)}
 
 ## INSTRUCTIONS
-Decide whether to CHANGE your sanctions policy or keep it NO_CHANGE. Either
-way you MUST provide a rationale of at least one sentence (>20 chars)
-explaining WHY.
+Decide whether to CHANGE your sanctions posture or keep it NO_CHANGE.
+Either way you MUST provide a rationale of at least 30 characters explaining WHY.
 
-Consider:
-- Hostile/at-war countries without sanctions → consider imposing
-- Sanctions on neutrals/allies → consider lifting
-- Escalation vs de-escalation trade-offs
-- "No change" is valid but must be justified (e.g. "existing L3 on Persia is
-  already maximal and serves wartime isolation objective")
-
-Respond with JSON ONLY, matching this EXACT schema:
+Respond with JSON ONLY, matching this EXACT schema (CONTRACT_SANCTIONS v1.0 §2):
 
 {{
-  "decision": "change" | "no_change",
-  "rationale": "string, >= 20 characters",
-  "changes": [
-    {{ "target": "country_code", "level": 0, "action": "impose|lift|adjust" }}
-  ]
+  "action_type": "set_sanctions",
+  "country_code": "{s.country_code}",
+  "round_num": {ROUND_NUM},
+  "decision": "change",
+  "rationale": "string, >= 30 characters",
+  "changes": {{
+    "sanctions": {{
+      "target_country": 3
+    }}
+  }}
 }}
 
 Rules:
-- level: 0 (none) to 3 (heavy)
-- action must be one of: impose, lift, adjust
-- Include "changes" ONLY when decision == "change"; it may be empty if the
-  decision is no_change
+- changes.sanctions is a flat dict mapping target country code to signed int [-3, +3]
+- It is SPARSE — only include targets you want to CHANGE this round
+- On decision="no_change", OMIT the "changes" field entirely (do not send null)
+- On decision="change", include "changes" with a "sanctions" dict with at least 1 entry
 """
 
 
@@ -996,24 +1077,22 @@ def _assert_budget_payload(parsed: dict, cc: str) -> None:
 
 
 def _assert_sanctions_payload(parsed: dict, cc: str) -> None:
-    """D2 sanctions: legacy list-of-dicts format (not yet migrated to contract)."""
-    if parsed.get("decision") != "change":
-        return
-    changes = parsed.get("changes")
-    assert isinstance(changes, list), f"{cc} sanctions: changes must be list on change"
-    for entry in changes:
-        assert isinstance(entry, dict), f"{cc} sanctions: entry must be dict: {entry}"
-        target = entry.get("target")
-        assert isinstance(target, str) and target, (
-            f"{cc} sanctions: target must be non-empty string: {entry}"
-        )
-        if "level" in entry:
-            lvl = int(entry["level"])
-            assert 0 <= lvl <= 3, f"{cc} sanctions: level out of range: {lvl}"
-        if "action" in entry:
-            assert entry["action"] in {"impose", "lift", "adjust"}, (
-                f"{cc} sanctions: invalid action: {entry['action']}"
-            )
+    """D2 sanctions: full CONTRACT_SANCTIONS v1.0 validation via production validator.
+
+    The harness auto-fills action_type/country_code/round_num if the LLM
+    omitted them — these are envelope fields the communication layer would
+    normally inject, not decision content.
+    """
+    payload = dict(parsed)
+    payload.setdefault("action_type", "set_sanctions")
+    payload.setdefault("country_code", cc)
+    payload.setdefault("round_num", ROUND_NUM)
+
+    report = validate_sanctions_decision(payload)
+    assert report["valid"], (
+        f"{cc} sanctions: validator rejected decision: {report['errors']}\n"
+        f"payload: {payload}"
+    )
 
 
 def _assert_tariff_payload(parsed: dict, cc: str) -> None:
@@ -1228,14 +1307,28 @@ def test_budget_prompt_has_economic_focus_only():
 
 
 def test_sanctions_prompt_has_relationships_focus():
-    """D2 prompt: relationships/wars visible; no budget allocation numbers pushed as primary."""
+    """D2 prompt: CONTRACT_SANCTIONS v1.0 schema — roster, both directions, signed levels."""
     s = next(x for x in SCENARIOS if x.sanctions_imposed)
     p = _build_sanctions_prompt(s)
     assert "SANCTIONS REVIEW" in p
+    assert "CONTRACT_SANCTIONS v1.0" in p
     assert "Relationships and threats" in p
-    assert "Sanctions you currently impose" in p
-    assert "Sanctions currently imposed against you" in p
+    assert "IMPOSED BY ME" in p
+    assert "IMPOSED ON ME" in p
+    assert '"action_type": "set_sanctions"' in p
+    # Signed level range + evasion support
+    assert "-3" in p and "+3" in p
+    assert "evasion" in p.lower()
+    # no_change reminder
+    assert "no_change" in p
+    assert "legitimate" in p.lower()
+    # Coverage and tipping point
+    assert "coverage" in p.lower() or "Coverage" in p
+    # Schema teaches sparse dict, not legacy list-of-dicts
+    assert '"sanctions"' in p
+    assert "impose|lift|adjust" not in p  # legacy format must not leak
     assert "BUDGET REVIEW" not in p
+    assert "TRADE AND TARIFF REVIEW" not in p
 
 
 def test_tariffs_prompt_has_trade_focus():

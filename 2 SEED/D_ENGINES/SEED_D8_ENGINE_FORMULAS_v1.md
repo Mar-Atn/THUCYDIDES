@@ -237,40 +237,71 @@ TARIFF HIT (F1-F104: Complete rebuild — prisoner's dilemma model):
   Customs revenue: imposer gains tariff_revenue = tariff_rate × bilateral_trade_value
   Tariff inflation: applied as LEVEL (not cumulative across rounds)
 
-SANCTIONS HIT (F1-F104: Complete rebuild — GDP coefficient model):
-  Recomputed every round (no compounding).
-  GDP coefficient range: 0.50 to 1.0 (where 1.0 = no damage, 0.50 = max damage)
+SANCTIONS HIT (2026-04-10 — rewritten per CONTRACT_SANCTIONS v1.0):
+  Recomputed every round (stateless, no compounding, no temporal adaptation).
+  GDP coefficient range: SANCTIONS_FLOOR (0.15) to 1.0.
+  Per-country max damage is derived from sector mix — no global MAX_DAMAGE.
 
-  Step A: Calculate coverage
-    coverage = SUM over all sanctioning countries of:
-      (sanctioner_GDP_share × sanctions_level / 3)
+  Step A: Per-country max damage ceiling (sector-derived)
+    max_damage = tec% × 0.25  +  svc% × 0.25
+               + ind% × 0.125 + res% × 0.05
 
-  Step B: Map coverage to effectiveness via S-curve (F1-F104 recalibrated):
+    Tech/services-heavy economies cap ~22%; resource-heavy cap ~13-14%.
+    Industrial economies in between. Each country has its own ceiling.
+
+  Step B: Signed coverage (supports evasion/anti-sanctions)
+    coverage = SUM over all actors with sanctions on target of:
+      (actor_GDP_share × level / 3)
+
+    where level ∈ [-3, +3]:
+      positive level = active sanctioner (contributes positively to coverage)
+      negative level = evasion support (subtracts from coverage)
+
+    coverage = clamp(coverage, 0, 1)
+    # Evasion can cancel sanctions (drive coverage toward 0) but cannot produce
+    # a positive GDP bonus.
+
+  Step C: Map coverage to effectiveness via steeper S-curve
     coverage 0.0 →  0% effectiveness
-    coverage 0.2 →  5% effectiveness
-    coverage 0.4 → 25% effectiveness
-    coverage 0.5 → 40% effectiveness
-    coverage 0.7 → 70% effectiveness
-    coverage 0.8 → 80% effectiveness
+    coverage 0.1 →  5%
+    coverage 0.2 → 10%
+    coverage 0.3 → 15%
+    coverage 0.4 → 25%
+    coverage 0.5 → 35%
+    coverage 0.6 → 55%  ← tipping point (the steepest segment)
+    coverage 0.7 → 65%
+    coverage 0.8 → 75%
+    coverage 0.9 → 90%
+    coverage 1.0 → 100%
     Interpolate linearly between points.
-    MAX_DAMAGE = 0.87 (GDP coefficient floor = 0.13)
 
-  Step C: Apply sector vulnerability
-    effectiveness *= sector_vulnerability_weight (per target country)
+  Step D: Damage and coefficient
+    damage      = max_damage × effectiveness
+    coefficient = max(SANCTIONS_FLOOR, 1.0 - damage)
 
-  Step D: GDP coefficient
-    gdp_coefficient = 1.0 - (effectiveness * MAX_DAMAGE)
-    gdp_coefficient = max(0.13, gdp_coefficient)
+  Step E: No compounding — coefficient applied as RATIO in Step 2 GDP growth.
+    sanc_ratio = new_coef / old_coef
+    new_gdp = gdp_after_growth × sanc_ratio
+    This means: one-time shock at imposition, zero additional effect while
+    sanctions remain steady, immediate recovery bounce when lifted.
 
-  Step E: No compounding — coefficient is absolute, not additive to previous round
-  Step F: Lifting sanctions = immediate recovery (coefficient returns toward 1.0)
+  Step F: No adaptation over time (was removed 2026-04-10).
+  Step G: No imposer cost, no evasion benefit for actors (target-damage only).
+  Step H: No dollar credibility modifier.
 
-  No adaptation over time (removed — recomputation handles it).
-  No dollar credibility modifier (removed from sanctions).
+  Canonical calibration anchors (Sarmatia, DB starting state 2026-04-10):
+    Clean world:                             coef 1.0000   loss  0.00%
+    Teutonia alone L3:                       coef 0.9960   loss  0.40%
+    Columbia alone L3:                       coef 0.9714   loss  2.86%
+    Real DB starting (12 actors incl. Cathay L-1 evasion):
+                                             coef 0.9490   loss  5.10%
+    Cathay flips L-1 → L+2:                  coef 0.9028   loss  9.72%
 
-  Coalition dynamics: West alone ≈ coverage 0.3-0.5 (modest).
-  Add swing states (Bharata, Phrygia) ≈ 0.6-0.7 (serious).
-  Cathay joins coalition ≈ 0.8-0.9 (devastating).
+  Coalition strategic dynamics:
+    Solo action is noise — S-curve flat below 0.4 coverage.
+    Coalition tipping point at 0.5-0.6 (steepest segment, 20pp jump).
+    Big swing states (Cathay 24% of world GDP) can make or break a coalition
+    single-handedly by choosing to sanction or support evasion.
 
 OIL SHOCK (F1-F104: delta-only — only CHANGES from starting oil price count):
   oil_delta = current_oil_price - starting_oil_price
@@ -1229,7 +1260,7 @@ These adjustments fire after Pass 1 for each country. Total GDP adjustment is ca
 | Capital flight (severe) | Stability < 3 | -8% GDP (democracy) or -3% GDP (autocracy) | 1444-1454 |
 | Capital flight (mild) | Stability < 4 | -3% GDP (non-autocracy) or -1% GDP (autocracy) | 1455-1466 |
 | Ceasefire rally | Was at war, now not | +1.5 momentum | 1470-1479 |
-| Sanctions adaptation | sanctions_rounds > 4 | +2% GDP | 1482-1493 |
+| ~~Sanctions adaptation~~ | **REMOVED 2026-04-10** per CONTRACT_SANCTIONS v1.0 | stateless recomputation handles it | — |
 | Brain drain | Democracy in crisis/collapse | -0.02 AI R&D progress | 1496-1505 |
 | War loss shock | Zone captured by enemy | -8% to -15% GDP (random) | 1507-1520 |
 | Nuclear R&D pushback | Territory struck | -0.15 nuclear R&D progress | 1522-1537 |
