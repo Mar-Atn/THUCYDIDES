@@ -404,45 +404,67 @@ All values Template-customizable.
 
 > **Mandatory Decisions (added 2026-04-08):** Budget, tariffs, sanctions, and OPEC production are MANDATORY per-round decisions, not optional. Each participant must submit these before the round ends. The system prompts participants ~2 minutes before deadline. If not submitted by deadline, previous round's values carry forward as defaults. In unmanned mode, AI agents are explicitly prompted to submit these before committing other actions.
 
-### 2.1 Set Budget
+### 2.1 Set Budget — CONTRACT_BUDGET v1.1 (🔒 locked 2026-04-10)
 | Field | Value |
 |---|---|
 | action_type | `set_budget` |
 | Who | Finance/PM. HoS can override. Columbia: requires parliamentary co-sign (opposition, if majority). |
-| Timing | Mandatory each round (submitted between rounds). **If no decision submitted, previous round's settings carry forward (status quo).** |
+| Timing | Mandatory each round (submitted between rounds). **`no_change` is a valid explicit choice; if no decision is submitted at all, previous round's settings carry forward.** |
+| Spec | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_BUDGET.md` v1.1 — single source of truth for schema, validation, persistence, engine behavior |
+
+**Decision schema:**
+
+```json
+{
+  "action_type": "set_budget",
+  "country_code": "columbia",
+  "round_num": 3,
+  "decision": "change",
+  "rationale": "string, ≥30 chars, required even on no_change",
+  "changes": {
+    "social_pct": 1.0,
+    "production": {
+      "ground":            0|1|2|3,
+      "naval":             0|1|2|3,
+      "tactical_air":      0|1|2|3,
+      "strategic_missile": 0|1|2|3,
+      "air_defense":       0|1|2|3
+    },
+    "research": {
+      "nuclear_coins": 0,
+      "ai_coins":      0
+    }
+  }
+}
+```
 
 **The participant sets:**
 
 | Decision | Field | Range | What it does |
 |---|---|---|---|
-| Social spending | `social_pct` | 0.5–1.5 | Multiplier on social baseline × revenue. <1.0 = austerity (stability risk). >1.0 = generous (stability boost). |
-| Military: ground | `ground_coins` + `ground_tier` | coins ≥0, tier: normal\|accelerated\|maximum | Coins + production speed for ground units |
-| Military: naval | `naval_coins` + `naval_tier` | same | Coins + production speed for naval units |
-| Military: air | `air_coins` + `air_tier` | same | Coins + production speed for tactical air units |
-| Tech: nuclear R&D | `nuclear_coins` | ≥0 | Investment in nuclear technology |
-| Tech: AI R&D | `ai_coins` | ≥0 | Investment in AI technology |
+| Social spending | `social_pct` | 0.5–1.5 (continuous slider) | Multiplier on `social_baseline × revenue`. <1.0 = austerity (Δ stability = (social_pct−1.0)×4). >1.0 = generous (Δ stability positive). |
+| Production | `production.{branch}` | int 0..3 per branch (all 5 required) | Discrete level per branch. 0=none, 1=normal, 2=accelerated (2×cost, 2×output), 3=maximum (4×cost, 3×output, "emergency gear"). |
+| Research | `research.{nuclear,ai}_coins` | int ≥ 0 each (both required) | Direct coin allocation. Progress = (coins/GDP)×0.8 per round. |
 
-**Production tiers** (per unit type — speed vs cost tradeoff):
-
-| Tier | Cost multiplier | Output multiplier | Example |
-|---|---|---|---|
-| normal | 1× | 1× | 3 coins → 1 ground unit |
-| accelerated | 2× | 2× | 6 coins → 2 ground units |
-| maximum | 4× | 3× | 12 coins → 3 ground units |
+**Branch unit costs (level 1, coins per unit):** ground 3, naval 6, tactical_air 5, strategic_missile 8, air_defense 4.
+**Strategic_missile and air_defense:** capacity 0 for all countries in v1.1 — schema present, levels accepted, but produces 0 units until capacities are raised in a future template version.
 
 **Calculated automatically by engine** (participant does NOT control these):
-- Revenue = GDP × tax_rate + oil_revenue − debt − inflation_erosion − war_damage − sanctions_cost
-- Military maintenance = total_units × unit_cost × 3.0 (MAINTENANCE_MULTIPLIER) — **automatic, always paid first**
-- Military spending capped at 40% of remaining after fixed costs
-- Tech spending capped at 30% of remaining after military
-- Deficit cascade: spending > revenue → draw treasury → if insufficient → print money (inflation += printed/GDP × 60.0, debt += deficit × 0.15)
+- `revenue = GDP × tax_rate + oil_revenue − debt − inflation_erosion − war_damage − sanctions_cost`
+- `maintenance = total_units × maintenance_per_unit × 3.0` — paid first, before any participant allocations
+- **No percentage caps.** Over-spending feeds the deficit cascade: drain treasury → print money (inflation += printed/GDP × 60.0) → debt += deficit × 0.15. When the cascade can't fully fund military, branch production is scaled proportionally by affordability — not a hard cap.
+- `stability_delta = (social_pct − 1.0) × 4.0`, `political_support_delta = (social_pct − 1.0) × 6.0`
 
-See CARD_FORMULAS.md → A.5 Revenue, A.6 Budget Execution, A.7 Military Production for full formulas.
+See CARD_FORMULAS.md A.6 (Budget Execution) + A.7 (Military Production) for the engine flow, and `CONTRACT_BUDGET.md` for the canonical contract.
 
-**UI note (human participant phase):** Budget submission screen must show a real-time preview — estimated revenue, maintenance cost, spending total, deficit/surplus, expected unit production, R&D progress, and stability impact — updating as the participant adjusts inputs. All estimates based on current-round data (actual outcomes may differ due to events resolved after submission).
+**Validation:** all submissions go through `app/engine/services/budget_validator.py` which returns `{valid, errors, warnings, normalized}`. Invalid submissions emit a `budget_rejected` observatory event and the round still completes using the previous round's values.
 
-| Engine | `engines/economic.calc_revenue()` + `calc_budget_execution()` + `calc_military_production()` |
-| Status | **DONE** (engine fully calibrated), **PARTIAL** (agents don't submit every round yet) |
+**Context package** (assembled by `app/engine/services/budget_context.py`): every decision-maker (AI or human) gets the country's economic state, mandatory cost forecast, current budget, and a **dry-run "no-change forecast"** — running the actual engine on a deep-copy to show "what happens if you do nothing." Same engine code as the real round = single source of truth.
+
+**UI note (human participant phase):** the budget submission screen will reuse `build_budget_context` + `dry_run_budget` to show a live preview that updates as the participant adjusts inputs. Same context, different rendering.
+
+| Engine | `engines/economic.calc_budget_execution()` + `calc_military_production()` + `calc_tech_advancement()` |
+| Status | ✅ **DONE** end-to-end (CONTRACT v1.1, validator, context+dry-run, persistence, AI acceptance gate). See `CHECKPOINT_BUDGET.md`. |
 
 ### 2.2 Set Tariff
 | Field | Value |

@@ -177,6 +177,8 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
         for cc, c in countries.items():
             eco = c.get("economic", {})
             pol = c.get("political", {})
+            mil = c.get("military", {})
+            tech = c.get("technology", {})
             rs = round_by_cc.get(cc)
             if not rs:
                 continue
@@ -191,6 +193,20 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
                 # Persist computed coefficients so next round uses ratio (one-time shock, not repeated)
                 "sanctions_coefficient": round(eco.get("sanctions_coefficient", 1.0), 6),
                 "tariff_coefficient": round(eco.get("tariff_coefficient", 1.0), 6),
+                # Military unit counts — credited by calc_military_production
+                # (CONTRACT_BUDGET v1.1 §6.2). Persisting so the next round's
+                # _merge_to_engine_dict carries them forward.
+                "mil_ground": int(mil.get("ground", 0)),
+                "mil_naval": int(mil.get("naval", 0)),
+                "mil_tactical_air": int(mil.get("tactical_air", 0)),
+                "mil_strategic_missiles": int(mil.get("strategic_missile", 0)),
+                "mil_air_defense": int(mil.get("air_defense", 0)),
+                # Tech R&D progress — accumulated by calc_tech_advancement.
+                # Stored as numeric (fractional) so multi-round progress works.
+                "nuclear_rd_progress": round(float(tech.get("nuclear_rd_progress", 0.0)), 6),
+                "ai_rd_progress": round(float(tech.get("ai_rd_progress", 0.0)), 6),
+                "nuclear_level": int(tech.get("nuclear_level", 0)),
+                "ai_level": int(tech.get("ai_level", 0)),
             }
             try:
                 client.table("country_states_per_round") \
@@ -559,11 +575,28 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
             "starting_oil_price": 80.0,
         },
         "military": {
-            "ground": int(_safe_float(base.get("mil_ground"), 0)),
-            "naval": int(_safe_float(base.get("mil_naval"), 0)),
-            "tactical_air": int(_safe_float(base.get("mil_tactical_air"), 0)),
-            "strategic_missile": int(_safe_float(base.get("mil_strategic_missiles"), 0)),
-            "air_defense": int(_safe_float(base.get("mil_air_defense"), 0)),
+            # Prefer the per-round snapshot (authoritative after R0); fall back
+            # to structural base data when the snapshot column is NULL.
+            "ground": int(_safe_float(
+                rs.get("mil_ground") if rs.get("mil_ground") is not None else base.get("mil_ground"),
+                0,
+            )),
+            "naval": int(_safe_float(
+                rs.get("mil_naval") if rs.get("mil_naval") is not None else base.get("mil_naval"),
+                0,
+            )),
+            "tactical_air": int(_safe_float(
+                rs.get("mil_tactical_air") if rs.get("mil_tactical_air") is not None else base.get("mil_tactical_air"),
+                0,
+            )),
+            "strategic_missile": int(_safe_float(
+                rs.get("mil_strategic_missiles") if rs.get("mil_strategic_missiles") is not None else base.get("mil_strategic_missiles"),
+                0,
+            )),
+            "air_defense": int(_safe_float(
+                rs.get("mil_air_defense") if rs.get("mil_air_defense") is not None else base.get("mil_air_defense"),
+                0,
+            )),
             "production_costs": {
                 "ground": _safe_float(base.get("prod_cost_ground"), 3),
                 "naval": _safe_float(base.get("prod_cost_naval"), 5),
@@ -573,6 +606,11 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
                 "ground": int(_safe_float(base.get("prod_cap_ground"), 2)),
                 "naval": int(_safe_float(base.get("prod_cap_naval"), 1)),
                 "tactical_air": int(_safe_float(base.get("prod_cap_tactical"), 1)),
+                # CONTRACT_BUDGET v1.1: all countries start at 0 capacity for
+                # strategic_missile and air_defense — no prod_cap_* columns
+                # exist in the countries table for these branches yet.
+                "strategic_missile": 0,
+                "air_defense": 0,
             },
             "maintenance_cost_per_unit": _safe_float(base.get("maintenance_per_unit"), 0.3),
             "strategic_missile_growth": int(_safe_float(base.get("strategic_missile_growth"), 0)),
@@ -593,10 +631,18 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
         },
         "technology": {
             "nuclear_level": int(_safe_float(rs.get("nuclear_level") or base.get("nuclear_level"), 0)),
-            "nuclear_rd_progress": int(_safe_float(rs.get("nuclear_rd_progress") or base.get("nuclear_rd_progress"), 0)),
+            # R&D progress is a fractional accumulator per CONTRACT_BUDGET §6.2;
+            # load as float (was int() which silently truncated every round).
+            "nuclear_rd_progress": _safe_float(
+                rs.get("nuclear_rd_progress") if rs.get("nuclear_rd_progress") is not None else base.get("nuclear_rd_progress"),
+                0.0,
+            ),
             "nuclear_tested": int(_safe_float(base.get("nuclear_level"), 0)) >= 1,
             "ai_level": int(_safe_float(rs.get("ai_level") or base.get("ai_level"), 0)),
-            "ai_rd_progress": int(_safe_float(rs.get("ai_rd_progress") or base.get("ai_rd_progress"), 0)),
+            "ai_rd_progress": _safe_float(
+                rs.get("ai_rd_progress") if rs.get("ai_rd_progress") is not None else base.get("ai_rd_progress"),
+                0.0,
+            ),
         },
         "home_zones": [],
         "_at_war": False,  # TODO: derive from relationships

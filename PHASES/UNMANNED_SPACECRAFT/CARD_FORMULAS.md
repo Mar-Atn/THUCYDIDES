@@ -178,33 +178,74 @@ revenue = GDP × tax_rate
 
 ---
 
-### A.6 BUDGET EXECUTION
+### A.6 BUDGET EXECUTION (CONTRACT_BUDGET v1.1, 🔒 locked 2026-04-10)
 
-**Constants:** MAINTENANCE_MULTIPLIER = 3.0, MONEY_PRINTING_INFLATION_MULT = 60.0, DEFICIT_TO_DEBT = 0.15
+**Authoritative spec:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_BUDGET.md` v1.1.
 
+**Constants:** MAINTENANCE_MULTIPLIER = 3.0, MONEY_PRINTING_INFLATION_MULT = 60.0, DEFICIT_TO_DEBT = 0.15, SOCIAL_STABILITY_MULT = 4.0, SOCIAL_SUPPORT_MULT = 6.0, RD_MULTIPLIER = 0.8.
+
+**Decision schema** (set by participant):
 ```
-maintenance = total_units × 0.02 × 3.0   (unit_cost × multiplier)
-social_spending = social_baseline × revenue × social_pct   (social_pct: 0.5-1.5)
-military_budget = player input   (capped at 40% of remaining)
-tech_budget = player input   (capped at 30% of remaining after mil)
+social_pct  : float in [0.5, 1.5]                      (continuous slider)
+production  : {ground, naval, tactical_air,
+               strategic_missile, air_defense} → int 0..3   (per-branch level)
+research    : {nuclear_coins: int>=0, ai_coins: int>=0}     (absolute coins)
+```
 
-If spending > revenue:
+**Production level expansion** (per branch, level → multipliers):
+
+| Level | Cost mult | Output mult | Note |
+|---|---|---|---|
+| 0 | 0× | 0× | none |
+| 1 | 1× | 1× | normal |
+| 2 | 2× | 2× | accelerated |
+| 3 | 4× | 3× | maximum (emergency gear, deliberately inefficient) |
+
+**Branch standard costs** (coins per unit at level 1): ground 3, naval 6, tactical_air 5, strategic_missile 8, air_defense 4.
+**Strategic_missile and air_defense capacity = 0 for ALL countries in v1.1** (schema is forward-compatible; raising capacity is a pure data change).
+
+**Engine flow (per country, per round):**
+```
+maintenance     = total_units × maintenance_per_unit × MAINTENANCE_MULTIPLIER
+social_spending = social_baseline × revenue × social_pct
+mil_spending    = Σ_branch (cap[branch] × unit_cost[branch] × cost_mult[level[branch]])
+research_total  = nuclear_coins + ai_coins
+total_spending  = maintenance + social_spending + mil_spending + research_total
+
+# No percentage caps (removed 2026-04-10). Over-spending feeds the deficit cascade.
+If total_spending > revenue:
   deficit → draw treasury → if insufficient: print money
-  money_printed → inflation += (printed/GDP) × 60.0
-  debt += deficit × 0.15
+  money_printed → inflation += (printed / GDP) × MONEY_PRINTING_INFLATION_MULT
+  debt += deficit × DEFICIT_TO_DEBT
+  # When the cascade can't fund full mil_spending, branch production is scaled
+  # proportionally by affordability — NOT a hard cap, just available coins.
 Else:
   treasury += surplus
+
+# Social side-effects (linear deviation from 1.0):
+stability_delta        = (social_pct - 1.0) × SOCIAL_STABILITY_MULT
+political_support_delta = (social_pct - 1.0) × SOCIAL_SUPPORT_MULT
+
+# R&D progress (per domain):
+progress_delta = (coins / GDP) × RD_MULTIPLIER × rare_earth_factor
 ```
 
 ---
 
-### A.7 MILITARY PRODUCTION
+### A.7 MILITARY PRODUCTION (per CONTRACT_BUDGET v1.1 §6.2)
 
 ```
-Production tiers: normal (1×cost, 1×cap), accelerated (2×, 2×), maximum (4×, 3×)
-units = min(coins/unit_cost, capacity × tier_output)
+For each of 5 branches:
+  units_produced = capacity[branch] × output_mult[level[branch]]
+  coins_spent    = capacity[branch] × unit_cost[branch] × cost_mult[level[branch]]
 
-Special: Cathay +1 strategic_missile/round. Naval auto +1/2 rounds if fleet≥5.
+# Scaling: when affordability < requested mil_spending, produced units are
+# proportionally reduced. This is the deficit cascade in action — NOT a
+# hard percentage cap.
+
+Special:
+  Cathay +1 strategic_missile/round (template flag).
+  Naval auto +1/2 rounds if fleet ≥ 5 (only when no naval production this round).
 ```
 
 ---

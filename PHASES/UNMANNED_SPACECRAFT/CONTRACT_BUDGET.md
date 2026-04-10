@@ -1,10 +1,18 @@
 # CONTRACT: Budget Decision
 
-**Status:** Canonical reference — engine, persistence, communication layer, AI prompt builder, and human UI MUST all match this document. If code and this contract disagree: STOP, update one to match the other, then proceed.
+**Status:** 🔒 **LOCKED** (2026-04-10) — canonical reference, frozen for the Unmanned Spacecraft phase.
+Engine, persistence, communication layer, AI prompt builder, tests, and human UI (future) MUST all match this document. Any change requires (a) Marat's explicit approval, (b) a version bump, and (c) reconciliation of all listed consumers in the same commit. If code and this contract disagree: STOP, update one to match the other, then proceed.
 
 **Version:** 1.1 (2026-04-10)
 **Owner:** Marat
-**Used by:** `resolve_round.py`, `round_tick.py`, `economic.py`, mandatory-decisions skill harness, human budget UI (future)
+**Verified end-to-end:** 2026-04-10 — L1 (16 tests) + L2 (21 tests) + L3 AI acceptance gate all passing. See `CHECKPOINT_BUDGET.md`.
+**Used by:**
+- Engine: `app/engine/engines/economic.py` (`calc_budget_execution`, `calc_military_production`, `calc_tech_advancement`)
+- Validator: `app/engine/services/budget_validator.py`
+- Context builder: `app/engine/services/budget_context.py` (context package + dry-run)
+- Persistence: `app/engine/round_engine/resolve_round.py` (set_budget handler) + `app/engine/engines/round_tick.py` (load + write-back)
+- Tests: `app/tests/layer1/test_budget_engine.py`, `app/tests/layer2/test_budget_e2e.py`, `app/tests/layer2/test_budget_context.py`, `app/tests/layer2/test_budget_persistence.py`, `app/tests/layer3/test_skill_mandatory_decisions.py`, `app/tests/layer3/test_budget_full_chain_ai.py`
+- Human UI (future — not yet implemented)
 
 ---
 

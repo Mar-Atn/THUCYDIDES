@@ -993,3 +993,61 @@ Column semantics: `basing_rights_a_to_b = true` means `from_country_id` (a) is t
 - `at_war` usage in engine code (`engines/economic.py`, `engines/political.py`, `engines/round_tick.py`) refers to a boolean `_at_war` flag derived from combat/relationship status — NOT the `status` column value. This is consistent with the model (the engine detects war state from events, which drives the `status` column update).
 - Legacy `at_war` string values in CSV data files and template JSONB (`at_war_with` field) are starting data that maps to `military_conflict` in the `status` column.
 - `stage*_results/` JSON files contain `at_war` boolean fields — these are test fixtures, not production data. No change needed.
+
+---
+
+## BUDGET VERTICAL SLICE — DONE end-to-end (2026-04-10)
+
+**Scope:** First of the four mandatory end-of-round decisions shipped as a fully polished vertical slice. CONTRACT_BUDGET v1.1 is now 🔒 LOCKED. The 7-step methodology used to ship this is documented as the template for sanctions/tariffs/OPEC.
+
+### Design decisions locked
+
+| # | Decision | Why |
+|---|---|---|
+| 1 | Removed all percentage caps (40% military, 30% R&D) | Caps were invented during implementation, not in SEED_D8. Over-spending now feeds the deficit cascade directly. |
+| 2 | Production is level-based (0/1/2/3), not coin-based | Matches policymaker thinking, not accountant typing. Level × capacity × branch_unit_cost → coins. |
+| 3 | Level 3 is non-linear: 4× cost for 3× output | "Emergency gear" — deliberately worthwhile only in crisis. |
+| 4 | Social spending is continuous (slider, not tier) | Linear formulas: stability_delta = (social_pct−1.0)×4, support_delta = ×6. |
+| 5 | Research is absolute coins, not levels | R&D is a funding decision, not a pacing decision. |
+| 6 | strategic_missile + air_defense in schema, capacity 0 for all countries | Forward-compatible. Raising capacity is a pure data change. |
+| 7 | `no_change` must explicitly omit the `changes` field; rationale required for both branches (≥30 chars) | Explicit choice, not silent default. |
+| 8 | Validator returns ALL errors in one pass | Fail-fast wastes participant time. |
+| 9 | Context package includes a dry-run "no-change forecast" using the real engine on a deep copy | Single source of truth — preview = real round. |
+
+### Two known gaps closed
+
+- **Gap A (units not persisted):** added 5 mil_* integer columns to `country_states_per_round` (`mil_ground`, `mil_naval`, `mil_tactical_air`, `mil_strategic_missiles`, `mil_air_defense`). Backfilled R0 from `countries`. Migration: `add_mil_columns_country_states_per_round`. Fixed `_merge_to_engine_dict` to load from snapshot first; extended write-back payload to persist credited units.
+- **Gap B (R&D progress truncated):** `nuclear_rd_progress` and `ai_rd_progress` already existed as numeric columns but were loaded via `int()` and never written back. Fixed both halves; multi-round R&D progress now accumulates correctly with 6-decimal precision.
+
+### Documents updated
+
+| Document | Change |
+|---|---|
+| `PHASES/UNMANNED_SPACECRAFT/CONTRACT_BUDGET.md` | 🔒 LOCKED status header, version 1.1, list of consumers |
+| `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_BUDGET.md` | NEW — durable record of the slice (decisions, code, tests, demo numbers, gaps closed, pointers) |
+| `PHASES/UNMANNED_SPACECRAFT/PHASE.md` | Marked Sprint B6 budget portion DONE, added 2026-04-10 status block |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_FORMULAS.md` | A.6 + A.7 rewritten to match v1.1 (caps removed, level scale, social slider formula, branch unit costs) |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md` | 2.1 set_budget rewritten with v1.1 schema, removed cap language, added validator + context refs |
+| `EVOLVING METHODOLOGY/VERTICAL_SLICE_PATTERN.md` | NEW — the 7-step methodology template for sanctions/tariffs/OPEC |
+
+### Code changed
+
+- `app/engine/engines/economic.py` — `calc_budget_execution`, `calc_military_production`, `calc_tech_advancement` rewritten for v1.1; added `_compute_production_from_levels` helper, `PRODUCTION_COST_MULT`, `PRODUCTION_OUTPUT_MULT`, `BRANCH_UNIT_COST`, `BUDGET_PRODUCTION_BRANCHES`, `SOCIAL_STABILITY_MULT`, `SOCIAL_SUPPORT_MULT` constants; removed all percentage caps; extended `BudgetResult` dataclass.
+- `app/engine/engines/round_tick.py` — `_merge_to_engine_dict` loads units from snapshot first (fall back to base), R&D progress as float (was truncating int), added strategic_missile + air_defense to production_capacity. Write-back payload extended with 5 mil_* counts + 2 R&D progress floats + 2 tech levels.
+- `app/engine/round_engine/resolve_round.py` — `set_budget` handler runs the validator, writes JSONB columns, emits `budget_rejected` events on invalid input.
+- `app/engine/services/budget_validator.py` — NEW pure validator with 10 error codes per CONTRACT §4.
+- `app/engine/services/budget_context.py` — NEW context builder + dry-run service.
+
+### Tests
+
+- L1: 16 in `test_budget_engine.py`, 36 in `test_budget_validator.py`
+- L2: 3 in `test_budget_persistence.py`, 8 in `test_budget_context.py`, 10 in `test_budget_e2e.py`
+- L3: 10 LLM decisions in `test_skill_mandatory_decisions.py` (D1 budget portion ported to v1.1) + 1 acceptance gate in `test_budget_full_chain_ai.py`
+- All passing as of 2026-04-10. Both gaps verified by hard DB-backed assertions in `test_budget_e2e.py`.
+
+### Out of scope (deferred to post-phase architectural re-synthesis)
+
+- Full SEED_D8 rewrite — needs sanctions/tariffs/OPEC to be at the same level first
+- Unified mandatory-decision base contract — same reason
+- CONCEPT/SEED frozen documents — no changes during mid-phase work
+- Schema cleanup of stale `budget_military_coins` / `budget_tech_coins` columns — separate ticket

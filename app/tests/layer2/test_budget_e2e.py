@@ -15,22 +15,14 @@ engine actually consumed the decision (not the default budget).
 Uses rounds 75-78 to avoid collision with battery (90-91), persistence (79-82),
 and live runs.
 
-Architectural notes (verified 2026-04-10):
-  * `country_states_per_round` has NO mil_ground / mil_naval columns. The
-    economic engine credits the in-memory `country.military[branch]` dict but
-    `round_tick.run_engine_tick` does NOT write unit counts back to the DB.
-    Therefore tests that claim to verify "ground unit count grew" actually
-    verify the proxy signals the engine DOES persist:
-        - treasury was drawn down by the expected production cost
-        - if no R&D was set, R&D progress stayed flat
-        - stability moved by exactly the social-pct delta
-    The unit-count gap is documented and reported back to LEAD/BACKEND so the
-    snapshot writer can be extended.
-  * R&D progress is written by resolve_round via apply_rd_investment, NOT by
-    the budget pipeline. The engine's tech advancement step in round_tick is
-    in-memory only and the new ai_rd_progress is also discarded. So the budget
-    `research.ai_coins` field currently has NO observable effect at the
-    country_states level. This is a second known gap.
+Architectural notes (updated 2026-04-10, post-gap-closure):
+  * `country_states_per_round` now has mil_ground / mil_naval /
+    mil_tactical_air / mil_strategic_missiles / mil_air_defense columns.
+    `round_tick.run_engine_tick` writes the credited unit counts back to the
+    snapshot, so tests assert unit growth directly.
+  * ai_rd_progress / nuclear_rd_progress are persisted as numeric fractionals
+    by the budget pipeline — so `research.ai_coins` now has a directly
+    observable effect on the country_states snapshot.
 
 Run::
 
@@ -335,14 +327,8 @@ def test_generous_helps_stability(client, scenario_id):
 
 
 # ---------------------------------------------------------------------------
-# Test 3 — Ground production level 1 spends coins (treasury proxy)
+# Test 3 — Ground production level 1 actually produces units (DB-verified)
 # ---------------------------------------------------------------------------
-#
-# KNOWN GAP: round_tick.run_engine_tick does NOT persist mil_ground/naval/etc.
-# back to country_states_per_round (no such columns exist on the snapshot).
-# So we cannot directly assert "ground units increased". Instead we verify the
-# *proxy* signal the engine DOES persist: treasury was drawn down by the
-# expected production cost (relative to a no-production baseline).
 
 
 def _treasury_after(client, scenario_id, round_num):
@@ -362,23 +348,29 @@ def test_ground_production_level_1_spends_coins(client, scenario_id):
     )
     _full_chain(scenario_id, 78)
 
+    r77 = _get_country_row(client, scenario_id, 77, TEST_COUNTRY)
     row = _get_country_row(client, scenario_id, 78, TEST_COUNTRY)
     expected_units = COL_PROD_CAP_GROUND * 1  # 4
     expected_coin_cost = COL_PROD_CAP_GROUND * 3 * 1  # 12
 
+    ground_before = int(r77.get("mil_ground") or 0)
+    ground_after = int(row.get("mil_ground") or 0)
+    unit_delta = ground_after - ground_before
+
     print(
         f"\n  [test_ground_L1] expected units={expected_units}  "
         f"expected ground coins spent={expected_coin_cost}  "
-        f"R78 treasury={row['treasury']}  "
-        f"budget_production persisted={row.get('budget_production')}"
+        f"R77 mil_ground={ground_before}  R78 mil_ground={ground_after}  "
+        f"delta=+{unit_delta}  R78 treasury={row['treasury']}"
     )
 
     assert row.get("budget_production") is not None
     assert row["budget_production"]["ground"] == 1
-    # The full treasury delta is dominated by revenue + maintenance + social,
-    # not just production. We confirm here that the budget WAS persisted and
-    # the chain ran end to end. Actual unit-count assertion is in the
-    # comparative test below.
+    # Hard assertion: level-1 production credited exactly cap_ground units.
+    assert unit_delta == expected_units, (
+        f"Expected +{expected_units} ground units, got delta={unit_delta} "
+        f"(R77={ground_before} R78={ground_after})"
+    )
 
 
 def test_ground_production_level_2_costs_more_than_level_1(client, scenario_id):
@@ -518,42 +510,45 @@ def test_strategic_missile_zero_capacity_no_production(client, scenario_id):
 
 
 # ---------------------------------------------------------------------------
-# Test 6 — Research coin allocation persists in budget_research column
+# Test 6 — Research coin allocation accumulates ai_rd_progress (DB-verified)
 # ---------------------------------------------------------------------------
-#
-# KNOWN GAP: round_tick computes ai_rd_progress in memory but does NOT persist
-# the new value back to country_states_per_round. The DB column is therefore
-# unchanged after run_engine_tick. We assert what the system does today: the
-# budget_research JSONB is correctly persisted by resolve_round, and the
-# pipeline does not crash with non-zero research.
 
 
-def test_research_coins_persist_in_budget_column(client, scenario_id):
-    """research.ai_coins=10 must land in budget_research column on the snapshot."""
+def test_research_coins_accumulate_progress(client, scenario_id):
+    """research.ai_coins=10 must advance ai_rd_progress per CONTRACT §6.2."""
     _seed_round_from_r0(client, scenario_id, 77)
     _insert_set_budget(
         client, scenario_id, 78, TEST_COUNTRY,
         social_pct=1.0,
         production=_zero_production(),
         research={"nuclear_coins": 0, "ai_coins": 10},
-        rationale="E2E test 6: heavy AI research investment, persisted in budget_research column",
+        rationale="E2E test 6: heavy AI research investment, verified via ai_rd_progress delta",
     )
     _full_chain(scenario_id, 78)
 
-    row = _get_country_row(client, scenario_id, 78, TEST_COUNTRY)
+    r77 = _get_country_row(client, scenario_id, 77, TEST_COUNTRY)
+    r78 = _get_country_row(client, scenario_id, 78, TEST_COUNTRY)
 
-    # Expected analytical (informational) — see CONTRACT_BUDGET §6.2:
-    expected_progress_delta = (10 / COL_GDP) * 0.8 * 1.0
+    # CONTRACT_BUDGET §6.2: progress = (coins / gdp) * RD_MULTIPLIER
+    expected_progress_delta = (10 / COL_GDP) * 0.8
+    progress_before = float(r77.get("ai_rd_progress") or 0)
+    progress_after = float(r78.get("ai_rd_progress") or 0)
+    delta = progress_after - progress_before
+
     print(
-        f"\n  [test_research_persist] budget_research={row.get('budget_research')}  "
-        f"expected progress delta (info only) = {expected_progress_delta:.4f}  "
-        f"actual ai_rd_progress in DB = {row.get('ai_rd_progress')} "
-        f"(KNOWN GAP: round_tick does not write back ai_rd_progress)"
+        f"\n  [test_research_persist] budget_research={r78.get('budget_research')}  "
+        f"ai_rd_progress R77={progress_before:.6f}  R78={progress_after:.6f}  "
+        f"delta=+{delta:.6f}  expected=+{expected_progress_delta:.6f}"
     )
 
-    assert row.get("budget_research") is not None
-    assert row["budget_research"]["ai_coins"] == 10
-    assert row["budget_research"]["nuclear_coins"] == 0
+    assert r78.get("budget_research") is not None
+    assert r78["budget_research"]["ai_coins"] == 10
+    assert r78["budget_research"]["nuclear_coins"] == 0
+    # Hard assertion: ai_rd_progress grew by the contract-specified amount.
+    assert delta == pytest.approx(expected_progress_delta, rel=0.05), (
+        f"ai_rd_progress did not accumulate as expected: "
+        f"delta={delta}, expected={expected_progress_delta}"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -716,11 +711,10 @@ def test_invalid_budget_skipped_round_still_runs(client, scenario_id):
 
 def test_full_chain_values_match(client, scenario_id):
     """The acceptance gate. Compute expected outcomes by hand, query the DB,
-    and verify everything we CAN check matches.
+    and verify everything matches.
 
-    Honest scope: only the values that the engine actually persists today are
-    asserted. Unit counts and ai_rd_progress are documented as known gaps and
-    printed for diagnostics, not asserted.
+    Post-gap-closure (2026-04-10): unit counts and ai_rd_progress are now
+    persisted by round_tick and are hard-asserted here.
     """
     _seed_round_from_r0(client, scenario_id, 77)
     # Bring R77 stability down to 5 to give the +0.8 social bonus room to show
@@ -771,6 +765,13 @@ def test_full_chain_values_match(client, scenario_id):
     s77 = float(r77["stability"])
     s78 = float(r78["stability"])
 
+    ground_before = int(r77.get("mil_ground") or 0)
+    ground_after = int(r78.get("mil_ground") or 0)
+    naval_before = int(r77.get("mil_naval") or 0)
+    naval_after = int(r78.get("mil_naval") or 0)
+    ai_progress_before = float(r77.get("ai_rd_progress") or 0)
+    ai_progress_after = float(r78.get("ai_rd_progress") or 0)
+
     print("\n  [test_full_chain] EXPECTED vs ACTUAL")
     print(f"    budget_social_pct:      expected {expected_social_pct}  "
           f"actual {r78.get('budget_social_pct')}")
@@ -780,17 +781,16 @@ def test_full_chain_values_match(client, scenario_id):
           f"actual {r78.get('budget_research')}")
     print(f"    stability:              R77={s77}  R78={s78}  "
           f"delta={s78-s77:+.2f}  (social contribution alone {expected_stab_delta_social:+.2f})")
-    print(f"    ground production:      cost {expected_ground_coins} coins, "
-          f"{expected_ground_units} units (KNOWN GAP: units not persisted)")
-    print(f"    naval production:       cost {expected_naval_coins} coins, "
-          f"{expected_naval_units} units (KNOWN GAP: units not persisted)")
-    print(f"    ai R&D progress delta:  expected +{expected_ai_progress_delta:.4f} "
-          f"(KNOWN GAP: not persisted by round_tick)  "
-          f"actual ai_rd_progress R77={r77.get('ai_rd_progress')} R78={r78.get('ai_rd_progress')}")
+    print(f"    ground units:           R77={ground_before}  R78={ground_after}  "
+          f"delta=+{ground_after-ground_before}  expected +{expected_ground_units}")
+    print(f"    naval units:            R77={naval_before}  R78={naval_after}  "
+          f"delta=+{naval_after-naval_before}  expected +{expected_naval_units}")
+    print(f"    ai_rd_progress:         R77={ai_progress_before:.6f}  R78={ai_progress_after:.6f}  "
+          f"delta=+{ai_progress_after-ai_progress_before:.6f}  expected +{expected_ai_progress_delta:.6f}")
     print(f"    treasury:               R77={r77['treasury']}  R78={r78['treasury']}  "
           f"delta={float(r78['treasury'])-float(r77['treasury']):+.2f}")
 
-    # ---- Hard assertions on what IS persisted ----
+    # ---- Hard assertions — every contract clause verified in the DB ----
     assert float(r78["budget_social_pct"]) == pytest.approx(expected_social_pct)
     assert r78["budget_production"] == budget_changes["production"]
     assert r78["budget_research"] == budget_changes["research"]
@@ -803,4 +803,21 @@ def test_full_chain_values_match(client, scenario_id):
     # Treasury moved (engine ran)
     assert float(r78["treasury"]) != float(r77["treasury"]), (
         "Treasury unchanged — engine did not actually run the budget"
+    )
+
+    # Military units credited per contract
+    assert ground_after - ground_before == expected_ground_units, (
+        f"Ground production mismatch: expected +{expected_ground_units}, "
+        f"got +{ground_after - ground_before}"
+    )
+    assert naval_after - naval_before == expected_naval_units, (
+        f"Naval production mismatch: expected +{expected_naval_units}, "
+        f"got +{naval_after - naval_before}"
+    )
+
+    # R&D progress accumulated per contract
+    ai_delta = ai_progress_after - ai_progress_before
+    assert ai_delta == pytest.approx(expected_ai_progress_delta, rel=0.05), (
+        f"AI R&D progress mismatch: expected +{expected_ai_progress_delta}, "
+        f"got +{ai_delta}"
     )

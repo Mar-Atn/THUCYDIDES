@@ -104,7 +104,12 @@ See the reference documents (10 files in this directory):
 
 ---
 
-## Current Status (2026-04-07)
+## Current Status (2026-04-10)
+
+### 🟢 Budget vertical slice — DONE end-to-end (2026-04-10)
+First mandatory-decision slice complete and locked. CONTRACT_BUDGET v1.1, validator, engine v1.1 (caps removed, level scale, social slider), DB migration (5 mil_* columns), context+dry-run service, AI skill harness, full-chain acceptance gate. All gaps closed (units now persist, R&D progress now persists). 37 L1+L2 tests passing, L3 AI acceptance gate passing. See `CHECKPOINT_BUDGET.md` for the durable record. The 7-step methodology used to ship this is documented as the template for sanctions/tariffs/OPEC in `EVOLVING METHODOLOGY/VERTICAL_SLICE_PATTERN.md`.
+
+
 
 ### Completed
 - Economic engine: 9/10 (all formulas live, calibrated, 98% SEED match)
@@ -177,7 +182,7 @@ See the reference documents (10 files in this directory):
 
 ### Sprint B: Active Loop + Conversations (~3-4 days)
 - ✅ B1: Multi-action per round (up to 3 commits per agent, prompt guides quality)
-- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **NOT STARTED** *(added 2026-04-08)*
+- B6: Mandatory decisions system (budget/sanctions/tariffs/OPEC prompt before round end): **BUDGET DONE** ✅ 2026-04-10 (CONTRACT v1.1, full vertical slice, AI acceptance gate green — see CHECKPOINT_BUDGET.md). Sanctions/tariffs/OPEC remaining — follow VERTICAL_SLICE_PATTERN.md.
 - B7: Inter-round relocation phase (deploy/redeploy between rounds, separate from in-round): **NOT STARTED** *(added 2026-04-08)*
 - B8: Scripted battery testing (pre-scripted decisions, no LLM, full engine chain validation in `app/tests/layer2/`): **IN PROGRESS** *(added 2026-04-08)*
 - B2: Bilateral conversations — THE core feature:

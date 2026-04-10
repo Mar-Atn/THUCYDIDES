@@ -41,6 +41,10 @@ import pytest
 from engine.agents.decisions import _parse_json
 from engine.agents.full_round_runner import OPEC_MEMBERS
 from engine.config.settings import LLMUseCase
+from engine.services.budget_validator import (
+    REQUIRED_PRODUCTION_BRANCHES,
+    validate_budget_decision,
+)
 from engine.services.llm import call_llm
 
 logger = logging.getLogger(__name__)
@@ -72,7 +76,7 @@ SYSTEM_OPEC = (
 
 VALID_OPEC_LEVELS = {"min", "low", "normal", "high", "max"}
 VALID_DECISION_VALUES = {"change", "no_change"}
-MIN_RATIONALE_LEN = 20
+MIN_RATIONALE_LEN = 30  # CONTRACT_BUDGET v1.1 §4: rationale >= 30 chars
 
 ROUND_NUM = 2
 
@@ -109,10 +113,32 @@ class LeaderScenario:
     threats: list[str] = field(default_factory=list)
     recent_events: list[str] = field(default_factory=list)
 
-    # Current economic settings
+    # Current economic settings — CONTRACT_BUDGET v1.1
     social_pct: float = 1.0
-    military_coins: int = 0
-    tech_coins: int = 0
+    # Current per-branch production levels (0..3). All 5 branches always present.
+    current_production: dict = field(
+        default_factory=lambda: {
+            "ground": 1,
+            "naval": 1,
+            "tactical_air": 1,
+            "strategic_missile": 0,
+            "air_defense": 0,
+        }
+    )
+    # Standard production capacity — Template data (units/round at level 1).
+    # strategic_missile + air_defense are 0 for all countries in v1.1.
+    production_capacity: dict = field(
+        default_factory=lambda: {
+            "ground": 4,
+            "naval": 2,
+            "tactical_air": 3,
+            "strategic_missile": 0,
+            "air_defense": 0,
+        }
+    )
+    current_research: dict = field(
+        default_factory=lambda: {"nuclear_coins": 0, "ai_coins": 0}
+    )
 
     sanctions_imposed: list[dict] = field(default_factory=list)
     sanctions_against: list[dict] = field(default_factory=list)
@@ -169,12 +195,21 @@ def _build_budget_prompt(s: LeaderScenario) -> str:
     gdp_sign = "+" if s.gdp_change_pct >= 0 else ""
     war_line = f"At war with: {', '.join(s.wars)}" if s.wars else "Not at war."
 
+    cap = s.production_capacity
+    lvl = s.current_production
+    cap_lines = "\n".join(
+        f"  - {b}: cap {cap.get(b, 0)}/round (current level {lvl.get(b, 0)})"
+        for b in ("ground", "naval", "tactical_air", "strategic_missile", "air_defense")
+    )
+    nuc = s.current_research.get("nuclear_coins", 0)
+    ai = s.current_research.get("ai_coins", 0)
+
     return f"""You are {s.character_name}, {s.title} of {s.country_name}.
 
 ## D1 — BUDGET REVIEW (Round {ROUND_NUM})
 
-This is the BUDGET meeting. Focus only on fiscal allocation. Do NOT address
-sanctions, tariffs, or OPEC in this call.
+This is the BUDGET meeting per CONTRACT_BUDGET v1.1. Focus only on fiscal
+allocation. Do NOT address sanctions, tariffs, or OPEC in this call.
 
 ## Economic state
 - GDP: {s.gdp:.0f} ({gdp_sign}{s.gdp_change_pct:.1f}% vs last round)
@@ -185,40 +220,70 @@ sanctions, tariffs, or OPEC in this call.
 - War tiredness: {s.war_tiredness:.1f}
 - {war_line}
 
-## Current budget
-- Social spending: {s.social_pct:.2f} x baseline
-- Military allocation: {s.military_coins} coins
-- Tech R&D allocation: {s.tech_coins} coins
+## Current budget (last round)
+- Social spending slider: {s.social_pct:.2f} x baseline
+- Production levels (by branch):
+{cap_lines}
+- Research allocation: nuclear={nuc} coins, ai={ai} coins
+
+## Production level scale (all 5 branches, 0-3)
+- 0 = none (no spending, no units)
+- 1 = normal (1x cost, 1x output per capacity)
+- 2 = accelerated (2x cost, 2x output — rushed)
+- 3 = maximum (4x cost, 3x output — emergency gear, inefficient)
+
+Branch unit costs at level 1: ground 3, naval 6, tac_air 5, strat_missile 8,
+air_defense 4 (coins per unit). Strategic missile and air defense currently
+have capacity 0 for all countries — setting levels is accepted but produces 0
+units until capacity is raised.
+
+## Social slider
+Continuous range [0.5, 1.5]. Effects linear on deviation from 1.0:
+- stability delta = (social_pct - 1.0) × 4
+- political support delta = (social_pct - 1.0) × 6
+
+## Research
+Direct coin allocation. Progress = (coins/GDP) × 0.8 per round. Over-spending
+feeds the deficit cascade (treasury → money printing → inflation).
 
 ## Your relevant objectives
 {_objectives_block(s.objectives)}
 
 ## INSTRUCTIONS
 Decide whether to CHANGE the budget or keep it NO_CHANGE. Either way you MUST
-provide a rationale of at least one sentence (>20 chars) explaining WHY.
+provide a rationale of at least 30 characters explaining WHY.
 
-Consider:
-- If at war or treasury healthy → military or tech may rise
-- If inflation high → social spending may need to be cut
-- If treasury critical → austerity; minimal new allocations
-- If stable and rich → tech or diversification
-
-Respond with JSON ONLY, matching this EXACT schema:
+Respond with JSON ONLY, matching this EXACT schema (CONTRACT_BUDGET v1.1 §2):
 
 {{
-  "decision": "change" | "no_change",
-  "rationale": "string, >= 20 characters, explains the why",
+  "action_type": "set_budget",
+  "country_code": "{s.country_code}",
+  "round_num": {ROUND_NUM},
+  "decision": "change",
+  "rationale": "string, >= 30 characters",
   "changes": {{
     "social_pct": 1.0,
-    "military_coins": 2,
-    "tech_coins": 1
+    "production": {{
+      "ground": 1,
+      "naval": 1,
+      "tactical_air": 1,
+      "strategic_missile": 0,
+      "air_defense": 0
+    }},
+    "research": {{
+      "nuclear_coins": 0,
+      "ai_coins": 0
+    }}
   }}
 }}
 
 Rules:
-- social_pct range 0.5 to 1.5
-- military_coins / tech_coins: 0 to 10 each
-- Include "changes" ONLY when decision == "change"
+- social_pct: float in [0.5, 1.5]
+- production: ALL 5 branches required, each integer in [0, 3]
+- research: both nuclear_coins and ai_coins required, integers >= 0
+- On decision="no_change", OMIT the "changes" field entirely (do not send
+  null, do not send an empty object)
+- On decision="change", include the full "changes" object with all fields
 """
 
 
@@ -436,7 +501,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Authorized naval deployment to the Gulf",
             "Fed raised rates to combat inflation",
         ],
-        social_pct=1.0, military_coins=3, tech_coins=2,
+        social_pct=1.0,
+        current_production={"ground": 2, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 5, "naval": 4, "tactical_air": 5, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 6},
         sanctions_imposed=[{"target": "persia", "level": 3, "note": "wartime"}],
         tariffs_imposed=[{"target": "cathay", "level": 2, "note": "ongoing trade war"}],
         major_trade_partners=[
@@ -465,7 +533,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Launched BRI-2 infrastructure initiative",
             "Imposed counter-tariffs on Columbian goods",
         ],
-        social_pct=0.9, military_coins=3, tech_coins=4,
+        social_pct=0.9,
+        current_production={"ground": 1, "naval": 2, "tactical_air": 1, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 5, "naval": 3, "tactical_air": 4, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 10},
         sanctions_imposed=[],
         tariffs_imposed=[{"target": "columbia", "level": 2, "note": "retaliatory"}],
         major_trade_partners=[
@@ -494,7 +565,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Western sanctions hit oil exports",
             "Mobilized 3rd army group for Ruthenia front",
         ],
-        social_pct=0.8, military_coins=5, tech_coins=1,
+        social_pct=0.8,
+        current_production={"ground": 3, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 4, "naval": 2, "tactical_air": 3, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 3, "ai_coins": 0},
         sanctions_imposed=[{"target": "ruthenia", "level": 3, "note": "wartime"}],
         sanctions_against=[
             {"target": "sarmatia", "imposer": "columbia", "level": 3},
@@ -526,7 +600,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Lost eastern oblast to Sarmatian advance",
             "IMF emergency loan approved",
         ],
-        social_pct=0.7, military_coins=6, tech_coins=0,
+        social_pct=0.7,
+        current_production={"ground": 3, "naval": 0, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 3, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 0},
         sanctions_imposed=[{"target": "sarmatia", "level": 3, "note": "defensive war"}],
         tariffs_imposed=[],
         major_trade_partners=[
@@ -554,7 +631,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Announced 2nm fab investment",
             "Joint naval drill with Columbia",
         ],
-        social_pct=1.0, military_coins=2, tech_coins=4,
+        social_pct=1.0,
+        current_production={"ground": 1, "naval": 1, "tactical_air": 1, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 2, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 8},
         sanctions_imposed=[],
         tariffs_imposed=[],
         major_trade_partners=[
@@ -583,7 +663,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Signed defense pact renewal with Columbia",
             "Announced Vision-2040 diversification plan",
         ],
-        social_pct=1.1, military_coins=4, tech_coins=2,
+        social_pct=1.1,
+        current_production={"ground": 1, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 3, "naval": 2, "tactical_air": 3, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 3},
         sanctions_imposed=[],
         tariffs_imposed=[],
         major_trade_partners=[
@@ -614,7 +697,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Currency collapsed 40%",
             "Food riots in two provinces",
         ],
-        social_pct=1.3, military_coins=1, tech_coins=0,
+        social_pct=1.3,
+        current_production={"ground": 1, "naval": 0, "tactical_air": 0, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 1, "naval": 0, "tactical_air": 0, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 0},
         sanctions_imposed=[],
         sanctions_against=[{"target": "caribe", "imposer": "columbia", "level": 3}],
         tariffs_imposed=[],
@@ -645,7 +731,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Centrifuge cascade expanded at Natanz",
             "Gulf naval skirmish with Columbia",
         ],
-        social_pct=0.85, military_coins=5, tech_coins=3,
+        social_pct=0.85,
+        current_production={"ground": 2, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 3, "naval": 1, "tactical_air": 2, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 5, "ai_coins": 0},
         sanctions_imposed=[{"target": "levantia", "level": 2, "note": "proxy conflict"}],
         sanctions_against=[
             {"target": "persia", "imposer": "columbia", "level": 3},
@@ -680,7 +769,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Made In Bharata manufacturing push announced",
             "Purchased S-500 from Sarmatia",
         ],
-        social_pct=1.0, military_coins=3, tech_coins=2,
+        social_pct=1.0,
+        current_production={"ground": 1, "naval": 1, "tactical_air": 1, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 4, "naval": 2, "tactical_air": 3, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 2, "ai_coins": 2},
         sanctions_imposed=[],
         tariffs_imposed=[{"target": "cathay", "level": 1, "note": "strategic hedging"}],
         major_trade_partners=[
@@ -709,7 +801,10 @@ SCENARIOS: list[LeaderScenario] = [
             "Approved Zeitenwende-2 rearmament package",
             "Shut down last nuclear plant",
         ],
-        social_pct=1.1, military_coins=3, tech_coins=2,
+        social_pct=1.1,
+        current_production={"ground": 1, "naval": 1, "tactical_air": 1, "strategic_missile": 0, "air_defense": 0},
+        production_capacity={"ground": 3, "naval": 2, "tactical_air": 3, "strategic_missile": 0, "air_defense": 0},
+        current_research={"nuclear_coins": 0, "ai_coins": 4},
         sanctions_imposed=[{"target": "sarmatia", "level": 2, "note": "ally coordination"}],
         tariffs_imposed=[],
         major_trade_partners=[
@@ -809,17 +904,22 @@ def _assert_base_shape(domain: str, parsed: dict | None, cc: str) -> None:
 
 
 def _assert_budget_payload(parsed: dict, cc: str) -> None:
-    if parsed.get("decision") != "change":
-        return
-    changes = parsed.get("changes")
-    assert isinstance(changes, dict), f"{cc} budget: changes must be dict on change"
-    if "social_pct" in changes:
-        v = float(changes["social_pct"])
-        assert 0.5 <= v <= 1.5, f"{cc} budget: social_pct out of range: {v}"
-    for k in ("military_coins", "tech_coins"):
-        if k in changes:
-            v = float(changes[k])
-            assert 0 <= v <= 10, f"{cc} budget: {k} out of range: {v}"
+    """Full CONTRACT_BUDGET v1.1 validation via the production validator.
+
+    The harness auto-fills action_type/country_code/round_num if the LLM
+    omitted them — these are envelope fields the communication layer would
+    normally inject, not decision content.
+    """
+    payload = dict(parsed)
+    payload.setdefault("action_type", "set_budget")
+    payload.setdefault("country_code", cc)
+    payload.setdefault("round_num", ROUND_NUM)
+
+    report = validate_budget_decision(payload)
+    assert report["valid"], (
+        f"{cc} budget: validator rejected decision: {report['errors']}\n"
+        f"payload: {payload}"
+    )
 
 
 def _assert_sanction_or_tariff_payload(domain: str, parsed: dict, cc: str) -> None:
@@ -1018,6 +1118,16 @@ def test_budget_prompt_has_economic_focus_only():
     assert "Economic state" in p
     assert "GDP" in p
     assert "social_pct" in p
+    # CONTRACT_BUDGET v1.1 schema markers — prompt must teach the new shape
+    assert "CONTRACT_BUDGET v1.1" in p
+    for branch in REQUIRED_PRODUCTION_BRANCHES:
+        assert branch in p, f"budget prompt missing branch {branch}"
+    assert "nuclear_coins" in p
+    assert "ai_coins" in p
+    assert '"action_type": "set_budget"' in p
+    # Old schema must not leak
+    assert "military_coins" not in p
+    assert "tech_coins" not in p
     # Budget prompt should not include other domain section headers
     assert "SANCTIONS committee" not in p
     assert "TRADE AND TARIFF REVIEW" not in p
