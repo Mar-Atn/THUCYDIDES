@@ -31,9 +31,15 @@ from engine.config.map_config import (
     theater_for_global_hex,
 )
 from engine.services.supabase import get_client
+from engine.engines.movement import process_movements as movement_process
 from engine.round_engine import combat as combat_mod
-from engine.round_engine import movement as movement_mod
 from engine.round_engine import rd as rd_mod
+from engine.services.movement_data import (
+    build_units_dict_from_rows,
+    load_basing_rights,
+    load_global_grid_zones,
+)
+from engine.services.movement_validator import validate_movement_decision
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +50,7 @@ COMMUNICATION_ACTIONS = {
     "public_statement", "call_org_meeting",
     "diplomatic_move",  # legacy — agents may still use this; treat as public_statement
 }
-MOVEMENT_ACTIONS = {"move_unit"}
-MOBILIZATION_ACTIONS = {"mobilize_reserve"}
+MOVEMENT_ACTIONS = {"move_units"}  # CONTRACT_MOVEMENT v1.0 — plural
 RD_ACTIONS = {"rd_investment"}
 ECONOMIC_ACTIONS = {
     "set_sanction", "set_sanctions", "set_tariff", "set_tariffs",
@@ -214,35 +219,117 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 "payload": payload,
             })
 
-    # --- 2. Movement + mobilization ---------------------------------------
+    # --- 2. Movement (CONTRACT_MOVEMENT v1.0) -----------------------------
+    # Last-submission-wins: collect all move_units decisions per country and
+    # use only the LAST one in document order (matches the upsert intent).
+    move_decisions_by_country: dict[str, dict] = {}
     for d in decisions:
-        at = d["action_type"]
-        if at in MOVEMENT_ACTIONS:
-            unit_state, narr = movement_mod.resolve_movement(
-                d["action_payload"], unit_state
-            )
-            narratives.append(narr)
-            events.append({
-                "scenario_id": scenario_id,
+        if d["action_type"] in MOVEMENT_ACTIONS:
+            move_decisions_by_country[d["country_code"]] = d
+
+    if move_decisions_by_country:
+        # Lazy-load shared context dicts (zones + basing) once per round
+        _zones = load_global_grid_zones()
+        _basing = load_basing_rights(client)
+
+        for cc, d in move_decisions_by_country.items():
+            payload = d.get("action_payload") or {}
+            full_payload = {
+                "action_type": "move_units",
+                "country_code": cc,
                 "round_num": round_num,
-                "event_type": "movement",
-                "country_code": d["country_code"],
-                "summary": narr,
-                "payload": d.get("action_payload"),
-            })
-        elif at in MOBILIZATION_ACTIONS:
-            unit_state, narr = movement_mod.resolve_mobilization(
-                d["action_payload"], unit_state
+                "decision": payload.get("decision", "change"),
+                "rationale": payload.get(
+                    "rationale",
+                    "no rationale provided — placeholder for backward "
+                    "compatibility with pre-v1.0 move_units payloads",
+                ),
+            }
+            if "changes" in payload:
+                full_payload["changes"] = payload["changes"]
+
+            _units_dict = build_units_dict_from_rows(list(unit_state.values()))
+            result = validate_movement_decision(
+                full_payload, _units_dict, _zones, _basing,
             )
-            narratives.append(narr)
-            events.append({
-                "scenario_id": scenario_id,
-                "round_num": round_num,
-                "event_type": "mobilization",
-                "country_code": d["country_code"],
-                "summary": narr,
-                "payload": d.get("action_payload"),
-            })
+            if not result["valid"]:
+                logger.warning(
+                    "[resolve R%d] invalid move_units from %s: %s",
+                    round_num, cc, result["errors"],
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "movement_rejected",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} move_units rejected: "
+                        f"{result['errors'][0] if result['errors'] else 'invalid'}"
+                    ),
+                    "payload": {
+                        "errors": result["errors"],
+                        "original": payload,
+                    },
+                })
+                continue
+
+            normalized = result["normalized"]
+
+            # 1. Always write the per-round audit record (incl. no_change).
+            #    The country snapshot for this round is written at the end
+            #    of resolve_round; we ensure the row exists by upserting.
+            try:
+                client.table("country_states_per_round").upsert(
+                    {
+                        "scenario_id": scenario_id,
+                        "round_num": round_num,
+                        "country_code": cc,
+                        "movement_decision": normalized,
+                    },
+                    on_conflict="scenario_id,round_num,country_code",
+                ).execute()
+            except Exception as e:
+                logger.warning(
+                    "[resolve R%d] movement_decision write failed for %s: %s",
+                    round_num, cc, e,
+                )
+
+            # 2. On change, mutate unit_state via the engine.
+            if normalized["decision"] == "change":
+                moves = normalized.get("changes", {}).get("moves", [])
+                # Mutate unit_state (the dict resolve_round persists later).
+                # The validator's view (_units_dict) was a per-call snapshot,
+                # so we run process_movements directly against unit_state.
+                apply_results = movement_process(
+                    moves, cc, unit_state, _zones,
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "movement_applied",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} move_units applied: {len(moves)} moves"
+                    ),
+                    "payload": {
+                        "moves_count": len(moves),
+                        "results": apply_results,
+                    },
+                })
+                logger.info(
+                    "[resolve R%d] %s move_units change (%d moves applied)",
+                    round_num, cc, len(moves),
+                )
+            else:
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "movement_no_change",
+                    "country_code": cc,
+                    "summary": f"{cc} move_units no_change",
+                    "payload": {"rationale": normalized.get("rationale")},
+                })
+                logger.info(
+                    "[resolve R%d] %s move_units no_change (audit persisted)",
+                    round_num, cc,
+                )
 
     # --- 3-5. Combat (ranged, ground, naval) ------------------------------
     attacks = [d for d in decisions if d["action_type"] in ATTACK_ACTIONS]

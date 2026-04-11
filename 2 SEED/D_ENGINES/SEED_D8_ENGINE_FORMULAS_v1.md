@@ -2169,6 +2169,25 @@ No authorization check beyond existence
 
 # PART 6B: UNIT MOVEMENT & REDEPLOYMENT RULES
 
+> **🔒 RECONCILIATION (2026-04-11):** The canonical source of truth for unit movement is now
+> **`PHASES/UNMANNED_SPACECRAFT/CONTRACT_MOVEMENT.md` v1.0** (locked) +
+> **`PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md §1.1`** (summary). Where this section
+> below conflicts with CONTRACT_MOVEMENT, CARD wins. Known deltas:
+>
+> - **Range is unlimited** (no hex-distance range limit); spatial legality is type-based
+>   + territory-based, not distance-based. The old `MOVE_RANGE = {ground: 1, naval: 2, ...}`
+>   table is abandoned.
+> - **Instant deployment** (zero transit delay) — moves submitted in round N take effect
+>   at round-end / start of round N+1.
+> - **Strategic missiles CAN move** (same rules as ground — own territory / basing /
+>   previously occupied). The "strategic missiles are fixed" note is deprecated.
+> - **No "leave ≥1 unit" constraint** on withdrawal. You can empty any hex.
+> - **Action name is `move_units` (plural)**, not `move_unit`. One batch per country per
+>   round, atomic validation.
+> - Auto-embark + auto-debark are first-class engine flows (see CONTRACT §5).
+>
+> The text below is retained for historical context only.
+
 ## When deployment happens
 
 Phase B (combined world update + deployment). Production and mobilization run FIRST (instant), then deployment window opens while World Model Engine processes in parallel. No units are lost during world model processing — combat only happens in Phase A.

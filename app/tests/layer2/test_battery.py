@@ -214,14 +214,21 @@ def _build_scripted_decisions(client, scenario_id: str) -> list[dict]:
         except Exception:
             logger.warning("No Mashriq units found — skipping Levantia attack")
 
-    # Mobilize reserve: Columbia
+    # Move units (CONTRACT_MOVEMENT v1.0): Columbia deploys a reserve unit
     reserve_unit = _find_reserve_unit(client, scenario_id, "columbia")
     if reserve_unit:
-        decisions.append(_d("columbia", "mobilize_reserve", {
-            "unit_code": reserve_unit,
-            "target_global_row": 3,
-            "target_global_col": 3,
-        }, "BATTERY: Columbia mobilize reserve"))
+        decisions.append(_d("columbia", "move_units", {
+            "decision": "change",
+            "rationale": "BATTERY: deploy a reserve ground unit to Columbia home territory",
+            "changes": {
+                "moves": [{
+                    "unit_code": reserve_unit,
+                    "target": "hex",
+                    "target_global_row": 3,
+                    "target_global_col": 3,
+                }],
+            },
+        }, "BATTERY: Columbia move_units"))
 
     # =====================================================================
     # PUBLIC STATEMENTS (3)

@@ -32,8 +32,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 ALL_ACTION_TYPES = [
-    "move_unit",
-    "mobilize_reserve",
+    "move_units",
     "declare_attack",
     "naval_bombardment",
     "declare_blockade",
@@ -82,7 +81,7 @@ SCENARIOS: list[Scenario] = [
             "Columbia has strong military forces deployed globally."
         ),
         objectives=["defend homeland", "punish aggression", "maintain global credibility"],
-        plausible={"declare_attack", "mobilize_reserve", "public_statement", "covert_op"},
+        plausible={"declare_attack", "move_units", "public_statement", "covert_op"},
         implausible={"rd_investment", "propose_transaction"},
     ),
     # 2. Caribe economic crisis
@@ -129,7 +128,7 @@ SCENARIOS: list[Scenario] = [
             "Columbia and Teutonia are sympathetic but haven't committed forces."
         ),
         objectives=["survive the war", "get military aid from allies", "hold remaining territory"],
-        plausible={"propose_transaction", "public_statement", "mobilize_reserve"},
+        plausible={"propose_transaction", "public_statement", "move_units"},
         implausible={"rd_investment", "set_tariff", "covert_op"},
     ),
     # 5. Solaria oil power
@@ -177,7 +176,7 @@ SCENARIOS: list[Scenario] = [
             "Objectives include territorial_control over disputed eastern provinces."
         ),
         objectives=["territorial_control", "win war quickly", "prevent international intervention"],
-        plausible={"declare_attack", "mobilize_reserve", "covert_op", "public_statement"},
+        plausible={"declare_attack", "move_units", "covert_op", "public_statement"},
         implausible={"propose_transaction"},
     ),
     # 8. Teutonia reluctant rearmament

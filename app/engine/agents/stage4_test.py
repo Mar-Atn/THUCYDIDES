@@ -59,8 +59,7 @@ COMMIT_ACTION_SCHEMA = {
                 "description": (
                     "Structured action payload. Required: action_type + rationale.\n\n"
                     "MILITARY:\n"
-                    "  move_unit: unit_code, target_global_row, target_global_col\n"
-                    "  mobilize_reserve: unit_code, target_global_row, target_global_col\n"
+                    "  move_units: decision (change|no_change), rationale, changes.moves[] (CONTRACT_MOVEMENT v1.0)\n"
                     "  declare_attack: attacker_unit_codes (list), target_global_row, target_global_col, target_description\n"
                     "  naval_bombardment: naval_unit_codes (list), target_global_row, target_global_col\n"
                     "  declare_blockade: zone_id (chokepoint name), level (full|partial)\n"
@@ -156,8 +155,7 @@ STEP 2: Decide on your PRIMARY action for this round.
 STEP 3: Commit that action using the commit_action tool with a structured payload.
 
 The commit_action tool accepts these action types:
-- move_unit: reposition an existing unit
-- mobilize_reserve: activate a reserve unit to a location
+- move_units: batch movement (CONTRACT_MOVEMENT v1.0 — reposition / deploy / withdraw / embark)
 - declare_attack: declare attack against an enemy position
 - naval_bombardment: bombard a land hex from adjacent sea
 - declare_blockade: blockade a chokepoint or sea zone

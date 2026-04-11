@@ -1320,3 +1320,126 @@ With OPEC locked, all 4 mandatory decision slices are complete:
 | OPEC | 🔒 DONE 2026-04-11 | this commit |
 
 **Milestone:** the economic decision layer is complete. Every economic lever in the sim is now fully specified, tested, and canonical. Next per strategy directive: Military Actions slices.
+
+---
+
+## 2026-04-11 — MOVEMENT VERTICAL SLICE — DONE (M1)
+
+**Status:** 🔒 DONE end-to-end
+**Authoritative contract:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_MOVEMENT.md` v1.0
+**Checkpoint:** `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_MOVEMENT.md`
+
+The **first military vertical slice** — unit movement. Same 7-step pattern as the 4 economic slices (Budget / Tariffs / Sanctions / OPEC), but the first slice with a net new production engine (`engines/movement.py`) and a **full legacy cleanup pass** as a mandatory part of the close.
+
+### Design decisions locked (Marat Q1-Q6 resolved pre-slice)
+
+1. **Action name canonicalized to `move_units` (plural)** — full replacement for legacy singular `move_unit`. No backward compatibility.
+2. **Range is unlimited** — no hex-distance constraint. Spatial legality is type-based + territory-based (per CARD_ACTIONS §1.1 "all units can be relocated globally to any suitable hex"). Old `MOVE_RANGE = {ground: 1, naval: 2, ...}` table deleted.
+3. **Instant deployment** — zero transit delay. Submitted in round N → visible at start of round N+1.
+4. **One batch per country per round** — atomic validation. Any invalid move rejects the whole batch. Batch-internal state propagation (move #1's new position qualifies move #2's "previously occupied" check).
+5. **Last-submission-wins** — if a country submits `move_units` twice in the same round, the second submission replaces the first (supports human correction workflows).
+6. **Auto-embark + auto-debark** — engine-owned flows. Participant just says "move unit X to hex Y"; if Y has a friendly carrier with capacity the engine embarks; if X is currently embarked the engine debarks first. Schema doesn't expose embark as a distinct concept. Carrier capacity: 1 ground + 2 tactical_air per naval.
+
+### Engine changes
+
+- **NEW:** `engine/engines/movement.py` (`process_movements` + `_hex_to_theater` + `_friendly_carriers_at` + `_carrier_capacity_remaining`)
+- **DELETED:** `engine/round_engine/movement.py` (deprecated Phase-1 MVP — replaced by the new canonical engine)
+- **DELETED:** `engine/round_engine/test_resolve.py` (old test scaffold)
+- **RENAMED:** `engine/engines/military.py:resolve_mobilization` → `resolve_martial_law` (and `MobilizationInput` → `MartialLawInput`, `MobilizationResult` → `MartialLawResult`) to eliminate the naming collision with the deprecated deploy-from-reserve mechanic
+
+### New services
+
+| Service | File | Purpose |
+|---|---|---|
+| **Validator** | `app/engine/services/movement_validator.py` | Pure `validate_movement_decision(payload, units, zones, basing_rights) → {valid, errors, warnings, normalized}`. **17 error codes.** Batch-atomic, state-propagating. |
+| **Data loaders** | `app/engine/services/movement_data.py` | `load_global_grid_zones()` (synthesized from SEED canonical map JSON), `load_basing_rights(client)`, `build_units_dict_from_rows(rows)`. |
+| **Context builder** | `app/engine/services/movement_context.py` | `build_movement_context(country_code, scenario_code, round_num) → dict`. Returns 10 data blocks per CONTRACT §3. **Data only — no cognitive layer.** |
+
+### Persistence
+
+**Migration:** `movement_v1_canonical_schema` (applied 2026-04-11)
+
+- **Added** `country_states_per_round.movement_decision jsonb` (per-round audit column)
+- **Deleted** 7 stale `agent_decisions` rows `WHERE action_type IN ('move_unit', 'mobilize_reserve')`
+
+**Resolve handler:** `engine/round_engine/resolve_round.py` movement block fully rewritten:
+- Removed `from engine.round_engine import movement as movement_mod` import
+- `MOVEMENT_ACTIONS = {"move_units"}` (plural); `MOBILIZATION_ACTIONS` deleted entirely
+- New handler: builds units + zones + basing context dicts, calls validator, emits `movement_rejected` on invalid, writes `movement_decision` JSONB audit on valid (both change and no_change), calls `process_movements` on change, emits `movement_applied` / `movement_no_change` events
+- Last-submission-wins implemented by collecting all move_units decisions per country and using the last one in document order
+
+### Legacy cleanup (exhaustive)
+
+| File | Action |
+|---|---|
+| `engine/round_engine/movement.py` | **DELETED** (whole file — deprecated MVP) |
+| `engine/round_engine/test_resolve.py` | **DELETED** (old test scaffold) |
+| `engine/round_engine/resolve_round.py` | Rewrote movement block, removed legacy import, deleted `MOBILIZATION_ACTIONS` |
+| `engine/round_engine/spec_compliance.md` | Updated movement row to point at new engine + CONTRACT |
+| `engine/engines/military.py` | Renamed `resolve_mobilization` → `resolve_martial_law`, `MobilizationInput` → `MartialLawInput`, `MobilizationResult` → `MartialLawResult` |
+| `engine/agents/action_schemas.py` | Replaced `MoveOrder` + `MobilizeOrder` Pydantic models with a single `MoveUnitsOrder` envelope shim |
+| `engine/agents/tools.py` | Updated `commit_action` dispatch — `move_units` only, legacy pair deleted |
+| `engine/agents/stage4_test.py` | Replaced legacy action-list text with `move_units` entry |
+| `tests/layer2/test_battery.py` | Migrated Columbia reserve deploy to `move_units` v1.0 schema |
+| `tests/layer2/test_battery_military.py` | Same — migrated to `move_units` |
+| `tests/layer3/test_skill_action_selection.py` | Removed `move_unit` + `mobilize_reserve` from action list; replaced with `move_units` |
+
+### Test coverage
+
+| Layer | File | Count | Purpose |
+|---|---|---|---|
+| **L1** | `tests/layer1/test_movement_validator.py` | **42** | All 17 error codes + batch propagation (previously-occupied chaining, embark capacity across batch) |
+| **L1** | `tests/layer1/test_movement_engine.py` | **10** | Engine pin: reposition / deploy-from-reserve / withdraw / auto-embark / debark+move / atomic batch / theater auto-derivation |
+| **L2** | `tests/layer2/test_movement_persistence.py` | **4** | Change decision persisted; no_change audit + unit preservation; invalid rejected event; last-submission-wins |
+| **L2** | `tests/layer2/test_movement_context.py` | **10** | All 10 context blocks present; 57-zone world map; zone adjacency; decision rules with no_change reminder |
+| **L3** | `tests/layer3/test_skill_movement.py` | **4 offline + 1 LLM** | D5 prompt v1.0 markers; reference change + no_change payloads validated by production validator; min rationale constant |
+| **L3** | `tests/layer3/test_movement_full_chain_ai.py` | **1** | **THE acceptance gate** — real LLM → validator → DB → engine → snapshot. Visual demo rounds 200-201 **LEFT IN DB** for Marat's Observatory review. |
+
+**Total:** 71 new/migrated tests green. Full L1 suite: 458 passing.
+
+### Concrete demo (2026-04-11 acceptance gate run)
+
+Columbia R200 → R201, real LLM decision:
+
+```json
+{
+  "action_type": "move_units",
+  "country_code": "columbia",
+  "round_num": 201,
+  "decision": "change",
+  "rationale": "Deploying ground forces to secure both territories and establish defensive positions across our controlled hexes for better territorial control.",
+  "changes": {
+    "moves": [
+      {"unit_code": "col_g_04", "target": "hex",
+       "target_global_row": 3, "target_global_col": 3},
+      {"unit_code": "col_g_05", "target": "hex",
+       "target_global_row": 4, "target_global_col": 3}
+    ]
+  }
+}
+```
+
+Chain: validator ✓ → agent_decisions ✓ → resolve_round (audit JSONB written, engine applies moves) ✓ → unit_states_per_round updated ✓. Result: `col_g_04` R200=reserve/(None,None) → R201=active/(3,3); `col_g_05` R200=reserve/(None,None) → R201=active/(4,3). Audit JSONB matches AI output byte-for-byte.
+
+**Visual demo rounds 200-201 LEFT IN DB for Observatory review.**
+
+### Next — military slices continue
+
+```
+✅ Budget       DONE  2026-04-10
+✅ Tariffs      DONE  2026-04-10
+✅ Sanctions    DONE  2026-04-10
+✅ OPEC         DONE  2026-04-11
+✅ Movement M1  DONE  2026-04-11  ← FIRST MILITARY SLICE
+---
+   Ground Combat (M2 — declare_attack)
+   Air / Missile Strikes (M3)
+   Naval Combat (M4)
+   Blockades (M5)
+   Nuclear Decisions
+   Martial Law
+   Transactions + Agreements
+   Other Actions (fire/reassign / assassination / arrest / propaganda / sabotage / private investments)
+```
+
+**Milestone:** with M1 movement shipped, the first of the military decision layer is complete and the 7-step pattern is proven on a non-economic domain. All 4 economic + 1 military mandatory decisions now have canonical contracts, validators, engines, decision-specific context builders, persistence handlers, AI skill harnesses, and full-chain acceptance gates.

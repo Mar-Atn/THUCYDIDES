@@ -11,30 +11,19 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field
 
 
-class MoveOrder(BaseModel):
-    """Reposition an existing unit (active or already-mobilized)."""
+class MoveUnitsOrder(BaseModel):
+    """Batch movement order — CONTRACT_MOVEMENT v1.0.
 
-    action_type: Literal["move_unit"] = "move_unit"
-    unit_code: str = Field(..., description="The unit to move (e.g. 'col_g_09')")
-    target_global_row: Optional[int] = None
-    target_global_col: Optional[int] = None
-    target_theater: Optional[str] = None
-    target_theater_row: Optional[int] = None
-    target_theater_col: Optional[int] = None
+    The full schema is defined in ``engine/services/movement_validator.py``;
+    this Pydantic shim only validates that ``action_type == "move_units"``
+    and the envelope fields are present so that legacy ``commit_action``
+    callers don't crash. The real validation lives in the validator.
+    """
+
+    action_type: Literal["move_units"] = "move_units"
+    decision: Literal["change", "no_change"] = "change"
     rationale: str
-
-
-class MobilizeOrder(BaseModel):
-    """Activate a reserve unit to a specific location."""
-
-    action_type: Literal["mobilize_reserve"] = "mobilize_reserve"
-    unit_code: str
-    target_global_row: int
-    target_global_col: int
-    target_theater: Optional[str] = None
-    target_theater_row: Optional[int] = None
-    target_theater_col: Optional[int] = None
-    rationale: str
+    changes: Optional[dict] = None
 
 
 class AttackDeclarationOrder(BaseModel):
@@ -120,8 +109,7 @@ class TransactionOrder(BaseModel):
 
 
 AnyAction = Union[
-    MoveOrder,
-    MobilizeOrder,
+    MoveUnitsOrder,
     AttackDeclarationOrder,
     SanctionOrder,
     TariffOrder,
@@ -133,8 +121,7 @@ AnyAction = Union[
 ]
 
 ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
-    "move_unit": MoveOrder,
-    "mobilize_reserve": MobilizeOrder,
+    "move_units": MoveUnitsOrder,
     "declare_attack": AttackDeclarationOrder,
     "set_sanction": SanctionOrder,
     "set_tariff": TariffOrder,
@@ -148,13 +135,11 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
 
 
 __all__ = [
-    "MoveOrder",
-    "MobilizeOrder",
+    "MoveUnitsOrder",
     "AttackDeclarationOrder",
     "SanctionOrder",
     "TariffOrder",
     "RDInvestmentOrder",
-    "DiplomaticOrder",
     "AnyAction",
     "ACTION_TYPE_TO_MODEL",
 ]

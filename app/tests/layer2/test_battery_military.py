@@ -137,13 +137,22 @@ def battery_run(client, scenario_id):
     }, "MIL_BATTERY: blockade"))
     meta["blockade"] = True
 
-    # 6. Mobilize reserve: Columbia
+    # 6. Move units (CONTRACT_MOVEMENT v1.0): Columbia deploys a reserve unit
     col_reserve = _find_units(client, scenario_id, "columbia", "ground", status="reserve", limit=1)
     if col_reserve:
-        decisions.append(_d("columbia", "mobilize_reserve", {
-            "unit_code": col_reserve[0]["unit_code"], "target_global_row": 3, "target_global_col": 3,
-        }, "MIL_BATTERY: mobilize"))
-        meta["mobilize"] = True
+        decisions.append(_d("columbia", "move_units", {
+            "decision": "change",
+            "rationale": "MIL_BATTERY: deploy a reserve ground unit to home territory to exercise movement",
+            "changes": {
+                "moves": [{
+                    "unit_code": col_reserve[0]["unit_code"],
+                    "target": "hex",
+                    "target_global_row": 3,
+                    "target_global_col": 3,
+                }],
+            },
+        }, "MIL_BATTERY: move_units"))
+        meta["movement"] = True
 
     # 7. Basing rights: Albion grants to Columbia
     decisions.append(_d("albion", "basing_rights", {

@@ -34,12 +34,12 @@
 
 | Rule | Status | Notes |
 |---|---|---|
-| Ground move to adjacent land hex | Implemented (simplified) | `movement.resolve_movement`, max 1 hex |
-| Naval move between adjacent sea hexes | Implemented (simplified) | Max 2 hex range, terrain NOT validated |
-| Air unit range up to 3 hops | Implemented | |
-| Mobilize reserve to active (optional move) | Implemented | `movement.resolve_mobilization` |
-| Terrain validation (land vs sea hex) | Deferred | Phase 2 — needs hex terrain map |
-| Movement cost by terrain | Deferred | Phase 2 |
+| Reposition active unit | CONTRACT_MOVEMENT v1.0 | `engines/movement.py:process_movements` |
+| Deploy from reserve | CONTRACT_MOVEMENT v1.0 | (validator gates territory legality) |
+| Withdraw to reserve | CONTRACT_MOVEMENT v1.0 | |
+| Auto-embark + auto-debark | CONTRACT_MOVEMENT v1.0 | Capacity 1 ground + 2 tactical_air per carrier |
+| Terrain validation (land vs sea hex) | Implemented | `services/movement_validator.py` |
+| Range limit | Removed (CARD_ACTIONS §1.1) | Range is unlimited; territory rules gate legality |
 
 ## R&D
 

@@ -104,7 +104,10 @@ See the reference documents (10 files in this directory):
 
 ---
 
-## Current Status (2026-04-10)
+## Current Status (2026-04-11)
+
+### 🟢 Movement vertical slice (M1) — DONE end-to-end (2026-04-11)
+**First military slice** complete. Unit movement (reposition / deploy from reserve / withdraw to reserve / auto-embark / auto-debark) now flows through the same 7-step pattern as the 4 economic slices. CONTRACT_MOVEMENT v1.0 locked. NEW validator with 17 error codes (batch-atomic, state-propagating) and NEW engine `engines/movement.py` replaces deprecated `round_engine/movement.py` (deleted). Action name canonicalized: `move_units` (plural) replaces legacy `move_unit`. `engines/military.py:resolve_mobilization` renamed to `resolve_martial_law` to eliminate naming collision. DB migration `movement_v1_canonical_schema`: added `country_states_per_round.movement_decision` JSONB audit column, cleaned 7 stale legacy `agent_decisions` rows. Full legacy cleanup: deleted `round_engine/movement.py` + `round_engine/test_resolve.py`, migrated all callers (`action_schemas.py`, `tools.py`, `test_battery.py`, `test_battery_military.py`, `test_skill_action_selection.py`, `stage4_test.py`) to the plural `move_units` action. 60+ tests green (L1 42 validator + 10 engine / L2 4 persistence + 10 context / L3 4 offline harness + 1 acceptance gate). Visual demo rounds 200-201 LEFT IN DB for Observatory review. See `CHECKPOINT_MOVEMENT.md`.
 
 ### 🟢 OPEC vertical slice — DONE end-to-end (2026-04-11)
 Fourth and final mandatory-decision slice complete and locked. **All 4 mandatory decisions now shipped** (Budget, Tariffs, Sanctions, OPEC). Engine math UNCHANGED (contract-around-existing-behavior pattern, like tariffs). Canonical OPEC+ roster corrected to 5 members (Caribe/Venezuela confirmed, Sarmatia added, code constant fixed). DB migration `opec_v1_canonical_schema`: added `opec_decision` JSONB audit column, fixed Caribe `opec_member=true`, cleaned R0 snapshot pollution (non-OPEC countries back to `na`). 82 tests green (L1 67: 47 validator + 20 engine regression / L2 14: 4 persistence + 10 context / L3 1 acceptance gate). See `CHECKPOINT_OPEC.md`.

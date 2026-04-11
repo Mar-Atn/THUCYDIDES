@@ -351,8 +351,13 @@ class ProductionOrderInput(BaseModel):
     country: CountryMilitary
 
 
-class MobilizationInput(BaseModel):
-    """Input for resolve_mobilization."""
+class MartialLawInput(BaseModel):
+    """Input for resolve_martial_law (martial-law conscription pool).
+
+    Renamed 2026-04-11 from MobilizationInput to eliminate the naming
+    collision with the deprecated round_engine/movement.py:resolve_mobilization
+    (deploy-from-reserve mechanic). Per CONTRACT_MOVEMENT v1.0 closing step.
+    """
     country_id: str
     units_to_mobilize: int
     country: CountryMilitary
@@ -600,9 +605,9 @@ class ProductionResult(BaseModel):
     error: Optional[str] = None
 
 
-class MobilizationResult(BaseModel):
-    """Result of mobilization."""
-    type: str = "mobilization"
+class MartialLawResult(BaseModel):
+    """Result of resolve_martial_law (renamed 2026-04-11 from MobilizationResult)."""
+    type: str = "martial_law"
     country_id: str
     units_mobilized: int = 0
     pool_remaining: int = 0
@@ -1701,21 +1706,25 @@ def validate_production_order(inp: ProductionOrderInput) -> ProductionResult:
     )
 
 
-def resolve_mobilization(inp: MobilizationInput) -> MobilizationResult:
-    """Mobilize ground units from the finite depletable mobilization pool.
+def resolve_martial_law(inp: MartialLawInput) -> MartialLawResult:
+    """Mobilize ground units from the finite martial-law pool.
 
-    Mobilization pool is set at game start and never replenishes.
+    Renamed 2026-04-11 from resolve_mobilization to eliminate the naming
+    collision with the deprecated round_engine/movement.py:resolve_mobilization
+    (deploy-from-reserve mechanic). Per CONTRACT_MOVEMENT v1.0 closing step.
+
+    The martial-law pool is set at game start and never replenishes.
     Units mobilized are added to ground forces; pool is reduced.
     """
     pool = inp.country.mobilization_pool
     if pool <= 0:
-        return MobilizationResult(
+        return MartialLawResult(
             country_id=inp.country_id,
-            error=f"{inp.country_id} has no mobilization pool remaining",
+            error=f"{inp.country_id} has no martial-law pool remaining",
         )
 
     actual = min(inp.units_to_mobilize, pool)
-    return MobilizationResult(
+    return MartialLawResult(
         country_id=inp.country_id,
         units_mobilized=actual,
         pool_remaining=pool - actual,

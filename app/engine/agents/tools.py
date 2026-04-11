@@ -1158,10 +1158,11 @@ def commit_action(
         warnings: list[str] = []
 
         # Light validations that only warn
-        if action_type in ("move_unit", "mobilize_reserve"):
-            unit_warn = _validate_unit_code(country_code, payload_dict["unit_code"])
-            if unit_warn:
-                warnings.append(unit_warn)
+        if action_type == "move_units":
+            # CONTRACT_MOVEMENT v1.0 — full validation lives in
+            # engine/services/movement_validator.py. The harness skips
+            # per-unit warning here because moves are batched.
+            pass
         if action_type == "declare_attack":
             for uc in payload_dict.get("attacker_unit_codes", []):
                 uw = _validate_unit_code(country_code, uc)

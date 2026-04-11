@@ -42,22 +42,31 @@ Initial resource pools per role (intelligence cards, sabotage cards, personal co
 
 ## 1. MILITARY ACTIONS
 
-### 1.1 Move / Deploy / Withdraw
+### 1.1 Move Units (CONTRACT_MOVEMENT v1.0) 🔒
+
+**Canonical contract:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_MOVEMENT.md` (v1.0 LOCKED 2026-04-11). This section summarizes — the contract is authoritative where it conflicts with SEED_D8 Part 6B.
+
 | Field | Value |
 |---|---|
-| action_type | `move_unit` |
-| Fields | `unit_code`, `target_global_row`, `target_global_col` (or `target: "reserve"` to withdraw) |
-| Who | HoS or military chief |
-| Timing | Between rounds (deployment phase). No intra-round movement except attack advance (surviving attackers move onto captured hex). |
-| Three use cases | **Reposition:** active unit → different hex. **Deploy from reserve:** reserve unit → hex (becomes active). **Withdraw to reserve:** active unit → reserve (invisible, cannot be used next round). |
-| Range | No range limit during deployment phase. All units can be relocated globally to any suitable hex. |
-| Ground/AD/Missile constraints | Cannot move to sea hex. Must target: own territory, country with granted basing rights, or previously occupied hex (must have ≥1 own military unit already there). |
-| Air constraints | Same as ground. Can also be loaded onto own naval unit (max 2 air per ship). |
-| Naval constraints | Cannot move to land hex. Sea hexes only. |
-| Embark | Ground units can load onto own naval (max 1 ground + 2 air per ship). Move with the ship. If ship destroyed → embarked units destroyed. |
-| Engine infers | Unit type from `unit_code`, current status (active/reserve/embarked), validates constraints accordingly. If target is a linked hex, engine auto-sets theater coords. |
-| Engine | `round_engine/movement.resolve_movement()` + `resolve_mobilization()` |
-| Status | **LIVE** |
+| action_type | `move_units` (PLURAL — full replacement for legacy singular `move_unit`) |
+| Envelope | `action_type`, `country_code`, `round_num`, `decision` ∈ {`change`, `no_change`}, `rationale` (≥30 chars REQUIRED on both branches), `changes.moves[]` (only when decision=change) |
+| Move shape | `unit_code`, `target` ∈ {`hex`, `reserve`}, plus `target_global_row` + `target_global_col` when target=`hex` |
+| Who | HoS or military chief (one batch per country per round — last-submission-wins) |
+| Timing | Submitted during round N → applied at round-end by `resolve_round(N)` → visible as round N's `unit_states_per_round` snapshot (read as start of round N+1). No transit delay. |
+| Three use cases | **Reposition:** active unit → new hex. **Deploy from reserve:** reserve unit → hex (becomes active). **Withdraw to reserve:** active unit → reserve. |
+| Two auto-flows | **Embark:** ground/tactical_air moving onto a hex with a friendly naval carrier with capacity → auto-embark. **Debark:** embarked unit's hex target auto-clears `embarked_on` first. |
+| Range | UNLIMITED. No hex-distance constraint. Spatial legality is type-based + territory-based. |
+| Ground / AD / Strategic Missile | Target hex must NOT be sea. Must be in **own territory**, **basing-rights zone**, OR **previously occupied hex** (≥1 own active unit already there). |
+| Tactical Air | Same as ground, PLUS can auto-embark on own naval. |
+| Naval | Sea hexes only. Cannot touch land. |
+| Carrier capacity | 1 ground + 2 tactical_air per friendly naval (total 3 embarked slots). |
+| Batch semantics | Atomic. If any move in the batch is invalid, the entire batch is rejected with all errors reported. Batch-internal state propagates — move #1's new position qualifies move #2's "previously occupied" check. |
+| Duplicate unit in batch | Rejected (`DUPLICATE_UNIT_IN_BATCH`). One unit = one move per round. |
+| Validator | `engine/services/movement_validator.py:validate_movement_decision(payload, units, zones, basing_rights)` — 17 error codes. |
+| Engine | `engine/engines/movement.py:process_movements(moves, country_code, units, zones)` — pure state mutator. |
+| Persistence | `country_states_per_round.movement_decision` JSONB audit column (per-round envelope, incl. no_change) + `unit_states_per_round` (outcome — positions/status). |
+| Observatory events | `movement_applied` (on valid change), `movement_no_change` (on valid no_change), `movement_rejected` (on invalid). |
+| Status | **LIVE** (M1 vertical slice DONE 2026-04-11) |
 
 ### 1.2 Declare Martial Law (Conscription)
 | Field | Value |
@@ -66,10 +75,10 @@ Initial resource pools per role (intelligence cards, sabotage cards, personal co
 | Fields | (no parameters — one-off action) |
 | Who | HoS |
 | Eligible countries | Sarmatia, Ruthenia, Persia, Cathay (all partially mobilized already in current scenario) |
-| Mechanic | One-off boost: adds ground units from mobilization pool to reserve (available for deployment next round via `move_unit`). Immediate stability and war tiredness cost. Can only be declared ONCE per SIM. |
-| Mobilization pool (Template data) | Sarmatia: 10, Ruthenia: 6, Persia: 8, Cathay: 10 |
+| Mechanic | One-off boost: adds ground units from martial-law pool to reserve (available for deployment next round via `move_units`). Immediate stability and war tiredness cost. Can only be declared ONCE per SIM. |
+| Martial-law pool (Template data) | Sarmatia: 10, Ruthenia: 6, Persia: 8, Cathay: 10 |
 | Cost | Stability: **-1.0** immediately. War tiredness: **+1.0** immediately. |
-| Engine | `engines/military.resolve_mobilization()` |
+| Engine | `engines/military.resolve_martial_law()` (renamed 2026-04-11 from `resolve_mobilization` to eliminate naming collision with the deprecated deploy-from-reserve mechanic) |
 | Status | **STUB** — engine exists, needs wiring + template data |
 
 ### 1.3 Attack — Ground
