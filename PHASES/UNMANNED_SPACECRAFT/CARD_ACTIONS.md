@@ -608,25 +608,64 @@ max_damage = tec% × 0.25 + svc% × 0.25 + ind% × 0.125 + res% × 0.05
 | Engine | `engines/economic.calc_sanctions_coefficient()` — REWRITTEN 2026-04-10, regression-locked by L1 tests |
 | Status | 🟡 **IN PROGRESS** — Engine + L1 tests DONE; contract / validator / persistence / context / L3 still to ship. See `CHECKPOINT_SANCTIONS.md` when complete. |
 
-### 2.4 Set OPEC Production
+### 2.4 Set OPEC Production — CONTRACT_OPEC v1.0 (🔒 locked 2026-04-11)
 | Field | Value |
 |---|---|
-| action_type | `set_opec` |
-| Fields | `production` (min\|low\|normal\|high\|max) |
-| Who | HoS of OPEC member countries only. Previous setting carries forward if unchanged. |
+| action_type | `set_opec` (singular — single-value decision, no matrix) |
+| Who | HoS of **OPEC+ member countries only** (5 members: Caribe, Mirage, Persia, Sarmatia, Solaria). Non-members rejected with `NOT_OPEC_MEMBER`. |
+| Timing | Mandatory each round (submitted between rounds). **`no_change` is a legitimate explicit choice.** If no decision submitted, previous round's value carries forward. |
+| Spec | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_OPEC.md` v1.0 |
 
-| Level | Multiplier | Effect |
+**Decision schema:**
+
+```json
+{
+  "action_type": "set_opec",
+  "country_code": "solaria",
+  "round_num": 3,
+  "decision": "change",
+  "rationale": "string, ≥30 chars, required even on no_change",
+  "changes": {
+    "production_level": "min" | "low" | "normal" | "high" | "max"
+  }
+}
+```
+
+**Level scale:**
+
+| Level | Multiplier | World-supply contribution per member |
 |---|---|---|
-| min | 0.70× | Cut production 30% → oil price rises |
-| low | 0.85× | Mild cut → moderate price rise |
-| normal | 1.00× | Baseline production |
-| high | 1.15× | Increased output → price drops |
-| max | 1.30× | Flood the market → significant price drop |
+| `min` | 0.70× | `−0.30 × share × 2.0` (aggressive cut) |
+| `low` | 0.85× | `−0.15 × share × 2.0` (mild cut) |
+| `normal` | 1.00× | 0 (baseline) |
+| `high` | 1.15× | `+0.15 × share × 2.0` (mild flood) |
+| `max` | 1.30× | `+0.30 × share × 2.0` (aggressive flood) |
 
-Each OPEC member decides independently. Combined effect is weighted by each member's share of global production (with 2× amplifier for cartel leverage). See CARD_FORMULAS.md → A.1 Oil Price.
+Each OPEC+ member decides independently. Effect is on the world oil price via the supply mechanism with a **2× cartel leverage amplifier** applied per-member.
 
-| Engine | `engines/economic.calc_oil_price()` |
-| Status | **LIVE** |
+**OPEC+ roster** (5 canonical members from `countries.opec_member = true`):
+- **Caribe** (0.8 mbpd) — Venezuela-equivalent, the smallest OPEC+ producer
+- **Mirage** (3.5 mbpd) — Gulf producer
+- **Persia** (3.5 mbpd) — Persian Gulf producer
+- **Sarmatia** (10 mbpd) — OPEC+ (Russia-equivalent, de facto OPEC+ coordination)
+- **Solaria** (10 mbpd) — core OPEC producer
+
+**Non-OPEC oil producers** (cannot submit `set_opec`):
+- **Columbia** (13 mbpd) — largest producer in the world, free agent
+- (Others have 0 mbpd)
+
+**Validation:** all submissions go through `app/engine/services/opec_validator.py` with 9 error codes. Invalid submissions emit `opec_rejected` observatory events.
+
+**Persistence:**
+- Live value → `country_states_per_round.opec_production` (existing text column — `min/low/normal/high/max` for members, `"na"` for non-members)
+- Per-round decision audit → `country_states_per_round.opec_decision` JSONB (new 2026-04-11)
+
+**Context package** (assembled by `app/engine/services/opec_context.py`): economic state + oil market state + **oil price history for all rounds already played** + **unified oil producers table** with current production levels + chokepoint blockades + sanctions on producers + tariffs on producers + decision rules with no_change reminder. **Decision-specific data only — no commentary, no cognitive context.**
+
+**Legacy compatibility:** old payloads with top-level `production_level` field (no `changes` wrapper) are auto-migrated by the `resolve_round` handler.
+
+| Engine | `engines/economic.calc_oil_price()` — OPEC section UNCHANGED, regression-locked by L1 tests |
+| Status | ✅ **DONE** end-to-end (CONTRACT v1.0, validator, context, persistence, AI acceptance gate). See `CHECKPOINT_OPEC.md`. |
 
 ---
 

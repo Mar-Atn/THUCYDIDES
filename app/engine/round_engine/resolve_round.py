@@ -644,12 +644,94 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                         changes["research"],
                     )
 
-        # --- Inject OPEC production into country_state dict ---
+        # --- set_opec: CONTRACT_OPEC v1.0 — validate, persist decision audit,
+        # update opec_production column for the actor (OPEC+ members only).
         elif atype == "set_opec":
-            if cc in country_state:
-                country_state[cc]["opec_production"] = payload.get("production_level", "normal")
-                logger.info("[resolve R%d] %s OPEC -> %s", round_num, cc,
-                            country_state[cc]["opec_production"])
+            from engine.services.opec_validator import validate_opec_decision
+
+            full_payload = {
+                "action_type": "set_opec",
+                "country_code": cc,
+                "round_num": round_num,
+                "decision": payload.get("decision", "change"),
+                "rationale": payload.get(
+                    "rationale",
+                    "no rationale provided — placeholder for backward "
+                    "compatibility with pre-v1.0 set_opec payloads",
+                ),
+            }
+            if "changes" in payload:
+                full_payload["changes"] = payload["changes"]
+            elif full_payload["decision"] == "change" and "production_level" in payload:
+                # Backward-compat: old payloads had production_level at top level
+                full_payload["changes"] = {
+                    "production_level": payload["production_level"],
+                }
+
+            result = validate_opec_decision(full_payload)
+            if not result["valid"]:
+                logger.warning(
+                    "[resolve R%d] invalid set_opec from %s: %s",
+                    round_num, cc, result["errors"],
+                )
+                events.append({
+                    "scenario_id": scenario_id, "round_num": round_num,
+                    "event_type": "opec_rejected",
+                    "country_code": cc,
+                    "summary": (
+                        f"{cc} OPEC decision rejected: "
+                        f"{result['errors'][0] if result['errors'] else 'invalid'}"
+                    ),
+                    "payload": {
+                        "errors": result["errors"],
+                        "original": payload,
+                    },
+                })
+                continue
+
+            normalized = result["normalized"]
+
+            # 1. Always write the per-round audit record (incl. no_change)
+            try:
+                client.table("country_states_per_round").update({
+                    "opec_decision": normalized,
+                }).eq("scenario_id", scenario_id) \
+                  .eq("round_num", round_num) \
+                  .eq("country_code", cc).execute()
+            except Exception as e:
+                logger.warning(
+                    "[resolve R%d] opec_decision write failed for %s: %s",
+                    round_num, cc, e,
+                )
+
+            # 2. On change, update the live opec_production column.
+            #    On no_change, the column carries forward by inaction.
+            if normalized["decision"] == "change":
+                new_level = normalized["changes"]["production_level"]
+                try:
+                    client.table("country_states_per_round").update({
+                        "opec_production": new_level,
+                    }).eq("scenario_id", scenario_id) \
+                      .eq("round_num", round_num) \
+                      .eq("country_code", cc).execute()
+                except Exception as e:
+                    logger.warning(
+                        "[resolve R%d] opec_production write failed for %s: %s",
+                        round_num, cc, e,
+                    )
+                # Also mirror into country_state dict so the same-round engine
+                # tick (if run sequentially) reads the new value.
+                if cc in country_state:
+                    country_state[cc]["opec_production"] = new_level
+                logger.info(
+                    "[resolve R%d] %s OPEC change -> %s (audit + live value persisted)",
+                    round_num, cc, new_level,
+                )
+            else:
+                logger.info(
+                    "[resolve R%d] %s OPEC no_change (audit persisted, live value unchanged)",
+                    round_num, cc,
+                )
 
         # Log all economic actions as observatory events
         events.append({

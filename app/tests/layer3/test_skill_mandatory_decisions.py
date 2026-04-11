@@ -45,6 +45,7 @@ from engine.services.budget_validator import (
     REQUIRED_PRODUCTION_BRANCHES,
     validate_budget_decision,
 )
+from engine.services.opec_validator import validate_opec_decision
 from engine.services.sanction_validator import validate_sanctions_decision
 from engine.services.tariff_validator import validate_tariffs_decision
 from engine.services.llm import call_llm
@@ -77,9 +78,12 @@ SYSTEM_TARIFFS = (
     "On change: include changes.tariffs as a flat dict of {target: level}."
 )
 SYSTEM_OPEC = (
-    "You are an AI head of state reviewing OPEC production posture. "
-    "Return ONLY JSON. Every field required. Rationale mandatory on both "
-    "change and no_change."
+    "You are an AI head of state reviewing OPEC+ production posture per "
+    "CONTRACT_OPEC v1.0. Return ONLY JSON matching the set_opec schema. "
+    "Rationale >= 30 chars mandatory on both change and no_change. "
+    "On no_change: OMIT the changes field entirely. "
+    "On change: include changes.production_level with one of "
+    "min | low | normal | high | max."
 )
 
 VALID_OPEC_LEVELS = {"min", "low", "normal", "high", "max"}
@@ -163,6 +167,21 @@ class LeaderScenario:
     opec_level: str | None = None
     oil_price: float = 75.0
     oil_revenue_potential: float = 0.0
+    oil_production_mbpd: float = 0.0
+    my_world_oil_share_pct: float = 0.0
+    total_world_mbpd: float = 40.8
+    opec_share_pct: float = 68.1
+    oil_price_history: list[dict] = field(default_factory=list)
+    oil_producers_table: list[dict] = field(default_factory=list)
+    chokepoint_blockades: dict = field(
+        default_factory=lambda: {
+            "gulf_gate": "none",
+            "caribe_passage": "none",
+            "formosa_strait": "none",
+        }
+    )
+    sanctions_on_producers: list[dict] = field(default_factory=list)
+    tariffs_on_producers: list[dict] = field(default_factory=list)
 
     objectives: list[str] = field(default_factory=list)
     expected_direction: str = ""
@@ -575,50 +594,134 @@ def _build_opec_prompt(s: LeaderScenario) -> str:
         f"Key threats: {', '.join(s.threats)}" if s.threats else "No acute external threats."
     )
 
+    # [OIL PRICE HISTORY]
+    if s.oil_price_history:
+        history_block = "\n".join(
+            f"  Round {h['round']}: ${h['oil_price']:.0f}/bbl"
+            for h in s.oil_price_history
+        )
+    else:
+        history_block = "  (no history — round 0)"
+
+    # [OIL PRODUCERS TABLE]
+    if s.oil_producers_table:
+        prod_lines = [
+            f"  {row['code']:<10} {row['mbpd']:>5.1f} mbpd  "
+            f"{row['world_share_pct']:>5.1f}%  {row['current_level']}"
+            for row in s.oil_producers_table
+        ]
+        producers_block = "\n".join(prod_lines)
+    else:
+        producers_block = "  (no producer data)"
+
+    # [SANCTIONS ON PRODUCERS]
+    if s.sanctions_on_producers:
+        sanc_lines = []
+        for row in s.sanctions_on_producers:
+            if row["max_level"] == 0:
+                sanc_lines.append(f"  {row['code']:<10} : none")
+            else:
+                mark = " (>= L2 -> -10% supply penalty)" if row["max_level"] >= 2 else ""
+                sanc_lines.append(
+                    f"  {row['code']:<10} : L{row['max_level']} "
+                    f"from {row['num_sanctioners']} sanctioners{mark}"
+                )
+        sanc_block = "\n".join(sanc_lines)
+    else:
+        sanc_block = "  (no active sanctions on oil producers)"
+
+    # [TARIFFS ON PRODUCERS]
+    if s.tariffs_on_producers:
+        tariff_block = "\n".join(
+            f"  {row['imposer']:<10} -> {row['target']:<10} L{row['level']}"
+            for row in s.tariffs_on_producers
+        )
+    else:
+        tariff_block = "  (no active tariffs involving oil producers)"
+
     return f"""You are {s.character_name}, {s.title} of {s.country_name}.
 
-## D4 — OPEC PRODUCTION REVIEW (Round {ROUND_NUM})
+## D4 — OPEC+ PRODUCTION REVIEW (Round {ROUND_NUM}) — CONTRACT_OPEC v1.0
 
-This is the OPEC posture review. Focus only on oil production level and its
-fiscal/geopolitical consequences. Do NOT address budget, sanctions, or
-tariffs in this call.
+You are an OPEC+ member. Decide this round's production posture.
 
-## Oil and fiscal context
-- Current OPEC production level: {s.opec_level or 'normal'}
-- Current oil price: ${s.oil_price:.0f}/bbl
-- Your oil revenue potential at current level: ~{s.oil_revenue_potential:.0f} coins/round
-- Treasury: {s.treasury:.0f} coins
-- Inflation: {s.inflation:.1f}%
+[ECONOMIC STATE]
+  GDP:                          {s.gdp:.0f}
+  Treasury:                     {s.treasury:.0f}
+  Inflation:                    {s.inflation:.1f}%
+  Stability:                    {s.stability:.1f}/10
+  My oil production:            {s.oil_production_mbpd:.1f} mbpd ({s.my_world_oil_share_pct:.1f}% of world)
+  My oil revenue (last round):  {s.oil_revenue_potential:.0f} coins
+  My current production level:  {s.opec_level or 'normal'}
 
-## Geopolitical context
+[OIL MARKET STATE]
+  Current oil price:            ${s.oil_price:.0f}/bbl
+  Total world supply:           {s.total_world_mbpd:.1f} mbpd
+  OPEC+ share:                  {s.opec_share_pct:.1f}% of world supply
+
+[OIL PRICE HISTORY]
+{history_block}
+
+[OIL PRODUCERS TABLE]
+  code       mbpd   share  current level
+{producers_block}
+
+[CHOKEPOINT BLOCKADES]
+  gulf_gate:       {s.chokepoint_blockades.get('gulf_gate', 'none')}
+  caribe_passage:  {s.chokepoint_blockades.get('caribe_passage', 'none')}
+  formosa_strait:  {s.chokepoint_blockades.get('formosa_strait', 'none')}
+
+[SANCTIONS ON PRODUCERS]
+{sanc_block}
+
+[TARIFFS ON PRODUCERS]
+{tariff_block}
+
+[GEOPOLITICAL CONTEXT]
 - {war_line}
 - {threats_line}
 
-## Your relevant objectives
+[YOUR OBJECTIVES]
 {_objectives_block(s.objectives)}
 
-## INSTRUCTIONS
-Decide whether to CHANGE the OPEC production level or keep it NO_CHANGE.
-Either way you MUST provide a rationale of at least one sentence (>20 chars)
-explaining WHY.
+[DECISION RULES]
+HOW OPEC+ WORKS
+- 5 canonical members (caribe, mirage, persia, sarmatia, solaria) jointly
+  control most world oil.
+- Each member picks ONE level per round: min / low / normal / high / max.
+- Engine applies 2x cartel leverage on top of each member's share.
+- Cuts (min/low) push price UP; floods (high/max) push price DOWN.
 
-Consider:
-- Treasury critical → high/max to grab revenue (accepting future price erosion)
-- Price leverage vs rivals → coordinated cuts to raise prices
-- Long-term market share concerns → avoid excessive cuts
-- Restraint is valid if current level already matches strategy
+YOUR AUTHORITY
+- Only OPEC+ members can submit set_opec (you are one).
+- Non-members are rejected with NOT_OPEC_MEMBER.
 
-Respond with JSON ONLY, matching this EXACT schema:
+DECISION RULES
+- decision="change"    -> MUST include changes.production_level with one of
+                          min | low | normal | high | max
+- decision="no_change" -> MUST OMIT the changes field entirely
+- rationale >=30 chars REQUIRED in both cases
+
+REMINDER -- no_change is a legitimate choice
+Market churn is expensive. If current level still serves your goals,
+no_change with a clear rationale is the correct answer.
+
+[INSTRUCTION]
+Decide whether to CHANGE or NO_CHANGE. Rationale >=30 chars required.
+Respond with JSON ONLY, matching CONTRACT_OPEC §2:
 
 {{
+  "action_type": "set_opec",
+  "country_code": "{s.country_code}",
+  "round_num": {ROUND_NUM},
   "decision": "change" | "no_change",
-  "rationale": "string, >= 20 characters",
-  "new_level": "min | low | normal | high | max"
+  "rationale": "string, >= 30 characters",
+  "changes": {{ "production_level": "min|low|normal|high|max" }}
 }}
 
 Rules:
-- new_level MUST be one of: min, low, normal, high, max
-- When decision == "no_change", new_level should equal the current level
+- On "change": include "changes" with "production_level".
+- On "no_change": OMIT the "changes" field entirely (do not send null).
 """
 
 
@@ -738,6 +841,11 @@ SCENARIOS: list[LeaderScenario] = [
             "Maintain regime stability",
         ],
         expected_direction="military up; already isolated so tariffs unlikely",
+        opec_level="normal",
+        oil_price=78.0,
+        oil_revenue_potential=70.0,
+        oil_production_mbpd=10.0,
+        my_world_oil_share_pct=24.5,
     ),
     LeaderScenario(
         country_code="ruthenia",
@@ -829,6 +937,8 @@ SCENARIOS: list[LeaderScenario] = [
         opec_level="normal",
         oil_price=78.0,
         oil_revenue_potential=120.0,
+        oil_production_mbpd=10.0,
+        my_world_oil_share_pct=24.5,
         objectives=[
             "Maximize long-term oil revenue",
             "Counter Persian influence",
@@ -863,6 +973,8 @@ SCENARIOS: list[LeaderScenario] = [
         opec_level="high",
         oil_price=78.0,
         oil_revenue_potential=35.0,
+        oil_production_mbpd=0.8,
+        my_world_oil_share_pct=2.0,
         objectives=[
             "Prevent regime collapse",
             "Secure emergency food imports",
@@ -901,6 +1013,8 @@ SCENARIOS: list[LeaderScenario] = [
         opec_level="normal",
         oil_price=78.0,
         oil_revenue_potential=90.0,
+        oil_production_mbpd=3.5,
+        my_world_oil_share_pct=8.5,
         objectives=[
             "Achieve nuclear breakout capability",
             "Survive the war with Columbia",
@@ -1115,9 +1229,21 @@ def _assert_tariff_payload(parsed: dict, cc: str) -> None:
 
 
 def _assert_opec_payload(parsed: dict, cc: str) -> None:
-    new_level = (parsed.get("new_level") or "").lower().strip()
-    assert new_level in VALID_OPEC_LEVELS, (
-        f"{cc} opec: new_level invalid: {parsed.get('new_level')!r}"
+    """D4 OPEC: full CONTRACT_OPEC v1.0 validation via production validator.
+
+    The harness auto-fills action_type/country_code/round_num if the LLM
+    omitted them — these are envelope fields the communication layer would
+    normally inject, not decision content.
+    """
+    payload = dict(parsed)
+    payload.setdefault("action_type", "set_opec")
+    payload.setdefault("country_code", cc)
+    payload.setdefault("round_num", ROUND_NUM)
+
+    report = validate_opec_decision(payload)
+    assert report["valid"], (
+        f"{cc} opec: validator rejected decision: {report['errors']}\n"
+        f"payload: {payload}"
     )
 
 
@@ -1158,7 +1284,10 @@ def _print_leader_report(s: LeaderScenario, decisions: dict[str, dict | None]) -
                 for entry in parsed.get("changes") or []:
                     lines.append(f"     - {entry}")
             elif domain == "opec":
-                lines.append(f"     new_level: {parsed.get('new_level')}")
+                changes = parsed.get("changes") or {}
+                lines.append(
+                    f"     production_level: {changes.get('production_level')}"
+                )
     lines.append(banner)
 
     report = "\n".join(lines)
@@ -1356,8 +1485,16 @@ def test_opec_prompt_only_for_members():
     non_member = next(x for x in SCENARIOS if not x.is_opec)
 
     p = _build_opec_prompt(member)
-    assert "OPEC PRODUCTION REVIEW" in p
+    assert "OPEC+ PRODUCTION REVIEW" in p
+    assert "CONTRACT_OPEC v1.0" in p
     assert "oil price" in p.lower()
+    # v1.0 schema markers
+    assert '"action_type": "set_opec"' in p
+    assert "production_level" in p
+    assert "no_change" in p
+    assert "30 char" in p.lower() or ">=30" in p
+    # Legacy v0 schema must NOT leak
+    assert '"new_level"' not in p
 
     with pytest.raises(AssertionError):
         _build_opec_prompt(non_member)

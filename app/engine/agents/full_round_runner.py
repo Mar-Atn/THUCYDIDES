@@ -220,7 +220,7 @@ def _run_leader_sync(cc: str, name: str, title: str, round_num: int) -> dict:
 # Mandatory decisions phase — orchestrator-driven economic settings
 # ---------------------------------------------------------------------------
 
-OPEC_MEMBERS = {"solaria", "persia", "mirage", "caribe"}
+OPEC_MEMBERS = {"caribe", "mirage", "persia", "sarmatia", "solaria"}  # CONTRACT_OPEC v1.0: 5 canonical members
 
 
 def _load_current_economic_state(

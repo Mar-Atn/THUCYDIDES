@@ -1232,3 +1232,91 @@ Columbia R75→R76, real LLM decision: `set_sanctions change {cathay: 3}` with r
 - CONCEPT/SEED architectural re-synthesis — waits until all decision slices ship
 - Cleanup of `StabilityInput.sanctions_rounds` deprecated field — future cleanup pass
 - OPEC slice — next in the sequence per Marat's strategy directive
+
+---
+
+## OPEC VERTICAL SLICE — DONE end-to-end (2026-04-11)
+
+**Scope:** Fourth and final mandatory-decision vertical slice. **All 4 mandatory decisions now shipped.** CONTRACT_OPEC v1.0 🔒 LOCKED. Engine math UNCHANGED — contract-around-existing-behavior pattern (tariff template, not a sanctions-style rewrite). The existing `calc_oil_price` OPEC section at lines 650-659 already matched SEED_D8 + CARD_FORMULAS A.1; we locked it with regression tests and built the validator + context + persistence around it.
+
+### Design decisions locked
+
+| # | Gap | Decision |
+|---|---|---|
+| G1 | Field name chaos (`production` vs `production_level` vs `new_level`) | **Canonical: `production_level`** — nested inside `changes.production_level` |
+| G2 | No validator | **NEW** `opec_validator.py` with 9 error codes + CANONICAL_OPEC_MEMBERS frozenset |
+| G3 | OPEC+ roster mismatch between DB and code | **5 canonical members** per Marat 2026-04-11: `{caribe, mirage, persia, sarmatia, solaria}`. Fixed DB (Caribe `opec_member=true`), fixed code constant, contract locks it. |
+| G4 | R0 snapshot pollution (all 20 had `opec_production="normal"`) | Migration cleans non-OPEC rows to `"na"` — 15 cleaned, 5 OPEC+ members stay at `"normal"` |
+| G5 | Engine doesn't check OPEC membership | Not an engine problem — enforced at validator + handler layer. Documented as implicit contract in regression tests. |
+| G6 | No per-round decision audit | **NEW** `country_states_per_round.opec_decision` JSONB column (matches tariff_decision/sanction_decision pattern) |
+| G7 | No mandatory-decision flow | Slice work — contract/validator/context/persistence/harness/gate all built |
+| G8 | D4 skill harness had wrong roster + wrong field + old 20-char rationale | Rewritten to v1.0 schema with 5-member roster, `production_level`, 30-char rationale |
+
+### Key design principle (inherited from prior slices)
+
+- **Decision-specific context is data-only per Marat's 2026-04-10 directive.** No commentary, no warnings, no "consider X" hints. The context delivers raw facts; interpretation is the participant's job. Only the no_change reminder remains (approved separately by Marat).
+
+### Canonical new facts
+
+- **OPEC+ roster: 5 members**: Caribe (0.8 mbpd), Mirage (3.5), Persia (3.5), Sarmatia (10), Solaria (10). Caribe = Venezuela-equivalent, Sarmatia = Russia-equivalent OPEC+. Total OPEC+ share ~68% of world oil supply.
+- **Columbia** (13 mbpd, 31.7% world supply) is the biggest producer in the world but NOT OPEC+. Free agent.
+- **Engine unchanged** — `calc_oil_price` OPEC section already correct. Constants locked: `OPEC_PRODUCTION_MULTIPLIER = {min:0.70, low:0.85, normal:1.00, high:1.15, max:1.30}` + 2× cartel leverage.
+
+### Calibration anchors (Solaria, locked in L1)
+
+| Scenario | Supply delta | Notes |
+|---|---|---|
+| Solaria alone at `min` | −0.147 supply (−15%) | 24.5% share × 30% cut × 2× leverage |
+| Solaria alone at `max` | +0.147 supply | Symmetric |
+| All 5 OPEC+ at `max` | +0.409 supply | Full market flood |
+| Caribe alone at `min` | −0.012 supply (−1.2%) | Smallest member, marginal effect |
+
+### Documents updated
+
+| Document | Change |
+|---|---|
+| `PHASES/UNMANNED_SPACECRAFT/CONTRACT_OPEC.md` | NEW — 🔒 LOCKED v1.0 |
+| `PHASES/UNMANNED_SPACECRAFT/CHECKPOINT_OPEC.md` | NEW — durable record |
+| `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md` | 2.4 rewritten with v1.0 schema, 5-member roster, level table, data-only context reference |
+| `PHASES/UNMANNED_SPACECRAFT/PHASE.md` | Added OPEC DONE status block; Sprint B6 now **ALL 4 DONE** |
+
+### Code changed
+
+- `app/engine/agents/full_round_runner.py` — `OPEC_MEMBERS` updated to 5-member canonical set
+- `app/engine/round_engine/resolve_round.py` — `set_opec` handler rewritten: validates, writes `opec_decision` JSONB audit + `opec_production` live value, emits `opec_rejected` events, handles backward-compat for top-level `production_level` field
+- `app/engine/services/opec_validator.py` — NEW pure validator
+- `app/engine/services/opec_context.py` — NEW decision-specific context builder (9 blocks, data-only)
+- `app/tests/layer3/test_skill_mandatory_decisions.py` — D4 OPEC prompt rewritten, scenarios updated with OPEC fields for Sarmatia/Solaria/Caribe/Persia, real validator assertion
+
+### DB migration
+
+`opec_v1_canonical_schema`:
+- Added `country_states_per_round.opec_decision` JSONB column
+- Fixed `countries.opec_member = true` for Caribe
+- Cleaned R0 snapshot: non-OPEC countries → `opec_production = 'na'`
+
+### Tests
+
+- L1: 47 in `test_opec_validator.py`, 20 in `test_opec_engine.py` (regression lock)
+- L2: 4 in `test_opec_persistence.py`, 10 in `test_opec_context.py`
+- L3: D4 OPEC portion updated + 1 acceptance gate in `test_opec_full_chain_ai.py`
+- **Total: 82 OPEC-specific tests green.** Full L1 suite continues green.
+
+### Concrete demo (2026-04-11 acceptance gate run)
+
+Solaria R40→R41, real LLM decision: `set_opec no_change` with rationale "Current oil price at $78/bbl provides solid revenue while maintaining market stability. No immediate need to adjust production given stable economic conditions and absence of external pressures."
+
+Chain: validator ✓ → agent_decisions ✓ → resolve_round (audit JSONB written, live value unchanged per no_change) ✓ → run_engine_tick (oil price recomputed) ✓. Result: oil_price $85 → $87.20, Solaria `opec_production = "normal"` (unchanged). Audit JSONB matches AI output byte-for-byte.
+
+### All 4 mandatory decisions — milestone
+
+With OPEC locked, all 4 mandatory decision slices are complete:
+
+| Decision | Status | Commit |
+|---|---|---|
+| Budget | 🔒 DONE 2026-04-10 | `776aaaf` |
+| Tariffs | 🔒 DONE 2026-04-10 | `8a4c9d1` |
+| Sanctions | 🔒 DONE 2026-04-10 | `175fbe3` |
+| OPEC | 🔒 DONE 2026-04-11 | this commit |
+
+**Milestone:** the economic decision layer is complete. Every economic lever in the sim is now fully specified, tested, and canonical. Next per strategy directive: Military Actions slices.
