@@ -215,16 +215,17 @@ def _get_events_affecting_country(
     prev_round = round_num - 1
     try:
         from engine.services.supabase import get_client
+        from engine.services.sim_run_manager import resolve_sim_run_id
         client = get_client()
-        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-        if not scen.data:
+        try:
+            sim_run_id = resolve_sim_run_id(scenario_code)
+        except ValueError:
             return ""
-        scenario_id = scen.data[0]["id"]
 
         # Get events mentioning this country (as target or in payload)
         res = client.table("observatory_events") \
             .select("event_type, country_code, summary") \
-            .eq("scenario_id", scenario_id) \
+            .eq("sim_run_id", sim_run_id) \
             .eq("round_num", prev_round) \
             .execute()
 

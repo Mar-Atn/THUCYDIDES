@@ -33,7 +33,7 @@ from engine.engines.economic import (
 # ---------------------------------------------------------------------------
 from engine.engines.military import (
     resolve_attack,
-    resolve_naval_combat,
+    resolve_naval_combat_legacy_v1 as resolve_naval_combat,
     resolve_covert_op,
     resolve_blockade,
     AttackInput,

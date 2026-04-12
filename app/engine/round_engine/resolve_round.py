@@ -44,8 +44,10 @@ from engine.services.movement_validator import validate_movement_decision
 logger = logging.getLogger(__name__)
 
 # Action categories — determines processing order
-ATTACK_ACTIONS = {"declare_attack"}
-BOMBARDMENT_ACTIONS = {"naval_bombardment"}
+ATTACK_ACTIONS = {"declare_attack", "attack_ground"}  # M2: attack_ground is canonical, declare_attack legacy
+AIR_STRIKE_ACTIONS = {"attack_air"}  # M3 canonical
+BOMBARDMENT_ACTIONS = {"naval_bombardment", "attack_bombardment"}  # M5: attack_bombardment canonical
+MISSILE_ACTIONS = {"launch_missile"}  # M5 conventional (M6 will add nuclear warhead support)
 COMMUNICATION_ACTIONS = {
     "public_statement", "call_org_meeting",
     "diplomatic_move",  # legacy — agents may still use this; treat as public_statement
@@ -57,11 +59,11 @@ ECONOMIC_ACTIONS = {
     "set_budget", "set_opec",
     "impose_sanction", "impose_tariff", "lift_sanction", "lift_tariff",
 }
-BLOCKADE_ACTIONS = {"declare_blockade"}
+BLOCKADE_ACTIONS = {"declare_blockade", "blockade"}  # M5: blockade canonical
 COVERT_ACTIONS = {"covert_op"}
 NUCLEAR_ACTIONS = {"nuclear_test"}
 TRANSACTION_ACTIONS = {"propose_transaction", "propose_agreement"}
-NAVAL_ATTACK_ACTIONS = {"attack_naval"}
+NAVAL_ATTACK_ACTIONS = {"attack_naval"}  # M4 canonical
 MARTIAL_LAW_ACTIONS = {"declare_martial_law"}
 BASING_RIGHTS_ACTIONS = {"basing_rights"}
 
@@ -92,7 +94,7 @@ def _resolve_scenario_id(client, scenario_code: str) -> str:
 
 
 def _load_unit_state(
-    client, scenario_id: str, round_num: int
+    client, sim_run_id: str, round_num: int
 ) -> dict[str, dict]:
     """Load unit_states_per_round snapshot into a dict keyed by unit_code.
 
@@ -102,7 +104,7 @@ def _load_unit_state(
     res = (
         client.table("unit_states_per_round")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num)
         .execute()
     )
@@ -111,7 +113,7 @@ def _load_unit_state(
         res = (
             client.table("unit_states_per_round")
             .select("*")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .lte("round_num", round_num)
             .order("round_num", desc=True)
             .limit(10_000)
@@ -128,13 +130,13 @@ def _load_unit_state(
 
 
 def _load_country_state(
-    client, scenario_id: str, round_num: int
+    client, sim_run_id: str, round_num: int
 ) -> dict[str, dict]:
     """Load country state for this round, falling back to previous round if not yet created."""
     res = (
         client.table("country_states_per_round")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num)
         .execute()
     )
@@ -144,7 +146,7 @@ def _load_country_state(
     prev = (
         client.table("country_states_per_round")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num - 1)
         .execute()
     )
@@ -156,14 +158,21 @@ def _load_country_state(
 
 
 def _load_decisions(
-    client, scenario_id: str, round_num: int
+    client, sim_run_id: str, round_num: int
 ) -> list[dict]:
-    """Load committed decisions for this scenario + round (uses new round_num column)."""
+    """Load committed decisions for this run + round in insertion order.
+
+    Ordering by ``created_at`` (ascending) makes "last-submission-wins"
+    deterministic regardless of physical row placement. Without this, the
+    previous implicit ordering broke when uniqueness constraints were
+    swapped to ``sim_run_id`` in F1.
+    """
     res = (
         client.table("agent_decisions")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num)
+        .order("created_at", desc=False)
         .execute()
     )
     return res.data or []
@@ -174,30 +183,41 @@ def _load_decisions(
 # ---------------------------------------------------------------------------
 
 
-def resolve_round(scenario_code: str, round_num: int) -> dict:
-    """Resolve a round end-to-end. Returns a summary dict."""
+def resolve_round(run_or_scenario: str, round_num: int) -> dict:
+    """Resolve a round end-to-end. Returns a summary dict.
+
+    ``run_or_scenario`` accepts either a sim_run_id (uuid) or a scenario
+    code like ``'start_one'``. A scenario code resolves to the archived
+    "legacy" run for that scenario — used by pre-F1 tests. New tests pass
+    a freshly-created sim_run_id from ``sim_run_manager.create_run``.
+    """
+    from engine.services.sim_run_manager import (
+        resolve_sim_run_id, get_scenario_id_for_run,
+    )
     client = get_client()
-    scenario_id = _resolve_scenario_id(client, scenario_code)
+    sim_run_id = resolve_sim_run_id(run_or_scenario)
+    scenario_id = get_scenario_id_for_run(sim_run_id)
 
     # Mark round as resolving
     client.table("round_states").upsert(
         {
+            "sim_run_id": sim_run_id,
             "scenario_id": scenario_id,
             "round_num": round_num,
             "status": "resolving",
         },
-        on_conflict="scenario_id,round_num",
+        on_conflict="sim_run_id,round_num",
     ).execute()
 
     # Load prior state
     prev_round = round_num - 1
-    unit_state = _load_unit_state(client, scenario_id, prev_round)
-    country_state = _load_country_state(client, scenario_id, prev_round)
-    decisions = _load_decisions(client, scenario_id, round_num)
+    unit_state = _load_unit_state(client, sim_run_id, prev_round)
+    country_state = _load_country_state(client, sim_run_id, prev_round)
+    decisions = _load_decisions(client, sim_run_id, round_num)
 
     logger.info(
-        "resolve_round: scenario=%s round=%d decisions=%d units=%d countries=%d",
-        scenario_code, round_num, len(decisions), len(unit_state), len(country_state),
+        "resolve_round: run=%s round=%d decisions=%d units=%d countries=%d",
+        sim_run_id, round_num, len(decisions), len(unit_state), len(country_state),
     )
 
     events: list[dict] = []
@@ -211,6 +231,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             payload = d.get("action_payload") or {}
             content = payload.get("content") or payload.get("agenda") or ""
             events.append({
+                "sim_run_id": sim_run_id,
                 "scenario_id": scenario_id,
                 "round_num": round_num,
                 "event_type": d["action_type"],
@@ -258,7 +279,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     round_num, cc, result["errors"],
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "movement_rejected",
                     "country_code": cc,
                     "summary": (
@@ -280,12 +301,13 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             try:
                 client.table("country_states_per_round").upsert(
                     {
+                        "sim_run_id": sim_run_id,
                         "scenario_id": scenario_id,
                         "round_num": round_num,
                         "country_code": cc,
                         "movement_decision": normalized,
                     },
-                    on_conflict="scenario_id,round_num,country_code",
+                    on_conflict="sim_run_id,round_num,country_code",
                 ).execute()
             except Exception as e:
                 logger.warning(
@@ -303,7 +325,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     moves, cc, unit_state, _zones,
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "movement_applied",
                     "country_code": cc,
                     "summary": (
@@ -320,7 +342,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 )
             else:
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "movement_no_change",
                     "country_code": cc,
                     "summary": f"{cc} move_units no_change",
@@ -334,7 +356,14 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
     # --- 3-5. Combat (ranged, ground, naval) ------------------------------
     attacks = [d for d in decisions if d["action_type"] in ATTACK_ACTIONS]
     for d in attacks:
-        _process_attack(d, unit_state, scenario_id, round_num, combats, events)
+        _process_attack(d, unit_state, sim_run_id, scenario_id, round_num, combats, events,
+                        country_state=country_state)
+
+    # --- M3 Air strikes (CONTRACT_AIR_STRIKES v1.0) -------------------------
+    air_strike_decisions = [d for d in decisions if d["action_type"] in AIR_STRIKE_ACTIONS]
+    for d in air_strike_decisions:
+        _process_air_strike(d, unit_state, sim_run_id, scenario_id, round_num, combats, events,
+                            country_state=country_state)
 
     # --- 6. R&D increments ------------------------------------------------
     for d in decisions:
@@ -350,6 +379,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             )
             narratives.append(narr)
             events.append({
+                "sim_run_id": sim_run_id,
                 "scenario_id": scenario_id,
                 "round_num": round_num,
                 "event_type": "rd_investment",
@@ -390,7 +420,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     ground_targets = [g for g in ground_targets if g["unit_code"] != victim["unit_code"]]
 
             events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
+                "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "naval_bombardment",
                 "country_code": cc,
                 "summary": f"{cc} naval bombardment at ({b_tgt_row},{b_tgt_col}): "
@@ -402,8 +432,9 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
     # ARCHITECTURE (2026-04-08): Write to DB STATE TABLES so engine reads
     # from canonical state, not from agent_decisions.
     # Flow: Participant -> resolve_round WRITES state table -> engine READS state table.
-    from engine.config.settings import Settings
-    _sim_run_id = Settings().default_sim_id
+    # F1 (2026-04-11): the sanctions/tariffs state tables are keyed by sim_run_id,
+    # so the run's actual id is used instead of the hard-coded default_sim_id.
+    _sim_run_id = sim_run_id
 
     for d in decisions:
         if d["action_type"] not in ECONOMIC_ACTIONS:
@@ -476,7 +507,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     round_num, cc, result["errors"],
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "sanction_rejected",
                     "country_code": cc,
                     "summary": (
@@ -496,7 +527,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             try:
                 client.table("country_states_per_round").update({
                     "sanction_decision": normalized,
-                }).eq("scenario_id", scenario_id) \
+                }).eq("sim_run_id", sim_run_id) \
                   .eq("round_num", round_num) \
                   .eq("country_code", cc).execute()
             except Exception as e:
@@ -597,7 +628,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     round_num, cc, result["errors"],
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "tariff_rejected",
                     "country_code": cc,
                     "summary": (
@@ -617,7 +648,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             try:
                 client.table("country_states_per_round").update({
                     "tariff_decision": normalized,
-                }).eq("scenario_id", scenario_id) \
+                }).eq("sim_run_id", sim_run_id) \
                   .eq("round_num", round_num) \
                   .eq("country_code", cc).execute()
             except Exception as e:
@@ -693,7 +724,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     round_num, cc, result["errors"],
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "budget_rejected",
                     "country_code": cc,
                     "summary": (
@@ -762,7 +793,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     round_num, cc, result["errors"],
                 )
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "opec_rejected",
                     "country_code": cc,
                     "summary": (
@@ -782,7 +813,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             try:
                 client.table("country_states_per_round").update({
                     "opec_decision": normalized,
-                }).eq("scenario_id", scenario_id) \
+                }).eq("sim_run_id", sim_run_id) \
                   .eq("round_num", round_num) \
                   .eq("country_code", cc).execute()
             except Exception as e:
@@ -798,7 +829,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 try:
                     client.table("country_states_per_round").update({
                         "opec_production": new_level,
-                    }).eq("scenario_id", scenario_id) \
+                    }).eq("sim_run_id", sim_run_id) \
                       .eq("round_num", round_num) \
                       .eq("country_code", cc).execute()
                 except Exception as e:
@@ -822,7 +853,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
 
         # Log all economic actions as observatory events
         events.append({
-            "scenario_id": scenario_id, "round_num": round_num,
+            "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
             "event_type": atype,
             "country_code": cc,
             "summary": f"{cc} -> {atype}",
@@ -876,7 +907,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                                    round_num, cc, zone_id, e)
 
             events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
+                "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "blockade_declared",
                 "country_code": cc,
                 "summary": summary,
@@ -945,7 +976,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 effect = {"support_delta": delta}
 
             events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
+                "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "covert_op",
                 "country_code": cc,
                 "summary": f"{cc} covert {op_type} vs {target}: "
@@ -981,7 +1012,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 alert = "T3+ ALERT"
 
             events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
+                "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "nuclear_test",
                 "country_code": cc,
                 "summary": f"{alert}: {cc} conducts {test_type} nuclear test",
@@ -999,6 +1030,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 # Write to agreements table
                 try:
                     client.table("agreements").insert({
+                        "sim_run_id": sim_run_id,
                         "scenario_id": scenario_id,
                         "round_num": round_num,
                         "agreement_name": payload.get("agreement_name", "Untitled"),
@@ -1012,7 +1044,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     logger.warning("agreement insert failed: %s", e)
 
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "agreement_proposed",
                     "country_code": cc,
                     "summary": f"{cc} proposes {payload.get('agreement_type','agreement')} "
@@ -1022,6 +1054,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             else:
                 # Exchange transaction — collect for batch write at end of resolve
                 exchange_txns.append({
+                    "sim_run_id": sim_run_id,
                     "scenario_id": scenario_id,
                     "round_num": round_num,
                     "proposer": cc,
@@ -1033,45 +1066,84 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 })
 
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "transaction_proposed",
                     "country_code": cc,
                     "summary": f"{cc} proposes exchange with {counterpart}",
                     "payload": payload,
                 })
 
-    # --- 12. Naval attack 1v1 (CARD_ACTIONS 1.5) ----------------------------
+    # --- 12. Naval attack 1v1 (M4 canonical — CONTRACT_NAVAL_COMBAT v1.0) ---
     for d in decisions:
         if d["action_type"] in NAVAL_ATTACK_ACTIONS:
-            payload = d["action_payload"] or {}
+            raw_payload = d.get("action_payload") or {}
             cc = d["country_code"]
-            att_code = payload.get("attacker_unit_code", "")
-            tgt_code = payload.get("target_unit_code", "")
+            ch = raw_payload.get("changes") or raw_payload  # M4 has changes envelope
+            att_code = ch.get("attacker_unit_code", "")
+            tgt_code = ch.get("target_unit_code", "")
             att_unit = unit_state.get(att_code)
             tgt_unit = unit_state.get(tgt_code)
+
+            # Persist M4 audit JSONB
+            try:
+                get_client().table("country_states_per_round").update({
+                    "attack_naval_decision": raw_payload,
+                }).eq("sim_run_id", sim_run_id) \
+                  .eq("round_num", round_num) \
+                  .eq("country_code", cc).execute()
+            except Exception:
+                pass
+
             if not att_unit or not tgt_unit:
-                events.append({"scenario_id": scenario_id, "round_num": round_num,
+                events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "attack_invalid", "country_code": cc,
                     "summary": f"{cc} naval attack invalid (units not found)",
-                    "payload": payload})
+                    "payload": raw_payload})
                 continue
-            # 1v1 dice: each rolls 1d6, higher wins, ties → defender
-            a_roll = _rng.randint(1, 6)
-            d_roll = _rng.randint(1, 6)
-            if a_roll > d_roll:
-                _apply_losses(unit_state, [], [tgt_code])
-                winner = "attacker"
+
+            # Build modifiers (AI L4 + low morale only per CARD D.3)
+            mods: list[dict] = []
+            cs = country_state or {}
+            atk_cs = cs.get(cc) or {}
+            def_cc = tgt_unit.get("country_code", "?")
+            def_cs = cs.get(def_cc) or {}
+            if int(atk_cs.get("ai_level", 0) or 0) >= 4:
+                mods.append({"side": "attacker", "value": 1, "reason": "ai_l4 doctrine bonus"})
+            if int(def_cs.get("ai_level", 0) or 0) >= 4:
+                mods.append({"side": "defender", "value": 1, "reason": "ai_l4 doctrine bonus"})
+            if int(atk_cs.get("stability", 5) or 5) <= 3:
+                mods.append({"side": "attacker", "value": -1, "reason": "low morale (stability ≤ 3)"})
+            if int(def_cs.get("stability", 5) or 5) <= 3:
+                mods.append({"side": "defender", "value": -1, "reason": "low morale (stability ≤ 3)"})
+
+            from engine.engines.military import resolve_naval_combat as _resolve_nc
+            cr = _resolve_nc(att_unit, tgt_unit, modifiers=mods, precomputed_rolls=None)
+
+            # Apply losses
+            if cr.winner == "attacker":
+                _apply_losses(unit_state, [], [cr.destroyed_unit])
             else:
-                _apply_losses(unit_state, [att_code], [])
-                winner = "defender"
-            combats.append(_combat_row(
-                scenario_id, round_num, "naval", cc, tgt_unit.get("country_code", "?"),
+                _apply_losses(unit_state, [cr.destroyed_unit], [])
+
+            combat_row = _combat_row(
+                sim_run_id, scenario_id, round_num, "naval", cc, def_cc,
                 att_unit.get("global_row"), att_unit.get("global_col"),
-                [att_code], [tgt_code], [a_roll], [d_roll],
-                [att_code] if winner == "defender" else [],
-                [tgt_code] if winner == "attacker" else [],
-                f"Naval 1v1: {att_code} ({a_roll}) vs {tgt_code} ({d_roll}) → {winner} wins",
-            ))
+                [att_code], [tgt_code],
+                [{"roll": cr.attacker_roll, "modified": cr.attacker_modified}],
+                [{"roll": cr.defender_roll, "modified": cr.defender_modified}],
+                [att_code] if cr.winner == "defender" else [],
+                [tgt_code] if cr.winner == "attacker" else [],
+                cr.narrative,
+            )
+            combat_row["modifier_breakdown"] = [m.model_dump() for m in cr.modifier_breakdown]
+            combats.append(combat_row)
+
+            events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
+                "event_type": "naval_combat", "country_code": cc,
+                "summary": f"{cc} naval 1v1: {att_code} vs {tgt_code} → {cr.winner} wins, {cr.destroyed_unit} destroyed",
+                "payload": {"attacker": att_code, "target": tgt_code,
+                            "rolls": {"atk": cr.attacker_modified, "def": cr.defender_modified},
+                            "winner": cr.winner, "destroyed": cr.destroyed_unit}})
 
     # --- 13. Martial law (CARD_ACTIONS 1.2) --------------------------------
     MARTIAL_LAW_POOLS = {"sarmatia": 10, "ruthenia": 6, "persia": 8, "cathay": 10}
@@ -1080,7 +1152,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
             cc = d["country_code"]
             pool = MARTIAL_LAW_POOLS.get(cc, 0)
             if pool <= 0:
-                events.append({"scenario_id": scenario_id, "round_num": round_num,
+                events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "martial_law_invalid", "country_code": cc,
                     "summary": f"{cc} cannot declare martial law (not eligible or pool=0)",
                     "payload": {}})
@@ -1102,7 +1174,7 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                 country_state[cc]["war_tiredness"] = min(10, country_state[cc].get("war_tiredness", 0) + 1)
             # Zero out the pool (one-off)
             MARTIAL_LAW_POOLS[cc] = 0
-            events.append({"scenario_id": scenario_id, "round_num": round_num,
+            events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "martial_law", "country_code": cc,
                 "summary": f"{cc} declares martial law: +{len(added)} ground reserves, stability -1, war tiredness +1",
                 "payload": {"units_added": added, "pool_used": pool}})
@@ -1125,14 +1197,14 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
                     ).eq("from_country_id", cc).eq("to_country_id", counterpart).execute()
             except Exception as e:
                 logger.warning("basing rights update failed: %s", e)
-            events.append({"scenario_id": scenario_id, "round_num": round_num,
+            events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "basing_rights", "country_code": cc,
                 "summary": f"{cc} {action}s basing rights to {counterpart}",
                 "payload": payload})
 
     # --- Persist new snapshots -------------------------------------------
-    _write_unit_snapshot(client, scenario_id, round_num, unit_state)
-    _write_country_snapshot(client, scenario_id, round_num, country_state)
+    _write_unit_snapshot(client, sim_run_id, scenario_id, round_num, unit_state)
+    _write_country_snapshot(client, sim_run_id, scenario_id, round_num, country_state)
     _write_combats(client, combats)
     _write_events(client, events)
     _write_exchange_transactions(client, exchange_txns)
@@ -1140,14 +1212,16 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
     # Mark round complete
     client.table("round_states").upsert(
         {
+            "sim_run_id": sim_run_id,
             "scenario_id": scenario_id,
             "round_num": round_num,
             "status": "completed",
         },
-        on_conflict="scenario_id,round_num",
+        on_conflict="sim_run_id,round_num",
     ).execute()
 
     return {
+        "sim_run_id": sim_run_id,
         "scenario_id": scenario_id,
         "round_num": round_num,
         "decisions_processed": len(decisions),
@@ -1166,35 +1240,60 @@ def resolve_round(scenario_code: str, round_num: int) -> dict:
 def _process_attack(
     decision: dict,
     unit_state: dict[str, dict],
+    sim_run_id: str,
     scenario_id: str,
     round_num: int,
     combats: list[dict],
     events: list[dict],
+    country_state: dict[str, dict] | None = None,
 ) -> None:
-    """Process a declare_attack decision with RISK chain mechanic.
+    """Process an attack_ground (M2) or declare_attack (legacy) decision.
 
-    Per CARD_ACTIONS 1.3 (2026-04-07):
-    - Attacker selects ground units from source hex → attack adjacent hex
-    - Iterative RISK dice until one side zero
-    - If attacker wins: survivors move onto captured hex, trophies captured
-    - CHAIN: if ≥2 units on captured hex and adjacent enemy hex exists,
-      auto-continue (leave ≥1 behind each hop)
-    - Air strikes resolved BEFORE ground (separate from chain)
+    Per CONTRACT_GROUND_COMBAT v1.0 (2026-04-12), M2 wraps the existing
+    chain mechanic with the new validator + canonical pure dice function +
+    audit JSONB persistence.
+
+    Payload shape:
+      - M2 canonical: ``{action_type: "attack_ground", changes: {source_…, target_…, attacker_unit_codes}}``
+      - Legacy: top-level ``attacker_unit_codes`` + ``target_global_row/col``
     """
-    payload = decision["action_payload"] or {}
+    raw_payload = decision.get("action_payload") or {}
+    action_type = decision.get("action_type")
     attacker_country = decision["country_code"]
-    attacker_codes = payload.get("attacker_unit_codes") or []
-    tgt_row = payload.get("target_global_row")
-    tgt_col = payload.get("target_global_col")
+
+    # Normalize: M2 has a `changes` envelope, legacy has flat keys
+    if action_type == "attack_ground" and "changes" in raw_payload:
+        ch = raw_payload.get("changes") or {}
+        attacker_codes = ch.get("attacker_unit_codes") or []
+        tgt_row = ch.get("target_global_row")
+        tgt_col = ch.get("target_global_col")
+        allow_chain = bool(ch.get("allow_chain", True))
+    else:
+        attacker_codes = raw_payload.get("attacker_unit_codes") or []
+        tgt_row = raw_payload.get("target_global_row")
+        tgt_col = raw_payload.get("target_global_col")
+        allow_chain = True
+
+    # Persist the M2 decision audit JSONB (only on canonical shape)
+    if action_type == "attack_ground":
+        try:
+            get_client().table("country_states_per_round").update({
+                "attack_ground_decision": raw_payload,
+            }).eq("sim_run_id", sim_run_id) \
+              .eq("round_num", round_num) \
+              .eq("country_code", attacker_country).execute()
+        except Exception as e:
+            logger.debug("[resolve R%d] attack_ground_decision write failed for %s: %s",
+                         round_num, attacker_country, e)
 
     attacker_units = [unit_state[c] for c in attacker_codes if c in unit_state
                       and unit_state[c].get("status") != "destroyed"]
     if not attacker_units:
         events.append({
-            "scenario_id": scenario_id, "round_num": round_num,
+            "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
             "event_type": "attack_invalid", "country_code": attacker_country,
             "summary": f"{attacker_country} attack had no valid attacker units",
-            "payload": payload,
+            "payload": raw_payload,
         })
         return
 
@@ -1206,20 +1305,156 @@ def _process_attack(
     # --- RANGED STRIKES FIRST (air + missiles, before ground) ---
     _resolve_ranged_strikes(
         air_units, missile_units, attacker_country, tgt_row, tgt_col,
-        unit_state, scenario_id, round_num, combats, events,
+        unit_state, sim_run_id, scenario_id, round_num, combats, events,
     )
 
-    # --- GROUND ATTACK WITH CHAIN ---
+    # --- GROUND ATTACK WITH CHAIN (M2 canonical) ---
     if not ground_units:
-        return  # only ranged strikes, no ground assault
+        return
 
     _resolve_ground_chain(
         ground_units, attacker_country, tgt_row, tgt_col,
-        unit_state, scenario_id, round_num, combats, events,
+        unit_state, sim_run_id, scenario_id, round_num, combats, events,
+        country_state=country_state,
+        allow_chain=allow_chain,
     )
 
-    # Old inline ranged/ground/naval code removed 2026-04-07.
-    # Now handled by _resolve_ranged_strikes() + _resolve_ground_chain() above.
+
+# ---------------------------------------------------------------------------
+# M3 — Air strike handler (CONTRACT_AIR_STRIKES v1.0)
+# ---------------------------------------------------------------------------
+
+
+def _process_air_strike(
+    decision: dict,
+    unit_state: dict[str, dict],
+    sim_run_id: str,
+    scenario_id: str,
+    round_num: int,
+    combats: list[dict],
+    events: list[dict],
+    country_state: dict[str, dict] | None = None,
+) -> None:
+    """Process an attack_air decision per CONTRACT_AIR_STRIKES v1.0.
+
+    One source hex → one target hex → batch of tactical_air sorties.
+    Each sortie rolls independently for hit + downed. Result list-of-shots
+    is persisted to ``observatory_combat_results.attacker_rolls`` JSONB.
+    """
+    raw_payload = decision.get("action_payload") or {}
+    attacker_country = decision["country_code"]
+    ch = raw_payload.get("changes") or {}
+    src_r = ch.get("source_global_row")
+    src_c = ch.get("source_global_col")
+    tgt_r = ch.get("target_global_row")
+    tgt_c = ch.get("target_global_col")
+    attacker_codes = ch.get("attacker_unit_codes") or []
+
+    # Persist M3 audit JSONB
+    try:
+        get_client().table("country_states_per_round").update({
+            "attack_air_decision": raw_payload,
+        }).eq("sim_run_id", sim_run_id) \
+          .eq("round_num", round_num) \
+          .eq("country_code", attacker_country).execute()
+    except Exception as e:
+        logger.debug("[resolve R%d] attack_air_decision write failed for %s: %s",
+                     round_num, attacker_country, e)
+
+    # Resolve attacker units
+    attackers = [
+        unit_state[c] for c in attacker_codes
+        if c in unit_state and (unit_state[c].get("status") or "").lower() == "active"
+    ]
+    if not attackers or src_r is None or tgt_r is None:
+        events.append({
+            "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
+            "event_type": "air_strike_invalid", "country_code": attacker_country,
+            "summary": f"{attacker_country} attack_air had no valid attackers or coords",
+            "payload": raw_payload,
+        })
+        return
+
+    # Defenders on target hex
+    defender_units = [
+        u for u in unit_state.values()
+        if u.get("global_row") == tgt_r and u.get("global_col") == tgt_c
+        and u.get("country_code") not in (None, attacker_country)
+        and (u.get("status") or "").lower() == "active"
+    ]
+    if not defender_units:
+        events.append({
+            "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
+            "event_type": "air_strike_no_target", "country_code": attacker_country,
+            "summary": f"{attacker_country} attack_air target ({tgt_r},{tgt_c}) has no enemy defenders",
+            "payload": raw_payload,
+        })
+        return
+
+    defender_country = defender_units[0].get("country_code")
+
+    # AD coverage of the target hex (uses existing zone helper)
+    ad_units = _ad_units_in_zone(unit_state, defender_country, tgt_r, tgt_c)
+
+    # Air superiority count: friendly tactical_air on source hex NOT in attacker_codes
+    air_sup = sum(
+        1 for u in unit_state.values()
+        if u.get("country_code") == attacker_country
+        and u.get("global_row") == src_r and u.get("global_col") == src_c
+        and (u.get("unit_type") or "").lower() == "tactical_air"
+        and (u.get("status") or "").lower() == "active"
+        and u.get("unit_code") not in attacker_codes
+    )
+
+    # Run the canonical M3 engine
+    from engine.engines.military import resolve_air_strike as _resolve_as_v3
+    result = _resolve_as_v3(
+        attackers=attackers,
+        defenders=defender_units,
+        ad_units=ad_units,
+        air_superiority_count=air_sup,
+        precomputed_rolls=None,  # M3 unmanned mode
+    )
+
+    # Apply losses
+    _apply_losses(unit_state, result.attacker_losses, result.defender_losses)
+
+    # Build the combat row with M3-shape data
+    combat_row = _combat_row(
+        sim_run_id, scenario_id, round_num, "air_strike",
+        attacker_country, defender_country,
+        tgt_r, tgt_c,
+        [u["unit_code"] for u in attackers],
+        [u["unit_code"] for u in defender_units],
+        [s.model_dump() for s in result.shots],  # attacker_rolls = list of shot dicts
+        [],  # defender_rolls (empty for air strikes)
+        result.attacker_losses,
+        result.defender_losses,
+        result.narrative,
+    )
+    combat_row["modifier_breakdown"] = [m.model_dump() for m in result.modifier_breakdown]
+    combats.append(combat_row)
+
+    # Event
+    events.append({
+        "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
+        "event_type": "air_strike",
+        "country_code": attacker_country,
+        "summary": (
+            f"{attacker_country} air strike on ({tgt_r},{tgt_c}): "
+            f"{len(result.shots)} sorties, "
+            f"{sum(1 for s in result.shots if s.hit)} hits, "
+            f"{len(result.attacker_losses)} downed"
+        ),
+        "payload": {
+            "source": [src_r, src_c],
+            "target": [tgt_r, tgt_c],
+            "attacker_losses": result.attacker_losses,
+            "defender_losses": result.defender_losses,
+            "n_shots": len(result.shots),
+            "n_hits": sum(1 for s in result.shots if s.hit),
+        },
+    })
 
 
 def _generate_intelligence_report(
@@ -1284,7 +1519,7 @@ def _generate_intelligence_report(
 
 def _resolve_ranged_strikes(
     air_units, missile_units, attacker_country, tgt_row, tgt_col,
-    unit_state, scenario_id, round_num, combats, events,
+    unit_state, sim_run_id, scenario_id, round_num, combats, events,
 ):
     """Resolve air strikes + missile strikes against target hex."""
     defender_units = [
@@ -1305,7 +1540,7 @@ def _resolve_ranged_strikes(
             dist = _hex_distance(au_r, au_c, tgt_row, tgt_col)
             if dist > AIR_STRIKE_MAX_RANGE:
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "attack_out_of_range", "country_code": attacker_country,
                     "summary": f"{au['unit_code']} air strike OUT OF RANGE ({dist} hex)",
                     "payload": {"unit": au["unit_code"], "distance": dist},
@@ -1313,7 +1548,7 @@ def _resolve_ranged_strikes(
                 continue
         sr = combat_mod.resolve_air_strike(au, defender_units, defender_ad)
         combats.append(_combat_row(
-            scenario_id, round_num, "air", attacker_country, defender_country,
+            sim_run_id, scenario_id, round_num, "air", attacker_country, defender_country,
             tgt_row, tgt_col, [au["unit_code"]], [u["unit_code"] for u in defender_units],
             [], [], [], sr.defender_losses, sr.narrative,
         ))
@@ -1328,7 +1563,7 @@ def _resolve_ranged_strikes(
         tgt = defender_units[0]
         sr = combat_mod.resolve_missile_strike(mu, tgt, defender_ad)
         combats.append(_combat_row(
-            scenario_id, round_num, "missile", attacker_country, defender_country,
+            sim_run_id, scenario_id, round_num, "missile", attacker_country, defender_country,
             tgt_row, tgt_col, [mu["unit_code"]], [tgt["unit_code"]],
             [], [], [], sr.defender_losses, sr.narrative,
         ))
@@ -1340,8 +1575,10 @@ def _resolve_ranged_strikes(
 
 def _resolve_ground_chain(
     ground_units, attacker_country, tgt_row, tgt_col,
-    unit_state, scenario_id, round_num, combats, events,
+    unit_state, sim_run_id, scenario_id, round_num, combats, events,
     max_chain=10,
+    country_state: dict | None = None,
+    allow_chain: bool = True,
 ):
     """RISK ground attack with chain mechanic (CARD_ACTIONS 1.3).
 
@@ -1386,7 +1623,7 @@ def _resolve_ground_chain(
             captured = _capture_trophies(unit_state, trophies, attacker_country)
             _move_attackers_forward(unit_state, current_attackers, current_tgt_row, current_tgt_col)
             events.append({
-                "scenario_id": scenario_id, "round_num": round_num,
+                "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "occupation",
                 "country_code": attacker_country,
                 "summary": f"{attacker_country} occupies ({current_tgt_row},{current_tgt_col})"
@@ -1394,26 +1631,37 @@ def _resolve_ground_chain(
                 "payload": {"hex": [current_tgt_row, current_tgt_col], "trophies": captured},
             })
         else:
-            # Defended — RISK combat
+            # Defended — RISK combat (M2 canonical: engines/military.resolve_ground_combat)
             defender_country = defender_ground[0].get("country_code", "?")
 
-            # Build hex_context modifiers (SEED ACTION REVIEW 2026-03-30)
-            hex_context = _build_ground_modifiers(
+            # Build modifier list per CONTRACT_GROUND_COMBAT v1.0 §5
+            modifiers = _build_ground_modifiers(
                 attacker_country, defender_country, current_tgt_row, current_tgt_col,
                 unit_state, current_attackers,
+                country_state=country_state,
             )
 
-            cr = combat_mod.resolve_ground_combat(current_attackers, defender_ground, hex_context)
+            from engine.engines.military import resolve_ground_combat as _resolve_gc_v2
+            cr = _resolve_gc_v2(
+                attackers=current_attackers,
+                defenders=defender_ground,
+                modifiers=modifiers,
+                precomputed_rolls=None,  # M2 unmanned mode
+            )
             _apply_losses(unit_state, cr.attacker_losses, cr.defender_losses)
 
-            combats.append(_combat_row(
-                scenario_id, round_num, "ground", attacker_country, defender_country,
+            # Persist combat with M2-shape data: per-exchange dice + modifier breakdown
+            combat_row = _combat_row(
+                sim_run_id, scenario_id, round_num, "ground", attacker_country, defender_country,
                 current_tgt_row, current_tgt_col,
                 [u["unit_code"] for u in current_attackers],
                 [u["unit_code"] for u in defender_ground],
                 cr.attacker_rolls, cr.defender_rolls,
                 cr.attacker_losses, cr.defender_losses, cr.narrative,
-            ))
+            )
+            # Enrich with modifier breakdown for the visualization
+            combat_row["modifier_breakdown"] = [m.model_dump() for m in cr.modifier_breakdown]
+            combats.append(combat_row)
 
             if not cr.success:
                 # Attack failed — chain stops
@@ -1428,7 +1676,7 @@ def _resolve_ground_chain(
 
             if captured:
                 events.append({
-                    "scenario_id": scenario_id, "round_num": round_num,
+                    "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                     "event_type": "trophies_captured",
                     "country_code": attacker_country,
                     "summary": f"{attacker_country} captured {len(captured)} units at ({current_tgt_row},{current_tgt_col})",
@@ -1437,6 +1685,8 @@ def _resolve_ground_chain(
 
         # --- CHAIN CHECK: can we continue? ---
         # Need ≥2 units to chain (leave 1 behind + attack with ≥1)
+        if not allow_chain:
+            return  # Caller opted out of chain attacks
         if len(current_attackers) < 2:
             return
 
@@ -1468,40 +1718,63 @@ def _resolve_ground_chain(
 
 def _build_ground_modifiers(
     attacker_country, defender_country, tgt_row, tgt_col,
-    unit_state, attacker_units,
-) -> dict:
-    """Build hex_context modifiers for ground combat per SEED/CARD_ACTIONS."""
-    ctx: dict = {}
+    unit_state, attacker_units, country_state: dict | None = None,
+) -> list[dict]:
+    """Build CONTRACT_GROUND_COMBAT v1.0 §5 modifier list (M2).
 
-    # Die hard: check if target hex has die_hard flag (from map data)
-    # For now: check if any unit on hex has "die_hard" in notes or hex is in known die_hard list
-    # TODO: read from map grid data properly
-    # Simplified: check map_config for die_hard hexes when available
+    Returns a list of ``{side, value, reason}`` dicts. The pure dice
+    function consumes this and the visualization echoes it verbatim.
 
-    # Air support: defender has tactical_air on the hex
-    def_air = any(
-        u.get("global_row") == tgt_row and u.get("global_col") == tgt_col
+    Sources:
+      - die_hard:    target hex has die_hard flag (TODO: read from map)
+      - air_support: defender has tactical_air on the target hex (+1 def)
+      - amphibious:  any attacker is currently embarked on a naval (-1 atk)
+      - ai_l4:       attacker or defender country has ai_level == 4 (+1)
+      - low_morale:  attacker or defender stability ≤ 3 (-1)
+    """
+    mods: list[dict] = []
+    cs = country_state or {}
+
+    # Defender air support: tactical_air on the same hex
+    def_air = next((
+        u for u in unit_state.values()
+        if u.get("global_row") == tgt_row and u.get("global_col") == tgt_col
         and u.get("country_code") == defender_country
         and u.get("unit_type") == "tactical_air"
-        and u.get("status") != "destroyed"
-        for u in unit_state.values()
-    )
+        and u.get("status") not in ("destroyed", "embarked")
+    ), None)
     if def_air:
-        ctx["air_support"] = True
+        mods.append({
+            "side": "defender",
+            "value": 1,
+            "reason": f"air_support: {def_air['unit_code']} on hex",
+        })
 
-    # Amphibious: attacker source hex is sea, target is land
-    # Simplified check: if any attacker was on a sea hex (embarked)
+    # Amphibious: any attacker currently embarked
     for au in attacker_units:
-        if au.get("embarked_on"):
-            ctx["amphibious"] = True
+        if au.get("embarked_on") or (au.get("status") == "embarked"):
+            mods.append({
+                "side": "attacker",
+                "value": -1,
+                "reason": "amphibious assault from embarked carrier",
+            })
             break
 
-    # AI L4 + morale: need country state data
-    # These require access to country_states which we don't have here
-    # TODO: pass country_states into _process_attack and read stability + ai_level
-    # For now: omitted (will wire in next iteration)
+    # AI level 4 doctrine bonus
+    atk_state = cs.get(attacker_country) or {}
+    def_state = cs.get(defender_country) or {}
+    if int(atk_state.get("ai_level", 0) or 0) >= 4:
+        mods.append({"side": "attacker", "value": 1, "reason": "ai_l4 doctrine bonus"})
+    if int(def_state.get("ai_level", 0) or 0) >= 4:
+        mods.append({"side": "defender", "value": 1, "reason": "ai_l4 doctrine bonus"})
 
-    return ctx
+    # Low morale (stability ≤ 3)
+    if int(atk_state.get("stability", 5) or 5) <= 3:
+        mods.append({"side": "attacker", "value": -1, "reason": "low morale (stability ≤ 3)"})
+    if int(def_state.get("stability", 5) or 5) <= 3:
+        mods.append({"side": "defender", "value": -1, "reason": "low morale (stability ≤ 3)"})
+
+    return mods
 
 
 def _apply_losses(
@@ -1676,11 +1949,12 @@ def _ad_units_in_zone(
 
 
 def _combat_row(
-    scenario_id, round_num, combat_type, attacker_country, defender_country,
+    sim_run_id, scenario_id, round_num, combat_type, attacker_country, defender_country,
     loc_row, loc_col, attacker_units, defender_units,
     attacker_rolls, defender_rolls, attacker_losses, defender_losses, narrative,
 ) -> dict:
     return {
+        "sim_run_id": sim_run_id,
         "scenario_id": scenario_id,
         "round_num": round_num,
         "combat_type": combat_type,
@@ -1704,12 +1978,12 @@ def _combat_row(
 
 
 _UNIT_COLS = {
-    "scenario_id", "round_num", "unit_code", "country_code", "unit_type",
+    "sim_run_id", "scenario_id", "round_num", "unit_code", "country_code", "unit_type",
     "global_row", "global_col", "theater", "theater_row", "theater_col",
     "embarked_on", "status", "notes",
 }
 _COUNTRY_COLS = {
-    "scenario_id", "round_num", "country_code", "gdp", "treasury", "inflation",
+    "sim_run_id", "scenario_id", "round_num", "country_code", "gdp", "treasury", "inflation",
     "stability", "political_support", "war_tiredness",
     "nuclear_level", "nuclear_rd_progress", "ai_level", "ai_rd_progress",
     "budget_social_pct", "budget_production", "budget_research",
@@ -1719,10 +1993,11 @@ _COUNTRY_COLS = {
 }
 
 
-def _write_unit_snapshot(client, scenario_id, round_num, unit_state):
+def _write_unit_snapshot(client, sim_run_id, scenario_id, round_num, unit_state):
     rows = []
     for uc, u in unit_state.items():
         row = {k: u.get(k) for k in _UNIT_COLS if k in u}
+        row["sim_run_id"] = sim_run_id
         row["scenario_id"] = scenario_id
         row["round_num"] = round_num
         row["unit_code"] = uc
@@ -1732,11 +2007,11 @@ def _write_unit_snapshot(client, scenario_id, round_num, unit_state):
     # batch in chunks of 200
     for i in range(0, len(rows), 200):
         client.table("unit_states_per_round").upsert(
-            rows[i:i+200], on_conflict="scenario_id,round_num,unit_code"
+            rows[i:i+200], on_conflict="sim_run_id,round_num,unit_code"
         ).execute()
 
 
-def _write_country_snapshot(client, scenario_id, round_num, country_state):
+def _write_country_snapshot(client, sim_run_id, scenario_id, round_num, country_state):
     rows = []
     # Integer columns in country_states_per_round — must be int, not float
     INT_COLS = {"stability", "political_support", "war_tiredness", "nuclear_level", "ai_level"}
@@ -1746,6 +2021,7 @@ def _write_country_snapshot(client, scenario_id, round_num, country_state):
         for col in INT_COLS:
             if col in row and row[col] is not None:
                 row[col] = int(round(float(row[col])))
+        row["sim_run_id"] = sim_run_id
         row["scenario_id"] = scenario_id
         row["round_num"] = round_num
         row["country_code"] = cc
@@ -1753,7 +2029,7 @@ def _write_country_snapshot(client, scenario_id, round_num, country_state):
     if not rows:
         return
     client.table("country_states_per_round").upsert(
-        rows, on_conflict="scenario_id,round_num,country_code"
+        rows, on_conflict="sim_run_id,round_num,country_code"
     ).execute()
 
 
@@ -1775,12 +2051,12 @@ def _write_exchange_transactions(client, txns: list[dict]):
         return
     # Dedup: check which proposer+counterpart pairs already exist for this round
     sample = txns[0]
-    scenario_id = sample["scenario_id"]
+    sim_run_id = sample["sim_run_id"]
     round_num = sample["round_num"]
     try:
         existing = client.table("exchange_transactions") \
             .select("proposer, counterpart") \
-            .eq("scenario_id", scenario_id) \
+            .eq("sim_run_id", sim_run_id) \
             .eq("round_num", round_num) \
             .execute()
         existing_pairs = {(r["proposer"], r["counterpart"]) for r in (existing.data or [])}

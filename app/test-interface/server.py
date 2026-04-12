@@ -17,6 +17,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
+from typing import Optional
 import io
 
 from engine.agents.leader import LeaderAgent
@@ -111,31 +112,56 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             params = parse_qs(parsed.query)
             rnd = params.get("round", [""])[0]
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_units(rnd, scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_units(rnd, scenario, sim_run_id))
         elif path == "/api/observatory/countries":
             params = parse_qs(parsed.query)
             rnd = params.get("round", [""])[0]
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_countries(rnd, scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_countries(rnd, scenario, sim_run_id))
         elif path == "/api/observatory/events":
             params = parse_qs(parsed.query)
             limit = int(params.get("limit", ["50"])[0] or "50")
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_events(limit, scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_events(limit, scenario, sim_run_id))
         elif path == "/api/observatory/combats":
             params = parse_qs(parsed.query)
             rnd = params.get("round", [""])[0]
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_combats(rnd, scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_combats(rnd, scenario, sim_run_id))
         elif path == "/api/observatory/blockades":
             params = parse_qs(parsed.query)
             rnd = params.get("round", [""])[0]
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_blockades(rnd, scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_blockades(rnd, scenario, sim_run_id))
         elif path == "/api/observatory/global-series":
             params = parse_qs(parsed.query)
             scenario = params.get("scenario", ["start_one"])[0]
-            self._json_response(self._observatory_global_series(scenario))
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_global_series(scenario, sim_run_id))
+        elif path == "/api/observatory/sim_runs":
+            self._json_response(self._observatory_sim_runs())
+        elif path == "/api/observatory/available-rounds":
+            params = parse_qs(parsed.query)
+            scenario = params.get("scenario", ["start_one"])[0]
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(self._observatory_available_rounds(scenario, sim_run_id))
+        elif path == "/api/observatory/movement-context":
+            params = parse_qs(parsed.query)
+            country = params.get("country", [""])[0]
+            try:
+                round_num = int(params.get("round", ["0"])[0])
+            except ValueError:
+                round_num = 0
+            scenario = params.get("scenario", ["start_one"])[0]
+            sim_run_id = params.get("sim_run_id", [""])[0] or None
+            self._json_response(
+                self._observatory_movement_context(country, round_num, scenario, sim_run_id)
+            )
         elif path == "/api/map/global":
             self._serve_map_json("global")
         elif path == "/api/map/theater/eastern_ereb":
@@ -977,7 +1003,112 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             state["db_latest_round"] = None
         return state
 
-    def _observatory_units(self, round_num: str, scenario: str):
+    def _resolve_observatory_run(self, scenario: str, sim_run_id: Optional[str]) -> Optional[str]:
+        """Return the sim_run_id to use for Observatory filters.
+
+        If ``sim_run_id`` is explicit (from the selector), use it.
+        Otherwise resolve ``scenario`` to its legacy archived run.
+        Returns None if nothing resolves (Observatory data endpoints
+        should then treat the result as empty / fallback to seed CSVs).
+        """
+        if sim_run_id:
+            return sim_run_id
+        try:
+            from engine.services.sim_run_manager import resolve_sim_run_id
+            return resolve_sim_run_id(scenario)
+        except Exception:
+            return None
+
+    def _observatory_sim_runs(self):
+        """Return visible sim_runs for the Observatory selector dropdown.
+
+        Lists runs with status ``visible_for_review`` (plus the singular
+        ``archived`` legacy bucket) so facilitators can browse any test
+        run that opted to persist its data after completing.
+        """
+        sb = _supabase_or_none()
+        if sb is None:
+            return {"runs": [], "source": "unavailable"}
+        try:
+            res = (
+                sb.table("sim_runs")
+                .select("id,name,description,status,current_round,max_rounds,scenario_id,seed,created_at,finalized_at")
+                .in_("status", ["visible_for_review", "archived"])
+                .order("created_at", desc=True)
+                .limit(100)
+                .execute()
+            )
+            runs = res.data or []
+            # Enrich each run with scenario_code for UX
+            scen_ids = {r["scenario_id"] for r in runs if r.get("scenario_id")}
+            code_by_id: dict[str, str] = {}
+            if scen_ids:
+                try:
+                    scens = (
+                        sb.table("sim_scenarios")
+                        .select("id,code")
+                        .in_("id", list(scen_ids))
+                        .execute()
+                    )
+                    code_by_id = {s["id"]: s["code"] for s in (scens.data or [])}
+                except Exception as e:
+                    logger.debug("sim_scenarios lookup failed: %s", e)
+            for r in runs:
+                r["scenario_code"] = code_by_id.get(r.get("scenario_id", ""), "")
+            return {"runs": runs, "source": "db"}
+        except Exception as e:
+            logger.debug("sim_runs query failed: %s", e)
+            return {"runs": [], "source": "error", "error": str(e)}
+
+    def _observatory_available_rounds(self, scenario: str, sim_run_id: Optional[str] = None):
+        """Return the sorted list of round_num values present for the run.
+
+        Used by the MAPS-tab round scrubber so it knows what rounds to render.
+        Queries ``country_states_per_round`` (20 rows/round, well under any
+        pagination cap) instead of ``unit_states_per_round`` (345 rows/round
+        which can blow past the Supabase Python client's 1000-row default).
+        """
+        sb = _supabase_or_none()
+        if sb is None:
+            return {"rounds": [], "source": "none"}
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
+        if not run_id:
+            return {"rounds": [], "source": "no_run"}
+        try:
+            res = (
+                sb.table("country_states_per_round")
+                .select("round_num")
+                .eq("sim_run_id", run_id)
+                .execute()
+            )
+            rounds = sorted({r["round_num"] for r in (res.data or [])})
+            return {"rounds": rounds, "source": "db", "sim_run_id": run_id}
+        except Exception as e:
+            logger.debug("available_rounds query failed: %s", e)
+            return {"rounds": [], "source": "error", "error": str(e)}
+
+    def _observatory_movement_context(
+        self, country: str, round_num: int, scenario: str, sim_run_id: Optional[str] = None,
+    ):
+        """Return the AI movement context dict — exactly what build_movement_context()
+        produces. Used by the Observatory's "context" inspector button.
+        """
+        if not country:
+            return {"error": "country query param required"}
+        try:
+            from engine.services.movement_context import build_movement_context
+            ctx = build_movement_context(
+                country_code=country,
+                scenario_code=scenario,
+                round_num=round_num,
+                sim_run_id=sim_run_id,
+            )
+            return ctx
+        except Exception as e:
+            logger.warning("movement_context build failed: %s", e)
+            return {"error": str(e)}
+
+    def _observatory_units(self, round_num: str, scenario: str, sim_run_id: Optional[str] = None):
         """Units at a given round from unit_states_per_round. Falls back to units.csv at round 0."""
         sb = _supabase_or_none()
         rnd_int = None
@@ -986,18 +1117,20 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         except ValueError:
             rnd_int = None
 
-        if sb is not None and rnd_int is not None:
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
+
+        if sb is not None and rnd_int is not None and run_id:
             try:
-                q = (
+                res = (
                     sb.table("unit_states_per_round")
                     .select("*")
+                    .eq("sim_run_id", run_id)
                     .eq("round_num", rnd_int)
+                    .execute()
                 )
-                # scenario_id is a UUID so we skip filter if not a UUID-like value
-                res = q.execute()
                 data = res.data or []
                 if data:
-                    return {"round": rnd_int, "scenario": scenario, "units": data, "source": "db"}
+                    return {"round": rnd_int, "scenario": scenario, "sim_run_id": run_id, "units": data, "source": "db"}
             except Exception as e:
                 logger.debug("unit_states_per_round query failed: %s", e)
 
@@ -1006,11 +1139,12 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         return {
             "round": rnd_int or 0,
             "scenario": scenario,
+            "sim_run_id": run_id,
             "units": baseline.get("units", []),
             "source": "seed_csv",
         }
 
-    def _observatory_countries(self, round_num: str, scenario: str):
+    def _observatory_countries(self, round_num: str, scenario: str, sim_run_id: Optional[str] = None):
         """Country states at round N from country_states_per_round. Falls back to countries.csv."""
         sb = _supabase_or_none()
         rnd_int = None
@@ -1019,17 +1153,20 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         except ValueError:
             rnd_int = None
 
-        if sb is not None and rnd_int is not None:
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
+
+        if sb is not None and rnd_int is not None and run_id:
             try:
                 res = (
                     sb.table("country_states_per_round")
                     .select("*")
+                    .eq("sim_run_id", run_id)
                     .eq("round_num", rnd_int)
                     .execute()
                 )
                 data = res.data or []
                 if data:
-                    return {"round": rnd_int, "scenario": scenario, "countries": data, "source": "db"}
+                    return {"round": rnd_int, "scenario": scenario, "sim_run_id": run_id, "countries": data, "source": "db"}
             except Exception as e:
                 logger.debug("country_states_per_round query failed: %s", e)
 
@@ -1075,7 +1212,7 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             "source": "seed_csv",
         }
 
-    def _observatory_combats(self, round_num: str, scenario: str):
+    def _observatory_combats(self, round_num: str, scenario: str, sim_run_id: Optional[str] = None):
         """Combat log for a given round from observatory_combat_results."""
         sb = _supabase_or_none()
         rnd_int = None
@@ -1085,21 +1222,24 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             rnd_int = None
         if sb is None:
             return {"round": rnd_int or 0, "scenario": scenario, "combats": [], "source": "none"}
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
         try:
             q = sb.table("observatory_combat_results").select("*")
+            if run_id:
+                q = q.eq("sim_run_id", run_id)
             if rnd_int is not None:
                 q = q.eq("round_num", rnd_int)
             try:
                 res = q.order("id", desc=False).execute()
             except Exception:
                 res = q.execute()
-            return {"round": rnd_int or 0, "scenario": scenario, "combats": res.data or [], "source": "db"}
+            return {"round": rnd_int or 0, "scenario": scenario, "sim_run_id": run_id, "combats": res.data or [], "source": "db"}
         except Exception as e:
             logger.debug("observatory_combat_results query failed: %s", e)
             return {"round": rnd_int or 0, "scenario": scenario, "combats": [], "source": "error", "error": str(e)}
 
-    def _observatory_global_series(self, scenario: str):
-        """Return global_state_per_round for all rounds of a scenario.
+    def _observatory_global_series(self, scenario: str, sim_run_id: Optional[str] = None):
+        """Return global_state_per_round for all rounds of a run/scenario.
 
         Payload: {"rounds": [{round_num, oil_price, stock_index,
         bond_yield, gold_price}, ...], ... }.
@@ -1107,15 +1247,14 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         sb = _supabase_or_none()
         if sb is None:
             return {"rounds": [], "source": "none", "scenario": scenario}
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
+        if not run_id:
+            return {"rounds": [], "source": "no_run", "scenario": scenario}
         try:
-            scen = sb.table("sim_scenarios").select("id").eq("code", scenario).limit(1).execute()
-            if not scen.data:
-                return {"rounds": [], "source": "no_scenario", "scenario": scenario}
-            scenario_id = scen.data[0]["id"]
             res = (
                 sb.table("global_state_per_round")
                 .select("round_num, oil_price, stock_index, bond_yield, gold_price, notes")
-                .eq("scenario_id", scenario_id)
+                .eq("sim_run_id", run_id)
                 .order("round_num", desc=False)
                 .execute()
             )
@@ -1135,20 +1274,22 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             logger.debug("observatory_global_series query failed: %s", e)
             return {"rounds": [], "source": "error", "error": str(e), "scenario": scenario}
 
-    def _observatory_blockades(self, round_num: str, scenario: str):
+    def _observatory_blockades(self, round_num: str, scenario: str, sim_run_id: Optional[str] = None):
         """Return active blockades from the `blockades` state table.
 
         Reads from the canonical `blockades` table (not agent_decisions).
-        Architecture fix: V-7 (2026-04-08).
+        Architecture fix: V-7 (2026-04-08). F1 (2026-04-12): now scoped to
+        the resolved Observatory run instead of a hard-coded default sim id.
         """
         sb = _supabase_or_none()
         if sb is None:
             return {"blockades": [], "source": "none", "scenario": scenario}
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
+        if not run_id:
+            return {"blockades": [], "source": "no_run", "scenario": scenario}
         try:
-            from engine.config.settings import Settings
-            sim_run_id = Settings().default_sim_id
             res = sb.table("blockades").select("*") \
-                .eq("sim_run_id", sim_run_id) \
+                .eq("sim_run_id", run_id) \
                 .eq("status", "active").execute()
             blockades = []
             for row in (res.data or []):
@@ -1170,20 +1311,22 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             logger.debug("observatory_blockades query failed: %s", e)
             return {"blockades": [], "source": "error", "error": str(e), "scenario": scenario}
 
-    def _observatory_events(self, limit: int, scenario: str):
-        """Return most recent N events from observatory_events (DB)."""
+    def _observatory_events(self, limit: int, scenario: str, sim_run_id: Optional[str] = None):
+        """Return most recent N events from observatory_events for the resolved run."""
         sb = _supabase_or_none()
         if sb is None:
             return {"events": [], "source": "none", "scenario": scenario}
+        run_id = self._resolve_observatory_run(scenario, sim_run_id)
         try:
+            q = sb.table("observatory_events").select("*")
+            if run_id:
+                q = q.eq("sim_run_id", run_id)
             res = (
-                sb.table("observatory_events")
-                .select("*")
-                .order("created_at", desc=True)
-                .limit(max(1, min(limit, 500)))
-                .execute()
+                q.order("created_at", desc=True)
+                 .limit(max(1, min(limit, 500)))
+                 .execute()
             )
-            return {"events": res.data or [], "source": "db", "scenario": scenario}
+            return {"events": res.data or [], "source": "db", "scenario": scenario, "sim_run_id": run_id}
         except Exception as e:
             logger.debug("observatory_events query failed: %s", e)
             return {"events": [], "source": "error", "error": str(e), "scenario": scenario}

@@ -431,8 +431,385 @@ class CombatResult(BaseModel):
     error: Optional[str] = None
 
 
+# ---------------------------------------------------------------------------
+# M2 — Ground Combat (CONTRACT_GROUND_COMBAT v1.0) — canonical pure dice fn
+# ---------------------------------------------------------------------------
+
+
+class GroundCombatModifier(BaseModel):
+    """A single modifier applied to a ground combat exchange."""
+    side: str  # "attacker" | "defender"
+    value: int  # +1, -1, etc.
+    reason: str  # human-readable explanation for the visualization
+
+
+class GroundCombatResult(BaseModel):
+    """M2 — pure RISK ground combat result. CONTRACT_GROUND_COMBAT v1.0 §5."""
+    combat_type: str = "ground"
+    attacker_rolls: list[list[int]] = Field(default_factory=list)
+    defender_rolls: list[list[int]] = Field(default_factory=list)
+    attacker_losses: list[str] = Field(default_factory=list)
+    defender_losses: list[str] = Field(default_factory=list)
+    modifier_breakdown: list[GroundCombatModifier] = Field(default_factory=list)
+    summed_attacker_bonus: int = 0
+    summed_defender_bonus: int = 0
+    exchanges: int = 0
+    rolls_source: str = "random"
+    narrative: str = ""
+    success: bool = False  # True iff attacker won
+
+
+def resolve_ground_combat(
+    attackers: list[dict],
+    defenders: list[dict],
+    modifiers: list[dict] | None = None,
+    precomputed_rolls: dict | None = None,
+    max_exchanges: int = 50,
+) -> GroundCombatResult:
+    """Resolve a single ground engagement — RISK iterative dice.
+
+    Per CONTRACT_GROUND_COMBAT v1.0 §5:
+      - Attacker rolls min(3, len(attackers_alive)) dice each exchange
+      - Defender rolls min(2, len(defenders_alive)) dice each exchange
+      - Sort each list descending, apply highest-die modifiers (cap at 6)
+      - Re-sort, compare highest-vs-highest then second-vs-second
+      - Ties go to defender
+      - Loop until one side has zero units
+      - Per-exchange dice stored as list-of-lists (NOT flattened) for replay
+
+    ``modifiers`` is a list of ``{side, value, reason}`` dicts. Sums are
+    applied to the highest die per side per exchange. The full list is
+    echoed in the result for the visualization.
+
+    ``precomputed_rolls`` (optional) lets a moderator (or unit test) supply
+    deterministic dice instead of random. Shape:
+        {"attacker": [[5,3,2], [6,4]], "defender": [[6,2], [4,1]]}
+    Each inner list is one exchange. If the precomputed list runs out
+    before combat ends, remaining exchanges fall back to random.
+
+    Returns ``GroundCombatResult`` with full per-exchange dice + modifier
+    breakdown for the Observatory combat panel.
+    """
+    import random as _random
+
+    modifiers = modifiers or []
+    breakdown = [GroundCombatModifier(**m) for m in modifiers]
+    sum_atk = sum(m.value for m in breakdown if m.side == "attacker")
+    sum_def = sum(m.value for m in breakdown if m.side == "defender")
+
+    if not attackers or not defenders:
+        return GroundCombatResult(
+            modifier_breakdown=breakdown,
+            summed_attacker_bonus=sum_atk,
+            summed_defender_bonus=sum_def,
+            narrative="No combat: one side has zero units.",
+            success=False,
+        )
+
+    pre_atk = (precomputed_rolls or {}).get("attacker") or []
+    pre_def = (precomputed_rolls or {}).get("defender") or []
+    rolls_source = "moderator" if (pre_atk or pre_def) else "random"
+
+    attackers_alive = list(attackers)
+    defenders_alive = list(defenders)
+    attacker_losses: list[str] = []
+    defender_losses: list[str] = []
+    all_a_rolls: list[list[int]] = []
+    all_d_rolls: list[list[int]] = []
+    exchanges = 0
+
+    while attackers_alive and defenders_alive:
+        exchanges += 1
+        a_n = min(len(attackers_alive), 3)
+        d_n = min(len(defenders_alive), 2)
+
+        # Source dice from precomputed if available, else random
+        if exchanges - 1 < len(pre_atk) and pre_atk[exchanges - 1] is not None:
+            a_rolls = list(pre_atk[exchanges - 1])[:a_n]
+            # If precomputed is short, top up with random
+            while len(a_rolls) < a_n:
+                a_rolls.append(_random.randint(1, 6))
+        else:
+            a_rolls = [_random.randint(1, 6) for _ in range(a_n)]
+
+        if exchanges - 1 < len(pre_def) and pre_def[exchanges - 1] is not None:
+            d_rolls = list(pre_def[exchanges - 1])[:d_n]
+            while len(d_rolls) < d_n:
+                d_rolls.append(_random.randint(1, 6))
+        else:
+            d_rolls = [_random.randint(1, 6) for _ in range(d_n)]
+
+        a_rolls.sort(reverse=True)
+        d_rolls.sort(reverse=True)
+        all_a_rolls.append(list(a_rolls))
+        all_d_rolls.append(list(d_rolls))
+
+        # Apply modifiers to the highest die of each side (cap at 6, floor at 1)
+        a_mod = list(a_rolls)
+        d_mod = list(d_rolls)
+        if a_mod and sum_atk:
+            a_mod[0] = max(1, min(6, a_mod[0] + sum_atk))
+            a_mod.sort(reverse=True)
+        if d_mod and sum_def:
+            d_mod[0] = max(1, min(6, d_mod[0] + sum_def))
+            d_mod.sort(reverse=True)
+
+        pairs = min(len(a_mod), len(d_mod))
+        for i in range(pairs):
+            if a_mod[i] > d_mod[i]:
+                # defender loses one unit (last one out for stable removal)
+                lost = defenders_alive.pop()
+                defender_losses.append(lost["unit_code"])
+            else:
+                # attacker loses (defender wins ties)
+                lost = attackers_alive.pop()
+                attacker_losses.append(lost["unit_code"])
+
+        if exchanges >= max_exchanges:
+            break
+
+    success = (len(defenders_alive) == 0)
+    narrative = (
+        f"Ground combat ({exchanges} exchanges, "
+        f"atk_bonus={sum_atk:+d}, def_bonus={sum_def:+d}): "
+        f"attackers -{len(attacker_losses)}, defenders -{len(defender_losses)}. "
+        f"{'ATTACKER WINS' if success else 'DEFENDER HOLDS'}"
+    )
+
+    return GroundCombatResult(
+        attacker_rolls=all_a_rolls,
+        defender_rolls=all_d_rolls,
+        attacker_losses=attacker_losses,
+        defender_losses=defender_losses,
+        modifier_breakdown=breakdown,
+        summed_attacker_bonus=sum_atk,
+        summed_defender_bonus=sum_def,
+        exchanges=exchanges,
+        rolls_source=rolls_source,
+        narrative=narrative,
+        success=success,
+    )
+
+
+# ---------------------------------------------------------------------------
+# M3 — Air Strikes (CONTRACT_AIR_STRIKES v1.0) — canonical pure function
+# ---------------------------------------------------------------------------
+
+
+class AirStrikeShot(BaseModel):
+    """One per-attacker outcome in an air strike batch."""
+    attacker_code: str
+    hit_probability: float
+    hit_roll: float
+    hit: bool
+    downed_probability: float
+    downed_roll: float
+    downed: bool
+    target_destroyed: Optional[str] = None
+
+
+class AirStrikeResult(BaseModel):
+    """M3 — air strike result. CONTRACT_AIR_STRIKES v1.0 §4."""
+    combat_type: str = "air_strike"
+    shots: list[AirStrikeShot] = Field(default_factory=list)
+    attacker_losses: list[str] = Field(default_factory=list)
+    defender_losses: list[str] = Field(default_factory=list)
+    modifier_breakdown: list["GroundCombatModifier"] = Field(default_factory=list)
+    rolls_source: str = "random"
+    narrative: str = ""
+    success: bool = False  # True iff at least one hit
+
+
+def resolve_air_strike(
+    attackers: list[dict],
+    defenders: list[dict],
+    ad_units: Optional[list[dict]] = None,
+    air_superiority_count: int = 0,
+    precomputed_rolls: Optional[dict] = None,
+) -> AirStrikeResult:
+    """Resolve a tactical air strike batch — CONTRACT_AIR_STRIKES v1.0 §4.
+
+    Each attacker rolls independently:
+      - hit_prob = clamp([3%, 20%], 0.12 + 0.02 * air_sup) * (0.5 if AD else 1)
+      - downed_prob = 0.15 if AD present else 0
+    """
+    import random as _random
+
+    ad_units = ad_units or []
+    ad_present = any((u.get("status") or "").lower() != "destroyed" for u in ad_units)
+
+    # Per CARD_FORMULAS D.2: 12% base, 6% with AD (halved). No air superiority
+    # bonus. No clamp. All probabilities Template-customizable.
+    # NOTE: air_superiority_count parameter is KEPT in the signature for future
+    # Template customization but has zero effect per canonical CARD.
+    base_hit = 0.12
+    hit_prob = base_hit * 0.5 if ad_present else base_hit
+    downed_prob = 0.15 if ad_present else 0.0
+
+    # Modifier breakdown for the visualization (informational, not arithmetic)
+    breakdown: list[GroundCombatModifier] = []
+    if ad_present:
+        breakdown.append(GroundCombatModifier(
+            side="defender", value=-50,
+            reason=f"AD coverage halves hit probability ({len(ad_units)} AD units)",
+        ))
+        breakdown.append(GroundCombatModifier(
+            side="defender", value=15,
+            reason="AD downs attacker (15% per shot if AD covers)",
+        ))
+
+    pre_shots = (precomputed_rolls or {}).get("shots") or []
+    rolls_source = "moderator" if pre_shots else "random"
+
+    shots: list[AirStrikeShot] = []
+    attacker_losses: list[str] = []
+    defender_losses: list[str] = []
+    living_defenders = list(defenders)
+
+    for i, au in enumerate(attackers):
+        # hit roll
+        if i < len(pre_shots) and "hit_roll" in (pre_shots[i] or {}):
+            hit_roll = float(pre_shots[i]["hit_roll"])
+        else:
+            hit_roll = _random.random()
+        hit = hit_roll < hit_prob
+
+        target_code: Optional[str] = None
+        if hit and living_defenders:
+            tgt = next(
+                (d for d in living_defenders
+                 if (d.get("unit_type") or "").lower() != "air_defense"),
+                living_defenders[0],
+            )
+            target_code = tgt["unit_code"]
+            defender_losses.append(target_code)
+            living_defenders = [d for d in living_defenders if d["unit_code"] != target_code]
+
+        # downed roll
+        if i < len(pre_shots) and "downed_roll" in (pre_shots[i] or {}):
+            downed_roll = float(pre_shots[i]["downed_roll"])
+        else:
+            downed_roll = _random.random() if ad_present else 1.0
+        downed = ad_present and downed_roll < downed_prob
+
+        if downed:
+            attacker_losses.append(au["unit_code"])
+
+        shots.append(AirStrikeShot(
+            attacker_code=au["unit_code"],
+            hit_probability=round(hit_prob, 4),
+            hit_roll=round(hit_roll, 4),
+            hit=hit,
+            downed_probability=round(downed_prob, 4),
+            downed_roll=round(downed_roll, 4),
+            downed=downed,
+            target_destroyed=target_code,
+        ))
+
+    n_hit = sum(1 for s in shots if s.hit)
+    n_down = len(attacker_losses)
+    narrative = (
+        f"Air strike: {len(shots)} sorties, {n_hit} hits, "
+        f"{n_down} attacker losses to AD"
+        + (f" (AD covers target zone, hit_prob={hit_prob:.2f})" if ad_present
+           else f" (no AD, hit_prob={hit_prob:.2f})")
+    )
+
+    return AirStrikeResult(
+        shots=shots,
+        attacker_losses=attacker_losses,
+        defender_losses=defender_losses,
+        modifier_breakdown=breakdown,
+        rolls_source=rolls_source,
+        narrative=narrative,
+        success=(n_hit > 0),
+    )
+
+
+# ---------------------------------------------------------------------------
+# M4 — Naval Combat (CONTRACT_NAVAL_COMBAT v1.0) — canonical 1v1 dice
+# ---------------------------------------------------------------------------
+
+
+class NavalCombatResultM4(BaseModel):
+    """M4 — 1v1 naval combat result. CONTRACT_NAVAL_COMBAT v1.0 §4."""
+    combat_type: str = "naval"
+    attacker_code: str
+    defender_code: str
+    attacker_roll: int
+    defender_roll: int
+    attacker_modified: int
+    defender_modified: int
+    winner: str  # "attacker" | "defender"
+    destroyed_unit: str
+    modifier_breakdown: list[GroundCombatModifier] = Field(default_factory=list)
+    rolls_source: str = "random"
+    narrative: str = ""
+
+
+def resolve_naval_combat(
+    attacker: dict,
+    defender: dict,
+    modifiers: list[dict] | None = None,
+    precomputed_rolls: dict | None = None,
+) -> NavalCombatResultM4:
+    """Resolve a 1v1 naval engagement — CONTRACT_NAVAL_COMBAT v1.0 §4.
+
+    Each side rolls 1d6 + modifiers. Higher wins. Ties → defender.
+    Loser destroyed.
+
+    ``precomputed_rolls``: ``{"attacker": 5, "defender": 3}`` — single
+    int per side. Default ``None`` = random.
+    """
+    import random as _random
+
+    modifiers = modifiers or []
+    breakdown = [GroundCombatModifier(**m) for m in modifiers]
+    sum_atk = sum(m.value for m in breakdown if m.side == "attacker")
+    sum_def = sum(m.value for m in breakdown if m.side == "defender")
+
+    pre = precomputed_rolls or {}
+    rolls_source = "moderator" if ("attacker" in pre or "defender" in pre) else "random"
+
+    a_roll = pre.get("attacker") if isinstance(pre.get("attacker"), int) else _random.randint(1, 6)
+    d_roll = pre.get("defender") if isinstance(pre.get("defender"), int) else _random.randint(1, 6)
+
+    a_mod = max(1, min(6, a_roll + sum_atk))
+    d_mod = max(1, min(6, d_roll + sum_def))
+
+    # Higher wins. Ties → defender.
+    if a_mod > d_mod:
+        winner = "attacker"
+        destroyed = defender["unit_code"]
+    else:
+        winner = "defender"
+        destroyed = attacker["unit_code"]
+
+    narrative = (
+        f"Naval 1v1: {attacker['unit_code']} ({a_roll}"
+        + (f"{sum_atk:+d}={a_mod}" if sum_atk else "")
+        + f") vs {defender['unit_code']} ({d_roll}"
+        + (f"{sum_def:+d}={d_mod}" if sum_def else "")
+        + f") → {winner} wins, {destroyed} destroyed"
+    )
+
+    return NavalCombatResultM4(
+        attacker_code=attacker["unit_code"],
+        defender_code=defender["unit_code"],
+        attacker_roll=a_roll,
+        defender_roll=d_roll,
+        attacker_modified=a_mod,
+        defender_modified=d_mod,
+        winner=winner,
+        destroyed_unit=destroyed,
+        modifier_breakdown=breakdown,
+        rolls_source=rolls_source,
+        narrative=narrative,
+    )
+
+
 class NavalCombatResult(BaseModel):
-    """Result of ship-vs-ship naval combat."""
+    """[LEGACY v1] Result of ship-vs-ship naval combat."""
     type: str = "naval_combat"
     attacker: str
     defender: str
@@ -446,8 +823,12 @@ class NavalCombatResult(BaseModel):
     error: Optional[str] = None
 
 
-class AirStrikeResult(BaseModel):
-    """Result of tactical air strike."""
+class AirStrikeResultLegacyV1(BaseModel):
+    """[LEGACY v1, used by resolve_air_strike_legacy_v1] Country-level result.
+
+    Renamed in M3 (2026-04-12) to free up `AirStrikeResult` for the
+    canonical M3 unit-level shape.
+    """
     type: str = "air_strike"
     country: str
     target_zone: str
@@ -814,9 +1195,13 @@ def resolve_attack(inp: AttackInput) -> CombatResult:
 # 2. NAVAL COMBAT — ship vs ship RISK dice
 # ===========================================================================
 
-def resolve_naval_combat(inp: NavalCombatInput) -> NavalCombatResult:
-    """Ship vs ship combat in a sea zone.
+def resolve_naval_combat_legacy_v1(inp: NavalCombatInput) -> NavalCombatResult:
+    """[LEGACY v1, unused after M4 2026-04-12] Country-level naval combat.
 
+    Renamed in M4 to free up ``resolve_naval_combat`` for the canonical
+    M4 1v1 unit-level function. No callers in production code.
+
+    Original: Ship vs ship combat in a sea zone.
     Same RISK dice as ground: 1d6 per pair, attacker needs >= defender + 1.
     No terrain modifiers (open sea). Carrier air support applies (+1).
     Sunk ship = all embarked units (ground + air) also lost.
@@ -910,9 +1295,14 @@ def resolve_naval_combat(inp: NavalCombatInput) -> NavalCombatResult:
 # 3. AIR COMBAT — AD interception, carrier ops, airfield vulnerability
 # ===========================================================================
 
-def resolve_air_strike(inp: AirStrikeInput) -> AirStrikeResult:
-    """Full tactical air combat system.
+def resolve_air_strike_legacy_v1(inp: AirStrikeInput) -> "AirStrikeResultLegacyV1":
+    """[LEGACY v1, unused after M3 2026-04-12] Country-level air combat.
 
+    Renamed in M3 (2026-04-12) to avoid collision with the canonical
+    M3 ``resolve_air_strike(attackers, defenders, ad_units, …)``.
+    Kept here for reference; no callers in production code.
+
+    Original docstring:
     Air units strike a target zone. Defender's air defense intercepts with
     degrading probability per AD unit. Intercepted air units are DESTROYED.
     Surviving air units strike at 15% hit rate per unit.
@@ -924,7 +1314,7 @@ def resolve_air_strike(inp: AirStrikeInput) -> AirStrikeResult:
     """
     available_air = inp.attacker.tactical_air
     if available_air <= 0:
-        return AirStrikeResult(
+        return AirStrikeResultLegacyV1(
             country=inp.country_id,
             target_zone=inp.target_zone_id,
             error=f"{inp.country_id} has no tactical air units",
@@ -968,7 +1358,7 @@ def resolve_air_strike(inp: AirStrikeInput) -> AirStrikeResult:
         if random.random() < AIR_STRIKE_HIT_PROB:
             ground_destroyed += 1
 
-    return AirStrikeResult(
+    return AirStrikeResultLegacyV1(
         country=inp.country_id,
         target_zone=inp.target_zone_id,
         air_sent=air_sent,

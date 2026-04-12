@@ -92,7 +92,7 @@ def _seed_round_from_r0(client, scenario_id: str, round_num: int) -> None:
         for i in range(0, len(rows), 50):
             client.table("country_states_per_round").upsert(
                 rows[i : i + 50],
-                on_conflict="scenario_id,round_num,country_code",
+                on_conflict="sim_run_id,round_num,country_code",
             ).execute()
 
     us0 = (
@@ -111,7 +111,7 @@ def _seed_round_from_r0(client, scenario_id: str, round_num: int) -> None:
         for i in range(0, len(rows), 200):
             client.table("unit_states_per_round").upsert(
                 rows[i : i + 200],
-                on_conflict="scenario_id,round_num,unit_code",
+                on_conflict="sim_run_id,round_num,unit_code",
             ).execute()
 
 
@@ -299,6 +299,15 @@ def test_movement_vertical_slice_ai_full_chain(client, scenario_id):
         post = _get_unit(client, scenario_id, 201, sample_code)
         assert post["status"] == (pre["status"] if pre else "reserve")
         print(f"  [no_change path] {sample_code} preserved")
+
+    # ---- 6. (F1) The Observatory now lists sim_runs directly. The legacy
+    # archived run still owns the demo rows at R200-201 since this test runs
+    # against scenario_code='start_one' (which the engine resolves to the
+    # legacy bucket). A future iteration of this test should call
+    # ``sim_run_manager.create_run(...)`` + ``finalize_run(..., status='visible_for_review')``
+    # to give the demo its own dedicated run, but the existing R200-201 rows
+    # remain browseable through the Observatory selector via the archived
+    # legacy run entry.
 
     print(
         "\n  [ACCEPTANCE GATE PASSED] "

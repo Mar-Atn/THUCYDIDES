@@ -32,19 +32,18 @@ logger = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
-def _resolve_scenario_id_cached(scenario_code: str) -> Optional[str]:
-    """Map scenario code -> scenario_id UUID. Used by live-state queries."""
-    client = get_client()
-    result = (
-        client.table("sim_scenarios")
-        .select("id")
-        .eq("code", scenario_code)
-        .limit(1)
-        .execute()
-    )
-    if not result.data:
+def _resolve_sim_run_id_cached(scenario_code: str) -> Optional[str]:
+    """Map scenario code -> sim_run_id (legacy archived run for that scenario).
+
+    F1 (2026-04-11): live-state queries key by sim_run_id, not scenario_id.
+    For pre-F1 callers that only have a scenario code, we resolve to the
+    archived legacy run.
+    """
+    try:
+        from engine.services.sim_run_manager import resolve_sim_run_id
+        return resolve_sim_run_id(scenario_code)
+    except Exception:
         return None
-    return result.data[0]["id"]
 
 
 def _load_live_units(
@@ -55,14 +54,14 @@ def _load_live_units(
     Returns None if no live snapshot exists (caller should fall back to seed).
     If ``country_code`` is given, filters to that country only.
     """
-    scenario_id = _resolve_scenario_id_cached(scenario_code)
-    if not scenario_id:
+    sim_run_id = _resolve_sim_run_id_cached(scenario_code)
+    if not sim_run_id:
         return None
     client = get_client()
     q = (
         client.table("unit_states_per_round")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num)
     )
     if country_code:
@@ -80,14 +79,14 @@ def _load_live_country_state(
 
     Returns None if no live snapshot exists (caller should fall back to seed).
     """
-    scenario_id = _resolve_scenario_id_cached(scenario_code)
-    if not scenario_id:
+    sim_run_id = _resolve_sim_run_id_cached(scenario_code)
+    if not sim_run_id:
         return None
     client = get_client()
     res = (
         client.table("country_states_per_round")
         .select("*")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("round_num", round_num)
         .eq("country_code", country_code)
         .limit(1)
@@ -1174,19 +1173,25 @@ def commit_action(
         validation_status = "warned" if warnings else "passed"
         validation_notes = "; ".join(warnings) if warnings else None
 
-        # Resolve scenario_id
-        client = get_client()
-        scen_result = (
-            client.table("sim_scenarios")
-            .select("id")
-            .eq("code", scenario_code)
-            .execute()
+        # Resolve sim_run_id (F1) + denormed scenario_id
+        from engine.services.sim_run_manager import (
+            resolve_sim_run_id, get_scenario_id_for_run,
         )
-        scenario_id = scen_result.data[0]["id"] if scen_result.data else None
+        client = get_client()
+        try:
+            sim_run_id = resolve_sim_run_id(scenario_code)
+        except ValueError:
+            return {
+                "success": False,
+                "validation_status": "rejected",
+                "validation_notes": f"Cannot resolve '{scenario_code}' to a sim_run",
+            }
+        scenario_id = get_scenario_id_for_run(sim_run_id)
 
         rationale = payload_dict.get("rationale", "")
 
         insert_row = {
+            "sim_run_id": sim_run_id,
             "scenario_id": scenario_id,
             "country_code": country_code,
             "action_type": action_type,
@@ -1223,18 +1228,17 @@ def commit_action(
 # Tools 14-16: persistent agent memory (Stage 5)
 # ---------------------------------------------------------------------------
 
-def _resolve_scenario_id(scenario_code: str) -> Optional[str]:
-    """Map scenario code to scenario_id UUID."""
-    client = get_client()
-    result = (
-        client.table("sim_scenarios")
-        .select("id")
-        .eq("code", scenario_code)
-        .execute()
-    )
-    if not result.data:
+def _resolve_sim_run_id(scenario_code: str) -> Optional[str]:
+    """Map scenario code to sim_run_id (legacy archived run for the scenario).
+
+    F1: agent_memories is now keyed by sim_run_id. Pre-F1 callers still pass
+    a scenario code and get the archived legacy run.
+    """
+    try:
+        from engine.services.sim_run_manager import resolve_sim_run_id as _r
+        return _r(scenario_code)
+    except Exception:
         return None
-    return result.data[0]["id"]
 
 
 def read_memory(
@@ -1247,14 +1251,14 @@ def read_memory(
     Returns {exists: bool, content: str|None, round_num: int|None, updated_at: str|None}.
     """
     try:
-        scenario_id = _resolve_scenario_id(scenario_code)
-        if not scenario_id:
+        sim_run_id = _resolve_sim_run_id(scenario_code)
+        if not sim_run_id:
             return {"error": f"Unknown scenario: {scenario_code}"}
         client = get_client()
         result = (
             client.table("agent_memories")
             .select("content,round_num,updated_at")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("country_code", country_code)
             .eq("memory_key", memory_key)
             .execute()
@@ -1280,14 +1284,14 @@ def list_my_memories(
 ) -> dict:
     """Return all memory keys for this agent + timestamps + previews (first 200 chars)."""
     try:
-        scenario_id = _resolve_scenario_id(scenario_code)
-        if not scenario_id:
+        sim_run_id = _resolve_sim_run_id(scenario_code)
+        if not sim_run_id:
             return {"error": f"Unknown scenario: {scenario_code}"}
         client = get_client()
         result = (
             client.table("agent_memories")
             .select("memory_key,content,round_num,updated_at")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("country_code", country_code)
             .order("updated_at", desc=True)
             .execute()
@@ -1322,9 +1326,14 @@ def write_memory(
 ) -> dict:
     """UPSERT a memory row for this agent. Returns {success, memory_id}."""
     try:
-        scenario_id = _resolve_scenario_id(scenario_code)
-        if not scenario_id:
+        from engine.services.sim_run_manager import (
+            resolve_sim_run_id, get_scenario_id_for_run,
+        )
+        try:
+            sim_run_id = resolve_sim_run_id(scenario_code)
+        except ValueError:
             return {"success": False, "error": f"Unknown scenario: {scenario_code}"}
+        scenario_id = get_scenario_id_for_run(sim_run_id)
         if not memory_key or not isinstance(memory_key, str):
             return {"success": False, "error": "memory_key is required"}
         if content is None:
@@ -1332,6 +1341,7 @@ def write_memory(
         from datetime import datetime, timezone
         client = get_client()
         row = {
+            "sim_run_id": sim_run_id,
             "scenario_id": scenario_id,
             "country_code": country_code,
             "memory_key": memory_key,
@@ -1339,10 +1349,10 @@ def write_memory(
             "round_num": round_num,
             "updated_at": datetime.now(timezone.utc).isoformat(),
         }
-        # UPSERT on composite unique constraint
+        # UPSERT on composite unique constraint (F1: now keyed by sim_run_id)
         result = (
             client.table("agent_memories")
-            .upsert(row, on_conflict="scenario_id,country_code,memory_key")
+            .upsert(row, on_conflict="sim_run_id,country_code,memory_key")
             .execute()
         )
         data = (result.data or [{}])[0]

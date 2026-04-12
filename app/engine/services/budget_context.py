@@ -55,15 +55,21 @@ def build_budget_context(
     country_code: str,
     scenario_code: str,
     round_num: int,
+    sim_run_id: str | None = None,
 ) -> dict:
     """Assemble the full context package for a budget decision.
 
     Returns a dict matching CONTRACT_BUDGET v1.1 §3.2. Pure read — no DB
     mutations. If ``round_num`` has no snapshot row yet, falls back to
     ``round_num - 1``.
+
+    F1 (2026-04-11): ``sim_run_id`` may be passed explicitly to read from an
+    isolated run. If omitted, resolves to the legacy archived run for the
+    scenario (so pre-F1 callers that only pass ``scenario_code`` still work).
     """
+    from engine.services.sim_run_manager import resolve_sim_run_id
     client = get_client()
-    scenario_id = _get_scenario_id(client, scenario_code)
+    sim_run_id = sim_run_id or resolve_sim_run_id(scenario_code)
 
     base_countries = _load_base_countries(client)
     if country_code not in base_countries:
@@ -71,7 +77,7 @@ def build_budget_context(
 
     # Load snapshot for target round, fall back to N-1
     snapshot_round, rs_row = _load_snapshot(
-        client, scenario_id, country_code, round_num
+        client, sim_run_id, country_code, round_num
     )
 
     country = _merge_to_engine_dict(base_countries[country_code], rs_row or {})
@@ -84,7 +90,7 @@ def build_budget_context(
 
     # Revenue forecast — compute oil, then call calc_revenue on a copy
     revenue_forecast = _compute_revenue_forecast(
-        client, scenario_id, base_countries, country_code, round_num
+        client, sim_run_id, base_countries, country_code, round_num
     )
 
     # Mandatory costs
@@ -150,6 +156,7 @@ def build_budget_context(
             scenario_code=scenario_code,
             round_num=round_num,
             budget_override=None,
+            sim_run_id=sim_run_id,
         )
     except Exception as e:  # pragma: no cover — defensive
         logger.warning("no-change dry-run failed for %s R%d: %s",
@@ -180,6 +187,7 @@ def dry_run_budget(
     scenario_code: str,
     round_num: int,
     budget_override: dict | None = None,
+    sim_run_id: str | None = None,
 ) -> dict:
     """Run the economic engine in dry-run mode — NO DB writes.
 
@@ -189,16 +197,20 @@ def dry_run_budget(
     budget step, and returns the result as a flat dict.
 
     The loaded country dict is local to this call and discarded on return.
+
+    F1: ``sim_run_id`` may be passed explicitly; otherwise resolves to the
+    legacy archived run for ``scenario_code``.
     """
+    from engine.services.sim_run_manager import resolve_sim_run_id
     client = get_client()
-    scenario_id = _get_scenario_id(client, scenario_code)
+    sim_run_id = sim_run_id or resolve_sim_run_id(scenario_code)
 
     base_countries = _load_base_countries(client)
     if country_code not in base_countries:
         raise ValueError(f"Unknown country '{country_code}'")
 
     snapshot_round, rs_row = _load_snapshot(
-        client, scenario_id, country_code, round_num
+        client, sim_run_id, country_code, round_num
     )
 
     # Build full-world engine dict (so calc_oil_price sees all producers)
@@ -412,7 +424,7 @@ def _load_base_countries(client) -> dict[str, dict]:
 
 
 def _load_snapshot(
-    client, scenario_id: str, country_code: str, round_num: int,
+    client, sim_run_id: str, country_code: str, round_num: int,
 ) -> tuple[int, dict | None]:
     """Return (actual_round_used, row_dict_or_None).
 
@@ -424,7 +436,7 @@ def _load_snapshot(
         res = (
             client.table("country_states_per_round")
             .select("*")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("round_num", candidate)
             .eq("country_code", country_code)
             .limit(1)
@@ -490,7 +502,7 @@ def _normalize_budget(budget: dict) -> dict:
 
 
 def _compute_revenue_forecast(
-    client, scenario_id: str, base_countries: dict,
+    client, sim_run_id: str, base_countries: dict,
     country_code: str, round_num: int,
 ) -> dict:
     """Independent revenue forecast using calc_revenue on a fresh copy.
@@ -499,7 +511,7 @@ def _compute_revenue_forecast(
     """
     # Build a minimal countries dict — just the target country is enough for
     # calc_revenue (it only touches countries[country_code]).
-    _, rs_row = _load_snapshot(client, scenario_id, country_code, round_num)
+    _, rs_row = _load_snapshot(client, sim_run_id, country_code, round_num)
     country = _merge_to_engine_dict(base_countries[country_code], rs_row or {})
 
     # Compute oil revenue (needs the producer set; pass a minimal world)

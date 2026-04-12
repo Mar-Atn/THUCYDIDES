@@ -133,13 +133,14 @@ def _set_budget_row(
 ) -> None:
     """Directly update the country_states_per_round row with a budget,
     bypassing resolve_round. This is what the context assembler reads."""
+    from tests._sim_run_helper import legacy_run_id
     client.table("country_states_per_round").update(
         {
             "budget_social_pct": social_pct,
             "budget_production": production,
             "budget_research": research,
         }
-    ).eq("scenario_id", scenario_id).eq("round_num", round_num).eq(
+    ).eq("sim_run_id", legacy_run_id()).eq("round_num", round_num).eq(
         "country_code", country
     ).execute()
 
@@ -149,6 +150,7 @@ def _insert_set_budget_decision(
     social_pct: float, production: dict, research: dict,
 ) -> None:
     """Insert a decision row so resolve_round + tick will apply it."""
+    from tests._sim_run_helper import legacy_run_id
     payload = {
         "action_type": "set_budget",
         "country_code": country,
@@ -167,6 +169,7 @@ def _insert_set_budget_decision(
     }
     client.table("agent_decisions").insert(
         {
+            "sim_run_id": legacy_run_id(),
             "scenario_id": scenario_id,
             "country_code": country,
             "action_type": "set_budget",

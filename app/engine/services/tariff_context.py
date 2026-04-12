@@ -34,15 +34,21 @@ def build_tariff_context(
     country_code: str,
     scenario_code: str,
     round_num: int,
+    sim_run_id: str | None = None,
 ) -> dict:
     """Assemble the full context package for a tariff decision.
 
     Returns a dict matching CONTRACT_TARIFFS v1.0 §3. Pure read — no DB
     mutations. If ``round_num`` has no snapshot row yet, falls back to
     ``round_num - 1``.
+
+    F1 (2026-04-11): ``sim_run_id`` may be passed explicitly to target an
+    isolated run; otherwise resolves to the legacy archived run for the
+    scenario.
     """
+    from engine.services.sim_run_manager import resolve_sim_run_id
     client = get_client()
-    scenario_id = _get_scenario_id(client, scenario_code)
+    sim_run_id = sim_run_id or resolve_sim_run_id(scenario_code)
 
     base_countries = _load_base_countries(client)
     if country_code not in base_countries:
@@ -50,7 +56,7 @@ def build_tariff_context(
 
     # Load snapshot for target round, fall back to N-1
     snapshot_round, rs_row = _load_snapshot(
-        client, scenario_id, country_code, round_num
+        client, sim_run_id, country_code, round_num
     )
 
     country = _merge_to_engine_dict(base_countries[country_code], rs_row or {})
@@ -173,7 +179,7 @@ def _load_base_countries(client) -> dict[str, dict]:
 
 
 def _load_snapshot(
-    client, scenario_id: str, country_code: str, round_num: int,
+    client, sim_run_id: str, country_code: str, round_num: int,
 ) -> tuple[int, dict | None]:
     """Return (actual_round_used, row_dict_or_None).
 
@@ -185,7 +191,7 @@ def _load_snapshot(
         res = (
             client.table("country_states_per_round")
             .select("*")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("round_num", candidate)
             .eq("country_code", country_code)
             .limit(1)

@@ -42,12 +42,16 @@ def build_opec_context(
     country_code: str,
     scenario_code: str,
     round_num: int,
+    sim_run_id: str | None = None,
 ) -> dict:
     """Assemble the full context package for an OPEC+ production decision.
 
     Returns a dict matching CONTRACT_OPEC v1.0 §3. Pure read — no DB
     mutations. Raises ``ValueError`` if the country is not in the canonical
     OPEC+ roster.
+
+    F1: if ``sim_run_id`` is provided, reads from that isolated run; else
+    resolves to the legacy archived run for ``scenario_code``.
     """
     country_code = (country_code or "").strip().lower()
 
@@ -57,9 +61,9 @@ def build_opec_context(
             f"{sorted(CANONICAL_OPEC_MEMBERS)}"
         )
 
+    from engine.services.sim_run_manager import resolve_sim_run_id
     client = get_client()
-    scenario_id = _get_scenario_id(client, scenario_code)
-    sim_run_id = _get_sim_run_id()
+    sim_run_id = sim_run_id or resolve_sim_run_id(scenario_code)
 
     base_countries = _load_base_countries(client)
     if country_code not in base_countries:
@@ -67,10 +71,10 @@ def build_opec_context(
 
     # Load the current-round snapshot for every country so we can read
     # opec_production (the live OPEC+ level per member).
-    cs_rows = _load_country_states(client, scenario_id, round_num)
+    cs_rows = _load_country_states(client, sim_run_id, round_num)
     if not cs_rows:
         # Fall back to previous round if the target round isn't seeded yet.
-        cs_rows = _load_country_states(client, scenario_id, max(0, round_num - 1))
+        cs_rows = _load_country_states(client, sim_run_id, max(0, round_num - 1))
 
     # Merge base + snapshot into engine-shaped dicts keyed by country_code.
     all_countries: dict[str, dict] = {}
@@ -84,15 +88,15 @@ def build_opec_context(
 
     # Previous-round oil price (for "my oil revenue last round" calc).
     prev_round = max(0, round_num - 1)
-    prev_oil_price = _load_oil_price(client, scenario_id, prev_round)
+    prev_oil_price = _load_oil_price(client, sim_run_id, prev_round)
     if prev_oil_price is None:
         # Try current round (e.g. round 0 case — no prior round).
-        prev_oil_price = _load_oil_price(client, scenario_id, round_num)
+        prev_oil_price = _load_oil_price(client, sim_run_id, round_num)
     if prev_oil_price is None:
         prev_oil_price = 80.0  # template default
 
     # Current oil price: same — prefer current round, else prev.
-    current_oil_price = _load_oil_price(client, scenario_id, round_num)
+    current_oil_price = _load_oil_price(client, sim_run_id, round_num)
     if current_oil_price is None:
         current_oil_price = prev_oil_price
 
@@ -128,7 +132,7 @@ def build_opec_context(
     }
 
     # --- 3. oil_price_history (rounds 0..round_num-1) ---------------------
-    oil_price_history = _load_oil_price_history(client, scenario_id, round_num)
+    oil_price_history = _load_oil_price_history(client, sim_run_id, round_num)
 
     # --- 4. oil_producers_table -------------------------------------------
     oil_producers_table = _build_producers_table(
@@ -206,7 +210,7 @@ def _load_base_countries(client) -> dict[str, dict]:
 
 
 def _load_country_states(
-    client, scenario_id: str, round_num: int
+    client, sim_run_id: str, round_num: int
 ) -> dict[str, dict]:
     """Return {country_code: country_states_per_round row} for the round."""
     out: dict[str, dict] = {}
@@ -214,7 +218,7 @@ def _load_country_states(
         res = (
             client.table("country_states_per_round")
             .select("*")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("round_num", round_num)
             .execute()
         )
@@ -227,12 +231,12 @@ def _load_country_states(
     return out
 
 
-def _load_oil_price(client, scenario_id: str, round_num: int) -> float | None:
+def _load_oil_price(client, sim_run_id: str, round_num: int) -> float | None:
     try:
         res = (
             client.table("global_state_per_round")
             .select("oil_price")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .eq("round_num", round_num)
             .limit(1)
             .execute()
@@ -248,7 +252,7 @@ def _load_oil_price(client, scenario_id: str, round_num: int) -> float | None:
 
 
 def _load_oil_price_history(
-    client, scenario_id: str, round_num: int
+    client, sim_run_id: str, round_num: int
 ) -> list[dict]:
     """Return all oil prices for rounds [0, round_num - 1], ascending."""
     if round_num <= 0:
@@ -257,7 +261,7 @@ def _load_oil_price_history(
         res = (
             client.table("global_state_per_round")
             .select("round_num, oil_price")
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .lt("round_num", round_num)
             .gte("round_num", 0)
             .order("round_num", desc=False)

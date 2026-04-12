@@ -27,7 +27,7 @@ from engine.services.supabase import get_client
 logger = logging.getLogger(__name__)
 
 
-def run_engine_tick(scenario_code: str, round_num: int) -> dict:
+def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
     """Run economic + political engines on the current round's country state.
 
     Steps:
@@ -39,9 +39,15 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
         6. Write updated values back to ``country_states_per_round``
         7. Update ``global_state_per_round`` (oil price etc.)
 
+    ``run_or_scenario`` accepts either a sim_run_id (uuid) or a scenario
+    code (resolved to the archived legacy run).
+
     Returns summary dict.
     """
     try:
+        from engine.services.sim_run_manager import (
+            resolve_sim_run_id, get_scenario_id_for_run,
+        )
         client = get_client()
 
         # 1. Load base structural data (immutable per template)
@@ -49,14 +55,15 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
         if not base_countries:
             return {"success": False, "error": "no countries in base table"}
 
-        # 2. Load per-round state
-        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-        if not scen.data:
-            return {"success": False, "error": f"scenario {scenario_code} not found"}
-        scenario_id = scen.data[0]["id"]
+        # 2. Resolve the target sim_run and its scenario
+        try:
+            sim_run_id = resolve_sim_run_id(run_or_scenario)
+        except ValueError as e:
+            return {"success": False, "error": str(e)}
+        scenario_id = get_scenario_id_for_run(sim_run_id)
 
         round_states = client.table("country_states_per_round") \
-            .select("*").eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+            .select("*").eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute()
         if not round_states.data:
             return {"success": False, "error": f"no country_states for round {round_num}"}
 
@@ -74,11 +81,9 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
             countries[cc] = _merge_to_engine_dict(base, rs)
 
         # 4. Build REAL world_state from DB STATE TABLES (not agent_decisions)
-        from engine.config.settings import Settings
-        sim_run_id = Settings().default_sim_id
         actions = _load_state_from_tables(client, sim_run_id, scenario_id, round_num)
-        war_countries = _extract_war_state(client, scenario_id)
-        combat_losses = _count_combat_losses(client, scenario_id, round_num)
+        war_countries = _extract_war_state(client, sim_run_id)
+        combat_losses = _count_combat_losses(client, sim_run_id, round_num)
         world_state = _build_world_state(round_num, base_countries, actions, war_countries)
 
         # Mark countries at war + apply combat loss costs
@@ -91,7 +96,7 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
                 c["economic"]["treasury"] = max(0, c["economic"]["treasury"] - cost)
 
         # 4b. Formosa blockade semiconductor cascade (CARD_ACTIONS 1.10, CARD_FORMULAS D.8)
-        formosa_blocked = _detect_formosa_blockade(client, scenario_id, round_num)
+        formosa_blocked = _detect_formosa_blockade(client, sim_run_id, round_num)
         if formosa_blocked:
             level = formosa_blocked  # "partial" or "full"
             multiplier = 0.10 if level == "partial" else 0.20
@@ -219,13 +224,14 @@ def run_engine_tick(scenario_code: str, round_num: int) -> dict:
         try:
             client.table("global_state_per_round").upsert(
                 {
+                    "sim_run_id": sim_run_id,
                     "scenario_id": scenario_id,
                     "round_num": round_num,
                     "oil_price": round(new_oil, 2),
                     "stock_index": round(100 + round_num * 1.2, 2),
                     "notes": f"Engine tick round {round_num}",
                 },
-                on_conflict="scenario_id,round_num",
+                on_conflict="sim_run_id,round_num",
             ).execute()
         except Exception as e:
             logger.warning("[tick R%d] global_state upsert failed: %s", round_num, e)
@@ -318,7 +324,7 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     try:
         res = client.table("country_states_per_round") \
             .select("country_code, budget_social_pct, budget_production, budget_research") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+            .eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute()
         for row in (res.data or []):
             cc = row.get("country_code", "")
             if not cc:
@@ -356,7 +362,7 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     try:
         res = client.table("country_states_per_round") \
             .select("country_code, opec_production") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+            .eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute()
         for row in (res.data or []):
             cc = row.get("country_code", "")
             prod = row.get("opec_production")
@@ -375,7 +381,7 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     }
 
 
-def _extract_war_state(client, scenario_id: str) -> set[str]:
+def _extract_war_state(client, sim_run_id: str) -> set[str]:
     """Return set of country_codes that are currently at war.
 
     Reads from state tables only:
@@ -393,11 +399,11 @@ def _extract_war_state(client, scenario_id: str) -> set[str]:
             at_war.add(r.get("to_country_id", ""))
     except Exception:
         pass
-    # Also check for countries involved in combat this sim
+    # Also check for countries involved in combat this run
     try:
         res = client.table("observatory_combat_results") \
             .select("attacker_country, defender_country") \
-            .eq("scenario_id", scenario_id).execute()
+            .eq("sim_run_id", sim_run_id).execute()
         for r in (res.data or []):
             at_war.add(r.get("attacker_country", ""))
             at_war.add(r.get("defender_country", ""))
@@ -407,13 +413,13 @@ def _extract_war_state(client, scenario_id: str) -> set[str]:
     return at_war
 
 
-def _count_combat_losses(client, scenario_id: str, round_num: int) -> dict[str, int]:
+def _count_combat_losses(client, sim_run_id: str, round_num: int) -> dict[str, int]:
     """Count military units lost per country this round from combat results."""
     losses: dict[str, int] = {}
     try:
         res = client.table("observatory_combat_results") \
             .select("defender_country, defender_losses, attacker_country, attacker_losses") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num).execute()
+            .eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute()
         for r in (res.data or []):
             dl = r.get("defender_losses") or []
             al = r.get("attacker_losses") or []
@@ -469,15 +475,13 @@ def _flatten_bilateral(changes: dict) -> dict:
     return changes  # engine already expects this shape
 
 
-def _detect_formosa_blockade(client, scenario_id: str, round_num: int) -> str | None:
+def _detect_formosa_blockade(client, sim_run_id: str, round_num: int) -> str | None:
     """Check if Formosa Strait is blockaded this round.
 
     Reads from `blockades` state table (canonical source).
     Returns 'partial' | 'full' | None.
     """
     try:
-        from engine.config.settings import Settings
-        sim_run_id = Settings().default_sim_id
         res = client.table("blockades").select("zone_id, level, status") \
             .eq("sim_run_id", sim_run_id) \
             .eq("status", "active").execute()

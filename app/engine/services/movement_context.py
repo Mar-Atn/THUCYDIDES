@@ -44,24 +44,29 @@ def build_movement_context(
     country_code: str,
     scenario_code: str,
     round_num: int,
+    sim_run_id: str | None = None,
 ) -> dict:
     """Assemble the full context package for a movement decision.
 
     Returns a dict matching CONTRACT_MOVEMENT v1.0 §3. Pure read — no DB
     mutations. Falls back to ``round_num - 1`` for snapshots if the
     requested round has no row yet.
+
+    F1: pass an explicit ``sim_run_id`` to read from an isolated run,
+    otherwise falls back to the legacy archived run for ``scenario_code``.
     """
+    from engine.services.sim_run_manager import resolve_sim_run_id
     client = get_client()
-    scenario_id = _get_scenario_id(client, scenario_code)
+    sim_run_id = sim_run_id or resolve_sim_run_id(scenario_code)
 
     # 1. Economic state (own snapshot)
     economic_state = _load_economic_state(
-        client, scenario_id, country_code, round_num,
+        client, sim_run_id, country_code, round_num,
     )
 
     # 2. My units — full inventory
     my_units = _load_my_units(
-        client, scenario_id, country_code, round_num,
+        client, sim_run_id, country_code, round_num,
     )
 
     # 3. Own territory — zones I own or control (from canonical 57-zones table)
@@ -99,7 +104,7 @@ def build_movement_context(
 
     # 6. Recent combat events — last 3 rounds involving my units
     recent_combat_events = _load_recent_combat(
-        client, scenario_id, country_code, round_num,
+        client, sim_run_id, country_code, round_num,
     )
 
     # 7. World zone map — all 57 zones (compact)
@@ -165,7 +170,7 @@ def _get_scenario_id(client, scenario_code: str) -> str:
 
 
 def _load_economic_state(
-    client, scenario_id: str, country_code: str, round_num: int,
+    client, sim_run_id: str, country_code: str, round_num: int,
 ) -> dict:
     """Load economic snapshot, falling back to most recent prior round."""
     res = (
@@ -174,7 +179,7 @@ def _load_economic_state(
             "round_num, gdp, treasury, inflation, stability, "
             "political_support, war_tiredness"
         )
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("country_code", country_code)
         .lte("round_num", round_num)
         .order("round_num", desc=True)
@@ -234,14 +239,14 @@ def _load_wars(client, country_code: str) -> list[str]:
 
 
 def _load_my_units(
-    client, scenario_id: str, country_code: str, round_num: int,
+    client, sim_run_id: str, country_code: str, round_num: int,
 ) -> list[dict]:
     """Return full inventory of own units at round_num (or most recent prior)."""
     # Find the latest round_num <= round_num that has any rows for this country.
     latest = (
         client.table("unit_states_per_round")
         .select("round_num")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("country_code", country_code)
         .lte("round_num", round_num)
         .order("round_num", desc=True)
@@ -257,7 +262,7 @@ def _load_my_units(
             "unit_code, unit_type, status, global_row, global_col, "
             "theater, theater_row, theater_col, embarked_on"
         )
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("country_code", country_code)
         .eq("round_num", snapshot_round)
         .execute()
@@ -295,7 +300,7 @@ def _load_zone_adjacency(client) -> list[dict]:
 
 
 def _load_recent_combat(
-    client, scenario_id: str, country_code: str, round_num: int,
+    client, sim_run_id: str, country_code: str, round_num: int,
 ) -> list[dict]:
     """Last 3 rounds of combat events involving this country (attacker or defender)."""
     out: list[dict] = []
@@ -307,7 +312,7 @@ def _load_recent_combat(
                 "round_num, combat_type, attacker_country, defender_country, "
                 "location_global_row, location_global_col, narrative"
             )
-            .eq("scenario_id", scenario_id)
+            .eq("sim_run_id", sim_run_id)
             .gte("round_num", low)
             .lte("round_num", round_num)
             .or_(

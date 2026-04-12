@@ -38,15 +38,23 @@ logger = logging.getLogger(__name__)
 
 
 def _emit_event(scenario_code: str, round_num: int, event_type: str, country_code: str | None, summary: str, payload: dict | None = None) -> None:
-    """Insert a row into observatory_events table (fire-and-forget)."""
+    """Insert a row into observatory_events table (fire-and-forget).
+
+    F1 (2026-04-11): observatory_events now has sim_run_id NOT NULL. We
+    resolve ``scenario_code`` to its archived legacy run so pre-F1 callers
+    that only know a scenario code continue to work.
+    """
     try:
         from engine.services.supabase import get_client
+        from engine.services.sim_run_manager import (
+            resolve_sim_run_id, get_scenario_id_for_run,
+        )
         client = get_client()
-        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-        if not scen.data:
-            return
+        sim_run_id = resolve_sim_run_id(scenario_code)
+        scenario_id = get_scenario_id_for_run(sim_run_id)
         client.table("observatory_events").insert({
-            "scenario_id": scen.data[0]["id"],
+            "sim_run_id": sim_run_id,
+            "scenario_id": scenario_id,
             "round_num": round_num,
             "event_type": event_type,
             "country_code": country_code,
@@ -233,16 +241,13 @@ def _load_current_economic_state(
     columns are missing or null.
     """
     from engine.services.supabase import get_client
-    from engine.config.settings import Settings
+    from engine.services.sim_run_manager import resolve_sim_run_id
 
     client = get_client()
-    settings = Settings()
-    sim_run_id = settings.default_sim_id
-
-    scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-    if not scen.data:
+    try:
+        sim_run_id = resolve_sim_run_id(scenario_code)
+    except ValueError:
         return {}
-    scenario_id = scen.data[0]["id"]
 
     state: dict[str, Any] = {}
 
@@ -250,7 +255,7 @@ def _load_current_economic_state(
     cs = (
         client.table("country_states_per_round")
         .select("budget_social_pct, budget_military_coins, budget_tech_coins, opec_production")
-        .eq("scenario_id", scenario_id)
+        .eq("sim_run_id", sim_run_id)
         .eq("country_code", country_code)
         .eq("round_num", round_num)
         .limit(1)
@@ -318,17 +323,18 @@ def _load_situation_context(scenario_code: str, country_code: str, round_num: in
     """Load key situation data for the mandatory decisions prompt."""
     try:
         from engine.services.supabase import get_client
+        from engine.services.sim_run_manager import resolve_sim_run_id
         client = get_client()
-        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-        if not scen.data:
+        try:
+            sim_run_id = resolve_sim_run_id(scenario_code)
+        except ValueError:
             return ""
-        scenario_id = scen.data[0]["id"]
 
         lines = []
 
         # Country economic state
         cs = client.table("country_states_per_round").select("*") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num) \
+            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", country_code).limit(1).execute()
         if cs.data:
             s = cs.data[0]
@@ -369,7 +375,7 @@ def _load_situation_context(scenario_code: str, country_code: str, round_num: in
 
         # Recent key events (last round)
         events = client.table("observatory_events").select("event_type, summary") \
-            .eq("scenario_id", scenario_id).eq("round_num", round_num) \
+            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", country_code).limit(5).execute()
         if events.data:
             evt_lines = [e["summary"][:80] for e in events.data]
@@ -511,72 +517,52 @@ async def _run_one_mandatory(
 
             # Insert decisions into agent_decisions
             from engine.services.supabase import get_client
+            from engine.services.sim_run_manager import (
+                resolve_sim_run_id, get_scenario_id_for_run,
+            )
             client = get_client()
-            scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-            if not scen.data:
+            try:
+                sim_run_id = resolve_sim_run_id(scenario_code)
+            except ValueError:
                 return None
-            scenario_id = scen.data[0]["id"]
+            scenario_id = get_scenario_id_for_run(sim_run_id)
 
             inserted = []
+
+            def _insert_decision(action_type: str, payload: dict) -> None:
+                client.table("agent_decisions").insert({
+                    "sim_run_id": sim_run_id,
+                    "scenario_id": scenario_id,
+                    "country_code": cc,
+                    "action_type": action_type,
+                    "action_payload": payload,
+                    "rationale": "mandatory_decisions_phase",
+                    "validation_status": "passed",
+                    "round_num": round_num,
+                }).execute()
 
             # Budget
             if parsed.get("budget"):
                 budget_payload = parsed["budget"]
-                # Ensure required fields have defaults
                 budget_payload.setdefault("social_pct", 1.0)
                 budget_payload.setdefault("military_coins", 0)
                 budget_payload.setdefault("tech_coins", 0)
-                client.table("agent_decisions").insert({
-                    "scenario_id": scenario_id,
-                    "country_code": cc,
-                    "action_type": "set_budget",
-                    "action_payload": budget_payload,
-                    "rationale": "mandatory_decisions_phase",
-                    "validation_status": "passed",
-                    "round_num": round_num,
-                }).execute()
+                _insert_decision("set_budget", budget_payload)
                 inserted.append("set_budget")
 
             # Sanctions
             if parsed.get("sanctions") is not None:
-                sanction_payload = {"sanctions": parsed["sanctions"]}
-                client.table("agent_decisions").insert({
-                    "scenario_id": scenario_id,
-                    "country_code": cc,
-                    "action_type": "set_sanction",
-                    "action_payload": sanction_payload,
-                    "rationale": "mandatory_decisions_phase",
-                    "validation_status": "passed",
-                    "round_num": round_num,
-                }).execute()
+                _insert_decision("set_sanction", {"sanctions": parsed["sanctions"]})
                 inserted.append("set_sanction")
 
             # Tariffs
             if parsed.get("tariffs") is not None:
-                tariff_payload = {"tariffs": parsed["tariffs"]}
-                client.table("agent_decisions").insert({
-                    "scenario_id": scenario_id,
-                    "country_code": cc,
-                    "action_type": "set_tariff",
-                    "action_payload": tariff_payload,
-                    "rationale": "mandatory_decisions_phase",
-                    "validation_status": "passed",
-                    "round_num": round_num,
-                }).execute()
+                _insert_decision("set_tariff", {"tariffs": parsed["tariffs"]})
                 inserted.append("set_tariff")
 
             # OPEC (only for OPEC members)
             if parsed.get("opec") is not None and cc in OPEC_MEMBERS:
-                opec_payload = parsed["opec"]
-                client.table("agent_decisions").insert({
-                    "scenario_id": scenario_id,
-                    "country_code": cc,
-                    "action_type": "set_opec",
-                    "action_payload": opec_payload,
-                    "rationale": "mandatory_decisions_phase",
-                    "validation_status": "passed",
-                    "round_num": round_num,
-                }).execute()
+                _insert_decision("set_opec", parsed["opec"])
                 inserted.append("set_opec")
 
             if inserted:
@@ -678,23 +664,27 @@ async def _try_run_conversations(
             # Persist transcript to observatory_events
             try:
                 from engine.services.supabase import get_client
+                from engine.services.sim_run_manager import (
+                    resolve_sim_run_id, get_scenario_id_for_run,
+                )
                 client = get_client()
-                scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-                if scen.data:
-                    client.table("observatory_events").insert({
-                        "scenario_id": scen.data[0]["id"],
-                        "round_num": round_num,
-                        "event_type": "bilateral_conversation",
-                        "country_code": agent_a_info["country_code"],
-                        "summary": f"💬 {agent_a_info['character_name']} ↔ {agent_b_info['character_name']}: "
-                                   f"{result.get('turns', 0)} turns — {topic}",
-                        "payload": {
-                            "participants": [agent_a_info["country_code"], agent_b_info["country_code"]],
-                            "topic": topic,
-                            "turns": result.get("turns", 0),
-                            "ended_by": result.get("ended_by"),
-                        },
-                    }).execute()
+                sim_run_id = resolve_sim_run_id(scenario_code)
+                scenario_id = get_scenario_id_for_run(sim_run_id)
+                client.table("observatory_events").insert({
+                    "sim_run_id": sim_run_id,
+                    "scenario_id": scenario_id,
+                    "round_num": round_num,
+                    "event_type": "bilateral_conversation",
+                    "country_code": agent_a_info["country_code"],
+                    "summary": f"💬 {agent_a_info['character_name']} ↔ {agent_b_info['character_name']}: "
+                               f"{result.get('turns', 0)} turns — {topic}",
+                    "payload": {
+                        "participants": [agent_a_info["country_code"], agent_b_info["country_code"]],
+                        "topic": topic,
+                        "turns": result.get("turns", 0),
+                        "ended_by": result.get("ended_by"),
+                    },
+                }).execute()
             except Exception:
                 pass  # fire-and-forget
         except Exception as e:
@@ -887,66 +877,69 @@ async def _run_one_conversation(
 
         try:
             from engine.services.supabase import get_client
+            from engine.services.sim_run_manager import (
+                resolve_sim_run_id, get_scenario_id_for_run,
+            )
             client = get_client()
-            scen = client.table("sim_scenarios").select("id").eq("code", "start_one").limit(1).execute()
-            if scen.data:
-                scenario_id = scen.data[0]["id"]
+            sim_run_id = resolve_sim_run_id("start_one")
+            scenario_id = get_scenario_id_for_run(sim_run_id)
 
-                # Build offer/request from transaction result if available
-                if transaction_result and not transaction_result.get("error"):
-                    offer = (transaction_result.get("terms") or {}).get("gives") or {}
-                    request = (transaction_result.get("terms") or {}).get("receives") or {}
-                else:
-                    offer = {}
-                    request = {}
+            # Build offer/request from transaction result if available
+            if transaction_result and not transaction_result.get("error"):
+                offer = (transaction_result.get("terms") or {}).get("gives") or {}
+                request = (transaction_result.get("terms") or {}).get("receives") or {}
+            else:
+                offer = {}
+                request = {}
 
-                txn_payload = {
-                    "scenario_id": scenario_id,
-                    "round_num": round_num,
-                    "proposer": agent_a_info["country_code"],
-                    "counterpart": agent_b_info["country_code"],
-                    "offer": offer,
-                    "request": request,
-                    "status": db_status,
-                }
+            txn_payload = {
+                "sim_run_id": sim_run_id,
+                "scenario_id": scenario_id,
+                "round_num": round_num,
+                "proposer": agent_a_info["country_code"],
+                "counterpart": agent_b_info["country_code"],
+                "offer": offer,
+                "request": request,
+                "status": db_status,
+            }
 
-                # Try update existing row first (resolve_round may have inserted "proposed")
-                existing = client.table("exchange_transactions") \
-                    .select("id") \
-                    .eq("scenario_id", scenario_id) \
-                    .eq("round_num", round_num) \
-                    .eq("proposer", agent_a_info["country_code"]) \
-                    .eq("counterpart", agent_b_info["country_code"]) \
-                    .limit(1).execute()
+            # Try update existing row first (resolve_round may have inserted "proposed")
+            existing = client.table("exchange_transactions") \
+                .select("id") \
+                .eq("sim_run_id", sim_run_id) \
+                .eq("round_num", round_num) \
+                .eq("proposer", agent_a_info["country_code"]) \
+                .eq("counterpart", agent_b_info["country_code"]) \
+                .limit(1).execute()
 
-                if existing.data:
-                    client.table("exchange_transactions") \
-                        .update({"status": db_status,
-                                 "offer": txn_payload["offer"],
-                                 "request": txn_payload["request"]}) \
-                        .eq("id", existing.data[0]["id"]).execute()
-                else:
-                    client.table("exchange_transactions").insert(txn_payload).execute()
+            if existing.data:
+                client.table("exchange_transactions") \
+                    .update({"status": db_status,
+                             "offer": txn_payload["offer"],
+                             "request": txn_payload["request"]}) \
+                    .eq("id", existing.data[0]["id"]).execute()
+            else:
+                client.table("exchange_transactions").insert(txn_payload).execute()
 
-                logger.info("[R%d] exchange_transaction persisted: %s->%s status=%s",
-                            round_num, agent_a_info["country_code"],
-                            agent_b_info["country_code"], db_status)
+            logger.info("[R%d] exchange_transaction persisted: %s->%s status=%s",
+                        round_num, agent_a_info["country_code"],
+                        agent_b_info["country_code"], db_status)
 
-                if db_status == "executed":
-                    _emit_event("start_one", round_num, "transaction_executed",
-                                agent_a_info["country_code"],
-                                f"{agent_a_info['country_code']} <-> {agent_b_info['country_code']}: "
-                                f"{transaction_result.get('type', '?')} executed",
-                                transaction_result)
+            if db_status == "executed":
+                _emit_event("start_one", round_num, "transaction_executed",
+                            agent_a_info["country_code"],
+                            f"{agent_a_info['country_code']} <-> {agent_b_info['country_code']}: "
+                            f"{transaction_result.get('type', '?')} executed",
+                            transaction_result)
 
-                    # Persist state changes to country_states_per_round
-                    _persist_transaction_state_changes(
-                        "start_one", round_num,
-                        agent_a_info["country_code"],
-                        agent_b_info["country_code"],
-                        leader_a.country,
-                        leader_b.country,
-                    )
+                # Persist state changes to country_states_per_round
+                _persist_transaction_state_changes(
+                    "start_one", round_num,
+                    agent_a_info["country_code"],
+                    agent_b_info["country_code"],
+                    leader_a.country,
+                    leader_b.country,
+                )
         except Exception as e:
             logger.error("transaction DB persist failed: %s", e)
 
@@ -980,11 +973,15 @@ def _persist_transaction_state_changes(
     """
     try:
         from engine.services.supabase import get_client
+        from engine.services.sim_run_manager import (
+            resolve_sim_run_id, get_scenario_id_for_run,
+        )
         client = get_client()
-        scen = client.table("sim_scenarios").select("id").eq("code", scenario_code).limit(1).execute()
-        if not scen.data:
+        try:
+            sim_run_id = resolve_sim_run_id(scenario_code)
+        except ValueError:
             return
-        scenario_id = scen.data[0]["id"]
+        scenario_id = get_scenario_id_for_run(sim_run_id)
 
         # Only persist columns that exist in country_states_per_round
         PERSISTABLE_FIELDS = {"treasury", "nuclear_rd_progress", "ai_rd_progress"}
@@ -992,7 +989,7 @@ def _persist_transaction_state_changes(
         for cc, country_data in [(proposer_cc, proposer_country), (counterpart_cc, counterpart_country)]:
             row = client.table("country_states_per_round") \
                 .select("id") \
-                .eq("scenario_id", scenario_id) \
+                .eq("sim_run_id", sim_run_id) \
                 .eq("round_num", round_num) \
                 .eq("country_code", cc) \
                 .limit(1).execute()
@@ -1001,13 +998,15 @@ def _persist_transaction_state_changes(
                 # No row for this round yet — clone previous round
                 prev = client.table("country_states_per_round") \
                     .select("*") \
-                    .eq("scenario_id", scenario_id) \
+                    .eq("sim_run_id", sim_run_id) \
                     .eq("round_num", round_num - 1) \
                     .eq("country_code", cc) \
                     .limit(1).execute()
                 if prev.data:
                     new_row = {k: v for k, v in prev.data[0].items() if k != "id"}
                     new_row["round_num"] = round_num
+                    new_row["sim_run_id"] = sim_run_id
+                    new_row["scenario_id"] = scenario_id
                     new_row["treasury"] = round(country_data.get("treasury", new_row.get("treasury", 0)), 2)
                     new_row["nuclear_rd_progress"] = round(country_data.get("nuclear_rd_progress", new_row.get("nuclear_rd_progress", 0)), 4)
                     new_row["ai_rd_progress"] = round(country_data.get("ai_rd_progress", new_row.get("ai_rd_progress", 0)), 4)

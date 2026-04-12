@@ -21,6 +21,8 @@
     round: 0,
     prevRound: null,
     scenario: 'start_one',
+    simRunId: null,        // F1: when set, pins all data queries to this sim_run
+    availableRounds: [],   // F1: rounds present in the pinned run for the map scrubber
     totalRounds: 6,
     speedSec: 15,
     paused: false,
@@ -91,6 +93,7 @@
     ]).then(function () {
       renderCountryGrid();
       renderMap();
+      refreshAvailableRounds();
       refreshAll();
       startPolling();
       tryRealtime();
@@ -110,7 +113,19 @@
     document.getElementById('btnStop').addEventListener('click', onStop);
     document.getElementById('btnRewind').addEventListener('click', onRewind);
     document.getElementById('speedSelect').addEventListener('change', onSpeedChange);
+    var trSel = document.getElementById('testRunSelect');
+    if (trSel) {
+      trSel.addEventListener('change', onTestRunChange);
+      loadTestRuns();
+    }
     document.getElementById('detailClose').addEventListener('click', closeDetail);
+    var ctxClose = document.getElementById('contextClose');
+    if (ctxClose) {
+      ctxClose.addEventListener('click', function () {
+        var p = document.getElementById('contextPanel');
+        if (p) p.style.display = 'none';
+      });
+    }
     var backBtn = document.getElementById('btnMapBack');
     if (backBtn) backBtn.addEventListener('click', function () { setMapView('global'); });
   }
@@ -147,14 +162,15 @@
     // Use the scrubbed round if user is browsing history, else current
     var dataRound = state.viewRound != null ? state.viewRound : state.round;
     var sc = encodeURIComponent(state.scenario);
+    var runQs = state.simRunId ? '&sim_run_id=' + encodeURIComponent(state.simRunId) : '';
     Promise.all([
       fetchJSON('/api/observatory/state').catch(noop),
-      fetchJSON('/api/observatory/units?round=' + dataRound + '&scenario=' + sc).catch(noop),
-      fetchJSON('/api/observatory/countries?round=' + dataRound + '&scenario=' + sc).catch(noop),
-      fetchJSON('/api/observatory/events?limit=50&scenario=' + sc).catch(noop),
-      fetchJSON('/api/observatory/combats?round=' + dataRound + '&scenario=' + sc).catch(noop),
-      fetchJSON('/api/observatory/blockades?round=' + dataRound + '&scenario=' + sc).catch(noop),
-      fetchJSON('/api/observatory/global-series?scenario=' + sc).catch(noop),
+      fetchJSON('/api/observatory/units?round=' + dataRound + '&scenario=' + sc + runQs).catch(noop),
+      fetchJSON('/api/observatory/countries?round=' + dataRound + '&scenario=' + sc + runQs).catch(noop),
+      fetchJSON('/api/observatory/events?limit=50&scenario=' + sc + runQs).catch(noop),
+      fetchJSON('/api/observatory/combats?round=' + dataRound + '&scenario=' + sc + runQs).catch(noop),
+      fetchJSON('/api/observatory/blockades?round=' + dataRound + '&scenario=' + sc + runQs).catch(noop),
+      fetchJSON('/api/observatory/global-series?scenario=' + sc + runQs).catch(noop),
     ]).then(function (res) {
       var rt = res[0], un = res[1], co = res[2], ev = res[3], cb = res[4], bl = res[5], gs = res[6];
       if (rt) applyRuntime(rt);
@@ -198,6 +214,17 @@
   function applyRuntime(rt) {
     state.runtime = rt;
     var status = rt.status || 'idle';
+    // Test Run mode: when the user selected a registered test run,
+    // keep the badge pinned to the scrubbed view and skip runtime-driven
+    // round updates so polling doesn't yank us back to db_latest_round.
+    if (state.viewRound != null && status !== 'running') {
+      document.getElementById('roundCurrent').textContent = state.viewRound;
+      document.getElementById('roundTotal').textContent = state.totalRounds;
+      var badge0 = document.getElementById('runStatusBadge');
+      badge0.textContent = 'REPLAY';
+      badge0.setAttribute('data-status', status);
+      return;
+    }
     var round = rt.current_round != null ? rt.current_round : 0;
     state.totalRounds = rt.total_rounds || state.totalRounds;
     state.speedSec = rt.speed_sec || state.speedSec;
@@ -338,7 +365,146 @@
     state.decisionsByCountry = decisions;
     updateCountryTiles();
     renderFeed();
+    renderMovementTicker();
     setMeta('feedMeta', state.events.length + ' events');
+  }
+
+  // --------------------------------------------------------------
+  // Movement ticker (F1) — events for the currently-selected round.
+  // --------------------------------------------------------------
+  var MOVEMENT_EVENT_TYPES = [
+    'movement_applied',
+    'movement_no_change',
+    'movement_rejected',
+  ];
+
+  function renderMovementTicker() {
+    var el = document.getElementById('movementTicker');
+    if (!el) return;
+    var meta = document.getElementById('movementMeta');
+    var viewR = state.viewRound != null ? state.viewRound : state.round;
+    var rows = (state.events || []).filter(function (e) {
+      return MOVEMENT_EVENT_TYPES.indexOf(e.event_type) >= 0
+          && e.round_num === viewR;
+    });
+    // Newest committed first within the round
+    rows.sort(function (a, b) {
+      return new Date(b.created_at) - new Date(a.created_at);
+    });
+
+    if (meta) meta.textContent = rows.length + ' movement' + (rows.length === 1 ? '' : 's');
+
+    if (!rows.length) {
+      el.innerHTML = '<div class="obs-feed-empty">No movements in round ' + viewR + '.</div>';
+      return;
+    }
+
+    var html = '';
+    rows.forEach(function (e) {
+      var country = (e.country_code || '?').toUpperCase();
+      var et = e.event_type;
+      var verdictClass = et === 'movement_applied' ? 'change'
+                       : et === 'movement_rejected' ? 'rejected' : '';
+      var verdictText = et === 'movement_applied' ? 'change applied'
+                      : et === 'movement_no_change' ? 'no_change'
+                      : 'rejected';
+      var rowClass = et === 'movement_no_change' ? ' no-change' : '';
+      var payload = e.payload || {};
+      var rationale = '';
+      var movesList = '';
+
+      // movement_applied: payload has moves_count + results.applied[]
+      // movement_no_change: payload has rationale
+      // movement_rejected: payload has errors[] + original
+      if (et === 'movement_applied') {
+        var results = payload.results || {};
+        var applied = results.applied || [];
+        if (applied.length) {
+          movesList = '<ul class="moves">';
+          applied.forEach(function (m) {
+            var unit = m.unit_code || '?';
+            var to = '';
+            if (m.to_status === 'reserve') {
+              to = '→ reserve';
+            } else if (m.to_global_row != null && m.to_global_col != null) {
+              to = '→ (' + m.to_global_row + ',' + m.to_global_col + ')';
+              if (m.to_status === 'embarked') to += ' [EMBARKED]';
+            }
+            movesList += '<li>' + unit + ' ' + to + '</li>';
+          });
+          movesList += '</ul>';
+        } else if (payload.moves_count) {
+          movesList = '<ul class="moves"><li>' + payload.moves_count + ' moves applied</li></ul>';
+        }
+      } else if (et === 'movement_no_change') {
+        rationale = payload.rationale || '';
+      } else if (et === 'movement_rejected') {
+        var errs = (payload.errors || []).slice(0, 2);
+        movesList = '<ul class="moves">';
+        errs.forEach(function (er) {
+          movesList += '<li style="color:#d44">' + (typeof er === 'string' ? er : JSON.stringify(er)) + '</li>';
+        });
+        movesList += '</ul>';
+      }
+
+      html += '<div class="obs-move-row' + rowClass + '">' +
+              '<div class="head">' +
+                '<span class="country">' + country + '</span>' +
+                '<span class="verdict ' + verdictClass + '">' + verdictText +
+                  ' <button class="ctx-btn" data-country="' + (e.country_code || '') +
+                  '" data-round="' + e.round_num + '">context</button>' +
+                '</span>' +
+              '</div>' +
+              movesList +
+              (rationale ? '<div class="rationale">' + escapeHtml(rationale) + '</div>' : '') +
+              '</div>';
+    });
+    el.innerHTML = html;
+
+    // Wire context buttons
+    el.querySelectorAll('.ctx-btn').forEach(function (b) {
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        var cc = b.getAttribute('data-country');
+        var rn = parseInt(b.getAttribute('data-round'), 10);
+        showMovementContext(cc, rn);
+      });
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s || '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // --------------------------------------------------------------
+  // AI movement context viewer (F1)
+  //   Calls /api/observatory/movement-context to fetch the same dict
+  //   we feed to the AI before asking for a movement decision.
+  // --------------------------------------------------------------
+  function showMovementContext(country, round) {
+    var panel = document.getElementById('contextPanel');
+    var content = document.getElementById('contextContent');
+    if (!panel || !content) return;
+    content.innerHTML = '<h3>AI Context — ' + country.toUpperCase() +
+                        ' · Round ' + round + '</h3><pre>Loading…</pre>';
+    panel.style.display = 'block';
+
+    var sc = encodeURIComponent(state.scenario);
+    var runQs = state.simRunId ? '&sim_run_id=' + encodeURIComponent(state.simRunId) : '';
+    var url = '/api/observatory/movement-context?country=' + encodeURIComponent(country) +
+              '&round=' + round + '&scenario=' + sc + runQs;
+    fetchJSON(url).then(function (data) {
+      content.innerHTML = '<h3>AI Movement Context — ' + country.toUpperCase() +
+                          ' · Round ' + round + '</h3>' +
+                          '<div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">' +
+                          'Exact dict produced by build_movement_context() — what the AI sees ' +
+                          'before deciding.</div>' +
+                          '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>';
+    }).catch(function (err) {
+      content.innerHTML = '<h3>AI Context fetch failed</h3><pre>' + escapeHtml(String(err)) + '</pre>';
+    });
   }
 
   function applyCombats(cb) {
@@ -604,6 +770,65 @@
     },
   };
 
+  // --------------------------------------------------------------
+  // Map-tab round scrubber (F1) — independent of dashboard scrubber.
+  // Renders a row of buttons for every round that exists in the
+  // selected sim_run (or in the live scenario). Click → updates
+  // viewRound + refetches map data.
+  // --------------------------------------------------------------
+  function renderMapScrubber(rounds) {
+    var el = document.getElementById('mapRoundScrubber');
+    if (!el) return;
+    if (!rounds || !rounds.length) {
+      el.innerHTML = '';
+      return;
+    }
+    var current = state.viewRound != null ? state.viewRound : (state.round || 0);
+    var html = '<span class="label">Round</span>';
+    rounds.forEach(function (r) {
+      var active = r === current ? ' active' : '';
+      html += '<button class="obs-scrub-btn' + active + '" data-round="' + r + '">' + r + '</button>';
+    });
+    el.innerHTML = html;
+    el.querySelectorAll('.obs-scrub-btn').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var rnd = parseInt(b.getAttribute('data-round'), 10);
+        scrubToRound(rnd);
+      });
+    });
+  }
+
+  function scrubToRound(rnd) {
+    state.viewRound = rnd;
+    var rcEl = document.getElementById('roundCurrent');
+    if (rcEl) rcEl.textContent = rnd;
+    // Re-render scrubber immediately so the active button moves
+    renderMapScrubber(state.availableRounds || []);
+    // Reset prev caches so animations don't tween across unrelated rounds
+    state.prevUnitPositions = {};
+    state.prevCountryStates = {};
+    // Re-render the movement ticker with the new round filter (already-loaded events)
+    renderMovementTicker();
+    refreshAll();
+  }
+
+  // Detect available rounds for the current run by querying global-series.
+  // For runs that didn't get a global_state_per_round write per round, we
+  // fall back to scanning unit_states_per_round distinct round_num values.
+  function refreshAvailableRounds() {
+    var sc = encodeURIComponent(state.scenario);
+    var runQs = state.simRunId ? '&sim_run_id=' + encodeURIComponent(state.simRunId) : '';
+    fetchJSON('/api/observatory/available-rounds?scenario=' + sc + runQs)
+      .then(function (data) {
+        var rounds = (data && data.rounds) || [];
+        state.availableRounds = rounds;
+        renderMapScrubber(rounds);
+      })
+      .catch(function (e) {
+        console.warn('available-rounds fetch failed', e);
+      });
+  }
+
   function renderGlobalStrip() {
     var el = document.getElementById('globalStrip');
     if (!el) return;
@@ -663,13 +888,19 @@
       b.addEventListener('click', function () {
         var rnd = parseInt(b.getAttribute('data-round'), 10);
         state.viewRound = rnd;
+        // Also update the round badge so the user sees the scrub round on MAPS tab
+        var rcEl = document.getElementById('roundCurrent');
+        if (rcEl) rcEl.textContent = rnd;
         renderGlobalStrip();
         renderGlobalChart();
-        // Re-fetch country + unit data for the selected round
+        // Re-fetch country + unit data for the selected round, scoped to the
+        // pinned sim_run when a Test Run is selected (F1).
+        var sc = encodeURIComponent(state.scenario);
+        var runQs = state.simRunId ? '&sim_run_id=' + encodeURIComponent(state.simRunId) : '';
         Promise.all([
-          fetchJSON('/api/observatory/units?round=' + rnd + '&scenario=' + encodeURIComponent(state.scenario)).catch(noop),
-          fetchJSON('/api/observatory/countries?round=' + rnd + '&scenario=' + encodeURIComponent(state.scenario)).catch(noop),
-          fetchJSON('/api/observatory/combats?round=' + rnd + '&scenario=' + encodeURIComponent(state.scenario)).catch(noop),
+          fetchJSON('/api/observatory/units?round=' + rnd + '&scenario=' + sc + runQs).catch(noop),
+          fetchJSON('/api/observatory/countries?round=' + rnd + '&scenario=' + sc + runQs).catch(noop),
+          fetchJSON('/api/observatory/combats?round=' + rnd + '&scenario=' + sc + runQs).catch(noop),
         ]).then(function (res) {
           if (res[0]) applyUnits(res[0]);
           if (res[1]) applyCountries(res[1]);
@@ -1587,49 +1818,159 @@
     state.combats.forEach(function (c) {
       var card = document.createElement('div');
       card.className = 'obs-combat-card';
-      card.addEventListener('click', function () { card.classList.toggle('expanded'); });
       var atk = c.attacker_country || '?';
       var def = c.defender_country || '?';
       var coord = (c.location_global_row != null && c.location_global_col != null)
         ? '@(' + c.location_global_row + ',' + c.location_global_col + ')' : '';
       var ctype = c.combat_type || 'combat';
+      var atkLossN = (c.attacker_losses || []).length;
+      var defLossN = (c.defender_losses || []).length;
+      var winner = atkLossN === 0 && defLossN > 0 ? 'ATTACKER WINS'
+                 : defLossN === 0 && atkLossN > 0 ? 'DEFENDER HOLDS'
+                 : (defLossN > atkLossN ? 'attacker advantage' : 'defender advantage');
 
-      // Extract dice/outcome hints
-      var rolls = Array.isArray(c.attacker_rolls) ? c.attacker_rolls : [];
-      var firstRoll = rolls[0] || {};
-      var diceTxt = '';
-      if (firstRoll.roll != null && firstRoll.threshold != null) {
-        var hit = firstRoll.roll <= firstRoll.threshold;
-        diceTxt = '🎲 roll ' + fmtDice(firstRoll.roll) + ' vs ' + fmtDice(firstRoll.threshold) + ' → ' + (hit ? 'HIT' : 'MISS');
-      } else if (firstRoll.outcome) {
-        diceTxt = '🎲 ' + firstRoll.outcome;
+      var html = '<div class="obs-combat-head">' +
+        '<span class="obs-combat-title">⚔ R' + (c.round_num != null ? c.round_num : state.round) +
+          ' • <b style="color:' + uiColorFor(atk) + '">' + escapeHtml(atk) + '</b>' +
+          ' → <b style="color:' + uiColorFor(def) + '">' + escapeHtml(def) + '</b> ' + escapeHtml(coord) + '</span>' +
+        '<span class="obs-combat-type">' + escapeHtml(ctype.replace(/_/g, ' ')) + '</span>' +
+      '</div>';
+
+      // M3 air-strike block: per-shot dicts + modifier_breakdown
+      var mb = c.modifier_breakdown || [];
+      if (ctype === 'air_strike' && Array.isArray(c.attacker_rolls)) {
+        var shots = c.attacker_rolls || [];
+        var modsHtml = '';
+        if (mb.length) {
+          modsHtml = '<div class="obs-combat-mods"><b>Modifiers:</b><ul>';
+          mb.forEach(function (m) {
+            var sign = m.value > 0 ? '+' + m.value : String(m.value);
+            modsHtml += '<li><span class="' + (m.side === 'attacker' ? 'atk' : 'def') + '">' +
+                        escapeHtml(m.side) + ' ' + sign + '%</span> — ' + escapeHtml(m.reason) + '</li>';
+          });
+          modsHtml += '</ul></div>';
+        } else {
+          modsHtml = '<div class="obs-combat-mods"><b>Modifiers:</b> none</div>';
+        }
+        var shotsHtml = '<div class="obs-combat-dice"><b>Sorties:</b><table>' +
+          '<tr><th>#</th><th>Attacker</th><th>Hit Prob</th><th>Hit Roll</th><th>Hit?</th><th>Down Prob</th><th>Down Roll</th><th>Down?</th></tr>';
+        shots.forEach(function (s, i) {
+          var hitMark = s.hit ? '✓' : '✗';
+          var downMark = s.downed ? '💀' : '—';
+          shotsHtml += '<tr>' +
+            '<td>' + (i + 1) + '</td>' +
+            '<td>' + escapeHtml(s.attacker_code || '?') + '</td>' +
+            '<td>' + (Math.round((s.hit_probability || 0) * 1000) / 10) + '%</td>' +
+            '<td>' + (Math.round((s.hit_roll || 0) * 1000) / 10) + '%</td>' +
+            '<td>' + hitMark + '</td>' +
+            '<td>' + (Math.round((s.downed_probability || 0) * 1000) / 10) + '%</td>' +
+            '<td>' + (Math.round((s.downed_roll || 0) * 1000) / 10) + '%</td>' +
+            '<td>' + downMark + '</td>' +
+          '</tr>';
+        });
+        shotsHtml += '</table></div>';
+
+        var resultClass = atkLossN === 0 && defLossN > 0 ? 'win' : (defLossN === 0 ? 'loss' : '');
+        var resultHtml = '<div class="obs-combat-result ' + resultClass + '">' +
+          '<b>RESULT:</b> ATK losses = ' + atkLossN + ' &nbsp; DEF losses = ' + defLossN +
+          ' &nbsp;→&nbsp; <b>' + (defLossN > 0 ? 'TARGETS HIT' : 'NO HITS') + '</b></div>';
+
+        var lossDetail = '';
+        if (atkLossN || defLossN) {
+          lossDetail = '<div class="obs-combat-losses">';
+          if (atkLossN) lossDetail += '<div>💀 ATK downed: ' + escapeHtml((c.attacker_losses || []).join(', ')) + '</div>';
+          if (defLossN) lossDetail += '<div>💀 DEF destroyed: ' + escapeHtml((c.defender_losses || []).join(', ')) + '</div>';
+          lossDetail += '</div>';
+        }
+        var sourceTag = c.rolls_source === 'moderator'
+          ? '<span class="obs-combat-mod-tag">moderator-input rolls</span>' : '';
+
+        html += '<div class="obs-combat-body">' +
+          modsHtml + shotsHtml + resultHtml + lossDetail +
+          (c.narrative ? '<div class="obs-combat-narrative">' + escapeHtml(c.narrative) + '</div>' : '') +
+          sourceTag +
+        '</div>';
       }
-      var probTxt = firstRoll.threshold != null
-        ? 'Probability: ' + Math.round(firstRoll.threshold * 100) + '%'
-        : '';
+      // M2 ground-combat block: per-exchange dice + modifier_breakdown
+      else if (ctype === 'ground' && (mb.length || Array.isArray(c.attacker_rolls))) {
+        var atkRolls = c.attacker_rolls || [];
+        var defRolls = c.defender_rolls || [];
 
-      var destroyed = Array.isArray(c.defender_losses) ? c.defender_losses : [];
-      var destroyedTxt = destroyed.length
-        ? '💥 Destroyed: ' + destroyed.map(function (x) { return typeof x === 'string' ? x : (x.unit_code || x.id || '?'); }).join(', ')
-        : '';
+        // Modifier breakdown
+        var modsHtml = '';
+        if (mb.length) {
+          modsHtml = '<div class="obs-combat-mods"><b>Modifiers:</b><ul>';
+          mb.forEach(function (m) {
+            var sign = m.value > 0 ? '+' + m.value : String(m.value);
+            modsHtml += '<li><span class="' + (m.side === 'attacker' ? 'atk' : 'def') + '">' +
+                        escapeHtml(m.side) + ' ' + sign + '</span> — ' + escapeHtml(m.reason) + '</li>';
+          });
+          modsHtml += '</ul></div>';
+        } else {
+          modsHtml = '<div class="obs-combat-mods"><b>Modifiers:</b> none</div>';
+        }
 
-      card.innerHTML =
-        '<div class="obs-combat-head">' +
-          '<span class="obs-combat-title">⚔ R' + (c.round_num != null ? c.round_num : state.round) +
-            ' • <b style="color:' + uiColorFor(atk) + '">' + escapeHtml(atk) + '</b>' +
-            ' → <b style="color:' + uiColorFor(def) + '">' + escapeHtml(def) + '</b> ' + escapeHtml(coord) + '</span>' +
-          '<span class="obs-combat-type">' + escapeHtml(ctype.replace(/_/g, ' ')) + '</span>' +
-        '</div>' +
-        '<div class="obs-combat-body">' +
+        // Per-exchange dice table
+        var diceHtml = '<div class="obs-combat-dice"><b>Dice (per exchange):</b><table>';
+        diceHtml += '<tr><th>#</th><th>Attacker</th><th>Defender</th></tr>';
+        var nExch = Math.max(atkRolls.length, defRolls.length);
+        for (var i = 0; i < nExch; i++) {
+          var a = (atkRolls[i] || []).map(fmtDice).join(' ');
+          var d = (defRolls[i] || []).map(fmtDice).join(' ');
+          diceHtml += '<tr><td>' + (i + 1) + '</td><td>' + escapeHtml(a) + '</td><td>' + escapeHtml(d) + '</td></tr>';
+        }
+        diceHtml += '</table></div>';
+
+        // Result line
+        var resultClass = atkLossN === 0 && defLossN > 0 ? 'win' : (defLossN === 0 ? 'loss' : '');
+        var resultHtml = '<div class="obs-combat-result ' + resultClass + '">' +
+          '<b>RESULT:</b> ATK losses = ' + atkLossN + ' &nbsp; DEF losses = ' + defLossN +
+          ' &nbsp;→&nbsp; <b>' + winner + '</b></div>';
+
+        // Losses detail
+        var lossDetail = '';
+        if (atkLossN || defLossN) {
+          lossDetail = '<div class="obs-combat-losses">';
+          if (atkLossN) lossDetail += '<div>💀 ATK destroyed: ' + escapeHtml((c.attacker_losses || []).join(', ')) + '</div>';
+          if (defLossN) lossDetail += '<div>💀 DEF destroyed: ' + escapeHtml((c.defender_losses || []).join(', ')) + '</div>';
+          lossDetail += '</div>';
+        }
+
+        var sourceTag = c.rolls_source === 'moderator'
+          ? '<span class="obs-combat-mod-tag">moderator-input dice</span>' : '';
+
+        html += '<div class="obs-combat-body">' +
+          modsHtml +
+          diceHtml +
+          resultHtml +
+          lossDetail +
+          (c.narrative ? '<div class="obs-combat-narrative">' + escapeHtml(c.narrative) + '</div>' : '') +
+          sourceTag +
+        '</div>';
+      } else {
+        // Legacy / non-ground combat fallback (air, missile, naval — pre-M2 format)
+        var rolls = Array.isArray(c.attacker_rolls) ? c.attacker_rolls : [];
+        var firstRoll = rolls[0] || {};
+        var diceTxt = '';
+        if (firstRoll.roll != null && firstRoll.threshold != null) {
+          var hit = firstRoll.roll <= firstRoll.threshold;
+          diceTxt = '🎲 roll ' + fmtDice(firstRoll.roll) + ' vs ' + fmtDice(firstRoll.threshold) + ' → ' + (hit ? 'HIT' : 'MISS');
+        } else if (firstRoll.outcome) {
+          diceTxt = '🎲 ' + firstRoll.outcome;
+        }
+        var probTxt = firstRoll.threshold != null
+          ? 'Probability: ' + Math.round(firstRoll.threshold * 100) + '%' : '';
+        var destroyed = Array.isArray(c.defender_losses) ? c.defender_losses : [];
+        var destroyedTxt = destroyed.length
+          ? '💥 Destroyed: ' + destroyed.map(function (x) { return typeof x === 'string' ? x : (x.unit_code || x.id || '?'); }).join(', ') : '';
+        html += '<div class="obs-combat-body">' +
           (probTxt ? '<div class="obs-combat-line">' + escapeHtml(probTxt) + (diceTxt ? ' | ' + escapeHtml(diceTxt) : '') + '</div>' : '') +
           (destroyedTxt ? '<div class="obs-combat-line dmg">' + escapeHtml(destroyedTxt) + '</div>' : '') +
           (c.narrative ? '<div class="obs-combat-narrative">' + escapeHtml(c.narrative) + '</div>' : '') +
-        '</div>' +
-        '<pre class="obs-combat-detail">' + escapeHtml(JSON.stringify({
-          attacker_units: c.attacker_units, defender_units: c.defender_units,
-          attacker_rolls: c.attacker_rolls, defender_rolls: c.defender_rolls,
-          attacker_losses: c.attacker_losses, defender_losses: c.defender_losses,
-        }, null, 2)) + '</pre>';
+        '</div>';
+      }
+
+      card.innerHTML = html;
       el.appendChild(card);
     });
   }
@@ -1856,6 +2197,73 @@
     var s = parseInt(ev.target.value, 10) || 15;
     state.speedSec = s;
     postJSON('/api/observatory/speed', { speed_sec: s }).then(function (r) { if (r && r.state) applyRuntime(r.state); });
+  }
+
+  // --------------------------------------------------------------
+  // Sim Run selector (F1): loads a sim_run from sim_runs table and
+  // pins the Observatory to that run's data. Each registered run is
+  // an isolated playthrough with rounds 0..max_rounds.
+  // --------------------------------------------------------------
+  function loadTestRuns() {
+    fetchJSON('/api/observatory/sim_runs').then(function (data) {
+      var sel = document.getElementById('testRunSelect');
+      if (!sel) return;
+      var runs = (data && data.runs) || [];
+      // "— live —" stays as the default ("don't pin to a specific run").
+      sel.innerHTML = '<option value="">— live —</option>';
+      runs.forEach(function (r) {
+        var opt = document.createElement('option');
+        // Encode the full run metadata so onchange can pin everything
+        // we need without re-fetching the listing.
+        opt.value = JSON.stringify({
+          sim_run_id: r.id,
+          scenario: r.scenario_code || 'start_one',
+          r0: 0,
+          r1: r.current_round || r.max_rounds || 0,
+          status: r.status,
+        });
+        var rangeLabel = 'R0–' + (r.current_round || r.max_rounds || 0);
+        var label = (r.name || '(unnamed)') +
+                    ' · ' + rangeLabel +
+                    ' · ' + (r.scenario_code || '?') +
+                    ' · ' + r.status;
+        opt.textContent = label;
+        opt.title = r.description || '';
+        sel.appendChild(opt);
+      });
+    }).catch(function (err) {
+      console.warn('loadTestRuns failed', err);
+    });
+  }
+
+  function onTestRunChange(ev) {
+    var raw = ev.target.value;
+    if (!raw) {
+      // Back to live: clear scrub + run pin
+      state.viewRound = null;
+      state.simRunId = null;
+      state.scenario = 'start_one';
+      state.availableRounds = [];
+      renderMapScrubber([]);
+      refreshAll();
+      return;
+    }
+    var meta;
+    try { meta = JSON.parse(raw); } catch (e) { return; }
+    state.simRunId = meta.sim_run_id;
+    state.scenario = meta.scenario;
+    state.viewRound = meta.r0;
+    // Force totalRounds hint so round badge shows the run range
+    state.round = meta.r1;
+    state.totalRounds = meta.r1;
+    // Reset delta caches so scrubbing across unrelated rounds doesn't
+    // produce bogus movement animations or prev-snapshot deltas.
+    state.prevUnitPositions = {};
+    state.prevCountryStates = {};
+    document.getElementById('roundCurrent').textContent = meta.r0;
+    document.getElementById('roundTotal').textContent = meta.r1;
+    refreshAvailableRounds();
+    refreshAll();
   }
 
   // ================================================================

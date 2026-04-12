@@ -132,8 +132,8 @@ Modifiers applied to the **highest die** of each side per exchange. Integer only
 | Attacker -1 vs defender +2 | 8% |
 | Attacker +1 (AI L4) vs no modifier | 58% |
 
-| Engine | `round_engine/resolve_round._process_attack()` + `combat.resolve_ground_combat()` |
-| Status | **LIVE** (chain mechanic needs implementation) |
+| Engine | `round_engine/resolve_round._process_attack()` + `engines/military.resolve_ground_combat()` (canonical) |
+| Status | **LIVE — slice locked v1.0 (M2, 2026-04-12)** — see `CONTRACT_GROUND_COMBAT.md` |
 
 ### 1.4 Attack — Air Strike
 | Field | Value |
@@ -158,8 +158,8 @@ Modifiers applied to the **highest die** of each side per exchange. Integer only
 **On downed:** attacking air unit destroyed. No hit resolved for that unit.
 **All probabilities are Template-customizable** — stored as coefficients, not hardcoded.
 
-| Engine | `round_engine/combat.resolve_air_strike()` |
-| Status | **LIVE** (needs attacker-downed mechanic added) |
+| Engine | `engines/military.resolve_air_strike()` (canonical M3) |
+| Status | **LIVE — slice locked v1.0 (M3, 2026-04-12)** — see `CONTRACT_AIR_STRIKES.md` |
 
 ### 1.5 Attack — Naval vs Naval
 | Field | Value |
@@ -171,8 +171,8 @@ Modifiers applied to the **highest die** of each side per exchange. Integer only
 | Constraint | Attacker must be on same or adjacent sea hex as target. |
 | Modifiers | AI L4: +1 (either side). Low morale: -1 (stability ≤ 3, either side). Same as ground. |
 | No fleet advantage | No batching. Each naval attack is one ship vs one ship. To destroy a fleet, attack multiple times. |
-| Engine | `round_engine/combat.resolve_naval()` |
-| Status | **LIVE** (needs simplification from current batch mechanic) |
+| Engine | `engines/military.resolve_naval_combat()` (canonical M4) |
+| Status | **LIVE — slice locked v1.0 (M4, 2026-04-12)** — see `CONTRACT_NAVAL_COMBAT.md` |
 
 ### 1.7 Attack — Naval Bombardment (ground target)
 | Field | Value |
@@ -182,8 +182,8 @@ Modifiers applied to the **highest die** of each side per exchange. Integer only
 | Who | Military chief |
 | Mechanic | Each naval unit fires once. **10%** chance per unit to destroy one random ground unit on target hex. |
 | Constraint | Naval must be on sea hex adjacent to target land hex. |
-| Engine | `engines/military.resolve_naval_bombardment_units()` |
-| Status | **STUB** — logged, not processed |
+| Engine | `engines/military.resolve_bombardment()` (M5 canonical) |
+| Status | **LIVE — slice locked v1.0 (M5, 2026-04-12)** — see `CONTRACT_NAVAL_BOMBARDMENT_BLOCKADE.md` |
 
 ### 1.8 Ballistic Missile Launch
 
@@ -258,7 +258,7 @@ Countries with **pre-defined nuclear levels** in Template data (e.g. Columbia T3
 | On failure | Test fails — no confirmation. Can retry next round. R&D progress NOT lost. |
 | Alert | **Only T3+ countries** receive alert: "Underground nuclear test detected at (row, col)." Other countries unaware. |
 | Stability | Global: **-0.2** (all countries). Template-customizable. |
-| Engine | `engines/military.resolve_nuclear_test()` |
+| Engine | `orchestrators/nuclear_chain.NuclearChainOrchestrator` (M6 canonical) |
 
 #### 1.9b Surface Nuclear Test
 | Field | Value |
@@ -272,7 +272,7 @@ Countries with **pre-defined nuclear levels** in Template data (e.g. Columbia T3
 | Alert | **GLOBAL alert** — all countries notified. 10 minutes real-time play triggered. |
 | Economic cost | **-5% own GDP** (pollution/contamination). Template-customizable. |
 | Stability | Global: **-0.4** (all countries). Adjacent hexes to explosion: **-0.6** additional to those countries' stability. Template-customizable. |
-| Engine | `engines/military.resolve_nuclear_test()` |
+| Engine | `orchestrators/nuclear_chain.NuclearChainOrchestrator` (M6 canonical) |
 
 #### 1.9c Nuclear Missile Launch
 | Field | Value |
@@ -322,8 +322,8 @@ Countries with **pre-defined nuclear levels** in Template data (e.g. Columbia T3
 - Each T3+ country that chooses to intercept rolls **25% per active AD unit** they own. Each success destroys 1 incoming missile.
 - **Launcher does NOT learn who intercepted.** Only T3+ nations see launch telemetry (launcher + target).
 
-| Engine | `engines/military.resolve_nuclear_salvo_interception()` |
-| Status | **DONE** (code needs voluntary decision mechanic added) |
+| Engine | `orchestrators/nuclear_chain.NuclearChainOrchestrator` (M6 canonical — handles full 4-phase chain including voluntary interception) |
+| Status | **LIVE — slice locked v1.0 (M6, 2026-04-13)** — see `CONTRACT_NUCLEAR_CHAIN.md` |
 
 ### 1.10 Naval Blockade
 | Field | Value |
@@ -393,7 +393,7 @@ All values Template-customizable.
 ```
 
 | Engine | `engines/military.resolve_blockade()` + `engines/economic.calc_oil_price()` |
-| Status | **LIVE** (oil cascade implemented, blockade resolution needs update to match these mechanics) |
+| Status | **LIVE — slice locked v1.0 (M5, 2026-04-12)** — see `CONTRACT_NAVAL_BOMBARDMENT_BLOCKADE.md` |
 
 ### 1.11 Basing Rights
 | Field | Value |

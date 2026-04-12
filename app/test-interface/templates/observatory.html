@@ -71,6 +71,12 @@
         <option value="0">manual</option>
       </select>
     </label>
+    <label class="obs-speed-label" title="Load a registered test run">
+      Test Run:
+      <select id="testRunSelect" class="obs-speed-select">
+        <option value="">— live —</option>
+      </select>
+    </label>
   </div>
   <div class="obs-topbar-right">
     <span class="status-pill" id="obsStatusPill">Loading…</span>
@@ -91,6 +97,7 @@
     <div class="obs-panel-head">
       <h2>Live Map <span id="mapSubtitle" class="obs-map-subtitle">— Global</span></h2>
       <div class="obs-panel-head-right">
+        <div class="obs-round-scrubber" id="mapRoundScrubber"></div>
         <button class="obs-ctrl-btn obs-back-btn" id="btnMapBack" style="display:none">← Back to Global</button>
         <span class="obs-meta" id="mapMeta">—</span>
       </div>
@@ -112,7 +119,25 @@
       <div class="obs-feed-empty">No combats this round.</div>
     </div>
   </section>
+  <!-- Movement ticker (below combat) -->
+  <section class="obs-panel obs-panel-movements">
+    <div class="obs-panel-head">
+      <h2>Movements This Round</h2>
+      <div class="obs-panel-head-right">
+        <span class="obs-meta" id="movementMeta">0 movements</span>
+      </div>
+    </div>
+    <div class="obs-panel-body obs-movements-body" id="movementTicker">
+      <div class="obs-feed-empty">No movements this round.</div>
+    </div>
+  </section>
 </main>
+
+<!-- Context viewer overlay (AI movement context inspection) -->
+<div class="obs-detail-panel obs-context-panel" id="contextPanel" style="display:none">
+  <button class="obs-detail-close" id="contextClose">×</button>
+  <div class="obs-detail-content" id="contextContent"></div>
+</div>
 
 <!-- ==================== SCREEN: DASHBOARD ==================== -->
 <main class="obs-screen obs-screen-dashboard" id="screen-dashboard">
