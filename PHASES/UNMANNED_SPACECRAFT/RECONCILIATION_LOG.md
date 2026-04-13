@@ -193,7 +193,21 @@ lookup tools).
 
 ---
 
-## Updated summary counts (post T1+T2)
+## Run Roles — Per-Run Role State (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| **NEW `run_roles` DB table** — per-run clone of template roles, mutable (status, coins) | DB migration `run_roles_table` | DET_B1 (new table), SEED_E5 (role lifecycle model) |
+| **`run_roles.py` service** — seed_run_roles, get/update status, personal coins | `engine/services/run_roles.py` | DET_C1 (role state contracts) |
+| **Architectural principle: template roles are FROZEN per run** — all mutations go to run_roles | Design decision (matches KING pattern) | CONCEPT (data model), SEED_C §5 (Template/Scenario/Run), DET_B1 |
+| **Status lifecycle: active→arrested→released, active→killed, active→deposed** | run_roles.status column | SEED_E5 (role lifecycle), DET_D8 |
+| **Personal coins tracked per run** (not template-level) | run_roles.personal_coins | SEED_E5, CARD_TEMPLATE |
+| **40 roles seeded per run** from Template v1.0 | seed_run_roles() | CARD_TEMPLATE |
+| **Template `roles` table stays frozen** — read-only during sim runs | Architecture constraint | CONCEPT, SEED_C, DET_B1 |
+
+---
+
+## Updated summary counts (post T1+T2+Power+RunRoles)
 
 | Category | Items |
 |---|---|
