@@ -66,30 +66,30 @@ class TestArrest:
 
 class TestMartialLaw:
     def test_valid_martial_law(self):
-        cs = {"sarmatia": {"stability": 3}}
+        cs = {"sarmatia": {"stability": 5, "martial_law_declared": False}}
         p = {"action_type": "martial_law", "country_code": "sarmatia", "round_num": 3,
              "decision": "change",
-             "rationale": "Declaring martial law due to critical stability crisis in Sarmatia"}
+             "rationale": "Declaring martial law to mobilize full conscription pool for war effort"}
         r = validate_martial_law(p, cs)
         assert r["valid"], r["errors"]
         assert r["normalized"]["changes"]["conscription_pool"] == 10
 
-    def test_stability_too_high(self):
-        cs = {"sarmatia": {"stability": 7}}
+    def test_already_declared(self):
+        cs = {"sarmatia": {"stability": 5, "martial_law_declared": True}}
         p = {"action_type": "martial_law", "country_code": "sarmatia", "round_num": 3,
              "decision": "change", "rationale": "x" * 30}
-        assert any("STABILITY_TOO_HIGH" in e for e in validate_martial_law(p, cs)["errors"])
+        assert any("ALREADY_DECLARED" in e for e in validate_martial_law(p, cs)["errors"])
 
     def test_not_eligible_country(self):
-        cs = {"columbia": {"stability": 3}}
+        cs = {"columbia": {"stability": 7}}
         p = {"action_type": "martial_law", "country_code": "columbia", "round_num": 3,
              "decision": "change", "rationale": "x" * 30}
         assert any("NOT_ELIGIBLE" in e for e in validate_martial_law(p, cs)["errors"])
 
     def test_valid_no_change(self):
-        cs = {"sarmatia": {"stability": 3}}
+        cs = {"sarmatia": {"stability": 5}}
         p = {"action_type": "martial_law", "country_code": "sarmatia", "round_num": 3,
              "decision": "no_change",
-             "rationale": "Not declaring martial law this round — situation not yet critical enough"}
+             "rationale": "Not declaring martial law this round — holding conscription in reserve"}
         r = validate_martial_law(p, cs)
         assert r["valid"], r["errors"]

@@ -78,8 +78,8 @@ Initial resource pools per role (intelligence cards, sabotage cards, personal co
 | Mechanic | One-off boost: adds ground units from martial-law pool to reserve (available for deployment next round via `move_units`). Immediate stability and war tiredness cost. Can only be declared ONCE per SIM. |
 | Martial-law pool (Template data) | Sarmatia: 10, Ruthenia: 6, Persia: 8, Cathay: 10 |
 | Cost | Stability: **-1.0** immediately. War tiredness: **+1.0** immediately. |
-| Engine | `engines/military.resolve_martial_law()` (renamed 2026-04-11 from `resolve_mobilization` to eliminate naming collision with the deprecated deploy-from-reserve mechanic) |
-| Status | **LIVE — validator locked (2026-04-13)** — see `domestic_validator.py` |
+| Engine | `services/martial_law_engine.py` + `services/domestic_validator.py` |
+| Status | **LIVE — slice locked v1.0 (2026-04-13)** — see `CONTRACT_MARTIAL_LAW.md` |
 
 ### 1.3 Attack — Ground
 | Field | Value |

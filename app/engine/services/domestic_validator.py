@@ -176,11 +176,10 @@ def validate_martial_law(
     if cc and cc not in MARTIAL_LAW_POOLS:
         errors.append(f"NOT_ELIGIBLE: {cc!r} has no martial law conscription pool")
 
-    # Check stability is low enough to justify (stability ≤ 5)
+    # Check not already declared this run (one-time per country per SIM)
     cs = country_state.get(cc) or {}
-    stability = int(cs.get("stability", 5) or 5)
-    if stability > 5:
-        errors.append(f"STABILITY_TOO_HIGH: {cc} stability={stability} (need ≤5 for martial law)")
+    if cs.get("martial_law_declared"):
+        errors.append(f"ALREADY_DECLARED: {cc} has already declared martial law this SIM")
 
     if errors:
         return {"valid": False, "errors": errors, "warnings": [], "normalized": None}
