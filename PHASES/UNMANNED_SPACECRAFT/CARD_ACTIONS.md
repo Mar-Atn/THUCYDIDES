@@ -876,8 +876,8 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 | Constraint | Target must be physically on the arresting country's soil (in SIM terms: in the same room/space). |
 | Execution | **Moderator-confirmed only.** Moderator verifies the target is on the arresting country's soil, then executes. |
 | Effect | Arrested actor is **inactive** — moved to a dedicated holding space until end of round. Cannot attend meetings, make decisions, or communicate. Released at round end. |
-| Engine | `services/domestic_validator.py:validate_arrest()` + role state change |
-| Status | **LIVE — validator locked (2026-04-13)** |
+| Engine | `services/arrest_engine.py` + `services/run_roles.py` |
+| Status | **LIVE — slice locked v1.0 (2026-04-13)** — see `CONTRACT_ARREST.md` |
 
 ### 6.2 Assassination
 | Field | Value |
