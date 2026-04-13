@@ -404,8 +404,8 @@ All values Template-customizable.
 | Effect | Counterpart can deploy/move units to host's territory hexes. |
 | Tradeable | Yes — can be granted for free or as part of a transaction (like technology, but REVOCABLE). |
 | Template data | Initial basing rights map must exist in Template (reflecting real alliance structure — Western Treaty members host Columbia bases, Asian allies, etc.). |
-| Engine | `services/basing_rights_validator.py` + relationship state update |
-| Status | **LIVE — validator locked (2026-04-13)** |
+| Engine | `services/basing_rights_engine.py` + `services/basing_rights_validator.py` |
+| Status | **LIVE — slice locked v1.0 (2026-04-13)** — see `CONTRACT_BASING_RIGHTS.md` |
 
 ---
 
@@ -901,15 +901,15 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 | Engine | `engines/military.resolve_assassination()` |
 | Status | **DONE** (engine needs probability update), **ABSENT** (agent schema) |
 
-### 6.3 Fire / Reassign
+### 6.3 Reassign Powers (replaces Fire/Reassign)
 | Field | Value |
 |---|---|
-| action_type | `fire_role` |
-| Fields | `target_role` (must be a direct report) |
-| Who | Any role with authority over the target (HoS fires ministers, military chief reassigns officers, etc.) |
-| Mechanic | Target loses current powers. Stays in game (can be reassigned to another position, or remains powerless). **Must be public** — all participants notified. |
-| Engine | `services/domestic_validator.py:validate_fire_role()` + role state change |
-| Status | **LIVE — validator locked (2026-04-13)** |
+| action_type | `reassign_powers` |
+| Fields | `power_type` (military\|economic\|foreign_affairs), `new_role` (role_id or null to vacate) |
+| Who | **HoS only.** |
+| Mechanic | HoS reassigns one of three power categories to a different role within the same country (or vacates the slot, making HoS the sole authority). Immediate. Public — all notified. |
+| Engine | `services/power_assignments.py:reassign_power()` + `check_authorization()` |
+| Status | **LIVE — slice locked v1.0 (2026-04-13)** — see `CONTRACT_POWER_ASSIGNMENTS.md` |
 
 *(Domestic propaganda covered by covert ops 4.3 — Propaganda/Disinformation with target: own country, intent: boost.)*
 
