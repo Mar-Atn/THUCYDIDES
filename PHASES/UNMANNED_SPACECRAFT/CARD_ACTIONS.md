@@ -828,8 +828,8 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 
 **NOT tradeable via exchange:** covert op cards (non-transferable), territory (use agreements), promises/commitments (use agreements), sanctions/tariff coordination (use agreements).
 
-| Engine | `agents/transactions.py` (propose/evaluate/execute) |
-| Status | **STUB** — code exists, not in round flow |
+| Engine | `services/transaction_engine.py` + `services/transaction_validator.py` (T1 canonical) |
+| Status | **LIVE — slice locked v1.0 (T1, 2026-04-13)** — see `CONTRACT_TRANSACTIONS.md` |
 
 ### 5.2 Agreements
 | Field | Value |
@@ -860,8 +860,8 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 
 **Mechanic:** Proposer drafts name + type + terms + required signatories. Each signatory confirms or declines. Once all confirm → agreement is **recorded and active**. No engine enforcement except ceasefire and peace treaty — all other agreements rely on trust.
 
-| Engine | `agents/transactions.py` |
-| Status | **STUB** — code exists, ceasefire/peace engine mechanics need wiring |
+| Engine | `services/agreement_engine.py` + `services/agreement_validator.py` (T2 canonical) |
+| Status | **LIVE — slice locked v1.0 (T2, 2026-04-13)** — see `CONTRACT_AGREEMENTS.md` |
 
 ---
 

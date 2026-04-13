@@ -1,0 +1,236 @@
+"""Agreement Engine — CONTRACT_AGREEMENTS v1.0.
+
+Pure service for written commitments. Actor-agnostic.
+
+Lifecycle:
+    propose_agreement(proposal, sim_run_id) → {id, status}
+    sign_agreement(agreement_id, country_code, role_id, confirm, comments) → {status}
+    get_pending_agreements(country_code, sim_run_id) → list
+    get_active_agreements(country_code, sim_run_id) → list
+
+No enforcement — all agreements are just saved.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, timezone
+
+from engine.services.supabase import get_client
+from engine.services.agreement_validator import validate_agreement_proposal
+
+logger = logging.getLogger(__name__)
+
+
+def propose_agreement(
+    proposal: dict,
+    sim_run_id: str,
+    roles: dict[str, dict] | None = None,
+) -> dict:
+    """Validate and create a PROPOSED agreement.
+
+    Returns ``{agreement_id, status, errors}``.
+    """
+    client = get_client()
+
+    if roles is None:
+        roles = _load_roles(client)
+
+    report = validate_agreement_proposal(proposal, roles)
+    if not report["valid"]:
+        return {"agreement_id": None, "status": "rejected", "errors": report["errors"]}
+
+    norm = report["normalized"]
+    scenario_id = _get_scenario_id(client, sim_run_id)
+
+    # Proposer auto-signs
+    signatures = {
+        norm["proposer_country_code"]: {
+            "confirmed": True,
+            "role_id": norm["proposer_role_id"],
+            "comments": norm.get("rationale", ""),
+            "signed_at": datetime.now(timezone.utc).isoformat(),
+        }
+    }
+
+    row = {
+        "sim_run_id": sim_run_id,
+        "scenario_id": scenario_id,
+        "round_num": norm["round_num"],
+        "agreement_name": norm["agreement_name"],
+        "agreement_type": norm["agreement_type"],
+        "visibility": norm["visibility"],
+        "terms": norm["terms"],
+        "signatories": norm["signatories"],
+        "proposer_country_code": norm["proposer_country_code"],
+        "proposer_role_id": norm["proposer_role_id"],
+        "signatures": signatures,
+        "status": "proposed",
+    }
+
+    res = client.table("agreements").insert(row).execute()
+    agreement_id = res.data[0]["id"]
+
+    # Check if only 2 signatories and proposer already signed → need 1 more
+    # If proposer is the only signatory needed... (shouldn't happen, min 2)
+
+    _write_event(client, sim_run_id, scenario_id, norm["round_num"],
+                 "agreement_proposed", norm["proposer_country_code"],
+                 f"{norm['proposer_country_code']} proposes {norm['agreement_type']}: "
+                 f"'{norm['agreement_name']}' with {', '.join(norm['signatories'])}",
+                 {"agreement_id": agreement_id, "type": norm["agreement_type"],
+                  "visibility": norm["visibility"]})
+
+    logger.info("[agreement] proposed %s: '%s' by %s",
+                agreement_id, norm["agreement_name"], norm["proposer_country_code"])
+
+    return {"agreement_id": agreement_id, "status": "proposed", "errors": []}
+
+
+def sign_agreement(
+    agreement_id: str,
+    country_code: str,
+    role_id: str,
+    confirm: bool,
+    comments: str = "",
+) -> dict:
+    """Sign or decline an agreement.
+
+    Returns ``{status, activated?}``.
+    """
+    client = get_client()
+
+    res = client.table("agreements").select("*").eq("id", agreement_id).limit(1).execute()
+    if not res.data:
+        return {"status": "error", "errors": ["Agreement not found"]}
+    agr = res.data[0]
+
+    if agr["status"] != "proposed":
+        return {"status": agr["status"], "errors": ["Agreement not in proposed state"]}
+
+    if country_code not in (agr["signatories"] or []):
+        return {"status": "error", "errors": [f"{country_code} is not a signatory"]}
+
+    signatures = agr.get("signatures") or {}
+    sim_run_id = agr["sim_run_id"]
+    scenario_id = agr.get("scenario_id")
+
+    signatures[country_code] = {
+        "confirmed": confirm,
+        "role_id": role_id,
+        "comments": comments,
+        "signed_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    if not confirm:
+        client.table("agreements").update({
+            "signatures": signatures,
+            "status": "declined",
+        }).eq("id", agreement_id).execute()
+
+        _write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                     "agreement_declined", country_code,
+                     f"{country_code} declined '{agr['agreement_name']}'",
+                     {"agreement_id": agreement_id, "comments": comments})
+
+        return {"status": "declined", "declined_by": country_code}
+
+    # Confirm — check if all signatories have now signed
+    client.table("agreements").update({
+        "signatures": signatures,
+    }).eq("id", agreement_id).execute()
+
+    all_signed = all(
+        signatures.get(s, {}).get("confirmed") is True
+        for s in (agr["signatories"] or [])
+    )
+
+    if all_signed:
+        client.table("agreements").update({
+            "status": "active",
+        }).eq("id", agreement_id).execute()
+
+        _write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                     "agreement_activated", agr.get("proposer_country_code", ""),
+                     f"Agreement ACTIVE: '{agr['agreement_name']}' ({agr['agreement_type']}) — "
+                     f"signed by {', '.join(agr['signatories'] or [])}",
+                     {"agreement_id": agreement_id, "type": agr["agreement_type"],
+                      "visibility": agr["visibility"]})
+
+        logger.info("[agreement] ACTIVATED %s: '%s'", agreement_id, agr["agreement_name"])
+        return {"status": "active", "activated": True}
+
+    _write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                 "agreement_signed", country_code,
+                 f"{country_code} signed '{agr['agreement_name']}'",
+                 {"agreement_id": agreement_id})
+
+    return {"status": "proposed", "signed_by": country_code, "activated": False}
+
+
+def get_pending_agreements(country_code: str, sim_run_id: str) -> list[dict]:
+    """Return proposed agreements awaiting this country's signature."""
+    client = get_client()
+    res = client.table("agreements").select("*") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("status", "proposed") \
+        .contains("signatories", [country_code]) \
+        .order("created_at", desc=True) \
+        .execute()
+    # Filter to those where this country hasn't signed yet
+    out = []
+    for a in (res.data or []):
+        sigs = a.get("signatures") or {}
+        if country_code not in sigs:
+            out.append(a)
+    return out
+
+
+def get_active_agreements(country_code: str, sim_run_id: str) -> list[dict]:
+    """Return all active agreements involving this country."""
+    client = get_client()
+    res = client.table("agreements").select("*") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("status", "active") \
+        .contains("signatories", [country_code]) \
+        .order("created_at", desc=True) \
+        .execute()
+    return res.data or []
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _load_roles(client):
+    try:
+        res = client.table("roles").select("*").execute()
+        return {r.get("id") or r.get("role_id", ""): r for r in (res.data or [])}
+    except Exception:
+        return {}
+
+
+def _get_scenario_id(client, sim_run_id):
+    try:
+        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
+        return r.data[0]["scenario_id"] if r.data else None
+    except Exception:
+        return None
+
+
+def _write_event(client, sim_run_id, scenario_id, round_num, event_type, country_code, summary, payload):
+    if not scenario_id:
+        return
+    try:
+        client.table("observatory_events").insert({
+            "sim_run_id": sim_run_id,
+            "scenario_id": scenario_id,
+            "round_num": round_num,
+            "event_type": event_type,
+            "country_code": country_code,
+            "summary": summary,
+            "payload": payload,
+        }).execute()
+    except Exception as e:
+        logger.debug("event write failed: %s", e)
