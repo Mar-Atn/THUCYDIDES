@@ -142,3 +142,51 @@ lookup tools).
 | L2 tests added | ~25 |
 | L3 tests added | ~8 |
 | Design docs to update | DET_B1, DET_D8, DET_C1, DET_F, SEED_D8, SEED_C §5, SEED_E5, CARD_OBSERVATORY, CONCEPT (hierarchy) |
+
+---
+
+## T1 — Exchange Transactions (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| `propose_transaction` + `respond_to_exchange` as canonical API | `engine/services/transaction_engine.py` | SEED_E5 §7 (transaction flow), DET_C1 (contracts) |
+| Transaction validator with role authorization (HoS=all, mil=units, FM=coins+basing) | `engine/services/transaction_validator.py` | DET_D8 (action validation) |
+| Atomic asset transfers: coins, units (unit_code-level), tech (+0.20 nuclear/+0.15 AI), basing rights | `transaction_engine.py:_execute_transfers` | SEED_E5 §7, CARD_FORMULAS C.4 (tech transfer values) |
+| Country scope vs personal scope trading | Validator + engine | SEED_E5 §7.2 (individual transactions) |
+| Counter-offer chain: propose → counter → accept/decline (one iteration max) | Engine | TRANSACTION_LOGIC.md (already correct) |
+| Execution validation: both sides re-checked at execution time (assets may have changed) | `transaction_validator.py:validate_execution` | NEW — not in any doc |
+| Unit transfer = specific unit_codes flipped to receiver's reserve (not count-based) | `_transfer_unit` | SEED_D8 (unit ownership), DET_B1 (unit_states_per_round) |
+| `exchange_transactions` table already had `sim_run_id` from F1 | F1 migration | DET_B1 |
+
+---
+
+## T2 — Agreements (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| `propose_agreement` + `sign_agreement` as canonical API | `engine/services/agreement_engine.py` | SEED_E5 §7, DET_C1 |
+| Agreement validator: 10 error codes, role auth (HoS/FM/diplomat), signatory checks | `engine/services/agreement_validator.py` | DET_D8 |
+| Per-signatory tracking via `signatures JSONB` column on `agreements` table | DB migration `t2_agreements_enhancement` | DET_B1 |
+| `proposer_country_code` + `proposer_role_id` columns added to `agreements` | Same migration | DET_B1 |
+| Pre-defined agreement types (armistice, peace_treaty, military_alliance, etc.) + custom | Engine | CARD_ACTIONS §5.2 (already correct) |
+| Public/secret visibility flag | Engine | CARD_ACTIONS §5.2 (already correct) |
+| **NO enforcement** of any agreement type — all trust-based, full sovereignty | Design decision | SEED_E5 (update: remove "engine-enforced ceasefire" language), DET_C1 |
+| Proposer auto-signs at proposal time (included in signatures) | Engine | NEW — not in design docs |
+| Multilateral support: N signatories, unanimous required for activation | Engine | CARD_ACTIONS §5.2 (already correct) |
+
+---
+
+## Updated summary counts (post T1+T2)
+
+| Category | Items |
+|---|---|
+| New contracts | 10 (added: `CONTRACT_TRANSACTIONS`, `CONTRACT_AGREEMENTS`) |
+| New DB tables | 1 (`nuclear_actions`) |
+| New DB columns | 12 JSONB audit columns + 3 agreement enhancement columns |
+| DB column type changes | 2 (`attacker_rolls`/`defender_rolls` int[] → jsonb) |
+| New validators | 11 files in `engine/services/` (added: transaction, agreement) |
+| New engine functions | 6 (added: transaction_engine, agreement_engine) |
+| L1 tests added | 134 (458 → 592) |
+| L2 tests added | ~33 |
+| L3 tests added | ~8 |
+| Design docs to update | DET_B1, DET_D8, DET_C1, DET_F, SEED_D8, SEED_C §5, SEED_E5 §7, CARD_OBSERVATORY, CONCEPT (hierarchy), TRANSACTION_LOGIC.md (minor updates) |
