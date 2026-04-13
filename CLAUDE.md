@@ -1,18 +1,28 @@
 # CLAUDE.md — Thucydides Trap (TTT) Project
 
-**Version:** 2.1 | **Date:** 2026-04-06 | **Phase:** BUILD — UNMANNED SPACECRAFT
+**Version:** 3.0 | **Date:** 2026-04-13 | **Phase:** EXECUTION — Module Build
 **Owner:** Marat Atn (marat@metagames.org)
 **Any change to this file must be confirmed by Marat.**
 
 ---
 
-## CURRENT PHASE: UNMANNED SPACECRAFT
+## CURRENT PHASE: EXECUTION (6-week sprint)
 
-**Start here:** `PHASES/UNMANNED_SPACECRAFT/PHASE.md` — scope, plan, definition of done.
-**Reference cards:** `PHASES/UNMANNED_SPACECRAFT/CARD_*.md` — actions, formulas, architecture, template.
-**All pointers:** `PHASES/UNMANNED_SPACECRAFT/REFERENCES.md` — DB tables, code entry points, heritage docs.
+**Start here:** `MODULES/ROADMAP.md` — module sequence, timeline, milestones.
+**Build standards:** `MODULES/STANDARDS.md` — per-module protocol, quality gates.
+**Status dashboard:** `MODULES/MODULE_REGISTRY.md` — live status of all modules.
+**Foundation reference:** `MODULES/FOUNDATION/` — what's already built (engines, communication, data).
 
-Every session: check PHASE.md first. Validate every implementation against the reference cards. Do not invent — look up.
+**Design heritage (frozen reference):**
+- `1. CONCEPT/` — what and why
+- `2 SEED/` — how (specification level)
+- `3 DETAILED DESIGN/` — how (implementation level), includes CONTRACTS/ and CARDS/
+- `3 DETAILED DESIGN/DET_DOCUMENT_REGISTRY.md` — index to all 125+ design documents
+
+**Reference cards:** `3 DETAILED DESIGN/CARDS/` — actions, formulas, architecture, template.
+**Locked contracts:** `3 DETAILED DESIGN/CONTRACTS/` — 28 action specifications.
+
+Every session: check ROADMAP.md and current module SPEC.md. Build to spec. Do not invent — look up.
 
 ---
 
