@@ -176,6 +176,23 @@ lookup tools).
 
 ---
 
+---
+
+## Power Assignments — Authorization Backbone (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| **NEW `power_assignments` DB table** — tracks who holds military/economic/foreign_affairs authority per country per run | DB migration `power_assignments_table` | DET_B1 (new table) |
+| **`power_assignments.py` service** — seed_defaults, check_authorization, reassign_power, get_assignments | `engine/services/power_assignments.py` | DET_C1, SEED_E5 (role authorization model) |
+| **Canonical starting table** — 5 multi-role countries × 3 powers = 15 default assignments | `DEFAULT_ASSIGNMENTS` constant | CARD_TEMPLATE (new section: starting power assignments) |
+| **Action-to-power mapping** — every action_type mapped to military/economic/foreign_affairs power | `ACTION_TO_POWER` dict | CARD_ACTIONS (add authorization column to action table) |
+| **HoS implicit authority** — HoS always authorized for everything, not stored in table | Design decision | SEED_E5, CONCEPT (role model) |
+| **Reassign_power action** — HoS can reassign or vacate any power slot mid-game | Engine function | CARD_ACTIONS §6.3 (replaces fire_role concept) |
+| **Basing rights table** — separate from relationships, tracks grant/revoke with source | DB migration + `basing_rights_engine.py` | DET_B1 (new table), CARD_ACTIONS §1.11 |
+| **Transaction engine routes through basing_rights_engine** — single source of truth | `transaction_engine.py:_grant_basing` updated | DET_C1 |
+
+---
+
 ## Updated summary counts (post T1+T2)
 
 | Category | Items |

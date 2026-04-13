@@ -79,7 +79,7 @@ Initial resource pools per role (intelligence cards, sabotage cards, personal co
 | Martial-law pool (Template data) | Sarmatia: 10, Ruthenia: 6, Persia: 8, Cathay: 10 |
 | Cost | Stability: **-1.0** immediately. War tiredness: **+1.0** immediately. |
 | Engine | `engines/military.resolve_martial_law()` (renamed 2026-04-11 from `resolve_mobilization` to eliminate naming collision with the deprecated deploy-from-reserve mechanic) |
-| Status | **STUB** — engine exists, needs wiring + template data |
+| Status | **LIVE — validator locked (2026-04-13)** — see `domestic_validator.py` |
 
 ### 1.3 Attack — Ground
 | Field | Value |
@@ -404,8 +404,8 @@ All values Template-customizable.
 | Effect | Counterpart can deploy/move units to host's territory hexes. |
 | Tradeable | Yes — can be granted for free or as part of a transaction (like technology, but REVOCABLE). |
 | Template data | Initial basing rights map must exist in Template (reflecting real alliance structure — Western Treaty members host Columbia bases, Asian allies, etc.). |
-| Engine | Relationship state update |
-| Status | **ABSENT** |
+| Engine | `services/basing_rights_validator.py` + relationship state update |
+| Status | **LIVE — validator locked (2026-04-13)** |
 
 ---
 
@@ -876,8 +876,8 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 | Constraint | Target must be physically on the arresting country's soil (in SIM terms: in the same room/space). |
 | Execution | **Moderator-confirmed only.** Moderator verifies the target is on the arresting country's soil, then executes. |
 | Effect | Arrested actor is **inactive** — moved to a dedicated holding space until end of round. Cannot attend meetings, make decisions, or communicate. Released at round end. |
-| Engine | State change on role (status: active → arrested → active at round end) |
-| Status | **ABSENT** |
+| Engine | `services/domestic_validator.py:validate_arrest()` + role state change |
+| Status | **LIVE — validator locked (2026-04-13)** |
 
 ### 6.2 Assassination
 | Field | Value |
@@ -908,7 +908,8 @@ Two distinct types: **exchanges** (transfer of assets) and **agreements** (writt
 | Fields | `target_role` (must be a direct report) |
 | Who | Any role with authority over the target (HoS fires ministers, military chief reassigns officers, etc.) |
 | Mechanic | Target loses current powers. Stays in game (can be reassigned to another position, or remains powerless). **Must be public** — all participants notified. |
-| Status | **ABSENT** |
+| Engine | `services/domestic_validator.py:validate_fire_role()` + role state change |
+| Status | **LIVE — validator locked (2026-04-13)** |
 
 *(Domestic propaganda covered by covert ops 4.3 — Propaganda/Disinformation with target: own country, intent: boost.)*
 

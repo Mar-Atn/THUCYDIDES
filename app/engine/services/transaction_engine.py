@@ -347,19 +347,17 @@ def _transfer_tech(client, sim_run_id, round_num, receiver_cc, field, boost, cha
 
 
 def _grant_basing(client, sim_run_id, host_cc, guest_cc, changes):
-    """Grant basing rights (host allows guest to deploy on host territory)."""
-    try:
-        # Upsert into relationships table
-        client.table("relationships").upsert({
-            "sim_run_id": sim_run_id,
-            "from_country_id": host_cc,
-            "to_country_id": guest_cc,
-            "relationship": "basing_rights_granted",
-            "status": "active",
-        }, on_conflict="sim_run_id,from_country_id,to_country_id").execute()
+    """Grant basing rights via the canonical basing_rights_engine."""
+    from engine.services.basing_rights_engine import grant_basing_rights
+    result = grant_basing_rights(
+        sim_run_id=sim_run_id,
+        host_country=host_cc,
+        guest_country=guest_cc,
+        round_num=0,  # round_num not tracked per transaction — use 0
+        source="transaction",
+    )
+    if result.get("success"):
         changes.append(f"{host_cc} grants basing rights to {guest_cc}")
-    except Exception as e:
-        logger.warning("basing rights grant failed: %s", e)
 
 
 # ---------------------------------------------------------------------------
