@@ -396,6 +396,19 @@ Most questions from v1.1 are now addressed in E1 Engine Architecture v0.7. Remai
 
 ---
 
+## BUILD Reconciliation Notes (2026-04-13)
+
+> This section documents how BUILD implementation diverged from or refined the original CONCEPT design.
+> CONCEPT remains frozen as the design heritage record. For current canonical values, see references below.
+
+- **Domain 3 (Domestic Politics) — Elections**: BUILD implements a camp system (president_camp vs opposition in Columbia), nominations (1 round before election), voting (secret ballot), and resolution with 50% participant votes + 50% AI-scored population votes.
+- **Power Assignments** added: military/economic/foreign_affairs delegation from Head of State to subordinate roles. HoS retains implicit authority over all categories.
+- **Run Roles**: per-run mutable clones of template roles. Status lifecycle: active, arrested, killed, deposed. Personal coins tracked per run.
+- **Martial Law** replaces the 3-tier mobilization concept. One-off per country per SIM. Creates conscript units plus stability/war_tiredness cost.
+- Canonical specs: `CONTRACT_ELECTIONS.md`, `CONTRACT_POWER_ASSIGNMENTS.md`, `CONTRACT_RUN_ROLES.md`
+
+---
+
 ## Changelog
 
 - **v2.0 (2026-03-21):** Aligned with E1 Engine Architecture v0.7. Military: 5 unit types (added strategic missiles with unified nuclear warhead unknown to target, air defense as deployable unit). Budget: production tiers (1×/4×/9×), capacity investment removed, country-specific maintenance costs. Economy: GDP formula reference, financial indexes, revenue formula. Politics: simplified to Stability + Political Support only, Columbia Dem/Rep split added. Tech: pre-set advancement model. Elections: detailed mechanics from E1. Coup: multi-step mechanic. Most open questions resolved by E1 specs.

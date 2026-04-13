@@ -1,8 +1,8 @@
 # TTT Data Architecture
 ## Foundation Specification — Everything Builds on This
 
-**Version:** 1.0 | **Date:** 2026-03-28
-**Status:** SEED Design (pre-implementation)
+**Version:** 1.1 | **Date:** 2026-04-13 | **Updated:** BUILD reconciliation
+**Status:** SEED Design + BUILD implementation notes
 **Cross-references:** [F1 Data Schema](SEED_F1_DATA_SCHEMA_v1.md) | [F3 Data Flows](SEED_F3_DATA_FLOWS_v1.md) | [F4 API Contracts](SEED_F4_API_CONTRACTS_v1.md) | [D8 Engine Formulas](../D_ENGINES/SEED_D8_ENGINE_FORMULAS_v1.md)
 
 ---
@@ -872,3 +872,62 @@ Quick reference for all stored CORE variables with their specifications.
 ---
 
 *This document is the single reference for TTT data architecture decisions. All engine, API, and UI development must conform to the classifications and rules specified here. Changes require updating this document first.*
+
+---
+
+## BUILD Reconciliation (2026-04-13)
+
+### Template → Scenario → Sim-Run Data Model
+
+BUILD established the canonical **3-level data hierarchy** that maps to the parameter
+blocks defined in this document:
+
+```
+🏛️ TEMPLATE — the game itself (evolves over months; semver-tracked)
+  │  Map topology, country master list, role library, formula coefficients,
+  │  default relationships, default unit layout, allowed ranges
+  │
+  └── 🎬 SCENARIO — one event's configuration (sparse override of template)
+        │  Event metadata, starting date, max rounds, oil price, theater activation,
+        │  role assignments, election schedule, country/relationship/briefing overrides
+        │
+        └── ⚡ SIM-RUN — one actual playthrough (immutable once started)
+              Frozen config snapshot, user↔role bindings, per-round state snapshots,
+              append-only event log, agent memories, all action submissions
+```
+
+**Key principle:** A Scenario is a "modified copy of Template" with sparse overrides.
+Every scenario field defaults to its template value. Scenario stores ONLY the fields
+it wants to change.
+
+**DB tables:** `sim_templates`, `sim_scenarios`, `sim_runs` (with `scenario_id` FK).
+All per-round data keyed by `sim_run_id` (UUID, NOT NULL).
+
+### Per-Round State Snapshots (BUILD implementation)
+
+The entity model's state snapshots are implemented as:
+
+| SEED Concept | BUILD Table | Key |
+|---|---|---|
+| Country state per round | `country_states_per_round` | `(sim_run_id, round_num, country_code)` |
+| Unit state per round | `unit_states_per_round` | `(sim_run_id, round_num, unit_code)` |
+| Global state per round | `global_state_per_round` | `(sim_run_id, round_num)` |
+| Role state per round | `run_roles` | `(sim_run_id, role_id)` — mutable, not per-round |
+
+### Run Lifecycle
+
+| Status | Meaning |
+|---|---|
+| `setup` | Created, R0 seeded, not yet started |
+| `active` | In progress, rounds being processed |
+| `paused` | Temporarily halted |
+| `completed` | All rounds finished |
+| `aborted` | Terminated early |
+| `archived` | Read-only historical record |
+
+### Cascade Delete Pattern
+
+Deleting a `sim_run` cascades to all child tables (country_states, unit_states,
+agent_decisions, observatory_events, etc.). This is the canonical cleanup pattern.
+
+*Full spec: `PHASES/UNMANNED_SPACECRAFT/F1_TAXONOMY.md`, `DET_F_SCENARIO_CONFIG_SCHEMA.md`*

@@ -502,6 +502,21 @@ This document maps to **Section D: Starting Scenario** in the Concept Checklist.
 
 ---
 
+## BUILD Reconciliation Notes (2026-04-13)
+
+> This section documents how BUILD implementation maps the CONCEPT parameter classification to the running system.
+> CONCEPT remains frozen as the design heritage record. For current canonical values, see references below.
+
+- The three-block classification (Block A/B/C) maps directly to the **Template / Scenario / Sim-Run** data model implemented in BUILD:
+  - Block A (SEED DESIGN parameters) = **Template** level — the game itself, evolves over months, semver-tracked
+  - Block B (SCENARIO CONFIGURATION) = **Scenario** level — one event's configuration, sparse override of template
+  - Block C (SIM-RUN PRESET) = **Sim-Run** level — one actual playthrough, immutable once started
+- A Scenario is a "modified copy of Template" with sparse overrides. Every field defaults to its template value. Scenario stores only fields it wants to change.
+- Formula coefficients are Template-locked (preserves calibration). Starting stats, role briefings, and relationship matrix are Scenario-overridable.
+- Canonical specs: `F1_TAXONOMY.md`, `DET_F_SCENARIO_CONFIG_SCHEMA.md`
+
+---
+
 ## Changelog
 
 - **v1.1 (2026-03-25):** Review pass. Removed derived/redundant parameters (team vs. solo classification, team sizes — folded into role definitions via base/optional flag). Expanded role definition (0.2.1) into specific sub-fields (a–i). Reframed vote weights as organization-linked (0.2.3). Removed non-parameters (dramatic arc, delivery format, session start time, world update duration, break schedule). Corrected 1.1.9 to RISK attack garrison rule. Moved solo country assignment to Block C. Removed premature parameters (personal wealth mechanics, press assignment, briefing distribution). Marked 2.5.3 for engine-development calibration. 174 parameters.

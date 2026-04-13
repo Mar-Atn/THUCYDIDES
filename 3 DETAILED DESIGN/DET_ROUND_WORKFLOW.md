@@ -1,273 +1,242 @@
 # DET_ROUND_WORKFLOW.md
-## Complete Facilitator Round-End Workflow
-**Version:** 1.0 | **Date:** 2026-03-30 | **Status:** DRAFT
-**Owner:** NOVA (Backend) + SIMON (SIM Design)
-**Cross-references:** [C3 API Spec](DET_C3_API_SPEC.yaml) | [F5 Engine API](DET_F5_ENGINE_API.md) | [Edge Functions](DET_EDGE_FUNCTIONS.md) | [C1 System Contracts](DET_C1_SYSTEM_CONTRACTS.md)
+## Canonical Round Flow — Phase A / Phase B / Inter-Round
+**Version:** 2.0 | **Date:** 2026-04-13 | **Status:** ACTIVE
+**Owner:** BUILD Team
+**Source of truth:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_ROUND_FLOW.md` (LOCKED v1.0)
+**Cross-references:** [C1 System Contracts](DET_C1_SYSTEM_CONTRACTS.md) | [Action Dispatcher](DET_ACTION_DISPATCHER.md) | [F5 Engine API](DET_F5_ENGINE_API.md) | [CARD_ACTIONS](../PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md)
 
 ---
 
-# PURPOSE
+## PURPOSE
 
-This document specifies the complete facilitator workflow from "End Phase A" through "Next Round Begins" as a single end-to-end sequence. This was identified as a gap in DET_VALIDATION_LEVEL3 (Trace 3, Issue T3-3): the full facilitator workflow spans multiple endpoints across C3 and F5 but was not documented as a unified sequence.
+Specifies the canonical round flow for every simulation round. The same logical flow
+applies to **unmanned** (AI-only, orchestrator-driven) and **manned** (human+AI,
+facilitator-driven) modes — only the interface layer differs.
+
+Supersedes DET_ROUND_WORKFLOW v1.0 (2026-03-30) which described a manned-only
+17-step facilitator workflow. The manned workflow is retained as Section 6 (secondary).
 
 ---
 
-# COMPLETE ROUND WORKFLOW
-
-## Overview
+## 1. ROUND OVERVIEW
 
 ```
-Phase A (Live Play, 60 min)
-    |
-    v
-Step 1: Facilitator clicks "End Phase A"
-Step 2: System collects all pending submissions
-Step 3: Facilitator reviews submissions summary
-Step 4: Facilitator triggers "Process Round"
-Step 5: Edge Function assembles data, calls F5 /engine/round/process
-Step 6: Engine runs 14-step world model + elections
-Step 7: Results returned to Edge Function
-Step 8: Expert panel adjustments applied (within engine)
-Step 9: Coherence flags raised (within engine)
-Step 10: Facilitator reviews results + expert panel + flags
-Step 11: Facilitator can override any value
-Step 12: Facilitator clicks "Publish"
-Step 13: Edge Function calls F5 /engine/round/publish
-Step 14: Results written to DB, events logged
-Step 15: Real-time broadcast to all channels
-Step 16: Participants see new world state
-Step 17: Next round begins (Phase A timer starts)
+ROUND N
+  │
+  ├── PHASE A — Free Actions + Regular Decisions (concurrent, real-time)
+  │     ├── A.1 Free Actions (military, covert, domestic, political, transactions)
+  │     └── A.2 Regular Decisions (budget, sanctions, tariffs, OPEC)
+  │
+  ├── PHASE B — Batch Processing (no participant input)
+  │     └── Steps 0-19: Economic → Political → Elections → Persist
+  │
+  └── INTER-ROUND — Unit Movement Window
+        └── All participants submit movement orders (5-10 minutes)
 ```
 
 ---
 
-## Step-by-Step Specification
+## 2. PHASE A — Free Actions + Regular Decisions
 
-### Step 1: Facilitator Clicks "End Phase A"
+### A.1 Free Actions
 
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Facilitator Dashboard > Round Management > "End Phase A" button |
-| **C3 Endpoint** | `POST /moderator/round/advance` |
-| **Request** | `{ "action": "end_phase_a" }` |
-| **What Happens** | Phase changes from `A` to `B`. Timer stops. Late submissions blocked. |
-| **Channel** | `sim:{sim_run_id}:phase` -- broadcasts `system.phase_change` event |
-| **DB Change** | `sim_runs.current_phase = 'B'` |
-| **Can Fail** | Yes -- if phase is not `A`, returns `409 Conflict` |
+Participants submit actions from the full action menu. Each action is dispatched
+immediately to its engine via `action_dispatcher.dispatch_action()`.
 
-### Step 2: System Collects All Pending Submissions
+**Human participants:** Act freely throughout the round — submit attacks, propose
+transactions, use cards, initiate conversations at their own pace.
 
-| Property | Value |
-|----------|-------|
-| **Who** | Automatic (triggered by Step 1) |
-| **What Happens** | Edge Function queries all submitted actions for the current round |
-| **Data Collected** | Per country: budget (from `country_state.budget`), tariffs (from `tariffs`), sanctions (from `sanctions`), OPEC production (from `country_state.opec_production`), Phase A events (from `events` table) |
-| **Missing Submissions** | Countries without submitted budgets are flagged. Previous round settings used as default. |
-| **Output** | Submissions summary JSON for facilitator review |
-| **Can Fail** | No -- missing submissions use defaults |
+**AI participants (unmanned mode):** The orchestrator asks each AI participant
+**2 times per round** for actions from the full menu. Each participant may submit
+up to **5 actions per round** across both asks.
 
-### Step 3: Facilitator Reviews Submissions Summary
+| Category | Actions | Resolution |
+|---|---|---|
+| **Military** | declare_attack (ground/air/naval/bombardment), launch_missile, blockade, basing_rights | Immediate combat resolution |
+| **Covert** | intelligence, sabotage, propaganda, election_meddling | Immediate resolution (rolls + effects) |
+| **Domestic** | arrest, martial_law, reassign_powers, lead_protest, coup_attempt, assassination | Immediate resolution |
+| **Political** | submit_nomination, cast_vote, call_early_elections, public_statement | Immediate resolution |
+| **Transactions** | propose_exchange, respond_exchange, propose_agreement, sign_agreement | Proposal immediate; counterpart responds asynchronously |
 
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Facilitator Dashboard shows: countries that submitted budgets, countries with defaults, Phase A combat count, transaction count, covert ops count |
-| **C3 Endpoint** | `GET /moderator/state/{round_num}` (includes submission status) |
-| **Decision Point** | Facilitator can: (a) proceed to engine processing, (b) extend Phase A to allow late submissions, (c) manually enter missing budgets |
-| **Can Fail** | No -- informational step |
+**Resolution timing:**
+- **Immediate:** Result computed and persisted during Phase A. Participant sees outcome.
+- **Immediate + Phase B input:** Combat resolves immediately; casualties/support effects also feed Phase B stability/support calculations.
 
-### Step 4: Facilitator Triggers "Process Round"
+### A.2 Regular Decisions (mandatory, per-country)
 
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Facilitator Dashboard > "Process Round" button (enabled only when Phase = B) |
-| **C3 Endpoint** | `POST /moderator/engine/trigger` |
-| **Request** | `{ "round_num": 3, "auto_publish": false }` |
-| **What Happens** | Triggers Step 5 |
-| **Can Fail** | Yes -- if round already processed, returns `409 Conflict` |
+Each country submits once per round:
 
-### Step 5: Edge Function Assembles Data, Calls F5
+| Decision | Who | Schema |
+|---|---|---|
+| **Budget** | HoS or Finance Minister | Social spending %, production levels per branch, R&D coins |
+| **Sanctions** | HoS or Finance Minister | Bilateral sanction level changes (-3 to +3) |
+| **Tariffs** | HoS or Finance Minister | Bilateral tariff level changes (0-3) |
+| **OPEC Production** | OPEC members only | Production posture (min/low/normal/high/max) |
 
-| Property | Value |
-|----------|-------|
-| **Who** | Edge Function (`trigger-engine`) |
-| **Source Data** | DB: `country_state.budget`, `tariffs`, `sanctions`, `events` (Phase A), `world_state` |
-| **Assembly** | Constructs `country_actions` object per country, `event_log` array |
-| **F5 Endpoint** | `POST /engine/round/process` |
-| **F5 Request** | See F5 Section 2.4 for full schema |
-| **Timeout** | Returns `202 Accepted` immediately; engine processes async (up to 5 min) |
-| **Can Fail** | Yes -- if engine unreachable, returns `503` to facilitator |
+**Human:** Can submit anytime during Phase A.
+**AI:** Asked once near end of round (after free actions).
 
-### Step 6: Engine Runs 14-Step World Model
-
-| Property | Value |
-|----------|-------|
-| **Who** | Python Engine Server (WorldModelEngine) |
-| **Processing** | Three-pass architecture: |
-| | **Pass 1 (Deterministic, <1s):** 14 chained steps -- oil price, GDP, revenue, budget execution, military production, tech advancement, inflation, debt, economic state, momentum, contagion, stability, political support |
-| | **Pass 2 (Expert Panel, <30s):** Three AI experts (KEYNES, CLAUSEWITZ, MACHIAVELLI) make heuristic adjustments. GDP adjustment capped at 30% per country. |
-| | **Pass 3 (Coherence, <60s):** Auto-fixes HIGH severity contradictions. Generates round narrative (200-400 words). |
-| **Elections** | If scheduled for this round (per C7 Time Structure), separate `POST /engine/election` call processes election results |
-| **Output** | New world state, combat results, elections, narrative, expert panel, coherence flags |
-| **Can Fail** | Yes -- `ENGINE_PROCESSING_FAILED` (500) or `ENGINE_TIMEOUT` (504) |
-
-### Step 7: Results Returned to Edge Function
-
-| Property | Value |
-|----------|-------|
-| **Who** | Engine Server -> Edge Function |
-| **Response** | F5 Section 2.4 response schema: `new_world_state`, `combat_results`, `elections`, `narrative`, `expert_panel`, `coherence_flags`, `processing_metadata` |
-| **Edge Function Action** | Stores results in temporary state (DB or in-memory) for facilitator review. Does NOT publish to participants yet. |
-| **Channel** | `sim:{sim_run_id}:facilitator` -- sends `engine_status: processing_complete` |
-
-### Step 8: Expert Panel Adjustments (Within Engine)
-
-| Property | Value |
-|----------|-------|
-| **Who** | Engine (Pass 2) |
-| **What** | Three AI domain experts review Pass 1 output and propose adjustments |
-| **Constraints** | GDP adjustment capped at +/-30% per country. Each adjustment requires 2/3 expert votes. |
-| **Output** | `expert_panel` object in response: per-expert assessments, synthesis of applied/rejected adjustments |
-| **Facilitator Action** | Review in Step 10 |
-
-### Step 9: Coherence Flags (Within Engine)
-
-| Property | Value |
-|----------|-------|
-| **Who** | Engine (Pass 3) |
-| **What** | Checks for logical contradictions (e.g., GDP growth during economic collapse) |
-| **Severity Levels** | HIGH (auto-fixed if `auto_fix_coherence: true`), MEDIUM (flagged for review), LOW (informational) |
-| **Output** | `coherence_flags` array in response |
-| **Facilitator Action** | Review in Step 10 |
-
-### Step 10: Facilitator Reviews Results
-
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Facilitator Dashboard > Engine Results panel showing: |
-| | - Per-country economic changes (GDP, treasury, inflation, debt) |
-| | - Per-country military changes (production, losses) |
-| | - Per-country political changes (stability, support) |
-| | - Expert panel assessments (expandable per expert) |
-| | - Coherence flags (highlighted by severity) |
-| | - Round narrative preview |
-| | - Election results (if any) |
-| **C3 Endpoint** | `GET /moderator/expert-panel/{round_num}` (for detailed panel data) |
-| **Decision Point** | Facilitator can: (a) approve and publish as-is, (b) apply overrides (Step 11), (c) re-run engine with different options |
-| **Can Fail** | No -- review step |
-
-### Step 11: Facilitator Overrides (Optional)
-
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Click any value in results panel > Override dialog > Enter new value + reason |
-| **C3 Endpoint** | `POST /moderator/override` |
-| **Request** | `{ "idempotency_key": "...", "overrides": [{ "path": "countries.persia.economic.gdp_growth_rate", "new_value": -0.02, "reason": "..." }] }` |
-| **What Happens** | Override applied to staged results. Logged as `system.moderator_override` event (MODERATOR visibility). |
-| **Can Fail** | Yes -- if path invalid, returns `422` |
-
-### Step 12: Facilitator Clicks "Publish"
-
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator (moderator) |
-| **UI** | Facilitator Dashboard > "Publish Results" button |
-| **C3 Endpoint** | `POST /moderator/engine/publish` |
-| **Request** | `{ "round_num": 3, "adjustments": [...], "idempotency_key": "publish_round3_v1" }` |
-| **What Happens** | Triggers Steps 13-16 |
-| **Can Fail** | Yes -- if already published, returns `409 Conflict` |
-
-### Step 13: Edge Function Calls F5 /engine/round/publish
-
-| Property | Value |
-|----------|-------|
-| **Who** | Edge Function (`publish-results`) |
-| **F5 Endpoint** | `POST /engine/round/publish` |
-| **Request** | `{ "sim_run_id": "...", "round_num": 3, "approved_state": "full" or "with_overrides", "overrides": [...] }` |
-| **What Happens** | Engine finalizes state, applies any remaining overrides |
-| **Can Fail** | Yes -- engine error |
-
-### Step 14: Results Written to DB, Events Logged
-
-| Property | Value |
-|----------|-------|
-| **Who** | Engine Server -> Supabase REST API |
-| **DB Changes** | |
-| | `world_state` -- INSERT new row for round N+1 with updated global values |
-| | `country_state` -- INSERT per country for round N+1 with updated values |
-| | `role_state` -- INSERT per role for round N+1 with updated pools/status |
-| | `events` -- INSERT: `engine.round_end` (PUBLIC), `engine.world_update` (MODERATOR), `engine.country_update` per country (COUNTRY), `engine.production_complete` per country (COUNTRY), `engine.tech_advance` if any (PUBLIC), `engine.election_result` if any (PUBLIC) |
-| | `combat_results` -- INSERT any combat records from this round |
-| | `sim_runs.current_round` -- Incremented to N+1 |
-| **Snapshot Frozen** | Current round's `world_state`, `country_state`, `role_state` rows set `is_frozen = TRUE` |
-| **Can Fail** | Yes -- DB write failure. Engine retries once. On second failure, facilitator alerted. |
-
-### Step 15: Real-Time Broadcast to All Channels
-
-| Property | Value |
-|----------|-------|
-| **Who** | Edge Function (post-publish) |
-| **Channels Broadcast** | |
-| | `sim:{sim_run_id}:world` -- oil price change, chokepoint changes, public events, round narrative |
-| | `sim:{sim_run_id}:country:{country_id}` (x21) -- per-country economic/military/political/tech updates |
-| | `sim:{sim_run_id}:phase` -- `system.phase_change` to next round |
-| | `sim:{sim_run_id}:alerts` -- significant events (election result, tech breakthrough, war outcomes) |
-| | `sim:{sim_run_id}:facilitator` -- engine status, full diagnostics |
-| **Event Types** | `engine.round_end`, `engine.country_update`, `engine.production_complete`, `engine.tech_advance`, `engine.election_result`, `system.phase_change` |
-
-### Step 16: Participants See New World State
-
-| Property | Value |
-|----------|-------|
-| **Who** | All participants (via React frontend) |
-| **UI Updates** | |
-| | Country dashboard: new GDP, treasury, inflation, military counts, stability, support |
-| | World map: zone ownership changes, new unit positions, chokepoint status |
-| | News feed: round narrative, combat outcomes, election results, announcements |
-| | Global dashboard: Columbia vs Cathay GDP bars, oil price, naval comparison, active wars, election countdown, nuclear threat level |
-| | Public display (room screens): global map, key indicators, news ticker, round clock |
-| **Zustand Stores** | `worldStateStore`, `roleStore`, `eventStore`, `timerStore`, `mapStore` all update |
-
-### Step 17: Next Round Begins
-
-| Property | Value |
-|----------|-------|
-| **Who** | Facilitator triggers |
-| **C3 Endpoint** | `POST /moderator/round/advance { "action": "start_phase_a" }` |
-| **What Happens** | Phase set to `A`. Timer starts (default 60 minutes). `engine.round_start` event broadcast. |
-| **Channel** | `sim:{sim_run_id}:phase` -- `system.phase_change` to new round Phase A |
-| **DB Change** | `sim_runs.current_phase = 'A'`. New `world_state` row's `phase_a_start` set. |
+Missing submissions use previous round's settings as default.
 
 ---
 
-# TIMING SUMMARY
+## 3. PHASE B — Batch Processing
 
-| Step | Duration | Who Waits |
-|------|----------|-----------|
-| Steps 1-3 (End Phase A + review) | 2-5 minutes | Participants see "Phase B -- Processing" |
-| Steps 4-9 (Engine processing) | 30 seconds - 5 minutes | Facilitator sees progress bar |
-| Steps 10-11 (Facilitator review + overrides) | 2-10 minutes | Participants see "Results pending" |
-| Steps 12-16 (Publish + broadcast) | 5-15 seconds | Near-instant for participants |
-| Step 17 (Start next round) | Immediate | Timer begins |
+The orchestrator runs all engines in sequence. **No participant input during Phase B.**
 
-**Total between-round gap:** 5-20 minutes typical. Facilitator controls the pace.
+```
+Step 0:   Apply submitted regular decisions (tariff/sanction/OPEC changes to world_state dict)
+Steps 1-11: ECONOMIC ENGINE
+            1. Oil price (supply/demand with non-linear amplification)
+            2. GDP growth (per-country with trade/sanctions/tariff coefficients)
+            3. Revenue (tax on GDP)
+            4. Budget execution (social spending + military maintenance + production + R&D)
+            5. Military production (units built from budget allocation)
+            6. Technology progress (nuclear/AI R&D advancement)
+            7. Inflation (money supply, tariffs, oil-driven)
+            8. Debt dynamics (deficit → borrowing → debt_burden)
+            9. Economic state transitions (normal → stressed → crisis → collapse)
+            10. Momentum (growth persistence)
+            11. Contagion (crisis spreads through trade when major GDP enters crisis)
+Step 12:  STABILITY per country (gdp_growth, inflation, war, social_spending, market_stress)
+Step 13:  POLITICAL SUPPORT per country (stability, growth, economic_state, oil, war_tiredness)
+Step 14:  WAR TIREDNESS (accumulates for belligerents, decays in peace)
+Step 15:  REVOLUTION CHECKS (stability ≤ 2 AND support < 20% → protest auto-trigger)
+Step 16:  HEALTH EVENTS (10% per round incapacitation for elderly leaders)
+Step 17:  ELECTIONS — scheduled elections + early_election_called flag processing
+Step 18:  CAPITULATION CHECK (sustained economic collapse → forced surrender)
+Step 19:  PERSIST all state to DB (country_states_per_round, global_state_per_round, sim_runs)
+```
+
+**Inputs from Phase A that feed Phase B:**
+- Combat casualties → affect stability, support, war tiredness (Step 12-14)
+- Martial law → stability and war_tiredness costs already applied immediately
+- Sabotage damage → affects GDP in Step 2 (infrastructure damage), nuclear_rd_progress in Step 6
+- Propaganda effects → stability shifts already applied immediately
+- Election results → parliament changes recorded
+- Assassination/coup outcomes → role status changes, support shifts
 
 ---
 
-# ERROR RECOVERY
+## 4. INTER-ROUND — Unit Movement Window
 
-| Failure Point | Recovery |
-|---------------|----------|
-| Engine unreachable (Step 5) | Retry once. If still down, facilitator sees "Engine unavailable" with option to retry. Participants not affected (still in Phase A hold). |
-| Engine processing fails (Step 6) | Facilitator sees error details. Can re-trigger with `auto_fix_coherence: false` to skip Pass 3, or manually adjust and re-trigger. |
-| DB write fails (Step 14) | Engine retries once. On second failure, facilitator alerted. State is not published. Can retry publish. |
-| Broadcast fails (Step 15) | Participants reconnect and receive full state refresh (via client reconnection protocol, C1 Section 2.4). |
-| Facilitator disconnects mid-review | State persists in DB. Any facilitator can resume from where it was left. |
+**Duration:** 5-10 minutes while Phase B results are being reviewed/published.
+
+Both human and AI participants may submit movement orders for their units.
+This is the **ONLY time movement is submitted** — not during Phase A.
+
+**AI participants:** Orchestrator asks each AI participant once for movement orders.
+
+Movement is processed via `move_units` action type through the movement validator
+(17 error codes) and persisted to `unit_states_per_round`.
 
 ---
 
-*This document specifies the complete round-end workflow. Each step references the specific C3 endpoint, F5 route, DB operation, and Realtime channel involved. For endpoint details, see C3 and F5. For event schemas, see C1.*
+## 5. ACTION DISPATCH FLOW
+
+```
+Participant submits action
+        │
+        ▼
+  commit_action() validates via Pydantic schema (action_schemas.py)
+        │
+        ▼
+  Persisted to agent_decisions table
+        │
+        ▼
+  action_dispatcher.dispatch_action() routes to engine
+        │
+        ├── Validator checks (role authorization, asset sufficiency, etc.)
+        │
+        ├── Engine resolves (combat rolls, state changes, etc.)
+        │
+        ├── Observatory event logged
+        │
+        └── Result returned to participant
+```
+
+**Orchestrator Phase A integration:** At the start of Phase B, the orchestrator calls
+`_dispatch_phase_a_actions()` which loads all unprocessed actions from `agent_decisions`
+(where `processed_at IS NULL`) and dispatches each through the action dispatcher.
+Processed actions are marked with `processed_at` timestamp.
+
+---
+
+## 6. MANNED MODE — Facilitator Workflow (Secondary)
+
+In manned mode, a human facilitator controls the round flow with these additional steps:
+
+1. **End Phase A:** Facilitator clicks "End Phase A" → `sim_runs.current_phase = 'B'`
+2. **Review submissions:** Facilitator reviews per-country submission summary
+3. **Trigger processing:** Facilitator clicks "Process Round" → Phase B runs
+4. **Review results:** Facilitator reviews economic/political changes, combat outcomes
+5. **Override (optional):** Facilitator can override any value with logged reason
+6. **Publish:** Facilitator clicks "Publish" → results broadcast to all participants
+7. **Movement window:** Inter-Round phase begins, participants move units
+8. **Start next round:** Facilitator starts Phase A for next round
+
+The manned workflow wraps the same Phase A → Phase B → Inter-Round logic with
+facilitator gates between phases. All engines and dispatchers are identical.
+
+---
+
+## 7. AI PARTICIPANT CADENCE (Unmanned Mode)
+
+```
+Per round, for each of ~40 AI participants:
+
+  Ask #1 (early round):  "What actions do you want to take?"  → up to 3 actions
+  Ask #2 (mid round):    "Any additional actions?"             → up to 2 more actions
+  Regular decisions:     Budget/sanctions/tariffs/OPEC          → mandatory, asked once
+  Movement:              Unit movement orders                   → inter-round window
+
+Total per participant: max 5 free actions + 1 set of regular decisions + 1 movement batch
+```
+
+---
+
+## 8. NUCLEAR CHAIN (Special Multi-Step)
+
+Nuclear actions follow a 4-phase state machine (see CONTRACT_NUCLEAR_CHAIN.md):
+
+```
+Phase 1: INITIATE    — launcher submits nuclear action
+Phase 2: AUTHORIZE   — 3-way authorization (launcher HoS + military chief + officer)
+Phase 3: ALERT       — target country + T3+ countries alerted, decide whether to intercept
+Phase 4: RESOLVE     — interception rolls + hit rolls + damage assessment
+```
+
+The orchestrator manages the nuclear chain as a special sub-process within Phase A.
+AI officer authorization and interception decisions are resolved via LLM calls.
+
+---
+
+## 9. TIMING SUMMARY
+
+| Phase | Unmanned Duration | Manned Duration | What Happens |
+|---|---|---|---|
+| Phase A | ~2-5 min (AI processing) | 45-80 min (human play) | Free actions + regular decisions |
+| Phase B | ~30 sec (engine batch) | 5-20 min (with facilitator review) | World model update |
+| Inter-Round | ~1-2 min (AI movement) | 5-10 min (human movement) | Unit repositioning |
+| **Total** | **~5 min per round** | **~60-100 min per round** | |
+
+---
+
+## 10. LOCKED INVARIANTS
+
+1. **Phase A → Phase B → Inter-Round** is the canonical round sequence
+2. AI participants asked **2 times per round** for free actions, max **5 actions total**
+3. Regular decisions (budget/sanctions/tariffs/OPEC) are **mandatory** once per country per round
+4. Phase B batch processing runs **all engines in sequence** (economic → political → elections)
+5. Unit movement happens ONLY during Inter-Round window
+6. Same flow for unmanned and manned modes (only interface differs)
+7. Orchestrator is the **core of the Moderator module**
+8. All action results logged to `observatory_events`
+9. All state changes persist to `country_states_per_round` / `unit_states_per_round`
+10. Transaction responses (accept/decline) happen asynchronously within Phase A
+
+---
+
+*Version History:*
+- *v1.0 (2026-03-30): Manned facilitator workflow (17 steps)*
+- *v2.0 (2026-04-13): Canonical Phase A/B/Inter-Round flow for both manned and unmanned modes. Source: CONTRACT_ROUND_FLOW.md.*

@@ -2,6 +2,8 @@
 
 **Source:** CON_C2_ACTION_SYSTEM_v2 + calibration (2026-04-05/06) + Marat review (2026-04-06)
 **Rule:** If this card and code disagree, STOP and decide which is right.
+**Round Flow:** See `CONTRACT_ROUND_FLOW.md` for Phase A / Phase B / Inter-Round architecture.
+**Dispatcher:** All actions route through `engine/services/action_dispatcher.py`.
 
 ---
 
@@ -951,8 +953,9 @@ All Template-customizable.
 **Success:** Regime change — protest leader becomes HoS. Old HoS deposed. Stability **+1** (new hope). Political support **+20** (fresh mandate).
 **Failure:** Protest crushed. Leader imprisoned. Stability **-0.5**. Support **-5** (fear).
 
-| Engine | SEED `live_action_engine.resolve_protest_action()` |
-| Status | **DONE** (SEED code), **ABSENT** (not ported to BUILD yet) |
+| Engine | `engine/services/protest_engine.execute_mass_protest()` |
+| Contract | `CONTRACT_MASS_PROTEST.md` 🔒 |
+| Status | **LIVE** |
 
 ### 6.6 Elections (Scheduled)
 | Field | Value |
@@ -962,16 +965,47 @@ All Template-customizable.
 
 **Schedule (Template v1.0):**
 
-| Round | Election | Country | Trigger |
-|---|---|---|---|
-| R2 | Mid-term parliamentary | Columbia | Automatic (scheduled) |
-| R5 | Presidential election | Columbia | Automatic (scheduled) |
-| — | Wartime election | Ruthenia | NOT scheduled. Triggered by: HoS of Ruthenia voluntarily, OR 2+ Ruthenian participants demand it, OR full Ruthenian team consensus. One-off event. |
+| Round | Election | Country | Trigger | Nominations |
+|---|---|---|---|---|
+| R2 | Mid-term parliamentary | Columbia | Automatic (scheduled) | R1 |
+| R5 | Presidential election | Columbia | Automatic (scheduled) | R4 |
+| — | Wartime election | Ruthenia | NOT scheduled. Triggered by: HoS of Ruthenia voluntarily, OR 2+ Ruthenian participants demand it, OR full Ruthenian team consensus. One-off event. | — |
 
-**Result:** 50% AI score (based on GDP growth, stability, war outcomes, foreign policy) + 50% player voting/campaign. Incumbent wins if final score ≥ 50%. See CARD_FORMULAS.md → B.3 Elections.
+**Result:** 50% participant votes + 50% population votes (AI score). See CARD_FORMULAS.md → B.3 Elections.
 
-| Engine | `engines/political.process_election()` (SEED, exact match) |
-| Status | **DONE** (engine), **PARTIAL** (not wired into round flow) |
+| Engine | AI score: `engines/political.process_election()`. Nominations/voting/resolution: `engine/services/election_engine.py` |
+| Status | **LIVE** |
+
+### 6.6a Nominate Self for Election
+| Field | Value |
+|---|---|
+| action_type | `submit_nomination` |
+| Who | Any Columbia participant (active role) |
+| Timing | Exactly 1 round before the election (R1 for R2 midterms, R4 for R5 presidential) |
+| Camp | Automatically assigned from role: `president_camp` (dealer, volt, anchor, shadow, shield) or `opposition` (tribune, challenger) |
+| Engine | `engine/services/election_engine.submit_nomination()` |
+| Contract | `CONTRACT_ELECTIONS.md` 🔒 |
+| Status | **LIVE** |
+
+### 6.6b Vote in Election
+| Field | Value |
+|---|---|
+| action_type | `cast_vote` |
+| Who | Any Columbia participant (active role) |
+| Timing | During the election round |
+| Mechanic | Secret ballot — only moderator can see individual votes. One vote per participant per election. Must vote for a nominated candidate. |
+| Engine | `engine/services/election_engine.cast_vote()` |
+| Contract | `CONTRACT_ELECTIONS.md` 🔒 |
+| Status | **LIVE** |
+
+### 6.6c Resolve Election
+| Field | Value |
+|---|---|
+| action_type | (orchestrator-triggered, not player action) |
+| Mechanic | Counts participant votes + population votes (AI score distributed by camp). Winner = highest total. For midterms: winner takes contested parliament seat. |
+| Engine | `engine/services/election_engine.resolve_election()` |
+| Contract | `CONTRACT_ELECTIONS.md` 🔒 |
+| Status | **LIVE** |
 
 ### 6.7 Call Early Elections
 | Field | Value |
@@ -979,7 +1013,9 @@ All Template-customizable.
 | action_type | `call_early_election` |
 | Who | HoS (voluntarily) or opposition (if they have parliamentary majority — Columbia only) |
 | Mechanic | Triggers election process in the NEXT round. Uses same election engine as scheduled elections. |
-| Status | **ABSENT** |
+| Engine | `engine/services/early_elections_engine.execute_early_elections()` |
+| Contract | `CONTRACT_EARLY_ELECTIONS.md` 🔒 |
+| Status | **LIVE** |
 
 ---
 

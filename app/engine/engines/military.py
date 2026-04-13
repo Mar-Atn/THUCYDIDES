@@ -130,8 +130,11 @@ PRODUCTION_TIER_OUTPUT: dict[str, float] = {
     "maximum": 3.0,
 }
 
-# --- Missile interception ---
-MISSILE_INTERCEPT_PROB: float = 0.30
+# --- Missile interception (LEGACY v1 — conventional missiles only) ---
+# Nuclear interception uses nuclear_chain.py constants:
+#   TARGET_AD_INTERCEPT_PROB = 0.50 (target's own AD)
+#   T3_INTERCEPT_PROB_PER_AD = 0.25 (other T3+ countries)
+MISSILE_INTERCEPT_PROB: float = 0.30  # conventional missile AD interception (legacy v1)
 MISSILE_AD_MAX_ATTEMPTS: int = 5  # max intercept attempts per missile
 
 

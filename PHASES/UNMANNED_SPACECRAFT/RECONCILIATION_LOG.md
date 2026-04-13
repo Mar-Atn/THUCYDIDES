@@ -207,17 +207,78 @@ lookup tools).
 
 ---
 
-## Updated summary counts (post T1+T2+Power+RunRoles)
+## Domestic + Covert + Political Actions (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| **Arrest engine** — request_arrest + release_arrested_roles | `engine/services/arrest_engine.py` | SEED_D8 (political), DET_D8 |
+| **Martial law engine** — conscript units + stability/WT costs | `engine/services/martial_law_engine.py` | SEED_D8, DET_D8 |
+| **`martial_law_declared` boolean** on country_states_per_round | DB migration | DET_B1 |
+| **Intelligence engine** — 9-domain world context + LLM oracle | `engine/services/intelligence_engine.py` | SEED_D8, DET_C1 |
+| **Sabotage engine** — 3 damage types + detection/attribution | `engine/services/sabotage_engine.py` | SEED_D8, DET_D8 |
+| **Propaganda engine** — boost/destabilize + diminishing returns | `engine/services/propaganda_engine.py` | SEED_D8, DET_D8 |
+| **Election meddling engine** — support shift ±2-5% | `engine/services/election_meddling_engine.py` | SEED_D8, DET_D8 |
+| **Assassination engine** — kill/survive 50/50 + martyr/sympathy | `engine/services/assassination_engine.py` | SEED_D8, DET_D8 |
+| **Coup engine** — AI co-conspirator LLM call + HoS swap | `engine/services/coup_engine.py` | SEED_D8, DET_D8, DET_C1 |
+| **Mass protest engine** — revolution attempt + prerequisites | `engine/services/protest_engine.py` | SEED_D8, DET_D8 |
+| **Early elections engine** — HoS calls election for next round | `engine/services/early_elections_engine.py` | SEED_D8, DET_D8 |
+| **`early_election_called` boolean** on country_states_per_round | DB migration | DET_B1 |
+| **Protest engine bug fix** — `0 or 5` falsy guard on stability/support | `protest_engine.py:42-43` | — |
+| **Domestic validator** — arrest, martial_law, fire_role | `engine/services/domestic_validator.py` | DET_C1 |
+| **Covert ops validator** — intelligence, sabotage, propaganda, election_meddling | `engine/services/covert_ops_validator.py` | DET_C1 |
+| **Political validator** — assassination, coup, mass_protest, early_elections | `engine/services/political_validator.py` | DET_C1 |
+| **11 new CONTRACT docs** — arrest through early_elections | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_*.md` | — |
+
+---
+
+## Elections — Nominations, Voting, Resolution (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| **3 new DB tables**: `election_nominations`, `election_votes`, `election_results` | DB migration `create_election_nominations_and_votes` | DET_B1 (3 new tables) |
+| **Election engine** — submit_nomination(), cast_vote(), resolve_election() | `engine/services/election_engine.py` | SEED_D8 (election mechanics), DET_D8, DET_C1 |
+| **Camp system** — Columbia roles tagged president_camp / opposition | `election_engine.py:COLUMBIA_CAMPS` | SEED_B1_COUNTRY_COLUMBIA (political camps) |
+| **Population vote mechanic** — AI score distributed by camp, 50/50 with participant votes | `election_engine.resolve_election()` | SEED_D8, CARD_FORMULAS B.3 |
+| **Secret ballot** — individual votes not revealed in observatory events | Design decision | DET_C1 (event visibility rules) |
+| **`early_election_called` boolean** on country_states_per_round | DB migration | DET_B1 |
+| **Early elections engine** — HoS calls election for next round | `engine/services/early_elections_engine.py` | SEED_D8, DET_D8 |
+| **CONTRACT_ELECTIONS.md** — nominations, voting, resolution contract | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_ELECTIONS.md` | — |
+| **CONTRACT_EARLY_ELECTIONS.md** — call early elections contract | `PHASES/UNMANNED_SPACECRAFT/CONTRACT_EARLY_ELECTIONS.md` | — |
+
+---
+
+## Quality Audit + Integration Glue (2026-04-13)
+
+| Change | Code location | Docs to update |
+|---|---|---|
+| **Falsy-value bug fix** — `int(x or 5)` treats 0 as 5. Fixed in 8 engine files | coup, assassination, election_meddling, propaganda, protest, martial_law engines | — |
+| **Shared helpers module** — `safe_int()`, `safe_float()`, `get_scenario_id()`, `write_event()` | `engine/services/common.py` | DET_C1 (shared services) |
+| **Action Dispatcher** — central routing of all 25+ action types to engines | `engine/services/action_dispatcher.py` | DET_F (orchestration), DET_C1 |
+| **Round Flow Contract** — Phase A / Phase B / Inter-Round architecture | `CONTRACT_ROUND_FLOW.md` | DET_F, SEED_D9, CONCEPT |
+| **AI participant cadence** — 2 asks per round, max 5 actions, mandatory decisions separate | `CONTRACT_ROUND_FLOW.md` | DET_F, SEED_E5 |
+| **Agent schemas expanded** — 9 → 25 action types (added 16 domestic/political/military schemas) | `engine/agents/action_schemas.py` | DET_C1 (agent API) |
+| **Election state context block** — schedule, nominations, voting status for AI agents | `engine/context/blocks.py` | SEED_D9, DET_C1 |
+| **Political risks context block** — revolution probability, coup risk per country | `engine/context/blocks.py` | SEED_D9, DET_C1 |
+| **Orchestrator Phase A wiring** — `_dispatch_phase_a_actions()` processes free actions from agent_decisions | `engine/engines/orchestrator.py` | DET_F |
+| **`processed_at` column** on agent_decisions — tracks which actions have been dispatched | DB migration | DET_B1 |
+| **`nuclear_test` + `propose_transaction` routes** in dispatcher | `engine/services/action_dispatcher.py` | — |
+| **L1 tests for dispatcher + schemas + formulas** — 59 new tests (routing, validation, probability formulas, safe helpers) | `tests/layer1/test_action_*.py`, `test_engine_formulas.py` | — |
+| **DET_B1 schema addendum** — 26 missing tables documented with full column specs | `3 DETAILED DESIGN/DET_B1_SCHEMA_ADDENDUM_BUILD.sql` | DET_B1 (merge into v1.3) |
+| **Probability calibration PASS** — all covert/political engine probabilities match contracts | Audit finding | — |
+| **Nuclear intercept clarification** — `MISSILE_INTERCEPT_PROB=0.30` is legacy conventional only; nuclear chain uses correct 50%/25% | `engine/engines/military.py:134` comment, `engine/orchestrators/nuclear_chain.py:61-62` | — |
+
+---
+
+## Updated summary counts (post all work)
 
 | Category | Items |
 |---|---|
-| New contracts | 10 (added: `CONTRACT_TRANSACTIONS`, `CONTRACT_AGREEMENTS`) |
-| New DB tables | 1 (`nuclear_actions`) |
-| New DB columns | 12 JSONB audit columns + 3 agreement enhancement columns |
+| New contracts | 24 (added: round_flow, elections, early_elections, mass_protest + prior 20) |
+| New DB tables | 4 (`nuclear_actions`, `election_nominations`, `election_votes`, `election_results`) |
+| New DB columns | 12 JSONB audit + 3 agreement + `martial_law_declared` bool + `early_election_called` bool |
 | DB column type changes | 2 (`attacker_rolls`/`defender_rolls` int[] → jsonb) |
-| New validators | 11 files in `engine/services/` (added: transaction, agreement) |
-| New engine functions | 6 (added: transaction_engine, agreement_engine) |
-| L1 tests added | 134 (458 → 592) |
-| L2 tests added | ~33 |
-| L3 tests added | ~8 |
-| Design docs to update | DET_B1, DET_D8, DET_C1, DET_F, SEED_D8, SEED_C §5, SEED_E5 §7, CARD_OBSERVATORY, CONCEPT (hierarchy), TRANSACTION_LOGIC.md (minor updates) |
+| New validators | 14 files (added: domestic, covert_ops, political) |
+| New engine files | 21 (added: action_dispatcher, common, election_engine, early_elections_engine, protest_engine + prior 16) |
+| Bug fixes | 8 falsy-value bugs across 6 engine files |
+| L2 tests added | ~58 |
+| Design docs to update | DET_B1, DET_D8, DET_C1, DET_F, SEED_D8, SEED_D9, SEED_B1_COLUMBIA, SEED_C §5, SEED_E5 §7, CARD_OBSERVATORY, CONCEPT (hierarchy, round flow) |

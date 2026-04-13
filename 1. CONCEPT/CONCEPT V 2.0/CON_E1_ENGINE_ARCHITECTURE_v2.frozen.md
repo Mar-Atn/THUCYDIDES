@@ -682,3 +682,44 @@ Each of the following needs detailed specification. We should work through them 
 
 
 <!-- CM-006: Deployment rules updated 2026-03-30. Transit delay removed (instant deployment). Ship capacity formalized (1 ground + 2 air). Naval blockade restriction added. Approved by Marat. -->
+
+---
+
+## BUILD Reconciliation Notes (2026-04-13)
+
+The following architectural elements were established during BUILD that extend this concept:
+
+### Action Dispatcher
+BUILD introduced an **Action Dispatcher** (`action_dispatcher.py`) that routes all 25
+participant action types to the appropriate engine. This replaces the separate "Transaction
+Engine" and "Live Action Engine" concept with a **unified dispatch layer**. The three-system
+architecture still holds conceptually, but the dispatch is centralized:
+
+- **Immediate dispatch** (Phase A): military attacks, covert ops, domestic/political actions, transactions
+- **Batch dispatch** (Phase B): budget, sanctions, tariffs, OPEC → economic engine
+- **Movement dispatch** (Inter-Round): unit repositioning
+
+### Round Flow: Phase A / Phase B / Inter-Round
+The two-phase model (Phase A + Phase B) evolved to **three phases**:
+1. **Phase A** — Free actions + regular decisions (real-time, concurrent)
+2. **Phase B** — Batch processing (19-step engine sequence, no participant input)
+3. **Inter-Round** — Unit movement window (replaces "deployment window" concept)
+
+See `CONTRACT_ROUND_FLOW.md` for the canonical specification.
+
+### Typed Contract Layer
+All modules communicate via **typed Pydantic contracts** (not ad-hoc dicts). 28 locked
+CONTRACT documents specify every action's inputs, outputs, probabilities, and invariants.
+14 validator files enforce authorization and business rules with specific error codes.
+
+### Engine State Isolation
+A key invariant: engines read **state tables** (country_states_per_round, unit_states_per_round),
+never `agent_decisions`. The action dispatcher processes decisions into state changes before
+engines run in Phase B.
+
+### Mobilization → Martial Law
+The 3-tier mobilization concept (partial/general/total) was simplified to a **one-off martial law**
+declaration (4 eligible countries, immediate conscription + stability cost). Calibration showed
+the tiered model was over-designed for the game's dynamics.
+
+*Detailed specs: `DET_ACTION_DISPATCHER.md`, `DET_ROUND_WORKFLOW.md` v2.0, `DET_CONTRACTS_COMMUNICATION.md`*

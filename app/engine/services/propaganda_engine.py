@@ -131,7 +131,7 @@ def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", target_cc).limit(1).execute().data
         if row:
-            old = int(row[0].get("stability") or 5)
+            old = int(row[0]["stability"]) if row[0].get("stability") is not None else 5
             new = max(0, min(10, old + int(round(change))))
             if new != old:
                 client.table("country_states_per_round").update({"stability": new}) \

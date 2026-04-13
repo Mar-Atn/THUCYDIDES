@@ -1,6 +1,8 @@
 # Contracts & Collective Decisions
 ## Thucydides Trap SIM — SEED Specification
-**Version:** 1.0 | **Date:** 2026-03-28
+**Version:** 1.1 | **Date:** 2026-04-13 | **Updated:** BUILD reconciliation
+**Canonical contracts:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_TRANSACTIONS.md`, `CONTRACT_AGREEMENTS.md`
+**Detailed spec:** `3 DETAILED DESIGN/DET_CONTRACTS_COMMUNICATION.md`
 
 ---
 
@@ -38,15 +40,15 @@ An agreement with potential mechanical effects, depending on subtype.
 
 | Subtype | Mechanical Effect |
 |---------|------------------|
-| **ceasefire** | Ends active war between signatories on opposing sides |
-| **peace** | Ends active war between signatories on opposing sides |
+| **ceasefire** | Registers peace status between signatories (relationship updated) |
+| **peace** | Registers peace status between signatories (relationship updated) |
 | **trade** | None — records terms, compliance is social |
 | **alliance** | None — records commitment, compliance is social |
 | **general** | None |
 
-**Ceasefire/Peace mechanic:** When an agreement of subtype `ceasefire` or `peace` is confirmed, the engine scans all active wars. If the signatories are on opposing sides of a war, that war is removed. This is the ONLY mechanical effect of any contract type.
+**Peace/Ceasefire mechanic (BUILD — 2026-04-13):** When a peace or ceasefire agreement is signed, the relationship status between signatories is updated to reflect peace. However, the engine does **NOT block subsequent hostile actions**. A country can sign a peace agreement and launch an attack against the same country in the same round. There is no interference, no ban — **full sovereignty**. All enforcement is social/political, not mechanical. This is a deliberate design principle confirmed during BUILD.
 
-**Important:** A ceasefire stops the war but does NOT require troop withdrawal. Units remain where they are. Occupied territory stays occupied. These are separate decisions for the participants.
+**Important:** A ceasefire/peace does NOT require troop withdrawal. Units remain where they are. Occupied territory stays occupied. These are separate decisions for the participants.
 
 | Property | Value |
 |----------|-------|
@@ -178,13 +180,33 @@ All membership changes are recorded in the event log.
 
 ---
 
+## Typed Contract Layer (BUILD — 2026-04-13)
+
+During BUILD, a **typed contract layer** was established for all inter-module communication:
+
+- **28 locked CONTRACT documents** specify every action's inputs, outputs, probabilities, and invariants
+- **Action Dispatcher** (`action_dispatcher.py`) routes all 25 action types to their engine implementations
+- **Pydantic schemas** (`action_schemas.py`) validate all action payloads before dispatch
+- **14 validator files** enforce authorization, asset sufficiency, and business rules with specific error codes
+
+This contract layer ensures that all modules (AI participants, human interfaces, moderator tools) communicate through the same typed interface. See `DET_ACTION_DISPATCHER.md` and `DET_CONTRACTS_COMMUNICATION.md` for full specifications.
+
+### Exchange Transactions (distinct from agreements)
+
+BUILD separated **exchange transactions** (asset transfers) from **agreements** (diplomatic commitments):
+
+- **Exchange transactions:** Atomic transfer of coins, units, tech shares, basing rights between countries. Propose → counterpart responds (accept/decline/counter, one iteration max) → execute. Validated for asset sufficiency at both proposal and execution.
+- **Agreements:** Written commitments (ceasefire, peace, alliance, trade, custom). Recorded with per-signatory tracking. Trust-based — no mechanical enforcement.
+
+---
+
 ## Integration with Other Systems
 
-- **Transaction Engine** processes all contract types in real-time during Phase A
-- **Event Log** records every contract with full text, signatories, and round
-- **AI Participants** factor contracts into their Block 3 (Memory) and Block 4 (Strategy)
-- **Public Speaking** (C5) captures any public announcements about contracts
-- **World Model Engine** sees ceasefire/peace effects (war list changes) at next processing
+- **Action Dispatcher** routes all action types (including transactions and agreements) during Phase A
+- **Observatory Events** log every contract, agreement, and transaction
+- **AI Participants** can propose transactions and agreements via tool-use interface
+- **Public Speaking** (C5) captures public announcements about contracts
+- **Phase B Engine** sees relationship status changes from peace/ceasefire agreements
 
 ---
 

@@ -1,10 +1,33 @@
 -- =============================================================================
 -- DET_B1_DATABASE_SCHEMA.sql
 -- Thucydides Trap SIM — Complete PostgreSQL Schema for Supabase
--- Version: 1.2 | Date: 2026-04-03
--- Updated 2026-04-03: Added oil_production_mbpd, sanctions/tariff coefficients,
---   sanctions_recovery_rounds, sanctions_adaptation_rounds, market_indexes JSONB.
--- Source of truth: SEED F1 Data Schema, F2 Data Architecture, world_state.py, CSVs
+-- Version: 1.3 | Date: 2026-04-13
+--
+-- VERSION HISTORY:
+--   1.3 (2026-04-13): BUILD reconciliation. Merged addendum (26 new tables from
+--     BUILD Sprint A+B). Key changes:
+--     - Template/Scenario/Run hierarchy (sim_templates, sim_scenarios)
+--     - Per-round state snapshots (country_states_per_round, unit_states_per_round,
+--       global_state_per_round) supersede country_state/role_state/events
+--     - Run roles (run_roles supersedes role_state)
+--     - Elections (election_nominations, election_votes, election_results)
+--     - Nuclear actions (nuclear_actions)
+--     - Transactions & agreements (exchange_transactions, agreements, basing_rights)
+--     - Power assignments (power_assignments)
+--     - Observatory (observatory_events, observatory_combat_results)
+--     - Agent autonomy (agent_decisions, agent_memories, agent_reflections, agent_conversations)
+--     - All hot-path tables re-keyed by sim_run_id (F1 foundation)
+--     See DET_B1_SCHEMA_ADDENDUM_BUILD.sql for full table definitions.
+--   1.2 (2026-04-03): Added oil_production_mbpd, sanctions/tariff coefficients,
+--     sanctions_recovery_rounds, sanctions_adaptation_rounds, market_indexes JSONB.
+--   1.1 (2026-03-30): Initial DET schema from SEED F1/F2.
+--
+-- IMPORTANT: This file (v1.3) documents the DESIGNED schema. The LIVE schema
+-- includes all tables from DET_B1_SCHEMA_ADDENDUM_BUILD.sql which were applied
+-- via Supabase migrations during BUILD. Both files together constitute the
+-- complete schema until a full merge into v1.4 is performed.
+--
+-- Source of truth: SEED F1 Data Schema, F2 Data Architecture, BUILD contracts
 -- Naming authority: DET_NAMING_CONVENTIONS.md
 -- Includes: B1 (schema), B2 (RLS policies), B4 (database functions)
 -- =============================================================================

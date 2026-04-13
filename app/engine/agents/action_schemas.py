@@ -1,8 +1,10 @@
-"""Pydantic v2 schemas for Stage 4 agent action commits.
+"""Pydantic v2 schemas for agent action commits.
 
-Seven structured action types covering the four domains (military, economic,
-political, technological). Agents emit one of these via the ``commit_action``
-tool; the payload is validated and persisted to ``agent_decisions``.
+25+ structured action types covering all domains (military, economic,
+political, technological, covert, domestic, transactions). Agents emit
+one of these via the ``commit_action`` tool; the payload is validated
+and persisted to ``agent_decisions``, then dispatched via
+``action_dispatcher.dispatch_action()`` for engine resolution.
 """
 from __future__ import annotations
 
@@ -108,6 +110,120 @@ class TransactionOrder(BaseModel):
     rationale: str
 
 
+class RespondExchangeOrder(BaseModel):
+    """Respond to a proposed transaction (accept/decline/counter)."""
+    action_type: Literal["respond_exchange"] = "respond_exchange"
+    transaction_id: str
+    response: Literal["accept", "decline", "counter"]
+    counter_offer: Optional[dict] = None
+    rationale: str
+
+
+class SignAgreementOrder(BaseModel):
+    """Sign a proposed agreement."""
+    action_type: Literal["sign_agreement"] = "sign_agreement"
+    agreement_id: str
+    rationale: str
+
+
+# ── Domestic / Political ──────────────────────────────────────────────────
+
+class ArrestOrder(BaseModel):
+    """Request arrest of a role in your country (HoS only)."""
+    action_type: Literal["arrest"] = "arrest"
+    target_role: str
+    rationale: str
+
+
+class MartialLawOrder(BaseModel):
+    """Declare martial law (HoS only, one-time per country per SIM)."""
+    action_type: Literal["martial_law"] = "martial_law"
+    rationale: str
+
+
+class AssassinationOrder(BaseModel):
+    """Assassination attempt against a target role."""
+    action_type: Literal["assassination"] = "assassination"
+    target_role: str
+    domestic: bool = True
+    rationale: str
+
+
+class CoupAttemptOrder(BaseModel):
+    """Coup attempt with a co-conspirator (same country)."""
+    action_type: Literal["coup_attempt"] = "coup_attempt"
+    co_conspirator_role: str
+    rationale: str
+
+
+class LeadProtestOrder(BaseModel):
+    """Lead a mass protest / revolution attempt."""
+    action_type: Literal["lead_protest"] = "lead_protest"
+    rationale: str
+
+
+class ReassignPowersOrder(BaseModel):
+    """Reassign power category to a different role (HoS only)."""
+    action_type: Literal["reassign_powers"] = "reassign_powers"
+    power_type: Literal["military", "economic", "foreign_affairs"]
+    new_holder_role: str
+    rationale: str
+
+
+class CallEarlyElectionsOrder(BaseModel):
+    """Call early elections (HoS only)."""
+    action_type: Literal["call_early_elections"] = "call_early_elections"
+    rationale: str
+
+
+class SubmitNominationOrder(BaseModel):
+    """Self-nominate for an upcoming election (Columbia only)."""
+    action_type: Literal["submit_nomination"] = "submit_nomination"
+    election_type: str  # columbia_midterms | columbia_presidential
+    election_round: int  # the round the election happens
+    rationale: str
+
+
+class CastVoteOrder(BaseModel):
+    """Cast a secret vote in an election (Columbia only)."""
+    action_type: Literal["cast_vote"] = "cast_vote"
+    election_type: str
+    candidate_role_id: str
+    rationale: str
+
+
+class BasingRightsOrder(BaseModel):
+    """Grant or revoke basing rights."""
+    action_type: Literal["basing_rights"] = "basing_rights"
+    operation: Literal["grant", "revoke"]
+    guest_country: str
+    zone_id: str
+    rationale: str
+
+
+class BlockadeOrder(BaseModel):
+    """Impose a naval blockade on a chokepoint."""
+    action_type: Literal["blockade"] = "blockade"
+    zone_id: str  # chokepoint zone
+    imposer_units: list[str]  # unit codes
+    rationale: str
+
+
+class MissileLaunchOrder(BaseModel):
+    """Launch conventional missile strike."""
+    action_type: Literal["launch_missile"] = "launch_missile"
+    launcher_unit_code: str
+    target_global_row: int
+    target_global_col: int
+    rationale: str
+
+
+class NuclearTestOrder(BaseModel):
+    """Conduct a nuclear test."""
+    action_type: Literal["nuclear_test"] = "nuclear_test"
+    rationale: str
+
+
 AnyAction = Union[
     MoveUnitsOrder,
     AttackDeclarationOrder,
@@ -118,28 +234,83 @@ AnyAction = Union[
     OrgMeetingOrder,
     CovertOpOrder,
     TransactionOrder,
+    RespondExchangeOrder,
+    SignAgreementOrder,
+    ArrestOrder,
+    MartialLawOrder,
+    AssassinationOrder,
+    CoupAttemptOrder,
+    LeadProtestOrder,
+    ReassignPowersOrder,
+    CallEarlyElectionsOrder,
+    SubmitNominationOrder,
+    CastVoteOrder,
+    BasingRightsOrder,
+    BlockadeOrder,
+    MissileLaunchOrder,
+    NuclearTestOrder,
 ]
 
 ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
+    # Military
     "move_units": MoveUnitsOrder,
     "declare_attack": AttackDeclarationOrder,
+    "blockade": BlockadeOrder,
+    "launch_missile": MissileLaunchOrder,
+    "nuclear_test": NuclearTestOrder,
+    "basing_rights": BasingRightsOrder,
+    "martial_law": MartialLawOrder,
+    # Economic
     "set_sanction": SanctionOrder,
     "set_tariff": TariffOrder,
     "rd_investment": RDInvestmentOrder,
-    "public_statement": PublicStatementOrder,
-    "call_org_meeting": OrgMeetingOrder,
+    # Covert
     "covert_op": CovertOpOrder,
+    # Transactions
     "propose_transaction": TransactionOrder,
     "propose_agreement": TransactionOrder,
+    "respond_exchange": RespondExchangeOrder,
+    "sign_agreement": SignAgreementOrder,
+    # Domestic / Political
+    "arrest": ArrestOrder,
+    "assassination": AssassinationOrder,
+    "coup_attempt": CoupAttemptOrder,
+    "lead_protest": LeadProtestOrder,
+    "reassign_powers": ReassignPowersOrder,
+    "call_early_elections": CallEarlyElectionsOrder,
+    "submit_nomination": SubmitNominationOrder,
+    "cast_vote": CastVoteOrder,
+    # Communications
+    "public_statement": PublicStatementOrder,
+    "call_org_meeting": OrgMeetingOrder,
 }
 
 
 __all__ = [
+    "AnyAction",
+    "ACTION_TYPE_TO_MODEL",
     "MoveUnitsOrder",
     "AttackDeclarationOrder",
     "SanctionOrder",
     "TariffOrder",
     "RDInvestmentOrder",
-    "AnyAction",
-    "ACTION_TYPE_TO_MODEL",
+    "PublicStatementOrder",
+    "OrgMeetingOrder",
+    "CovertOpOrder",
+    "TransactionOrder",
+    "RespondExchangeOrder",
+    "SignAgreementOrder",
+    "ArrestOrder",
+    "MartialLawOrder",
+    "AssassinationOrder",
+    "CoupAttemptOrder",
+    "LeadProtestOrder",
+    "ReassignPowersOrder",
+    "CallEarlyElectionsOrder",
+    "SubmitNominationOrder",
+    "CastVoteOrder",
+    "BasingRightsOrder",
+    "BlockadeOrder",
+    "MissileLaunchOrder",
+    "NuclearTestOrder",
 ]

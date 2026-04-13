@@ -1,7 +1,7 @@
 # SEED C — Map + Units Master Integration
 
-**Version:** 1.0 | **Date:** 2026-04-05 | **Status:** Template v1.0 candidate
-**Owner:** Marat Atn | **Phase:** BUILD Sprint 1
+**Version:** 1.1 | **Date:** 2026-04-13 | **Status:** Template v1.0 LOCKED
+**Owner:** Marat Atn | **Phase:** BUILD — reconciled with F1_TAXONOMY.md + DET_F_SCENARIO_CONFIG_SCHEMA.md
 
 ---
 

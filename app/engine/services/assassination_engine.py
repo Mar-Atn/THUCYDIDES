@@ -132,7 +132,7 @@ def _apply_support_change(client, sim_run_id, round_num, target_cc, change):
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", target_cc).limit(1).execute().data
         if row:
-            old = int(row[0].get("political_support") or 50)
+            old = int(row[0]["political_support"]) if row[0].get("political_support") is not None else 50
             new = max(0, min(100, old + change))
             client.table("country_states_per_round").update({"political_support": new}) \
                 .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \

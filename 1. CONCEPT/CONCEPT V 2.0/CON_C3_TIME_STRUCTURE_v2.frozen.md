@@ -266,6 +266,21 @@ The moderator decides the final round count based on:
 
 ---
 
+## BUILD Reconciliation Notes (2026-04-13)
+
+> This section documents how BUILD implementation diverged from or refined the original CONCEPT design.
+> CONCEPT remains frozen as the design heritage record. For current canonical values, see references below.
+
+- Round structure evolved from **two phases** (A + B with deployment step) to **three phases**: Phase A, Phase B, Inter-Round.
+- **Phase A** — Free Actions + Regular Decisions (same as concept).
+- **Phase B** — Batch Processing, expanded from 8 steps to 19 steps (economic, political, elections, persist).
+- **Inter-Round** — Unit Movement Window (replaces "deployment window" / "Phase C" concept). This is the ONLY time movement is submitted.
+- AI participant cadence in unmanned mode: 2 asks per round, max 5 free actions, mandatory decisions separate.
+- Unmanned round takes approximately 5 minutes total vs 60-100 minutes manned.
+- Canonical specs: `CONTRACT_ROUND_FLOW.md`, `DET_ROUND_WORKFLOW.md` v2.0
+
+---
+
 ## Changelog
 
 - **v1.1 (2026-03-21):** Aligned with E1 Engine Architecture v0.7. Phase A: two real-time engines (Market + Live Action) operate during negotiation; real-time actions anytime, only routine submissions have deadline. Phase B: references World Model Engine. Phase C added: 5-minute deployment window. Mid-round AI events resolved as NO.

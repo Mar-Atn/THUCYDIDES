@@ -92,8 +92,9 @@ def execute_coup(
     cs = client.table("country_states_per_round").select("stability,political_support") \
         .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
         .eq("country_code", country_code).limit(1).execute().data
-    stability = int((cs[0] if cs else {}).get("stability", 5) or 5)
-    support = int((cs[0] if cs else {}).get("political_support", 50) or 50)
+    raw = (cs[0] if cs else {})
+    stability = int(raw["stability"]) if raw.get("stability") is not None else 5
+    support = int(raw["political_support"]) if raw.get("political_support") is not None else 50
 
     # Check for active protests (look for recent protest events)
     protest_events = client.table("observatory_events").select("id", count="exact") \
@@ -222,7 +223,7 @@ def _apply_stability_change(client, sim_run_id, round_num, country_code, change)
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", country_code).limit(1).execute().data
         if row:
-            old = int(row[0].get("stability") or 5)
+            old = int(row[0]["stability"]) if row[0].get("stability") is not None else 5
             new = max(0, min(10, old + change))
             client.table("country_states_per_round").update({"stability": new}) \
                 .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \

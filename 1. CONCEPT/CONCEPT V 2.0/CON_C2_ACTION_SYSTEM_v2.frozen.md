@@ -218,6 +218,21 @@ Suggest time and venue. UNSC, EU, NATO, Parliament, BRICS+, OPEC+, player-create
 
 ---
 
+## BUILD Reconciliation Notes (2026-04-13)
+
+> This section documents how BUILD implementation diverged from or refined the original CONCEPT design.
+> CONCEPT remains frozen as the design heritage record. For current canonical values, see references below.
+
+- BUILD consolidated the action catalog from 51 concept actions to 32 SEED actions to **25 implemented with locked contracts**.
+- 28 locked CONTRACT documents specify every action (probabilities, schemas, invariants).
+- All 25 action types route through a central **Action Dispatcher** with typed Pydantic schemas.
+- Actions split into 3 dispatch categories: Immediate (Phase A), Batch (Phase B), Movement (Inter-Round).
+- 6 action categories: Military (7), Covert (4), Domestic/Political (8), Transactions (4), Economic/Regular (4), Communications (2).
+- Key simplifications from CONCEPT: mobilization replaced by martial law (one-off), cyber merged with sabotage, export restrictions merged with sanctions.
+- Canonical action catalog: `PHASES/UNMANNED_SPACECRAFT/CARD_ACTIONS.md`
+
+---
+
 ## Changelog
 
 - **v3.0 (2026-03-21):** Full alignment with E1 Engine Architecture v0.7. Restructured by processing system. Military production absorbed into budget. Five unit types with unified strategic missiles (warhead unknown). Asset seizure parked. Print money in budget deficit rules. Respond to crisis removed. Covert ops AI-mediated with election meddling. Territorial claim → Public statement. Council session → Call any org meeting. Deployment post-processing window.

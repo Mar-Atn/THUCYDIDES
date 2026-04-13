@@ -28,6 +28,8 @@ BLOCK_REGISTRY: dict[str, str] = {
     "round_outputs": "Pass 1 formula results",
     "role_context": "Role brief, powers, objectives, personal state",
     "available_actions": "What this role can do this round",
+    "election_state": "Election schedule, nominations, voting status",
+    "political_risks": "Revolution probability, coup risk, health events",
 }
 
 
@@ -352,6 +354,152 @@ def _build_available_actions(ctx: ContextAssembler, *, scope: str | None = None,
 
 
 # ---------------------------------------------------------------------------
+# ELECTION STATE BLOCK
+# ---------------------------------------------------------------------------
+
+_ELECTION_SCHEDULE = {
+    2: {"type": "columbia_midterms", "country": "columbia", "nominations": 1},
+    5: {"type": "columbia_presidential", "country": "columbia", "nominations": 4},
+}
+
+
+def _build_election_state(ctx: ContextAssembler, scope: str | None = None, **params) -> str:
+    """Election schedule, nominations, voting status.
+
+    Queries election_nominations and election_votes tables for live state.
+    """
+    round_num = params.get("round_num", 0)
+    sim_run_id = params.get("sim_run_id")
+    lines = ["# Election State\n"]
+
+    # Schedule
+    lines.append("## Schedule (Template v1.0)")
+    lines.append("| Round | Election | Country | Nominations Due |")
+    lines.append("|---|---|---|---|")
+    for rnd, info in sorted(_ELECTION_SCHEDULE.items()):
+        nom_rnd = info["nominations"]
+        status = ""
+        if rnd < round_num:
+            status = " (COMPLETED)"
+        elif rnd == round_num:
+            status = " ← ELECTION THIS ROUND"
+        elif nom_rnd == round_num:
+            status = " ← NOMINATIONS OPEN"
+        lines.append(f"| R{rnd} | {info['type']} | {info['country']} | R{nom_rnd}{status} |")
+    lines.append("")
+
+    # Live nomination data (if sim_run_id available)
+    if sim_run_id:
+        try:
+            from engine.services.supabase import get_client
+            client = get_client()
+
+            # Get nominations for upcoming elections
+            noms = client.table("election_nominations").select("election_type,election_round,role_id,camp") \
+                .eq("sim_run_id", sim_run_id).execute().data or []
+
+            if noms:
+                lines.append("## Current Nominations")
+                by_election: dict[str, list] = {}
+                for n in noms:
+                    key = f"{n['election_type']} (R{n['election_round']})"
+                    by_election.setdefault(key, []).append(n)
+                for election, candidates in sorted(by_election.items()):
+                    lines.append(f"\n**{election}:**")
+                    for c in candidates:
+                        lines.append(f"- {c['role_id']} ({c['camp']})")
+                lines.append("")
+
+            # Vote counts (without revealing who voted for whom — secret ballot)
+            votes = client.table("election_votes").select("election_type,voter_role_id") \
+                .eq("sim_run_id", sim_run_id).execute().data or []
+            if votes:
+                by_election_votes: dict[str, int] = {}
+                for v in votes:
+                    by_election_votes[v["election_type"]] = by_election_votes.get(v["election_type"], 0) + 1
+                lines.append("## Voting Status")
+                for etype, count in sorted(by_election_votes.items()):
+                    lines.append(f"- {etype}: {count} votes cast (secret ballot)")
+
+                # If scoped to a role, show if they've voted
+                if scope:
+                    voted_types = {v["election_type"] for v in votes if v["voter_role_id"] == scope}
+                    for etype in voted_types:
+                        lines.append(f"- You ({scope}) have already voted in {etype}")
+                lines.append("")
+
+        except Exception:
+            lines.append("*(election data unavailable)*\n")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
+# POLITICAL RISKS BLOCK
+# ---------------------------------------------------------------------------
+
+def _build_political_risks(ctx: ContextAssembler, scope: str | None = None, **params) -> str:
+    """Revolution probability, coup risk, health events for each country."""
+    countries = ctx.countries
+    lines = ["# Political Risk Assessment\n"]
+
+    if not countries:
+        return lines[0] + "*(no country data available)*"
+
+    lines.append("## Revolution / Protest Risk")
+    lines.append("*Trigger: stability ≤ 2 AND support < 20% → protest possible*\n")
+
+    for cid in sorted(countries.keys()):
+        c = countries[cid]
+        pol = c.get("political", {})
+        stab = pol.get("stability", 5)
+        sup = pol.get("political_support", 50)
+
+        risk = "LOW"
+        if stab <= 2 and sup < 20:
+            risk = "CRITICAL — revolution conditions MET"
+        elif stab <= 3 and sup < 30:
+            risk = "HIGH — approaching crisis"
+        elif stab <= 4 and sup < 40:
+            risk = "ELEVATED"
+
+        if risk != "LOW":
+            lines.append(f"- **{cid}**: {risk} (stability={stab}, support={sup}%)")
+
+    if len(lines) == 3:  # only header + threshold info
+        lines.append("- All countries: LOW risk")
+    lines.append("")
+
+    # Coup conditions (stability < 3 OR support < 30% makes coups more likely)
+    lines.append("## Coup Risk Factors")
+    lines.append("*Base 15% + modifiers for low stability/support/active protests*\n")
+    for cid in sorted(countries.keys()):
+        c = countries[cid]
+        pol = c.get("political", {})
+        stab = pol.get("stability", 5)
+        sup = pol.get("political_support", 50)
+        modifiers = []
+        prob = 15
+        if stab < 3:
+            modifiers.append(f"stability {stab} < 3 → +15%")
+            prob += 15
+        elif stab <= 4:
+            modifiers.append(f"stability {stab} ≤ 4 → +5%")
+            prob += 5
+        if sup < 30:
+            modifiers.append(f"support {sup}% < 30% → +10%")
+            prob += 10
+        if modifiers:
+            lines.append(f"- **{cid}**: {prob}% ({', '.join(modifiers)})")
+
+    if not any("**" in l for l in lines[-5:]):
+        lines.append("- All countries: base 15% (no elevated risk)")
+    lines.append("")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # BUILDER DISPATCH
 # ---------------------------------------------------------------------------
 
@@ -364,6 +512,8 @@ _BUILDERS: dict[str, Any] = {
     "round_outputs": _build_round_outputs,
     "role_context": _build_role_context,
     "available_actions": _build_available_actions,
+    "election_state": _build_election_state,
+    "political_risks": _build_political_risks,
 }
 
 

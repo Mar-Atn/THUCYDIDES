@@ -553,6 +553,22 @@ The moderator can:
 
 ---
 
+## BUILD Reconciliation Notes (2026-04-13)
+
+> This section documents how BUILD implementation diverged from or refined the original CONCEPT design.
+> CONCEPT remains frozen as the design heritage record. For current canonical values, see references below.
+
+- BUILD implemented the 4-block cognitive model as **LeaderAgent** using Gemini Flash with tool-use.
+- **10 context blocks** assembled per agent per round: sim_rules, methodology, world_state, sim_history, round_inputs, round_outputs, role_context, available_actions, election_state, political_risks.
+- **Autonomous action loop**: orchestrator asks each AI participant 2 times per round, max 5 free actions total, plus mandatory decisions (budget/sanctions/tariffs/OPEC) and inter-round movement.
+- **25 action types** available via typed Pydantic schemas in `action_schemas.py`.
+- **Tool-use interface**: agents call typed tool functions (get_my_forces, get_economic_state, commit_action, etc.) rather than free-text action descriptions.
+- **Dual LLM provider**: Gemini Flash primary + Claude fallback, provider-agnostic via `llm_tools.py`.
+- **Persistent memory**: agents read/write memory between rounds via agent_memories table.
+- Canonical specs: `SEED_E5_AI_PARTICIPANT_MODULE_v1.md`, `CONTRACT_ROUND_FLOW.md`
+
+---
+
 ## Changelog
 
 - **v1.1 (2026-03-25):** Multi-party meetings simplified to standard voice interface with listen-first behavioral instructions. LLM selection updated: Gemini and Anthropic Claude as leading candidates (latest available models), with per-task model mixing and runtime switching. Removed specific model version references. Multi-conversation concurrency question resolved (voice interface handles it).

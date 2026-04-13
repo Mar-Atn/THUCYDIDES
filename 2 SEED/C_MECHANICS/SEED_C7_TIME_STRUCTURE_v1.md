@@ -1,6 +1,8 @@
 # Time Structure
 ## Thucydides Trap SIM — SEED Specification
-**Version:** 1.0 | **Date:** 2026-03-28
+**Version:** 1.1 | **Date:** 2026-04-13 | **Updated:** BUILD reconciliation
+**Canonical round flow:** `PHASES/UNMANNED_SPACECRAFT/CONTRACT_ROUND_FLOW.md`
+**Detailed spec:** `3 DETAILED DESIGN/DET_ROUND_WORKFLOW.md` v2.0
 
 ---
 
@@ -17,53 +19,57 @@
 
 ## Round Structure
 
-Every round has two phases:
+Every round has **three phases:**
 
-### Phase A — Free Action & Negotiation (45–80 min, varies by round)
+### Phase A — Free Actions + Regular Decisions (45–80 min manned, ~2-5 min unmanned)
 
 The heart of the SIM. This is where 80% of the learning happens.
 
-**What happens simultaneously:**
-- Bilateral negotiations, alliance caucuses, back-channel deals
-- Organization meetings (any member can call one)
-- Public speeches and press conferences
-- Crisis response and diplomatic signaling
+**A.1 Free Actions** (concurrent, real-time):
 
-**Two real-time engines operate continuously:**
-- **Transaction Engine** — instant bilateral transfers (coins, arms, tech, basing rights, treaties, org creation). Both parties confirm → executes immediately.
-- **Live Action Engine** — unilateral actions requiring resolution (attacks, blockades, missile strikes, covert ops, arrests, assassinations, coups, propaganda). Resolves instantly with dice/fortune wheel mechanic.
+All actions route through the **Action Dispatcher** (`action_dispatcher.py`) for
+immediate resolution. 25 action types across 6 categories:
 
-**Routine submissions deadline:** End of Phase A. Budget allocations, tariff levels, sanctions positions, OPEC+ production, export restrictions, mobilization orders. Submitted via web app. If not submitted, previous round's settings continue.
+- **Military:** ground/air/naval/bombardment attacks, missile launch, blockade, basing rights
+- **Covert:** intelligence, sabotage, propaganda, election meddling (card-based)
+- **Domestic:** arrest, martial law (one-off), reassign powers, lead protest, coup attempt, assassination
+- **Political:** submit nomination, cast vote, call early elections, public statement
+- **Transactions:** propose exchange, propose agreement (counterpart responds asynchronously)
 
-**Real-time actions have NO deadline** — they execute anytime during Phase A.
+Human participants act freely throughout the round. AI participants are asked **2 times
+per round**, max **5 free actions total** per participant.
 
-### Phase B — World Update + Deployment (10–15 min combined)
+**A.2 Regular Decisions** (mandatory, per-country):
 
-Production and deployment happen FIRST, then full world model processing runs in parallel.
+Budget allocations, tariff levels, sanctions positions, OPEC production. Submitted via
+web app. If not submitted, previous round's settings continue.
 
-**Step 1 — Produce & deploy (immediate):**
-- Military production calculated from previous round's budget (instant math, no AI)
-- Mobilization orders executed (new units added)
-- Militia calls resolved (if applicable)
-- **Deployment window OPENS** — military authorities deploy all available units:
-  - Newly produced units
-  - Newly mobilized / militia units
-  - Units arrived from previous round's transit
-- Domestic deployment = immediate. All deployment is instant. No transit delay. Deploy in Phase B → available for combat next round's Phase A.
+### Phase B — Batch Processing (30 sec unmanned, 5-20 min manned with review)
 
-**Step 2 — World Model Engine (runs while deployment continues):**
-- Deterministic pass — GDP, revenue, inflation, oil price, debt, tech advancement
-- AI Expert Panel — adjusts growth rates, stability, support, momentum
-- Coherence check — validates outputs
+No participant input during Phase B. The orchestrator runs 19 steps:
 
-**Step 3 — Facilitator review & publish:**
-- Moderator reviews calculated values, adjusts if needed, approves
-- Results published to all participants
-- Deployment window closes
+```
+Step 0:    Apply regular decisions (tariff/sanction/OPEC changes)
+Steps 1-11: Economic engine (oil → GDP → revenue → budget → production →
+            tech → inflation → debt → crisis → momentum → contagion)
+Step 12:   Stability per country
+Step 13:   Political support per country
+Step 14:   War tiredness
+Step 15:   Revolution checks
+Step 16:   Health events
+Step 17:   Elections (scheduled + early_election_called flag)
+Step 18:   Capitulation check
+Step 19:   Persist all state to DB
+```
 
-**Why combined:** No units are lost during world model processing (combat only happens in Phase A). Production runs first so new units are available for immediate deployment. Saves ~5 minutes per round.
+In manned mode, a facilitator reviews results and may override before publishing.
 
-**After Phase B: next round begins.**
+### Inter-Round — Unit Movement Window (5-10 min)
+
+**This is the ONLY time unit movement is submitted.** Both human and AI participants
+reposition their forces on the map while Phase B results are processed/published.
+
+AI participants are asked once for movement orders during this window.
 
 ---
 
@@ -216,11 +222,12 @@ Events are anchored to scenario time, not round number.
 
 | Engine | When it runs | Duration |
 |--------|:----------:|:--------:|
-| **Transaction Engine** | Continuously during Phase A | Real-time |
-| **Live Action Engine** | Continuously during Phase A | Real-time |
-| **Production + Mobilization** | Start of Phase B (instant) | < 1 min |
-| **Deployment** | Phase B (parallel with world model) | 5–10 min |
-| **World Model Engine** | Phase B (parallel with deployment) | 5–10 min |
+| **Action Dispatcher** | Phase A — routes all 25 action types to engines | Real-time |
+| **Combat Engines** | Phase A — ground/air/naval/bombardment/missile/nuclear | Immediate per action |
+| **Covert Ops Engines** | Phase A — intelligence/sabotage/propaganda/election meddling | Immediate per action |
+| **Transaction Engine** | Phase A — propose/respond/execute | Immediate per action |
+| **Batch Orchestrator** | Phase B — Steps 0-19 (economic → political → elections) | 30 sec - 5 min |
+| **Movement Engine** | Inter-Round — unit repositioning | Immediate per batch |
 
 ---
 

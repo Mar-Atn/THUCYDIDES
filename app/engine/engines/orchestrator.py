@@ -59,6 +59,7 @@ class RoundResult(BaseModel):
     revolutions: dict[str, RevolutionResult] = Field(default_factory=dict)
     health_events: dict[str, HealthEventResult] = Field(default_factory=dict)
     capitulation_flags: list[str] = Field(default_factory=list)
+    phase_a_results: list[dict] = Field(default_factory=list)
     log: list[str] = Field(default_factory=list)
 
 
@@ -355,6 +356,82 @@ async def initialize_sim(sim_id: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# PHASE A — FREE ACTION DISPATCH
+# ---------------------------------------------------------------------------
+
+# Action types that are regular/batch decisions (Phase B), NOT Phase A free actions.
+_BATCH_ACTION_TYPES = {
+    "set_budget", "set_sanction", "set_tariff", "set_opec",
+    "move_units",  # inter-round movement, not Phase A
+}
+
+
+def _dispatch_phase_a_actions(
+    sim_run_id: str, round_num: int, log: list[str],
+) -> list[dict]:
+    """Load and dispatch all Phase A free actions from agent_decisions.
+
+    Reads unprocessed actions for this round, dispatches each through
+    action_dispatcher, marks them as processed, returns results.
+    """
+    from engine.services.action_dispatcher import dispatch_action
+
+    client = get_client()
+    results = []
+
+    try:
+        # Load all decisions for this round that haven't been processed yet
+        rows = client.table("agent_decisions") \
+            .select("id,action_type,action_payload,country_code") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("round_num", round_num) \
+            .is_("processed_at", "null") \
+            .execute().data or []
+    except Exception as e:
+        logger.warning("Failed to load Phase A actions: %s", e)
+        return results
+
+    # Filter to free actions only (exclude batch/movement decisions)
+    free_actions = [r for r in rows if r.get("action_type") not in _BATCH_ACTION_TYPES]
+
+    if free_actions:
+        log.append(f"  Phase A: dispatching {len(free_actions)} free actions")
+
+    for row in free_actions:
+        action_type = row.get("action_type", "")
+        payload = row.get("action_payload", {})
+        if isinstance(payload, str):
+            import json
+            try:
+                payload = json.loads(payload)
+            except Exception:
+                payload = {}
+
+        # Ensure action_type and country_code are in payload
+        payload.setdefault("action_type", action_type)
+        payload.setdefault("country_code", row.get("country_code", ""))
+
+        try:
+            result = dispatch_action(sim_run_id, round_num, payload)
+            results.append({"action_id": row["id"], "action_type": action_type, **result})
+
+            success = result.get("success", False)
+            log.append(f"    {action_type} → {'OK' if success else 'FAILED'}")
+
+            # Mark as processed
+            client.table("agent_decisions").update({
+                "processed_at": "now()",
+            }).eq("id", row["id"]).execute()
+
+        except Exception as e:
+            logger.warning("Phase A dispatch failed for %s: %s", action_type, e)
+            results.append({"action_id": row["id"], "action_type": action_type,
+                            "success": False, "narrative": f"Dispatch error: {e}"})
+
+    return results
+
+
+# ---------------------------------------------------------------------------
 # MAIN ORCHESTRATOR
 # ---------------------------------------------------------------------------
 
@@ -390,9 +467,16 @@ async def process_round(
     world_state = _build_world_dict(db_ws, db_sanctions, db_tariffs, db_rels, round_num)
     previous_states = _snapshot_prev(countries, world_state["wars"])
 
-    # STEP 0: APPLY ACTIONS
+    # ── PHASE A: DISPATCH FREE ACTIONS ────────────────────────────────
+    # Process any Phase A actions submitted to agent_decisions during the round.
+    # These are immediate-resolution actions (combat, covert ops, domestic politics,
+    # transactions). See CONTRACT_ROUND_FLOW.md.
+    phase_a_results = _dispatch_phase_a_actions(sim_id, round_num, log)
+
+    # STEP 0: APPLY REGULAR DECISIONS (tariffs, sanctions, OPEC, blockades)
     _apply_actions(world_state, actions)
 
+    # ── PHASE B: BATCH PROCESSING ─────────────────────────────────────
     # STEPS 1-11: ECONOMIC ENGINE
     econ_result = process_economy(countries, world_state, actions, previous_states)
     _sync_econ_results(countries, econ_result)
@@ -508,7 +592,8 @@ async def process_round(
         stability=stability_results, support=support_results,
         war_tiredness=wt_results, threshold_flags=tf_results,
         elections=election_results, revolutions=rev_results,
-        health_events=health_results, capitulation_flags=cap_flags, log=log,
+        health_events=health_results, capitulation_flags=cap_flags,
+        phase_a_results=phase_a_results, log=log,
     )
 
 

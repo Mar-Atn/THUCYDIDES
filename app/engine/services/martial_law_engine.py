@@ -87,8 +87,8 @@ def execute_martial_law(
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", country_code).limit(1).execute().data
         if row:
-            old_stab = float(row[0].get("stability", 5) or 5)
-            old_wt = float(row[0].get("war_tiredness", 0) or 0)
+            old_stab = float(row[0]["stability"]) if row[0].get("stability") is not None else 5.0
+            old_wt = float(row[0]["war_tiredness"]) if row[0].get("war_tiredness") is not None else 0.0
             client.table("country_states_per_round").update({
                 "stability": int(max(0, old_stab + STABILITY_COST)),
                 "war_tiredness": int(old_wt + WAR_TIREDNESS_COST),
