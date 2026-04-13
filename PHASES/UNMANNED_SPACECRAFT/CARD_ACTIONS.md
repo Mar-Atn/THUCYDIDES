@@ -793,8 +793,8 @@ Diminishing returns: each successive use against same target in the SIM reduces 
 | Propaganda | per SIM (consumable), widely distributed | 55% | ±0.3 stability (own or foreign, boost or destabilize) | 25% / 20% |
 | Election meddling | per SIM (consumable), election round only | 40% | ±2-5% support for chosen candidate | 45% / 50% |
 
-| Engine | `engines/military.resolve_covert_op()` |
-| Status | **STUB** — framework exists, outcomes need wiring to world state |
+| Engine | `services/intelligence_engine.py` (comprehensive 9-domain context + LLM) + `services/covert_ops_validator.py` |
+| Status | **LIVE — slice locked v1.0 (2026-04-13)** — see `CONTRACT_INTELLIGENCE.md` |
 
 ---
 
