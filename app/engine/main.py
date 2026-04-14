@@ -1,15 +1,17 @@
 """FastAPI entry point — TTT Engine API.
 
-Health check, SIM state queries, LLM test endpoint.
+Health check, SIM state queries, auth admin endpoints, LLM test endpoint.
 """
 
 import logging
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from engine.auth.models import AuthUser
+from engine.auth.dependencies import get_current_user, require_moderator
 from engine.config import settings
 from engine.models.api import (
     APIResponse, HealthStatus, LLMTestRequest, LLMTestResponse, CountryListResponse,
@@ -192,3 +194,87 @@ async def test_llm(request: LLMTestRequest):
 async def llm_health():
     """Get LLM provider health statistics."""
     return APIResponse(data=llm.get_health_stats())
+
+
+# ---------------------------------------------------------------------------
+# Auth endpoints (M10.1)
+# ---------------------------------------------------------------------------
+
+@app.get("/api/auth/me", response_model=APIResponse)
+async def get_me(user: AuthUser = Depends(get_current_user)):
+    """Get current user's profile."""
+    return APIResponse(data=user.model_dump())
+
+
+@app.get("/api/admin/users", response_model=APIResponse)
+async def list_users(user: AuthUser = Depends(require_moderator)):
+    """List all registered users. Moderator only."""
+    from supabase import create_client
+
+    client = create_client(settings.supabase_url, settings.supabase_service_role_key)
+    result = (
+        client.table("users")
+        .select("id, email, display_name, system_role, status, data_consent, created_at, last_login_at")
+        .order("created_at", desc=True)
+        .execute()
+    )
+    return APIResponse(
+        data=result.data,
+        meta={"count": len(result.data)},
+    )
+
+
+@app.post("/api/admin/users/{user_id}/approve", response_model=APIResponse)
+async def approve_user(
+    user_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Approve a pending moderator. Moderator only."""
+    from supabase import create_client
+
+    client = create_client(settings.supabase_url, settings.supabase_service_role_key)
+
+    # Verify user exists and is pending
+    check = (
+        client.table("users")
+        .select("id, status, system_role")
+        .eq("id", user_id)
+        .single()
+        .execute()
+    )
+    if not check.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    if check.data["status"] != "pending_approval":
+        raise HTTPException(status_code=400, detail="User is not pending approval")
+
+    # Approve
+    result = (
+        client.table("users")
+        .update({"status": "active"})
+        .eq("id", user_id)
+        .execute()
+    )
+    logger.info("User %s approved by moderator %s", user_id, user.id)
+    return APIResponse(data={"approved": True, "user_id": user_id})
+
+
+@app.post("/api/admin/users/{user_id}/suspend", response_model=APIResponse)
+async def suspend_user(
+    user_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Suspend a user. Moderator only."""
+    from supabase import create_client
+
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot suspend yourself")
+
+    client = create_client(settings.supabase_url, settings.supabase_service_role_key)
+    result = (
+        client.table("users")
+        .update({"status": "suspended"})
+        .eq("id", user_id)
+        .execute()
+    )
+    logger.info("User %s suspended by moderator %s", user_id, user.id)
+    return APIResponse(data={"suspended": True, "user_id": user_id})

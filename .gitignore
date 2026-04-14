@@ -13,3 +13,10 @@ API KEYS_
 app/.env
 app/engine/.env
 app/frontend/.env
+
+# Node
+node_modules/
+package-lock.json
+
+# Build output
+dist/

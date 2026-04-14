@@ -86,6 +86,17 @@
 - Election trigger thresholds
 - Debt accumulation under deficit spending
 
+## SKILL-1: Mandatory decisions JSON reliability (CRITICAL, 2026-04-10)
+**Finding:** Test run 1 (2026-04-09): 10/10 leaders produced valid JSON. Test run 2 (2026-04-10): 2/10 succeeded, 8/10 parse failed. Same test, same code.
+**Root cause hypothesis:** LLM returns JSON with markdown fences (```json) or extra prose, breaking strict parse. Temperature variance causes different output formats.
+**Impact:** Skill is unreliable for production. 4 calls × 10 agents = high chance at least one fails per round.
+**Required fixes:**
+1. Add retry logic (parse fail → one retry with stricter prompt)
+2. Use structured output / function calling instead of free-form JSON
+3. More tolerant JSON extraction (strip ```json fences, find first {...} block)
+4. Better error reporting (distinguish parse fail from API error)
+**Decision needed:** Fix JSON robustness before declaring mandatory decisions skill DONE.
+
 ---
 
 ## COMBAT DISCREPANCIES (found 2026-04-09, DECIDED 2026-04-09 — CARD prevails on all 4)
