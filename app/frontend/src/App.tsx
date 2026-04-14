@@ -13,6 +13,8 @@ import { PendingApproval } from '@/pages/PendingApproval'
 import { AISetup } from '@/pages/AISetup'
 import { UserManagement } from '@/pages/UserManagement'
 import { SimRunWizard } from '@/pages/SimRunWizard'
+import { TemplateList } from '@/pages/TemplateList'
+import { TemplateEditor } from '@/pages/TemplateEditor'
 
 export function App() {
   return (
@@ -53,6 +55,24 @@ export function App() {
         element={
           <ProtectedRoute>
             <UserManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Template management */}
+      <Route
+        path="/admin/templates"
+        element={
+          <ProtectedRoute>
+            <TemplateList />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/templates/:id/edit"
+        element={
+          <ProtectedRoute>
+            <TemplateEditor />
           </ProtectedRoute>
         }
       />

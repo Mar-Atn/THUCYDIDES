@@ -54,11 +54,6 @@ const FALLBACK_SCHEDULE: Record<string, number> = {
 const DEFAULT_SIM_RUN_ID = '00000000-0000-0000-0000-000000000001'
 
 /** Represents a single role in the wizard's local state. */
-/** Powers that indicate budget responsibility. */
-const BUDGET_POWERS = new Set([
-  'set_budget', 'block_budget', 'budget_co_sign', 'state_budget',
-  'economic_management',
-])
 
 interface WizardRole {
   id: string
@@ -68,13 +63,10 @@ interface WizardRole {
   is_head_of_state: boolean
   is_military_chief: boolean
   is_ai_operated: boolean
+  is_economy_officer: boolean
   expansion_role: boolean
   powers: string[]
   active: boolean
-}
-
-function hasBudgetPower(role: WizardRole): boolean {
-  return role.powers.some((p) => BUDGET_POWERS.has(p))
 }
 
 /** Key event entry — structured schema matching template data. */
@@ -188,6 +180,7 @@ export function SimRunWizard() {
               is_head_of_state: r.is_head_of_state,
               is_military_chief: r.is_military_chief,
               is_ai_operated: r.is_ai_operated,
+              is_economy_officer: r.is_economy_officer ?? false,
               expansion_role: r.expansion_role ?? false,
               powers: r.powers ?? [],
               active: r.status !== 'inactive',
@@ -248,6 +241,7 @@ export function SimRunWizard() {
             is_head_of_state: r.is_head_of_state,
             is_military_chief: r.is_military_chief,
             is_ai_operated: r.is_ai_operated,
+            is_economy_officer: r.is_economy_officer ?? false,
             expansion_role: r.expansion_role ?? false,
             powers: r.powers ?? [],
             active: true,
@@ -1003,9 +997,9 @@ function StepCountriesRoles({
                               Military
                             </span>
                           )}
-                          {hasBudgetPower(role) && !role.is_head_of_state && (
+                          {role.is_economy_officer && !role.is_head_of_state && (
                             <span className="font-body text-caption font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-2">
-                              Budget
+                              Economy
                             </span>
                           )}
                           {role.expansion_role && (
