@@ -13,7 +13,8 @@ import { TabRoles } from '@/components/template/TabRoles'
 import { TabOrganizations } from '@/components/template/TabOrganizations'
 import { TabRelationships } from '@/components/template/TabRelationships'
 import { TabSanctionsTariffs } from '@/components/template/TabSanctionsTariffs'
-import { TabMapDeployments } from '@/components/template/TabMapDeployments'
+import { TabMap } from '@/components/template/TabMap'
+import { TabDeployments } from '@/components/template/TabDeployments'
 import { TabSchedule } from '@/components/template/TabSchedule'
 import { TabFormulas } from '@/components/template/TabFormulas'
 
@@ -24,7 +25,8 @@ const TABS = [
   { key: 'organizations', label: 'Organizations' },
   { key: 'relationships', label: 'Relationships' },
   { key: 'sanctions-tariffs', label: 'Sanctions & Tariffs' },
-  { key: 'map-deployments', label: 'Map & Deployments' },
+  { key: 'map', label: 'Map' },
+  { key: 'deployments', label: 'Deployments' },
   { key: 'schedule', label: 'Schedule' },
   { key: 'formulas', label: 'Formulas' },
 ] as const
@@ -133,8 +135,11 @@ export function TemplateEditor() {
           {activeTab === 'sanctions-tariffs' && (
             <TabSanctionsTariffs templateId={template.id} />
           )}
-          {activeTab === 'map-deployments' && (
-            <TabMapDeployments templateId={template.id} />
+          {activeTab === 'map' && (
+            <TabMap templateId={template.id} />
+          )}
+          {activeTab === 'deployments' && (
+            <TabDeployments templateId={template.id} />
           )}
           {activeTab === 'schedule' && (
             <TabSchedule templateId={template.id} />

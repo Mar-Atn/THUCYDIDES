@@ -411,6 +411,18 @@ function CountryEditor({ country, onSave, onDelete }: CountryEditorProps) {
       <SectionHeader title="Geography" />
       <TextField label="home_zones (comma-separated)" value={draft.home_zones} onChange={(v) => set('home_zones', v)} />
 
+      {/* Country Brief */}
+      <SectionHeader title="Country Brief" />
+      <div>
+        <textarea
+          value={draft.country_brief ?? ''}
+          onChange={(e) => set('country_brief', e.target.value)}
+          rows={8}
+          className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary focus:outline-none focus:border-action transition-colors resize-y"
+          placeholder="3-5 paragraph country description: context, challenges, internal dynamics..."
+        />
+      </div>
+
       {/* Save + Delete */}
       <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
         <div className="flex items-center gap-3">

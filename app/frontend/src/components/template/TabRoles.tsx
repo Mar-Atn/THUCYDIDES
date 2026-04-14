@@ -1,24 +1,31 @@
 /**
  * TabRoles — Template Editor tab for viewing and editing all participant roles.
- * Loads from the reference sim_run, groups by country, displays in accordion.
+ * Loads from the reference sim_run. Flat list sorted by country order.
+ * Expanded view: Identity, Bio & Objectives, Actions (read-only), Org Memberships (read-only), Relationships (read-only).
  */
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   getTemplateRoles,
   getTemplateCountries,
   updateRole,
   createRole,
   deleteRole,
+  getTemplateRoleActions,
+  getTemplateRoleRelationships,
+  getTemplateOrgMemberships,
+  getTemplateOrganizations,
   type Role,
   type Country,
+  type RoleAction,
+  type RoleRelationship,
+  type OrgMembership,
 } from '@/lib/queries'
 
 /* -------------------------------------------------------------------------- */
 /*  Constants                                                                  */
 /* -------------------------------------------------------------------------- */
 
-/** Canonical display order: large teams, EU, mid-size, solo alphabetical. */
 const COUNTRY_ORDER: string[] = [
   'columbia', 'cathay',
   'gallia', 'teutonia', 'ponte', 'freeland', 'albion',
@@ -28,16 +35,70 @@ const COUNTRY_ORDER: string[] = [
 ]
 
 const GENDER_OPTIONS = ['M', 'F'] as const
+const POSITION_OPTIONS = ['head_of_state', 'military_chief', 'economy_officer', 'diplomat', 'other'] as const
+const PARTY_OPTIONS = ['', 'rep', 'dem', 'independent'] as const
+
+const ACTION_LABELS: Record<string, string> = {
+  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions',
+  set_opec: 'Set OPEC Production', rd_investment: 'R&D Investment',
+  move_units: 'Move Units', declare_attack: 'Ground Attack', attack_air: 'Air Strike',
+  attack_naval: 'Naval Combat', attack_bombardment: 'Naval Bombardment',
+  launch_missile: 'Launch Missile', blockade: 'Naval Blockade', basing_rights: 'Basing Rights',
+  martial_law: 'Martial Law',
+  nuclear_initiate: 'Nuclear Launch (initiate)', nuclear_authorize: 'Nuclear Authorization',
+  nuclear_intercept: 'Nuclear Intercept',
+  intelligence: 'Intelligence Report', sabotage: 'Sabotage', cyber_ops: 'Cyber Operations',
+  propaganda: 'Propaganda', election_meddling: 'Election Meddling',
+  assassination: 'Assassination', protest_stimulation: 'Protest Stimulation',
+  arrest: 'Arrest', reassign_powers: 'Reassign Powers',
+  call_early_elections: 'Call Early Elections', self_nominate: 'Self-Nominate',
+  cast_vote: 'Cast Vote', coup_attempt: 'Coup Attempt', lead_protest: 'Lead Protest',
+  propose_agreement: 'Propose Agreement', sign_agreement: 'Sign Agreement',
+  propose_transaction_country: 'Country Transaction', call_org_meeting: 'Call Org Meeting',
+  private_rd: 'Private R&D Investment',
+  public_statement: 'Public Statement', propose_transaction_personal: 'Personal Transaction',
+  respond_transaction: 'Respond to Transaction',
+}
+
+const ACTION_CATEGORIES: Record<string, string[]> = {
+  'Regular Decisions': ['set_budget', 'set_tariffs', 'set_sanctions', 'set_opec', 'rd_investment'],
+  'Military': ['move_units', 'declare_attack', 'attack_air', 'attack_naval', 'attack_bombardment', 'launch_missile', 'blockade', 'basing_rights', 'martial_law'],
+  'Nuclear': ['nuclear_initiate', 'nuclear_authorize', 'nuclear_intercept'],
+  'Covert Operations': ['intelligence', 'sabotage', 'cyber_ops', 'propaganda', 'election_meddling', 'assassination', 'protest_stimulation'],
+  'Political': ['arrest', 'reassign_powers', 'call_early_elections', 'self_nominate', 'cast_vote', 'coup_attempt', 'lead_protest'],
+  'Transactions & Agreements': ['propose_agreement', 'sign_agreement', 'propose_transaction_country', 'propose_transaction_personal', 'respond_transaction', 'private_rd'],
+  'Communication': ['public_statement', 'call_org_meeting'],
+}
+
+const POSITION_BADGE: Record<string, { label: string; cls: string }> = {
+  head_of_state:  { label: 'HoS',      cls: 'bg-warning/10 text-warning' },
+  military_chief: { label: 'Military',  cls: 'bg-danger/10 text-danger' },
+  economy_officer:{ label: 'Economy',   cls: 'bg-accent/10 text-accent' },
+  diplomat:       { label: 'Diplomat',  cls: 'bg-action/10 text-action' },
+  other:          { label: 'Other',     cls: 'bg-base text-text-secondary' },
+}
+
+const PARTY_BADGE: Record<string, { label: string; cls: string }> = {
+  rep:         { label: 'Rep',         cls: 'bg-danger/10 text-danger' },
+  dem:         { label: 'Dem',         cls: 'bg-action/10 text-action' },
+  independent: { label: 'Independent', cls: 'bg-base text-text-secondary' },
+}
+
+const RELATIONSHIP_COLOR: Record<string, string> = {
+  reports_to: 'text-action',
+  rival: 'text-warning',
+  ally: 'text-success',
+  patron: 'text-accent',
+  adversary: 'text-danger',
+  co_conspirator: 'text-text-primary',
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1)
-}
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
-/** Sort country IDs according to COUNTRY_ORDER. */
 function sortCountryIds(ids: string[]): string[] {
   return [...ids].sort((a, b) => {
     const ia = COUNTRY_ORDER.indexOf(a)
@@ -49,129 +110,10 @@ function sortCountryIds(ids: string[]): string[] {
   })
 }
 
-/** Convert comma-separated string to array, filtering empties. */
-function csvToArray(s: string): string[] {
-  return s.split(',').map((v) => v.trim()).filter(Boolean)
-}
-
-/** Convert array to comma-separated string. */
-function arrayToCsv(arr: string[]): string {
-  return arr.join(', ')
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Field components                                                           */
-/* -------------------------------------------------------------------------- */
-
-interface NumberFieldProps {
-  label: string
-  value: number
-  onChange: (v: number) => void
-  step?: number
-  min?: number
-  max?: number
-}
-
-function NumberField({ label, value, onChange, step, min, max }: NumberFieldProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="font-body text-caption text-text-secondary">{label}</label>
-      <input
-        type="number"
-        value={value}
-        onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-        step={step}
-        min={min}
-        max={max}
-        className="font-data text-data bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
-      />
-    </div>
-  )
-}
-
-interface TextFieldProps {
-  label: string
-  value: string
-  onChange: (v: string) => void
-}
-
-function TextField({ label, value, onChange }: TextFieldProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="font-body text-caption text-text-secondary">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
-      />
-    </div>
-  )
-}
-
-interface TextAreaFieldProps {
-  label: string
-  value: string
-  onChange: (v: string) => void
-  rows?: number
-}
-
-function TextAreaField({ label, value, onChange, rows = 3 }: TextAreaFieldProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="font-body text-caption text-text-secondary">{label}</label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        rows={rows}
-        className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none resize-y"
-      />
-    </div>
-  )
-}
-
-interface SelectFieldProps {
-  label: string
-  value: string
-  options: readonly string[]
-  onChange: (v: string) => void
-}
-
-function SelectField({ label, value, options, onChange }: SelectFieldProps) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="font-body text-caption text-text-secondary">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
-      >
-        {options.map((opt) => (
-          <option key={opt} value={opt}>{opt}</option>
-        ))}
-      </select>
-    </div>
-  )
-}
-
-interface CheckboxFieldProps {
-  label: string
-  checked: boolean
-  onChange: (v: boolean) => void
-}
-
-function CheckboxField({ label, checked, onChange }: CheckboxFieldProps) {
-  return (
-    <label className="flex items-center gap-2 cursor-pointer">
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="w-4 h-4 rounded border-border text-action focus:ring-action"
-      />
-      <span className="font-body text-body-sm text-text-primary">{label}</span>
-    </label>
-  )
+function formatLimit(perRound: number | null, total: number | null): string {
+  if (perRound !== null && perRound > 0) return `${perRound}/round`
+  if (total !== null && total > 0) return `${total}/SIM`
+  return 'unlimited'
 }
 
 /* -------------------------------------------------------------------------- */
@@ -183,37 +125,6 @@ function SectionHeader({ title }: { title: string }) {
     <h4 className="font-heading text-h3 text-text-primary mt-4 mb-2 border-b border-border pb-1">
       {title}
     </h4>
-  )
-}
-
-/* -------------------------------------------------------------------------- */
-/*  Role badges                                                                */
-/* -------------------------------------------------------------------------- */
-
-function RoleBadges({ role }: { role: Role }) {
-  return (
-    <>
-      {role.is_head_of_state && (
-        <span className="font-body text-caption font-medium bg-warning/10 text-warning px-1.5 py-0.5 rounded ml-2">
-          HoS
-        </span>
-      )}
-      {role.is_military_chief && !role.is_head_of_state && (
-        <span className="font-body text-caption font-medium bg-danger/10 text-danger px-1.5 py-0.5 rounded ml-2">
-          Military
-        </span>
-      )}
-      {role.is_economy_officer && !role.is_head_of_state && (
-        <span className="font-body text-caption font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-2">
-          Economy
-        </span>
-      )}
-      {role.expansion_role && (
-        <span className="font-body text-caption font-medium text-text-secondary bg-border/50 px-1.5 py-0.5 rounded ml-2">
-          optional
-        </span>
-      )}
-    </>
   )
 }
 
@@ -291,7 +202,7 @@ function AddRoleForm({ countryIds, onCreated, onCancel }: AddRoleFormProps) {
             className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
           >
             {countryIds.map((cid) => (
-              <option key={cid} value={cid}>{capitalize(cid)}</option>
+              <option key={cid} value={cid}>{cap(cid)}</option>
             ))}
           </select>
         </div>
@@ -329,31 +240,192 @@ function AddRoleForm({ countryIds, onCreated, onCancel }: AddRoleFormProps) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Actions section (read-only)                                                */
+/* -------------------------------------------------------------------------- */
+
+function ActionsSection({ actions }: { actions: RoleAction[] }) {
+  const actionSet = useMemo(() => new Set(actions.map((a) => a.action_id)), [actions])
+  const actionMap = useMemo(() => {
+    const m: Record<string, RoleAction> = {}
+    for (const a of actions) m[a.action_id] = a
+    return m
+  }, [actions])
+
+  const hasAny = actions.length > 0
+
+  if (!hasAny) {
+    return (
+      <div>
+        <SectionHeader title="Actions Available" />
+        <p className="font-body text-body-sm text-text-secondary">No actions assigned to this role.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <SectionHeader title="Actions Available" />
+      <div className="space-y-3">
+        {Object.entries(ACTION_CATEGORIES).map(([category, actionIds]) => {
+          const available = actionIds.filter((id) => actionSet.has(id))
+          if (available.length === 0) return null
+          return (
+            <div key={category}>
+              <h5 className="font-body text-caption font-medium text-text-secondary mb-1">{category}</h5>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="font-body text-caption text-text-secondary py-1 pr-4">Action</th>
+                    <th className="font-body text-caption text-text-secondary py-1">Limit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {available.map((actionId) => {
+                    const ra = actionMap[actionId]
+                    return (
+                      <tr key={actionId} className="border-b border-border/50">
+                        <td className="font-body text-body-sm text-text-primary py-1 pr-4">
+                          {ACTION_LABELS[actionId] ?? actionId}
+                        </td>
+                        <td className="font-data text-data text-text-secondary py-1">
+                          {formatLimit(ra?.uses_per_round ?? null, ra?.uses_total ?? null)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Org memberships section (read-only)                                        */
+/* -------------------------------------------------------------------------- */
+
+function OrgMembershipsSection({ memberships, orgNames }: { memberships: OrgMembership[]; orgNames: Record<string, string> }) {
+  if (memberships.length === 0) {
+    return (
+      <div>
+        <SectionHeader title="Organization Memberships" />
+        <p className="font-body text-body-sm text-text-secondary">No organization memberships.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <SectionHeader title="Organization Memberships" />
+      <table className="w-full text-left">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="font-body text-caption text-text-secondary py-1 pr-4">Organization</th>
+            <th className="font-body text-caption text-text-secondary py-1">Role in Org</th>
+          </tr>
+        </thead>
+        <tbody>
+          {memberships.map((m) => (
+            <tr key={m.id} className="border-b border-border/50">
+              <td className="font-body text-body-sm text-text-primary py-1 pr-4">
+                {orgNames[m.org_id] ?? m.org_id}
+              </td>
+              <td className="font-body text-body-sm text-text-secondary py-1">
+                {m.role_in_org}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Relationships section (read-only)                                          */
+/* -------------------------------------------------------------------------- */
+
+function RelationshipsSection({ relationships, roleNames }: { relationships: RoleRelationship[]; roleNames: Record<string, string> }) {
+  if (relationships.length === 0) {
+    return (
+      <div>
+        <SectionHeader title="Relationships" />
+        <p className="font-body text-body-sm text-text-secondary">No relationships defined.</p>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      <SectionHeader title="Relationships" />
+      <table className="w-full text-left">
+        <thead>
+          <tr className="border-b border-border">
+            <th className="font-body text-caption text-text-secondary py-1 pr-4">Other Role</th>
+            <th className="font-body text-caption text-text-secondary py-1 pr-4">Type</th>
+            <th className="font-body text-caption text-text-secondary py-1">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {relationships.map((rel) => {
+            const colorCls = RELATIONSHIP_COLOR[rel.relationship_type] ?? 'text-text-secondary'
+            return (
+              <tr key={rel.id} className="border-b border-border/50">
+                <td className="font-body text-body-sm text-text-primary py-1 pr-4">
+                  {roleNames[rel.role_a_id] && roleNames[rel.role_b_id]
+                    ? roleNames[rel.role_b_id]
+                    : rel.role_b_id}
+                </td>
+                <td className="py-1 pr-4">
+                  <span className={`font-body text-caption font-medium ${colorCls}`}>
+                    {rel.relationship_type}
+                  </span>
+                </td>
+                <td className="font-body text-caption text-text-secondary py-1">
+                  {rel.notes}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Role editor (expanded panel)                                               */
 /* -------------------------------------------------------------------------- */
 
 interface RoleEditorProps {
   role: Role
   countryIds: string[]
+  actions: RoleAction[]
+  memberships: OrgMembership[]
+  relationships: RoleRelationship[]
+  orgNames: Record<string, string>
+  roleNames: Record<string, string>
   onSave: (updated: Role) => Promise<void>
   onDelete: (id: string) => Promise<void>
 }
 
-function RoleEditor({ role, countryIds, onSave, onDelete }: RoleEditorProps) {
+function RoleEditor({ role, countryIds, actions, memberships, relationships, orgNames, roleNames, onSave, onDelete }: RoleEditorProps) {
   const [draft, setDraft] = useState<Role>({ ...role })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null)
 
-  /** Reset draft when the role prop changes. */
   useEffect(() => {
     setDraft({ ...role })
   }, [role])
 
-  const set = useCallback(<K extends keyof Role>(key: K, value: Role[K]) => {
+  const set = <K extends keyof Role>(key: K, value: Role[K]) => {
     setDraft((prev) => ({ ...prev, [key]: value }))
-  }, [])
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -382,78 +454,169 @@ function RoleEditor({ role, countryIds, onSave, onDelete }: RoleEditorProps) {
     }
   }
 
+  const isColumbia = draft.country_id === 'columbia'
+
   return (
     <div className="px-4 py-4 space-y-2">
-      {/* Identity */}
+      {/* 1. Identity */}
       <SectionHeader title="Identity" />
       <div className="grid grid-cols-2 gap-4">
-        <TextField label="character_name" value={draft.character_name} onChange={(v) => set('character_name', v)} />
-        <TextField label="title" value={draft.title} onChange={(v) => set('title', v)} />
-        <NumberField label="age" value={draft.age} onChange={(v) => set('age', v)} min={18} max={100} />
-        <SelectField label="gender" value={draft.gender} options={GENDER_OPTIONS} onChange={(v) => set('gender', v)} />
-        <SelectField label="country_id" value={draft.country_id} options={countryIds} onChange={(v) => set('country_id', v)} />
-        <TextField label="team" value={draft.team} onChange={(v) => set('team', v)} />
-        <TextField label="faction" value={draft.faction} onChange={(v) => set('faction', v)} />
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">character_name</label>
+          <input
+            type="text"
+            value={draft.character_name}
+            onChange={(e) => set('character_name', e.target.value)}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">title</label>
+          <input
+            type="text"
+            value={draft.title}
+            onChange={(e) => set('title', e.target.value)}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">country_id</label>
+          <select
+            value={draft.country_id}
+            onChange={(e) => set('country_id', e.target.value)}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          >
+            {countryIds.map((cid) => (
+              <option key={cid} value={cid}>{cap(cid)}</option>
+            ))}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">position_type</label>
+          <select
+            value={draft.position_type}
+            onChange={(e) => set('position_type', e.target.value)}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          >
+            {POSITION_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{cap(opt.replace(/_/g, ' '))}</option>
+            ))}
+          </select>
+        </div>
+        {isColumbia && (
+          <div className="flex flex-col gap-1">
+            <label className="font-body text-caption text-text-secondary">party</label>
+            <select
+              value={draft.party}
+              onChange={(e) => set('party', e.target.value)}
+              className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+            >
+              {PARTY_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt ? cap(opt) : '(none)'}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">age</label>
+          <input
+            type="number"
+            value={draft.age}
+            onChange={(e) => set('age', parseInt(e.target.value) || 0)}
+            min={18}
+            max={100}
+            className="font-data text-data bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">gender</label>
+          <select
+            value={draft.gender}
+            onChange={(e) => set('gender', e.target.value)}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+          >
+            {GENDER_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>{opt}</option>
+            ))}
+          </select>
+        </div>
       </div>
-      <div className="mt-2">
-        <TextAreaField label="public_bio" value={draft.public_bio} onChange={(v) => set('public_bio', v)} rows={3} />
+      <div className="grid grid-cols-2 gap-4 mt-3">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={draft.expansion_role}
+            onChange={(e) => set('expansion_role', e.target.checked)}
+            className="w-4 h-4 rounded border-border text-action focus:ring-action"
+          />
+          <span className="font-body text-body-sm text-text-primary">expansion_role</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={draft.ai_candidate}
+            onChange={(e) => set('ai_candidate', e.target.checked)}
+            className="w-4 h-4 rounded border-border text-action focus:ring-action"
+          />
+          <span className="font-body text-body-sm text-text-primary">ai_candidate</span>
+        </label>
+      </div>
+      <div className="mt-3">
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">personal_coins</label>
+          <input
+            type="number"
+            value={draft.personal_coins}
+            onChange={(e) => set('personal_coins', parseFloat(e.target.value) || 0)}
+            step={0.01}
+            min={0}
+            className="font-data text-data bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none w-40"
+          />
+        </div>
       </div>
 
-      {/* Position */}
-      <SectionHeader title="Position" />
-      <div className="grid grid-cols-2 gap-4">
-        <CheckboxField label="is_head_of_state" checked={draft.is_head_of_state} onChange={(v) => set('is_head_of_state', v)} />
-        <CheckboxField label="is_military_chief" checked={draft.is_military_chief} onChange={(v) => set('is_military_chief', v)} />
-        <CheckboxField label="Economy Officer" checked={draft.is_economy_officer} onChange={(v) => set('is_economy_officer', v)} />
-        <CheckboxField label="is_diplomat" checked={draft.is_diplomat} onChange={(v) => set('is_diplomat', v)} />
-        <NumberField label="parliament_seat" value={draft.parliament_seat} onChange={(v) => set('parliament_seat', v)} min={0} />
-      </div>
-
-      {/* Resources */}
-      <SectionHeader title="Resources" />
-      <div className="grid grid-cols-2 gap-4">
-        <NumberField label="personal_coins" value={draft.personal_coins} onChange={(v) => set('personal_coins', v)} step={0.01} min={0} />
-      </div>
-
-      {/* Covert Ops Deck */}
-      <SectionHeader title="Covert Ops Deck" />
-      <div className="grid grid-cols-2 gap-4">
-        <NumberField label="intelligence_pool" value={draft.intelligence_pool} onChange={(v) => set('intelligence_pool', v)} min={0} />
-        <NumberField label="sabotage_cards" value={draft.sabotage_cards} onChange={(v) => set('sabotage_cards', v)} min={0} />
-        <NumberField label="cyber_cards" value={draft.cyber_cards} onChange={(v) => set('cyber_cards', v)} min={0} />
-        <NumberField label="disinfo_cards" value={draft.disinfo_cards} onChange={(v) => set('disinfo_cards', v)} min={0} />
-        <NumberField label="election_meddling_cards" value={draft.election_meddling_cards} onChange={(v) => set('election_meddling_cards', v)} min={0} />
-        <NumberField label="assassination_cards" value={draft.assassination_cards} onChange={(v) => set('assassination_cards', v)} min={0} />
-        <NumberField label="protest_stim_cards" value={draft.protest_stim_cards} onChange={(v) => set('protest_stim_cards', v)} min={0} />
-        <NumberField label="fatherland_appeal" value={draft.fatherland_appeal} onChange={(v) => set('fatherland_appeal', v)} min={0} />
-      </div>
-
-      {/* Role Definition */}
-      <SectionHeader title="Role Definition" />
+      {/* 2. Bio & Objectives */}
+      <SectionHeader title="Bio & Objectives" />
       <div className="space-y-3">
-        <TextField
-          label="powers (comma-separated)"
-          value={arrayToCsv(draft.powers)}
-          onChange={(v) => set('powers', csvToArray(v))}
-        />
-        <TextField
-          label="objectives (comma-separated)"
-          value={arrayToCsv(draft.objectives)}
-          onChange={(v) => set('objectives', csvToArray(v))}
-        />
-        <TextField label="ticking_clock" value={draft.ticking_clock} onChange={(v) => set('ticking_clock', v)} />
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">public_bio</label>
+          <textarea
+            value={draft.public_bio}
+            onChange={(e) => set('public_bio', e.target.value)}
+            rows={3}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none resize-y"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">confidential_brief</label>
+          <textarea
+            value={draft.confidential_brief}
+            onChange={(e) => set('confidential_brief', e.target.value)}
+            rows={5}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none resize-y"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="font-body text-caption text-text-secondary">objectives (one per line)</label>
+          <textarea
+            value={Array.isArray(draft.objectives) ? draft.objectives.join('\n') : ''}
+            onChange={(e) => set('objectives', e.target.value.split('\n').filter((l) => l.trim() !== ''))}
+            rows={3}
+            className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none resize-y"
+          />
+        </div>
       </div>
 
-      {/* Config */}
-      <SectionHeader title="Config" />
-      <div className="grid grid-cols-2 gap-4">
-        <CheckboxField label="expansion_role" checked={draft.expansion_role} onChange={(v) => set('expansion_role', v)} />
-        <CheckboxField label="ai_candidate" checked={draft.ai_candidate} onChange={(v) => set('ai_candidate', v)} />
-        <CheckboxField label="is_ai_operated" checked={draft.is_ai_operated} onChange={(v) => set('is_ai_operated', v)} />
-        <TextField label="brief_file" value={draft.brief_file} onChange={(v) => set('brief_file', v)} />
-      </div>
+      {/* 3. Actions Available (read-only) */}
+      <ActionsSection actions={actions} />
 
-      {/* Save */}
+      {/* 4. Organization Memberships (read-only) */}
+      <OrgMembershipsSection memberships={memberships} orgNames={orgNames} />
+
+      {/* 5. Relationships (read-only) */}
+      <RelationshipsSection relationships={relationships} roleNames={roleNames} />
+
+      {/* Save button */}
       <div className="flex items-center gap-3 mt-4 pt-3 border-t border-border">
         <button
           onClick={handleSave}
@@ -469,7 +632,7 @@ function RoleEditor({ role, countryIds, onSave, onDelete }: RoleEditorProps) {
         )}
       </div>
 
-      {/* Delete */}
+      {/* Delete button */}
       <div className="mt-4 pt-3 border-t border-border">
         {!confirmDelete ? (
           <button
@@ -504,6 +667,35 @@ function RoleEditor({ role, countryIds, onSave, onDelete }: RoleEditorProps) {
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Collapsed role row badges                                                  */
+/* -------------------------------------------------------------------------- */
+
+function CollapsedBadges({ role }: { role: Role }) {
+  const pos = POSITION_BADGE[role.position_type]
+  const party = role.country_id === 'columbia' && role.party ? PARTY_BADGE[role.party] : null
+
+  return (
+    <>
+      {pos && (
+        <span className={`font-body text-caption font-medium px-1.5 py-0.5 rounded ml-2 ${pos.cls}`}>
+          {pos.label}
+        </span>
+      )}
+      {party && (
+        <span className={`font-body text-caption font-medium px-1.5 py-0.5 rounded ml-1 ${party.cls}`}>
+          {party.label}
+        </span>
+      )}
+      {role.expansion_role && (
+        <span className="font-body text-caption font-medium text-text-secondary bg-border/50 px-1.5 py-0.5 rounded ml-1">
+          optional
+        </span>
+      )}
+    </>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Main tab component                                                         */
 /* -------------------------------------------------------------------------- */
 
@@ -514,38 +706,97 @@ interface TabRolesProps {
 export function TabRoles({ templateId: _templateId }: TabRolesProps) {
   const [roles, setRoles] = useState<Role[]>([])
   const [countries, setCountries] = useState<Country[]>([])
+  const [allActions, setAllActions] = useState<RoleAction[]>([])
+  const [allMemberships, setAllMemberships] = useState<OrgMembership[]>([])
+  const [allRelationships, setAllRelationships] = useState<RoleRelationship[]>([])
+  const [orgNames, setOrgNames] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
 
-  const loadData = useCallback(async () => {
+  const loadData = async () => {
     setLoading(true)
     setError(null)
     try {
-      const [rolesData, countriesData] = await Promise.all([
+      const [rolesData, countriesData, actionsData, membershipsData, relationshipsData, orgsData] = await Promise.all([
         getTemplateRoles(),
         getTemplateCountries(),
+        getTemplateRoleActions(),
+        getTemplateOrgMemberships(),
+        getTemplateRoleRelationships(),
+        getTemplateOrganizations(),
       ])
       setRoles(rolesData)
       setCountries(countriesData)
+      setAllActions(actionsData)
+      setAllMemberships(membershipsData)
+      setAllRelationships(relationshipsData)
+      const names: Record<string, string> = {}
+      for (const org of orgsData) names[org.id] = org.sim_name
+      setOrgNames(names)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load roles'
       setError(message)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }
 
   useEffect(() => {
     loadData()
-  }, [loadData])
+  }, [])
 
-  /** Country IDs for the country dropdown. */
+  /** Country IDs for dropdowns. */
   const countryIds = useMemo(
     () => sortCountryIds(countries.map((c) => c.id)),
     [countries]
   )
+
+  /** Role name lookup. */
+  const roleNames = useMemo(() => {
+    const m: Record<string, string> = {}
+    for (const r of roles) m[r.id] = `${r.character_name} (${cap(r.country_id)})`
+    return m
+  }, [roles])
+
+  /** Actions indexed by role_id. */
+  const actionsByRole = useMemo(() => {
+    const m: Record<string, RoleAction[]> = {}
+    for (const a of allActions) {
+      if (!m[a.role_id]) m[a.role_id] = []
+      m[a.role_id].push(a)
+    }
+    return m
+  }, [allActions])
+
+  /** Memberships indexed by role_id. */
+  const membershipsByRole = useMemo(() => {
+    const m: Record<string, OrgMembership[]> = {}
+    for (const mb of allMemberships) {
+      if (mb.role_id) {
+        if (!m[mb.role_id]) m[mb.role_id] = []
+        m[mb.role_id].push(mb)
+      }
+    }
+    return m
+  }, [allMemberships])
+
+  /** Relationships indexed by role_id (both sides). */
+  const relationshipsByRole = useMemo(() => {
+    const m: Record<string, RoleRelationship[]> = {}
+    for (const rel of allRelationships) {
+      // Index under role_a — show role_b as the "other"
+      if (!m[rel.role_a_id]) m[rel.role_a_id] = []
+      m[rel.role_a_id].push(rel)
+      // Also index under role_b with swapped display
+      if (rel.role_b_id !== rel.role_a_id) {
+        if (!m[rel.role_b_id]) m[rel.role_b_id] = []
+        m[rel.role_b_id].push({ ...rel, role_a_id: rel.role_b_id, role_b_id: rel.role_a_id })
+      }
+    }
+    return m
+  }, [allRelationships])
 
   /** Group roles by country_id. */
   const rolesByCountry = useMemo(() => {
@@ -564,23 +815,23 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
     [rolesByCountry]
   )
 
-  const handleSave = useCallback(async (updated: Role) => {
+  const handleSave = async (updated: Role) => {
     await updateRole(updated.id, updated)
     setRoles((prev) =>
       prev.map((r) => (r.id === updated.id ? updated : r))
     )
-  }, [])
+  }
 
-  const handleDelete = useCallback(async (id: string) => {
+  const handleDelete = async (id: string) => {
     await deleteRole(id)
     setRoles((prev) => prev.filter((r) => r.id !== id))
     setExpandedId(null)
-  }, [])
+  }
 
-  const handleRoleCreated = useCallback(() => {
+  const handleRoleCreated = () => {
     setShowAddForm(false)
     loadData()
-  }, [loadData])
+  }
 
   if (loading) {
     return (
@@ -640,7 +891,7 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
               <div className="bg-base px-4 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="font-heading text-h3 text-text-primary">
-                    {capitalize(countryId)}
+                    {cap(countryId)}
                   </h3>
                   <span className="font-data text-data text-text-secondary">
                     {countryRoles.length} roles
@@ -665,20 +916,16 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
                           >
                             {'\u25B6'}
                           </span>
-                          <span className="font-body text-body-sm text-text-primary">
+                          <span className="font-body text-body-sm text-text-primary font-medium">
                             {role.character_name}
                           </span>
                           <span className="font-body text-caption text-text-secondary">
                             {role.title}
                           </span>
-                          <RoleBadges role={role} />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {role.is_ai_operated && (
-                            <span className="font-body text-caption font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded">
-                              AI
-                            </span>
-                          )}
+                          <span className="font-body text-caption text-text-secondary">
+                            {cap(role.country_id)}
+                          </span>
+                          <CollapsedBadges role={role} />
                         </div>
                       </button>
 
@@ -688,6 +935,11 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
                           <RoleEditor
                             role={role}
                             countryIds={countryIds}
+                            actions={actionsByRole[role.id] ?? []}
+                            memberships={membershipsByRole[role.id] ?? []}
+                            relationships={relationshipsByRole[role.id] ?? []}
+                            orgNames={orgNames}
+                            roleNames={roleNames}
                             onSave={handleSave}
                             onDelete={handleDelete}
                           />

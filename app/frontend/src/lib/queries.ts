@@ -450,6 +450,7 @@ export interface Country {
   ai_level: number
   ai_rd_progress: number
   home_zones: string
+  country_brief: string | null
 }
 
 export interface Role {
@@ -474,6 +475,9 @@ export interface Role {
   is_ai_operated: boolean
   brief_file: string
   public_bio: string
+  confidential_brief: string
+  position_type: string
+  party: string
   intelligence_pool: number
   sabotage_cards: number
   cyber_cards: number
@@ -713,6 +717,45 @@ export async function getTemplateZones(): Promise<Zone[]> {
     .order('theater, id')
   if (error) throw error
   return (data ?? []) as Zone[]
+}
+
+export interface RoleAction {
+  id: string
+  sim_run_id: string
+  role_id: string
+  action_id: string
+  uses_per_round: number | null
+  uses_total: number | null
+  notes: string
+}
+
+export interface RoleRelationship {
+  id: string
+  sim_run_id: string
+  role_a_id: string
+  role_b_id: string
+  relationship_type: string
+  notes: string
+}
+
+export async function getTemplateRoleActions(): Promise<RoleAction[]> {
+  const { data, error } = await supabase
+    .from('role_actions')
+    .select('*')
+    .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
+    .order('role_id, action_id')
+  if (error) throw error
+  return (data ?? []) as RoleAction[]
+}
+
+export async function getTemplateRoleRelationships(): Promise<RoleRelationship[]> {
+  const { data, error } = await supabase
+    .from('role_relationships')
+    .select('*')
+    .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
+    .order('role_a_id, role_b_id')
+  if (error) throw error
+  return (data ?? []) as RoleRelationship[]
 }
 
 export async function getTemplateDeployments(): Promise<Deployment[]> {
