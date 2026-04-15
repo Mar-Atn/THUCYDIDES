@@ -565,19 +565,6 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
           <span className="font-body text-body-sm text-text-primary">ai_candidate</span>
         </label>
       </div>
-      <div className="mt-3">
-        <div className="flex flex-col gap-1">
-          <label className="font-body text-caption text-text-secondary">personal_coins</label>
-          <input
-            type="number"
-            value={draft.personal_coins}
-            onChange={(e) => set('personal_coins', parseFloat(e.target.value) || 0)}
-            step={0.01}
-            min={0}
-            className="font-data text-data bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none w-40"
-          />
-        </div>
-      </div>
 
       {/* 2. Bio & Objectives */}
       <SectionHeader title="Bio & Objectives" />

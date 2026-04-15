@@ -27,40 +27,32 @@ const COUNTRY_ORDER: string[] = [
   'levantia', 'mirage', 'phrygia', 'solaria', 'yamato',
 ]
 
-/** Short 3-letter labels for relationship types. */
+/** Short labels for relationship types. */
 const REL_ABBREV: Record<string, string> = {
   alliance: 'ALI',
-  close_ally: 'CLO',
-  friendly: 'FRI',
+  economic_partnership: 'ECO',
   neutral: 'NEU',
-  tense: 'TEN',
   hostile: 'HOS',
   at_war: 'WAR',
-  strategic_rival: 'RIV',
 }
 
 /** Background color classes for each relationship type. */
 const REL_BG: Record<string, string> = {
   alliance: 'bg-green-600 text-white',
-  close_ally: 'bg-green-400/80 text-white',
-  friendly: 'bg-blue-500/70 text-white',
+  economic_partnership: 'bg-blue-500/70 text-white',
   neutral: 'bg-gray-400/50 text-text-primary',
-  tense: 'bg-orange-500/70 text-white',
-  hostile: 'bg-red-600/80 text-white',
+  hostile: 'bg-orange-500/80 text-white',
   at_war: 'bg-red-900 text-white',
-  strategic_rival: 'bg-purple-600/80 text-white',
 }
 
 /** Relationship type options for the dropdown. */
 const RELATIONSHIP_TYPES = [
-  'alliance', 'close_ally', 'friendly', 'neutral',
-  'tense', 'hostile', 'at_war', 'strategic_rival',
+  'alliance', 'economic_partnership', 'neutral', 'hostile', 'at_war',
 ] as const
 
-/** Status options for the dropdown. */
-const STATUS_OPTIONS = [
-  'allied', 'friendly', 'neutral', 'tense', 'hostile',
-  'military_conflict', 'armistice', 'peace',
+/** Agreement types that can change relations. */
+const AGREEMENT_TYPES = [
+  'military_alliance', 'trade_agreement', 'peace_treaty', 'ceasefire', 'war_declaration',
 ] as const
 
 interface CellEditor {
@@ -330,24 +322,6 @@ export function TabRelationships({ templateId: _templateId }: TabRelationshipsPr
                   {RELATIONSHIP_TYPES.map((t) => (
                     <option key={t} value={t}>
                       {t.replace(/_/g, ' ')}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block font-body text-caption text-text-secondary mb-1">
-                  Status
-                </label>
-                <select
-                  value={editor.relationship.status ?? 'neutral'}
-                  onChange={(e) => updateEditorField('status', e.target.value)}
-                  className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary focus:outline-none focus:border-action"
-                >
-                  {STATUS_OPTIONS.map((s) => (
-                    <option key={s} value={s}>
-                      {s.replace(/_/g, ' ')}
                     </option>
                   ))}
                 </select>

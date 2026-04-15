@@ -51,7 +51,7 @@ def execute_election_meddling(
 
     if success:
         support_change = shift_roll if direction == "boost" else -shift_roll
-        _apply_support_change(client, sim_run_id, round_num, target_country, support_change)
+        _apply_stability_change(client, sim_run_id, round_num, target_country, support_change)
 
     scenario_id = _get_scenario_id(client, sim_run_id)
     candidate_label = f" (candidate: {candidate})" if candidate else ""
@@ -99,19 +99,22 @@ def execute_election_meddling(
     }
 
 
-def _apply_support_change(client, sim_run_id, round_num, target_cc, change):
+def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
+    """Apply stability change (replaces old political_support change). 2026-04-15 simplification."""
     try:
-        row = client.table("country_states_per_round").select("political_support") \
+        row = client.table("country_states_per_round").select("stability") \
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", target_cc).limit(1).execute().data
         if row:
-            old = int(row[0]["political_support"]) if row[0].get("political_support") is not None else 50
-            new = max(0, min(100, old + change))
-            client.table("country_states_per_round").update({"political_support": new}) \
+            old = float(row[0]["stability"]) if row[0].get("stability") is not None else 5.0
+            # Convert support-scale change (±2-5) to stability-scale (±0.2-0.5)
+            stab_change = change / 10.0
+            new = max(0.0, min(10.0, old + stab_change))
+            client.table("country_states_per_round").update({"stability": new}) \
                 .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
                 .eq("country_code", target_cc).execute()
     except Exception as e:
-        logger.warning("support change failed: %s", e)
+        logger.warning("stability change failed: %s", e)
 
 
 def _get_scenario_id(client, sim_run_id):

@@ -22,8 +22,8 @@ SUCCESS_PROB_INTERNATIONAL = 0.20
 SUCCESS_PROB_LEVANTIA = 0.50
 KILL_VS_SURVIVE_PROB = 0.50  # <0.5 = kill, >=0.5 = survive
 ATTRIBUTION_PROB = 0.50
-MARTYR_SUPPORT_BOOST = 15
-SYMPATHY_SUPPORT_BOOST = 10
+MARTYR_STABILITY_BOOST = 1.5  # 2026-04-15: converted from support +15 to stability scale
+SYMPATHY_STABILITY_BOOST = 1.0  # 2026-04-15: converted from support +10 to stability scale
 
 
 def execute_assassination(
@@ -82,15 +82,15 @@ def execute_assassination(
                                changed_by=attacker_role,
                                reason=f"Assassinated in round {round_num}",
                                round_num=round_num)
-            support_change = MARTYR_SUPPORT_BOOST
-            narrative = f"ASSASSINATION: {target_role} ({target.get('character_name', '?')}) KILLED — martyr effect +{MARTYR_SUPPORT_BOOST} support"
+            stability_change = MARTYR_STABILITY_BOOST
+            narrative = f"ASSASSINATION: {target_role} ({target.get('character_name', '?')}) KILLED — martyr effect +{MARTYR_STABILITY_BOOST} stability"
         else:
             # Target survives injured
-            support_change = SYMPATHY_SUPPORT_BOOST
-            narrative = f"ASSASSINATION ATTEMPT: {target_role} ({target.get('character_name', '?')}) SURVIVED (injured) — sympathy +{SYMPATHY_SUPPORT_BOOST} support"
+            stability_change = SYMPATHY_STABILITY_BOOST
+            narrative = f"ASSASSINATION ATTEMPT: {target_role} ({target.get('character_name', '?')}) SURVIVED (injured) — sympathy +{SYMPATHY_STABILITY_BOOST} stability"
 
-        # Apply support boost to target's country
-        _apply_support_change(client, sim_run_id, round_num, target_country, support_change)
+        # Apply stability boost to target's country (2026-04-15: replaces political_support)
+        _apply_stability_change(client, sim_run_id, round_num, target_country, stability_change)
     else:
         narrative = f"ASSASSINATION ATTEMPT FAILED: attack on {target_role} ({target.get('character_name', '?')}) unsuccessful"
 
@@ -126,19 +126,20 @@ def execute_assassination(
     }
 
 
-def _apply_support_change(client, sim_run_id, round_num, target_cc, change):
+def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
+    """Apply stability change (replaces old political_support change). 2026-04-15 simplification."""
     try:
-        row = client.table("country_states_per_round").select("political_support") \
+        row = client.table("country_states_per_round").select("stability") \
             .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
             .eq("country_code", target_cc).limit(1).execute().data
         if row:
-            old = int(row[0]["political_support"]) if row[0].get("political_support") is not None else 50
-            new = max(0, min(100, old + change))
-            client.table("country_states_per_round").update({"political_support": new}) \
+            old = float(row[0]["stability"]) if row[0].get("stability") is not None else 5.0
+            new = max(0.0, min(10.0, old + change))
+            client.table("country_states_per_round").update({"stability": new}) \
                 .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
                 .eq("country_code", target_cc).execute()
     except Exception as e:
-        logger.warning("support change failed: %s", e)
+        logger.warning("stability change failed: %s", e)
 
 
 def _get_scenario_id(client, sim_run_id):

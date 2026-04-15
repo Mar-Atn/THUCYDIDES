@@ -171,7 +171,7 @@ def _build_world_state(ctx: ContextAssembler, *, scope: str | None = None, **_) 
         lines.append(f"- Debt/GDP: {eco.get('debt_burden', 0):.0%}")
         lines.append(f"- Sanctions coeff: {eco.get('sanctions_coefficient', 1.0):.3f}, "
                       f"Tariff coeff: {eco.get('tariff_coefficient', 1.0):.3f}")
-        lines.append(f"- Stability: {pol.get('stability', 5):.1f}, Support: {pol.get('political_support', 50):.0f}%")
+        lines.append(f"- Stability: {pol.get('stability', 5):.1f}")
         lines.append(f"- Economic state: {eco.get('economic_state', 'normal')}")
         if eco.get("oil_producer"):
             lines.append(f"- Oil producer: {eco.get('oil_production_mbpd', 0)} mbpd")
@@ -274,7 +274,6 @@ def _build_round_outputs(ctx: ContextAssembler, **_) -> str:
         gdp = eco.get("gdp", 0)
         growth = eco.get("gdp_growth_rate", 0)
         stab = pol.get("stability", 5)
-        sup = pol.get("political_support", 50)
         infl = eco.get("inflation", 0)
         treas = eco.get("treasury", 0)
         state = eco.get("economic_state", "normal")
@@ -286,7 +285,7 @@ def _build_round_outputs(ctx: ContextAssembler, **_) -> str:
             flag = f" ⚠️ {state.upper()}"
 
         lines.append(f"- **{name}**: GDP {gdp:.0f} ({growth:+.1f}%), stab {stab:.1f}, "
-                      f"sup {sup:.0f}%, infl {infl:.0f}%, treas {treas:.0f}{flag}")
+                      f"infl {infl:.0f}%, treas {treas:.0f}{flag}")
 
     return "\n".join(lines)
 
@@ -453,47 +452,36 @@ def _build_political_risks(ctx: ContextAssembler, scope: str | None = None, **pa
         c = countries[cid]
         pol = c.get("political", {})
         stab = pol.get("stability", 5)
-        sup = pol.get("political_support", 50)
 
         risk = "LOW"
-        if stab <= 2 and sup < 20:
-            risk = "CRITICAL — revolution conditions MET"
-        elif stab <= 3 and sup < 30:
+        if stab <= 2:
+            risk = "CRITICAL — leadership change conditions MET"
+        elif stab <= 3:
             risk = "HIGH — approaching crisis"
-        elif stab <= 4 and sup < 40:
+        elif stab <= 4:
             risk = "ELEVATED"
 
         if risk != "LOW":
-            lines.append(f"- **{cid}**: {risk} (stability={stab}, support={sup}%)")
+            lines.append(f"- **{cid}**: {risk} (stability={stab:.1f})")
 
     if len(lines) == 3:  # only header + threshold info
         lines.append("- All countries: LOW risk")
     lines.append("")
 
-    # Coup conditions (stability < 3 OR support < 30% makes coups more likely)
-    lines.append("## Coup Risk Factors")
-    lines.append("*Base 15% + modifiers for low stability/support/active protests*\n")
+    # Leadership change conditions (stability below threshold enables majority vote)
+    lines.append("## Leadership Change Risk")
+    lines.append("*When stability drops below threshold, any team member can initiate a leadership vote. Simple majority of team required.*\n")
     for cid in sorted(countries.keys()):
         c = countries[cid]
         pol = c.get("political", {})
         stab = pol.get("stability", 5)
-        sup = pol.get("political_support", 50)
-        modifiers = []
-        prob = 15
-        if stab < 3:
-            modifiers.append(f"stability {stab} < 3 → +15%")
-            prob += 15
+        if stab <= 3:
+            lines.append(f"- **{cid}**: stability {stab:.1f} — LEADERSHIP CHANGE ENABLED")
         elif stab <= 4:
-            modifiers.append(f"stability {stab} ≤ 4 → +5%")
-            prob += 5
-        if sup < 30:
-            modifiers.append(f"support {sup}% < 30% → +10%")
-            prob += 10
-        if modifiers:
-            lines.append(f"- **{cid}**: {prob}% ({', '.join(modifiers)})")
+            lines.append(f"- **{cid}**: stability {stab:.1f} — approaching threshold")
 
     if not any("**" in l for l in lines[-5:]):
-        lines.append("- All countries: base 15% (no elevated risk)")
+        lines.append("- All countries: stable (no leadership change risk)")
     lines.append("")
 
     return "\n".join(lines)

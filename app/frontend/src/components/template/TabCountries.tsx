@@ -197,7 +197,6 @@ function AddCountryForm({ onCreated, onCancel }: AddCountryFormProps) {
         team_size_max: 1,
         gdp: 0,
         stability: 5,
-        political_support: 50,
       })
       onCreated()
     } catch (err: unknown) {
@@ -391,11 +390,8 @@ function CountryEditor({ country, onSave, onDelete }: CountryEditorProps) {
       {/* Political */}
       <SectionHeader title="Political" />
       <div className="grid grid-cols-2 gap-4">
-        <NumberField label="stability" value={draft.stability} onChange={(v) => set('stability', v)} min={0} max={10} step={0.01} />
-        <NumberField label="political_support" value={draft.political_support} onChange={(v) => set('political_support', v)} min={0} max={100} step={0.01} />
-        <NumberField label="dem_rep_split_dem" value={draft.dem_rep_split_dem} onChange={(v) => set('dem_rep_split_dem', v)} />
-        <NumberField label="dem_rep_split_rep" value={draft.dem_rep_split_rep} onChange={(v) => set('dem_rep_split_rep', v)} />
-        <NumberField label="war_tiredness" value={draft.war_tiredness} onChange={(v) => set('war_tiredness', v)} step={0.01} />
+        <NumberField label="stability (0-10)" value={draft.stability} onChange={(v) => set('stability', v)} min={0} max={10} step={0.1} />
+        <NumberField label="war_tiredness" value={draft.war_tiredness} onChange={(v) => set('war_tiredness', v)} step={0.1} />
       </div>
 
       {/* Technology */}
