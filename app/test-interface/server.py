@@ -102,6 +102,8 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._serve_html()
         elif path == "/map" or path == "/map.html":
             self._serve_template("map.html")
+        elif path == "/map/geography" or path == "/map_viewer" or path == "/map_viewer.html":
+            self._serve_template("map_viewer.html")
         elif path == "/observatory" or path == "/observatory.html":
             self._serve_template("observatory.html")
         elif path == "/api/observatory/state":

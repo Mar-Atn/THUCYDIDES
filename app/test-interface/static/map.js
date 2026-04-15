@@ -272,18 +272,40 @@
     renderCountryLabels(svg, data, r);
 
     // Units
-    for (let rIdx = 0; rIdx < rows; rIdx++) {
-      for (let c = 0; c < cols; c++) {
-        const key1 = `${rIdx + 1},${c + 1}`;
-        const units = globalUnits[key1];
-        if (!units || units.length === 0) continue;
-        const center = hexCenter(rIdx, c, r);
-        renderUnitStack(svg, center.x, center.y + 6, units, 'global');
+    // Units overlay (skip in geography-only mode)
+    if (window.MAP_VIEWER_MODE !== 'geography') {
+      for (let rIdx = 0; rIdx < rows; rIdx++) {
+        for (let c = 0; c < cols; c++) {
+          const key1 = `${rIdx + 1},${c + 1}`;
+          const units = globalUnits[key1];
+          if (!units || units.length === 0) continue;
+          const center = hexCenter(rIdx, c, r);
+          renderUnitStack(svg, center.x, center.y + 6, units, 'global');
+        }
       }
+      renderEmbarkBadges(svg,'global', r);
     }
 
-    // Embark badges on naval hexes (edit mode only, aggregated to global hexes)
-    renderEmbarkBadges(svg,'global', r);
+    // Nuclear sites overlay (always shown)
+    const nuclearSites = (window.MAP_CONFIG && window.MAP_CONFIG.NUCLEAR_SITES) || {};
+    Object.entries(nuclearSites).forEach(([country, coords]) => {
+      const [nRow, nCol] = coords; // 1-indexed
+      const center = hexCenter(nRow - 1, nCol - 1, r);
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      marker.setAttribute('cx', center.x);
+      marker.setAttribute('cy', center.y);
+      marker.setAttribute('r', r * 0.35);
+      marker.setAttribute('class', 'nuclear-marker');
+      marker.setAttribute('data-tooltip', `Nuclear site: ${country}`);
+      svg.appendChild(marker);
+      // Radiation symbol dot
+      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      dot.setAttribute('cx', center.x);
+      dot.setAttribute('cy', center.y);
+      dot.setAttribute('r', r * 0.12);
+      dot.setAttribute('fill', '#B03A3A');
+      svg.appendChild(dot);
+    });
   }
 
   // ---------- Theater view ----------
@@ -361,20 +383,35 @@
     // Country name labels at centroid
     renderCountryLabels(svg, data, r);
 
-    // Embark badges (edit mode)
-    renderEmbarkBadges(svg,theaterName, r);
-
-    // Render units per-hex using theater deployments
-    const theaterUnits = aggregateTheaterUnits(theaterName);
-    for (let rIdx = 0; rIdx < rows; rIdx++) {
-      for (let c = 0; c < cols; c++) {
-        const key1 = `${rIdx + 1},${c + 1}`;
-        const units = theaterUnits[key1];
-        if (!units || units.length === 0) continue;
-        const center = hexCenter(rIdx, c, r);
-        renderUnitStack(svg, center.x, center.y + 6, units, 'theater');
+    // Units overlay (skip in geography-only mode)
+    if (window.MAP_VIEWER_MODE !== 'geography') {
+      renderEmbarkBadges(svg,theaterName, r);
+      const theaterUnits = aggregateTheaterUnits(theaterName);
+      for (let rIdx = 0; rIdx < rows; rIdx++) {
+        for (let c = 0; c < cols; c++) {
+          const key1 = `${rIdx + 1},${c + 1}`;
+          const units = theaterUnits[key1];
+          if (!units || units.length === 0) continue;
+          const center = hexCenter(rIdx, c, r);
+          renderUnitStack(svg, center.x, center.y + 6, units, 'theater');
+        }
       }
     }
+
+    // Die-hard zones overlay (always shown)
+    const dieHards = theaterData.dieHards || {};
+    Object.entries(dieHards).forEach(([key, dh]) => {
+      const center = hexCenter(dh.row, dh.col, r); // 0-indexed in JSON
+      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+      const size = r * 1.6;
+      marker.setAttribute('x', center.x - size / 2);
+      marker.setAttribute('y', center.y - size / 2);
+      marker.setAttribute('width', size);
+      marker.setAttribute('height', size);
+      marker.setAttribute('class', 'diehard-marker');
+      marker.setAttribute('data-tooltip', `Die Hard: ${dh.name || key}`);
+      svg.appendChild(marker);
+    });
   }
 
   // ---------- Country name labels at centroid ----------

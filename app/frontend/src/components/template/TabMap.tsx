@@ -17,7 +17,8 @@ interface TabMapProps {
   templateId: string
 }
 
-const MAP_EDITOR_URL = 'http://localhost:8888/map'
+const MAP_VIEWER_URL = 'http://localhost:8888/map/geography'
+const MAP_FULL_EDITOR_URL = 'http://localhost:8888/map'
 
 export function TabMap({ templateId: _templateId }: TabMapProps) {
   const [showEditor, setShowEditor] = useState(false)
@@ -44,7 +45,7 @@ export function TabMap({ templateId: _templateId }: TabMapProps) {
             {showEditor ? 'Hide Map' : 'Show Map'}
           </button>
           <a
-            href={MAP_EDITOR_URL}
+            href={MAP_VIEWER_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="font-body text-body-sm font-medium py-2 px-4 rounded bg-base border border-border text-text-secondary hover:text-action transition-colors"
@@ -57,7 +58,7 @@ export function TabMap({ templateId: _templateId }: TabMapProps) {
       {showEditor && (
         <div className="border border-border rounded-lg overflow-hidden bg-card">
           <iframe
-            src={MAP_EDITOR_URL}
+            src={MAP_VIEWER_URL}
             title="TTT Map Editor"
             className="w-full border-0"
             style={{ height: '75vh', minHeight: '600px' }}

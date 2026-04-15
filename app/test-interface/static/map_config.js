@@ -92,5 +92,11 @@
       if (!t) return false;
       return row >= 1 && row <= t.rows && col >= 1 && col <= t.cols;
     },
+
+    // Nuclear sites — (row, col) 1-indexed global coordinates
+    NUCLEAR_SITES: {
+      persia: [7, 13],
+      choson: [3, 18],
+    },
   };
 })();
