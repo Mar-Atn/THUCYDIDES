@@ -15,7 +15,49 @@ from typing import Optional
 # ---------------------------------------------------------------------------
 # VERSION
 # ---------------------------------------------------------------------------
-MAP_CONFIG_VERSION = "1.0"  # Template v1.0 — 2026-04-05
+MAP_CONFIG_VERSION = "1.1"  # v1.1 2026-04-15 — hex convention formalized
+
+# ---------------------------------------------------------------------------
+# HEX CONVENTION (canonical — all rendering and engine code must follow)
+# ---------------------------------------------------------------------------
+# Type:       Pointy-top hexagons
+# Offset:     Odd-r (odd rows shifted right by half hex)
+# Coordinates: (row, col), 1-indexed, row first
+# Row 1 at top of map
+#
+# Visual layout:
+#   Row 1:  [1,1] [1,2] [1,3] ...
+#   Row 2:    [2,1] [2,2] [2,3] ...    (shifted right)
+#   Row 3:  [3,1] [3,2] [3,3] ...
+#
+# Adjacency (6 neighbors per hex):
+#   Odd rows  (1,3,5,7,9):  (-1,0) (-1,+1) (0,-1) (0,+1) (+1,0) (+1,+1)
+#   Even rows (2,4,6,8,10): (-1,-1) (-1,0) (0,-1) (0,+1) (+1,-1) (+1,0)
+
+HEX_TYPE = "pointy_top"
+HEX_OFFSET = "odd_r"
+
+
+def hex_neighbors(row: int, col: int) -> list[tuple[int, int]]:
+    """Return the 6 adjacent hex coordinates for a given (row, col).
+
+    Uses odd-r offset convention (pointy-top, odd rows shifted right).
+    Coordinates are 1-indexed. Does NOT check bounds — caller must filter.
+    """
+    if row % 2 == 1:  # odd row
+        deltas = [(-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0), (1, 1)]
+    else:  # even row
+        deltas = [(-1, -1), (-1, 0), (0, -1), (0, 1), (1, -1), (1, 0)]
+    return [(row + dr, col + dc) for dr, dc in deltas]
+
+
+def hex_neighbors_bounded(row: int, col: int, max_rows: int = 10, max_cols: int = 20) -> list[tuple[int, int]]:
+    """Return adjacent hex coordinates, filtered to grid bounds (1-indexed)."""
+    return [
+        (r, c) for r, c in hex_neighbors(row, col)
+        if 1 <= r <= max_rows and 1 <= c <= max_cols
+    ]
+
 
 # ---------------------------------------------------------------------------
 # GLOBAL MAP DIMENSIONS
@@ -206,6 +248,10 @@ def in_theater_bounds(theater: str, row: int, col: int) -> bool:
 
 __all__ = [
     "MAP_CONFIG_VERSION",
+    "HEX_TYPE",
+    "HEX_OFFSET",
+    "hex_neighbors",
+    "hex_neighbors_bounded",
     "GLOBAL_ROWS",
     "GLOBAL_COLS",
     "THEATERS",
