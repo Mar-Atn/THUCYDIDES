@@ -149,17 +149,20 @@ class AssassinationOrder(BaseModel):
     rationale: str
 
 
-class CoupAttemptOrder(BaseModel):
-    """Coup attempt with a co-conspirator (same country)."""
-    action_type: Literal["coup_attempt"] = "coup_attempt"
-    co_conspirator_role: str
-    rationale: str
+# DEPRECATED 2026-04-15: replaced by ChangeLeaderOrder (CONTRACT_CHANGE_LEADER.md)
+# class CoupAttemptOrder — removed
+# class LeadProtestOrder — removed
 
 
-class LeadProtestOrder(BaseModel):
-    """Lead a mass protest / revolution attempt."""
-    action_type: Literal["lead_protest"] = "lead_protest"
-    rationale: str
+class ChangeLeaderOrder(BaseModel):
+    """Initiate leadership change vote (replaces coup_attempt + lead_protest).
+
+    Requires: country stability ≤ threshold, non-HoS role, 3+ team members.
+    Triggers: Phase 2 (removal vote) → Phase 3 (election vote).
+    See CONTRACT_CHANGE_LEADER.md for full specification.
+    """
+    action_type: Literal["change_leader"] = "change_leader"
+    rationale: str = ""
 
 
 class ReassignPowersOrder(BaseModel):
@@ -239,8 +242,7 @@ AnyAction = Union[
     ArrestOrder,
     MartialLawOrder,
     AssassinationOrder,
-    CoupAttemptOrder,
-    LeadProtestOrder,
+    ChangeLeaderOrder,
     ReassignPowersOrder,
     CallEarlyElectionsOrder,
     SubmitNominationOrder,
@@ -274,8 +276,7 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
     # Domestic / Political
     "arrest": ArrestOrder,
     "assassination": AssassinationOrder,
-    "coup_attempt": CoupAttemptOrder,
-    "lead_protest": LeadProtestOrder,
+    "change_leader": ChangeLeaderOrder,
     "reassign_powers": ReassignPowersOrder,
     "call_early_elections": CallEarlyElectionsOrder,
     "submit_nomination": SubmitNominationOrder,
@@ -303,8 +304,7 @@ __all__ = [
     "ArrestOrder",
     "MartialLawOrder",
     "AssassinationOrder",
-    "CoupAttemptOrder",
-    "LeadProtestOrder",
+    "ChangeLeaderOrder",
     "ReassignPowersOrder",
     "CallEarlyElectionsOrder",
     "SubmitNominationOrder",

@@ -107,16 +107,12 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             action.get("target_role"),
             domestic=action.get("domestic", True))
 
-    if action_type == "coup_attempt":
-        from engine.services.coup_engine import execute_coup
-        return execute_coup(
-            sim_run_id, round_num, role_id,
-            action.get("co_conspirator_role"), country_code)
-
-    if action_type == "lead_protest":
-        from engine.services.protest_engine import execute_mass_protest
-        return execute_mass_protest(
-            sim_run_id, round_num, role_id, country_code)
+    # DEPRECATED 2026-04-15: coup_attempt and lead_protest replaced by change_leader
+    # change_leader is a multi-phase action handled by M4 Sim Runner (real-time voting)
+    # The dispatcher logs the initiation; M4 handles the vote phases.
+    if action_type == "change_leader":
+        logger.info("change_leader initiated by %s in %s — requires M4 Sim Runner for vote phases", role_id, country_code)
+        return {"status": "initiated", "action": "change_leader", "initiator": role_id, "country": country_code}
 
     if action_type == "reassign_powers":
         from engine.services.power_assignments import reassign_power
