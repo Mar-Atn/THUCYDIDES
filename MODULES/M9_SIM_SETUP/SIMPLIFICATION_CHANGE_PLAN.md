@@ -1,6 +1,6 @@
 # Simplification Change Plan
 
-**Date:** 2026-04-15 | **Status:** A+B+C+D DONE, E in progress
+**Date:** 2026-04-15 | **Status:** A+B+C+D+E ALL DONE
 **Approach:** Make all changes, then test and clean
 
 ## Completion Log
@@ -8,7 +8,7 @@
 - **B. personal_coins deprecated** ✅ — model marked, frontend removed
 - **C. Relations simplified (5 types)** ✅ — DB migrated, frontend updated, agreement types defined
 - **D. change_leader replaces coup/protest** ✅ — contract written, schema updated, old contracts archived to DEPRECATED/
-- **E. Columbia elections** — TODO
+- **E. Columbia elections simplified** ✅ — 9 base votes + economy bonus, simple majority, R2 midterm + R6 presidential, old camp system archived
 
 ---
 
