@@ -44,34 +44,46 @@
   document.addEventListener('DOMContentLoaded', init);
 
   async function init() {
+    const geographyMode = window.MAP_VIEWER_MODE === 'geography';
     setStatus('loading', 'Loading data…');
     try {
-      const [g, ee, mq, dep, cs, un] = await Promise.all([
+      // Core map data (always needed)
+      const [g, ee, mq, cs] = await Promise.all([
         fetchJson('/api/map/global'),
         fetchJson('/api/map/theater/eastern_ereb'),
         fetchJson('/api/map/theater/mashriq'),
-        fetchJson('/api/map/deployments'),
         fetchJson('/api/map/countries'),
-        fetchJson('/api/map/units'),
       ]);
       state.global = g;
       state.theaters.eastern_ereb = ee;
       state.theaters.mashriq = mq;
-      state.deployments = dep;
       state.countries = cs;
-      // Fill in missing global coords only (respects canonical mapping as default)
-      (un.units || []).forEach(u => {
-        if (u.theater && u.theater_row != null && u.theater_col != null &&
-            (u.global_row == null || u.global_col == null)) {
-          const g = globalHexForTheaterCell(u.theater, u.theater_row, u.theater_col);
-          if (g) { u.global_row = g[0]; u.global_col = g[1]; }
-        }
-      });
-      state.units = un;
+
+      // Unit data (skip in geography mode)
+      if (!geographyMode) {
+        const [dep, un] = await Promise.all([
+          fetchJson('/api/map/deployments'),
+          fetchJson('/api/map/units'),
+        ]);
+        state.deployments = dep;
+        // Fill in missing global coords only (respects canonical mapping as default)
+        (un.units || []).forEach(u => {
+          if (u.theater && u.theater_row != null && u.theater_col != null &&
+              (u.global_row == null || u.global_col == null)) {
+            const g = globalHexForTheaterCell(u.theater, u.theater_row, u.theater_col);
+            if (g) { u.global_row = g[0]; u.global_col = g[1]; }
+          }
+        });
+        state.units = un;
+      } else {
+        state.deployments = { rows: [], by_hex: {} };
+        state.units = { units: [] };
+      }
 
       buildCountryLegend();
       renderView('global');
-      setStatus('ok', `${countLandHexes(g)} land hexes · ${dep.rows.length} unit entries`);
+      const unitInfo = geographyMode ? '' : ` · ${state.deployments.rows.length} unit entries`;
+      setStatus('ok', `${countLandHexes(g)} land hexes${unitInfo}`);
     } catch (err) {
       console.error(err);
       showError(`Failed to load map data: ${err.message}`);
@@ -82,19 +94,22 @@
       renderView('global');
     });
 
-    // Edit mode wiring
-    document.getElementById('editBtn').addEventListener('click', toggleEditMode);
-    document.getElementById('editSaveBtn').addEventListener('click', () => saveLayout(false));
-    document.getElementById('editSaveAsBtn').addEventListener('click', () => saveLayout(true));
-    document.getElementById('editResetBtn').addEventListener('click', resetCountryToReserve);
-    document.getElementById('editClearAllBtn').addEventListener('click', clearAllDeployments);
-    document.getElementById('editLoadBtn').addEventListener('click', loadLayout);
-    document.getElementById('editUndoBtn').addEventListener('click', undoEdit);
-    document.getElementById('editRedoBtn').addEventListener('click', redoEdit);
+    // Edit mode wiring (skip in geography mode — edit buttons don't exist)
+    if (!geographyMode) {
+      document.getElementById('editBtn')?.addEventListener('click', toggleEditMode);
+      document.getElementById('editSaveBtn')?.addEventListener('click', () => saveLayout(false));
+      document.getElementById('editSaveAsBtn')?.addEventListener('click', () => saveLayout(true));
+      document.getElementById('editResetBtn')?.addEventListener('click', resetCountryToReserve);
+      document.getElementById('editClearAllBtn')?.addEventListener('click', clearAllDeployments);
+      document.getElementById('editLoadBtn')?.addEventListener('click', loadLayout);
+      document.getElementById('editUndoBtn')?.addEventListener('click', undoEdit);
+      document.getElementById('editRedoBtn')?.addEventListener('click', redoEdit);
 
-    // View-mode layout picker — populate & wire
-    refreshViewLayoutList();
-    document.getElementById('viewLayoutSelect').addEventListener('change', viewLoadLayout);
+      // View-mode layout picker — populate & wire
+      refreshViewLayoutList();
+      document.getElementById('viewLayoutSelect')?.addEventListener('change', viewLoadLayout);
+    }
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && state.armedUnitId) {
         disarmUnit();
@@ -180,12 +195,16 @@
     setTimeout(() => {
       // swap content
       if (viewName === 'global') {
-        document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('mapSubtitle').textContent = '— Global';
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) backBtn.style.display = 'none';
+        const sub = document.getElementById('mapSubtitle');
+        if (sub) sub.textContent = '— Global';
         renderGlobal(svg);
       } else {
-        document.getElementById('backBtn').style.display = 'inline-block';
-        document.getElementById('mapSubtitle').textContent = '— ' + THEATER_LABELS[viewName];
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) backBtn.style.display = 'inline-block';
+        const sub2 = document.getElementById('mapSubtitle');
+        if (sub2) sub2.textContent = '— ' + THEATER_LABELS[viewName];
         renderTheater(svg, viewName);
       }
       svg.classList.remove('fading');
@@ -242,6 +261,7 @@
         poly.setAttribute('class', cls);
         poly.dataset.row = rIdx;
         poly.dataset.col = c;
+        poly.dataset.owner = hex.owner || 'sea';
         poly.addEventListener('click', () => selectHex(rIdx, c));
         svg.appendChild(poly);
       }
@@ -355,6 +375,7 @@
         poly.setAttribute('class', cls);
         poly.dataset.row = rIdx;
         poly.dataset.col = c;
+        poly.dataset.owner = hex.owner || 'sea';
         poly.addEventListener('click', () => selectHex(rIdx, c));
         svg.appendChild(poly);
 
@@ -398,20 +419,7 @@
       }
     }
 
-    // Die-hard zones overlay (always shown)
-    const dieHards = theaterData.dieHards || {};
-    Object.entries(dieHards).forEach(([key, dh]) => {
-      const center = hexCenter(dh.row, dh.col, r); // 0-indexed in JSON
-      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      const size = r * 1.6;
-      marker.setAttribute('x', center.x - size / 2);
-      marker.setAttribute('y', center.y - size / 2);
-      marker.setAttribute('width', size);
-      marker.setAttribute('height', size);
-      marker.setAttribute('class', 'diehard-marker');
-      marker.setAttribute('data-tooltip', `Die Hard: ${dh.name || key}`);
-      svg.appendChild(marker);
-    });
+    // Die-hard zones already rendered above (line ~381)
   }
 
   // ---------- Country name labels at centroid ----------

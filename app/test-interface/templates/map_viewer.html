@@ -16,6 +16,23 @@
   .edit-btn { display: none !important; }
   .home-link { display: none !important; }
 
+  /* Narrower sidebars — more space for map */
+  .app-main {
+    grid-template-columns: 160px 1fr 200px !important;
+  }
+  .legend { padding: 12px 10px !important; }
+  .legend h3 { font-size: 13px !important; margin-bottom: 10px !important; }
+  .legend-section { margin-bottom: 12px !important; }
+  .legend-section h4 { font-size: 9px !important; }
+  .legend-row { font-size: 11px !important; }
+  .country-legend .legend-row { font-size: 10px !important; padding: 1px 0 !important; }
+  .inspector { padding: 12px !important; }
+  .inspector h3 { font-size: 13px !important; }
+  .inspector-empty p { font-size: 11px !important; }
+
+  /* Compact header */
+  .app-header { height: auto !important; min-height: 32px !important; padding: 4px 12px !important; }
+
   /* Nuclear site marker */
   .nuclear-marker {
     fill: none;
@@ -55,13 +72,14 @@
   </defs>
 </svg>
 
-<header class="app-header">
+<header class="app-header" style="padding: 6px 16px; min-height: auto;">
   <div class="header-left">
     <button id="backBtn" class="back-btn" style="display:none">&larr; Back to Global</button>
-    <h1 id="mapTitle">TTT Map <span class="subtitle" id="mapSubtitle">— Global Geography</span></h1>
+    <button id="geoEditBtn" class="back-btn" style="font-size:12px;">&#9998; Edit Map</button>
+    <h1 id="mapTitle" style="display:none"></h1>
   </div>
   <div class="header-right">
-    <span class="status-pill" id="statusPill">Loading…</span>
+    <span class="status-pill" id="statusPill" style="font-size: 11px;">Loading…</span>
   </div>
 </header>
 
@@ -95,14 +113,164 @@
   </aside>
 </main>
 
+<!-- Geography edit panel (hidden by default) -->
+<div id="geoEditPanel" style="display:none; position:fixed; top:40px; right:10px; width:200px; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; z-index:100; max-height:80vh; overflow-y:auto;">
+  <h4 style="font-family:var(--font-heading); font-size:13px; color:var(--accent); margin-bottom:8px;">Paint Country</h4>
+  <p style="font-size:10px; color:var(--text-secondary); margin-bottom:8px;">Select a country, then click hexes to assign ownership.</p>
+  <div id="geoCountryGrid" style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px;"></div>
+  <div style="border-top:1px solid var(--border); padding-top:8px; margin-top:4px;">
+    <button id="geoSaveBtn" style="width:100%; padding:6px; background:var(--action); color:white; border:none; border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer; margin-bottom:4px;">Save to Template</button>
+    <button id="geoCancelBtn" style="width:100%; padding:6px; background:var(--card-2); color:var(--text-secondary); border:1px solid var(--border); border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer;">Cancel</button>
+    <div id="geoSaveStatus" style="font-size:10px; color:var(--success); margin-top:4px; text-align:center;"></div>
+  </div>
+</div>
+
+<script>
+  // Set mode BEFORE map.js loads so it can check during init
+  window.MAP_VIEWER_MODE = 'geography';
+</script>
 <script src="/static/map_config.js"></script>
 <script src="/static/map.js"></script>
 <script>
-  // After map.js loads, hide all unit overlays and add nuclear/diehard markers
-  document.addEventListener('DOMContentLoaded', function() {
-    // Set mode flag for map.js to check
-    window.MAP_VIEWER_MODE = 'geography';
-  });
+(function() {
+  'use strict';
+
+  let geoEditActive = false;
+  let selectedCountry = null;
+
+  // Wait for map.js to finish init
+  const waitForMap = setInterval(() => {
+    const svg = document.getElementById('mapSvg');
+    if (!svg || svg.childElementCount === 0) return;
+    clearInterval(waitForMap);
+    setupGeoEdit();
+  }, 500);
+
+  function setupGeoEdit() {
+    const btn = document.getElementById('geoEditBtn');
+    const panel = document.getElementById('geoEditPanel');
+    const grid = document.getElementById('geoCountryGrid');
+    const saveBtn = document.getElementById('geoSaveBtn');
+    const cancelBtn = document.getElementById('geoCancelBtn');
+    const statusEl = document.getElementById('geoSaveStatus');
+
+    // Build country palette from loaded data
+    const countries = window._geoCountries || {};
+    // We need to get countries from the map.js state — it's in an IIFE so we access via the DOM
+    // Instead, fetch from API
+    fetch('/api/map/countries').then(r => r.json()).then(cs => {
+      const palette = cs.palette || {};
+      const sorted = Object.keys(palette).sort();
+      sorted.forEach(cid => {
+        const color = palette[cid];
+        const chip = document.createElement('div');
+        chip.style.cssText = `width:24px; height:18px; background:${color}; border:2px solid transparent; border-radius:3px; cursor:pointer; title:${cid};`;
+        chip.title = cid;
+        chip.addEventListener('click', () => {
+          selectedCountry = cid;
+          // Highlight selected
+          grid.querySelectorAll('div').forEach(d => d.style.borderColor = 'transparent');
+          chip.style.borderColor = '#fff';
+          statusEl.textContent = `Painting: ${cid}`;
+        });
+        grid.appendChild(chip);
+      });
+    });
+
+    btn.addEventListener('click', () => {
+      geoEditActive = !geoEditActive;
+      panel.style.display = geoEditActive ? 'block' : 'none';
+      btn.textContent = geoEditActive ? '✕ Close Edit' : '✎ Edit Map';
+      btn.style.color = geoEditActive ? '#D45B5B' : '';
+      if (!geoEditActive) {
+        selectedCountry = null;
+        statusEl.textContent = '';
+      }
+    });
+
+    cancelBtn.addEventListener('click', () => {
+      geoEditActive = false;
+      panel.style.display = 'none';
+      btn.textContent = '✎ Edit Map';
+      btn.style.color = '';
+      selectedCountry = null;
+      statusEl.textContent = '';
+    });
+
+    // Intercept hex clicks for painting
+    document.getElementById('mapSvg').addEventListener('click', (e) => {
+      if (!geoEditActive || !selectedCountry) return;
+
+      // Find the clicked hex polygon
+      let target = e.target;
+      while (target && target.tagName !== 'polygon' && target !== e.currentTarget) {
+        target = target.parentElement;
+      }
+      if (!target || target.tagName !== 'polygon') return;
+
+      const row = parseInt(target.getAttribute('data-row'));
+      const col = parseInt(target.getAttribute('data-col'));
+      if (isNaN(row) || isNaN(col)) return;
+
+      // Update the hex color visually
+      fetch('/api/map/countries').then(r => r.json()).then(cs => {
+        const color = (cs.palette || {})[selectedCountry] || '#888';
+        target.setAttribute('fill', color);
+        target.setAttribute('data-owner', selectedCountry);
+      });
+
+      statusEl.textContent = `Set (${row+1},${col+1}) → ${selectedCountry}`;
+    });
+
+    // Save to template
+    saveBtn.addEventListener('click', async () => {
+      statusEl.textContent = 'Saving...';
+      statusEl.style.color = 'var(--warning)';
+
+      try {
+        // Collect current grid state from SVG hex polygons
+        const hexes = document.querySelectorAll('#mapSvg polygon[data-row][data-col]');
+        // Rebuild grid from current state
+        const resp = await fetch('/api/map/global');
+        const globalData = await resp.json();
+        const grid = globalData.grid;
+
+        // Apply any painted changes
+        hexes.forEach(hex => {
+          const r = parseInt(hex.getAttribute('data-row'));
+          const c = parseInt(hex.getAttribute('data-col'));
+          const owner = hex.getAttribute('data-owner');
+          if (owner && grid[r] && grid[r][c]) {
+            grid[r][c].owner = owner;
+          }
+        });
+
+        // Save via API
+        const saveResp = await fetch('/api/map/save_geography', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            grid: grid,
+            chokepoints: globalData.chokepoints,
+            dieHards: globalData.dieHards || {},
+          }),
+        });
+
+        if (saveResp.ok) {
+          statusEl.textContent = 'Saved!';
+          statusEl.style.color = 'var(--success)';
+        } else {
+          const err = await saveResp.text();
+          statusEl.textContent = 'Save failed: ' + err;
+          statusEl.style.color = 'var(--danger)';
+        }
+      } catch (e) {
+        statusEl.textContent = 'Error: ' + e.message;
+        statusEl.style.color = 'var(--danger)';
+      }
+    });
+  }
+})();
 </script>
 </body>
 </html>

@@ -234,6 +234,8 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             self._json_response(self._cleanup_test_runs(body))
         elif path == "/api/map/units/save":
             self._json_response(self._save_units_edited(body))
+        elif path == "/api/map/save_geography":
+            self._json_response(self._save_geography(body))
         elif path == "/api/observatory/start":
             self._json_response(self._observatory_start(body))
         elif path == "/api/observatory/pause":
@@ -837,6 +839,52 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             "count": len(units),
             "timestamp": ts,
         }
+
+    def _save_geography(self, body):
+        """Save updated map geography to the template's map_config in Supabase.
+
+        Also saves the JSON file locally for backup.
+        Expects body = {"grid": [...], "chokepoints": {...}, "dieHards": {...}}
+        """
+        try:
+            grid = body.get("grid")
+            chokepoints = body.get("chokepoints", {})
+            die_hards = body.get("dieHards", {})
+
+            if not grid:
+                return {"error": "No grid data provided"}
+
+            # 1. Save to local JSON file (backup)
+            import json
+            map_path = os.path.join(os.path.dirname(__file__),
+                "..", "..", "2 SEED", "C_MECHANICS", "C1_MAP", "SEED_C1_MAP_GLOBAL_STATE_v4.json")
+            with open(map_path) as f:
+                existing = json.load(f)
+            existing["grid"] = grid
+            existing["chokepoints"] = chokepoints
+            existing["dieHards"] = die_hards
+            with open(map_path, "w") as f:
+                json.dump(existing, f, indent=2)
+
+            # 2. Save to Supabase template map_config
+            from supabase import create_client
+            url = os.environ.get("SUPABASE_URL", "https://lukcymegoldprbovglmn.supabase.co")
+            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "sb_secret_96Y8Pi8EYlZMrKaTn0AqkA_eORKFnCb")
+            client = create_client(url, key)
+
+            # Get current map_config
+            tpl = client.table("sim_templates").select("map_config").limit(1).execute()
+            if tpl.data:
+                map_config = tpl.data[0].get("map_config", {})
+                if isinstance(map_config, dict) and "global" in map_config:
+                    map_config["global"]["grid"] = grid
+                    map_config["global"]["chokepoints"] = chokepoints
+                    map_config["global"]["die_hards"] = die_hards
+                    client.table("sim_templates").update({"map_config": map_config}).eq("id", tpl.data[0].get("id", "")).execute()
+
+            return {"status": "ok", "message": "Geography saved to template and local JSON"}
+        except Exception as e:
+            return {"error": str(e)}
 
     def _list_layouts(self):
         """List saved layout files in units_layouts/ directory."""
