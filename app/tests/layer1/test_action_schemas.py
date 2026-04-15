@@ -5,16 +5,17 @@ import pytest
 from pydantic import ValidationError
 from engine.agents.action_schemas import (
     ACTION_TYPE_TO_MODEL,
-    ArrestOrder, MartialLawOrder, AssassinationOrder, CoupAttemptOrder,
-    LeadProtestOrder, ReassignPowersOrder, CallEarlyElectionsOrder,
+    ArrestOrder, MartialLawOrder, AssassinationOrder, ChangeLeaderOrder,
+    ReassignPowersOrder, CallEarlyElectionsOrder,
     SubmitNominationOrder, CastVoteOrder, BasingRightsOrder, BlockadeOrder,
     MissileLaunchOrder, NuclearTestOrder, RespondExchangeOrder, SignAgreementOrder,
 )
 
 
 class TestSchemaCount:
-    def test_all_25_types_registered(self):
-        assert len(ACTION_TYPE_TO_MODEL) == 25
+    def test_all_action_types_registered(self):
+        # Was 25, now 24 after removing coup_attempt + lead_protest, adding change_leader
+        assert len(ACTION_TYPE_TO_MODEL) == 24
 
 
 class TestDomesticSchemas:
@@ -36,13 +37,9 @@ class TestDomesticSchemas:
         assert o.action_type == "assassination"
         assert o.domestic is False
 
-    def test_coup_valid(self):
-        o = CoupAttemptOrder(co_conspirator_role="compass", rationale="Regime change")
-        assert o.action_type == "coup_attempt"
-
-    def test_lead_protest_valid(self):
-        o = LeadProtestOrder(rationale="The people demand change")
-        assert o.action_type == "lead_protest"
+    def test_change_leader_valid(self):
+        o = ChangeLeaderOrder(rationale="Leadership must change")
+        assert o.action_type == "change_leader"
 
     def test_reassign_powers_valid(self):
         o = ReassignPowersOrder(power_type="military", new_holder_role="shield", rationale="New strategy")
