@@ -35,47 +35,51 @@ const COUNTRY_ORDER: string[] = [
 ]
 
 const GENDER_OPTIONS = ['M', 'F'] as const
-const POSITION_OPTIONS = ['head_of_state', 'military_chief', 'economy_officer', 'diplomat', 'other'] as const
+const POSITION_OPTIONS = ['head_of_state', 'military_chief', 'economy_officer', 'diplomat', 'security', 'opposition', 'other'] as const
 const PARTY_OPTIONS = ['', 'rep', 'dem', 'independent'] as const
 
 const ACTION_LABELS: Record<string, string> = {
-  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions',
-  set_opec: 'Set OPEC Production', rd_investment: 'R&D Investment',
-  move_units: 'Move Units', declare_attack: 'Ground Attack', attack_air: 'Air Strike',
-  attack_naval: 'Naval Combat', attack_bombardment: 'Naval Bombardment',
-  launch_missile: 'Launch Missile', blockade: 'Naval Blockade', basing_rights: 'Basing Rights',
-  martial_law: 'Martial Law',
-  nuclear_initiate: 'Nuclear Launch (initiate)', nuclear_authorize: 'Nuclear Authorization',
-  nuclear_intercept: 'Nuclear Intercept',
-  intelligence: 'Intelligence Report', sabotage: 'Sabotage', cyber_ops: 'Cyber Operations',
-  propaganda: 'Propaganda', election_meddling: 'Election Meddling',
-  assassination: 'Assassination', protest_stimulation: 'Protest Stimulation',
-  arrest: 'Arrest', reassign_powers: 'Reassign Powers',
-  call_early_elections: 'Call Early Elections', self_nominate: 'Self-Nominate',
-  cast_vote: 'Cast Vote', coup_attempt: 'Coup Attempt', lead_protest: 'Lead Protest',
-  propose_agreement: 'Propose Agreement', sign_agreement: 'Sign Agreement',
-  propose_transaction_country: 'Country Transaction', call_org_meeting: 'Call Org Meeting',
-  private_rd: 'Private R&D Investment',
-  public_statement: 'Public Statement', propose_transaction_personal: 'Personal Transaction',
-  respond_transaction: 'Respond to Transaction',
+  // HoS only
+  reassign_types: 'Re-Assign Role Types', martial_law: 'Martial Law', arrest: 'Arrest',
+  // Regular Economic
+  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions', set_opec: 'Set OPEC Production',
+  // Military
+  ground_attack: 'Ground Attack', air_strike: 'Air Strike', naval_combat: 'Naval Combat',
+  naval_bombardment: 'Naval Bombardment', launch_missile_conventional: 'Launch Missile (conventional)',
+  naval_blockade: 'Naval Blockade', move_units: 'Move Units',
+  // Nuclear
+  nuclear_test: 'Nuclear Test', nuclear_launch_initiate: 'Nuclear Launch (initiate)',
+  nuclear_authorize: 'Nuclear Authorization', nuclear_intercept: 'Nuclear Intercept',
+  // Transactions & Agreements
+  propose_transaction: 'Propose Transaction', accept_transaction: 'Accept/Decline/Counter Transaction',
+  propose_agreement: 'Propose Agreement', sign_agreement: 'Sign Agreement', basing_rights: 'Basing Rights',
+  // Covert & Intelligence
+  intelligence: 'Intelligence', covert_operation: 'Covert Operation', assassination: 'Assassination',
+  // Political
+  change_leader: 'Change Leader', self_nominate: 'Self-Nominate', cast_vote: 'Cast Vote',
+  // Communication
+  public_statement: 'Public Statement', call_org_meeting: 'Call Organization Meeting', meet_freely: 'Meet Freely',
 }
 
 const ACTION_CATEGORIES: Record<string, string[]> = {
-  'Regular Decisions': ['set_budget', 'set_tariffs', 'set_sanctions', 'set_opec', 'rd_investment'],
-  'Military': ['move_units', 'declare_attack', 'attack_air', 'attack_naval', 'attack_bombardment', 'launch_missile', 'blockade', 'basing_rights', 'martial_law'],
-  'Nuclear': ['nuclear_initiate', 'nuclear_authorize', 'nuclear_intercept'],
-  'Covert Operations': ['intelligence', 'sabotage', 'cyber_ops', 'propaganda', 'election_meddling', 'assassination', 'protest_stimulation'],
-  'Political': ['arrest', 'reassign_powers', 'call_early_elections', 'self_nominate', 'cast_vote', 'coup_attempt', 'lead_protest'],
-  'Transactions & Agreements': ['propose_agreement', 'sign_agreement', 'propose_transaction_country', 'propose_transaction_personal', 'respond_transaction', 'private_rd'],
-  'Communication': ['public_statement', 'call_org_meeting'],
+  'HoS Powers': ['reassign_types', 'martial_law', 'arrest'],
+  'Regular Economic': ['set_budget', 'set_tariffs', 'set_sanctions', 'set_opec'],
+  'Military': ['ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional', 'naval_blockade', 'move_units'],
+  'Nuclear': ['nuclear_test', 'nuclear_launch_initiate', 'nuclear_authorize', 'nuclear_intercept'],
+  'Transactions & Agreements': ['propose_transaction', 'accept_transaction', 'propose_agreement', 'sign_agreement', 'basing_rights'],
+  'Covert & Intelligence': ['intelligence', 'covert_operation', 'assassination'],
+  'Political': ['change_leader', 'self_nominate', 'cast_vote'],
+  'Communication': ['public_statement', 'call_org_meeting', 'meet_freely'],
 }
 
 const POSITION_BADGE: Record<string, { label: string; cls: string }> = {
-  head_of_state:  { label: 'HoS',      cls: 'bg-warning/10 text-warning' },
-  military_chief: { label: 'Military',  cls: 'bg-danger/10 text-danger' },
-  economy_officer:{ label: 'Economy',   cls: 'bg-accent/10 text-accent' },
-  diplomat:       { label: 'Diplomat',  cls: 'bg-action/10 text-action' },
-  other:          { label: 'Other',     cls: 'bg-base text-text-secondary' },
+  head_of_state:  { label: 'HoS',        cls: 'bg-warning/10 text-warning' },
+  military_chief: { label: 'Military',    cls: 'bg-danger/10 text-danger' },
+  economy_officer:{ label: 'Economy',     cls: 'bg-accent/10 text-accent' },
+  diplomat:       { label: 'Diplomat',    cls: 'bg-action/10 text-action' },
+  security:       { label: 'Security',    cls: 'bg-text-secondary/10 text-text-primary' },
+  opposition:     { label: 'Opposition',  cls: 'bg-danger/20 text-danger' },
+  other:          { label: 'Other',       cls: 'bg-base text-text-secondary' },
 }
 
 const PARTY_BADGE: Record<string, { label: string; cls: string }> = {

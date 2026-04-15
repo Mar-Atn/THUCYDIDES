@@ -16,6 +16,20 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+// Clean up orphaned auth keys from earlier experiments
+try {
+  const keysToRemove: string[] = []
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (key && key.startsWith('ttt-auth')) {
+      keysToRemove.push(key)
+    }
+  }
+  keysToRemove.forEach((k) => localStorage.removeItem(k))
+} catch {
+  // localStorage may not be available
+}
+
 let _client: SupabaseClient | null = null
 
 export function getSupabase(): SupabaseClient {

@@ -118,15 +118,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 1. Direct session check — fast, works even if listener misses
     const initSession = async () => {
       try {
-        const { data: { session: s } } = await supabase.auth.getSession()
+        const { data: { session: s }, error: sessionError } = await supabase.auth.getSession()
         if (!mounted) return
+
+        if (sessionError) {
+          // Corrupted session — clear it
+          console.warn('Session error, signing out:', sessionError.message)
+          await supabase.auth.signOut()
+          return
+        }
+
         if (s?.user) {
           setUser(s.user)
           setSession(s)
           await fetchProfile(s.user.id)
+
+          // If profile is still null after fetch, token may be invalid
+          // Give it a moment then check
+          setTimeout(async () => {
+            if (!mounted) return
+            // Re-verify the session is still valid
+            const { data: { user: verifiedUser } } = await supabase.auth.getUser()
+            if (!verifiedUser) {
+              console.warn('Session invalid after verification, signing out')
+              await supabase.auth.signOut()
+              setUser(null)
+              setSession(null)
+              setProfile(null)
+            }
+          }, 1000)
         }
       } catch (e) {
         console.warn('getSession failed:', e)
+        // On any error, clear auth state to prevent stuck UI
+        try { await supabase.auth.signOut() } catch { /* ignore */ }
       } finally {
         if (mounted) setLoading(false)
       }
