@@ -449,7 +449,7 @@ async def process_round(
     sim_run = await get_sim_run(sim_id)
     if sim_run is None:
         raise ValueError(f"SIM run not found: {sim_id}")
-    if sim_run.status not in ("active", "setup"):
+    if sim_run.status not in ("active", "setup", "processing"):
         raise ValueError(f"SIM run not active: {sim_run.status}")
 
     db_countries = await get_countries(sim_id)
@@ -582,9 +582,7 @@ async def process_round(
 
     # PERSIST TO DB
     await _persist(sim_id, round_num, countries, econ_result, db_ws)
-    get_client().table("sim_runs").update(
-        {"current_round": round_num, "current_phase": "post"}
-    ).eq("id", sim_id).execute()
+    # Note: sim_run phase transitions are managed by sim_run_manager, not here.
     log.append(f"=== ROUND {round_num} COMPLETE ===")
 
     return RoundResult(

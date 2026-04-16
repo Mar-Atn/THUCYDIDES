@@ -374,18 +374,20 @@ export function SimRunWizard() {
           setSubmitting(false)
           return
         }
-        console.log('Creating sim run...')
+        console.log('Creating sim run with full data inheritance...')
         const newRun = await createSimRun({
           name: runName.trim(),
           template_id: selectedTemplateId,
-          facilitator_id: profile.id,
           schedule,
           key_events: keyEvents as unknown[],
           max_rounds: maxRounds,
-          human_participants: roleSummary.human,
-          ai_participants: roleSummary.ai,
           logo_url: logoUrl ?? undefined,
           description: runDescription.trim() || undefined,
+          role_customizations: roles.map((r) => ({
+            role_id: r.id,
+            active: r.active,
+            is_ai_operated: r.is_ai_operated,
+          })),
         })
         console.log('Created sim run:', newRun.id)
         navigate('/dashboard')

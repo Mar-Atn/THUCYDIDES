@@ -48,8 +48,8 @@ def _get_run(client, sim_id: str) -> dict:
 def _update_run(client, sim_id: str, updates: dict) -> dict:
     """Update sim_run and return new state."""
     updates["updated_at"] = datetime.now(timezone.utc).isoformat()
-    result = client.table("sim_runs").update(updates).eq("id", sim_id).select().single().execute()
-    return result.data
+    result = client.table("sim_runs").update(updates).eq("id", sim_id).execute()
+    return result.data[0] if result.data else {}
 
 
 def _validate_transition(current_status: str, new_status: str):

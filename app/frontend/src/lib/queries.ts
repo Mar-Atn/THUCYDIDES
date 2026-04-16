@@ -118,41 +118,46 @@ export async function getSimRun(id: string): Promise<SimRun | null> {
   return data as SimRun
 }
 
+export interface RoleCustomization {
+  role_id: string
+  active: boolean
+  is_ai_operated: boolean
+}
+
 export async function createSimRun(params: {
   name: string
   template_id: string
-  facilitator_id: string
   schedule: Record<string, number>
   key_events: unknown[]
   max_rounds: number
-  human_participants: number
-  ai_participants: number
   logo_url?: string
   description?: string
+  role_customizations?: RoleCustomization[]
 }): Promise<SimRun> {
-  const { data, error } = await supabase
-    .from('sim_runs')
-    .insert({
+  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const resp = await fetch('/api/sim/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
       name: params.name,
       template_id: params.template_id,
-      facilitator_id: params.facilitator_id,
-      status: 'setup',
-      current_round: 0,
-      current_phase: 'pre',
       schedule: params.schedule,
       key_events: params.key_events,
       max_rounds: params.max_rounds,
-      human_participants: params.human_participants,
-      ai_participants: params.ai_participants,
       logo_url: params.logo_url ?? null,
       description: params.description ?? null,
-      run_config: {},
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-  return data as SimRun
+      role_customizations: params.role_customizations ?? [],
+    }),
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Creation failed' }))
+    throw new Error(err.detail || err.error || 'SimRun creation failed')
+  }
+  const result = await resp.json()
+  return result.data as SimRun
 }
 
 export async function updateSimRun(
@@ -180,29 +185,17 @@ export async function duplicateSimRun(sourceId: string, newName: string): Promis
   const source = await getSimRun(sourceId)
   if (!source) throw new Error('SimRun not found')
 
-  const { data, error } = await supabase
-    .from('sim_runs')
-    .insert({
-      name: newName,
-      template_id: source.template_id,
-      facilitator_id: source.facilitator_id,
-      status: 'setup',
-      current_round: 0,
-      current_phase: 'pre',
-      schedule: source.schedule,
-      key_events: source.key_events,
-      max_rounds: source.max_rounds,
-      human_participants: source.human_participants,
-      ai_participants: source.ai_participants,
-      logo_url: source.logo_url,
-      description: source.description,
-      run_config: {},
-    })
-    .select()
-    .single()
-
-  if (error) throw error
-  return data as SimRun
+  // Use server-side creation to copy all game data
+  return createSimRun({
+    name: newName,
+    template_id: source.template_id ?? '',
+    schedule: source.schedule,
+    key_events: source.key_events as unknown[],
+    max_rounds: source.max_rounds,
+    logo_url: source.logo_url ?? undefined,
+    description: source.description ?? undefined,
+    // No role_customizations → copies all roles as-is
+  })
 }
 
 /* -------------------------------------------------------------------------- */
@@ -775,8 +768,41 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
 
 /** Fetch live sim state from the Sim Runner API. */
 export async function getSimState(simId: string): Promise<Record<string, unknown>> {
-  const resp = await fetch(`/api/sim/${simId}/state`)
+  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const resp = await fetch(`/api/sim/${simId}/state`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+  })
   if (!resp.ok) throw new Error('Failed to get sim state')
+  const data = await resp.json()
+  return data.data
+}
+
+/** Submit a game action (public_statement, set_budget, etc.). */
+export async function submitAction(
+  simId: string,
+  actionType: string,
+  roleId: string,
+  countryCode: string,
+  params?: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const resp = await fetch(`/api/sim/${simId}/action`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({
+      action_type: actionType,
+      role_id: roleId,
+      country_code: countryCode,
+      params: params ?? {},
+    }),
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Action failed' }))
+    throw new Error(err.detail || err.error || 'Action submission failed')
+  }
   const data = await resp.json()
   return data.data
 }

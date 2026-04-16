@@ -142,7 +142,7 @@ export function ModeratorDashboard() {
                 <div
                   key={run.id}
                   className="bg-card border border-border rounded-lg p-4 flex items-center justify-between hover:border-action/30 transition-colors cursor-pointer"
-                  onClick={() => navigate(run.status === 'setup' ? `/sim/${run.id}/edit` : `/sim/${run.id}/live`)}
+                  onClick={() => navigate(`/sim/${run.id}/live`)}
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-1">

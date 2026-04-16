@@ -32,9 +32,16 @@ The `sim_scenarios` table from DET_F is **retired**. All customization that was 
 
 **How it works:**
 - A **Template** holds the complete world: countries, roles, organizations, map, deployments, relationships, sanctions, tariffs, schedule defaults, formula coefficients.
-- When moderator clicks "Create SimRun", the system copies all template data into per-run tables (countries, roles, zones, deployments, relationships, etc.) with the run's `sim_run_id`.
-- The moderator can then customize the SimRun: toggle roles on/off, set human/AI, adjust schedule, upload logo. These changes affect ONLY this run.
+- Template data lives in the **default SimRun** (`00000000-0000-0000-0000-000000000001`), which serves as the canonical source for all game data.
+- When moderator clicks "Create SimRun", the frontend wizard calls `POST /api/sim/create` which:
+  1. Creates the `sim_runs` row with wizard settings (name, schedule, key_events, max_rounds)
+  2. Server-side copies **all 11 game tables** from the source sim, re-keying `sim_run_id` (see `engine/services/sim_create.py`)
+  3. Applies wizard customizations: role active/inactive status, human/AI flags
+  4. Tables copied: countries (20), roles (40), role_actions (713), relationships (380), zones (57), deployments (146), organizations (7), org_memberships (50), sanctions (43), tariffs (14), world_state (1)
+- The moderator can then further customize the SimRun via the edit wizard. These changes affect ONLY this run.
 - Once the SIM starts, the run is immutable.
+
+**Implementation:** `engine/services/sim_create.py` + `POST /api/sim/create` endpoint in `engine/main.py`. Frontend: `queries.ts:createSimRun()` calls the API. Duplicate also uses the same server-side path.
 
 **Impact on design docs:** DET_F_SCENARIO_CONFIG_SCHEMA.md and DET_B1a_TEMPLATE_TAXONOMY.sql need updating. The "sparse override" model in DET_F is replaced by "full copy + per-run edits."
 
@@ -489,6 +496,7 @@ This is a canonical convention for M4 implementation.
 - [x] Edit SimRun: same wizard, free step navigation, saves changes ✅
 - [x] Delete SimRun: with confirmation ✅
 - [x] Duplicate SimRun ✅
+- [x] **Full data inheritance on create** (2026-04-16): server-side `POST /api/sim/create` copies 11 tables (countries, roles, role_actions, relationships, zones, deployments, organizations, org_memberships, sanctions, tariffs, world_state) with role customizations (active/inactive, human/AI). See `engine/services/sim_create.py`. ✅
 - [x] User management: full page, sortable table, approve/suspend/delete ✅
 - [x] AI Setup: global LLM model selection ✅
 - [x] Countries & Roles: 40 roles, grouped by country, custom sort, HoS/Military/Budget/optional badges ✅
@@ -528,7 +536,7 @@ This is a canonical convention for M4 implementation.
 | Organizations + memberships + chairs | ✅ 7 orgs, 50 memberships |
 | Relationships (5 types) | ✅ 380 total |
 | Deployments | ✅ 146 entries, 338 units |
-| SimRun creation from template | ✅ Test SimRun linked |
+| SimRun creation from template | ✅ Full 11-table copy via `POST /api/sim/create` (20 countries, 40 roles, 713 role_actions, 380 relationships, 57 zones, 146 deployments, 7 orgs, 50 memberships, 43 sanctions, 14 tariffs, 1 world_state) |
 | Sanctions + Tariffs | ✅ 43 + 14 |
 | Key events naming (no real-world) | ✅ All SIM names |
 

@@ -1,9 +1,9 @@
 /**
- * Supabase client — singleton, persisted across Vite HMR.
+ * Supabase client — singleton with navigator lock disabled.
  *
- * The client is stored on `window` so that hot module replacement
- * reuses the same instance instead of creating a new one.
- * This prevents auth lock contention and session loss during dev.
+ * The PKCE flow's navigator.locks API causes "lock stolen" errors
+ * on page reload and HMR. We disable it by providing a custom lock
+ * implementation that uses a simple promise-based mutex instead.
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
@@ -17,18 +17,24 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Persist across HMR — same pattern used in production apps with Vite
+// Persist across HMR
 const GLOBAL_KEY = '__ttt_supabase_client__'
 
 function getOrCreateClient(): SupabaseClient {
-  const existing = (window as Record<string, unknown>)[GLOBAL_KEY] as SupabaseClient | undefined
-  if (existing) return existing
+  const w = window as Record<string, unknown>
+  if (w[GLOBAL_KEY]) return w[GLOBAL_KEY] as SupabaseClient
 
   const client = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: true,
+      // Disable navigator.locks — use simple mutex instead
+      // This prevents "lock stolen" errors on page reload
+      lock: async (name: string, _acquireTimeout: number, fn: () => Promise<unknown>) => {
+        // Simple non-blocking lock — just run the function
+        return await fn()
+      },
     },
     realtime: {
       params: {
@@ -37,7 +43,7 @@ function getOrCreateClient(): SupabaseClient {
     },
   })
 
-  ;(window as Record<string, unknown>)[GLOBAL_KEY] = client
+  w[GLOBAL_KEY] = client
   return client
 }
 

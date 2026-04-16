@@ -18,14 +18,28 @@ class SimRun(BaseModel):
     """sim_runs table."""
     id: str
     name: str
-    status: str  # setup | active | paused | completed | aborted
+    status: str  # setup | pre_start | active | processing | inter_round | paused | completed | aborted
     current_round: int = 0
-    current_phase: str = "pre"  # pre | A | B | C | post
-    config: dict = Field(default_factory=dict)
+    current_phase: str = "pre"  # pre | A | B | inter_round | post
+    template_id: Optional[str] = None
+    scenario_id: Optional[str] = None
+    facilitator_id: Optional[str] = None
+    schedule: dict = Field(default_factory=dict)
+    key_events: list = Field(default_factory=list)
+    run_config: dict = Field(default_factory=dict)
     max_rounds: int = 8
+    human_participants: int = 0
+    ai_participants: int = 0
+    logo_url: Optional[str] = None
+    description: Optional[str] = None
+    phase_started_at: Optional[datetime] = None
+    phase_duration_seconds: Optional[int] = None
+    auto_advance: bool = False
+    auto_approve: bool = False
     created_at: Optional[datetime] = None
     started_at: Optional[datetime] = None
     completed_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
 
 class Country(BaseModel):
@@ -109,13 +123,19 @@ class Role(BaseModel):
     team: str = ""
     faction: str = ""
     title: str = ""
+    position_type: Optional[str] = None  # head_of_state | military_chief | economy_officer | diplomat | security | opposition
     age: int = 50
     gender: str = "M"
+    public_bio: str = ""
+    confidential_brief: Optional[str] = None
+    party: Optional[str] = None
+    # Legacy booleans (DB still has them, position_type is canonical)
     is_head_of_state: bool = False
     is_military_chief: bool = False
+    is_economy_officer: bool = False
+    is_diplomat: bool = False
     parliament_seat: int = 0
     personal_coins: float = 0  # DEPRECATED 2026-04-15: no personal transactions
-    personal_coins_notes: str = ""  # DEPRECATED 2026-04-15
     expansion_role: bool = False
     ai_candidate: bool = False
     is_ai_operated: bool = False
@@ -133,7 +153,6 @@ class Role(BaseModel):
     assassination_cards: int = 0
     protest_stim_cards: int = 0
     fatherland_appeal: int = 0
-    is_diplomat: bool = False
 
 
 class Zone(BaseModel):

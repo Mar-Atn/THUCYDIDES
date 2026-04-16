@@ -64,3 +64,48 @@ class CountryListResponse(BaseModel):
     sim_id: str
     count: int
     countries: list[dict]
+
+
+# ---------------------------------------------------------------------------
+# Action submission (M4 Sprint 2.1)
+# ---------------------------------------------------------------------------
+
+class ActionSubmission(BaseModel):
+    """POST /api/sim/{id}/action request body.
+
+    The action_type determines which engine processes it.
+    role_id + country_code identify who is acting.
+    params holds action-specific data (varies by action_type).
+    """
+    action_type: str
+    role_id: str
+    country_code: str
+    params: dict = Field(default_factory=dict)
+
+
+# ---------------------------------------------------------------------------
+# SimRun creation (M4 / M9 — data inheritance)
+# ---------------------------------------------------------------------------
+
+class RoleCustomization(BaseModel):
+    """Per-role customization from the wizard."""
+    role_id: str
+    active: bool = True
+    is_ai_operated: bool = True
+
+
+class SimRunCreateRequest(BaseModel):
+    """POST /api/sim/create request body.
+
+    Creates a new SimRun by copying all template data from the source sim
+    and applying wizard customizations.
+    """
+    name: str
+    source_sim_id: str = "00000000-0000-0000-0000-000000000001"
+    template_id: str
+    schedule: dict = Field(default_factory=dict)
+    key_events: list = Field(default_factory=list)
+    max_rounds: int = 6
+    description: Optional[str] = None
+    logo_url: Optional[str] = None
+    role_customizations: list[RoleCustomization] = Field(default_factory=list)

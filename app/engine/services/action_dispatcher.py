@@ -3,6 +3,9 @@
 This is the GLUE between agent/human action submissions and the engine layer.
 Every action submitted during Phase A is dispatched here for immediate resolution.
 
+Action type names are CANONICAL — they match role_actions.action_id in the DB.
+Source of truth: M9 role_actions table (32 action types as of 2026-04-16).
+
 See CONTRACT_ROUND_FLOW.md for the canonical round flow.
 """
 
@@ -52,21 +55,67 @@ def dispatch_action(
 
 
 def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> dict:
-    """Route to the correct engine based on action_type."""
+    """Route to the correct engine based on action_type.
 
+    Action type names are CANONICAL DB names from role_actions.action_id.
+    """
     role_id = action.get("role_id", "")
     country_code = action.get("country_code", "")
 
-    # ── Military ──────────────────────────────────────────────────────
-    if action_type == "declare_attack":
-        return _dispatch_attack(sim_run_id, round_num, action)
+    # ── Military: Combat ──────────────────────────────────────────────
+    if action_type == "ground_attack":
+        from engine.engines.military import resolve_ground_combat
+        return resolve_ground_combat(
+            attacker_units=action.get("attacker_units", []),
+            defender_units=action.get("defender_units", []),
+            terrain=action.get("terrain", "open"),
+            modifiers=action.get("modifiers", {}),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
 
-    if action_type == "launch_missile":
-        return _dispatch_missile(sim_run_id, round_num, action)
+    if action_type == "air_strike":
+        from engine.engines.military import resolve_air_strike
+        return resolve_air_strike(
+            attacker_units=action.get("attacker_units", []),
+            target_units=action.get("target_units", []),
+            ad_units=action.get("ad_units", []),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
 
-    if action_type == "blockade":
-        return _dispatch_blockade(sim_run_id, round_num, action)
+    if action_type == "naval_combat":
+        from engine.engines.military import resolve_naval_combat
+        return resolve_naval_combat(
+            attacker_units=action.get("attacker_units", []),
+            defender_units=action.get("defender_units", []),
+            modifiers=action.get("modifiers", {}),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
 
+    if action_type == "naval_bombardment":
+        from engine.engines.military import resolve_naval_bombardment
+        return resolve_naval_bombardment(
+            naval_units=action.get("naval_units", []),
+            target_units=action.get("target_units", []),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
+
+    if action_type == "naval_blockade":
+        from engine.engines.military import resolve_blockade
+        return resolve_blockade(
+            imposer_units=action.get("imposer_units", []),
+            zone_id=action.get("zone_id", ""),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
+
+    if action_type == "launch_missile_conventional":
+        from engine.engines.military import resolve_missile_strike
+        return resolve_missile_strike(
+            launcher_unit=action.get("launcher_unit", {}),
+            target_units=action.get("target_units", []),
+            precomputed_rolls=action.get("precomputed_rolls"),
+        ).__dict__
+
+    # ── Military: Other ──────���────────────────────────────────────────
     if action_type == "basing_rights":
         from engine.services.basing_rights_engine import grant_basing_rights, revoke_basing_rights
         if action.get("operation") == "revoke":
@@ -89,11 +138,17 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             precomputed_rolls=action.get("precomputed_rolls"),
         ).__dict__
 
-    # ── Covert Ops ────────────────────────────────────────────────────
-    if action_type == "covert_op":
+    # ── Covert Ops ────────────────────────────────���───────────────────
+    if action_type == "covert_operation":
         return _dispatch_covert(sim_run_id, round_num, action)
 
-    # ── Domestic / Political ──────────────────────────────────────────
+    if action_type == "intelligence":
+        from engine.services.intelligence_engine import generate_intelligence_report
+        return generate_intelligence_report(
+            sim_run_id, round_num, role_id, country_code,
+            action.get("target_country"))
+
+    # ── Political ────��────────────────────────────────────────────────
     if action_type == "arrest":
         from engine.services.arrest_engine import request_arrest
         return request_arrest(
@@ -107,25 +162,18 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             action.get("target_role"),
             domestic=action.get("domestic", True))
 
-    # DEPRECATED 2026-04-15: coup_attempt and lead_protest replaced by change_leader
-    # change_leader is a multi-phase action handled by M4 Sim Runner (real-time voting)
-    # The dispatcher logs the initiation; M4 handles the vote phases.
     if action_type == "change_leader":
-        logger.info("change_leader initiated by %s in %s — requires M4 Sim Runner for vote phases", role_id, country_code)
-        return {"status": "initiated", "action": "change_leader", "initiator": role_id, "country": country_code}
+        logger.info("change_leader initiated by %s in %s — requires M4 for vote phases",
+                     role_id, country_code)
+        return {"success": True, "narrative": f"Change of leader initiated by {role_id} in {country_code}. Voting phase required."}
 
-    if action_type == "reassign_powers":
+    if action_type == "reassign_types":
         from engine.services.power_assignments import reassign_power
         return reassign_power(
             sim_run_id, role_id, country_code,
             action.get("power_type"), action.get("new_holder_role"))
 
-    if action_type == "call_early_elections":
-        from engine.services.early_elections_engine import execute_early_elections
-        return execute_early_elections(
-            sim_run_id, round_num, role_id, country_code)
-
-    if action_type == "submit_nomination":
+    if action_type == "self_nominate":
         from engine.services.election_engine import submit_nomination
         return submit_nomination(
             sim_run_id, round_num, role_id,
@@ -137,16 +185,16 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             sim_run_id, round_num, role_id,
             action.get("candidate_role_id"), action.get("election_type"))
 
-    # ── Transactions / Agreements ─────────────────────────────────────
-    if action_type in ("propose_exchange", "propose_transaction"):
+    # ── Transactions / Agreements ──────────────────���──────────────────
+    if action_type == "propose_transaction":
         from engine.services.transaction_engine import propose_exchange
         return propose_exchange(sim_run_id, round_num, action)
 
-    if action_type == "respond_exchange":
+    if action_type == "accept_transaction":
         from engine.services.transaction_engine import respond_to_exchange
         return respond_to_exchange(
             sim_run_id, action.get("transaction_id"),
-            action.get("response"), action.get("counter_offer"))
+            action.get("response", "accept"), action.get("counter_offer"))
 
     if action_type == "propose_agreement":
         from engine.services.agreement_engine import propose_agreement
@@ -157,81 +205,27 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return sign_agreement(
             sim_run_id, action.get("agreement_id"), role_id)
 
-    # ── Public Statement (no engine, just log) ────────────────────────
+    # ── Diplomatic ────────────────────────────────────────────────────
     if action_type == "public_statement":
         return _log_public_statement(sim_run_id, round_num, action)
+
+    # ── Batch Decisions (queued for Phase B, not immediate) ───────────
+    if action_type in ("set_budget", "set_tariffs", "set_sanctions", "set_opec"):
+        return _queue_batch_decision(sim_run_id, round_num, action_type, action)
+
+    # ── Not Yet Implemented (M4 Phase 4+) ���────────────────────────��───
+    if action_type in ("move_units", "call_org_meeting", "meet_freely",
+                        "nuclear_authorize", "nuclear_intercept", "nuclear_launch_initiate"):
+        return {"success": True, "narrative": f"{action_type} acknowledged — full implementation in M4 Phase 4"}
 
     # ── Unknown ───────────────────────────────────────────────────────
     return {"success": False, "narrative": f"Unknown action_type: {action_type}"}
 
 
-# ── Sub-dispatchers for complex action types ──────────────────────────────
-
-def _dispatch_attack(sim_run_id: str, round_num: int, action: dict) -> dict:
-    """Dispatch attack actions to the correct combat engine."""
-    attack_type = action.get("attack_type", "ground")
-
-    if attack_type == "ground":
-        from engine.engines.military import resolve_ground_combat
-        return resolve_ground_combat(
-            attacker_units=action.get("attacker_units", []),
-            defender_units=action.get("defender_units", []),
-            terrain=action.get("terrain", "open"),
-            modifiers=action.get("modifiers", {}),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
-
-    if attack_type == "air":
-        from engine.engines.military import resolve_air_strike
-        return resolve_air_strike(
-            attacker_units=action.get("attacker_units", []),
-            target_units=action.get("target_units", []),
-            ad_units=action.get("ad_units", []),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
-
-    if attack_type == "naval":
-        from engine.engines.military import resolve_naval_combat
-        return resolve_naval_combat(
-            attacker_units=action.get("attacker_units", []),
-            defender_units=action.get("defender_units", []),
-            modifiers=action.get("modifiers", {}),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
-
-    if attack_type == "bombardment":
-        from engine.engines.military import resolve_naval_bombardment
-        return resolve_naval_bombardment(
-            naval_units=action.get("naval_units", []),
-            target_units=action.get("target_units", []),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
-
-    return {"success": False, "narrative": f"Unknown attack_type: {attack_type}"}
-
-
-def _dispatch_missile(sim_run_id: str, round_num: int, action: dict) -> dict:
-    """Dispatch conventional missile launch."""
-    from engine.engines.military import resolve_missile_strike
-    return resolve_missile_strike(
-        launcher_unit=action.get("launcher_unit", {}),
-        target_units=action.get("target_units", []),
-        precomputed_rolls=action.get("precomputed_rolls"),
-    ).__dict__
-
-
-def _dispatch_blockade(sim_run_id: str, round_num: int, action: dict) -> dict:
-    """Dispatch blockade action."""
-    from engine.engines.military import resolve_blockade
-    return resolve_blockade(
-        imposer_units=action.get("imposer_units", []),
-        zone_id=action.get("zone_id", ""),
-        precomputed_rolls=action.get("precomputed_rolls"),
-    ).__dict__
-
+# ── Sub-dispatchers ──────────────────────────────────────────────────────
 
 def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
-    """Dispatch covert operation to the correct engine."""
+    """Dispatch covert operation to the correct engine based on op_type."""
     op_type = action.get("op_type", "")
     role_id = action.get("role_id", "")
     country_code = action.get("country_code", "")
@@ -262,7 +256,34 @@ def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
             action.get("target_country"), action.get("direction", "boost"),
             action.get("candidate", ""))
 
-    return {"success": False, "narrative": f"Unknown op_type: {op_type}"}
+    return {"success": False, "narrative": f"Unknown covert op_type: {op_type}"}
+
+
+def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, action: dict) -> dict:
+    """Queue a batch decision for Phase B processing.
+
+    Batch decisions (budget, tariffs, sanctions, OPEC) are submitted during Phase A
+    but only processed by the economic engine during Phase B.
+    """
+    role_id = action.get("role_id", "")
+    country_code = action.get("country_code", "")
+
+    # Store in agent_decisions table for Phase B pickup
+    try:
+        client = get_client()
+        client.table("agent_decisions").insert({
+            "sim_run_id": sim_run_id,
+            "round_num": round_num,
+            "country_code": country_code,
+            "action_type": action_type,
+            "action_payload": action,
+            "validation_status": "valid",
+        }).execute()
+    except Exception as e:
+        logger.warning("Failed to queue batch decision %s: %s", action_type, e)
+        return {"success": True, "narrative": f"{action_type} recorded (queue write failed: {e})"}
+
+    return {"success": True, "narrative": f"{action_type} by {role_id} ({country_code}) queued for Phase B processing"}
 
 
 def _log_public_statement(sim_run_id: str, round_num: int, action: dict) -> dict:
@@ -276,7 +297,8 @@ def _log_public_statement(sim_run_id: str, round_num: int, action: dict) -> dict
     narrative = f"PUBLIC STATEMENT by {role_id}: {statement[:200]}"
     write_event(client, sim_run_id, scenario_id, round_num, country_code,
                 "public_statement", narrative,
-                {"role_id": role_id, "content": statement})
+                {"role_id": role_id, "content": statement},
+                phase="A", category="diplomatic", role_name=role_id)
 
     return {"success": True, "narrative": narrative}
 

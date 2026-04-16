@@ -15,6 +15,7 @@ from engine.auth.dependencies import get_current_user, require_moderator
 from engine.config import settings
 from engine.models.api import (
     APIResponse, HealthStatus, LLMTestRequest, LLMTestResponse, CountryListResponse,
+    ActionSubmission, SimRunCreateRequest,
 )
 from engine.services import supabase as db
 from engine.services import llm
@@ -281,6 +282,38 @@ async def suspend_user(
 
 
 # ---------------------------------------------------------------------------
+# M9/M4: SimRun Creation (full data inheritance)
+# ---------------------------------------------------------------------------
+
+@app.post("/api/sim/create", response_model=APIResponse)
+async def create_sim_run(body: SimRunCreateRequest, user: AuthUser = Depends(require_moderator)):
+    """Create a new SimRun with full data inheritance from source sim.
+
+    Copies all 11 game tables (countries, roles, zones, deployments, etc.)
+    from the source sim and applies wizard customizations (active/AI flags).
+    """
+    from engine.services.sim_create import create_sim_run as do_create
+    try:
+        result = do_create(
+            name=body.name,
+            source_sim_id=body.source_sim_id,
+            template_id=body.template_id,
+            facilitator_id=user.id,
+            schedule=body.schedule,
+            key_events=body.key_events,
+            max_rounds=body.max_rounds,
+            description=body.description,
+            logo_url=body.logo_url,
+            role_customizations=[rc.model_dump() for rc in body.role_customizations],
+        )
+        logger.info("SimRun created: %s by %s", result["id"], user.id)
+        return APIResponse(data=result)
+    except Exception as e:
+        logger.exception("SimRun creation failed: %s", e)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
 # M4: Sim Runner — Facilitator Control Endpoints
 # ---------------------------------------------------------------------------
 
@@ -320,7 +353,12 @@ async def sim_start(sim_id: str, user: AuthUser = Depends(require_moderator)):
 
 @app.post("/api/sim/{sim_id}/phase/end", response_model=APIResponse)
 async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)):
-    """End current phase and advance to next."""
+    """End current phase and advance to next.
+
+    Phase A → Processing (Phase B): triggers engine pipeline automatically.
+    Phase B → Inter-Round: manual advance (moderator reviews results first).
+    Inter-Round → Next Round Phase A: advances round counter.
+    """
     from engine.services.sim_run_manager import (
         end_phase_a, end_phase_b, advance_round, get_state,
     )
@@ -329,6 +367,22 @@ async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)
         phase = run["current_phase"]
         if phase == "A":
             state = end_phase_a(sim_id)
+            # Trigger Phase B engine processing
+            round_num = run["current_round"]
+            logger.info("Sim %s Phase A ended → triggering Phase B engines for R%d", sim_id, round_num)
+            try:
+                await _run_phase_b(sim_id, round_num)
+                # Auto-advance to inter_round after engines complete
+                state = end_phase_b(sim_id)
+                logger.info("Sim %s Phase B complete → inter_round", sim_id)
+            except Exception as e:
+                logger.exception("Phase B engine failed for sim %s R%d: %s", sim_id, round_num, e)
+                # Stay in processing state so moderator can retry or skip
+                return APIResponse(
+                    success=False,
+                    data=state,
+                    error=f"Phase B engines failed: {e}. Sim is in processing state — click Next Phase to skip to inter-round.",
+                )
         elif phase == "B":
             state = end_phase_b(sim_id)
         elif phase == "inter_round":
@@ -339,6 +393,97 @@ async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)
         return APIResponse(data=state)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+async def _run_phase_b(sim_id: str, round_num: int) -> None:
+    """Run Phase B engine pipeline: collect batch decisions → run orchestrator → write events.
+
+    Calls the orchestrator's process_round() which handles:
+    - Economic engine (11 steps: oil → GDP → revenue → budget → inflation → debt → crisis)
+    - Political engine (stability, war tiredness, elections, revolutions)
+    - Persistence to countries + world_state tables
+    """
+    from engine.engines.orchestrator import process_round
+    from engine.services.common import write_event
+    from engine.services.supabase import get_client
+
+    client = get_client()
+
+    # 1. Collect batch decisions (set_budget, set_tariffs, set_sanctions, set_opec)
+    batch_rows = client.table("agent_decisions") \
+        .select("*") \
+        .eq("sim_run_id", sim_id) \
+        .eq("round_num", round_num) \
+        .in_("action_type", ["set_budget", "set_tariffs", "set_sanctions", "set_opec"]) \
+        .is_("processed_at", "null") \
+        .execute().data or []
+
+    # Convert batch decisions to the actions dict format orchestrator expects
+    actions: dict = {
+        "tariff_changes": {},
+        "sanction_changes": {},
+        "opec_production": {},
+        "budget_decisions": {},
+        "blockade_changes": {},
+    }
+    for row in batch_rows:
+        payload = row.get("action_payload", {})
+        cc = row.get("country_code", "")
+        at = row.get("action_type", "")
+
+        if at == "set_tariffs" and isinstance(payload, dict):
+            target = payload.get("target_country", "")
+            level = payload.get("level", 0)
+            if target:
+                actions["tariff_changes"].setdefault(cc, {})[target] = level
+        elif at == "set_sanctions" and isinstance(payload, dict):
+            target = payload.get("target_country", "")
+            level = payload.get("level", 0)
+            if target:
+                actions["sanction_changes"].setdefault(cc, {})[target] = level
+        elif at == "set_opec" and isinstance(payload, dict):
+            level = payload.get("production_level", "maintain")
+            actions["opec_production"][cc] = level
+        elif at == "set_budget" and isinstance(payload, dict):
+            actions["budget_decisions"][cc] = payload
+
+    logger.info("Phase B: %d batch decisions collected for sim %s R%d", len(batch_rows), sim_id, round_num)
+
+    # 2. Run the orchestrator
+    result = await process_round(sim_id, round_num, actions)
+
+    # 3. Mark batch decisions as processed
+    for row in batch_rows:
+        client.table("agent_decisions").update({
+            "processed_at": "now()",
+        }).eq("id", row["id"]).execute()
+
+    # 4. Write summary observatory event
+    run = client.table("sim_runs").select("scenario_id").eq("id", sim_id).single().execute()
+    scenario_id = run.data.get("scenario_id") if run.data else None
+
+    # Economic summary
+    oil_price = result.economic.oil_price.price if result.economic else 0
+    summary_lines = [f"Round {round_num} engines complete. Oil: ${oil_price:.0f}."]
+
+    for cid in sorted(result.stability.keys())[:5]:
+        sr = result.stability[cid]
+        summary_lines.append(f"{cid}: stability {sr.new_stability:.1f}")
+
+    if result.capitulation_flags:
+        summary_lines.append(f"CAPITULATION: {', '.join(result.capitulation_flags)}")
+
+    for cid, el in result.elections.items():
+        summary_lines.append(f"ELECTION {cid}: {'incumbent wins' if el.incumbent_wins else 'incumbent loses'}")
+
+    write_event(
+        client, sim_id, scenario_id, round_num,
+        "", "phase_b_complete", " | ".join(summary_lines),
+        {"oil_price": oil_price, "log_lines": len(result.log)},
+        phase="B", category="system",
+    )
+
+    logger.info("Phase B complete for sim %s R%d: %s", sim_id, round_num, summary_lines[0])
 
 
 @app.post("/api/sim/{sim_id}/phase/extend", response_model=APIResponse)
@@ -441,3 +586,190 @@ async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
         return APIResponse(data=state)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+# ---------------------------------------------------------------------------
+# M4/M5: AI Agent Trigger
+# ---------------------------------------------------------------------------
+
+@app.post("/api/sim/{sim_id}/ai/trigger", response_model=APIResponse)
+async def trigger_ai(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Trigger all AI-operated roles to submit their decisions.
+
+    Uses the M5 stub (default decisions) until the full AI module is built.
+    AI agents use the same action pipeline as human participants.
+    """
+    from engine.services.sim_run_manager import get_state
+    from engine.services.ai_stub import trigger_ai_agents
+    from engine.services.common import write_event
+    from engine.services.supabase import get_client
+
+    try:
+        run = get_state(sim_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
+
+    if run["status"] not in ("active",):
+        raise HTTPException(status_code=400, detail=f"Sim is '{run['status']}' — AI trigger only in active phase")
+
+    round_num = run["current_round"]
+    logger.info("AI trigger for sim %s R%d by %s", sim_id, round_num, user.id)
+
+    result = trigger_ai_agents(sim_run_id=sim_id, round_num=round_num)
+
+    # Write observatory event
+    client = get_client()
+    scenario_id = run.get("scenario_id")
+    write_event(
+        client, sim_id, scenario_id, round_num,
+        "", "ai_triggered", f"AI agents triggered: {result['total']} agents, {result['actions_submitted']} actions, {result['errors']} errors",
+        {"agents": len(result["agents"]), "actions": result["actions_submitted"]},
+        phase=run.get("current_phase", "A"),
+        category="system",
+    )
+
+    return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# M4: Action Submission Pipeline
+# ---------------------------------------------------------------------------
+
+# Action type → category mapping (matches role_actions.action_id values in DB)
+ACTION_CATEGORIES: dict[str, str] = {
+    # Military
+    "ground_attack": "military",
+    "air_strike": "military",
+    "naval_combat": "military",
+    "naval_bombardment": "military",
+    "naval_blockade": "military",
+    "launch_missile_conventional": "military",
+    "nuclear_test": "military",
+    "nuclear_launch_initiate": "military",
+    "nuclear_authorize": "military",
+    "nuclear_intercept": "military",
+    "basing_rights": "military",
+    "martial_law": "military",
+    "move_units": "military",
+    # Economic
+    "set_budget": "economic",
+    "set_tariffs": "economic",
+    "set_sanctions": "economic",
+    "set_opec": "economic",
+    "propose_transaction": "economic",
+    "accept_transaction": "economic",
+    # Diplomatic
+    "propose_agreement": "diplomatic",
+    "sign_agreement": "diplomatic",
+    "public_statement": "diplomatic",
+    "call_org_meeting": "diplomatic",
+    "meet_freely": "diplomatic",
+    # Covert
+    "covert_operation": "covert",
+    "intelligence": "covert",
+    # Political
+    "arrest": "political",
+    "assassination": "political",
+    "change_leader": "political",
+    "reassign_types": "political",
+    "self_nominate": "political",
+    "cast_vote": "political",
+}
+
+
+@app.post("/api/sim/{sim_id}/action", response_model=APIResponse)
+async def submit_action(
+    sim_id: str,
+    body: ActionSubmission,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Submit a game action during Phase A.
+
+    Validates: sim is active, phase allows actions, role exists.
+    Dispatches to the action engine and writes an observatory event.
+    """
+    from engine.services.sim_run_manager import get_state
+    from engine.services.action_dispatcher import dispatch_action
+    from engine.services.common import get_scenario_id, write_event
+    from engine.services.supabase import get_client
+
+    # 1. Validate sim state
+    try:
+        run = get_state(sim_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
+
+    if run["status"] not in ("active", "processing", "inter_round"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Sim is '{run['status']}' — actions only allowed when active",
+        )
+
+    current_phase = run.get("current_phase", "")
+
+    # 2. Validate role exists in this sim
+    client = get_client()
+    role_check = (
+        client.table("roles")
+        .select("id, character_name, country_id, position_type")
+        .eq("sim_run_id", sim_id)
+        .eq("id", body.role_id)
+        .execute()
+    )
+    if not role_check.data:
+        raise HTTPException(status_code=400, detail=f"Role '{body.role_id}' not found in sim")
+
+    role = role_check.data[0]
+
+    # 3. Validate role has this action type (check role_actions table)
+    action_check = (
+        client.table("role_actions")
+        .select("id")
+        .eq("sim_run_id", sim_id)
+        .eq("role_id", body.role_id)
+        .eq("action_id", body.action_type)
+        .execute()
+    )
+    if not action_check.data:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Role '{body.role_id}' is not authorized for action '{body.action_type}'",
+        )
+
+    # 4. Build action payload and dispatch
+    action_payload = {
+        "action_type": body.action_type,
+        "role_id": body.role_id,
+        "country_code": body.country_code,
+        **body.params,
+    }
+
+    round_num = run.get("current_round", 0)
+
+    try:
+        result = dispatch_action(sim_id, round_num, action_payload)
+    except Exception as e:
+        logger.exception("Action dispatch failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"Engine error: {e}")
+
+    # 5. Write enriched observatory event
+    category = ACTION_CATEGORIES.get(body.action_type, "system")
+    scenario_id = run.get("scenario_id")
+    summary = result.get("narrative", f"{body.action_type} by {role['character_name']}")
+
+    write_event(
+        client, sim_id, scenario_id, round_num,
+        body.country_code, body.action_type, summary,
+        {"action": action_payload, "result": result},
+        phase=current_phase,
+        category=category,
+        role_name=role["character_name"],
+    )
+
+    logger.info(
+        "Action %s by %s (%s) in sim %s R%d — %s",
+        body.action_type, role["character_name"], body.country_code,
+        sim_id, round_num, "OK" if result.get("success") else "FAILED",
+    )
+
+    return APIResponse(data=result)

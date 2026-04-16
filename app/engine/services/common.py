@@ -43,19 +43,43 @@ def write_event(
     event_type: str,
     summary: str,
     payload: dict,
+    *,
+    phase: str | None = None,
+    category: str | None = None,
+    role_name: str | None = None,
 ) -> None:
-    """Write an observatory event. Silently skips if no scenario_id."""
-    if not scenario_id:
-        return
+    """Write an observatory event.
+
+    Args:
+        sim_run_id: Required — primary key for the event.
+        scenario_id: Optional legacy field (nullable since M4 migration).
+        round_num: Current round number.
+        country_code: Country code of the acting country.
+        event_type: Action type or system event type.
+        summary: Human-readable description.
+        payload: Structured data (JSONB).
+        phase: SIM phase when event occurred (A, B, inter_round, pre, post).
+        category: Action domain (military, economic, diplomatic, covert, political, system).
+        role_name: Character name of the acting role.
+    """
+    row = {
+        "sim_run_id": sim_run_id,
+        "round_num": round_num,
+        "event_type": event_type,
+        "country_code": country_code,
+        "summary": summary,
+        "payload": payload,
+    }
+    if scenario_id:
+        row["scenario_id"] = scenario_id
+    if phase:
+        row["phase"] = phase
+    if category:
+        row["category"] = category
+    if role_name:
+        row["role_name"] = role_name
+
     try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
+        client.table("observatory_events").insert(row).execute()
     except Exception as e:
-        logger.debug("event write failed: %s", e)
+        logger.warning("event write failed: %s", e)

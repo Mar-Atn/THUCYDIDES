@@ -394,3 +394,42 @@ Participant submits action
 ---
 
 *SPEC approved in principle (2026-04-16). Phase 1 implementation begins.*
+
+---
+
+## 14. Build Progress (Live)
+
+### Phase 1: Foundation — DONE (2026-04-16)
+- State machine (`sim_run_manager.py`): setup → pre_start → active → processing → inter_round → completed
+- 12 facilitator control API endpoints in `main.py`
+- Facilitator Dashboard shell with timer, phase controls, event feed
+- Supabase Python SDK `.update()` chain fix (no `.select().single()`)
+
+### Phase 2: MVP — IN PROGRESS
+
+**Sprint 2.1: Action Endpoint + Event Schema** — DONE (2026-04-16)
+- DB migration: `observatory_events` +phase, +category, +role_name, scenario_id nullable
+- `write_event()` enriched with new fields
+- Frontend `ObservatoryEvent` interface aligned to actual DB columns
+- `SimRun` Pydantic model synced (24 fields), `Role` model +position_type
+- `POST /api/sim/{id}/action` endpoint: validate → dispatch → write event
+- `ACTION_CATEGORIES` map for 32 canonical action types
+
+**Sprint 2.1+: SimRun Data Inheritance** — DONE (2026-04-16)
+- `POST /api/sim/create` endpoint: server-side creation with full data copy
+- `engine/services/sim_create.py`: copies 11 tables (1,471 rows) from source sim
+- Wizard customizations applied: role active/inactive, human/AI flags
+- Frontend `createSimRun()` and `duplicateSimRun()` call server API
+- M9 SPEC updated with implementation details
+
+**Sprint 2.2: Test Action Panel + Naming Reconciliation** — DONE (2026-04-16)
+- Test Action panel on dashboard: select role → loads actual role_actions from DB → submit
+- **Action naming reconciliation**: all 32 DB canonical action IDs now match dispatcher
+- Stale names removed: `declare_attack`, `blockade`, `covert_op`, `reassign_powers`, etc.
+- Full systematic test: 32/32 route correctly (26 routed, 6 stubs for Phase 4)
+- MODULE_REGISTRY updated with canonical ACTION_NAMING table
+- Known gap: 9 military engine functions have param signature mismatches (v2 refactor)
+
+**Sprint 2.3: Phase B Engine Integration** — QUEUED
+**Sprint 2.4: AI Agent Trigger** — QUEUED
+**Sprint 2.5: Full 2-Round Integration Test** — QUEUED

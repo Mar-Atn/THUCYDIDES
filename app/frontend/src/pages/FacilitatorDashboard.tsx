@@ -14,6 +14,7 @@ import {
   getSimRunRoles,
   getSimState,
   simAction,
+  submitAction,
   type SimRun,
   type SimRunRole,
 } from '@/lib/queries'
@@ -24,6 +25,7 @@ import { supabase } from '@/lib/supabase'
 /* -------------------------------------------------------------------------- */
 
 interface SimState {
+  status: string
   current_round: number
   current_phase: string
   phase_started_at: string | null
@@ -44,12 +46,14 @@ interface PendingAction {
 interface ObservatoryEvent {
   id: string
   sim_run_id: string
-  round: number
-  phase: string
+  round_num: number
   event_type: string
-  category: string
+  country_code: string | null
+  summary: string
+  payload: Record<string, unknown> | null
+  phase: string | null
+  category: string | null
   role_name: string | null
-  description: string
   created_at: string
 }
 
@@ -194,6 +198,7 @@ export function FacilitatorDashboard() {
       } catch {
         // API not available yet — build state from sim_run
         setSimState({
+          status: run.status,
           current_round: run.current_round,
           current_phase: run.current_phase,
           phase_started_at: run.started_at,
@@ -282,6 +287,7 @@ export function FacilitatorDashboard() {
   }
 
   /* Derived data ---------------------------------------------------------- */
+  const currentStatus = simState?.status ?? simRun?.status ?? 'setup'
   const currentRound = simState?.current_round ?? simRun?.current_round ?? 0
   const currentPhase = simState?.current_phase ?? simRun?.current_phase ?? 'pre'
   const isPaused = simState?.paused ?? false
@@ -382,13 +388,38 @@ export function FacilitatorDashboard() {
                 variant="warning"
               />
             )}
-            <ControlButton
-              label="Next Phase"
-              suffix="▸"
-              onClick={() => doAction('phase/end')}
-              loading={actionLoading === 'phase/end'}
-              variant="primary"
-            />
+            {currentStatus === 'setup' || currentStatus === 'pre_start' ? (
+              <ControlButton
+                label="▶ Start Simulation"
+                onClick={async () => {
+                  if (!simId) return
+                  setActionLoading('start')
+                  try {
+                    // If in setup, move to pre_start first
+                    if (currentStatus === 'setup') {
+                      await simAction(simId, 'pre-start')
+                    }
+                    // Then start the simulation
+                    await simAction(simId, 'start')
+                    await loadData()
+                  } catch (e) {
+                    alert(e instanceof Error ? e.message : 'Start failed')
+                  } finally {
+                    setActionLoading(null)
+                  }
+                }}
+                loading={actionLoading === 'start'}
+                variant="primary"
+              />
+            ) : (
+              <ControlButton
+                label="Next Phase"
+                suffix="▸"
+                onClick={() => doAction('phase/end')}
+                loading={actionLoading === 'phase/end'}
+                variant="primary"
+              />
+            )}
             <ControlButton
               label="+5m"
               onClick={() => doAction('phase/extend', { minutes: 5 })}
@@ -524,18 +555,23 @@ export function FacilitatorDashboard() {
                     {evt.role_name ?? '---'}
                   </span>
                   <span className="font-body text-body-sm text-text-primary flex-1">
-                    {evt.description}
+                    {evt.summary}
                   </span>
                   <span
-                    className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category)}`}
+                    className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category ?? '')}`}
                   >
-                    {evt.category?.toUpperCase().slice(0, 4) ?? '---'}
+                    {evt.category?.toUpperCase().slice(0, 4) ?? evt.event_type?.slice(0, 4).toUpperCase() ?? '---'}
                   </span>
                 </div>
               ))}
             </div>
           )}
         </DashboardSection>
+
+        {/* -------------------------------------------------------------- */}
+        {/*  Test Action Panel                                             */}
+        {/* -------------------------------------------------------------- */}
+        <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
 
         {/* -------------------------------------------------------------- */}
         {/*  AI Participants                                                */}
@@ -747,6 +783,155 @@ function DashboardSection({
 function EmptyState({ message }: { message: string }) {
   return (
     <p className="font-body text-body-sm text-text-secondary py-2">{message}</p>
+  )
+}
+
+/** Test Action Panel — moderator submits actions as any role for testing.
+ *  Loads actual action permissions from role_actions table per selected role. */
+function TestActionPanel({
+  simId,
+  roles,
+  onActionSubmitted,
+}: {
+  simId: string
+  roles: SimRunRole[]
+  onActionSubmitted: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [selectedRole, setSelectedRole] = useState('')
+  const [actionType, setActionType] = useState('')
+  const [roleActions, setRoleActions] = useState<string[]>([])
+  const [content, setContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<string | null>(null)
+
+  const activeRoles = roles.filter((r) => r.status === 'active')
+  const selectedRoleData = activeRoles.find((r) => r.id === selectedRole)
+
+  // Load actual actions for the selected role from role_actions table
+  useEffect(() => {
+    if (!selectedRole || !simId) {
+      setRoleActions([])
+      setActionType('')
+      return
+    }
+    supabase
+      .from('role_actions')
+      .select('action_id')
+      .eq('sim_run_id', simId)
+      .eq('role_id', selectedRole)
+      .order('action_id')
+      .then(({ data }) => {
+        const actions = (data ?? []).map((r: { action_id: string }) => r.action_id)
+        setRoleActions(actions)
+        setActionType(actions[0] ?? '')
+      })
+  }, [selectedRole, simId])
+
+  const handleSubmit = async () => {
+    if (!selectedRole || !actionType) return
+    setSubmitting(true)
+    setResult(null)
+    try {
+      const params: Record<string, unknown> = {}
+      if (actionType === 'public_statement' && content) {
+        params.content = content
+      }
+      const res = await submitAction(
+        simId, actionType, selectedRole,
+        selectedRoleData?.country_id ?? '',
+        params,
+      )
+      setResult(res.narrative as string ?? 'Action submitted')
+      setContent('')
+      onActionSubmitted()
+    } catch (e) {
+      setResult(e instanceof Error ? e.message : 'Failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <DashboardSection title="Test Action">
+      <button
+        onClick={() => setOpen(!open)}
+        className="font-body text-caption text-action hover:underline mb-2"
+      >
+        {open ? 'Hide test panel' : 'Submit action as any role...'}
+      </button>
+
+      {open && (
+        <div className="space-y-3 mt-2">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="font-body text-caption text-text-secondary block mb-1">Role</label>
+              <select
+                value={selectedRole}
+                onChange={(e) => setSelectedRole(e.target.value)}
+                className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary"
+              >
+                <option value="">Select role...</option>
+                {activeRoles.map((r) => (
+                  <option key={r.id} value={r.id}>
+                    {r.character_name} ({r.country_id}) — {r.position_type}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="font-body text-caption text-text-secondary block mb-1">
+                Action ({roleActions.length} available)
+              </label>
+              <select
+                value={actionType}
+                onChange={(e) => setActionType(e.target.value)}
+                disabled={roleActions.length === 0}
+                className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary disabled:opacity-50"
+              >
+                {roleActions.length === 0 ? (
+                  <option value="">Select a role first...</option>
+                ) : (
+                  roleActions.map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))
+                )}
+              </select>
+            </div>
+          </div>
+
+          {actionType === 'public_statement' && (
+            <div>
+              <label className="font-body text-caption text-text-secondary block mb-1">
+                Statement content
+              </label>
+              <input
+                type="text"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Enter statement text..."
+                className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSubmit}
+              disabled={!selectedRole || submitting}
+              className="bg-action text-white font-body text-caption font-medium px-4 py-2 rounded hover:bg-action/90 disabled:opacity-50 transition-colors"
+            >
+              {submitting ? 'Submitting...' : 'Submit Action'}
+            </button>
+            {result && (
+              <span className="font-body text-caption text-text-secondary">
+                {result}
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </DashboardSection>
   )
 }
 
