@@ -19,6 +19,7 @@ import {
   createSimRun,
   updateSimRun,
   getSimRunRoles,
+  getTemplateCountries,
   type SimTemplate,
   type SimRun,
   type SimRunRole,
@@ -60,12 +61,10 @@ interface WizardRole {
   character_name: string
   country_id: string
   title: string
-  is_head_of_state: boolean
-  is_military_chief: boolean
+  position_type: string
   is_ai_operated: boolean
-  is_economy_officer: boolean
   expansion_role: boolean
-  powers: string[]
+  public_bio: string
   active: boolean
 }
 
@@ -126,6 +125,10 @@ export function SimRunWizard() {
   const [maxRounds, setMaxRounds] = useState(6)
   const [keyEvents, setKeyEvents] = useState<KeyEvent[]>([])
 
+  /* Info popup & country briefs */
+  const [countryBriefs, setCountryBriefs] = useState<Record<string, string>>({})
+  const [infoPopup, setInfoPopup] = useState<{type: 'role' | 'country', id: string, name: string, content: string} | null>(null)
+
   /* ---- Data loading ---- */
 
   useEffect(() => {
@@ -137,6 +140,16 @@ export function SimRunWizard() {
         console.error('Failed to load templates:', e)
       } finally {
         setTemplatesLoading(false)
+      }
+      try {
+        const countries = await getTemplateCountries()
+        const briefs: Record<string, string> = {}
+        for (const c of countries) {
+          if (c.country_brief) briefs[c.id] = c.country_brief
+        }
+        setCountryBriefs(briefs)
+      } catch (e) {
+        console.error('Failed to load country briefs:', e)
       }
     }
     load()
@@ -177,12 +190,10 @@ export function SimRunWizard() {
               character_name: r.character_name,
               country_id: r.country_id,
               title: r.title,
-              is_head_of_state: r.is_head_of_state,
-              is_military_chief: r.is_military_chief,
+              position_type: r.position_type ?? 'other',
               is_ai_operated: r.is_ai_operated,
-              is_economy_officer: r.is_economy_officer ?? false,
               expansion_role: r.expansion_role ?? false,
-              powers: r.powers ?? [],
+              public_bio: r.public_bio ?? '',
               active: r.status !== 'inactive',
             }))
           )
@@ -238,12 +249,10 @@ export function SimRunWizard() {
             character_name: r.character_name,
             country_id: r.country_id,
             title: r.title,
-            is_head_of_state: r.is_head_of_state,
-            is_military_chief: r.is_military_chief,
+            position_type: r.position_type ?? 'other',
             is_ai_operated: r.is_ai_operated,
-            is_economy_officer: r.is_economy_officer ?? false,
             expansion_role: r.expansion_role ?? false,
-            powers: r.powers ?? [],
+            public_bio: r.public_bio ?? '',
             active: true,
           }))
         )
@@ -509,10 +518,12 @@ export function SimRunWizard() {
               loading={rolesLoading}
               message={rolesMessage}
               summary={roleSummary}
+              countryBriefs={countryBriefs}
               onToggleRole={toggleRole}
               onToggleRoleAi={toggleRoleAi}
               onToggleCountryAll={toggleCountryAll}
               onSetCountryAllAi={setCountryAllAi}
+              onShowInfo={setInfoPopup}
             />
           )}
           {step === 3 && (
@@ -581,6 +592,29 @@ export function SimRunWizard() {
             </button>
           )}
         </div>
+        {/* Info popup overlay */}
+        {infoPopup && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            onClick={() => setInfoPopup(null)}
+          >
+            <div
+              className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-heading text-h3 text-text-primary">{infoPopup.name}</h3>
+                <button
+                  onClick={() => setInfoPopup(null)}
+                  className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-border/80 transition-colors"
+                >
+                  x
+                </button>
+              </div>
+              <p className="font-body text-body-sm text-text-secondary whitespace-pre-wrap">{infoPopup.content || 'No description available.'}</p>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
@@ -842,19 +876,23 @@ function StepCountriesRoles({
   loading,
   message,
   summary,
+  countryBriefs,
   onToggleRole,
   onToggleRoleAi,
   onToggleCountryAll,
   onSetCountryAllAi,
+  onShowInfo,
 }: {
   rolesByCountry: Record<string, WizardRole[]>
   loading: boolean
   message: string | null
   summary: { countries: number; total: number; human: number; ai: number }
+  countryBriefs: Record<string, string>
   onToggleRole: (id: string) => void
   onToggleRoleAi: (id: string, isAi: boolean) => void
   onToggleCountryAll: (countryId: string, active: boolean) => void
   onSetCountryAllAi: (countryId: string, isAi: boolean) => void
+  onShowInfo: (info: {type: 'role' | 'country', id: string, name: string, content: string} | null) => void
 }) {
   // Custom sort: large teams → EU → mid-size → solo (alphabetical)
   const COUNTRY_ORDER: string[] = [
@@ -927,6 +965,20 @@ function StepCountriesRoles({
                     <h3 className="font-heading text-h3 text-text-primary">
                       {countryId.charAt(0).toUpperCase() + countryId.slice(1)}
                     </h3>
+                    {countryBriefs[countryId] && (
+                      <button
+                        onClick={() => onShowInfo({
+                          type: 'country',
+                          id: countryId,
+                          name: countryId.charAt(0).toUpperCase() + countryId.slice(1),
+                          content: countryBriefs[countryId],
+                        })}
+                        className="w-5 h-5 rounded-full bg-border/50 flex items-center justify-center text-text-secondary hover:text-action hover:bg-action/10 transition-colors"
+                        title="Country info"
+                      >
+                        <span className="text-xs leading-none font-medium">i</span>
+                      </button>
+                    )}
                     <span className="font-data text-data text-text-secondary">
                       {countryRoles.filter((r) => r.active).length}/{countryRoles.length} roles
                     </span>
@@ -980,28 +1032,39 @@ function StepCountriesRoles({
                             <span className="text-[10px] leading-none">{'\u2713'}</span>
                           )}
                         </button>
-                        <div>
+                        <div className="flex items-center">
                           <span className="font-body text-body-sm text-text-primary">
                             {role.character_name}
                           </span>
+                          <button
+                            onClick={() => onShowInfo({
+                              type: 'role',
+                              id: role.id,
+                              name: role.character_name,
+                              content: `${role.title}\n\n${role.public_bio || 'No bio available.'}`,
+                            })}
+                            className="w-4 h-4 rounded-full bg-border/50 flex items-center justify-center text-text-secondary hover:text-action hover:bg-action/10 transition-colors ml-1.5 flex-shrink-0"
+                            title="Role info"
+                          >
+                            <span className="text-[10px] leading-none font-medium">i</span>
+                          </button>
                           <span className="font-body text-caption text-text-secondary ml-2">
                             {role.title}
                           </span>
-                          {role.is_head_of_state && (
-                            <span className="font-body text-caption font-medium bg-warning/10 text-warning px-1.5 py-0.5 rounded ml-2">
-                              HoS
-                            </span>
-                          )}
-                          {role.is_military_chief && !role.is_head_of_state && (
-                            <span className="font-body text-caption font-medium bg-danger/10 text-danger px-1.5 py-0.5 rounded ml-2">
-                              Military
-                            </span>
-                          )}
-                          {role.is_economy_officer && !role.is_head_of_state && (
-                            <span className="font-body text-caption font-medium bg-accent/10 text-accent px-1.5 py-0.5 rounded ml-2">
-                              Economy
-                            </span>
-                          )}
+                          {(() => {
+                            const badges: Record<string, {label: string, cls: string}> = {
+                              head_of_state: {label: 'HoS', cls: 'bg-warning/10 text-warning'},
+                              military_chief: {label: 'Military', cls: 'bg-danger/10 text-danger'},
+                              economy_officer: {label: 'Economy', cls: 'bg-accent/10 text-accent'},
+                              diplomat: {label: 'Diplomat', cls: 'bg-action/10 text-action'},
+                              security: {label: 'Security', cls: 'bg-text-secondary/10 text-text-primary'},
+                              opposition: {label: 'Opposition', cls: 'bg-danger/20 text-danger'},
+                            }
+                            const b = badges[role.position_type]
+                            return b ? (
+                              <span className={`font-body text-caption font-medium px-1.5 py-0.5 rounded ml-2 ${b.cls}`}>{b.label}</span>
+                            ) : null
+                          })()}
                           {role.expansion_role && (
                             <span className="font-body text-caption font-medium text-text-secondary bg-border/50 px-1.5 py-0.5 rounded ml-2">
                               optional

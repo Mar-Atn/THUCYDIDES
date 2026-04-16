@@ -48,12 +48,10 @@ export interface SimRunRole {
   character_name: string
   country_id: string
   title: string
-  is_head_of_state: boolean
-  is_military_chief: boolean
+  position_type: string
   is_ai_operated: boolean
-  is_economy_officer: boolean
   expansion_role: boolean
-  powers: string[]
+  public_bio: string
   status: string
   user_id: string | null
 }
@@ -214,7 +212,7 @@ export async function duplicateSimRun(sourceId: string, newName: string): Promis
 export async function getSimRunRoles(simRunId: string): Promise<SimRunRole[]> {
   const { data, error } = await supabase
     .from('roles')
-    .select('id, sim_run_id, character_name, country_id, title, is_head_of_state, is_military_chief, is_ai_operated, is_economy_officer, expansion_role, powers, status, user_id')
+    .select('id, sim_run_id, character_name, country_id, title, position_type, is_ai_operated, expansion_role, public_bio, status, user_id')
     .eq('sim_run_id', simRunId)
     .order('country_id')
 
