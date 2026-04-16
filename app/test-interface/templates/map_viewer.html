@@ -33,6 +33,10 @@
   /* Compact header */
   .app-header { height: auto !important; min-height: 32px !important; padding: 4px 12px !important; }
 
+  /* Map stage: vertical flow, scrollable */
+  .app-main { overflow: visible !important; height: calc(100vh - 40px) !important; }
+  .map-stage { overflow: auto !important; height: 100% !important; flex-direction: column !important; align-items: flex-start !important; justify-content: flex-start !important; }
+
   /* Interactive legend in edit mode */
   .geo-selectable { cursor: default; transition: background 0.15s; border-radius: 3px; padding: 2px 4px !important; }
   .geo-edit-active .geo-selectable { cursor: pointer; }
@@ -115,7 +119,10 @@
         <span class="swatch" style="background:#C4922A;border:2px dashed #C4922A"></span><span>Die Hard zone</span>
       </div>
       <div class="legend-row geo-selectable" data-geo-tool="nuclear">
-        <span class="swatch" style="background:#B03A3A;border-radius:50%"></span><span>Nuclear site</span>
+        <span class="swatch" style="background:transparent;color:#B03A3A;font-size:14px;text-align:center;line-height:16px;">☢</span><span>Nuclear site</span>
+      </div>
+      <div class="legend-row geo-selectable" data-geo-tool="clear_features">
+        <span class="swatch" style="background:var(--danger);font-size:10px;text-align:center;line-height:16px;color:white;">✕</span><span>Clear features</span>
       </div>
     </div>
     <div class="legend-section">
@@ -137,6 +144,7 @@
   <section class="map-stage">
     <div id="mapError" class="map-error" style="display:none"></div>
     <svg id="mapSvg" class="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="theaterMapsContainer"></div>
   </section>
 
   <aside class="inspector" id="inspector">

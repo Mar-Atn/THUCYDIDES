@@ -182,6 +182,7 @@
       chokepoint: 'Click hexes → Toggle Chokepoint',
       diehard: 'Click hexes → Toggle Die Hard',
       nuclear: 'Click hexes → Toggle Nuclear Site',
+      clear_features: 'Click hexes → Clear all features',
       copy: 'Click source hex, then click target',
     }[tool] || 'Paint: ' + tool;
   }
@@ -244,6 +245,22 @@
       return;
     }
 
+    // ---- Clear all features from hex ----
+    if (tool === 'clear_features') {
+      saveUndo(target, row, col);
+      ['chokepoint', 'diehard', 'nuclear'].forEach(f => {
+        target.dataset[f] = 'false';
+      });
+      target.style.stroke = '';
+      target.style.strokeWidth = '';
+      target.style.strokeDasharray = '';
+      // Remove any nuclear icons on this hex
+      document.querySelectorAll(`.geo-nuclear-icon[data-for-row="${row}"][data-for-col="${col}"]`).forEach(el => el.remove());
+      showStatus(`(${row+1},${col+1}) — all features cleared`);
+      geo.dirty = true;
+      return;
+    }
+
     // ---- Feature toggles ----
     if (tool === 'chokepoint' || tool === 'diehard' || tool === 'nuclear') {
       saveUndo(target, row, col);
@@ -275,49 +292,25 @@
       poly.style.strokeWidth = '3';
       poly.style.strokeDasharray = dash;
 
-      // Add nuclear site icon
+      // Add nuclear site icon — classic radiation trefoil
       if (feature === 'nuclear' && svg) {
         const cx = parseFloat(poly.getBBox().x + poly.getBBox().width / 2);
         const cy = parseFloat(poly.getBBox().y + poly.getBBox().height / 2);
-        const r = poly.getBBox().width * 0.2;
+        const sz = poly.getBBox().width * 0.5;
 
-        // Outer ring
-        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        ring.setAttribute('cx', cx);
-        ring.setAttribute('cy', cy);
-        ring.setAttribute('r', r);
-        ring.setAttribute('fill', 'none');
-        ring.setAttribute('stroke', '#B03A3A');
-        ring.setAttribute('stroke-width', '2');
-        ring.classList.add('geo-nuclear-icon');
-        ring.dataset.forRow = row;
-        ring.dataset.forCol = col;
-        svg.appendChild(ring);
-
-        // Inner dot
-        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        dot.setAttribute('cx', cx);
-        dot.setAttribute('cy', cy);
-        dot.setAttribute('r', r * 0.35);
-        dot.setAttribute('fill', '#B03A3A');
-        dot.classList.add('geo-nuclear-icon');
-        dot.dataset.forRow = row;
-        dot.dataset.forCol = col;
-        svg.appendChild(dot);
-
-        // ☢ text label
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', cx);
-        label.setAttribute('y', cy + r + 10);
-        label.setAttribute('text-anchor', 'middle');
-        label.setAttribute('font-size', '8');
-        label.setAttribute('fill', '#B03A3A');
-        label.setAttribute('font-family', 'var(--font-mono)');
-        label.textContent = '☢';
-        label.classList.add('geo-nuclear-icon');
-        label.dataset.forRow = row;
-        label.dataset.forCol = col;
-        svg.appendChild(label);
+        const nuc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        nuc.setAttribute('x', cx);
+        nuc.setAttribute('y', cy + sz * 0.15);
+        nuc.setAttribute('text-anchor', 'middle');
+        nuc.setAttribute('dominant-baseline', 'central');
+        nuc.setAttribute('font-size', sz);
+        nuc.setAttribute('fill', '#B03A3A');
+        nuc.style.pointerEvents = 'none';
+        nuc.textContent = '☢';
+        nuc.classList.add('geo-nuclear-icon');
+        nuc.dataset.forRow = row;
+        nuc.dataset.forCol = col;
+        svg.appendChild(nuc);
       }
     } else {
       const hasOther = ['chokepoint', 'diehard', 'nuclear'].some(f => f !== feature && poly.dataset[f] === 'true');
@@ -357,6 +350,31 @@
   function undo() {
     if (geo.undoStack.length === 0) return;
     const entry = geo.undoStack.pop();
+
+    // Handle color_change entries (palette undo)
+    if (entry.type === 'color_change') {
+      // Restore palette
+      if (geo.palette[entry.cid] && typeof geo.palette[entry.cid] === 'object') {
+        geo.palette[entry.cid].map = entry.oldColor;
+      }
+      // Restore legend swatch
+      const legendRows = document.querySelectorAll('#countryLegend .country-row');
+      legendRows.forEach(row => {
+        const nameSpan = row.querySelector('.cname');
+        if (nameSpan && findCountryId(nameSpan.textContent.trim()) === entry.cid) {
+          const swatch = row.querySelector('.swatch');
+          if (swatch) swatch.style.background = entry.oldColor;
+        }
+      });
+      // Restore all hex fills for this country
+      document.querySelectorAll(`#mapSvg polygon[data-owner="${entry.cid}"]`).forEach(poly => {
+        poly.setAttribute('fill', entry.oldColor);
+      });
+      geo.redoStack.push(entry);
+      showStatus(`Undo color: ${entry.cid}`);
+      return;
+    }
+
     const poly = document.querySelector(`#mapSvg polygon[data-row="${entry.row}"][data-col="${entry.col}"]`);
     if (!poly) return;
 
@@ -379,6 +397,28 @@
   function redo() {
     if (geo.redoStack.length === 0) return;
     const entry = geo.redoStack.pop();
+
+    // Handle color_change redo
+    if (entry.type === 'color_change') {
+      if (geo.palette[entry.cid] && typeof geo.palette[entry.cid] === 'object') {
+        geo.palette[entry.cid].map = entry.newColor;
+      }
+      const legendRows = document.querySelectorAll('#countryLegend .country-row');
+      legendRows.forEach(row => {
+        const nameSpan = row.querySelector('.cname');
+        if (nameSpan && findCountryId(nameSpan.textContent.trim()) === entry.cid) {
+          const swatch = row.querySelector('.swatch');
+          if (swatch) swatch.style.background = entry.newColor;
+        }
+      });
+      document.querySelectorAll(`#mapSvg polygon[data-owner="${entry.cid}"]`).forEach(poly => {
+        poly.setAttribute('fill', entry.newColor);
+      });
+      geo.undoStack.push(entry);
+      showStatus(`Redo color: ${entry.cid}`);
+      return;
+    }
+
     const poly = document.querySelector(`#mapSvg polygon[data-row="${entry.row}"][data-col="${entry.col}"]`);
     if (!poly) return;
 
@@ -402,9 +442,29 @@
     // Undo everything in reverse order
     while (geo.undoStack.length > 0) {
       const entry = geo.undoStack.pop();
-      const poly = document.querySelector(`#mapSvg polygon[data-row="${entry.row}"][data-col="${entry.col}"]`);
-      if (poly) applyState(poly, entry.prev);
+      if (entry.type === 'color_change') {
+        // Revert palette color
+        if (geo.palette[entry.cid] && typeof geo.palette[entry.cid] === 'object') {
+          geo.palette[entry.cid].map = entry.oldColor;
+        }
+        const legendRows = document.querySelectorAll('#countryLegend .country-row');
+        legendRows.forEach(row => {
+          const nameSpan = row.querySelector('.cname');
+          if (nameSpan && findCountryId(nameSpan.textContent.trim()) === entry.cid) {
+            const swatch = row.querySelector('.swatch');
+            if (swatch) swatch.style.background = entry.oldColor;
+          }
+        });
+        document.querySelectorAll(`#mapSvg polygon[data-owner="${entry.cid}"]`).forEach(poly => {
+          poly.setAttribute('fill', entry.oldColor);
+        });
+      } else {
+        const poly = document.querySelector(`#mapSvg polygon[data-row="${entry.row}"][data-col="${entry.col}"]`);
+        if (poly) applyState(poly, entry.prev);
+      }
     }
+    // Remove any editor-placed nuclear icons
+    document.querySelectorAll('.geo-nuclear-icon').forEach(el => el.remove());
     geo.redoStack = [];
     geo.dirty = false;
     showStatus('All changes reverted');
@@ -516,6 +576,24 @@
 
     document.getElementById('geoPickApply').addEventListener('click', () => {
       const newColor = document.getElementById('geoPickMap').value;
+      const oldColor = currentColor;
+
+      // Save undo for every affected hex + palette change
+      const affectedHexes = document.querySelectorAll(`#mapSvg polygon[data-owner="${cid}"]`);
+      affectedHexes.forEach(poly => {
+        const r = parseInt(poly.dataset.row);
+        const c = parseInt(poly.dataset.col);
+        saveUndo(poly, r, c);
+      });
+      // Also push a palette undo marker
+      geo.undoStack.push({
+        type: 'color_change',
+        cid: cid,
+        oldColor: oldColor,
+        newColor: newColor,
+        oldSwatch: legendRow.querySelector('.swatch')?.style.background || '',
+      });
+
       // Update palette
       if (!geo.palette[cid]) geo.palette[cid] = {};
       if (typeof geo.palette[cid] === 'object') {
@@ -525,9 +603,10 @@
       const swatch = legendRow.querySelector('.swatch');
       if (swatch) swatch.style.background = newColor;
       // Update all hexes with this owner
-      document.querySelectorAll(`#mapSvg polygon[data-owner="${cid}"]`).forEach(poly => {
+      affectedHexes.forEach(poly => {
         poly.setAttribute('fill', newColor);
       });
+      geo.redoStack = [];
       geo.dirty = true;
       showStatus(`Color updated: ${cid} → ${newColor}`);
       picker.remove();

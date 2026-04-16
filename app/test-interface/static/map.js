@@ -223,10 +223,10 @@
     const width = PAD * 2 + cols * w + w / 2;
     const height = PAD * 2 + rows * h + r * 0.5;
 
+    svg.innerHTML = '';
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('width', width);
     svg.setAttribute('height', height);
-    svg.innerHTML = '';
 
     // grid edge labels (col numbers on top, row numbers on left)
     for (let c = 0; c < cols; c++) {
@@ -317,30 +317,114 @@
       // Mark the hex polygon with data-nuclear
       const poly = svg.querySelector(`polygon[data-row="${nRow - 1}"][data-col="${nCol - 1}"]`);
       if (poly) poly.dataset.nuclear = 'true';
-      // Outer ring
-      const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      marker.setAttribute('cx', center.x);
-      marker.setAttribute('cy', center.y);
-      marker.setAttribute('r', r * 0.35);
-      marker.setAttribute('class', 'nuclear-marker');
-      svg.appendChild(marker);
-      // Inner dot
-      const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      dot.setAttribute('cx', center.x);
-      dot.setAttribute('cy', center.y);
-      dot.setAttribute('r', r * 0.12);
-      dot.setAttribute('fill', '#B03A3A');
-      svg.appendChild(dot);
-      // ☢ label
-      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      label.setAttribute('x', center.x);
-      label.setAttribute('y', center.y + r * 0.55);
-      label.setAttribute('text-anchor', 'middle');
-      label.setAttribute('font-size', '9');
-      label.setAttribute('fill', '#B03A3A');
-      label.textContent = '☢';
-      svg.appendChild(label);
+      // Classic radiation trefoil ☢
+      const nuc = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      nuc.setAttribute('x', center.x);
+      nuc.setAttribute('y', center.y + r * 0.15);
+      nuc.setAttribute('text-anchor', 'middle');
+      nuc.setAttribute('dominant-baseline', 'central');
+      nuc.setAttribute('font-size', r * 0.7);
+      nuc.setAttribute('fill', '#B03A3A');
+      nuc.style.pointerEvents = 'none';
+      nuc.textContent = '☢';
+      svg.appendChild(nuc);
     });
+
+    // In geography mode: render both theaters as separate SVGs below the global map
+    if (window.MAP_VIEWER_MODE === 'geography') {
+      const container = document.getElementById('theaterMapsContainer');
+      if (container) {
+        container.innerHTML = '';
+        container.style.cssText = 'display:flex; gap:10px; padding:10px 0; clear:both;';
+
+        const theaters = ['eastern_ereb', 'mashriq'];
+        theaters.forEach((tName) => {
+          const tData = state.theaters[tName];
+          if (!tData) return;
+          const tRows = tData.rows || 10;
+          const tCols = tData.cols || 10;
+          const tR = HEX_R_GLOBAL;
+          const tW = Math.sqrt(3) * tR;
+          const tSvgW = PAD * 2 + tCols * tW + tW / 2;
+          const tSvgH = PAD * 2 + tRows * (1.5 * tR) + tR * 0.5 + 20; // +20 for title
+
+          const wrapper = document.createElement('div');
+
+          // Title (clickable to collapse/expand)
+          const titleDiv = document.createElement('div');
+          titleDiv.style.cssText = 'cursor:pointer; font-family:var(--font-heading); font-size:13px; color:var(--accent); padding:4px 8px; user-select:none;';
+          titleDiv.textContent = '▼ ' + (THEATER_LABELS[tName] || tName);
+
+          const tSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          tSvg.setAttribute('viewBox', `0 0 ${tSvgW} ${tSvgH}`);
+          tSvg.setAttribute('width', tSvgW);
+          tSvg.setAttribute('height', tSvgH);
+          tSvg.classList.add('map-svg');
+
+          titleDiv.addEventListener('click', () => {
+            const visible = tSvg.style.display !== 'none';
+            tSvg.style.display = visible ? 'none' : 'block';
+            titleDiv.textContent = (visible ? '▶ ' : '▼ ') + (THEATER_LABELS[tName] || tName);
+          });
+
+          // Grid labels
+          for (let c = 0; c < tCols; c++) {
+            const cx = PAD + c * tW + tW / 2;
+            addText(tSvg, cx, PAD - 8, String(c + 1), 'grid-edge-label');
+          }
+          for (let rr = 0; rr < tRows; rr++) {
+            const cy = PAD + rr * (1.5 * tR) + tR;
+            addText(tSvg, PAD - 14, cy + 4, String(rr + 1), 'grid-edge-label');
+          }
+
+          // Hexes
+          for (let rr = 0; rr < tRows; rr++) {
+            for (let cc = 0; cc < tCols; cc++) {
+              const hex = tData.grid[rr][cc];
+              const xOff = (rr % 2 === 1) ? tW / 2 : 0;
+              const cx = PAD + cc * tW + xOff + tW / 2;
+              const cy = PAD + rr * (1.5 * tR) + tR;
+              const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+              poly.setAttribute('points', hexPoints(cx, cy, tR));
+              poly.setAttribute('fill', hex.occupied_by ? colorFor(hex.owner) : colorFor(hex.owner));
+              let cls = 'hex';
+              if (hex.owner === 'sea') cls += ' sea';
+              poly.setAttribute('class', cls);
+              poly.dataset.row = rr;
+              poly.dataset.col = cc;
+              poly.dataset.owner = hex.owner || 'sea';
+              poly.dataset.theater = tName;
+              poly.addEventListener('click', () => renderView(tName));
+              tSvg.appendChild(poly);
+
+              if (hex.owner && hex.owner !== 'sea') {
+                addText(tSvg, cx, cy - 12, `${rr+1},${cc+1}`, 'hex-label');
+              }
+            }
+          }
+
+          // Die-hards
+          const tDieHards = tData.dieHards || {};
+          Object.keys(tDieHards).forEach(k => {
+            const dh = tDieHards[k];
+            const xOff = (dh.row % 2 === 1) ? tW / 2 : 0;
+            const cx = PAD + dh.col * tW + xOff + tW / 2;
+            const cy = PAD + dh.row * (1.5 * tR) + tR;
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', cx);
+            circle.setAttribute('cy', cy);
+            circle.setAttribute('r', tR * 0.85);
+            circle.setAttribute('class', 'die-hard-marker');
+            tSvg.appendChild(circle);
+            addText(tSvg, cx, cy + 3, dh.name, 'chokepoint-label');
+          });
+
+          wrapper.appendChild(titleDiv);
+          wrapper.appendChild(tSvg);
+          container.appendChild(wrapper);
+        });
+      }
+    }
   }
 
   // ---------- Theater view ----------
@@ -413,7 +497,7 @@
       circle.setAttribute('r', r * 0.85);
       circle.setAttribute('class', 'die-hard-marker');
       svg.appendChild(circle);
-      addText(svg, center.x, center.y + r + 4, dh.name, 'chokepoint-label');
+      addText(svg, center.x, center.y + 3, dh.name, 'chokepoint-label');
     });
 
     // Country name labels at centroid
