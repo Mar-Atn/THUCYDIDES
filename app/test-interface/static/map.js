@@ -230,7 +230,7 @@
 
     // grid edge labels (col numbers on top, row numbers on left)
     for (let c = 0; c < cols; c++) {
-      const cx = PAD + c * w + w / 2 + w / 2; // approximate column center
+      const cx = PAD + c * w + w / 2; // aligned with even-row hex centers
       addText(svg, cx, PAD - 18, String(c + 1), 'grid-edge-label');
     }
     for (let rIdx = 0; rIdx < rows; rIdx++) {
@@ -306,25 +306,40 @@
       renderEmbarkBadges(svg,'global', r);
     }
 
-    // Nuclear sites overlay (always shown)
-    const nuclearSites = (window.MAP_CONFIG && window.MAP_CONFIG.NUCLEAR_SITES) || {};
+    // Nuclear sites overlay — read from template data, not hardcoded
+    // Sources: (1) saved nuclearSites in global JSON, (2) MAP_CONFIG fallback
+    const savedNuclear = data.nuclearSites || data.nuclear_sites || {};
+    const configNuclear = (window.MAP_CONFIG && window.MAP_CONFIG.NUCLEAR_SITES) || {};
+    const nuclearSites = Object.keys(savedNuclear).length > 0 ? savedNuclear : configNuclear;
     Object.entries(nuclearSites).forEach(([country, coords]) => {
-      const [nRow, nCol] = coords; // 1-indexed
+      const [nRow, nCol] = Array.isArray(coords) ? coords : [coords.row + 1, coords.col + 1]; // 1-indexed
       const center = hexCenter(nRow - 1, nCol - 1, r);
+      // Mark the hex polygon with data-nuclear
+      const poly = svg.querySelector(`polygon[data-row="${nRow - 1}"][data-col="${nCol - 1}"]`);
+      if (poly) poly.dataset.nuclear = 'true';
+      // Outer ring
       const marker = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       marker.setAttribute('cx', center.x);
       marker.setAttribute('cy', center.y);
       marker.setAttribute('r', r * 0.35);
       marker.setAttribute('class', 'nuclear-marker');
-      marker.setAttribute('data-tooltip', `Nuclear site: ${country}`);
       svg.appendChild(marker);
-      // Radiation symbol dot
+      // Inner dot
       const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       dot.setAttribute('cx', center.x);
       dot.setAttribute('cy', center.y);
       dot.setAttribute('r', r * 0.12);
       dot.setAttribute('fill', '#B03A3A');
       svg.appendChild(dot);
+      // ☢ label
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', center.x);
+      label.setAttribute('y', center.y + r * 0.55);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('font-size', '9');
+      label.setAttribute('fill', '#B03A3A');
+      label.textContent = '☢';
+      svg.appendChild(label);
     });
   }
 
@@ -347,7 +362,7 @@
 
     // grid edge labels
     for (let c = 0; c < cols; c++) {
-      const cx = PAD + c * w + w / 2 + w / 2;
+      const cx = PAD + c * w + w / 2; // aligned with even-row hex centers
       addText(svg, cx, PAD - 18, String(c + 1), 'grid-edge-label');
     }
     for (let rIdx = 0; rIdx < rows; rIdx++) {

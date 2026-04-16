@@ -266,6 +266,7 @@
   function toggleFeature(poly, row, col, feature) {
     const current = poly.dataset[feature] === 'true';
     poly.dataset[feature] = current ? 'false' : 'true';
+    const svg = document.getElementById('mapSvg');
 
     if (!current) {
       const cfg = { chokepoint: ['#E8B84D', '4 2'], diehard: ['#C4922A', '6 3'], nuclear: ['#B03A3A', 'none'] };
@@ -273,12 +274,62 @@
       poly.style.stroke = color;
       poly.style.strokeWidth = '3';
       poly.style.strokeDasharray = dash;
+
+      // Add nuclear site icon
+      if (feature === 'nuclear' && svg) {
+        const cx = parseFloat(poly.getBBox().x + poly.getBBox().width / 2);
+        const cy = parseFloat(poly.getBBox().y + poly.getBBox().height / 2);
+        const r = poly.getBBox().width * 0.2;
+
+        // Outer ring
+        const ring = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        ring.setAttribute('cx', cx);
+        ring.setAttribute('cy', cy);
+        ring.setAttribute('r', r);
+        ring.setAttribute('fill', 'none');
+        ring.setAttribute('stroke', '#B03A3A');
+        ring.setAttribute('stroke-width', '2');
+        ring.classList.add('geo-nuclear-icon');
+        ring.dataset.forRow = row;
+        ring.dataset.forCol = col;
+        svg.appendChild(ring);
+
+        // Inner dot
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', cx);
+        dot.setAttribute('cy', cy);
+        dot.setAttribute('r', r * 0.35);
+        dot.setAttribute('fill', '#B03A3A');
+        dot.classList.add('geo-nuclear-icon');
+        dot.dataset.forRow = row;
+        dot.dataset.forCol = col;
+        svg.appendChild(dot);
+
+        // ☢ text label
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('x', cx);
+        label.setAttribute('y', cy + r + 10);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '8');
+        label.setAttribute('fill', '#B03A3A');
+        label.setAttribute('font-family', 'var(--font-mono)');
+        label.textContent = '☢';
+        label.classList.add('geo-nuclear-icon');
+        label.dataset.forRow = row;
+        label.dataset.forCol = col;
+        svg.appendChild(label);
+      }
     } else {
       const hasOther = ['chokepoint', 'diehard', 'nuclear'].some(f => f !== feature && poly.dataset[f] === 'true');
       if (!hasOther) {
         poly.style.stroke = '';
         poly.style.strokeWidth = '';
         poly.style.strokeDasharray = '';
+      }
+
+      // Remove nuclear icon
+      if (feature === 'nuclear') {
+        document.querySelectorAll(`.geo-nuclear-icon[data-for-row="${row}"][data-for-col="${col}"]`).forEach(el => el.remove());
       }
     }
     showStatus(`(${row+1},${col+1}) ${feature}: ${!current}`);

@@ -850,6 +850,7 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             grid = body.get("grid")
             chokepoints = body.get("chokepoints", {})
             die_hards = body.get("dieHards", {})
+            nuclear_sites = body.get("nuclearSites", {})
 
             if not grid:
                 return {"error": "No grid data provided"}
@@ -863,6 +864,7 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             existing["grid"] = grid
             existing["chokepoints"] = chokepoints
             existing["dieHards"] = die_hards
+            existing["nuclearSites"] = nuclear_sites
             with open(map_path, "w") as f:
                 json.dump(existing, f, indent=2)
 
@@ -880,6 +882,7 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
                     map_config["global"]["grid"] = grid
                     map_config["global"]["chokepoints"] = chokepoints
                     map_config["global"]["die_hards"] = die_hards
+                    map_config["global"]["nuclear_sites"] = nuclear_sites
                     client.table("sim_templates").update({"map_config": map_config}).eq("id", tpl.data[0].get("id", "")).execute()
 
             # 3. Save color changes to countries table
