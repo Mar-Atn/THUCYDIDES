@@ -6,7 +6,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '@/components/Header'
-import { getSimRuns, deleteSimRun, duplicateSimRun, type SimRun } from '@/lib/queries'
+import { getSimRuns, deleteSimRun, duplicateSimRun, simAction, type SimRun } from '@/lib/queries'
 
 export function ModeratorDashboard() {
   const navigate = useNavigate()
@@ -170,6 +170,31 @@ export function ModeratorDashboard() {
                     className="flex items-center gap-2"
                     onClick={(e) => e.stopPropagation()}
                   >
+                    {run.status === 'setup' ? (
+                      <button
+                        onClick={async () => {
+                          try {
+                            await simAction(run.id, 'pre-start')
+                            navigate(`/sim/${run.id}/live`)
+                          } catch (e) {
+                            console.error('Launch failed:', e)
+                            navigate(`/sim/${run.id}/live`)
+                          }
+                        }}
+                        className="font-body text-caption font-medium text-success hover:underline px-2 py-1"
+                        title="Launch simulation"
+                      >
+                        Launch
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => navigate(`/sim/${run.id}/live`)}
+                        className="font-body text-caption font-medium text-success hover:underline px-2 py-1"
+                        title="Open live dashboard"
+                      >
+                        Live
+                      </button>
+                    )}
                     <button
                       onClick={() => navigate(`/sim/${run.id}/edit`)}
                       className="font-body text-caption text-action hover:underline px-2 py-1"
