@@ -137,41 +137,88 @@ Two modes:
 
 ## 6. Facilitator Dashboard Layout
 
+The dashboard prioritizes what the moderator DOES, not what the world looks like. The map is accessible but not the center focus — the moderator's attention goes to events, decisions, and control.
+
+### Top Bar (always visible, fixed)
 ```
-┌──────────────────────────────────────────────────────────┐
-│  Round 3 · Phase A · 42:17 remaining     [Extend] [End] │
-│  ═══════════════════════════════▓▓▓░░░░░░░  (65%)       │
-│  [Manual ○ / Automatic ●]   [Pause] [Next] [End Sim]    │
-└──────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  R3 · Phase A · 42:17          [◄ Back] [Pause] [▸ Next]    │
+│  ════════════════════▓▓▓░░░░░  [Extend +5m] [End Sim]       │
+│  Mode: [Manual ○ / Auto ●]    LLM: ✓ ok  Tokens: 82% left  │
+└──────────────────────────────────────────────────────────────┘
+```
+Phase control bar with full functionality: go back one phase, restart sim, pause, resume, advance, extend, end. Plus LLM/AI model health indicator.
 
-┌─────────────┬──────────────────────────┬────────────────┐
-│ LEFT PANEL  │  CENTER                  │ RIGHT PANEL    │
-│             │  Map (god view, all      │                │
-│ Participants│  units visible)          │ Country Status │
-│  7 human    │                          │  (stability,   │
-│  33 AI      │                          │   key metrics) │
-│  [Assign]   │                          │                │
-│             │                          │ Alerts         │
-│ AI Status   │                          │  ⚠ warnings    │
-│  33/33 idle │                          │  ☢ nuclear     │
-│  [Details]  │                          │  🗳 votes      │
-│             ├──────────────────────────┤                │
-│ Confirmation│  Action Feed             │ Key Events     │
-│  Queue (2)  │  (live stream)           │  this round    │
-│  [Review]   │                          │                │
-│             │  [Test Action Panel]     │                │
-│ Public Scr  │  (act as any role)       │                │
-│  [Controls] │                          │                │
-│             │                          │                │
-│ [Broadcast] │                          │                │
-└─────────────┴──────────────────────────┴────────────────┘
+### Main Area (scrollable, sections below)
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  ⚠ PENDING ACTIONS (2)                              [Auto ○]│
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ ☠ Assassination: Shadow → Furnace     [Confirm][Reject]│  │
+│  │ 🔄 Change Leader: Ironhand (Sarmatia) [Confirm][Reject]│  │
+│  └────────────────────────────────────────────────────────┘  │
+├──────────────────────────────────────────────────────────────┤
+│  📋 SIM EVENTS (live feed)                    [Filter] [All]│
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ 42:15  Shield submitted Ground Attack → (4,11)    MIL  │  │
+│  │ 41:50  Helmsman submitted Budget (social 1.2)     ECON │  │
+│  │ 41:30  ★ Dawn proposed Agreement to Anchor        DIPL │  │
+│  │ 40:55  Shadow submitted Intelligence request      COV  │  │
+│  │ 40:12  Compass submitted Set Tariffs on Columbia  ECON │  │
+│  │ ...                                                     │  │
+│  │ [Test Action: act as any role ▾]                        │  │
+│  └────────────────────────────────────────────────────────┘  │
+├──────────────────────────────────────────────────────────────┤
+│  🤖 AI PARTICIPANTS                                          │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │ Scales(idle) Chip(busy) Havana(idle) Pyro(busy)        │ │
+│  │ Vanguard(idle) Citadel(busy) Spire(idle) Sakura(idle)  │ │
+│  │ Vizier(busy) Wellspring(idle)                          │ │
+│  │ [Trigger Now] [Pause All] [Details ▸]                  │ │
+│  └─────────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────────┤
+│  👥 PARTICIPANTS                    7 human · 33 AI          │
+│  [Manage Assignments] [Oracle: 5/7 talked]                   │
+├──────────────────────────────────────────────────────────────┤
+│  📺 PUBLIC SCREEN          [View ▸] [Customize ▸]           │
+│  [📢 Broadcast Message]                                      │
+├──────────────────────────────────────────────────────────────┤
+│  🗺 MAP                    [Open Map ▸] [Open Deployments ▸] │
+├──────────────────────────────────────────────────────────────┤
+│  📊 EXPLORE SIM DATA       [Countries ▸] [Relationships ▸]  │
+│                             [Sanctions ▸] [All Tables ▸]     │
+└──────────────────────────────────────────────────────────────┘
 ```
 
-### Pre-Start view
-Same layout but center shows participant assignment interface instead of map.
+### Special Moments Area (context-sensitive, appears when relevant)
 
-### Phase B view
-Center shows engine processing progress (step 1/11... 2/11... done). Results summary appears when complete. Moderator can review and adjust before publishing.
+This section appears ONLY when the current round/phase triggers special events:
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  🔔 THIS ROUND: Columbia Mid-Term Elections                  │
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │ Nominations: 3 received (Shadow, Challenger, Shield)   │  │
+│  │ [Start Voting] [Extend Nominations]                    │  │
+│  └────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+Other special moment variants:
+- **Pre-start:** Participant assignment interface, Oracle status
+- **Nominations round:** Who has nominated, start/extend
+- **Voting round:** Vote progress, trigger counting
+- **Nuclear alert:** Authorization chain status, interception window
+- **Phase B:** Engine processing progress bar (step 1/11... done), result review
+
+### Linked Pages (open in new tab or modal)
+- **Map** → full hex map god-view (from map renderer)
+- **Deployments** → unit deployment view
+- **Public Screen** → preview of what the room projection shows
+- **Public Screen Customize** → control what's displayed
+- **Explore SIM Data** → all tables/data browser (countries, roles, relationships, sanctions, tariffs, etc.)
+- **AI Agent Details** → expanded view of each AI's status, pending actions, cognitive state
 
 ---
 
@@ -333,16 +380,17 @@ Participant submits action
 
 ---
 
-## 13. Open Questions for Marat
+## 13. Resolved Questions (Marat, 2026-04-16)
 
-**Q1: Number of AI triggers per Phase A.** You said 2-3 times. Suggest: (1) at Phase A start, (2) at midpoint, (3) 5 minutes before end for regular decisions. Does this feel right, or should it be configurable?
-
-**Q2: What does "moderator reviews Phase B results before publishing" mean in practice?** Does the moderator see a summary screen with all changes and can adjust individual values before they become visible to participants? Or is it more of a quick sanity check?
-
-**Q3: Participant lobby/waiting room.** After assignment in Phase 0, do participants see a "waiting for simulation to start" screen? Or do they immediately get their role brief?
-
-**Q4: Multiple facilitators.** Can two moderators share the dashboard simultaneously, or is it single-moderator only?
+| # | Question | Decision |
+|---|----------|----------|
+| Q1 | AI triggers per Phase A | **3 triggers:** (1) Phase A start, (2) midpoint, (3) near-end for regular decisions. Configurable later. |
+| Q2 | Phase B review | **Quick sanity check.** Moderator sees summary, can adjust values if something looks wrong. Not a full approval gate. |
+| Q3 | Participant lobby | **Role brief immediately** after assignment, then "Waiting for simulation to start" screen until moderator presses Start. |
+| Q4 | Multiple facilitators | **Single moderator** for now. Read-only observer mode for second facilitator can be added later. |
+| Q5 | Dashboard layout | **Events-first, not map-first.** Map accessible via link, not embedded. Priority: pending actions → event feed → AI status → participants. |
+| Q6 | Auto-approve mode | **Available for testing.** Toggle in Pending Actions section. Bypasses confirmation queue for all action types. |
 
 ---
 
-*This SPEC will be updated based on Marat's review. Once approved, Phase 1 implementation begins.*
+*SPEC approved in principle (2026-04-16). Phase 1 implementation begins.*
