@@ -592,7 +592,11 @@ export function FacilitatorDashboard() {
               <span className="font-body text-caption text-text-secondary">Mode:</span>
               <button
                 onClick={() => {
-                  /* Toggle placeholder — will call API */
+                  const newMode = mode === 'manual' ? 'automatic' : 'manual'
+                  doAction('mode', {
+                    auto_advance: newMode === 'automatic',
+                    auto_approve: newMode === 'automatic',
+                  })
                 }}
                 className={`font-body text-caption font-medium px-2 py-0.5 rounded ${
                   mode === 'manual'
@@ -616,6 +620,22 @@ export function FacilitatorDashboard() {
       {/*  MAIN CONTENT                                                      */}
       {/* ================================================================== */}
       <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6 space-y-6">
+        {/* Post-sim banner */}
+        {(currentStatus === 'completed' || currentStatus === 'aborted') && (
+          <div className={`rounded-lg p-6 border ${
+            currentStatus === 'completed' ? 'bg-success/5 border-success/30' : 'bg-danger/5 border-danger/30'
+          }`}>
+            <h2 className="font-heading text-h2 text-text-primary mb-2">
+              Simulation {currentStatus === 'completed' ? 'Complete' : 'Aborted'}
+            </h2>
+            <div className="flex items-center gap-6 font-data text-data text-text-secondary">
+              <span>Rounds played: {currentRound}</span>
+              <span>Events: {events.length}</span>
+              <span>Participants: {humanRoles.length} human / {aiRoles.length} AI</span>
+            </div>
+          </div>
+        )}
+
         {/* Sim title */}
         <div className="flex items-center justify-between">
           <h2 className="font-heading text-h2 text-text-primary">{simRun.name}</h2>
@@ -788,45 +808,30 @@ export function FacilitatorDashboard() {
         {/* -------------------------------------------------------------- */}
         {/*  Map                                                            */}
         {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Map">
-          <div className="flex items-center gap-3">
+        <DashboardSection title="Map & Data">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
-              onClick={() => {
-                /* Placeholder — open map viewer */
-              }}
+              onClick={() => window.open('/map/viewer.html', '_blank')}
               className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
             >
               Open Map
             </button>
             <button
-              onClick={() => {
-                /* Placeholder — open deployments */
-              }}
+              onClick={() => window.open('/map/deployments.html', '_blank')}
+              className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+            >
+              Deployments
+            </button>
+            <button
+              onClick={() => navigate(`/sim/${simId}/edit`)}
               className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
             >
-              Open Deployments
+              Edit Setup
             </button>
           </div>
         </DashboardSection>
 
-        {/* -------------------------------------------------------------- */}
-        {/*  Explore SIM Data                                               */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Explore SIM Data">
-          <div className="flex items-center gap-3">
-            {['Countries', 'Relationships', 'Sanctions', 'All Tables'].map((label) => (
-              <button
-                key={label}
-                onClick={() => {
-                  /* Placeholder — open data view */
-                }}
-                className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </DashboardSection>
+        {/* Explore SIM Data — merged into Map & Data section above */}
 
         {/* -------------------------------------------------------------- */}
         {/*  Special Moments (context-sensitive)                            */}

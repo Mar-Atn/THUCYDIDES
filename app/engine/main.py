@@ -546,7 +546,7 @@ async def sim_abort(sim_id: str, user: AuthUser = Depends(require_moderator)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.put("/api/sim/{sim_id}/mode", response_model=APIResponse)
+@app.post("/api/sim/{sim_id}/mode", response_model=APIResponse)
 async def sim_set_mode(
     sim_id: str,
     auto_advance: bool = False,
