@@ -551,14 +551,19 @@ async def sim_set_mode(
     sim_id: str,
     auto_advance: bool = False,
     auto_approve: bool = False,
+    dice_mode: bool = False,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Set automatic/manual mode."""
+    """Set automatic/manual mode and dice mode."""
     from engine.services.sim_run_manager import set_mode
     try:
         state = set_mode(sim_id, auto_advance=auto_advance, auto_approve=auto_approve)
-        logger.info("Sim %s mode: auto_advance=%s auto_approve=%s by %s",
-                     sim_id, auto_advance, auto_approve, user.id)
+        # Dice mode is stored directly on sim_runs (not in sim_run_manager)
+        from engine.services.supabase import get_client
+        get_client().table("sim_runs").update({"dice_mode": dice_mode}).eq("id", sim_id).execute()
+        state["dice_mode"] = dice_mode
+        logger.info("Sim %s mode: auto_advance=%s auto_approve=%s dice_mode=%s by %s",
+                     sim_id, auto_advance, auto_approve, dice_mode, user.id)
         return APIResponse(data=state)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -639,6 +644,12 @@ async def trigger_ai(sim_id: str, user: AuthUser = Depends(require_moderator)):
 # Actions requiring moderator confirmation before execution
 ACTIONS_REQUIRING_CONFIRMATION = {
     "assassination", "arrest", "change_leader",
+}
+
+# Combat actions that use dice (queue when dice_mode is on)
+COMBAT_DICE_ACTIONS = {
+    "ground_attack", "air_strike", "naval_combat",
+    "naval_bombardment", "naval_blockade", "launch_missile_conventional",
 }
 
 ACTION_CATEGORIES: dict[str, str] = {
@@ -786,6 +797,37 @@ async def submit_action(
             "narrative": f"{body.action_type} submitted — awaiting moderator approval",
         })
 
+    # 4b. Check if combat action needs physical dice input
+    dice_mode = run.get("dice_mode", False)
+    if body.action_type in COMBAT_DICE_ACTIONS and dice_mode:
+        target_info = f"{role['character_name']}: {body.action_type}"
+
+        client.table("pending_actions").insert({
+            "sim_run_id": sim_id,
+            "round_num": round_num,
+            "action_type": body.action_type,
+            "role_id": body.role_id,
+            "country_code": body.country_code,
+            "target_info": target_info,
+            "payload": {**action_payload, "_requires_dice": True},
+            "status": "pending",
+        }).execute()
+
+        write_event(
+            client, sim_id, scenario_id, round_num,
+            body.country_code, body.action_type,
+            f"DICE NEEDED: {body.action_type} by {role['character_name']} — moderator must input dice rolls",
+            {"action": action_payload, "status": "awaiting_dice"},
+            phase=current_phase, category=category, role_name=role["character_name"],
+        )
+
+        logger.info("Combat %s by %s queued for dice input", body.action_type, role["character_name"])
+        return APIResponse(data={
+            "success": True,
+            "status": "awaiting_dice",
+            "narrative": f"{body.action_type} submitted — moderator must input dice rolls",
+        })
+
     # 5. Immediate dispatch (no confirmation needed)
     try:
         result = dispatch_action(sim_id, round_num, action_payload)
@@ -834,8 +876,13 @@ async def get_pending_actions(sim_id: str, user: AuthUser = Depends(get_current_
 async def confirm_pending_action(
     sim_id: str, action_id: str,
     user: AuthUser = Depends(require_moderator),
+    precomputed_rolls: Optional[dict] = None,
 ):
-    """Approve a pending action — dispatches it to the engine."""
+    """Approve a pending action — dispatches it to the engine.
+
+    For combat actions with dice_mode, pass precomputed_rolls:
+      {"attacker": [[5,3,2], [6,4]], "defender": [[6,2], [4,1]]}
+    """
     from engine.services.action_dispatcher import dispatch_action
     from engine.services.common import write_event
     from engine.services.supabase import get_client
@@ -853,6 +900,12 @@ async def confirm_pending_action(
 
     payload = pending["payload"]
     round_num = pending["round_num"]
+
+    # Inject moderator dice values if provided (physical dice mode)
+    if precomputed_rolls:
+        payload["precomputed_rolls"] = precomputed_rolls
+    # Remove internal flag
+    payload.pop("_requires_dice", None)
 
     try:
         result = dispatch_action(sim_id, round_num, payload)
