@@ -21,9 +21,9 @@ export function Header({ subtitle }: HeaderProps) {
         className="flex items-center gap-3 hover:opacity-80 transition-opacity"
       >
         <img
-          src="/logo-48.png"
+          src="/logo-96.png"
           alt="TTT"
-          className="w-8 h-8"
+          className="w-14 h-14"
         />
         <div className="text-left">
           <h1 className="font-heading text-h3 text-text-primary">

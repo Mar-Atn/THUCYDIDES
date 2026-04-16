@@ -1,11 +1,12 @@
 /**
- * Supabase client — singleton, lazy-initialized.
- * Uses anon key (browser-safe). JWT auto-refresh enabled.
+ * Supabase client — singleton, persisted across Vite HMR.
  *
- * Matches KING's proven configuration — no custom flow or lock settings.
+ * The client is stored on `window` so that hot module replacement
+ * reuses the same instance instead of creating a new one.
+ * This prevents auth lock contention and session loss during dev.
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string
@@ -16,38 +17,28 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// Clean up orphaned auth keys from earlier experiments
-try {
-  const keysToRemove: string[] = []
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i)
-    if (key && key.startsWith('ttt-auth')) {
-      keysToRemove.push(key)
-    }
-  }
-  keysToRemove.forEach((k) => localStorage.removeItem(k))
-} catch {
-  // localStorage may not be available
+// Persist across HMR — same pattern used in production apps with Vite
+const GLOBAL_KEY = '__ttt_supabase_client__'
+
+function getOrCreateClient(): SupabaseClient {
+  const existing = (window as Record<string, unknown>)[GLOBAL_KEY] as SupabaseClient | undefined
+  if (existing) return existing
+
+  const client = createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+    },
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
+    },
+  })
+
+  ;(window as Record<string, unknown>)[GLOBAL_KEY] = client
+  return client
 }
 
-let _client: SupabaseClient | null = null
-
-export function getSupabase(): SupabaseClient {
-  if (!_client) {
-    _client = createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: true,
-      },
-      realtime: {
-        params: {
-          eventsPerSecond: 10,
-        },
-      },
-    })
-  }
-  return _client
-}
-
-export const supabase = getSupabase()
+export const supabase = getOrCreateClient()

@@ -96,7 +96,7 @@ export function Register() {
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="text-center mb-8">
-          <img src="/logo-96.png" alt="TTT" className="w-16 h-16 mx-auto mb-3" />
+          <img src="/logo-96.png" alt="TTT" className="w-16 h-16 mx-auto mb-3 rounded-full bg-base p-1" />
           <h1 className="font-heading text-h1 text-text-primary">
             Thucydides Trap
           </h1>
