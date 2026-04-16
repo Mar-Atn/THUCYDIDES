@@ -549,16 +549,16 @@ async def sim_abort(sim_id: str, user: AuthUser = Depends(require_moderator)):
 @app.post("/api/sim/{sim_id}/mode", response_model=APIResponse)
 async def sim_set_mode(
     sim_id: str,
-    auto_advance: bool = False,
-    auto_approve: bool = False,
-    dice_mode: bool = False,
+    body: dict = {},
     user: AuthUser = Depends(require_moderator),
 ):
-    """Set automatic/manual mode and dice mode."""
+    """Set automatic/manual mode and dice mode. Accepts JSON body."""
     from engine.services.sim_run_manager import set_mode
+    auto_advance = body.get("auto_advance", False)
+    auto_approve = body.get("auto_approve", False)
+    dice_mode = body.get("dice_mode", False)
     try:
         state = set_mode(sim_id, auto_advance=auto_advance, auto_approve=auto_approve)
-        # Dice mode is stored directly on sim_runs (not in sim_run_manager)
         from engine.services.supabase import get_client
         get_client().table("sim_runs").update({"dice_mode": dice_mode}).eq("id", sim_id).execute()
         state["dice_mode"] = dice_mode

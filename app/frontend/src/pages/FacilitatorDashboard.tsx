@@ -708,15 +708,18 @@ export function FacilitatorDashboard() {
                 <button
                   onClick={() => {
                     const newAuto = !simRun?.auto_approve
-                    if (newAuto && !confirm('Enable AUTO-APPROVE? All pending actions will be automatically confirmed.')) return
+                    if (newAuto && !confirm('ENABLE AUTO-APPROVE?\n\nAll pending actions (assassination, arrest, change_leader) will be automatically confirmed without moderator review.\n\nThis is intended for testing and AI-only runs.')) return
                     doAction('mode', { auto_advance: false, auto_approve: newAuto })
                   }}
-                  className={`font-body text-caption font-medium px-2 py-0.5 rounded ${
+                  className={`relative inline-flex items-center gap-2 font-body text-caption font-bold uppercase tracking-wider px-3 py-1 rounded border transition-all ${
                     simRun?.auto_approve
-                      ? 'bg-danger/20 text-danger'
-                      : 'bg-text-secondary/10 text-text-secondary'
+                      ? 'bg-danger/30 text-danger border-danger/60 shadow-[0_0_8px_rgba(220,38,38,0.4)] animate-pulse'
+                      : 'bg-text-secondary/5 text-text-secondary border-border hover:border-text-secondary/40'
                   }`}
                 >
+                  <span className={`w-2 h-2 rounded-full ${
+                    simRun?.auto_approve ? 'bg-danger' : 'bg-text-secondary/40'
+                  }`} />
                   {simRun?.auto_approve ? 'AUTO' : 'Manual'}
                 </button>
               </div>
