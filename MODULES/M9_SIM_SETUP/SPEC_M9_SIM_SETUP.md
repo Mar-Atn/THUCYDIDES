@@ -1,7 +1,7 @@
 # M9 — Sim Setup & Configuration SPEC
 
-**Version:** 1.1 | **Date:** 2026-04-13
-**Status:** Phase A DONE (2026-04-13), Phase B in progress
+**Version:** 2.0 | **Date:** 2026-04-16
+**Status:** v1 COMPLETE — Phase A + Phase B delivered and tested
 **KING source:** `Dashboard.tsx`, `SimulationWizard.tsx`, `EditScenario.tsx`, `ParticipantManagement.tsx`, `UserManagementModal.tsx`, `simulationStore.ts`
 
 ---
@@ -445,19 +445,19 @@ Two event types:
 }
 ```
 
-### Template v1.0 Canonical Events
+### Template v1.0 Canonical Events (updated 2026-04-15)
 
 | Round | Event | Type |
 |---|---|---|
-| R1 | EU Session | Organization meeting |
-| R1 | OPEC Meeting | Organization meeting |
-| R1 | UNSC Session on Persia Crisis | Organization meeting |
+| R1 | Ereb Union Session | Organization meeting |
+| R1 | The Cartel Meeting | Organization meeting |
+| R1 | Global Security Council Session on Persia Crisis | Organization meeting |
 | R1 | Columbia Parliament Session | Organization meeting |
-| R1 | Phrygia Peace Talks (Fixer, Broker, Compass) | Trilateral negotiation |
+| R1 | Phrygia Peace Talks (Shadow, Broker, Compass) | Trilateral negotiation |
 | R2 | Columbia Mid-Term Parliamentary Elections (nominations R1) | Election |
-| R2 | BRICS Meeting | Organization meeting |
-| R2 | NATO Session | Organization meeting |
-| R4 | Columbia Presidential Election (nominations R3) | Election |
+| R2 | The New League Meeting | Organization meeting |
+| R2 | Western Treaty Session | Organization meeting |
+| R6 | Columbia Presidential Election (nominations R5) | Election |
 
 ### How the Sim Runner (M4) will use this
 
@@ -494,3 +494,46 @@ This is a canonical convention for M4 implementation.
 - [x] Countries & Roles: 40 roles, grouped by country, custom sort, HoS/Military/Budget/optional badges ✅
 - [x] Schedule: correct calculations, structured key events with role-level participants ✅
 - [x] All pages follow TTT UX style ✅
+
+---
+
+## 12. v2 Delivery Summary (2026-04-15)
+
+### Phase B — Template Editor + Simplification
+
+| Deliverable | Status |
+|---|---|
+| **Template Editor** (10 tabs) | ✅ General, Countries, Roles, Organizations, Relationships, Sanctions/Tariffs, Map, Deployments, Schedule, Formulas |
+| **Map Viewer & Editor** | ✅ Geography mode (no units), country painting, chokepoint/diehard/nuclear toggles, color picker, undo/redo, save to template |
+| **Deployment Editor** | ✅ Full unit placement via embedded map editor |
+| **Role System** | ✅ 5 position types (HoS, Military, Economy, Diplomat, Security) + Opposition. 40 roles, 713 action assignments |
+| **Role Briefs** | ✅ 40 public bios + confidential briefs + objectives (Harvard style, gender-neutral, no real-world names) |
+| **Country Briefs** | ✅ 20 country descriptions (narrative, no numbers) |
+| **Simplification A-E** | ✅ Stability only, no personal coins, 5 relation types, change_leader, Columbia elections |
+| **Info Popups** | ✅ Role and country dashboard cards in SimRun wizard |
+| **Delete Protection** | ✅ Type name to confirm, canonical template protected |
+| **Hex Convention** | ✅ Pointy-top odd-r, formalized in map_config.py, 7 adjacency tests |
+| **Map Rendering Contract** | ✅ CONTRACT_MAP_RENDERING.md locked v1.0 |
+
+### L2 Integration Test Results (2026-04-16)
+
+| Check | Result |
+|---|---|
+| Template exists with data | ✅ TTT Main Template v1.0 |
+| Map config (global + 2 theaters) | ✅ 10x20 + 2x(10x10) |
+| Schedule + key events | ✅ 6 rounds, 9 events (all SIM names) |
+| Countries (20) with briefs + colors | ✅ 20/20 |
+| Roles (40) with bios + position types | ✅ 40/40, 6 position types |
+| Role actions | ✅ 713 assignments, 32 action types |
+| Organizations + memberships + chairs | ✅ 7 orgs, 50 memberships |
+| Relationships (5 types) | ✅ 380 total |
+| Deployments | ✅ 146 entries, 338 units |
+| SimRun creation from template | ✅ Test SimRun linked |
+| Sanctions + Tariffs | ✅ 43 + 14 |
+| Key events naming (no real-world) | ✅ All SIM names |
+
+### Cross-Module Reconciliation (2026-04-15)
+
+- M1 (Engines): deprecated fields marked, agent prompts use stability only, 720 L1 tests pass
+- M2 (Communication): 24 action types, 3 new contracts, orphaned validators marked deprecated
+- M3 (Data): template JSONB has map + schedule + formulas, country colors in DB
