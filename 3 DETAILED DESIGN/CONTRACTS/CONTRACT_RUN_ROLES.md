@@ -47,7 +47,7 @@ run_roles (
   is_military_chief boolean,
   is_diplomat boolean,
   status text (active|arrested|killed|deposed|inactive),
-  personal_coins integer,
+  personal_coins integer,    -- DEPRECATED 2026-04-15: no personal transactions in simplified model
   powers text,
   status_changed_round int,
   status_changed_by text,
@@ -72,7 +72,7 @@ from the template.
 
 ### Mutate
 - ``update_role_status(sim_run_id, role_id, new_status, by, reason, round)``
-- ``update_personal_coins(sim_run_id, role_id, delta)``
+- ``update_personal_coins(sim_run_id, role_id, delta)``  -- DEPRECATED 2026-04-15
 
 ### Status transitions
 ```

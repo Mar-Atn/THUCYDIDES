@@ -1,23 +1,41 @@
 # MODULE REGISTRY — Live Status
 **Last updated:** 2026-04-15
 
-| Module | Status | SPEC | KING | Progress |
-|---|---|---|---|---|
-| M1 World Model Engines | ⚠️ NEEDS UPDATE | N/A | N/A | 25 engines, 713 L1 tests passing. Simplification changes: political_support deprecated, stability-only, change_leader replaces coup/protest. Some engine files still reference deprecated fields — cleanup needed. |
-| M2 Communication & Standards | ⚠️ NEEDS UPDATE | N/A | N/A | 24 action types (was 25: -coup_attempt, -lead_protest, +change_leader). 2 new contracts (CHANGE_LEADER, COLUMBIA_ELECTIONS). 3 contracts archived (COUP, MASS_PROTEST, old ELECTIONS). Agreement types: 5. Relation types: 5. |
-| M3 Data Foundation | ⚠️ NEEDS UPDATE | N/A | N/A | 55+ tables. Template/Run hierarchy (scenario level removed). Deprecated fields: political_support, personal_coins, dem_rep_split. New tables: role_actions, role_relationships. New columns: position_type, confidential_brief, country_brief, party. |
-| M10.1 Auth | ✅ DONE | ✅ | ✅ | Email/password + Google OAuth, RLS, GDPR consent, moderator approval flow. |
-| M9 Sim Setup | ⚠️ Phase A+B DONE, polish in progress | ✅ | ✅ | Dashboard, SimRun wizard, User Mgmt, AI Setup, 10-tab Template Editor, 41 roles (5 types), 724 action assignments, 20 country briefs, 40 role briefs. Simplification A-E complete. |
-| M4 Sim Runner | ⚠️ PARTIAL | — | — | Orchestrator exists. Needs: change_leader voting flow, election voting flow, agreement auto-transitions, round flow with new mechanics. |
-| M8 Public Screen | ⚠️ ~40% | — | — | Hex map + basic dashboards |
-| M6 Human Interface | ❌ NOT STARTED | — | — | Week 3-5 |
-| M5 AI Participant | ⚠️ PARTIAL | — | — | Single-agent loop works, no conversations |
-| M7 Navigator | ❌ NOT STARTED | — | — | Week 5-6 |
-| M10 Final Assembly | ❌ NOT STARTED | — | — | Week 6 |
+| Module | Status | SPEC | Progress |
+|---|---|---|---|
+| M1 World Model Engines | ✅ ALIGNED | N/A | 720 L1 tests passing. Deprecated fields marked (political_support, dem_rep_split). Agent prompts use stability only. New actions: change_leader (stub for M4). |
+| M2 Communication & Standards | ✅ ALIGNED | N/A | 24 action types. 3 new contracts (CHANGE_LEADER, COLUMBIA_ELECTIONS, MAP_RENDERING). 3 archived. Orphaned validators marked deprecated. |
+| M3 Data Foundation | ✅ ALIGNED | N/A | Template/Run hierarchy. Hex map in template JSONB. Country colors in DB. Deprecated fields marked, backward compatible. |
+| M10.1 Auth | ✅ DONE | ✅ | Email/password + Google OAuth, RLS, GDPR consent. Auth persists across HMR. |
+| M9 Sim Setup | ✅ v1 DONE | ✅ | 10-tab Template Editor, SimRun wizard, User Mgmt, AI Setup. 40 roles (5 types), country/role briefs, map viewer/editor, deployment editor. Simplification A-E complete. |
+| M4 Sim Runner | ⚠️ NEXT | — | Needs: change_leader voting, elections, agreement auto-transitions, round flow. |
+| M8 Public Screen | ⚠️ ~40% | — | Hex map rendering contract ready (CONTRACT_MAP_RENDERING). |
+| M6 Human Interface | ❌ NOT STARTED | — | Map rendering contract ready. |
+| M5 AI Participant | ⚠️ PARTIAL | — | Agent prompts updated (stability only, no political_support). |
+| M7 Navigator | ❌ NOT STARTED | — | |
+| M10 Final Assembly | ❌ NOT STARTED | — | |
 
-## Simplification Sprint (2026-04-15) — ALL COMPLETE
-- A. political_support → stability only ✅
-- B. personal_coins deprecated ✅
+## Simplification Sprint (2026-04-15) — ALL COMPLETE + RECONCILED
+- A. political_support → stability only ✅ (engine, context, agents updated)
+- B. personal_coins deprecated ✅ (contract updated, code marked)
 - C. Relations: 5 types, 5 agreement types, auto-transitions ✅
-- D. change_leader replaces coup/protest ✅
+- D. change_leader replaces coup/protest ✅ (contract, schema, dispatcher)
 - E. Columbia elections: 9+bonus votes, simple majority ✅
+- Cross-module reconciliation: ✅ (720 L1 tests pass)
+
+## Active Contracts
+| Contract | Version | Status |
+|---|---|---|
+| CONTRACT_CHANGE_LEADER | 1.0 | LOCKED 2026-04-15 |
+| CONTRACT_COLUMBIA_ELECTIONS | 2.0 | LOCKED 2026-04-15 |
+| CONTRACT_MAP_RENDERING | 1.0 | LOCKED 2026-04-15 |
+| CONTRACT_POWER_ASSIGNMENTS | 1.0 | LOCKED 2026-04-13 |
+| CONTRACT_RUN_ROLES | 1.0 | Updated 2026-04-15 (personal_coins deprecated) |
+| CONTRACT_BUDGET | 1.1 | LOCKED 2026-04-10 |
+| CONTRACT_SANCTIONS | 1.0 | LOCKED |
+| CONTRACT_NUCLEAR_CHAIN | 1.0 | LOCKED 2026-04-13 |
+
+## Archived Contracts (in DEPRECATED/)
+- CONTRACT_COUP.md
+- CONTRACT_MASS_PROTEST.md
+- CONTRACT_ELECTIONS.md (v1, old camp system)

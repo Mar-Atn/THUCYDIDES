@@ -609,7 +609,7 @@ class LeaderAgent:
             + f"\n\nYOUR TICKING CLOCK: {self.role['ticking_clock']}\n\n"
             f"YOUR COUNTRY:\n"
             f"- GDP: {self.country['gdp']} ({self.country['regime_type']})\n"
-            f"- Stability: {self.country['stability']}, Support: {self.country['political_support']}%\n"
+            f"- Stability: {self.country['stability']}\n"
             f"- Military: {self.country['mil_ground']} ground, {self.country['mil_naval']} naval, {self.country['mil_tactical_air']} air\n"
             f"- Nuclear L{self.country['nuclear_level']}, AI L{self.country['ai_level']}\n\n"
             f"Create your STRATEGIC BRIEF (Block 4). Write as plain text, ~400-600 words:\n\n"

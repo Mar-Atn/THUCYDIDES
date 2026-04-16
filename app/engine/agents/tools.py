@@ -869,7 +869,9 @@ def get_political_state(
             client.table("countries")
             .select(
                 "stability,political_support,war_tiredness,regime_type,"
-                "dem_rep_split_dem,dem_rep_split_rep,team_type,team_size_min,team_size_max"
+                # DEPRECATED 2026-04-15: dem_rep_split removed — parliament simplified to 3 seats
+                # "dem_rep_split_dem,dem_rep_split_rep,"
+                "team_type,team_size_min,team_size_max"
             )
             .eq("id", country_code)
             .execute()
@@ -910,10 +912,11 @@ def get_political_state(
             "political_support": support,
             "war_tiredness": war_tiredness,
             "regime_type": pick("regime_type"),
-            "dem_rep_split": {
-                "dem": pick("dem_rep_split_dem", 0),
-                "rep": pick("dem_rep_split_rep", 0),
-            },
+            # DEPRECATED 2026-04-15: dem_rep_split removed — parliament simplified to 3 seats
+            # "dem_rep_split": {
+            #     "dem": pick("dem_rep_split_dem", 0),
+            #     "rep": pick("dem_rep_split_rep", 0),
+            # },
             "team_type": pick("team_type"),
             "team_size_min": pick("team_size_min"),
             "team_size_max": pick("team_size_max"),

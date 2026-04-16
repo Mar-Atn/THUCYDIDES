@@ -65,7 +65,8 @@ def load_country_context(country_id: str) -> dict[str, Any]:
                     "tax_rate": float(row.get("tax_rate", 0.24)),
                     "social_baseline": float(row.get("social_baseline", 0.30)),
                     "stability": float(row["stability"]),
-                    "political_support": float(row["political_support"]),
+                    # DEPRECATED 2026-04-15: political_support replaced by stability only
+                    "political_support": 0,
                     "war_tiredness": float(row.get("war_tiredness", 0)),
                     "oil_producer": row["oil_producer"].lower() == "true",
                     "opec_member": row["opec_member"].lower() == "true",

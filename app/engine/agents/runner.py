@@ -206,8 +206,10 @@ def _build_engine_countries(countries_flat: dict[str, dict]) -> dict[str, dict]:
             },
             "political": {
                 "stability": c["stability"],
-                "political_support": c["political_support"],
-                "dem_rep_split": {"dem": 50, "rep": 50},
+                # DEPRECATED 2026-04-15: political_support replaced by stability only
+                "political_support": 0,
+                # DEPRECATED 2026-04-15: dem_rep_split removed — parliament simplified to 3 seats
+                # "dem_rep_split": {"dem": 50, "rep": 50},
                 "war_tiredness": c["war_tiredness"],
                 "regime_type": c["regime_type"],
                 "regime_status": "stable",

@@ -76,6 +76,7 @@ def validate_coup(
     roles: dict[str, dict] | None = None,
     country_state: dict[str, dict] | None = None,
 ) -> dict:
+    # DEPRECATED 2026-04-15: replaced by change_leader (see CONTRACT_CHANGE_LEADER.md)
     """Validate a coup attempt. Military chief or opposition with conditions."""
     errors: list[str] = []
 
@@ -120,6 +121,7 @@ def validate_mass_protest(
     payload: dict,
     roles: dict[str, dict] | None = None,
 ) -> dict:
+    # DEPRECATED 2026-04-15: replaced by change_leader (see CONTRACT_CHANGE_LEADER.md)
     """Validate a mass protest action. Opposition/tycoon triggers."""
     errors: list[str] = []
 

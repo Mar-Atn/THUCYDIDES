@@ -203,7 +203,7 @@ class Relationship(BaseModel):
     sim_run_id: str
     from_country_id: str
     to_country_id: str
-    relationship: str  # close_ally | alliance | friendly | neutral | tense | hostile | at_war | strategic_rival
+    relationship: str  # alliance | economic_partnership | neutral | hostile | at_war
     status: str = "neutral"  # allied | friendly | neutral | tense | hostile | military_conflict | armistice | peace
     basing_rights_a_to_b: bool = False
     basing_rights_b_to_a: bool = False
