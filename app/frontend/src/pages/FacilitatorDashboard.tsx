@@ -762,7 +762,7 @@ export function FacilitatorDashboard() {
               {events.length === 0 ? (
                 <EmptyState message="No events yet" />
               ) : (
-                <div className="space-y-1 h-80 overflow-y-auto">
+                <div className="space-y-1 h-[60vh] overflow-y-auto">
                   {events.map((evt) => (
                     <div
                       key={evt.id}
