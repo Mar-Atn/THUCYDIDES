@@ -163,9 +163,8 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             domestic=action.get("domestic", True))
 
     if action_type == "change_leader":
-        logger.info("change_leader initiated by %s in %s — requires M4 for vote phases",
-                     role_id, country_code)
-        return {"success": True, "narrative": f"Change of leader initiated by {role_id} in {country_code}. Voting phase required."}
+        from engine.services.change_leader import initiate_change_leader
+        return initiate_change_leader(sim_run_id, round_num, role_id, country_code)
 
     if action_type == "reassign_types":
         from engine.services.power_assignments import reassign_power

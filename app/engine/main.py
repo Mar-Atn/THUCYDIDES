@@ -920,3 +920,49 @@ async def reject_pending_action(
 
     logger.info("Pending action %s rejected by %s", action_id, user.id)
     return APIResponse(data={"status": "rejected", "action_id": action_id})
+
+
+# ---------------------------------------------------------------------------
+# M4: Leadership Change Voting
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/leadership-votes", response_model=APIResponse)
+async def get_leadership_votes(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Get active leadership change votes for a sim."""
+    from engine.services.supabase import get_client
+    client = get_client()
+    rows = (
+        client.table("leadership_votes")
+        .select("*")
+        .eq("sim_run_id", sim_id)
+        .eq("status", "voting")
+        .order("created_at", desc=False)
+        .execute()
+    ).data or []
+    return APIResponse(data=rows, meta={"count": len(rows)})
+
+
+@app.post("/api/sim/{sim_id}/leadership-votes/{vote_id}/cast", response_model=APIResponse)
+async def cast_leadership_vote(
+    sim_id: str, vote_id: str,
+    role_id: str = "", vote: str = "",
+    user: AuthUser = Depends(get_current_user),
+):
+    """Cast a vote in an active leadership change."""
+    from engine.services.change_leader import cast_leader_vote
+    if not role_id or not vote:
+        raise HTTPException(status_code=400, detail="role_id and vote are required")
+    result = cast_leader_vote(sim_id, vote_id, role_id, vote)
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/leadership-votes/{vote_id}/resolve", response_model=APIResponse)
+async def resolve_leadership_vote(
+    sim_id: str, vote_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Resolve a leadership change vote (moderator closes voting)."""
+    from engine.services.change_leader import resolve_leader_vote
+    result = resolve_leader_vote(sim_id, vote_id)
+    logger.info("Leadership vote %s resolved by %s: %s", vote_id, user.id, result.get("outcome"))
+    return APIResponse(data=result)
