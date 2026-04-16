@@ -330,8 +330,8 @@
       svg.appendChild(nuc);
     });
 
-    // In geography mode: render both theaters as separate SVGs below the global map
-    if (window.MAP_VIEWER_MODE === 'geography') {
+    // Render both theaters as collapsible SVGs below the global map (all modes)
+    {
       const container = document.getElementById('theaterMapsContainer');
       if (container) {
         container.innerHTML = '';

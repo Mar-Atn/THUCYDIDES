@@ -791,6 +791,9 @@ export function FacilitatorDashboard() {
               )}
             </DashboardSection>
 
+            {/* Test Action Panel */}
+            <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
+
             {/* Participants & Role Assignment */}
             <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadData} />
           </div>
@@ -862,16 +865,10 @@ export function FacilitatorDashboard() {
             <DashboardSection title="Map & Data">
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() => window.open('/map/viewer.html', '_blank')}
-                  className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-                >
-                  Open Map
-                </button>
-                <button
                   onClick={() => window.open('/map/deployments.html', '_blank')}
                   className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
                 >
-                  Deployments
+                  Open Map
                 </button>
                 <button
                   onClick={() => navigate(`/sim/${simId}/edit`)}
@@ -882,8 +879,6 @@ export function FacilitatorDashboard() {
               </div>
             </DashboardSection>
 
-            {/* Test Action Panel */}
-            <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
           </div>
         </div>
       </main>
