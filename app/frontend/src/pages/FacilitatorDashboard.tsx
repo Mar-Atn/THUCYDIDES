@@ -642,10 +642,10 @@ export function FacilitatorDashboard() {
       {/* ================================================================== */}
       {/*  MAIN CONTENT                                                      */}
       {/* ================================================================== */}
-      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-6 space-y-6">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
         {/* Post-sim banner */}
         {(currentStatus === 'completed' || currentStatus === 'aborted') && (
-          <div className={`rounded-lg p-6 border ${
+          <div className={`rounded-lg p-6 border mb-6 ${
             currentStatus === 'completed' ? 'bg-success/5 border-success/30' : 'bg-danger/5 border-danger/30'
           }`}>
             <h2 className="font-heading text-h2 text-text-primary mb-2">
@@ -660,7 +660,7 @@ export function FacilitatorDashboard() {
         )}
 
         {/* Sim title */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="font-heading text-h2 text-text-primary">{simRun.name}</h2>
           <button
             onClick={() => navigate(`/sim/${simId}/edit`)}
@@ -670,219 +670,222 @@ export function FacilitatorDashboard() {
           </button>
         </div>
 
-        {/* -------------------------------------------------------------- */}
-        {/*  Pending Actions                                                */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Pending Actions" badge={pendingActions.length > 0 ? String(pendingActions.length) : undefined}>
-          {pendingActions.length === 0 ? (
-            <EmptyState message="No pending actions" />
-          ) : (
-            <div className="space-y-2">
-              {pendingActions.map((pa) => (
-                <div
-                  key={pa.id}
-                  className="flex items-center justify-between bg-base rounded-lg px-4 py-3 border border-border"
-                >
-                  <div>
-                    <span className="font-body text-body-sm text-text-primary font-medium">
-                      {pa.action_type}
-                    </span>
-                    <span className="font-body text-caption text-text-secondary ml-2">
-                      {pa.target_info || `${pa.role_id} (${pa.country_code})`}
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => doAction(`pending/${pa.id}/confirm`)}
-                      className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors"
-                    >
-                      Confirm
-                    </button>
-                    <button
-                      onClick={() => doAction(`pending/${pa.id}/reject`)}
-                      className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </DashboardSection>
-
-        {/* -------------------------------------------------------------- */}
-        {/*  SIM Events Feed                                                */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="SIM Events" badge={events.length > 0 ? String(events.length) : undefined}>
-          {events.length === 0 ? (
-            <EmptyState message="No events yet — actions will appear here as participants submit them" />
-          ) : (
-            <div className="space-y-1 max-h-80 overflow-y-auto">
-              {events.map((evt) => (
-                <div
-                  key={evt.id}
-                  className="flex items-start gap-3 px-3 py-2 rounded hover:bg-base transition-colors"
-                >
-                  <span className="font-data text-caption text-text-secondary w-14 shrink-0">
-                    {new Date(evt.created_at).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
-                  <span className="font-body text-body-sm text-text-primary font-medium w-24 shrink-0">
-                    {evt.role_name ?? '---'}
-                  </span>
-                  <span className="font-body text-body-sm text-text-primary flex-1">
-                    {evt.summary}
-                  </span>
+        {/* Special Moments banner (context-sensitive, above columns) */}
+        {roundKeyEvents.length > 0 && (
+          <div className="mb-4">
+            <DashboardSection title={`This Round: Special Events`} highlight>
+              <div className="flex flex-wrap gap-2">
+                {roundKeyEvents.map((ke, idx) => (
                   <span
-                    className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category ?? '')}`}
+                    key={idx}
+                    className="font-body text-caption bg-accent/10 text-accent border border-accent/20 rounded-full px-3 py-1"
                   >
-                    {evt.category?.toUpperCase().slice(0, 4) ?? evt.event_type?.slice(0, 4).toUpperCase() ?? '---'}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
-        </DashboardSection>
-
-        {/* -------------------------------------------------------------- */}
-        {/*  Test Action Panel                                             */}
-        {/* -------------------------------------------------------------- */}
-        <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
-
-        {/* -------------------------------------------------------------- */}
-        {/*  AI Participants                                                */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="AI Participants" badge={aiRoles.length > 0 ? String(aiRoles.length) : undefined}>
-          {aiRoles.length === 0 ? (
-            <EmptyState message="No AI participants assigned to this simulation" />
-          ) : (
-            <>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {aiRoles.map((role) => (
-                  <span
-                    key={role.id}
-                    className="font-body text-caption bg-base border border-border rounded-full px-3 py-1 text-text-primary"
-                  >
-                    {role.character_name}{' '}
-                    <span className="text-text-secondary">
-                      ({role.status === 'active' ? 'idle' : role.status})
-                    </span>
+                    {ke.type}: {ke.description}
+                    {ke.country && ` (${ke.country})`}
                   </span>
                 ))}
               </div>
-              <div className="flex gap-2">
+            </DashboardSection>
+          </div>
+        )}
+
+        {/* ============================================================ */}
+        {/*  TWO-COLUMN LAYOUT                                            */}
+        {/* ============================================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* ── LEFT COLUMN: Moderator Actions ───────────────────────── */}
+          <div className="space-y-6">
+            {/* Pending Actions + Auto-approve */}
+            <DashboardSection
+              title="Pending Actions"
+              badge={pendingActions.length > 0 ? String(pendingActions.length) : undefined}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-body text-caption text-text-secondary">
+                  Actions requiring your approval
+                </span>
                 <button
-                  onClick={() => doAction('ai/trigger')}
-                  className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+                  onClick={() => {
+                    const newAuto = !simRun?.auto_approve
+                    if (newAuto && !confirm('Enable AUTO-APPROVE? All pending actions will be automatically confirmed.')) return
+                    doAction('mode', { auto_advance: false, auto_approve: newAuto })
+                  }}
+                  className={`font-body text-caption font-medium px-2 py-0.5 rounded ${
+                    simRun?.auto_approve
+                      ? 'bg-danger/20 text-danger'
+                      : 'bg-text-secondary/10 text-text-secondary'
+                  }`}
                 >
-                  Trigger Now
-                </button>
-                <button
-                  onClick={() => doAction('ai/pause-all')}
-                  className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
-                >
-                  Pause All
+                  {simRun?.auto_approve ? 'AUTO' : 'Manual'}
                 </button>
               </div>
-            </>
-          )}
-        </DashboardSection>
-
-        {/* -------------------------------------------------------------- */}
-        {/*  Participants & Role Assignment                                 */}
-        {/* -------------------------------------------------------------- */}
-        <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadData} />
-
-        {/* -------------------------------------------------------------- */}
-        {/*  Public Screen                                                  */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Public Screen">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => {
-                /* Placeholder — open public screen preview */
-              }}
-              className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-            >
-              View
-            </button>
-            <button
-              onClick={() => {
-                /* Placeholder — customize public screen */
-              }}
-              className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
-            >
-              Customize
-            </button>
-            <button
-              onClick={() => {
-                /* Placeholder — broadcast message */
-              }}
-              className="font-body text-caption font-medium bg-accent/10 text-accent px-3 py-1 rounded hover:bg-accent/20 transition-colors"
-            >
-              Broadcast Message
-            </button>
-          </div>
-        </DashboardSection>
-
-        {/* -------------------------------------------------------------- */}
-        {/*  Map                                                            */}
-        {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Map & Data">
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={() => window.open('/map/viewer.html', '_blank')}
-              className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-            >
-              Open Map
-            </button>
-            <button
-              onClick={() => window.open('/map/deployments.html', '_blank')}
-              className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-            >
-              Deployments
-            </button>
-            <button
-              onClick={() => navigate(`/sim/${simId}/edit`)}
-              className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
-            >
-              Edit Setup
-            </button>
-          </div>
-        </DashboardSection>
-
-        {/* Explore SIM Data — merged into Map & Data section above */}
-
-        {/* -------------------------------------------------------------- */}
-        {/*  Special Moments (context-sensitive)                            */}
-        {/* -------------------------------------------------------------- */}
-        {roundKeyEvents.length > 0 && (
-          <DashboardSection title={`This Round: Special Events`} highlight>
-            <div className="space-y-2">
-              {roundKeyEvents.map((ke, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-3 bg-base rounded-lg px-4 py-3 border border-accent/30"
-                >
-                  <span className="font-body text-body-sm text-accent font-medium">
-                    {ke.type}
-                  </span>
-                  <span className="font-body text-body-sm text-text-primary flex-1">
-                    {ke.description}
-                  </span>
-                  {ke.country && (
-                    <span className="font-body text-caption text-text-secondary">
-                      {ke.country}
-                    </span>
-                  )}
+              {pendingActions.length === 0 ? (
+                <EmptyState message="No pending actions" />
+              ) : (
+                <div className="space-y-2">
+                  {pendingActions.map((pa) => (
+                    <div
+                      key={pa.id}
+                      className="flex items-center justify-between bg-base rounded-lg px-4 py-3 border border-border"
+                    >
+                      <div>
+                        <span className="font-body text-body-sm text-text-primary font-medium">
+                          {pa.action_type}
+                        </span>
+                        <span className="font-body text-caption text-text-secondary ml-2">
+                          {pa.target_info || `${pa.role_id} (${pa.country_code})`}
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => doAction(`pending/${pa.id}/confirm`)}
+                          className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors"
+                        >
+                          Confirm
+                        </button>
+                        <button
+                          onClick={() => doAction(`pending/${pa.id}/reject`)}
+                          className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </DashboardSection>
-        )}
+              )}
+            </DashboardSection>
+
+            {/* SIM Events Feed (fixed height, scrollable) */}
+            <DashboardSection title="SIM Events" badge={events.length > 0 ? String(events.length) : undefined}>
+              {events.length === 0 ? (
+                <EmptyState message="No events yet" />
+              ) : (
+                <div className="space-y-1 h-80 overflow-y-auto">
+                  {events.map((evt) => (
+                    <div
+                      key={evt.id}
+                      className="flex items-start gap-3 px-3 py-2 rounded hover:bg-base transition-colors"
+                    >
+                      <span className="font-data text-caption text-text-secondary w-14 shrink-0">
+                        {new Date(evt.created_at).toLocaleTimeString([], {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                      <span className="font-body text-body-sm text-text-primary font-medium w-24 shrink-0">
+                        {evt.role_name ?? '---'}
+                      </span>
+                      <span className="font-body text-body-sm text-text-primary flex-1">
+                        {evt.summary}
+                      </span>
+                      <span
+                        className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category ?? '')}`}
+                      >
+                        {evt.category?.toUpperCase().slice(0, 4) ?? evt.event_type?.slice(0, 4).toUpperCase() ?? '---'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </DashboardSection>
+
+            {/* Participants & Role Assignment */}
+            <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadData} />
+          </div>
+
+          {/* ── RIGHT COLUMN: Monitoring & Tools ─────────────────────── */}
+          <div className="space-y-6">
+            {/* AI Participants */}
+            <DashboardSection title="AI Participants" badge={aiRoles.length > 0 ? String(aiRoles.length) : undefined}>
+              {aiRoles.length === 0 ? (
+                <EmptyState message="No AI participants" />
+              ) : (
+                <>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {aiRoles.map((role) => (
+                      <span
+                        key={role.id}
+                        className="font-body text-caption bg-base border border-border rounded-full px-3 py-1 text-text-primary"
+                      >
+                        {role.character_name}{' '}
+                        <span className="text-text-secondary">
+                          ({role.country_id})
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => doAction('ai/trigger')}
+                      className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+                    >
+                      Trigger Now
+                    </button>
+                    <button
+                      onClick={() => doAction('ai/pause-all')}
+                      className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
+                    >
+                      Pause All
+                    </button>
+                  </div>
+                </>
+              )}
+            </DashboardSection>
+
+            {/* Public Screen */}
+            <DashboardSection title="Public Screen">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => { /* M8 */ }}
+                  className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+                >
+                  View
+                </button>
+                <button
+                  onClick={() => { /* M8 */ }}
+                  className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
+                >
+                  Customize
+                </button>
+                <button
+                  onClick={() => { /* Broadcast */ }}
+                  className="font-body text-caption font-medium bg-accent/10 text-accent px-3 py-1 rounded hover:bg-accent/20 transition-colors"
+                >
+                  Broadcast
+                </button>
+              </div>
+            </DashboardSection>
+
+            {/* Map & Data */}
+            <DashboardSection title="Map & Data">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => window.open('/map/viewer.html', '_blank')}
+                  className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+                >
+                  Open Map
+                </button>
+                <button
+                  onClick={() => window.open('/map/deployments.html', '_blank')}
+                  className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
+                >
+                  Deployments
+                </button>
+                <button
+                  onClick={() => navigate(`/sim/${simId}/edit`)}
+                  className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
+                >
+                  Edit Setup
+                </button>
+              </div>
+            </DashboardSection>
+
+            {/* Test Action Panel */}
+            <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
+          </div>
+        </div>
       </main>
     </div>
   )
