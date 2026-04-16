@@ -757,12 +757,22 @@ export function FacilitatorDashboard() {
               )}
             </DashboardSection>
 
-            {/* SIM Events Feed (fixed height, scrollable) */}
-            <DashboardSection title="SIM Events" badge={events.length > 0 ? String(events.length) : undefined}>
+            {/* SIM Events Feed (tall, scrollable — stock exchange monitor) */}
+            <div className="bg-card border border-border rounded-lg p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <h3 className="font-heading text-h3 text-text-primary">SIM Events</h3>
+                {events.length > 0 && (
+                  <span className="font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded-full">
+                    {events.length}
+                  </span>
+                )}
+              </div>
               {events.length === 0 ? (
-                <EmptyState message="No events yet" />
+                <div className="min-h-[60vh] flex items-center justify-center">
+                  <p className="font-body text-body-sm text-text-secondary">No events yet</p>
+                </div>
               ) : (
-                <div className="space-y-1 h-[60vh] overflow-y-auto">
+                <div className="space-y-1 min-h-[60vh] max-h-[60vh] overflow-y-auto">
                   {events.map((evt) => (
                     <div
                       key={evt.id}
@@ -789,7 +799,7 @@ export function FacilitatorDashboard() {
                   ))}
                 </div>
               )}
-            </DashboardSection>
+            </div>
 
             {/* Test Action Panel */}
             <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
