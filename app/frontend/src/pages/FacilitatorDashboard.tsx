@@ -37,9 +37,14 @@ interface SimState {
 
 interface PendingAction {
   id: string
+  sim_run_id: string
+  round_num: number
   action_type: string
-  submitted_by: string
-  target: string
+  role_id: string
+  country_code: string
+  target_info: string
+  payload: Record<string, unknown>
+  status: string
   submitted_at: string
 }
 
@@ -169,6 +174,7 @@ export function FacilitatorDashboard() {
   const [simState, setSimState] = useState<SimState | null>(null)
   const [events, setEvents] = useState<ObservatoryEvent[]>([])
   const [keyEvents, setKeyEvents] = useState<KeyEvent[]>([])
+  const [pendingActions, setPendingActions] = useState<PendingAction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
@@ -222,6 +228,19 @@ export function FacilitatorDashboard() {
         setEvents((evts ?? []) as ObservatoryEvent[])
       } catch {
         setEvents([])
+      }
+
+      // Load pending actions
+      try {
+        const { data: pa } = await supabase
+          .from('pending_actions')
+          .select('*')
+          .eq('sim_run_id', simId)
+          .eq('status', 'pending')
+          .order('submitted_at', { ascending: false })
+        setPendingActions((pa ?? []) as PendingAction[])
+      } catch {
+        setPendingActions([])
       }
 
       // Load key events from sim run
@@ -296,12 +315,37 @@ export function FacilitatorDashboard() {
       )
       .subscribe()
 
+    // Channel 3: pending_actions changes — confirmation queue
+    const pendingChannel = supabase
+      .channel(`pending:${simId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pending_actions',
+          filter: `sim_run_id=eq.${simId}`,
+        },
+        () => {
+          // Reload pending actions on any change (insert, update, delete)
+          supabase
+            .from('pending_actions')
+            .select('*')
+            .eq('sim_run_id', simId)
+            .eq('status', 'pending')
+            .order('submitted_at', { ascending: false })
+            .then(({ data }) => setPendingActions((data ?? []) as PendingAction[]))
+        },
+      )
+      .subscribe()
+
     // Fallback poll every 30s for resilience (connection drops, missed events)
     const fallbackInterval = setInterval(loadData, 30000)
 
     return () => {
       supabase.removeChannel(simRunChannel)
       supabase.removeChannel(eventsChannel)
+      supabase.removeChannel(pendingChannel)
       clearInterval(fallbackInterval)
     }
   }, [simId, loadData])
@@ -350,7 +394,6 @@ export function FacilitatorDashboard() {
   const currentPhase = simState?.current_phase ?? simRun?.current_phase ?? 'pre'
   const isPaused = simState?.paused ?? false
   const mode = simState?.mode ?? 'manual'
-  const pendingActions = simState?.pending_actions ?? []
   const aiRoles = roles.filter((r) => r.is_ai_operated)
   const humanRoles = roles.filter((r) => !r.is_ai_operated)
   const roundKeyEvents = keyEvents.filter((e) => e.round === currentRound)
@@ -567,7 +610,7 @@ export function FacilitatorDashboard() {
                       {pa.action_type}
                     </span>
                     <span className="font-body text-caption text-text-secondary ml-2">
-                      {pa.submitted_by} &rarr; {pa.target}
+                      {pa.target_info || `${pa.role_id} (${pa.country_code})`}
                     </span>
                   </div>
                   <div className="flex gap-2">

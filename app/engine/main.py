@@ -636,6 +636,11 @@ async def trigger_ai(sim_id: str, user: AuthUser = Depends(require_moderator)):
 # ---------------------------------------------------------------------------
 
 # Action type → category mapping (matches role_actions.action_id values in DB)
+# Actions requiring moderator confirmation before execution
+ACTIONS_REQUIRING_CONFIRMATION = {
+    "assassination", "arrest", "change_leader",
+}
+
 ACTION_CATEGORIES: dict[str, str] = {
     # Military
     "ground_attack": "military",
@@ -736,7 +741,7 @@ async def submit_action(
             detail=f"Role '{body.role_id}' is not authorized for action '{body.action_type}'",
         )
 
-    # 4. Build action payload and dispatch
+    # 4. Build action payload
     action_payload = {
         "action_type": body.action_type,
         "role_id": body.role_id,
@@ -745,25 +750,55 @@ async def submit_action(
     }
 
     round_num = run.get("current_round", 0)
+    category = ACTION_CATEGORIES.get(body.action_type, "system")
+    scenario_id = run.get("scenario_id")
 
+    # 4a. Check if action requires moderator confirmation
+    auto_approve = run.get("auto_approve", False)
+    if body.action_type in ACTIONS_REQUIRING_CONFIRMATION and not auto_approve:
+        # Queue for moderator approval instead of immediate dispatch
+        target = body.params.get("target_role", body.params.get("target_country", ""))
+        target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
+
+        client.table("pending_actions").insert({
+            "sim_run_id": sim_id,
+            "round_num": round_num,
+            "action_type": body.action_type,
+            "role_id": body.role_id,
+            "country_code": body.country_code,
+            "target_info": target_info,
+            "payload": action_payload,
+            "status": "pending",
+        }).execute()
+
+        write_event(
+            client, sim_id, scenario_id, round_num,
+            body.country_code, body.action_type,
+            f"PENDING: {body.action_type} by {role['character_name']} — awaiting moderator approval",
+            {"action": action_payload, "status": "pending"},
+            phase=current_phase, category=category, role_name=role["character_name"],
+        )
+
+        logger.info("Action %s by %s queued for confirmation", body.action_type, role["character_name"])
+        return APIResponse(data={
+            "success": True,
+            "status": "pending",
+            "narrative": f"{body.action_type} submitted — awaiting moderator approval",
+        })
+
+    # 5. Immediate dispatch (no confirmation needed)
     try:
         result = dispatch_action(sim_id, round_num, action_payload)
     except Exception as e:
         logger.exception("Action dispatch failed: %s", e)
         raise HTTPException(status_code=500, detail=f"Engine error: {e}")
 
-    # 5. Write enriched observatory event
-    category = ACTION_CATEGORIES.get(body.action_type, "system")
-    scenario_id = run.get("scenario_id")
     summary = result.get("narrative", f"{body.action_type} by {role['character_name']}")
-
     write_event(
         client, sim_id, scenario_id, round_num,
         body.country_code, body.action_type, summary,
         {"action": action_payload, "result": result},
-        phase=current_phase,
-        category=category,
-        role_name=role["character_name"],
+        phase=current_phase, category=category, role_name=role["character_name"],
     )
 
     logger.info(
@@ -773,3 +808,115 @@ async def submit_action(
     )
 
     return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# M4: Pending Action Confirmation
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/pending", response_model=APIResponse)
+async def get_pending_actions(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Get all pending actions for a sim."""
+    from engine.services.supabase import get_client
+    client = get_client()
+    rows = (
+        client.table("pending_actions")
+        .select("*")
+        .eq("sim_run_id", sim_id)
+        .eq("status", "pending")
+        .order("submitted_at", desc=False)
+        .execute()
+    ).data or []
+    return APIResponse(data=rows, meta={"count": len(rows)})
+
+
+@app.post("/api/sim/{sim_id}/pending/{action_id}/confirm", response_model=APIResponse)
+async def confirm_pending_action(
+    sim_id: str, action_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Approve a pending action — dispatches it to the engine."""
+    from engine.services.action_dispatcher import dispatch_action
+    from engine.services.common import write_event
+    from engine.services.supabase import get_client
+    from engine.services.sim_run_manager import get_state
+
+    client = get_client()
+
+    pa = client.table("pending_actions").select("*").eq("id", action_id).eq("sim_run_id", sim_id).execute()
+    if not pa.data:
+        raise HTTPException(status_code=404, detail="Pending action not found")
+    pending = pa.data[0]
+
+    if pending["status"] != "pending":
+        raise HTTPException(status_code=400, detail=f"Action already {pending['status']}")
+
+    payload = pending["payload"]
+    round_num = pending["round_num"]
+
+    try:
+        result = dispatch_action(sim_id, round_num, payload)
+    except Exception as e:
+        logger.exception("Confirmed action dispatch failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"Engine error: {e}")
+
+    client.table("pending_actions").update({
+        "status": "approved",
+        "resolved_at": "now()",
+        "resolved_by": user.id,
+    }).eq("id", action_id).execute()
+
+    run = get_state(sim_id)
+    category = ACTION_CATEGORIES.get(pending["action_type"], "system")
+    write_event(
+        client, sim_id, run.get("scenario_id"), round_num,
+        pending["country_code"], pending["action_type"],
+        f"APPROVED: {pending['action_type']} — {pending['target_info']}",
+        {"action": payload, "result": result, "approved_by": user.id},
+        phase=run.get("current_phase", "A"),
+        category=category, role_name=pending.get("role_id"),
+    )
+
+    logger.info("Pending action %s approved by %s", action_id, user.id)
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/pending/{action_id}/reject", response_model=APIResponse)
+async def reject_pending_action(
+    sim_id: str, action_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Reject a pending action — not executed."""
+    from engine.services.common import write_event
+    from engine.services.supabase import get_client
+    from engine.services.sim_run_manager import get_state
+
+    client = get_client()
+
+    pa = client.table("pending_actions").select("*").eq("id", action_id).eq("sim_run_id", sim_id).execute()
+    if not pa.data:
+        raise HTTPException(status_code=404, detail="Pending action not found")
+    pending = pa.data[0]
+
+    if pending["status"] != "pending":
+        raise HTTPException(status_code=400, detail=f"Action already {pending['status']}")
+
+    client.table("pending_actions").update({
+        "status": "rejected",
+        "resolved_at": "now()",
+        "resolved_by": user.id,
+    }).eq("id", action_id).execute()
+
+    run = get_state(sim_id)
+    category = ACTION_CATEGORIES.get(pending["action_type"], "system")
+    write_event(
+        client, sim_id, run.get("scenario_id"), pending["round_num"],
+        pending["country_code"], pending["action_type"],
+        f"REJECTED: {pending['action_type']} — {pending['target_info']}",
+        {"action": pending["payload"], "rejected_by": user.id},
+        phase=run.get("current_phase", "A"),
+        category=category, role_name=pending.get("role_id"),
+    )
+
+    logger.info("Pending action %s rejected by %s", action_id, user.id)
+    return APIResponse(data={"status": "rejected", "action_id": action_id})
