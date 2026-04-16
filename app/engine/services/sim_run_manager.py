@@ -265,8 +265,16 @@ def go_back_to_phase_a(sim_id: str, phase_duration_seconds: int = 3600) -> dict:
 
 
 def restart_simulation(sim_id: str) -> dict:
-    """Restart from Round 1 Phase A. Preserves template data, resets runtime state."""
+    """Restart from Round 0. Preserves template data, deletes all runtime data.
+
+    Cleans up: observatory_events, agent_decisions, pending_actions,
+    leadership_votes, nuclear_actions, world_state (rounds > 0).
+    Countries table is preserved (engines will overwrite on next Phase B).
+    """
     client = _get_client()
+
+    # Delete runtime data
+    _cleanup_runtime_data(client, sim_id, after_round=0)
 
     return _update_run(client, sim_id, {
         "status": "pre_start",
@@ -277,6 +285,77 @@ def restart_simulation(sim_id: str) -> dict:
         "started_at": None,
         "completed_at": None,
     })
+
+
+def rollback_to_round(sim_id: str, target_round: int) -> dict:
+    """Roll back to the start of a specific round. Deletes data for rounds > target.
+
+    Args:
+        sim_id: SimRun ID
+        target_round: Round to roll back to (e.g., 2 means start of R2 Phase A)
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    current_round = run.get("current_round", 0)
+    if target_round >= current_round:
+        raise ValueError(f"Cannot roll back to R{target_round} — currently at R{current_round}")
+    if target_round < 0:
+        raise ValueError("Target round must be >= 0")
+
+    # Delete data for rounds after target
+    _cleanup_runtime_data(client, sim_id, after_round=target_round)
+
+    return _update_run(client, sim_id, {
+        "status": "active" if target_round > 0 else "pre_start",
+        "current_round": target_round,
+        "current_phase": "A" if target_round > 0 else "pre",
+        "phase_started_at": datetime.now(timezone.utc).isoformat() if target_round > 0 else None,
+        "phase_duration_seconds": 3600 if target_round > 0 else None,
+        "completed_at": None,
+    })
+
+
+def _cleanup_runtime_data(client, sim_id: str, after_round: int) -> None:
+    """Delete runtime data for rounds > after_round.
+
+    If after_round=0, deletes ALL runtime data (full restart).
+    """
+    logger.info("Cleaning runtime data for sim %s after round %d", sim_id, after_round)
+
+    # Tables with round_num column — delete rows where round_num > after_round
+    for table in ["observatory_events", "agent_decisions"]:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).gt("round_num", after_round).execute()
+        except Exception as e:
+            logger.warning("Cleanup %s failed: %s", table, e)
+
+    # World state — keep round 0 (initial) + rounds <= after_round
+    try:
+        client.table("world_state").delete().eq("sim_run_id", sim_id).gt("round_num", after_round).execute()
+    except Exception as e:
+        logger.warning("Cleanup world_state failed: %s", e)
+
+    # Tables without round_num — delete ALL if full restart (after_round=0)
+    if after_round == 0:
+        for table in ["pending_actions", "leadership_votes"]:
+            try:
+                client.table(table).delete().eq("sim_run_id", sim_id).execute()
+            except Exception as e:
+                logger.warning("Cleanup %s failed: %s", table, e)
+        try:
+            client.table("nuclear_actions").delete().eq("sim_run_id", sim_id).execute()
+        except Exception as e:
+            logger.warning("Cleanup nuclear_actions failed: %s", e)
+    else:
+        # For rollback, delete pending/votes from rounds > target
+        for table in ["pending_actions", "leadership_votes"]:
+            try:
+                client.table(table).delete().eq("sim_run_id", sim_id).gt("round_num", after_round).execute()
+            except Exception as e:
+                logger.warning("Cleanup %s failed: %s", table, e)
+
+    logger.info("Cleanup complete for sim %s after round %d", sim_id, after_round)
 
 
 # ---------------------------------------------------------------------------

@@ -583,11 +583,23 @@ async def sim_go_back(sim_id: str, user: AuthUser = Depends(require_moderator)):
 
 @app.post("/api/sim/{sim_id}/restart", response_model=APIResponse)
 async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
-    """Restart simulation from beginning."""
+    """Restart simulation from beginning. Deletes all runtime data."""
     from engine.services.sim_run_manager import restart_simulation
     try:
         state = restart_simulation(sim_id)
-        logger.info("Sim %s RESTARTED by %s", sim_id, user.id)
+        logger.info("Sim %s RESTARTED (full cleanup) by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/rollback", response_model=APIResponse)
+async def sim_rollback(sim_id: str, target_round: int = 1, user: AuthUser = Depends(require_moderator)):
+    """Roll back to the start of a specific round. Deletes data for rounds after target."""
+    from engine.services.sim_run_manager import rollback_to_round
+    try:
+        state = rollback_to_round(sim_id, target_round)
+        logger.info("Sim %s ROLLED BACK to R%d by %s", sim_id, target_round, user.id)
         return APIResponse(data=state)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

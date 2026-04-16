@@ -572,6 +572,29 @@ export function FacilitatorDashboard() {
               loading={actionLoading === 'end'}
               variant="danger"
             />
+            <ControlButton
+              label="Restart"
+              onClick={() => {
+                if (confirm('RESTART simulation? All runtime data (events, decisions, world state changes) will be deleted. Only initial setup preserved.')) {
+                  doAction('restart')
+                }
+              }}
+              loading={actionLoading === 'restart'}
+              variant="danger"
+            />
+            {currentRound > 1 && (
+              <ControlButton
+                label={`← R${currentRound - 1}`}
+                onClick={() => {
+                  const target = currentRound - 1
+                  if (confirm(`Roll back to Round ${target}? All data from Round ${currentRound} will be deleted.`)) {
+                    simAction(simId!, 'rollback', { target_round: target }).then(() => loadData())
+                  }
+                }}
+                loading={actionLoading === 'rollback'}
+                variant="secondary"
+              />
+            )}
           </div>
         </div>
 
@@ -945,7 +968,12 @@ function ParticipantPanel({
     }
   }
 
-  const handleAssign = async (roleId: string, userId: string | null) => {
+  const handleAssign = async (roleId: string, userId: string | null, roleName: string) => {
+    const userName = userId ? users.find((u) => u.id === userId)?.display_name ?? 'user' : 'nobody'
+    const msg = userId
+      ? `Assign ${userName} to ${roleName}?`
+      : `Unassign ${roleName}?`
+    if (!confirm(msg)) return
     try {
       await assignUserToRole(simId, roleId, userId)
       onRolesChanged()
@@ -954,7 +982,11 @@ function ParticipantPanel({
     }
   }
 
-  const handleToggleAI = async (roleId: string, isAI: boolean) => {
+  const handleToggleAI = async (roleId: string, isAI: boolean, roleName: string) => {
+    const msg = isAI
+      ? `Switch ${roleName} to AI-operated?`
+      : `Switch ${roleName} to Human?`
+    if (!confirm(msg)) return
     try {
       await toggleRoleAI(simId, roleId, isAI)
       onRolesChanged()
@@ -1013,7 +1045,7 @@ function ParticipantPanel({
 
                       {/* AI/Human toggle */}
                       <button
-                        onClick={() => handleToggleAI(role.id, !role.is_ai_operated)}
+                        onClick={() => handleToggleAI(role.id, !role.is_ai_operated, role.character_name)}
                         className={`font-body text-caption px-2 py-0.5 rounded shrink-0 ${
                           role.is_ai_operated
                             ? 'bg-accent/10 text-accent'
@@ -1028,7 +1060,7 @@ function ParticipantPanel({
                         <select
                           value={role.user_id ?? ''}
                           onChange={(e) =>
-                            handleAssign(role.id, e.target.value || null)
+                            handleAssign(role.id, e.target.value || null, role.character_name)
                           }
                           className="flex-1 bg-card border border-border rounded px-2 py-1 font-body text-caption text-text-primary min-w-0"
                         >
