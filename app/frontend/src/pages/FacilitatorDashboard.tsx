@@ -768,11 +768,11 @@ export function FacilitatorDashboard() {
                 )}
               </div>
               {events.length === 0 ? (
-                <div className="min-h-[60vh] flex items-center justify-center">
+                <div className="min-h-[30vh] flex items-center justify-center">
                   <p className="font-body text-body-sm text-text-secondary">No events yet</p>
                 </div>
               ) : (
-                <div className="space-y-1 min-h-[60vh] max-h-[60vh] overflow-y-auto">
+                <div className="space-y-1 min-h-[30vh] max-h-[30vh] overflow-y-auto">
                   {events.map((evt) => (
                     <div
                       key={evt.id}
