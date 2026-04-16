@@ -882,6 +882,17 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
                     map_config["global"]["die_hards"] = die_hards
                     client.table("sim_templates").update({"map_config": map_config}).eq("id", tpl.data[0].get("id", "")).execute()
 
+            # 3. Save color changes to countries table
+            color_changes = body.get("colorChanges", {})
+            if color_changes:
+                for cid, colors in color_changes.items():
+                    update = {}
+                    if "color_map" in colors:
+                        update["color_map"] = colors["color_map"]
+                    if update:
+                        client.table("countries").update(update).eq(
+                            "id", cid).eq("sim_run_id", "00000000-0000-0000-0000-000000000001").execute()
+
             return {"status": "ok", "message": "Geography saved to template and local JSON"}
         except Exception as e:
             return {"error": str(e)}
@@ -1003,6 +1014,21 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
             "horn":     {"ui": "#8A7A68", "map": "#B5A896", "light": "#F0ECE8"},
             "sea":      {"ui": "#2a4a6a", "map": "#2a4a6a", "light": "#2a4a6a"},
         }
+        # Try loading colors from Supabase template (canonical source)
+        try:
+            from supabase import create_client
+            url = os.environ.get("SUPABASE_URL", "https://lukcymegoldprbovglmn.supabase.co")
+            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "sb_secret_96Y8Pi8EYlZMrKaTn0AqkA_eORKFnCb")
+            client = create_client(url, key)
+            rows = client.table("countries").select("id, color_ui, color_map, color_light").eq(
+                "sim_run_id", "00000000-0000-0000-0000-000000000001").execute().data
+            for row in (rows or []):
+                cid = row["id"]
+                if row.get("color_map") and row["color_map"] != '#AAAAAA':
+                    palette[cid] = {"ui": row["color_ui"], "map": row["color_map"], "light": row["color_light"]}
+        except Exception as e:
+            pass  # Fall back to hardcoded palette
+
         # merge palette onto countries
         for cid, colors in palette.items():
             countries.setdefault(cid, {"id": cid, "name": cid.title(), "home_zones": []})

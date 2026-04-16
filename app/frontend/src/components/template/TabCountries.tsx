@@ -407,6 +407,26 @@ function CountryEditor({ country, onSave, onDelete }: CountryEditorProps) {
       <SectionHeader title="Geography" />
       <TextField label="home_zones (comma-separated)" value={draft.home_zones} onChange={(v) => set('home_zones', v)} />
 
+      {/* Colors */}
+      <SectionHeader title="Colors" />
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="font-body text-caption text-text-secondary">UI:</label>
+          <input type="color" value={draft.color_ui ?? '#888888'} onChange={(e) => set('color_ui', e.target.value)} className="w-8 h-6 border border-border rounded cursor-pointer" />
+          <span className="font-data text-caption text-text-secondary">{draft.color_ui}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="font-body text-caption text-text-secondary">Map:</label>
+          <input type="color" value={draft.color_map ?? '#AAAAAA'} onChange={(e) => set('color_map', e.target.value)} className="w-8 h-6 border border-border rounded cursor-pointer" />
+          <span className="font-data text-caption text-text-secondary">{draft.color_map}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="font-body text-caption text-text-secondary">Light:</label>
+          <input type="color" value={draft.color_light ?? '#EEEEEE'} onChange={(e) => set('color_light', e.target.value)} className="w-8 h-6 border border-border rounded cursor-pointer" />
+          <span className="font-data text-caption text-text-secondary">{draft.color_light}</span>
+        </div>
+      </div>
+
       {/* Country Brief */}
       <SectionHeader title="Country Brief" />
       <div>

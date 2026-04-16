@@ -450,6 +450,9 @@ export interface Country {
   ai_level: number
   ai_rd_progress: number
   home_zones: string
+  color_ui: string
+  color_map: string
+  color_light: string
   country_brief: string | null
 }
 

@@ -33,6 +33,19 @@
   /* Compact header */
   .app-header { height: auto !important; min-height: 32px !important; padding: 4px 12px !important; }
 
+  /* Interactive legend in edit mode */
+  .geo-selectable { cursor: default; transition: background 0.15s; border-radius: 3px; padding: 2px 4px !important; }
+  .geo-edit-active .geo-selectable { cursor: pointer; }
+  .geo-edit-active .geo-selectable:hover { background: var(--card-2); }
+  .geo-selectable.geo-selected { background: var(--action) !important; color: white !important; }
+  .geo-selectable.geo-selected span { color: white !important; }
+
+  /* Country legend items become selectable in edit mode */
+  .geo-edit-active .country-legend .legend-row { cursor: pointer; border-radius: 3px; padding: 2px 4px; transition: background 0.15s; }
+  .geo-edit-active .country-legend .legend-row:hover { background: var(--card-2); }
+  .country-legend .legend-row.geo-selected { background: var(--action) !important; }
+  .country-legend .legend-row.geo-selected span { color: white !important; }
+
   /* Nuclear site marker */
   .nuclear-marker {
     fill: none;
@@ -87,15 +100,37 @@
   <aside class="legend" id="legend">
     <h3>Legend</h3>
     <div class="legend-section">
+      <h4>Terrain</h4>
+      <div class="legend-row geo-selectable" data-geo-tool="sea">
+        <span class="swatch" style="background:var(--sea)"></span><span>Sea</span>
+      </div>
+    </div>
+    <div class="legend-section">
       <h4>Map Features</h4>
-      <div class="legend-row"><span class="swatch chokepoint-swatch"></span><span>Chokepoint</span></div>
+      <div class="legend-row geo-selectable" data-geo-tool="chokepoint">
+        <span class="swatch chokepoint-swatch"></span><span>Chokepoint</span>
+      </div>
       <div class="legend-row"><span class="swatch theater-swatch"></span><span>Theater drill-down</span></div>
-      <div class="legend-row"><span class="swatch" style="background:#C4922A;border:2px dashed #C4922A"></span><span>Die Hard zone</span></div>
-      <div class="legend-row"><span class="swatch" style="background:#B03A3A;border-radius:50%"></span><span>Nuclear site</span></div>
+      <div class="legend-row geo-selectable" data-geo-tool="diehard">
+        <span class="swatch" style="background:#C4922A;border:2px dashed #C4922A"></span><span>Die Hard zone</span>
+      </div>
+      <div class="legend-row geo-selectable" data-geo-tool="nuclear">
+        <span class="swatch" style="background:#B03A3A;border-radius:50%"></span><span>Nuclear site</span>
+      </div>
+    </div>
+    <div class="legend-section">
+      <h4>Tools</h4>
+      <div class="legend-row geo-selectable" data-geo-tool="copy" style="display:none;">
+        <span class="swatch" style="background:var(--action);font-size:10px;text-align:center;line-height:16px;">⧉</span><span>Copy Hex</span>
+      </div>
     </div>
     <div class="legend-section">
       <h4>Countries</h4>
       <div id="countryLegend" class="country-legend"></div>
+    </div>
+    <div id="geoEditActions" class="legend-section" style="display:none; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+      <button id="geoSaveBtn" style="width:100%; padding:6px 8px; background:var(--action); color:white; border:none; border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer; margin-bottom:4px;">Save to Template</button>
+      <div id="geoSaveStatus" style="font-size:10px; text-align:center; min-height:14px;"></div>
     </div>
   </aside>
 
@@ -113,164 +148,15 @@
   </aside>
 </main>
 
-<!-- Geography edit panel (hidden by default) -->
-<div id="geoEditPanel" style="display:none; position:fixed; top:40px; right:10px; width:200px; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; z-index:100; max-height:80vh; overflow-y:auto;">
-  <h4 style="font-family:var(--font-heading); font-size:13px; color:var(--accent); margin-bottom:8px;">Paint Country</h4>
-  <p style="font-size:10px; color:var(--text-secondary); margin-bottom:8px;">Select a country, then click hexes to assign ownership.</p>
-  <div id="geoCountryGrid" style="display:flex; flex-wrap:wrap; gap:3px; margin-bottom:10px;"></div>
-  <div style="border-top:1px solid var(--border); padding-top:8px; margin-top:4px;">
-    <button id="geoSaveBtn" style="width:100%; padding:6px; background:var(--action); color:white; border:none; border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer; margin-bottom:4px;">Save to Template</button>
-    <button id="geoCancelBtn" style="width:100%; padding:6px; background:var(--card-2); color:var(--text-secondary); border:1px solid var(--border); border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer;">Cancel</button>
-    <div id="geoSaveStatus" style="font-size:10px; color:var(--success); margin-top:4px; text-align:center;"></div>
-  </div>
-</div>
+<!-- Geography edit panel (built dynamically by geo_edit.js) -->
+<div id="geoEditPanel" style="display:none; position:fixed; top:40px; right:10px; width:210px; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; z-index:100; max-height:80vh; overflow-y:auto;"></div>
 
 <script>
-  // Set mode BEFORE map.js loads so it can check during init
+  // Set mode BEFORE map.js loads
   window.MAP_VIEWER_MODE = 'geography';
 </script>
 <script src="/static/map_config.js"></script>
 <script src="/static/map.js"></script>
-<script>
-(function() {
-  'use strict';
-
-  let geoEditActive = false;
-  let selectedCountry = null;
-
-  // Wait for map.js to finish init
-  const waitForMap = setInterval(() => {
-    const svg = document.getElementById('mapSvg');
-    if (!svg || svg.childElementCount === 0) return;
-    clearInterval(waitForMap);
-    setupGeoEdit();
-  }, 500);
-
-  function setupGeoEdit() {
-    const btn = document.getElementById('geoEditBtn');
-    const panel = document.getElementById('geoEditPanel');
-    const grid = document.getElementById('geoCountryGrid');
-    const saveBtn = document.getElementById('geoSaveBtn');
-    const cancelBtn = document.getElementById('geoCancelBtn');
-    const statusEl = document.getElementById('geoSaveStatus');
-
-    // Build country palette from loaded data
-    const countries = window._geoCountries || {};
-    // We need to get countries from the map.js state — it's in an IIFE so we access via the DOM
-    // Instead, fetch from API
-    fetch('/api/map/countries').then(r => r.json()).then(cs => {
-      const palette = cs.palette || {};
-      const sorted = Object.keys(palette).sort();
-      sorted.forEach(cid => {
-        const color = palette[cid];
-        const chip = document.createElement('div');
-        chip.style.cssText = `width:24px; height:18px; background:${color}; border:2px solid transparent; border-radius:3px; cursor:pointer; title:${cid};`;
-        chip.title = cid;
-        chip.addEventListener('click', () => {
-          selectedCountry = cid;
-          // Highlight selected
-          grid.querySelectorAll('div').forEach(d => d.style.borderColor = 'transparent');
-          chip.style.borderColor = '#fff';
-          statusEl.textContent = `Painting: ${cid}`;
-        });
-        grid.appendChild(chip);
-      });
-    });
-
-    btn.addEventListener('click', () => {
-      geoEditActive = !geoEditActive;
-      panel.style.display = geoEditActive ? 'block' : 'none';
-      btn.textContent = geoEditActive ? '✕ Close Edit' : '✎ Edit Map';
-      btn.style.color = geoEditActive ? '#D45B5B' : '';
-      if (!geoEditActive) {
-        selectedCountry = null;
-        statusEl.textContent = '';
-      }
-    });
-
-    cancelBtn.addEventListener('click', () => {
-      geoEditActive = false;
-      panel.style.display = 'none';
-      btn.textContent = '✎ Edit Map';
-      btn.style.color = '';
-      selectedCountry = null;
-      statusEl.textContent = '';
-    });
-
-    // Intercept hex clicks for painting
-    document.getElementById('mapSvg').addEventListener('click', (e) => {
-      if (!geoEditActive || !selectedCountry) return;
-
-      // Find the clicked hex polygon
-      let target = e.target;
-      while (target && target.tagName !== 'polygon' && target !== e.currentTarget) {
-        target = target.parentElement;
-      }
-      if (!target || target.tagName !== 'polygon') return;
-
-      const row = parseInt(target.getAttribute('data-row'));
-      const col = parseInt(target.getAttribute('data-col'));
-      if (isNaN(row) || isNaN(col)) return;
-
-      // Update the hex color visually
-      fetch('/api/map/countries').then(r => r.json()).then(cs => {
-        const color = (cs.palette || {})[selectedCountry] || '#888';
-        target.setAttribute('fill', color);
-        target.setAttribute('data-owner', selectedCountry);
-      });
-
-      statusEl.textContent = `Set (${row+1},${col+1}) → ${selectedCountry}`;
-    });
-
-    // Save to template
-    saveBtn.addEventListener('click', async () => {
-      statusEl.textContent = 'Saving...';
-      statusEl.style.color = 'var(--warning)';
-
-      try {
-        // Collect current grid state from SVG hex polygons
-        const hexes = document.querySelectorAll('#mapSvg polygon[data-row][data-col]');
-        // Rebuild grid from current state
-        const resp = await fetch('/api/map/global');
-        const globalData = await resp.json();
-        const grid = globalData.grid;
-
-        // Apply any painted changes
-        hexes.forEach(hex => {
-          const r = parseInt(hex.getAttribute('data-row'));
-          const c = parseInt(hex.getAttribute('data-col'));
-          const owner = hex.getAttribute('data-owner');
-          if (owner && grid[r] && grid[r][c]) {
-            grid[r][c].owner = owner;
-          }
-        });
-
-        // Save via API
-        const saveResp = await fetch('/api/map/save_geography', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            grid: grid,
-            chokepoints: globalData.chokepoints,
-            dieHards: globalData.dieHards || {},
-          }),
-        });
-
-        if (saveResp.ok) {
-          statusEl.textContent = 'Saved!';
-          statusEl.style.color = 'var(--success)';
-        } else {
-          const err = await saveResp.text();
-          statusEl.textContent = 'Save failed: ' + err;
-          statusEl.style.color = 'var(--danger)';
-        }
-      } catch (e) {
-        statusEl.textContent = 'Error: ' + e.message;
-        statusEl.style.color = 'var(--danger)';
-      }
-    });
-  }
-})();
-</script>
+<script src="/static/geo_edit.js"></script>
 </body>
 </html>
