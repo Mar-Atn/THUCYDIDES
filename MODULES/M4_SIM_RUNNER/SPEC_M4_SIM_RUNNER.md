@@ -430,6 +430,27 @@ Participant submits action
 - MODULE_REGISTRY updated with canonical ACTION_NAMING table
 - Known gap: 9 military engine functions have param signature mismatches (v2 refactor)
 
-**Sprint 2.3: Phase B Engine Integration** — QUEUED
-**Sprint 2.4: AI Agent Trigger** — QUEUED
-**Sprint 2.5: Full 2-Round Integration Test** — QUEUED
+**Sprint 2.3: Phase B Engine Integration** — DONE (2026-04-16)
+**Sprint 2.4: AI Agent Trigger (M5 stub)** — DONE (2026-04-16)
+**Sprint 2.5: Full 2-Round Integration Test** — DONE (2026-04-16)
+
+### Phase 3: Real-Time — DONE (2026-04-16)
+- Supabase Realtime subscriptions: sim_runs UPDATE + observatory_events INSERT
+- Instant push to dashboard (was 5s polling), 30s fallback poll for resilience
+- DB: REPLICA IDENTITY FULL on sim_runs and observatory_events
+
+### Phase 4: Special Mechanics — IN PROGRESS
+
+**Sprint 4.1: Confirmation Queue** — DONE (2026-04-16)
+- `pending_actions` table with RLS + Realtime
+- Actions requiring approval (assassination, arrest, change_leader) queue for moderator
+- Confirm/Reject endpoints dispatch or cancel the action
+- Auto-approve mode respects `sim_runs.auto_approve` flag
+- Dashboard Pending Actions section with realtime updates
+
+**Sprint 4.2: Key Event Triggers** — DONE (2026-04-16)
+- Orchestrator reads elections + meetings from `sim_runs.key_events` (JSONB)
+- Removed hardcoded `SCHEDULED_EVENTS` from `political.py`
+- Elections fire on correct rounds per DB config (Columbia R2, R6)
+- Mandatory meetings logged in round processing output
+- Source of truth: M9 wizard → sim_runs.key_events

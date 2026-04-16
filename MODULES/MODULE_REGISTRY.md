@@ -3,12 +3,12 @@
 
 | Module | Status | SPEC | Progress |
 |---|---|---|---|
-| M1 World Model Engines | ✅ ALIGNED | N/A | 720 L1 tests passing. Deprecated fields marked (political_support, dem_rep_split). Agent prompts use stability only. New actions: change_leader (stub for M4). **Military engine function signatures outdated** — v2 refactor changed params but dispatcher not yet updated (9 combat functions). |
+| M1 World Model Engines | ⚠️ MOSTLY ALIGNED | N/A | 720 L1 tests passing. Deprecated fields marked. `SCHEDULED_EVENTS` in political.py deprecated (empty dict) — orchestrator reads from `sim_runs.key_events` now. **9 military engine functions have param signature mismatches** (v2 refactor, not yet reconciled with dispatcher). |
 | M2 Communication & Standards | ⚠️ UPDATE NEEDED | N/A | **32 canonical action types** (renamed 2026-04-16, see ACTION_NAMING below). 3 contracts (CHANGE_LEADER, COLUMBIA_ELECTIONS, MAP_RENDERING). 3 archived. Action dispatcher fully reconciled to DB names. |
 | M3 Data Foundation | ✅ ALIGNED | N/A | Template/Run hierarchy. **SimRun creation now copies 11 tables server-side** (`POST /api/sim/create`). observatory_events enriched (+phase, +category, +role_name). SimRun Pydantic model synced to DB (24 fields). |
 | M10.1 Auth | ✅ DONE | ✅ | Email/password + Google OAuth, RLS, GDPR consent. Custom lock bypass for navigator.locks. |
 | M9 Sim Setup | ✅ v2 DONE | ✅ | 10-tab Template Editor, SimRun wizard (now with server-side data inheritance), User Mgmt, AI Setup. 40 roles (5 types), 32 action types in role_actions, country/role briefs, map viewer/editor. |
-| M4 Sim Runner | ⚠️ Phase 2 IN PROGRESS | ✅ | Phase 1 done (state machine, 12 control endpoints, dashboard). Sprint 2.1 done (action endpoint, event schema). Sprint 2.2 done (test action panel, naming reconciliation). Sprints 2.3-2.5 queued. |
+| M4 Sim Runner | ⚠️ Phase 4 IN PROGRESS | ✅ | Phases 1-3 done (state machine, action pipeline, Phase B engines, AI stub, Realtime). Phase 4: confirmation queue done, key event triggers done (elections from DB). Remaining: change_leader voting, nuclear chain, physical dice. |
 | M8 Public Screen | ⚠️ ~40% | — | Hex map rendering contract ready (CONTRACT_MAP_RENDERING). |
 | M6 Human Interface | ❌ NOT STARTED | — | Map rendering contract ready. |
 | M5 AI Participant | ⚠️ PARTIAL | — | Agent prompts updated (stability only, no political_support). **Agent tool names need reconciliation to 32 canonical action IDs.** |

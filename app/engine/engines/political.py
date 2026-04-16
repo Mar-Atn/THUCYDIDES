@@ -36,12 +36,10 @@ CRISIS_STABILITY_PENALTY: dict[str, float] = {
     "collapse": -0.50,
 }
 
-SCHEDULED_EVENTS: dict[int, list[dict[str, str]]] = {
-    2: [{"type": "election", "subtype": "columbia_midterms", "country": "columbia"}],
-    3: [{"type": "election", "subtype": "ruthenia_wartime", "country": "ruthenia"}],
-    4: [{"type": "election", "subtype": "ruthenia_wartime_runoff", "country": "ruthenia"}],
-    5: [{"type": "election", "subtype": "columbia_presidential", "country": "columbia"}],
-}
+# DEPRECATED 2026-04-16: Orchestrator now reads key_events from sim_runs table (M4 Sprint 4.2).
+# This hardcoded dict is kept empty for backward compatibility with old test scripts.
+# DO NOT ADD EVENTS HERE. Use sim_runs.key_events (JSONB) configured via the wizard.
+SCHEDULED_EVENTS: dict[int, list[dict[str, str]]] = {}
 
 # Elderly leaders subject to health events (age, medical quality 0-1)
 ELDERLY_LEADERS: dict[str, dict[str, Any]] = {

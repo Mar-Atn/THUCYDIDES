@@ -26,7 +26,7 @@ from engine.engines.economic import EconomicResult, process_economy, get_market_
 from engine.engines.political import (
     StabilityInput, StabilityResult, PoliticalSupportInput, PoliticalSupportResult,
     ElectionInput, ElectionResult, RevolutionResult, HealthEventResult,
-    WarTirednessInput, WarTirednessResult, ThresholdFlagsResult, SCHEDULED_EVENTS,
+    WarTirednessInput, WarTirednessResult, ThresholdFlagsResult,
     calc_stability, calc_political_support, process_election,
     check_revolution, check_health_events, update_war_tiredness,
     update_threshold_flags, check_capitulation,
@@ -552,15 +552,22 @@ async def process_round(
             health_results[cid] = h
             log.append(f"  HEALTH: {cid} — {h.event}")
 
-    # ELECTIONS
+    # ELECTIONS — read from sim_run.key_events (DB), not hardcoded
     election_results: dict[str, ElectionResult] = {}
-    for event in SCHEDULED_EVENTS.get(round_num, []):
-        if event["type"] != "election" or event["country"] not in countries:
+    key_events = sim_run.key_events if isinstance(sim_run.key_events, list) else []
+    scheduled_elections = [
+        e for e in key_events
+        if e.get("type") == "election" and e.get("round") == round_num
+    ]
+    for event in scheduled_elections:
+        ecid = event.get("country_code", "")
+        if ecid not in countries:
+            log.append(f"  ELECTION skipped: {event.get('name', '?')} — country {ecid} not found")
             continue
-        ecid = event["country"]
         eco, pol = countries[ecid]["economic"], countries[ecid]["political"]
+        election_subtype = event.get("subtype", "parliamentary_midterm")
         el = process_election(ElectionInput(
-            country_id=ecid, election_type=event["subtype"], round_num=round_num,
+            country_id=ecid, election_type=election_subtype, round_num=round_num,
             gdp_growth_rate=eco.get("gdp_growth_rate", 0.0), stability=pol["stability"],
             economic_state=eco.get("economic_state", "normal"),
             oil_price=econ_result.oil_price.price,
@@ -569,7 +576,15 @@ async def process_round(
             incumbent_pct=actions.get("votes", {}).get(ecid, {}).get("incumbent_pct", 50.0),
         ))
         election_results[ecid] = el
-        log.append(f"  ELECTION: {ecid} — {'incumbent wins' if el.incumbent_wins else 'incumbent loses'}")
+        log.append(f"  ELECTION: {event.get('name', ecid)} — {'incumbent wins' if el.incumbent_wins else 'incumbent loses'}")
+
+    # Log mandatory meetings scheduled for this round (informational)
+    scheduled_meetings = [
+        e for e in key_events
+        if e.get("type") == "mandatory_meeting" and e.get("round") == round_num
+    ]
+    for meeting in scheduled_meetings:
+        log.append(f"  MEETING: {meeting.get('name', '?')} (round {round_num})")
 
     # CAPITULATION CHECK
     cap_flags: list[str] = []
