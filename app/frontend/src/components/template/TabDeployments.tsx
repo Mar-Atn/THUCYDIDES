@@ -7,6 +7,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { getTemplateDeployments, type Deployment } from '@/lib/queries'
 
+const DEPLOYMENT_EDITOR_URL = 'http://localhost:8888/map/deployments'
+
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
@@ -42,6 +44,7 @@ export function TabDeployments({ templateId: _templateId }: TabDeploymentsProps)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [expandedCountry, setExpandedCountry] = useState<string | null>(null)
+  const [showMap, setShowMap] = useState(false)
 
   useEffect(() => {
     const load = async () => {
@@ -107,18 +110,39 @@ export function TabDeployments({ templateId: _templateId }: TabDeploymentsProps)
         <div>
           <h3 className="font-heading text-h3 text-text-primary">Deployments</h3>
           <p className="font-body text-caption text-text-secondary mt-1">
-            Initial military unit placement across all countries
+            Initial military unit placement across all countries. Use Edit Deployments for drag-and-drop placement.
           </p>
         </div>
-        <a
-          href="http://localhost:8888/map"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-action text-white font-body text-body-sm font-medium py-2 px-4 rounded hover:opacity-90 transition-opacity"
-        >
-          Open Deployment Editor
-        </a>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowMap(!showMap)}
+            className={`font-body text-body-sm font-medium py-2 px-4 rounded transition-opacity ${
+              showMap ? 'bg-warning/20 text-warning' : 'bg-action text-white'
+            } hover:opacity-90`}
+          >
+            {showMap ? 'Hide Map' : 'Show Map'}
+          </button>
+          <a
+            href={DEPLOYMENT_EDITOR_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-body text-body-sm font-medium py-2 px-4 rounded bg-base border border-border text-text-secondary hover:text-action transition-colors"
+          >
+            Open in New Tab
+          </a>
+        </div>
       </div>
+
+      {showMap && (
+        <div className="border border-border rounded-lg overflow-hidden bg-card">
+          <iframe
+            src={DEPLOYMENT_EDITOR_URL}
+            title="TTT Deployment Editor"
+            className="w-full border-0"
+            style={{ height: '70vh', minHeight: '500px' }}
+          />
+        </div>
+      )}
 
       {/* Global summary */}
       <div className="bg-base border border-border rounded-lg p-4">

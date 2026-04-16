@@ -361,6 +361,10 @@
           tSvg.setAttribute('height', tSvgH);
           tSvg.classList.add('map-svg');
 
+          // Start collapsed
+          tSvg.style.display = 'none';
+          titleDiv.textContent = '▶ ' + (THEATER_LABELS[tName] || tName);
+
           titleDiv.addEventListener('click', () => {
             const visible = tSvg.style.display !== 'none';
             tSvg.style.display = visible ? 'none' : 'block';
