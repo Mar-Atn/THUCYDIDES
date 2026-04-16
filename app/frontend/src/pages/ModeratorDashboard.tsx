@@ -29,7 +29,11 @@ export function ModeratorDashboard() {
   }, [])
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete simulation "${name}"? This cannot be undone.`)) return
+    const typed = prompt(`To delete this simulation, type its full name:\n\n"${name}"`)
+    if (typed !== name) {
+      if (typed !== null) alert('Name does not match. Deletion cancelled.')
+      return
+    }
     try {
       await deleteSimRun(id)
       setSimRuns((prev) => prev.filter((r) => r.id !== id))

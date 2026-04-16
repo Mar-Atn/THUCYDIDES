@@ -58,11 +58,21 @@ export function TemplateList() {
     }
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Delete template "${name}"? This cannot be undone.`)) return
+  const CANONICAL_TEMPLATE_CODE = 'ttt_v1_0'
+
+  const handleDelete = async (tpl: SimTemplate) => {
+    if (tpl.code === CANONICAL_TEMPLATE_CODE) {
+      alert('The canonical template cannot be deleted.')
+      return
+    }
+    const typed = prompt(`To delete this template, type its full name:\n\n"${tpl.name}"`)
+    if (typed !== tpl.name) {
+      if (typed !== null) alert('Name does not match. Deletion cancelled.')
+      return
+    }
     try {
-      await deleteTemplate(id)
-      setTemplates((prev) => prev.filter((t) => t.id !== id))
+      await deleteTemplate(tpl.id)
+      setTemplates((prev) => prev.filter((t) => t.id !== tpl.id))
     } catch (e) {
       console.error('Delete failed:', e)
     }
@@ -170,13 +180,19 @@ export function TemplateList() {
                   >
                     Duplicate
                   </button>
-                  <button
-                    onClick={() => handleDelete(tpl.id, tpl.name)}
-                    className="font-body text-caption text-danger hover:underline px-2 py-1"
-                    title="Delete"
-                  >
-                    Delete
-                  </button>
+                  {tpl.code !== CANONICAL_TEMPLATE_CODE ? (
+                    <button
+                      onClick={() => handleDelete(tpl)}
+                      className="font-body text-caption text-danger hover:underline px-2 py-1"
+                      title="Delete"
+                    >
+                      Delete
+                    </button>
+                  ) : (
+                    <span className="font-body text-caption text-text-secondary/50 px-2 py-1" title="Canonical template cannot be deleted">
+                      Protected
+                    </span>
+                  )}
                 </div>
               </div>
             ))}

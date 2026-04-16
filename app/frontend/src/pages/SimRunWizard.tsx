@@ -592,26 +592,98 @@ export function SimRunWizard() {
             </button>
           )}
         </div>
-        {/* Info popup overlay */}
+        {/* Info popup overlay — full dashboard card */}
         {infoPopup && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={() => setInfoPopup(null)}
           >
             <div
-              className="bg-card border border-border rounded-lg p-6 max-w-md w-full mx-4 shadow-xl"
+              className="bg-card border border-border rounded-lg shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-heading text-h3 text-text-primary">{infoPopup.name}</h3>
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+                <div>
+                  <h3 className="font-heading text-h2 text-text-primary">{infoPopup.name}</h3>
+                  {infoPopup.type === 'role' && (
+                    <span className="font-body text-caption text-text-secondary">
+                      {roles.find(r => r.id === infoPopup.id)?.title ?? ''}
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => setInfoPopup(null)}
-                  className="w-6 h-6 rounded-full bg-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-border/80 transition-colors"
+                  className="w-8 h-8 rounded-full bg-border flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-border/80 transition-colors text-lg"
                 >
-                  x
+                  ×
                 </button>
               </div>
-              <p className="font-body text-body-sm text-text-secondary whitespace-pre-wrap">{infoPopup.content || 'No description available.'}</p>
+
+              {/* Scrollable content */}
+              <div className="overflow-y-auto px-6 py-4 space-y-4">
+                {infoPopup.type === 'role' && (() => {
+                  const role = roles.find(r => r.id === infoPopup.id)
+                  if (!role) return <p className="font-body text-body-sm text-text-secondary">Role not found.</p>
+
+                  const badgeMap: Record<string, {label: string, cls: string}> = {
+                    head_of_state: {label: 'Head of State', cls: 'bg-warning/10 text-warning'},
+                    military_chief: {label: 'Military Chief', cls: 'bg-danger/10 text-danger'},
+                    economy_officer: {label: 'Economy Officer', cls: 'bg-accent/10 text-accent'},
+                    diplomat: {label: 'Diplomat', cls: 'bg-action/10 text-action'},
+                    security: {label: 'Security', cls: 'bg-text-secondary/10 text-text-primary'},
+                    opposition: {label: 'Opposition', cls: 'bg-danger/20 text-danger'},
+                  }
+                  const badge = badgeMap[role.position_type]
+
+                  return (
+                    <>
+                      {/* Position badge */}
+                      {badge && (
+                        <span className={`inline-block font-body text-caption font-medium px-2 py-1 rounded ${badge.cls}`}>
+                          {badge.label}
+                        </span>
+                      )}
+                      {role.expansion_role && (
+                        <span className="inline-block font-body text-caption font-medium text-text-secondary bg-border/50 px-2 py-1 rounded ml-2">
+                          Optional role
+                        </span>
+                      )}
+
+                      {/* Public Bio */}
+                      {role.public_bio && (
+                        <div>
+                          <h4 className="font-heading text-h3 text-text-primary mb-2">Public Profile</h4>
+                          <p className="font-body text-body-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                            {role.public_bio}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Country */}
+                      <div className="text-body-sm text-text-secondary">
+                        <span className="font-medium text-text-primary">Country: </span>
+                        {role.country_id.charAt(0).toUpperCase() + role.country_id.slice(1)}
+                      </div>
+                    </>
+                  )
+                })()}
+
+                {infoPopup.type === 'country' && (() => {
+                  const brief = countryBriefs[infoPopup.id]
+                  return (
+                    <>
+                      {brief ? (
+                        <div className="font-body text-body-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+                          {brief}
+                        </div>
+                      ) : (
+                        <p className="font-body text-body-sm text-text-secondary">No country brief available.</p>
+                      )}
+                    </>
+                  )
+                })()}
+              </div>
             </div>
           </div>
         )}
