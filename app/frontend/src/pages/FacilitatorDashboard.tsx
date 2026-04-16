@@ -15,8 +15,12 @@ import {
   getSimState,
   simAction,
   submitAction,
+  getAllUsers,
+  assignUserToRole,
+  toggleRoleAI,
   type SimRun,
   type SimRunRole,
+  type UserRecord,
 } from '@/lib/queries'
 import { supabase } from '@/lib/supabase'
 
@@ -150,6 +154,37 @@ function categoryBadgeClass(category: string): string {
       return 'bg-warning/10 text-warning'
     default:
       return 'bg-text-secondary/10 text-text-secondary'
+  }
+}
+
+function positionBadgeClass(position: string): string {
+  switch (position) {
+    case 'head_of_state':
+      return 'bg-warning/15 text-warning'
+    case 'military_chief':
+      return 'bg-danger/15 text-danger'
+    case 'economy_officer':
+      return 'bg-accent/15 text-accent'
+    case 'diplomat':
+      return 'bg-action/15 text-action'
+    case 'security':
+      return 'bg-text-secondary/15 text-text-secondary'
+    case 'opposition':
+      return 'bg-text-secondary/10 text-text-secondary'
+    default:
+      return 'bg-base text-text-secondary'
+  }
+}
+
+function positionLabel(position: string): string {
+  switch (position) {
+    case 'head_of_state': return 'HoS'
+    case 'military_chief': return 'Military'
+    case 'economy_officer': return 'Economy'
+    case 'diplomat': return 'Diplomat'
+    case 'security': return 'Security'
+    case 'opposition': return 'Opposition'
+    default: return position
   }
 }
 
@@ -714,29 +749,9 @@ export function FacilitatorDashboard() {
         </DashboardSection>
 
         {/* -------------------------------------------------------------- */}
-        {/*  Participants                                                   */}
+        {/*  Participants & Role Assignment                                 */}
         {/* -------------------------------------------------------------- */}
-        <DashboardSection title="Participants">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <span className="font-data text-data text-text-primary">
-                {humanRoles.length} human
-              </span>
-              <span className="text-text-secondary">/</span>
-              <span className="font-data text-data text-text-primary">
-                {aiRoles.length} AI
-              </span>
-            </div>
-            <button
-              onClick={() => {
-                /* Placeholder — participant assignment page */
-              }}
-              className="font-body text-caption text-action hover:underline"
-            >
-              Manage Assignments
-            </button>
-          </div>
-        </DashboardSection>
+        <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadData} />
 
         {/* -------------------------------------------------------------- */}
         {/*  Public Screen                                                  */}
@@ -884,6 +899,157 @@ function DashboardSection({
 function EmptyState({ message }: { message: string }) {
   return (
     <p className="font-body text-body-sm text-text-secondary py-2">{message}</p>
+  )
+}
+
+/** Participant & Role Assignment Panel — assign users to roles, toggle AI/human. */
+function ParticipantPanel({
+  simId,
+  roles,
+  onRolesChanged,
+}: {
+  simId: string
+  roles: SimRunRole[]
+  onRolesChanged: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [users, setUsers] = useState<UserRecord[]>([])
+  const [usersLoaded, setUsersLoaded] = useState(false)
+
+  const activeRoles = roles.filter((r) => r.status === 'active')
+  const humanRoles = activeRoles.filter((r) => !r.is_ai_operated)
+  const aiRoles = activeRoles.filter((r) => r.is_ai_operated)
+  const assignedHuman = humanRoles.filter((r) => r.user_id)
+  const unassignedHuman = humanRoles.filter((r) => !r.user_id)
+
+  // Group roles by country
+  const byCountry = activeRoles.reduce((acc, r) => {
+    acc[r.country_id] = acc[r.country_id] || []
+    acc[r.country_id].push(r)
+    return acc
+  }, {} as Record<string, SimRunRole[]>)
+
+  const loadUsers = async () => {
+    if (usersLoaded) return
+    try {
+      const all = await getAllUsers()
+      setUsers(all.filter((u) => u.status === 'active'))
+      setUsersLoaded(true)
+    } catch {
+      setUsers([])
+    }
+  }
+
+  const handleAssign = async (roleId: string, userId: string | null) => {
+    try {
+      await assignUserToRole(simId, roleId, userId)
+      onRolesChanged()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Assignment failed')
+    }
+  }
+
+  const handleToggleAI = async (roleId: string, isAI: boolean) => {
+    try {
+      await toggleRoleAI(simId, roleId, isAI)
+      onRolesChanged()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Toggle failed')
+    }
+  }
+
+  // Users not assigned to any role in this sim
+  const assignedUserIds = new Set(roles.filter((r) => r.user_id).map((r) => r.user_id))
+  const availableUsers = users.filter((u) => !assignedUserIds.has(u.id))
+
+  return (
+    <DashboardSection
+      title="Participants"
+      badge={`${assignedHuman.length}/${humanRoles.length} assigned`}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-4 font-data text-caption text-text-secondary">
+          <span>{humanRoles.length} human</span>
+          <span>{aiRoles.length} AI</span>
+          <span>{unassignedHuman.length} unassigned</span>
+        </div>
+        <button
+          onClick={() => {
+            setOpen(!open)
+            if (!open) loadUsers()
+          }}
+          className="font-body text-caption text-action hover:underline"
+        >
+          {open ? 'Hide assignments' : 'Manage Assignments'}
+        </button>
+      </div>
+
+      {open && (
+        <div className="space-y-3 mt-3">
+          {Object.entries(byCountry)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([countryId, countryRoles]) => (
+              <div key={countryId} className="bg-base rounded-lg border border-border p-3">
+                <h4 className="font-heading text-caption text-text-primary font-medium mb-2 uppercase tracking-wider">
+                  {countryId}
+                </h4>
+                <div className="space-y-1">
+                  {countryRoles.map((role) => (
+                    <div
+                      key={role.id}
+                      className="flex items-center gap-3 py-1"
+                    >
+                      <span className="font-body text-caption text-text-primary w-24 shrink-0">
+                        {role.character_name}
+                      </span>
+                      <span className={`font-body text-caption font-medium w-28 shrink-0 px-1.5 py-0.5 rounded text-center ${positionBadgeClass(role.position_type)}`}>
+                        {positionLabel(role.position_type)}
+                      </span>
+
+                      {/* AI/Human toggle */}
+                      <button
+                        onClick={() => handleToggleAI(role.id, !role.is_ai_operated)}
+                        className={`font-body text-caption px-2 py-0.5 rounded shrink-0 ${
+                          role.is_ai_operated
+                            ? 'bg-accent/10 text-accent'
+                            : 'bg-success/10 text-success'
+                        }`}
+                      >
+                        {role.is_ai_operated ? 'AI' : 'Human'}
+                      </button>
+
+                      {/* User assignment dropdown (human roles only) */}
+                      {!role.is_ai_operated && (
+                        <select
+                          value={role.user_id ?? ''}
+                          onChange={(e) =>
+                            handleAssign(role.id, e.target.value || null)
+                          }
+                          className="flex-1 bg-card border border-border rounded px-2 py-1 font-body text-caption text-text-primary min-w-0"
+                        >
+                          <option value="">— unassigned —</option>
+                          {/* Show currently assigned user first */}
+                          {role.user_id && (
+                            <option value={role.user_id}>
+                              {users.find((u) => u.id === role.user_id)?.display_name ??
+                                role.user_id.slice(0, 8)}
+                            </option>
+                          )}
+                          {availableUsers.map((u) => (
+                            <option key={u.id} value={u.id}>
+                              {u.display_name} ({u.email})
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
+    </DashboardSection>
   )
 }
 

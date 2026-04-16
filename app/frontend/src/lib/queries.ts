@@ -239,6 +239,68 @@ export async function updateUserStatus(
   if (error) throw error
 }
 
+export async function assignUserToRole(
+  simRunId: string,
+  roleId: string,
+  userId: string | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from('roles')
+    .update({ user_id: userId })
+    .eq('sim_run_id', simRunId)
+    .eq('id', roleId)
+
+  if (error) throw error
+}
+
+export async function toggleRoleAI(
+  simRunId: string,
+  roleId: string,
+  isAI: boolean,
+): Promise<void> {
+  const { error } = await supabase
+    .from('roles')
+    .update({ is_ai_operated: isAI, user_id: null })
+    .eq('sim_run_id', simRunId)
+    .eq('id', roleId)
+
+  if (error) throw error
+}
+
+export async function randomAssignRoles(
+  simRunId: string,
+  userIds: string[],
+): Promise<number> {
+  // Get unassigned human roles
+  const { data: roles } = await supabase
+    .from('roles')
+    .select('id')
+    .eq('sim_run_id', simRunId)
+    .eq('is_ai_operated', false)
+    .is('user_id', null)
+    .eq('status', 'active')
+
+  if (!roles || roles.length === 0) return 0
+
+  // Shuffle users (Fisher-Yates)
+  const shuffled = [...userIds]
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+  }
+
+  // Assign up to min(users, roles)
+  const count = Math.min(shuffled.length, roles.length)
+  for (let i = 0; i < count; i++) {
+    await supabase
+      .from('roles')
+      .update({ user_id: shuffled[i] })
+      .eq('sim_run_id', simRunId)
+      .eq('id', roles[i].id)
+  }
+  return count
+}
+
 export async function deleteUser(userId: string): Promise<void> {
   const { error } = await supabase
     .from('users')
