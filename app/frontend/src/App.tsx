@@ -16,6 +16,7 @@ import { SimRunWizard } from '@/pages/SimRunWizard'
 import { TemplateList } from '@/pages/TemplateList'
 import { TemplateEditor } from '@/pages/TemplateEditor'
 import { FacilitatorDashboard } from '@/pages/FacilitatorDashboard'
+import { PublicScreen } from '@/pages/PublicScreen'
 
 export function App() {
   return (
@@ -103,6 +104,9 @@ export function App() {
           </ProtectedRoute>
         }
       />
+
+      {/* Public screen — no auth, display only */}
+      <Route path="/screen/:id" element={<PublicScreen />} />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/login" replace />} />
