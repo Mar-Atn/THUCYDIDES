@@ -768,3 +768,38 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
   if (error) throw error
   return (data ?? []) as Deployment[]
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Sim Runner API helpers                                                    */
+/* -------------------------------------------------------------------------- */
+
+/** Fetch live sim state from the Sim Runner API. */
+export async function getSimState(simId: string): Promise<Record<string, unknown>> {
+  const resp = await fetch(`/api/sim/${simId}/state`)
+  if (!resp.ok) throw new Error('Failed to get sim state')
+  const data = await resp.json()
+  return data.data
+}
+
+/** Execute a sim control action (start, pause, resume, phase/end, etc.). */
+export async function simAction(
+  simId: string,
+  action: string,
+  params?: Record<string, unknown>
+): Promise<Record<string, unknown>> {
+  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const resp = await fetch(`/api/sim/${simId}/${action}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: params ? JSON.stringify(params) : undefined,
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(err.detail || err.error || 'Action failed')
+  }
+  const data = await resp.json()
+  return data.data
+}

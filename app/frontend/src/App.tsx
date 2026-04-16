@@ -15,6 +15,7 @@ import { UserManagement } from '@/pages/UserManagement'
 import { SimRunWizard } from '@/pages/SimRunWizard'
 import { TemplateList } from '@/pages/TemplateList'
 import { TemplateEditor } from '@/pages/TemplateEditor'
+import { FacilitatorDashboard } from '@/pages/FacilitatorDashboard'
 
 export function App() {
   return (
@@ -91,6 +92,14 @@ export function App() {
         element={
           <ProtectedRoute>
             <SimRunWizard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/sim/:id/live"
+        element={
+          <ProtectedRoute>
+            <FacilitatorDashboard />
           </ProtectedRoute>
         }
       />
