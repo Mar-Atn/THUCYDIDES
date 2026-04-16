@@ -17,8 +17,9 @@ interface TabMapProps {
   templateId: string
 }
 
-const MAP_VIEWER_URL = 'http://localhost:8888/map/geography'
-const MAP_FULL_EDITOR_URL = 'http://localhost:8888/map'
+// Served from Vite public/map/ (API proxied to test-interface:8888)
+const MAP_VIEWER_URL = '/map/viewer.html'
+const MAP_FULL_EDITOR_URL = 'http://localhost:8888/map'  // full editor still on test-interface for now
 
 export function TabMap({ templateId: _templateId }: TabMapProps) {
   const [showEditor, setShowEditor] = useState(false)

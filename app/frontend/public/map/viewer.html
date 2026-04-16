@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TTT — Map Viewer (Geography)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/map/map.css">
+<style>
+  /* Map-only overrides: hide unit-related UI */
+  .legend-units { display: none !important; }
+  .edit-panel { display: none !important; }
+  .view-layout-picker { display: none !important; }
+  .edit-btn { display: none !important; }
+  .home-link { display: none !important; }
+
+  /* Narrower sidebars — more space for map */
+  .app-main {
+    grid-template-columns: 160px 1fr 200px !important;
+  }
+  .legend { padding: 12px 10px !important; }
+  .legend h3 { font-size: 13px !important; margin-bottom: 10px !important; }
+  .legend-section { margin-bottom: 12px !important; }
+  .legend-section h4 { font-size: 9px !important; }
+  .legend-row { font-size: 11px !important; }
+  .country-legend .legend-row { font-size: 10px !important; padding: 1px 0 !important; }
+  .inspector { padding: 12px !important; }
+  .inspector h3 { font-size: 13px !important; }
+  .inspector-empty p { font-size: 11px !important; }
+
+  /* Compact header */
+  .app-header { height: auto !important; min-height: 32px !important; padding: 4px 12px !important; }
+
+  /* Map stage: vertical flow, scrollable */
+  .app-main { overflow: visible !important; height: calc(100vh - 40px) !important; }
+  .map-stage { overflow: auto !important; height: 100% !important; flex-direction: column !important; align-items: flex-start !important; justify-content: flex-start !important; }
+
+  /* Interactive legend in edit mode */
+  .geo-selectable { cursor: default; transition: background 0.15s; border-radius: 3px; padding: 2px 4px !important; }
+  .geo-edit-active .geo-selectable { cursor: pointer; }
+  .geo-edit-active .geo-selectable:hover { background: var(--card-2); }
+  .geo-selectable.geo-selected { background: var(--action) !important; color: white !important; }
+  .geo-selectable.geo-selected span { color: white !important; }
+
+  /* Country legend items become selectable in edit mode */
+  .geo-edit-active .country-legend .legend-row { cursor: pointer; border-radius: 3px; padding: 2px 4px; transition: background 0.15s; }
+  .geo-edit-active .country-legend .legend-row:hover { background: var(--card-2); }
+  .country-legend .legend-row.geo-selected { background: var(--action) !important; }
+  .country-legend .legend-row.geo-selected span { color: white !important; }
+
+  /* Nuclear site marker */
+  .nuclear-marker {
+    fill: none;
+    stroke: #B03A3A;
+    stroke-width: 2;
+  }
+
+  /* Die-hard marker */
+  .diehard-marker {
+    fill: none;
+    stroke: #C4922A;
+    stroke-width: 2.5;
+    stroke-dasharray: 4 2;
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG defs for unit icons (kept for compatibility with map.js) -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+  <defs>
+    <symbol id="unit-naval" viewBox="0 0 24 24"><path d="M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z" fill="currentColor"/></symbol>
+    <symbol id="unit-ground-right" viewBox="0 0 24 24"><path d="M10 8 L18 8 L22 10 L22 11 L10 11 Z" fill="currentColor"/><path d="M2 13 L5 11 L20 11 L21 13 L21 15 L3 15 Z" fill="currentColor"/><path d="M2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z" fill="currentColor"/></symbol>
+    <symbol id="unit-ground-left" viewBox="0 0 24 24"><path d="M14 8 L6 8 L2 10 L2 11 L14 11 Z" fill="currentColor"/><path d="M22 13 L19 11 L4 11 L3 13 L3 15 L21 15 Z" fill="currentColor"/><path d="M22 15 L2 15 C2 18 4 19 6 19 L18 19 C20 19 22 18 22 15 Z" fill="currentColor"/></symbol>
+    <symbol id="unit-tactical-air" viewBox="0 0 24 24"><path d="M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z" fill="currentColor"/><circle cx="12" cy="5" r="2" fill="currentColor"/></symbol>
+    <symbol id="unit-air-defense" viewBox="0 0 24 24"><path d="M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z" fill="currentColor"/><rect x="11" y="9" width="2" height="11" fill="currentColor"/><rect x="7" y="20" width="10" height="2" rx="1" fill="currentColor"/></symbol>
+    <symbol id="unit-strategic-missile" viewBox="0 0 24 24"><path d="M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z" fill="currentColor"/></symbol>
+    <!-- Nuclear site symbol -->
+    <symbol id="nuclear-site" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+      <circle cx="12" cy="12" r="3" fill="currentColor"/>
+      <path d="M12 4 L14 8 L10 8 Z" fill="currentColor"/>
+      <path d="M12 20 L10 16 L14 16 Z" fill="currentColor"/>
+      <path d="M4 12 L8 10 L8 14 Z" fill="currentColor"/>
+      <path d="M20 12 L16 14 L16 10 Z" fill="currentColor"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="app-header" style="padding: 6px 16px; min-height: auto;">
+  <div class="header-left">
+    <button id="backBtn" class="back-btn" style="display:none">&larr; Back to Global</button>
+    <button id="geoEditBtn" class="back-btn" style="font-size:12px;">&#9998; Edit Map</button>
+    <h1 id="mapTitle" style="display:none"></h1>
+  </div>
+  <div class="header-right">
+    <span class="status-pill" id="statusPill" style="font-size: 11px;">Loading…</span>
+  </div>
+</header>
+
+<main class="app-main">
+  <aside class="legend" id="legend">
+    <h3>Legend</h3>
+    <div class="legend-section">
+      <h4>Terrain</h4>
+      <div class="legend-row geo-selectable" data-geo-tool="sea">
+        <span class="swatch" style="background:var(--sea)"></span><span>Sea</span>
+      </div>
+    </div>
+    <div class="legend-section">
+      <h4>Map Features</h4>
+      <div class="legend-row geo-selectable" data-geo-tool="chokepoint">
+        <span class="swatch chokepoint-swatch"></span><span>Chokepoint</span>
+      </div>
+      <div class="legend-row"><span class="swatch theater-swatch"></span><span>Theater drill-down</span></div>
+      <div class="legend-row geo-selectable" data-geo-tool="diehard">
+        <span class="swatch" style="background:#C4922A;border:2px dashed #C4922A"></span><span>Die Hard zone</span>
+      </div>
+      <div class="legend-row geo-selectable" data-geo-tool="nuclear">
+        <span class="swatch" style="background:transparent;color:#B03A3A;font-size:14px;text-align:center;line-height:16px;">☢</span><span>Nuclear site</span>
+      </div>
+      <div class="legend-row geo-selectable" data-geo-tool="clear_features">
+        <span class="swatch" style="background:var(--danger);font-size:10px;text-align:center;line-height:16px;color:white;">✕</span><span>Clear features</span>
+      </div>
+    </div>
+    <div class="legend-section">
+      <h4>Tools</h4>
+      <div class="legend-row geo-selectable" data-geo-tool="copy" style="display:none;">
+        <span class="swatch" style="background:var(--action);font-size:10px;text-align:center;line-height:16px;">⧉</span><span>Copy Hex</span>
+      </div>
+    </div>
+    <div class="legend-section">
+      <h4>Countries</h4>
+      <div id="countryLegend" class="country-legend"></div>
+    </div>
+    <div id="geoEditActions" class="legend-section" style="display:none; border-top:1px solid var(--border); padding-top:8px; margin-top:8px;">
+      <button id="geoSaveBtn" style="width:100%; padding:6px 8px; background:var(--action); color:white; border:none; border-radius:4px; font-family:var(--font-body); font-size:11px; cursor:pointer; margin-bottom:4px;">Save to Template</button>
+      <div id="geoSaveStatus" style="font-size:10px; text-align:center; min-height:14px;"></div>
+    </div>
+  </aside>
+
+  <section class="map-stage">
+    <div id="mapError" class="map-error" style="display:none"></div>
+    <svg id="mapSvg" class="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div id="theaterMapsContainer"></div>
+  </section>
+
+  <aside class="inspector" id="inspector">
+    <div class="inspector-empty" id="inspectorEmpty">
+      <h3>Hex Inspector</h3>
+      <p>Click any hex to inspect its owner, features, and adjacencies.</p>
+    </div>
+    <div class="inspector-content" id="inspectorContent" style="display:none"></div>
+  </aside>
+</main>
+
+<!-- Geography edit panel (built dynamically by geo_edit.js) -->
+<div id="geoEditPanel" style="display:none; position:fixed; top:40px; right:10px; width:210px; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:12px; z-index:100; max-height:80vh; overflow-y:auto;"></div>
+
+<script>
+  // Set mode BEFORE map.js loads
+  window.MAP_VIEWER_MODE = 'geography';
+</script>
+<script src="/map/map-config.js"></script>
+<script src="/map/map-core.js"></script>
+<script src="/map/geo-edit.js"></script>
+</body>
+</html>

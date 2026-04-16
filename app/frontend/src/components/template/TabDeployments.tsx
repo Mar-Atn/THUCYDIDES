@@ -7,7 +7,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { getTemplateDeployments, type Deployment } from '@/lib/queries'
 
-const DEPLOYMENT_EDITOR_URL = 'http://localhost:8888/map/deployments'
+// Served from Vite public/map/ (API proxied to test-interface:8888)
+const DEPLOYMENT_EDITOR_URL = '/map/deployments.html'
 
 function cap(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
