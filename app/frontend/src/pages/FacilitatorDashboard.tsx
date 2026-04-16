@@ -241,11 +241,69 @@ export function FacilitatorDashboard() {
     loadData()
   }, [loadData])
 
-  /* Poll state every 5 seconds ------------------------------------------- */
+  /* Supabase Realtime subscriptions --------------------------------------- */
   useEffect(() => {
     if (!simId) return
-    const interval = setInterval(loadData, 5000)
-    return () => clearInterval(interval)
+
+    // Channel 1: sim_runs changes — phase transitions, timer, status
+    const simRunChannel = supabase
+      .channel(`sim_run:${simId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'sim_runs',
+          filter: `id=eq.${simId}`,
+        },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>
+          if (row) {
+            // Update sim run state directly from realtime payload
+            setSimRun((prev) => prev ? { ...prev, ...row } as SimRun : prev)
+            setSimState((prev) => ({
+              status: (row.status as string) ?? prev?.status ?? 'setup',
+              current_round: (row.current_round as number) ?? prev?.current_round ?? 0,
+              current_phase: (row.current_phase as string) ?? prev?.current_phase ?? 'pre',
+              phase_started_at: (row.phase_started_at as string | null) ?? prev?.phase_started_at ?? null,
+              phase_duration_seconds: (row.phase_duration_seconds as number) ?? prev?.phase_duration_seconds ?? 3600,
+              mode: prev?.mode ?? 'manual',
+              paused: (row.status as string) === 'paused',
+              pending_actions: prev?.pending_actions ?? [],
+            }))
+          }
+        },
+      )
+      .subscribe()
+
+    // Channel 2: observatory_events inserts — live action feed
+    const eventsChannel = supabase
+      .channel(`events:${simId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'observatory_events',
+          filter: `sim_run_id=eq.${simId}`,
+        },
+        (payload) => {
+          const newEvent = payload.new as ObservatoryEvent
+          if (newEvent) {
+            setEvents((prev) => [newEvent, ...prev].slice(0, 100))
+          }
+        },
+      )
+      .subscribe()
+
+    // Fallback poll every 30s for resilience (connection drops, missed events)
+    const fallbackInterval = setInterval(loadData, 30000)
+
+    return () => {
+      supabase.removeChannel(simRunChannel)
+      supabase.removeChannel(eventsChannel)
+      clearInterval(fallbackInterval)
+    }
   }, [simId, loadData])
 
   /* Timer countdown ------------------------------------------------------- */
