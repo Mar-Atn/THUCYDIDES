@@ -8,7 +8,7 @@
 | M3 Data Foundation | ✅ ALIGNED | N/A | Template/Run hierarchy. **SimRun creation now copies 11 tables server-side** (`POST /api/sim/create`). observatory_events enriched (+phase, +category, +role_name). SimRun Pydantic model synced to DB (24 fields). |
 | M10.1 Auth | ✅ DONE | ✅ | Email/password + Google OAuth, RLS, GDPR consent. Custom lock bypass for navigator.locks. |
 | M9 Sim Setup | ✅ v2 DONE | ✅ | 10-tab Template Editor, SimRun wizard (now with server-side data inheritance), User Mgmt, AI Setup. 40 roles (5 types), 32 action types in role_actions, country/role briefs, map viewer/editor. |
-| M4 Sim Runner | ⚠️ Phase 4 IN PROGRESS | ✅ | Phases 1-3 done (state machine, action pipeline, Phase B engines, AI stub, Realtime). Phase 4: confirmation queue done, key event triggers done (elections from DB). Remaining: change_leader voting, nuclear chain, physical dice. |
+| M4 Sim Runner | ✅ DONE | ✅ | All 5 phases complete. 43 API endpoints, Supabase Realtime, confirmation queue, change_leader voting, nuclear chain, physical dice, AI stub, participant assignment, auto/manual mode, post-sim screen. |
 | M8 Public Screen | ⚠️ ~40% | — | Hex map rendering contract ready (CONTRACT_MAP_RENDERING). |
 | M6 Human Interface | ❌ NOT STARTED | — | Map rendering contract ready. |
 | M5 AI Participant | ⚠️ PARTIAL | — | Agent prompts updated (stability only, no political_support). **Agent tool names need reconciliation to 32 canonical action IDs.** |
