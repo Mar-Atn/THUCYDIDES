@@ -270,21 +270,16 @@ These are the template-level defaults that get copied into each SimRun:
 - Table: event_type, event_name, default_round, country (editable)
 - Pre-loaded from template data (elections, UNSC meetings, etc.)
 
-#### Tab 9: Formula Parameters
-Grouped by engine domain. Each parameter shown with:
-- Parameter name (human-readable label)
-- Current value (editable number input)
-- Description (tooltip or inline)
+#### Tab 10: Formula Parameters
+**Current status: READ-ONLY REFERENCE.** All formula coefficients are currently hardcoded in the Python engine files. A small selection of key parameters is displayed in this tab for moderator visibility. They are NOT yet configurable — editing them here has no effect on engine behavior.
 
-**Economic parameters** (~50): oil base price, crisis multipliers, sanctions weights, inflation dynamics, GDP floor, momentum caps, dollar credibility, market index compositions, etc.
+**Displayed parameters (key selection, 12 total):**
+- Economic: oil_base_price, gdp_floor, sanctions_floor, money_printing_inflation_multiplier, dollar_credibility_floor
+- Political: change_leader_threshold
+- Military: assassination stability boosts, nuclear hit probability, missile intercept probability
+- Technology: rd_multiplier, rare_earth_penalty_per_level
 
-**Political parameters** (~20): stability thresholds, elderly leaders, assassination bonuses, election mechanics, etc.
-
-**Military parameters** (~30): covert op probabilities, detection rates, amphibious ratios, naval bombardment probs, production tiers, missile interception, etc.
-
-**Technology parameters** (~15): R&D multiplier, nuclear/AI thresholds, tech growth factors, rare earth penalties, etc.
-
-Changes saved to template's `formula_coefficients` JSONB. Engine reads from run_config at runtime (copied from template at SimRun creation).
+**Future (M4/engine migration):** All ~150 constants will be moved to `formula_coefficients` JSONB on the template. At SimRun creation, coefficients are copied to `run_config`. The engine fetches all coefficients ONCE at round start into a Python dict — zero DB calls during computation. This enables different templates to have different formula tuning.
 
 ---
 

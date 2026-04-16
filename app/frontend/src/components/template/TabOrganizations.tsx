@@ -113,6 +113,11 @@ export function TabOrganizations({ templateId: _templateId }: TabOrganizationsPr
                     <span className="font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded">
                       {members.length} members
                     </span>
+                    {org.chair_role_id && (
+                      <span className="font-body text-caption text-accent">
+                        Chair: {cap(org.chair_role_id.replace('_role', ''))}
+                      </span>
+                    )}
                   </div>
                   <span className="font-body text-body text-text-secondary">
                     {isExpanded ? '\u25B2' : '\u25BC'}
@@ -264,8 +269,14 @@ export function TabOrganizations({ templateId: _templateId }: TabOrganizationsPr
                                       {m.seat_type === 'individual_seat' ? 'Individual' : 'Country'}
                                     </span>
                                   </td>
-                                  <td className="font-body text-body-sm text-text-primary px-3 py-2">
-                                    {m.role_in_org?.replace(/_/g, ' ') ?? '—'}
+                                  <td className="font-body text-body-sm px-3 py-2">
+                                    {m.role_id === org.chair_role_id ? (
+                                      <span className="font-medium text-accent">Chair</span>
+                                    ) : (
+                                      <span className="text-text-primary">
+                                        {m.role_in_org === 'member_reelection' ? 'Member (up for re-election)' : 'Member'}
+                                      </span>
+                                    )}
                                   </td>
                                   <td className="text-center px-3 py-2">
                                     {m.has_veto ? (

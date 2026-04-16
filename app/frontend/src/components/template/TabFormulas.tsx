@@ -217,6 +217,12 @@ export function TabFormulas({ templateId }: TabFormulasProps) {
   return (
     <div className="space-y-8">
       <h3 className="font-heading text-h3 text-text-primary">Formula Parameters</h3>
+      <div className="bg-warning/10 border border-warning/30 rounded-lg p-4">
+        <p className="font-body text-body-sm text-warning">
+          These values are currently <strong>hardcoded in the engine</strong> and shown here for reference only.
+          They will become configurable per template in a future update.
+        </p>
+      </div>
 
       {DOMAIN_ORDER.map((domain) => {
         const entries = grouped[domain]
