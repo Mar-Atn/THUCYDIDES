@@ -278,3 +278,166 @@ async def suspend_user(
     )
     logger.info("User %s suspended by moderator %s", user_id, user.id)
     return APIResponse(data={"suspended": True, "user_id": user_id})
+
+
+# ---------------------------------------------------------------------------
+# M4: Sim Runner — Facilitator Control Endpoints
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/state", response_model=APIResponse)
+async def get_sim_state(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Get current simulation runtime state (round, phase, timer)."""
+    from engine.services.sim_run_manager import get_timer_info
+    try:
+        return APIResponse(data=get_timer_info(sim_id))
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/pre-start", response_model=APIResponse)
+async def sim_pre_start(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Move sim from setup → pre_start (participant assignment phase)."""
+    from engine.services.sim_run_manager import start_pre_start
+    try:
+        state = start_pre_start(sim_id)
+        logger.info("Sim %s → pre_start by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/start", response_model=APIResponse)
+async def sim_start(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Start the simulation — Round 1 Phase A begins."""
+    from engine.services.sim_run_manager import start_simulation
+    try:
+        state = start_simulation(sim_id)
+        logger.info("Sim %s STARTED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/phase/end", response_model=APIResponse)
+async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """End current phase and advance to next."""
+    from engine.services.sim_run_manager import (
+        end_phase_a, end_phase_b, advance_round, get_state,
+    )
+    try:
+        run = get_state(sim_id)
+        phase = run["current_phase"]
+        if phase == "A":
+            state = end_phase_a(sim_id)
+        elif phase == "B":
+            state = end_phase_b(sim_id)
+        elif phase == "inter_round":
+            state = advance_round(sim_id)
+        else:
+            raise ValueError(f"Cannot end phase '{phase}'")
+        logger.info("Sim %s phase %s ended by %s", sim_id, phase, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/phase/extend", response_model=APIResponse)
+async def sim_extend_phase(sim_id: str, minutes: int = 5, user: AuthUser = Depends(require_moderator)):
+    """Extend current phase by N minutes."""
+    from engine.services.sim_run_manager import extend_phase
+    try:
+        state = extend_phase(sim_id, additional_seconds=minutes * 60)
+        logger.info("Sim %s extended +%dm by %s", sim_id, minutes, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/pause", response_model=APIResponse)
+async def sim_pause(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Pause the simulation."""
+    from engine.services.sim_run_manager import pause_simulation
+    try:
+        state = pause_simulation(sim_id)
+        logger.info("Sim %s PAUSED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/resume", response_model=APIResponse)
+async def sim_resume(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Resume a paused simulation."""
+    from engine.services.sim_run_manager import resume_simulation
+    try:
+        state = resume_simulation(sim_id)
+        logger.info("Sim %s RESUMED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/end", response_model=APIResponse)
+async def sim_end(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """End the simulation gracefully."""
+    from engine.services.sim_run_manager import end_simulation
+    try:
+        state = end_simulation(sim_id)
+        logger.info("Sim %s ENDED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/abort", response_model=APIResponse)
+async def sim_abort(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Abort the simulation (emergency stop)."""
+    from engine.services.sim_run_manager import abort_simulation
+    try:
+        state = abort_simulation(sim_id)
+        logger.info("Sim %s ABORTED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.put("/api/sim/{sim_id}/mode", response_model=APIResponse)
+async def sim_set_mode(
+    sim_id: str,
+    auto_advance: bool = False,
+    auto_approve: bool = False,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Set automatic/manual mode."""
+    from engine.services.sim_run_manager import set_mode
+    try:
+        state = set_mode(sim_id, auto_advance=auto_advance, auto_approve=auto_approve)
+        logger.info("Sim %s mode: auto_advance=%s auto_approve=%s by %s",
+                     sim_id, auto_advance, auto_approve, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/phase/back", response_model=APIResponse)
+async def sim_go_back(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Go back to Phase A of the current round."""
+    from engine.services.sim_run_manager import go_back_to_phase_a
+    try:
+        state = go_back_to_phase_a(sim_id)
+        logger.info("Sim %s went BACK to Phase A by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/sim/{sim_id}/restart", response_model=APIResponse)
+async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Restart simulation from beginning."""
+    from engine.services.sim_run_manager import restart_simulation
+    try:
+        state = restart_simulation(sim_id)
+        logger.info("Sim %s RESTARTED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

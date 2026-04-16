@@ -1,336 +1,304 @@
-"""Sim Run Manager — lifecycle service for sim_runs.
+"""SimRunManager — state machine for live simulation runs.
 
-A SIM-RUN is one playthrough of a SCENARIO. Every per-round snapshot row
-(``country_states_per_round``, ``unit_states_per_round``, ``agent_decisions``,
-etc.) is keyed by ``sim_run_id`` so runs are isolated. Runs can coexist for
-the same scenario: tests, comparison runs, calibration sweeps.
+Controls the lifecycle: setup → pre_start → active (Phase A) → processing (Phase B)
+→ inter_round → active (next round) → ... → completed.
 
-This module is the single entry point for creating, seeding, finalizing,
-and listing runs. Engine code, test fixtures, and the Observatory all go
-through these functions — no direct writes to ``sim_runs``.
-
-Lifecycle:
-
-    create_run(scenario, name) -> sim_run_id
-        |
-        v  status='setup'
-    seed_round_zero(run_id) -> copies template R0 snapshot into the new run
-        |
-        v
-    (engine executes rounds — resolve_round writes *_per_round rows)
-        |
-        v
-    finalize_run(run_id, status='completed' | 'visible_for_review' | 'archived')
-        |
-        v
-    list_runs() / get_run() for Observatory + tests
+All state transitions validated. Each method updates the DB and returns the new state.
 """
 
-from __future__ import annotations
-
 import logging
+from datetime import datetime, timezone
 from typing import Optional
 
-from engine.services.supabase import get_client
+from engine.config.settings import settings
 
 logger = logging.getLogger(__name__)
 
 
-# ---------------------------------------------------------------------------
-# Internal helpers
-# ---------------------------------------------------------------------------
-
-_VALID_STATUSES = {
-    "setup",
-    "active",
-    "paused",
-    "completed",
-    "aborted",
-    "archived",
-    "visible_for_review",
+# Valid state transitions
+VALID_TRANSITIONS = {
+    "setup": ["pre_start", "aborted"],
+    "pre_start": ["active", "aborted"],
+    "active": ["processing", "paused", "aborted"],
+    "processing": ["inter_round", "active", "aborted"],  # inter_round or skip to next Phase A
+    "inter_round": ["active", "aborted"],  # next round's Phase A
+    "paused": ["active", "aborted"],
+    "completed": [],
+    "aborted": [],
 }
 
-
-def _resolve_scenario_id(client, scenario_code: str) -> str:
-    """Look up a scenario's uuid by its human-readable code."""
-    res = (
-        client.table("sim_scenarios")
-        .select("id")
-        .eq("code", scenario_code)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
-        raise ValueError(f"Scenario '{scenario_code}' not found")
-    return res.data[0]["id"]
+# Phase sequence within a round
+PHASE_SEQUENCE = ["A", "B", "inter_round"]
 
 
-def _is_uuid(s: str) -> bool:
-    return isinstance(s, str) and len(s) == 36 and s.count("-") == 4
+def _get_client():
+    """Get Supabase service-role client."""
+    from supabase import create_client
+    return create_client(settings.supabase_url, settings.supabase_service_role_key)
 
 
-def resolve_sim_run_id(run_or_scenario: str) -> str:
-    """Normalize any accepted lookup key to an actual sim_run_id uuid.
-
-    Accepts either:
-      - an existing ``sim_run_id`` uuid (returned unchanged), or
-      - a ``scenario_code`` like ``'start_one'`` (resolved to the legacy
-        archived run for that scenario — the F1 migration placed every
-        pre-F1 per-round row under this run).
-
-    Raises ValueError if neither resolves.
-    """
-    client = get_client()
-    # 1. Direct uuid lookup
-    if _is_uuid(run_or_scenario):
-        res = (
-            client.table("sim_runs")
-            .select("id")
-            .eq("id", run_or_scenario)
-            .limit(1)
-            .execute()
-        )
-        if res.data:
-            return run_or_scenario
-    # 2. Scenario code → legacy archived run
-    try:
-        scenario_id = _resolve_scenario_id(client, run_or_scenario)
-    except ValueError:
-        raise ValueError(
-            f"'{run_or_scenario}' is neither a known sim_run_id nor a scenario code"
-        )
-    legacy = _legacy_run_id_for_scenario(client, scenario_id)
-    if legacy is None:
-        raise ValueError(
-            f"No archived (legacy) run found for scenario '{run_or_scenario}'. "
-            f"Create and finalize a run with status='archived' first, or pass "
-            f"an explicit sim_run_id."
-        )
-    return legacy
+def _get_run(client, sim_id: str) -> dict:
+    """Fetch sim_run or raise."""
+    result = client.table("sim_runs").select("*").eq("id", sim_id).single().execute()
+    if not result.data:
+        raise ValueError(f"SimRun {sim_id} not found")
+    return result.data
 
 
-def get_scenario_id_for_run(sim_run_id: str) -> str:
-    """Return the scenario_id that a sim_run belongs to. Cached in-process."""
-    return get_run(sim_run_id)["scenario_id"]
+def _update_run(client, sim_id: str, updates: dict) -> dict:
+    """Update sim_run and return new state."""
+    updates["updated_at"] = datetime.now(timezone.utc).isoformat()
+    result = client.table("sim_runs").update(updates).eq("id", sim_id).select().single().execute()
+    return result.data
 
 
-def _legacy_run_id_for_scenario(client, scenario_id: str) -> Optional[str]:
-    """Return the archived 'legacy' run that holds the scenario's template R0.
-
-    After the F1 migration, every historical per-round row for a scenario
-    lives under the single archived run created by ``sim_run_foundation_v1``.
-    That run is the authoritative source for R0 template snapshots until we
-    introduce explicit scenario template_run_id pointers.
-    """
-    res = (
-        client.table("sim_runs")
-        .select("id,created_at")
-        .eq("scenario_id", scenario_id)
-        .eq("status", "archived")
-        .order("created_at", desc=False)
-        .limit(1)
-        .execute()
-    )
-    return res.data[0]["id"] if res.data else None
+def _validate_transition(current_status: str, new_status: str):
+    """Validate state transition is allowed."""
+    allowed = VALID_TRANSITIONS.get(current_status, [])
+    if new_status not in allowed:
+        raise ValueError(f"Cannot transition from '{current_status}' to '{new_status}'. Allowed: {allowed}")
 
 
 # ---------------------------------------------------------------------------
-# Public API
+# Lifecycle Methods
 # ---------------------------------------------------------------------------
 
+def start_pre_start(sim_id: str) -> dict:
+    """Move from setup → pre_start. Moderator prepares participant assignments."""
+    client = _get_client()
+    run = _get_run(client, sim_id)
+    _validate_transition(run["status"], "pre_start")
 
-def create_run(
-    scenario_code: str,
-    name: str,
-    description: Optional[str] = None,
-    seed: Optional[int] = None,
-    max_rounds: int = 8,
-) -> str:
-    """Create a new sim_run bound to a scenario. Returns the new run's uuid.
-
-    The run starts in status ``setup``. Caller should invoke
-    ``seed_round_zero(run_id)`` to copy template state before running any
-    rounds, then ``finalize_run`` when done.
-    """
-    client = get_client()
-    scenario_id = _resolve_scenario_id(client, scenario_code)
-    payload = {
-        "name": name,
-        "description": description,
-        "scenario_id": scenario_id,
-        "status": "setup",
-        "seed": seed,
-        "max_rounds": max_rounds,
+    return _update_run(client, sim_id, {
+        "status": "pre_start",
         "current_round": 0,
         "current_phase": "pre",
-        "run_config": {},
+    })
+
+
+def start_simulation(sim_id: str, phase_duration_seconds: int = 4800) -> dict:
+    """Move from pre_start → active. Start Round 1 Phase A.
+
+    Args:
+        sim_id: SimRun ID
+        phase_duration_seconds: Phase A duration (default 80 minutes = 4800s)
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+    _validate_transition(run["status"], "active")
+
+    now = datetime.now(timezone.utc).isoformat()
+    return _update_run(client, sim_id, {
+        "status": "active",
+        "current_round": 1,
+        "current_phase": "A",
+        "phase_started_at": now,
+        "phase_duration_seconds": phase_duration_seconds,
+        "started_at": now,
+    })
+
+
+def end_phase_a(sim_id: str) -> dict:
+    """End Phase A → start Phase B (processing).
+
+    Triggers: engine batch processing (caller must invoke engines separately).
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    if run["current_phase"] != "A":
+        raise ValueError(f"Cannot end Phase A — current phase is '{run['current_phase']}'")
+    _validate_transition(run["status"], "processing")
+
+    return _update_run(client, sim_id, {
+        "status": "processing",
+        "current_phase": "B",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+        "phase_duration_seconds": None,  # Phase B is not timed — runs until engines finish
+    })
+
+
+def end_phase_b(sim_id: str, inter_round_seconds: int = 600) -> dict:
+    """End Phase B → start Inter-Round (unit movement window).
+
+    Args:
+        inter_round_seconds: Inter-round duration (default 10 minutes)
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    if run["current_phase"] != "B":
+        raise ValueError(f"Cannot end Phase B — current phase is '{run['current_phase']}'")
+    _validate_transition(run["status"], "inter_round")
+
+    return _update_run(client, sim_id, {
+        "status": "inter_round",
+        "current_phase": "inter_round",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+        "phase_duration_seconds": inter_round_seconds,
+    })
+
+
+def advance_round(sim_id: str, phase_duration_seconds: int = 3600) -> dict:
+    """End Inter-Round → start next round Phase A.
+
+    Args:
+        phase_duration_seconds: Next Phase A duration (default 60 min for subsequent rounds)
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    if run["current_phase"] != "inter_round":
+        raise ValueError(f"Cannot advance round — current phase is '{run['current_phase']}'")
+
+    new_round = run["current_round"] + 1
+    if new_round > run.get("max_rounds", 8):
+        # Simulation complete
+        return _update_run(client, sim_id, {
+            "status": "completed",
+            "current_phase": "post",
+            "completed_at": datetime.now(timezone.utc).isoformat(),
+            "phase_started_at": None,
+            "phase_duration_seconds": None,
+        })
+
+    _validate_transition(run["status"], "active")
+
+    return _update_run(client, sim_id, {
+        "status": "active",
+        "current_round": new_round,
+        "current_phase": "A",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+        "phase_duration_seconds": phase_duration_seconds,
+    })
+
+
+def pause_simulation(sim_id: str) -> dict:
+    """Pause the simulation. Timer stops."""
+    client = _get_client()
+    run = _get_run(client, sim_id)
+    _validate_transition(run["status"], "paused")
+
+    return _update_run(client, sim_id, {
+        "status": "paused",
+    })
+
+
+def resume_simulation(sim_id: str) -> dict:
+    """Resume a paused simulation. Timer restarts with remaining time."""
+    client = _get_client()
+    run = _get_run(client, sim_id)
+    _validate_transition(run["status"], "active")
+
+    return _update_run(client, sim_id, {
+        "status": "active",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+
+def extend_phase(sim_id: str, additional_seconds: int = 300) -> dict:
+    """Add time to the current phase.
+
+    Args:
+        additional_seconds: Seconds to add (default 5 minutes)
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    current_duration = run.get("phase_duration_seconds") or 0
+    return _update_run(client, sim_id, {
+        "phase_duration_seconds": current_duration + additional_seconds,
+    })
+
+
+def end_simulation(sim_id: str) -> dict:
+    """End the simulation gracefully."""
+    client = _get_client()
+    return _update_run(client, sim_id, {
+        "status": "completed",
+        "current_phase": "post",
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "phase_started_at": None,
+        "phase_duration_seconds": None,
+    })
+
+
+def abort_simulation(sim_id: str) -> dict:
+    """Abort the simulation (emergency stop)."""
+    client = _get_client()
+    return _update_run(client, sim_id, {
+        "status": "aborted",
+        "current_phase": "post",
+        "completed_at": datetime.now(timezone.utc).isoformat(),
+        "phase_started_at": None,
+        "phase_duration_seconds": None,
+    })
+
+
+def set_mode(sim_id: str, auto_advance: bool = False, auto_approve: bool = False) -> dict:
+    """Set automatic/manual mode flags."""
+    client = _get_client()
+    return _update_run(client, sim_id, {
+        "auto_advance": auto_advance,
+        "auto_approve": auto_approve,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Go-back Methods (moderator corrections)
+# ---------------------------------------------------------------------------
+
+def go_back_to_phase_a(sim_id: str, phase_duration_seconds: int = 3600) -> dict:
+    """Go back to Phase A of the current round (e.g., from Phase B or inter-round)."""
+    client = _get_client()
+    run = _get_run(client, sim_id)
+
+    if run["current_phase"] == "A":
+        raise ValueError("Already in Phase A")
+
+    return _update_run(client, sim_id, {
+        "status": "active",
+        "current_phase": "A",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+        "phase_duration_seconds": phase_duration_seconds,
+    })
+
+
+def restart_simulation(sim_id: str) -> dict:
+    """Restart from Round 1 Phase A. Preserves template data, resets runtime state."""
+    client = _get_client()
+
+    return _update_run(client, sim_id, {
+        "status": "pre_start",
+        "current_round": 0,
+        "current_phase": "pre",
+        "phase_started_at": None,
+        "phase_duration_seconds": None,
+        "started_at": None,
+        "completed_at": None,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Query Methods
+# ---------------------------------------------------------------------------
+
+def get_state(sim_id: str) -> dict:
+    """Get current simulation state."""
+    client = _get_client()
+    return _get_run(client, sim_id)
+
+
+def get_timer_info(sim_id: str) -> dict:
+    """Get timer information for client-side countdown."""
+    run = get_state(sim_id)
+    return {
+        "status": run["status"],
+        "current_round": run["current_round"],
+        "current_phase": run["current_phase"],
+        "phase_started_at": run.get("phase_started_at"),
+        "phase_duration_seconds": run.get("phase_duration_seconds"),
+        "auto_advance": run.get("auto_advance", False),
+        "auto_approve": run.get("auto_approve", False),
+        "max_rounds": run.get("max_rounds", 8),
     }
-    res = client.table("sim_runs").insert(payload).execute()
-    if not res.data:
-        raise RuntimeError(f"Failed to create sim_run for scenario '{scenario_code}'")
-    run_id = res.data[0]["id"]
-    logger.info("Created sim_run %s for scenario %s (%s)", run_id, scenario_code, name)
-    return run_id
-
-
-def seed_round_zero(sim_run_id: str, source_run_id: Optional[str] = None) -> dict:
-    """Copy template R0 snapshot into the new run.
-
-    Copies country_states, unit_states, and global_state rows at ``round_num=0``
-    from ``source_run_id`` (or, if omitted, the archived legacy run for the
-    same scenario) into ``sim_run_id``. Every copied row is re-keyed:
-    ``sim_run_id`` replaced, ``id`` dropped (new uuid assigned).
-
-    Returns a dict of copy counts for logging.
-    """
-    client = get_client()
-    run = get_run(sim_run_id)
-    scenario_id = run["scenario_id"]
-
-    if source_run_id is None:
-        source_run_id = _legacy_run_id_for_scenario(client, scenario_id)
-        if source_run_id is None:
-            raise RuntimeError(
-                f"No legacy archived run found for scenario {scenario_id}. "
-                f"Seed the template first or pass source_run_id explicitly."
-            )
-    if source_run_id == sim_run_id:
-        raise ValueError("source_run_id must differ from sim_run_id")
-
-    counts = {"country_states": 0, "unit_states": 0, "global_state": 0}
-
-    # Country states
-    cs = (
-        client.table("country_states_per_round")
-        .select("*")
-        .eq("sim_run_id", source_run_id)
-        .eq("round_num", 0)
-        .execute()
-    )
-    if cs.data:
-        rows = [_rekey_row(r, sim_run_id) for r in cs.data]
-        for batch in _batched(rows, 50):
-            client.table("country_states_per_round").upsert(
-                batch, on_conflict="sim_run_id,round_num,country_code"
-            ).execute()
-        counts["country_states"] = len(rows)
-
-    # Unit states
-    us = (
-        client.table("unit_states_per_round")
-        .select("*")
-        .eq("sim_run_id", source_run_id)
-        .eq("round_num", 0)
-        .execute()
-    )
-    if us.data:
-        rows = [_rekey_row(r, sim_run_id) for r in us.data]
-        for batch in _batched(rows, 200):
-            client.table("unit_states_per_round").upsert(
-                batch, on_conflict="sim_run_id,round_num,unit_code"
-            ).execute()
-        counts["unit_states"] = len(rows)
-
-    # Global state (singleton per round)
-    gs = (
-        client.table("global_state_per_round")
-        .select("*")
-        .eq("sim_run_id", source_run_id)
-        .eq("round_num", 0)
-        .execute()
-    )
-    if gs.data:
-        rows = [_rekey_row(r, sim_run_id) for r in gs.data]
-        client.table("global_state_per_round").upsert(
-            rows, on_conflict="sim_run_id,round_num"
-        ).execute()
-        counts["global_state"] = len(rows)
-
-    logger.info(
-        "Seeded R0 into run %s from source %s: %s", sim_run_id, source_run_id, counts
-    )
-    return counts
-
-
-def finalize_run(
-    sim_run_id: str,
-    status: str = "completed",
-    notes: Optional[str] = None,
-) -> None:
-    """Mark a run as finished. Status must be one of the terminal lifecycle values.
-
-    Common terminal statuses:
-        - ``completed``: run finished normally, keep for records
-        - ``visible_for_review``: keep AND expose in the Observatory selector
-        - ``archived``: keep but hide from default Observatory lists
-        - ``aborted``: run was interrupted / failed
-    """
-    if status not in _VALID_STATUSES:
-        raise ValueError(f"Invalid status '{status}'. Must be one of {_VALID_STATUSES}")
-    client = get_client()
-    payload: dict = {"status": status, "finalized_at": "now()"}
-    if notes:
-        # notes are appended to description so we don't clobber existing text
-        run = get_run(sim_run_id)
-        existing = run.get("description") or ""
-        payload["description"] = f"{existing}\n[final] {notes}" if existing else f"[final] {notes}"
-    # Supabase Python client doesn't expand 'now()' — use explicit timestamp
-    from datetime import datetime, timezone
-    payload["finalized_at"] = datetime.now(timezone.utc).isoformat()
-    client.table("sim_runs").update(payload).eq("id", sim_run_id).execute()
-    logger.info("Finalized sim_run %s -> %s", sim_run_id, status)
-
-
-def get_run(sim_run_id: str) -> dict:
-    """Return a single sim_run row by id. Raises if not found."""
-    client = get_client()
-    res = (
-        client.table("sim_runs")
-        .select("*")
-        .eq("id", sim_run_id)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
-        raise ValueError(f"sim_run '{sim_run_id}' not found")
-    return res.data[0]
-
-
-def list_runs(
-    scenario_code: Optional[str] = None,
-    status: Optional[str] = None,
-    limit: int = 50,
-) -> list[dict]:
-    """List sim_runs, optionally filtered by scenario + status.
-
-    Used by the Observatory selector and by tests. Newest first.
-    """
-    client = get_client()
-    q = client.table("sim_runs").select(
-        "id,name,description,scenario_id,status,current_round,max_rounds,"
-        "seed,created_at,started_at,completed_at,finalized_at"
-    )
-    if scenario_code is not None:
-        scenario_id = _resolve_scenario_id(client, scenario_code)
-        q = q.eq("scenario_id", scenario_id)
-    if status is not None:
-        q = q.eq("status", status)
-    res = q.order("created_at", desc=True).limit(limit).execute()
-    return res.data or []
-
-
-# ---------------------------------------------------------------------------
-# Internal plumbing
-# ---------------------------------------------------------------------------
-
-
-def _rekey_row(row: dict, new_sim_run_id: str) -> dict:
-    """Strip the original PK and replace sim_run_id for insertion into a new run."""
-    out = {k: v for k, v in row.items() if k != "id"}
-    out["sim_run_id"] = new_sim_run_id
-    return out
-
-
-def _batched(items, size):
-    for i in range(0, len(items), size):
-        yield items[i : i + size]
