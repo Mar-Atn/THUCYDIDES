@@ -212,10 +212,29 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     if action_type in ("set_budget", "set_tariffs", "set_sanctions", "set_opec"):
         return _queue_batch_decision(sim_run_id, round_num, action_type, action)
 
-    # ── Not Yet Implemented (M4 Phase 4+) ���────────────────────────��───
-    if action_type in ("move_units", "call_org_meeting", "meet_freely",
-                        "nuclear_authorize", "nuclear_intercept", "nuclear_launch_initiate"):
-        return {"success": True, "narrative": f"{action_type} acknowledged — full implementation in M4 Phase 4"}
+    # ── Nuclear Chain (INITIATE → AUTHORIZE → INTERCEPT → RESOLVE) ──
+    if action_type == "nuclear_launch_initiate":
+        from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
+        orch = NuclearChainOrchestrator()
+        return orch.initiate(action, sim_run_id, round_num, initiator_role_id=role_id)
+
+    if action_type == "nuclear_authorize":
+        from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
+        orch = NuclearChainOrchestrator()
+        action_id = action.get("nuclear_action_id", "")
+        confirm = action.get("confirm", True)
+        return orch.submit_authorization(action_id, role_id, confirm, action.get("rationale", ""))
+
+    if action_type == "nuclear_intercept":
+        from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
+        orch = NuclearChainOrchestrator()
+        action_id = action.get("nuclear_action_id", "")
+        intercept = action.get("intercept", True)
+        return orch.submit_interception(action_id, country_code, intercept, action.get("rationale", ""))
+
+    # ── Not Yet Implemented ───────────────────────────────────────────
+    if action_type in ("move_units", "call_org_meeting", "meet_freely"):
+        return {"success": True, "narrative": f"{action_type} acknowledged — implementation pending"}
 
     # ── Unknown ───────────────────────────────────────────────────────
     return {"success": False, "narrative": f"Unknown action_type: {action_type}"}

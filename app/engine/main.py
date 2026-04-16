@@ -1019,3 +1019,36 @@ async def resolve_leadership_vote(
     result = resolve_leader_vote(sim_id, vote_id)
     logger.info("Leadership vote %s resolved by %s: %s", vote_id, user.id, result.get("outcome"))
     return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# M4: Nuclear Chain Management
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/nuclear", response_model=APIResponse)
+async def get_nuclear_actions(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Get active nuclear actions for a sim."""
+    from engine.services.supabase import get_client
+    client = get_client()
+    rows = (
+        client.table("nuclear_actions")
+        .select("*")
+        .eq("sim_run_id", sim_id)
+        .in_("status", ["awaiting_authorization", "authorized", "awaiting_interception"])
+        .order("created_at", desc=False)
+        .execute()
+    ).data or []
+    return APIResponse(data=rows, meta={"count": len(rows)})
+
+
+@app.post("/api/sim/{sim_id}/nuclear/{action_id}/resolve", response_model=APIResponse)
+async def resolve_nuclear_action(
+    sim_id: str, action_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Resolve a nuclear action (moderator triggers resolution after authorization/interception)."""
+    from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
+    orch = NuclearChainOrchestrator()
+    result = orch.resolve(action_id)
+    logger.info("Nuclear action %s resolved by %s", action_id, user.id)
+    return APIResponse(data=result)
