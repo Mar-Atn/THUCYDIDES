@@ -144,7 +144,7 @@ class Role(BaseModel):
     intelligence_pool: int = 0
     powers: list[str] = Field(default_factory=list)
     objectives: list[str] = Field(default_factory=list)
-    ticking_clock: str = ""
+    ticking_clock: str = ""  # DEPRECATED 2026-04-17: cleared from DB, kept for backward compat
     status: str = "active"
     # Covert ops cards
     sabotage_cards: int = 0
@@ -153,7 +153,7 @@ class Role(BaseModel):
     election_meddling_cards: int = 0
     assassination_cards: int = 0
     protest_stim_cards: int = 0
-    fatherland_appeal: int = 0
+    fatherland_appeal: int = 0  # DEPRECATED 2026-04-17: scrapped mechanic
 
 
 class Zone(BaseModel):

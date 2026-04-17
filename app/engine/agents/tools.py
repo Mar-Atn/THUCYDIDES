@@ -1027,7 +1027,7 @@ def get_my_identity(country_code: str) -> dict:
         result = (
             client.table("roles")
             .select(
-                "character_name,title,parallel,objectives,powers,ticking_clock,country_id"
+                "character_name,title,parallel,objectives,powers,country_id"
             )
             .eq("is_head_of_state", True)
             .eq("country_id", country_code)
@@ -1044,7 +1044,6 @@ def get_my_identity(country_code: str) -> dict:
             "parallel": row.get("parallel"),
             "objectives": row.get("objectives") or [],
             "powers": row.get("powers") or [],
-            "ticking_clock": row.get("ticking_clock") or "",
         }
     except Exception as e:
         logger.exception("get_my_identity failed")

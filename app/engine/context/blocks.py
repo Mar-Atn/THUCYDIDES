@@ -315,9 +315,7 @@ def _build_role_context(ctx: ContextAssembler, *, scope: str | None = None, **_)
         for obj in objectives:
             lines.append(f"- {obj}")
 
-    clock = role.get("ticking_clock", "")
-    if clock:
-        lines.append(f"\n**Ticking Clock:** {clock}")
+    # ticking_clock DEPRECATED 2026-04-17 — field cleared from DB
 
     return "\n".join(lines)
 

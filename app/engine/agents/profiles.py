@@ -103,7 +103,7 @@ def _parse_role(row: dict) -> dict[str, Any]:
         "personal_coins": float(row.get("personal_coins", 0)),
         "powers": [p.strip() for p in row.get("powers", "").split(";") if p.strip()],
         "objectives": [o.strip() for o in row.get("objectives", "").split(";") if o.strip()],
-        "ticking_clock": row.get("ticking_clock", ""),
+        "ticking_clock": "",  # DEPRECATED 2026-04-17
         "brief_file": row.get("brief_file", ""),
         "is_diplomat": row.get("is_diplomat", "false").lower() == "true",
         # Cards
@@ -124,7 +124,6 @@ Age: {age}, Gender: {gender}
 Faction: {faction}
 Powers: {powers}
 Objectives: {objectives}
-Ticking Clock: {ticking_clock}
 
 Generate a 3-4 sentence personality description. Include:
 1. Core personality traits and decision-making style
@@ -147,5 +146,4 @@ def build_identity_prompt(role: dict, country: dict) -> str:
         faction=role.get("faction", ""),
         powers=", ".join(role["powers"]),
         objectives=", ".join(role["objectives"]),
-        ticking_clock=role["ticking_clock"],
     )

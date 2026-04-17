@@ -217,8 +217,9 @@ Expandable list, grouped by country. Click to expand:
 **Identity:** character_name, country, team, faction, title, age, gender, public_bio
 **Position:** is_head_of_state, is_military_chief, is_diplomat, parliament_seat
 **Resources:** personal_coins, personal_coins_notes
-**Covert ops deck:** intelligence_pool, sabotage_cards, cyber_cards, disinfo_cards, election_meddling_cards, assassination_cards, protest_stim_cards, fatherland_appeal
-**Role definition:** powers[] (multi-select), objectives[] (text list), ticking_clock (text)
+**Covert ops deck:** intelligence_pool, sabotage_cards, cyber_cards, disinfo_cards, election_meddling_cards, assassination_cards, protest_stim_cards
+**Role definition:** powers[] (multi-select), objectives[] (text list)
+*(ticking_clock and fatherland_appeal DEPRECATED 2026-04-17 — scrapped from DB and code)*
 **Config:** expansion_role (bool), ai_candidate (bool), brief_file (upload reference)
 
 #### Tab 4: Organizations

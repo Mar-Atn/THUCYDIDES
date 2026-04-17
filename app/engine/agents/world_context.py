@@ -350,7 +350,8 @@ def _build_objectives(role: dict) -> str:
 
 
 def _build_ticking_clock(role: dict) -> str:
-    return f"## Ticking Clock\n\n{role.get('ticking_clock', '').strip()}"
+    # DEPRECATED 2026-04-17 — ticking_clock field cleared from DB
+    return ""
 
 
 def _build_naming_rule(country: dict) -> str:
