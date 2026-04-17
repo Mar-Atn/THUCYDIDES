@@ -125,4 +125,44 @@ Each gauge: 1-10 scale, bar visualization, trend arrow (↑/↓/→), previous v
 
 ---
 
-*SPEC ready for Marat review.*
+## 7. Build Progress
+
+### Delivered (2026-04-16)
+
+| Element | Status | Details |
+|---|---|---|
+| **Page shell + routing** | ✅ | `/screen/:id` — no auth, full-screen dark layout |
+| **Header** | ✅ | Round, phase, timer countdown, sim date (H2 2026...), sim name |
+| **Global map** | ✅ | Sim-run-aware via `?sim_run_id=`, clean display mode (no chrome), units from DB with coordinates |
+| **Blast markers** | ✅ | 💥 with red glow + pulse animation at combat hexes. Both global and theater views. API: `/api/sim/{id}/map/combat-events` |
+| **Theater rotation** | ✅ | Right sidebar rotates (15s) between World Status and active theater maps when combat events exist in that theater |
+| **Doomsday gauges** | ✅ (visual) | 4 speedometer gauges with green/yellow/red/deep-red zones, needle, trend arrows. Economic Health has reversed zones (green=high). **Values are placeholder — LLM calculation not wired yet.** |
+| **Columbia vs Cathay** | ✅ | Power bar (country colors #3A6B9F/#C4A030) + 20-year historical trend graph with SIM continuation. Pulsing dots at current round. |
+| **News ticker** | ✅ | 2-line scrolling, opposite directions, category color dots. Filters to significant events. |
+| **Supabase Realtime** | ✅ | sim_runs UPDATE + observatory_events INSERT. 30s fallback poll. |
+| **View from facilitator** | ✅ | "View Public Screen" button opens in new tab |
+
+### Remaining (TODO)
+
+| Element | Priority | What's needed |
+|---|---|---|
+| **Doomsday indices — LLM calculation** | HIGH | After each Phase B, call LLM with world state summary → returns 4 scores (1-10). Store in `world_state` or `sim_config`. Currently placeholder values (5, 6, 4, 4). |
+| **News filtering/sorting** | MEDIUM | Filter by category (military/economic/diplomatic/political). Sort by significance. Currently shows all significant events chronologically. |
+| **Columbia-Cathay historical accuracy** | LOW | The pre-SIM trend data is estimated. Could be refined with real-world GDP/military data for the 2006-2026 period. |
+| **Map auto-refresh after Phase B** | MEDIUM | Map iframe should reload units after world state changes. Currently static until page refresh. |
+| **Blast marker cleanup** | LOW | Markers should clear when moving to next round. Currently persist across rounds. |
+| **Theater map unit display** | MEDIUM | Theater maps show in sidebar but unit rendering needs verification — theater_row/col coords may need tuning. |
+| **Responsive sizing** | LOW | Optimize for different projector resolutions (1080p, 4K, ultrawide). |
+| **Sound effects** | FUTURE | Optional: alert sound when combat events or phase transitions occur. |
+| **Moderator broadcast overlay** | FUTURE | Moderator sends announcement → appears as overlay on public screen. |
+
+### Architecture Notes
+
+- Map uses `?display=clean&sim_run_id={id}` for embed — reusable by M6 (participant interface)
+- Combat events stored with `target_row`/`target_col` in observatory_events payload — no zone_id translation
+- Doomsday indices designed for LLM judgment (abstract, not formulaic) — one call per Phase B
+- Theater detection reads `payload.theater` from combat events in observatory_events
+
+---
+
+*SPEC approved in principle (2026-04-16). Core layout and mechanics delivered. LLM indices are the main remaining feature.*

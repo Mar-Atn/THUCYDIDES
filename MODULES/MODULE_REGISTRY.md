@@ -9,7 +9,7 @@
 | M10.1 Auth | ✅ DONE | ✅ | Email/password + Google OAuth, RLS, GDPR consent. Custom lock bypass for navigator.locks. |
 | M9 Sim Setup | ✅ v2 DONE | ✅ | 10-tab Template Editor, SimRun wizard (now with server-side data inheritance), User Mgmt, AI Setup. 40 roles (5 types), 32 action types in role_actions, country/role briefs, map viewer/editor. |
 | M4 Sim Runner | ✅ DONE | ✅ | All 5 phases complete. 43 API endpoints, Supabase Realtime, confirmation queue, change_leader voting, nuclear chain, physical dice, AI stub, participant assignment, auto/manual mode, post-sim screen. |
-| M8 Public Screen | ⚠️ ~40% | — | Hex map rendering contract ready (CONTRACT_MAP_RENDERING). |
+| M8 Public Screen | ⚠️ ~80% | ✅ | Core delivered: global map (sim-run-aware, blast markers), 4 doomsday gauges (placeholder values), Columbia-Cathay power trend, theater rotation, 2-line news ticker, Realtime. **Remaining: LLM-calculated indices, news filtering, map auto-refresh.** |
 | M6 Human Interface | ❌ NOT STARTED | — | Map rendering contract ready. |
 | M5 AI Participant | ⚠️ PARTIAL | — | Agent prompts updated (stability only, no political_support). **Agent tool names need reconciliation to 32 canonical action IDs.** |
 | M7 Navigator | ❌ NOT STARTED | — | |
