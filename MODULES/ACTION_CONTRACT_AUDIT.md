@@ -153,12 +153,51 @@ This document tracks the gap between current implementation and contract spec fo
 
 ## Reconciliation Schedule
 
-| Phase | Actions to fix | Trigger |
+### M6 (Human Participant Interface) — MAJOR ACTION WIRING SPRINT
+
+M6 is not just "participant UI." It is the **full action pipeline integration** — every action
+wired to contract spec, with submission interface, validation, engine resolution, outcome display,
+and systematic testing. The human interface forces honesty: if a participant clicks "Attack," it
+must work exactly per CONTRACT_GROUND_COMBAT.
+
+**Scope: ALL 32 action types wired and tested during M6.**
+
+| Category | Actions | What M6 delivers |
 |---|---|---|
-| **M6 build** | ground_attack (full contract), set_budget (validation), public_statement (done), arrest, assassination | Humans submit these actions |
-| **M5 build** | All 32 — AI agents generate full contract-compliant payloads | AI needs proper schemas |
-| **M10** | Final sweep — every action verified against contract, edge cases, stress test | Pre-launch |
+| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, naval_blockade, launch_missile | Full contract: source→target hex, unit selection, adjacency, theater-level combat, chain attacks, validators |
+| **Military: Movement** | move_units | Inter-round unit repositioning with adjacency validation |
+| **Military: Nuclear** | nuclear_test, nuclear_launch_initiate, nuclear_authorize, nuclear_intercept | Already wired — M6 adds participant UI + testing |
+| **Military: Other** | basing_rights, martial_law | Already working — M6 adds participant UI |
+| **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
+| **Economic: Transactions** | propose_transaction, accept_transaction | Full flow: propose → counterparty sees → accept/reject → asset transfer. Visibility (public/secret). |
+| **Diplomatic** | propose_agreement, sign_agreement | Full flow: propose → signatories → sign → active. Visibility (public/secret). Terms enforcement. |
+| **Diplomatic** | public_statement, call_org_meeting, meet_freely | Statement UI, meeting creation, participant notification |
+| **Covert** | covert_operation, intelligence | Op type selection, target country, detection probability, outcome display |
+| **Political** | arrest, assassination, change_leader, reassign_types | Confirmation queue verified, 3-phase voting tested, target validation |
+| **Political** | self_nominate, cast_vote | Election flow: nominations → voting → results. Integrated with key events. |
+
+**Testing during M6:**
+- Every action submitted through the participant UI
+- Every validator enforced (adjacency, ownership, resources, permissions)
+- Every engine result displayed correctly
+- Every error case handled (insufficient units, wrong phase, unauthorized)
+- Theater-level combat verified (Eastern Ereb, Mashriq)
+- Transaction lifecycle (propose → accept → assets move)
+- Agreement lifecycle (propose → sign → active → broken?)
+- Covert ops (submit → probability → outcome → detected/undetected)
+
+### M5 (AI Participant)
+- AI agents use the same validated pipeline from M6
+- Focus: generating proper contract-compliant payloads via LLM
+- All 32 schemas tested with AI-generated decisions
+
+### M10 (Final Assembly)
+- Full sweep: every action, every edge case, stress test
+- Mixed mode: 25 humans + AI agents playing simultaneously
+- Performance: 32 concurrent action submissions
+- Data integrity: verify all DB state changes are correct
+- Error recovery: what happens when engine fails mid-action?
 
 ---
 
-*This audit should be reviewed at the start of M6 and M5 to prioritize which actions to fix first.*
+*This audit should be reviewed at the start of M6. It defines the scope of M6 as much as the UI does.*
