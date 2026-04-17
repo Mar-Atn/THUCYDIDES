@@ -249,20 +249,14 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
     if not atk_units:
         return {"success": False, "narrative": f"No {attacker} units in zone {zone_id}"}
 
-    # Convert deployments to engine format: one dict per individual unit
-    # Engine expects each unit to have a "unit_code" identifier
+    # Convert DB rows to engine format — each DB row = 1 unit (individual unit model)
     def to_unit_list(units: list) -> list[dict]:
-        result = []
-        for u in units:
-            count = u.get("count", 1)
-            for i in range(count):
-                result.append({
-                    "unit_code": f"{u['country_id']}_{u['unit_type']}_{u['zone_id']}_{i}",
-                    "type": u["unit_type"],
-                    "country": u["country_id"],
-                    "deployment_id": u["id"],
-                })
-        return result
+        return [{
+            "unit_code": u.get("unit_id") or u["id"],
+            "type": u["unit_type"],
+            "country": u["country_id"],
+            "deployment_id": u["id"],
+        } for u in units]
 
     atk_list = to_unit_list(atk_units)
     def_list = to_unit_list(def_units)
@@ -339,38 +333,28 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
 def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments: list, def_deployments: list, zone_id: str, combat_type: str) -> dict:
     """Apply combat losses to the deployments table.
 
+    Individual unit model: each lost unit_code maps to a deployment row → delete it.
     Engine returns attacker_losses and defender_losses as lists of unit_code strings.
-    Each unit_code maps back to a deployment row. We reduce counts accordingly.
     """
     atk_loss_codes = result.get("attacker_losses", [])
     def_loss_codes = result.get("defender_losses", [])
+    all_losses = set(atk_loss_codes if isinstance(atk_loss_codes, list) else []) | \
+                 set(def_loss_codes if isinstance(def_loss_codes, list) else [])
 
-    # Count losses per deployment_id
-    def count_losses_per_deployment(loss_codes: list, deployments: list) -> dict[str, int]:
-        # Map unit_code prefix back to deployment
-        losses: dict[str, int] = {}
-        for code in loss_codes:
-            # Find which deployment this unit belongs to
-            for dep in deployments:
-                dep_prefix = f"{dep['country_id']}_{dep['unit_type']}_{dep['zone_id']}"
-                if code.startswith(dep_prefix):
-                    losses[dep["id"]] = losses.get(dep["id"], 0) + 1
-                    break
-        return losses
+    # Build unit_code → deployment_id map
+    all_deps = atk_deployments + def_deployments
+    code_to_dep: dict[str, str] = {}
+    for dep in all_deps:
+        code = dep.get("unit_id") or dep["id"]
+        code_to_dep[code] = dep["id"]
 
-    atk_losses_map = count_losses_per_deployment(atk_loss_codes, atk_deployments)
-    def_losses_map = count_losses_per_deployment(def_loss_codes, def_deployments)
-
-    # Apply to DB
-    for dep_id, loss in {**atk_losses_map, **def_losses_map}.items():
-        dep = next((d for d in atk_deployments + def_deployments if d["id"] == dep_id), None)
-        if not dep:
-            continue
-        new_count = max(0, dep.get("count", 1) - loss)
-        if new_count <= 0:
+    # Delete destroyed units
+    deleted = 0
+    for code in all_losses:
+        dep_id = code_to_dep.get(code)
+        if dep_id:
             client.table("deployments").delete().eq("id", dep_id).execute()
-        else:
-            client.table("deployments").update({"count": new_count}).eq("id", dep_id).execute()
+            deleted += 1
 
     atk_total = len(atk_loss_codes) if isinstance(atk_loss_codes, list) else 0
     def_total = len(def_loss_codes) if isinstance(def_loss_codes, list) else 0
@@ -382,7 +366,8 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
     result["defender_losses_count"] = def_total
     result["narrative"] = f"{narrative} | Losses: attacker -{atk_total}, defender -{def_total}."
 
-    logger.info("Combat %s at %s: atk_losses=%d def_losses=%d", combat_type, zone_id, atk_total, def_total)
+    logger.info("Combat %s at %s: atk_losses=%d def_losses=%d (deleted %d rows)",
+                combat_type, zone_id, atk_total, def_total, deleted)
     return result
 
 
