@@ -273,7 +273,7 @@ export function PublicScreen() {
           {/* Map iframe */}
           <div className="flex-1 relative">
             <iframe
-              src="/map/deployments.html"
+              src="/map/deployments.html?display=clean"
               className="absolute inset-0 w-full h-full border-0"
               title="Global Map"
             />
@@ -397,7 +397,7 @@ export function PublicScreen() {
 /*  Sub-components                                                            */
 /* -------------------------------------------------------------------------- */
 
-/** Single doomsday gauge with bar, value, trend arrow. */
+/** Doomsday gauge — analogue speedometer style with needle. */
 function DoomsdayGauge({
   label, value, prev, max, dangerUp, colorHigh,
 }: {
@@ -408,51 +408,80 @@ function DoomsdayGauge({
   dangerUp: boolean
   colorHigh: 'danger' | 'success' | 'warning' | 'accent'
 }) {
-  const pct = Math.min(100, (value / max) * 100)
+  const pct = Math.min(1, value / max)
   const arrow = trendArrow(value, prev)
   const trend = trendColor(value, prev, dangerUp)
 
-  const barColor = colorHigh === 'danger' ? 'bg-danger'
-    : colorHigh === 'success' ? 'bg-success'
-    : colorHigh === 'warning' ? 'bg-warning'
-    : 'bg-accent'
+  // Needle angle: -120° (min) to +120° (max) — 240° arc
+  const angle = -120 + pct * 240
+
+  // Arc color gradient stops
+  const arcColor = colorHigh === 'danger' ? '#EF4444'
+    : colorHigh === 'success' ? '#22C55E'
+    : colorHigh === 'warning' ? '#F59E0B'
+    : '#3B82F6'
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-1">
-        <span className="font-body text-xs text-white/50 uppercase tracking-wider">
+    <div className="flex items-center gap-3">
+      {/* Speedometer SVG */}
+      <svg viewBox="0 0 100 60" className="w-20 h-12 shrink-0">
+        {/* Background arc */}
+        <path
+          d="M 10 55 A 40 40 0 0 1 90 55"
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="6"
+          strokeLinecap="round"
+        />
+        {/* Colored arc (filled to current value) */}
+        <path
+          d="M 10 55 A 40 40 0 0 1 90 55"
+          fill="none"
+          stroke={arcColor}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={`${pct * 126} 126`}
+          opacity="0.8"
+        />
+        {/* Needle */}
+        <line
+          x1="50" y1="55"
+          x2={50 + 30 * Math.cos((angle - 90) * Math.PI / 180)}
+          y2={55 + 30 * Math.sin((angle - 90) * Math.PI / 180)}
+          stroke="white"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        {/* Center dot */}
+        <circle cx="50" cy="55" r="3" fill="white" opacity="0.8" />
+        {/* Value text */}
+        <text x="50" y="48" textAnchor="middle" fill="white" fontSize="14" fontFamily="var(--font-data, monospace)" fontWeight="bold">
+          {value}
+        </text>
+      </svg>
+
+      {/* Label + trend */}
+      <div className="flex-1 min-w-0">
+        <div className="font-body text-xs text-white/50 uppercase tracking-wider truncate">
           {label}
-        </span>
-        <div className="flex items-center gap-2">
-          <span className={`font-data text-lg ${trend}`}>
-            {arrow}
-          </span>
-          <span className="font-data text-xl text-white">
-            {value}
-          </span>
-          <span className="font-data text-xs text-white/30">
-            /{max}
+        </div>
+        <div className="flex items-center gap-1 mt-0.5">
+          <span className={`font-data text-sm ${trend}`}>
+            {arrow} {prev !== value ? `from ${prev}` : 'stable'}
           </span>
         </div>
-      </div>
-      <div className="w-full bg-white/5 rounded-full h-3">
-        <div
-          className={`h-3 rounded-full transition-all duration-1000 ${barColor}`}
-          style={{ width: `${pct}%`, opacity: 0.8 }}
-        />
       </div>
     </div>
   )
 }
 
-/** Columbia vs Cathay power balance bar. */
+/** Columbia vs Cathay power balance — live bar + historical trend. */
 function PowerBalanceBar({ simId }: { simId: string }) {
   const [colPower, setColPower] = useState(55)
   const [catPower, setCatPower] = useState(45)
 
   useEffect(() => {
     if (!simId) return
-    // Load GDP + military + tech for both countries
     supabase
       .from('countries')
       .select('id, gdp, mil_ground, mil_naval, mil_tactical_air, mil_strategic_missiles, mil_air_defense, nuclear_level, ai_level')
@@ -479,24 +508,59 @@ function PowerBalanceBar({ simId }: { simId: string }) {
       })
   }, [simId])
 
+  // Historical trend data — expert estimate of US vs China global power (2006-2026)
+  // Normalized: US started ~70%, China ~30% in 2006, converging toward ~55/45 by 2026
+  const historicalYears = ['06','08','10','12','14','16','18','20','22','24','26','SIM']
+  const historicalCol =   [70,  68,  66,  64,  62,  60,  58,  57,  56,  55,  54, colPower]
+  const historicalCat =   [30,  32,  34,  36,  38,  40,  42,  43,  44,  45,  46, catPower]
+
   return (
-    <div className="flex items-center gap-3">
-      <span className="font-data text-sm text-action w-20 text-right">
-        Columbia {colPower}%
-      </span>
-      <div className="flex-1 flex h-4 rounded-full overflow-hidden bg-white/5">
-        <div
-          className="bg-action/70 transition-all duration-1000"
-          style={{ width: `${colPower}%` }}
-        />
-        <div
-          className="bg-danger/70 transition-all duration-1000"
-          style={{ width: `${catPower}%` }}
-        />
+    <div className="space-y-2">
+      {/* Live power bar */}
+      <div className="flex items-center gap-3">
+        <span className="font-data text-sm text-action w-24 text-right">
+          Columbia {colPower}%
+        </span>
+        <div className="flex-1 flex h-5 rounded-full overflow-hidden bg-white/5">
+          <div
+            className="bg-action/70 transition-all duration-1000"
+            style={{ width: `${colPower}%` }}
+          />
+          <div
+            className="bg-danger/70 transition-all duration-1000"
+            style={{ width: `${catPower}%` }}
+          />
+        </div>
+        <span className="font-data text-sm text-danger w-24">
+          {catPower}% Cathay
+        </span>
       </div>
-      <span className="font-data text-sm text-danger w-20">
-        {catPower}% Cathay
-      </span>
+
+      {/* Historical trend (mini SVG chart) */}
+      <div className="flex items-end gap-0.5">
+        <span className="font-data text-[10px] text-white/20 w-10 shrink-0">20yr</span>
+        <svg viewBox="0 0 240 40" className="flex-1 h-8" preserveAspectRatio="none">
+          {/* Columbia line (blue) */}
+          <polyline
+            fill="none"
+            stroke="var(--action, #3B82F6)"
+            strokeWidth="2"
+            opacity="0.7"
+            points={historicalCol.map((v, i) => `${i * (240 / (historicalCol.length - 1))},${40 - (v / 100) * 40}`).join(' ')}
+          />
+          {/* Cathay line (red) */}
+          <polyline
+            fill="none"
+            stroke="var(--danger, #EF4444)"
+            strokeWidth="2"
+            opacity="0.7"
+            points={historicalCat.map((v, i) => `${i * (240 / (historicalCat.length - 1))},${40 - (v / 100) * 40}`).join(' ')}
+          />
+          {/* Convergence zone highlight */}
+          <line x1="220" y1="0" x2="220" y2="40" stroke="white" strokeWidth="0.5" opacity="0.2" strokeDasharray="2,2" />
+        </svg>
+        <span className="font-data text-[10px] text-white/20 w-8 shrink-0 text-right">now</span>
+      </div>
     </div>
   )
 }

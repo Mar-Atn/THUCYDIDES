@@ -6,6 +6,33 @@
 (function () {
   'use strict';
 
+  // ---------- Display mode ----------
+  // ?display=clean hides all chrome (header, sidebar, inspector, edit panel)
+  // Used by public screen, participant interface, and any embed.
+  const urlParams = new URLSearchParams(window.location.search);
+  const DISPLAY_CLEAN = urlParams.get('display') === 'clean';
+  if (DISPLAY_CLEAN) {
+    document.documentElement.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
+    document.body.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
+    // Hide chrome after DOM ready
+    window.addEventListener('DOMContentLoaded', () => {
+      const hide = (sel) => { const el = document.querySelector(sel); if (el) el.style.display = 'none'; };
+      hide('.app-header');
+      hide('.legend');
+      hide('.inspector');
+      hide('.edit-panel');
+      hide('#editWarnings');
+      hide('#editToast');
+      // Make map stage fill everything
+      const main = document.querySelector('.app-main');
+      if (main) main.style.cssText = 'display:block; height:100vh; width:100vw; padding:0; margin:0;';
+      const stage = document.querySelector('.map-stage');
+      if (stage) stage.style.cssText = 'width:100%; height:100%; padding:0; margin:0;';
+      const svg = document.getElementById('mapSvg');
+      if (svg) svg.style.cssText = 'width:100%; height:100%;';
+    });
+  }
+
   // ---------- State ----------
   const state = {
     global: null,
@@ -330,8 +357,9 @@
       svg.appendChild(nuc);
     });
 
-    // Render both theaters as collapsible SVGs below the global map (all modes)
-    {
+    // Render both theaters as collapsible SVGs below the global map
+    // Skip in clean display mode (public screen — global map only)
+    if (!DISPLAY_CLEAN) {
       const container = document.getElementById('theaterMapsContainer');
       if (container) {
         container.innerHTML = '';
