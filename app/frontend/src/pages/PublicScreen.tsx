@@ -35,6 +35,7 @@ interface PublicEvent {
   role_name: string | null
   category: string | null
   country_code: string | null
+  payload: Record<string, unknown> | null
   created_at: string
 }
 
@@ -228,14 +229,8 @@ export function PublicScreen() {
   // Detect active combat in each theater (current round events)
   const COMBAT_TYPES = new Set(['ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade', 'launch_missile_conventional'])
   const combatEvents = events.filter((e) => COMBAT_TYPES.has(e.event_type))
-  const hasEasternEreb = combatEvents.some((e) => {
-    const payload = (e as unknown as { payload?: { theater?: string } }).payload
-    return payload?.theater === 'eastern_ereb'
-  })
-  const hasMashriq = combatEvents.some((e) => {
-    const payload = (e as unknown as { payload?: { theater?: string } }).payload
-    return payload?.theater === 'mashriq'
-  })
+  const hasEasternEreb = combatEvents.some((e) => e.payload?.theater === 'eastern_ereb')
+  const hasMashriq = combatEvents.some((e) => e.payload?.theater === 'mashriq')
 
   // Build rotation panels: always world status, + active theaters
   const sidebarPanels: string[] = ['world_status']
@@ -567,20 +562,17 @@ function DoomsdayGauge({
         />
         {/* Center dot */}
         <circle cx="50" cy="55" r="3" fill="white" opacity="0.8" />
-        {/* Value text */}
-        <text x="50" y="48" textAnchor="middle" fill="white" fontSize="14" fontFamily="var(--font-data, monospace)" fontWeight="bold">
-          {value}
-        </text>
+        {/* No number — needle position is the indicator */}
       </svg>
 
       {/* Label + trend */}
       <div className="flex-1 min-w-0">
-        <div className="font-body text-xs text-white/50 uppercase tracking-wider truncate">
+        <div className="font-body text-xs text-white/60 uppercase tracking-wider truncate">
           {label}
         </div>
         <div className="flex items-center gap-1 mt-0.5">
-          <span className={`font-data text-sm ${trend}`}>
-            {arrow} {prev !== value ? `from ${prev}` : 'stable'}
+          <span className={`font-data text-xs ${trend}`}>
+            {arrow} {prev !== value ? (value > prev ? 'rising' : 'falling') : 'stable'}
           </span>
         </div>
       </div>
