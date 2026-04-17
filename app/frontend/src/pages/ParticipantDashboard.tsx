@@ -687,6 +687,8 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   // Route to specific form or generic placeholder
   if (actionType === 'public_statement') return <PublicStatementForm {...{roleId,roleName,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_budget') return <BudgetForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_tariffs') return <TariffSanctionForm type="tariffs" {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_sanctions') return <TariffSanctionForm type="sanctions" {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -795,6 +797,139 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
             <p className="font-body text-body-sm text-danger">{error}</p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/* ── Tariff / Sanction Form ─────────────────────────────────────────────── */
+
+function TariffSanctionForm({type,roleId,countryId,simId,onClose,onSubmitted}:{
+  type:'tariffs'|'sanctions'; roleId:string; countryId:string; simId:string
+  onClose:()=>void; onSubmitted:()=>void
+}) {
+  const label = type === 'tariffs' ? 'Tariffs' : 'Sanctions'
+  const table = type === 'tariffs' ? 'tariffs' : 'sanctions'
+  const maxLevel = type === 'tariffs' ? 3 : 3
+  const levels = type === 'tariffs'
+    ? [{v:0,l:'None'},{v:1,l:'Low'},{v:2,l:'Medium'},{v:3,l:'High'}]
+    : [{v:-1,l:'Support (-1)'},{v:0,l:'None'},{v:1,l:'Light'},{v:2,l:'Medium'},{v:3,l:'Heavy'}]
+
+  const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string|null}[]>([])
+  const [existing, setExisting] = useState<{target:string;level:number}[]>([])
+  const [received, setReceived] = useState<{imposer:string;level:number}[]>([])
+  const [changes, setChanges] = useState<Record<string,number>>({})
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<string|null>(null)
+  const [error, setError] = useState<string|null>(null)
+
+  useEffect(()=>{
+    // Load all countries
+    supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
+      .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
+    // Load existing imposed by us
+    supabase.from(table).select('target_country_id,level').eq('sim_run_id',simId).eq('imposer_country_id',countryId)
+      .then(({data})=>{
+        const items = (data??[]).map((r:{target_country_id:string;level:number})=>({target:r.target_country_id,level:r.level}))
+        setExisting(items)
+        const ch: Record<string,number> = {}
+        items.forEach(i=>{ch[i.target]=i.level})
+        setChanges(ch)
+      })
+    // Load received against us
+    supabase.from(table).select('imposer_country_id,level').eq('sim_run_id',simId).eq('target_country_id',countryId)
+      .then(({data})=>setReceived((data??[]).map((r:{imposer_country_id:string;level:number})=>({imposer:r.imposer_country_id,level:r.level}))))
+  },[simId,countryId,table])
+
+  const setLevel = (target:string, level:number) => setChanges(p=>({...p,[target]:level}))
+  const hasChanges = Object.entries(changes).some(([t,l])=>{
+    const orig = existing.find(e=>e.target===t)
+    return orig ? orig.level !== l : l !== 0
+  })
+
+  const handleSubmit = async () => {
+    setSubmitting(true); setError(null)
+    try {
+      // Submit each changed target as a separate action
+      for (const [target, level] of Object.entries(changes)) {
+        const orig = existing.find(e=>e.target===target)
+        if (orig && orig.level === level) continue
+        if (!orig && level === 0) continue
+        await submitAction(simId, type === 'tariffs' ? 'set_tariffs' : 'set_sanctions', roleId, countryId, {
+          target_country: target, level,
+        })
+      }
+      setResult(`${label} updated — will take effect in Phase B`)
+    } catch(e) { setError(e instanceof Error?e.message:'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Set {label}</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT: Set our tariffs/sanctions */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-text-primary">{label} We Impose</h3>
+          <div className="bg-card border border-border rounded-lg divide-y divide-border">
+            {countries.map(c=>{
+              const current = changes[c.id] ?? 0
+              const orig = existing.find(e=>e.target===c.id)?.level ?? 0
+              const changed = current !== orig
+              return <div key={c.id} className={`flex items-center gap-3 px-4 py-2 ${changed?'bg-action/5':''}`}>
+                <div className="w-3 h-3 rounded shrink-0" style={{backgroundColor:c.color_ui??'#666'}}/>
+                <span className="font-body text-body-sm text-text-primary w-24 shrink-0">{c.sim_name}</span>
+                <div className="flex gap-1 ml-auto">
+                  {levels.map(l=>
+                    <button key={l.v} onClick={()=>setLevel(c.id,l.v)}
+                      className={`font-data text-caption px-2 py-0.5 rounded border transition-colors ${
+                        current===l.v
+                          ? l.v>0?'bg-warning text-white border-warning':l.v<0?'bg-success text-white border-success':'bg-text-secondary/20 text-text-secondary border-text-secondary/30'
+                          : 'bg-base border-border text-text-secondary hover:border-action/30'
+                      }`}>{l.l}</button>
+                  )}
+                </div>
+              </div>
+            })}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={handleSubmit} disabled={submitting||!hasChanges}
+              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+              {submitting?'Submitting...':`Submit ${label}`}</button>
+            <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+            {!hasChanges&&<span className="font-body text-caption text-text-secondary">No changes</span>}
+          </div>
+          {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-success">{result}</p>
+            <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+          </div>}
+          {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+        </div>
+
+        {/* RIGHT: What's imposed on us */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-text-primary">{label} Against Us</h3>
+          {received.length===0
+            ? <p className="font-body text-body-sm text-text-secondary bg-card border border-border rounded-lg p-4">No {label.toLowerCase()} imposed on us.</p>
+            : <div className="bg-card border border-border rounded-lg divide-y divide-border">
+                {received.map((r,i)=>{
+                  const c = countries.find(x=>x.id===r.imposer)
+                  return <div key={i} className="flex items-center gap-3 px-4 py-2">
+                    <div className="w-3 h-3 rounded shrink-0" style={{backgroundColor:c?.color_ui??'#666'}}/>
+                    <span className="font-body text-body-sm text-text-primary">{c?.sim_name??r.imposer}</span>
+                    <span className={`font-data text-body-sm ml-auto ${r.level>=2?'text-danger font-bold':r.level>=1?'text-warning':'text-text-secondary'}`}>
+                      Level {r.level}
+                    </span>
+                  </div>
+                })}
+              </div>
+          }
+        </div>
       </div>
     </div>
   )
