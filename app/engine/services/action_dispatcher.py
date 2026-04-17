@@ -423,8 +423,16 @@ def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, act
     country_code = action.get("country_code", "")
 
     # Store in agent_decisions table for Phase B pickup
+    # Delete previous decision of same type for same country+round (last submission wins)
     try:
         client = get_client()
+        client.table("agent_decisions").delete() \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("round_num", round_num) \
+            .eq("country_code", country_code) \
+            .eq("action_type", action_type) \
+            .is_("processed_at", "null") \
+            .execute()
         client.table("agent_decisions").insert({
             "sim_run_id": sim_run_id,
             "round_num": round_num,
