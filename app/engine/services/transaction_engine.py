@@ -406,18 +406,19 @@ def _get_scenario_id(client, sim_run_id):
 
 
 def _write_event(client, sim_run_id, scenario_id, round_num, event_type, country_code, summary, payload):
-    if not scenario_id:
-        return
     try:
-        client.table("observatory_events").insert({
+        row = {
             "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
             "round_num": round_num,
             "event_type": event_type,
             "country_code": country_code,
             "summary": summary,
             "payload": payload,
-        }).execute()
+            "category": "diplomatic",
+        }
+        if scenario_id:
+            row["scenario_id"] = scenario_id
+        client.table("observatory_events").insert(row).execute()
     except Exception as e:
         logger.debug("event write failed: %s", e)
 

@@ -776,8 +776,8 @@ ACTION_CATEGORIES: dict[str, str] = {
     "set_tariffs": "economic",
     "set_sanctions": "economic",
     "set_opec": "economic",
-    "propose_transaction": "economic",
-    "accept_transaction": "economic",
+    "propose_transaction": "diplomatic",
+    "accept_transaction": "diplomatic",
     # Diplomatic
     "propose_agreement": "diplomatic",
     "sign_agreement": "diplomatic",
