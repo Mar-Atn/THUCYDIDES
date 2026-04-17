@@ -96,16 +96,23 @@ function trendColor(current: number, prev: number, dangerUp: boolean = true): st
   return rising ? 'text-success' : current < prev ? 'text-danger' : 'text-text-secondary'
 }
 
-/* Significant event types for the news ticker */
-const SIGNIFICANT_EVENTS = new Set([
+/* PUBLIC event types for the news ticker.
+ * Only events that are publicly visible in the simulation world.
+ * Covert ops (intelligence, sabotage, propaganda, election_meddling)
+ * are SECRET — they only appear if the engine marks them as revealed. */
+const PUBLIC_NEWS_EVENTS = new Set([
+  // Military (always public — you can see armies fighting)
   'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade',
   'launch_missile_conventional', 'nuclear_test', 'nuclear_launch_initiate',
-  'assassination', 'arrest', 'change_leader', 'change_leader_initiated',
-  'change_leader_removal', 'change_leader_elected',
-  'public_statement', 'set_sanctions', 'set_tariffs',
-  'propose_agreement', 'sign_agreement',
-  'phase_b_complete', 'ai_triggered',
-  'martial_law', 'covert_operation',
+  // Political (public events)
+  'change_leader_initiated', 'change_leader_removal', 'change_leader_elected',
+  'martial_law', 'arrest',
+  // Diplomatic (public by nature)
+  'public_statement', 'propose_agreement', 'sign_agreement',
+  // Economic (public policy)
+  'set_sanctions', 'set_tariffs',
+  // System
+  'phase_b_complete',
 ])
 
 /* -------------------------------------------------------------------------- */
@@ -239,7 +246,7 @@ export function PublicScreen() {
     military: 0, political: 1, covert: 2, economic: 3, diplomatic: 4, system: 5,
   }
   const significantEvents = events
-    .filter((e) => SIGNIFICANT_EVENTS.has(e.event_type))
+    .filter((e) => PUBLIC_NEWS_EVENTS.has(e.event_type))
     .sort((a, b) => {
       const wa = CATEGORY_WEIGHT[a.category ?? 'system'] ?? 5
       const wb = CATEGORY_WEIGHT[b.category ?? 'system'] ?? 5
