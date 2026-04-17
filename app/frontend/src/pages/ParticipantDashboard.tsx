@@ -948,18 +948,18 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
           <Sec title="Technology">
             <div className="flex items-center gap-2">
-              <select value={offerTechType} onChange={e=>setOfferTechType(e.target.value as 'none'|'nuclear'|'ai')}
+              <select value={offerTechType} onChange={e=>{const v=e.target.value as 'none'|'nuclear'|'ai';setOfferTechType(v);setOfferTechLevel(v==='none'?0:1)}}
                 className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
                 <option value="none">None</option>
-                {myNuclear>0&&<option value="nuclear">Nuclear (L{myNuclear})</option>}
-                {myAI>0&&<option value="ai">AI (L{myAI})</option>}
+                {myNuclear>0&&<option value="nuclear">Nuclear (we have L{myNuclear})</option>}
+                {myAI>0&&<option value="ai">AI (we have L{myAI})</option>}
               </select>
               {offerTechType!=='none'&&<>
-                <span className="font-body text-caption text-text-secondary">Level:</span>
+                <span className="font-body text-caption text-text-secondary">Share up to level:</span>
                 <select value={offerTechLevel} onChange={e=>setOfferTechLevel(parseInt(e.target.value))}
                   className="bg-base border border-border rounded px-2 py-1 font-data text-caption">
-                  {Array.from({length:offerTechType==='nuclear'?myNuclear:myAI},(_, i)=>i+1).map(l=>
-                    <option key={l} value={l}>{l}</option>
+                  {Array.from({length:offerTechType==='nuclear'?myNuclear:myAI},(_,i)=>i+1).map(l=>
+                    <option key={l} value={l}>Level {l}</option>
                   )}
                 </select>
               </>}
@@ -1001,7 +1001,7 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
           <Sec title="Technology">
             <div className="flex items-center gap-2">
-              <select value={reqTechType} onChange={e=>setReqTechType(e.target.value as 'none'|'nuclear'|'ai')}
+              <select value={reqTechType} onChange={e=>{const v=e.target.value as 'none'|'nuclear'|'ai';setReqTechType(v);setReqTechLevel(v==='none'?0:1)}}
                 className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
                 <option value="none">None</option>
                 <option value="nuclear">Nuclear</option>
