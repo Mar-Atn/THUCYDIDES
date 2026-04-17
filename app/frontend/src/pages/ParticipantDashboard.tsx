@@ -13,6 +13,7 @@ import { useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { getSimRun, type SimRun } from '@/lib/queries'
+import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -311,11 +312,16 @@ function TabConf({role,artefacts,onRead}:{role:RoleData;artefacts:Artefact[];onR
               <span className="text-text-secondary">{open===art.id?'▲':'▼'}</span>
             </div>
           </button>
-          {open===art.id&&art.content_html&&<div className="border-t border-border px-5 py-4">
-            {art.subtitle&&<p className="font-body text-caption text-text-secondary mb-3 italic">{art.subtitle}</p>}
-            <div className="font-body text-body-sm text-text-primary leading-relaxed [&_h3]:font-heading [&_h3]:text-sm [&_h3]:font-bold [&_h3]:uppercase [&_h3]:tracking-wide [&_h3]:text-action [&_h3]:mt-5 [&_h3]:mb-2 [&_h3]:pb-1 [&_h3]:border-b [&_h3]:border-border [&_p]:mb-2 [&_.highlight]:bg-warning/5 [&_.highlight]:border-l-3 [&_.highlight]:border-warning [&_.highlight]:px-3 [&_.highlight]:py-2 [&_.highlight]:my-3 [&_.highlight]:text-sm [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2 [&_li]:mb-1"
-              dangerouslySetInnerHTML={{__html:art.content_html}}/>
-            {art.date_label&&<p className="font-data text-caption text-text-secondary mt-4 pt-3 border-t border-border">{art.date_label}</p>}
+          {open===art.id&&art.content_html&&<div className="border-t border-border p-4">
+            <ArtefactRenderer
+              type={art.artefact_type}
+              title={art.title}
+              subtitle={art.subtitle}
+              classification={art.classification}
+              from_entity={art.from_entity}
+              date_label={art.date_label}
+              content_html={art.content_html}
+            />
           </div>}
         </div>)}
       </div>}
