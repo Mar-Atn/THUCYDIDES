@@ -17,6 +17,7 @@ import { TemplateList } from '@/pages/TemplateList'
 import { TemplateEditor } from '@/pages/TemplateEditor'
 import { FacilitatorDashboard } from '@/pages/FacilitatorDashboard'
 import { PublicScreen } from '@/pages/PublicScreen'
+import { ParticipantDashboard } from '@/pages/ParticipantDashboard'
 
 export function App() {
   return (
@@ -101,6 +102,16 @@ export function App() {
         element={
           <ProtectedRoute>
             <FacilitatorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Participant dashboard */}
+      <Route
+        path="/play/:simId"
+        element={
+          <ProtectedRoute>
+            <ParticipantDashboard />
           </ProtectedRoute>
         }
       />
