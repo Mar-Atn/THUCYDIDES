@@ -73,10 +73,10 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
     {id:'set_budget',label:'Set Budget'},{id:'set_tariffs',label:'Set Tariffs'},
     {id:'set_sanctions',label:'Set Sanctions'},{id:'set_opec',label:'Set Cartel Production'},
   ]},
-  { key:'intl', label:'International Affairs', actions:[
-    {id:'propose_transaction',label:'Propose Transaction'},{id:'accept_transaction',label:'Respond to Transaction'},
-    {id:'propose_agreement',label:'Propose Agreement'},{id:'sign_agreement',label:'Sign Agreement'},
-    {id:'basing_rights',label:'Basing Rights'},
+  { key:'intl', label:'International Affairs & Trade', actions:[
+    {id:'propose_transaction',label:'Propose Transaction'},
+    {id:'propose_agreement',label:'Propose Agreement'},
+    {id:'basing_rights',label:'Grant / Revoke Basing Rights'},
   ]},
   { key:'military', label:'Military', actions:[
     {id:'ground_attack',label:'Ground Attack'},{id:'air_strike',label:'Air Strike'},{id:'naval_combat',label:'Naval Combat'},
@@ -690,6 +690,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'set_tariffs') return <TariffSanctionForm type="tariffs" {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_sanctions') return <TariffSanctionForm type="sanctions" {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_opec') return <CartelProductionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'propose_transaction') return <ProposeTransactionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -798,6 +799,249 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
             <p className="font-body text-body-sm text-danger">{error}</p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/* ── Propose Transaction Form ───────────────────────────────────────────── */
+
+const UNIT_TYPES_TRADE = ['ground','naval','tactical_air','strategic_missile','air_defense'] as const
+
+function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [countries,setCountries]=useState<{id:string;sim_name:string;color_ui:string|null}[]>([])
+  const [myReserves,setMyReserves]=useState<{unit_id:string;unit_type:string}[]>([])
+  const [myCountry,setMyCountry]=useState<Record<string,unknown>|null>(null)
+  const [counterpart,setCounterpart]=useState('')
+  const [secret,setSecret]=useState(false)
+  const [comment,setComment]=useState('')
+  // Offer
+  const [offerCoins,setOfferCoins]=useState(0)
+  const [offerUnits,setOfferUnits]=useState<string[]>([])  // unit_ids from reserve
+  const [offerTechType,setOfferTechType]=useState<'none'|'nuclear'|'ai'>('none')
+  const [offerTechLevel,setOfferTechLevel]=useState(0)
+  const [offerBasing,setOfferBasing]=useState(false)
+  // Request
+  const [reqCoins,setReqCoins]=useState(0)
+  const [reqUnits,setReqUnits]=useState<Record<string,number>>({})  // type → count
+  const [reqTechType,setReqTechType]=useState<'none'|'nuclear'|'ai'>('none')
+  const [reqTechLevel,setReqTechLevel]=useState(0)
+  const [reqBasing,setReqBasing]=useState(false)
+
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
+      .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
+    supabase.from('deployments').select('unit_id,unit_type').eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','reserve')
+      .then(({data})=>setMyReserves((data??[]) as typeof myReserves))
+    supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
+      .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
+  },[simId,countryId])
+
+  const treasury = Number(myCountry?.treasury??0)
+  const myNuclear = Number(myCountry?.nuclear_level??0)
+  const myAI = Number(myCountry?.ai_level??0)
+
+  // Group reserves by type
+  const reserveByType: Record<string,string[]> = {}
+  myReserves.forEach(u=>{
+    reserveByType[u.unit_type] = reserveByType[u.unit_type]||[]
+    reserveByType[u.unit_type].push(u.unit_id)
+  })
+
+  const hasOffer = offerCoins>0||offerUnits.length>0||offerTechType!=='none'||offerBasing
+  const hasRequest = reqCoins>0||Object.values(reqUnits).some(v=>v>0)||reqTechType!=='none'||reqBasing
+  const canSubmit = counterpart && (hasOffer||hasRequest)
+
+  const handleSubmit = async () => {
+    setSubmitting(true); setError(null)
+    try {
+      const offer: Record<string,unknown> = {}
+      const request: Record<string,unknown> = {}
+      if (offerCoins>0) offer.coins = offerCoins
+      if (offerUnits.length>0) offer.units = offerUnits
+      if (offerTechType!=='none') offer.technology = {type:offerTechType, level:offerTechLevel}
+      if (offerBasing) offer.basing_rights = {grant:true}
+      if (reqCoins>0) request.coins = reqCoins
+      const unitReqs = Object.entries(reqUnits).filter(([,v])=>v>0).map(([t,c])=>({type:t,count:c}))
+      if (unitReqs.length>0) request.units = unitReqs
+      if (reqTechType!=='none') request.technology = {type:reqTechType, level:reqTechLevel}
+      if (reqBasing) request.basing_rights = {grant:true}
+
+      await submitAction(simId,'propose_transaction',roleId,countryId,{
+        proposer_country_code:countryId, counterpart_country_code:counterpart,
+        scope:'country', offer, request,
+        rationale:comment, visibility:secret?'secret':'public',
+      })
+      setResult('Transaction proposed — awaiting counterpart response')
+    } catch(e) { setError(e instanceof Error?e.message:'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  const Sec = ({title,children}:{title:string;children:React.ReactNode}) => (
+    <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+      <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider">{title}</h3>
+      {children}
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Propose Transaction</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {/* Counterpart + options */}
+      <div className="flex items-center gap-4">
+        <div className="flex-1">
+          <label className="font-body text-caption text-text-secondary block mb-1">Trading with</label>
+          <select value={counterpart} onChange={e=>setCounterpart(e.target.value)}
+            className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary">
+            <option value="">Select country...</option>
+            {countries.map(c=><option key={c.id} value={c.id}>{c.sim_name}</option>)}
+          </select>
+        </div>
+        <label className="flex items-center gap-2 cursor-pointer mt-5">
+          <input type="checkbox" checked={secret} onChange={e=>setSecret(e.target.checked)} className="accent-danger"/>
+          <span className="font-body text-caption text-text-secondary">Secret deal</span>
+        </label>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT: What we offer */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-success">We Offer</h3>
+
+          <Sec title="Coins">
+            <div className="flex items-center gap-2">
+              <input type="number" min="0" max={treasury} value={offerCoins} onChange={e=>setOfferCoins(Math.max(0,parseInt(e.target.value)||0))}
+                className="w-24 bg-base border border-border rounded px-2 py-1 font-data text-body-sm text-right"/>
+              <span className="font-body text-caption text-text-secondary">of {treasury.toFixed(0)} available</span>
+            </div>
+          </Sec>
+
+          <Sec title="Military Units (from Reserve)">
+            {Object.keys(reserveByType).length===0
+              ? <p className="font-body text-caption text-text-secondary">No reserve units available</p>
+              : Object.entries(reserveByType).map(([type,ids])=>
+                <div key={type} className="space-y-1">
+                  <div className="font-body text-caption text-text-primary capitalize">{type.replace('_',' ')} ({ids.length} in reserve)</div>
+                  <div className="flex flex-wrap gap-1">
+                    {ids.map(uid=>{
+                      const sel = offerUnits.includes(uid)
+                      return <button key={uid} onClick={()=>setOfferUnits(prev=>sel?prev.filter(x=>x!==uid):[...prev,uid])}
+                        className={`font-data text-caption px-2 py-0.5 rounded border transition-colors ${sel?'bg-success text-white border-success':'bg-base border-border text-text-secondary hover:border-success/30'}`}>
+                        {uid.split('_').pop()}
+                      </button>
+                    })}
+                  </div>
+                </div>
+              )
+            }
+          </Sec>
+
+          <Sec title="Technology">
+            <div className="flex items-center gap-2">
+              <select value={offerTechType} onChange={e=>setOfferTechType(e.target.value as 'none'|'nuclear'|'ai')}
+                className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
+                <option value="none">None</option>
+                {myNuclear>0&&<option value="nuclear">Nuclear (L{myNuclear})</option>}
+                {myAI>0&&<option value="ai">AI (L{myAI})</option>}
+              </select>
+              {offerTechType!=='none'&&<>
+                <span className="font-body text-caption text-text-secondary">Level:</span>
+                <select value={offerTechLevel} onChange={e=>setOfferTechLevel(parseInt(e.target.value))}
+                  className="bg-base border border-border rounded px-2 py-1 font-data text-caption">
+                  {Array.from({length:offerTechType==='nuclear'?myNuclear:myAI},(_, i)=>i+1).map(l=>
+                    <option key={l} value={l}>{l}</option>
+                  )}
+                </select>
+              </>}
+            </div>
+          </Sec>
+
+          <Sec title="Basing Rights">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={offerBasing} onChange={e=>setOfferBasing(e.target.checked)} className="accent-action"/>
+              <span className="font-body text-body-sm text-text-primary">Grant access to our territory</span>
+            </label>
+          </Sec>
+        </div>
+
+        {/* RIGHT: What we request */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-action">We Request</h3>
+
+          <Sec title="Coins">
+            <div className="flex items-center gap-2">
+              <input type="number" min="0" max="999" value={reqCoins} onChange={e=>setReqCoins(Math.max(0,parseInt(e.target.value)||0))}
+                className="w-24 bg-base border border-border rounded px-2 py-1 font-data text-body-sm text-right"/>
+              <span className="font-body text-caption text-text-secondary">coins</span>
+            </div>
+          </Sec>
+
+          <Sec title="Military Units">
+            <div className="space-y-2">
+              {UNIT_TYPES_TRADE.map(type=>
+                <div key={type} className="flex items-center gap-2">
+                  <span className="font-body text-caption text-text-primary w-28 capitalize">{type.replace('_',' ')}</span>
+                  <input type="number" min="0" max="20" value={reqUnits[type]??0}
+                    onChange={e=>setReqUnits(p=>({...p,[type]:Math.max(0,parseInt(e.target.value)||0)}))}
+                    className="w-16 bg-base border border-border rounded px-2 py-1 font-data text-caption text-right"/>
+                </div>
+              )}
+            </div>
+          </Sec>
+
+          <Sec title="Technology">
+            <div className="flex items-center gap-2">
+              <select value={reqTechType} onChange={e=>setReqTechType(e.target.value as 'none'|'nuclear'|'ai')}
+                className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
+                <option value="none">None</option>
+                <option value="nuclear">Nuclear</option>
+                <option value="ai">AI</option>
+              </select>
+              {reqTechType!=='none'&&<>
+                <span className="font-body text-caption text-text-secondary">Level:</span>
+                <select value={reqTechLevel} onChange={e=>setReqTechLevel(parseInt(e.target.value))}
+                  className="bg-base border border-border rounded px-2 py-1 font-data text-caption">
+                  {[1,2,3].map(l=><option key={l} value={l}>{l}</option>)}
+                </select>
+              </>}
+            </div>
+          </Sec>
+
+          <Sec title="Basing Rights">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={reqBasing} onChange={e=>setReqBasing(e.target.checked)} className="accent-action"/>
+              <span className="font-body text-body-sm text-text-primary">Request access to their territory</span>
+            </label>
+          </Sec>
+        </div>
+      </div>
+
+      {/* Comment + Submit */}
+      <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+        <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Add a message to the counterpart (optional)..."
+          rows={2} className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary resize-none"/>
+        <div className="flex items-center gap-3">
+          <button onClick={handleSubmit} disabled={submitting||!canSubmit}
+            className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+            {submitting?'Sending...':'Send Proposal'}</button>
+          <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+          {!canSubmit&&counterpart&&<span className="font-body text-caption text-warning">Add at least one item to offer or request</span>}
+        </div>
+        {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+          <p className="font-body text-body-sm text-success">{result}</p>
+          <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+        </div>}
+        {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
       </div>
     </div>
   )
