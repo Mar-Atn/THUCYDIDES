@@ -96,6 +96,11 @@ export function ParticipantDashboard() {
   const { simId } = useParams<{ simId: string }>()
   const { user, profile } = useAuth()
 
+  // Proxy mode: ?role=sabre allows moderator to view as a specific role
+  const urlParams = new URLSearchParams(window.location.search)
+  const proxyRoleId = urlParams.get('role')
+  const isProxyMode = !!proxyRoleId
+
   const [simRun, setSimRun] = useState<SimRun | null>(null)
   const [myRole, setMyRole] = useState<RoleData | null>(null)
   const [myCountry, setMyCountry] = useState<CountryData | null>(null)
@@ -118,9 +123,13 @@ export function ParticipantDashboard() {
       setSimState({ status:run.status, current_round:run.current_round, current_phase:run.current_phase,
         phase_started_at:run.started_at, phase_duration_seconds:run.schedule?.phase_a_minutes?run.schedule.phase_a_minutes*60:3600 })
 
-      const { data: roles } = await supabase.from('roles')
+      // Load role: proxy mode uses role_id, normal mode uses user_id
+      const roleQuery = supabase.from('roles')
         .select('id,character_name,country_id,position_type,title,public_bio,confidential_brief')
-        .eq('sim_run_id',simId).eq('user_id',user.id).limit(1)
+        .eq('sim_run_id',simId)
+      const { data: roles } = proxyRoleId
+        ? await roleQuery.eq('id', proxyRoleId).limit(1)
+        : await roleQuery.eq('user_id', user.id).limit(1)
       if (roles?.[0]) {
         const role = roles[0] as RoleData; setMyRole(role)
         const { data: c } = await supabase.from('countries')
@@ -206,6 +215,17 @@ export function ParticipantDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Proxy mode banner */}
+      {isProxyMode&&<div className="bg-danger/10 border-b border-danger/30 px-6 py-2">
+        <div className="max-w-7xl mx-auto flex items-center gap-3">
+          <span className="font-body text-caption font-bold text-danger uppercase tracking-wider">Moderator View</span>
+          <span className="font-body text-body-sm text-text-primary">
+            Viewing as {myRole?.character_name ?? proxyRoleId} — actions will be attributed to this role
+          </span>
+          <button onClick={()=>window.close()} className="ml-auto font-body text-caption text-danger hover:underline">Close</button>
+        </div>
+      </div>}
 
       {broadcast&&<div className="bg-warning/10 border-b border-warning/30 px-6 py-2"><div className="max-w-7xl mx-auto flex items-center gap-3">
         <span className="font-body text-caption font-bold text-warning uppercase">Broadcast</span>
