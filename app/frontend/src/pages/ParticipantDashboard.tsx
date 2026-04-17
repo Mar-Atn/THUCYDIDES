@@ -69,14 +69,6 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
   { key:'general', label:'General', actions:[
     {id:'public_statement',label:'Public Statement'},{id:'meet_freely',label:'Meet Anyone'},{id:'call_org_meeting',label:'Call Org Meeting'},
   ]},
-  { key:'military', label:'Military', actions:[
-    {id:'ground_attack',label:'Ground Attack'},{id:'air_strike',label:'Air Strike'},{id:'naval_combat',label:'Naval Combat'},
-    {id:'naval_bombardment',label:'Naval Bombardment'},{id:'launch_missile_conventional',label:'Missile Launch'},
-    {id:'naval_blockade',label:'Naval Blockade'},{id:'move_units',label:'Move Units (inter-round)'},
-    {id:'martial_law',label:'Martial Law'},{id:'nuclear_test',label:'Nuclear Test'},
-    {id:'nuclear_launch_initiate',label:'Nuclear Launch'},{id:'nuclear_authorize',label:'Authorize Nuclear'},
-    {id:'nuclear_intercept',label:'Intercept Missiles'},
-  ]},
   { key:'economic', label:'Economic', actions:[
     {id:'set_budget',label:'Set Budget'},{id:'set_tariffs',label:'Set Tariffs'},
     {id:'set_sanctions',label:'Set Sanctions'},{id:'set_opec',label:'Set Cartel Production'},
@@ -86,12 +78,20 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
     {id:'propose_agreement',label:'Propose Agreement'},{id:'sign_agreement',label:'Sign Agreement'},
     {id:'basing_rights',label:'Basing Rights'},
   ]},
-  { key:'covert', label:'Secret Operations', actions:[
-    {id:'intelligence',label:'Intelligence'},{id:'covert_operation',label:'Covert Operation'},{id:'assassination',label:'Assassination'},
+  { key:'military', label:'Military', actions:[
+    {id:'ground_attack',label:'Ground Attack'},{id:'air_strike',label:'Air Strike'},{id:'naval_combat',label:'Naval Combat'},
+    {id:'naval_bombardment',label:'Naval Bombardment'},{id:'launch_missile_conventional',label:'Missile Launch'},
+    {id:'naval_blockade',label:'Naval Blockade'},{id:'move_units',label:'Move Units (inter-round)'},
+    {id:'martial_law',label:'Martial Law'},{id:'nuclear_test',label:'Nuclear Test'},
+    {id:'nuclear_launch_initiate',label:'Nuclear Launch'},{id:'nuclear_authorize',label:'Authorize Nuclear'},
+    {id:'nuclear_intercept',label:'Intercept Missiles'},
   ]},
   { key:'political', label:'Political', actions:[
     {id:'reassign_types',label:'Reassign Powers'},{id:'arrest',label:'Arrest'},{id:'change_leader',label:'Change Leader'},
     {id:'self_nominate',label:'Self-Nominate'},{id:'cast_vote',label:'Cast Vote'},
+  ]},
+  { key:'covert', label:'Secret Operations', actions:[
+    {id:'intelligence',label:'Intelligence'},{id:'covert_operation',label:'Covert Operation'},{id:'assassination',label:'Assassination'},
   ]},
 ]
 
