@@ -947,22 +947,34 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
           </Sec>
 
           <Sec title="Technology">
-            <div className="flex items-center gap-2">
-              <select value={offerTechType} onChange={e=>{const v=e.target.value as 'none'|'nuclear'|'ai';setOfferTechType(v);setOfferTechLevel(v==='none'?0:1)}}
-                className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
-                <option value="none">None</option>
-                {myNuclear>0&&<option value="nuclear">Nuclear (we have L{myNuclear})</option>}
-                {myAI>0&&<option value="ai">AI (we have L{myAI})</option>}
-              </select>
-              {offerTechType!=='none'&&<>
-                <span className="font-body text-caption text-text-secondary">Share up to level:</span>
-                <select value={offerTechLevel} onChange={e=>setOfferTechLevel(parseInt(e.target.value))}
-                  className="bg-base border border-border rounded px-2 py-1 font-data text-caption">
-                  {Array.from({length:offerTechType==='nuclear'?myNuclear:myAI},(_,i)=>i+1).map(l=>
-                    <option key={l} value={l}>Level {l}</option>
+            <div className="space-y-2">
+              {myNuclear>0&&<div>
+                <div className="font-body text-caption text-text-secondary mb-1">Nuclear (we have L{myNuclear})</div>
+                <div className="flex gap-1">
+                  <button onClick={()=>{setOfferTechType(offerTechType==='nuclear'&&offerTechLevel===0?'none':'nuclear');setOfferTechLevel(0)}}
+                    className={`font-data text-caption px-3 py-1 rounded border transition-colors ${offerTechType!=='nuclear'?'bg-base border-border text-text-secondary':'bg-base border-border text-text-secondary'}`}>None</button>
+                  {Array.from({length:myNuclear},(_,i)=>i+1).map(l=>
+                    <button key={l} onClick={()=>{setOfferTechType('nuclear');setOfferTechLevel(l)}}
+                      className={`font-data text-caption px-3 py-1 rounded border transition-colors ${offerTechType==='nuclear'&&offerTechLevel===l?'bg-success text-white border-success':'bg-base border-border text-text-secondary hover:border-success/30'}`}>
+                      L{l}
+                    </button>
                   )}
-                </select>
-              </>}
+                </div>
+              </div>}
+              {myAI>0&&<div>
+                <div className="font-body text-caption text-text-secondary mb-1">AI (we have L{myAI})</div>
+                <div className="flex gap-1">
+                  <button onClick={()=>{setOfferTechType(offerTechType==='ai'&&offerTechLevel===0?'none':'ai');setOfferTechLevel(0)}}
+                    className={`font-data text-caption px-3 py-1 rounded border transition-colors ${offerTechType!=='ai'?'bg-base border-border text-text-secondary':'bg-base border-border text-text-secondary'}`}>None</button>
+                  {Array.from({length:myAI},(_,i)=>i+1).map(l=>
+                    <button key={l} onClick={()=>{setOfferTechType('ai');setOfferTechLevel(l)}}
+                      className={`font-data text-caption px-3 py-1 rounded border transition-colors ${offerTechType==='ai'&&offerTechLevel===l?'bg-success text-white border-success':'bg-base border-border text-text-secondary hover:border-success/30'}`}>
+                      L{l}
+                    </button>
+                  )}
+                </div>
+              </div>}
+              {myNuclear===0&&myAI===0&&<p className="font-body text-caption text-text-secondary">No technology to offer</p>}
             </div>
           </Sec>
 
@@ -1000,20 +1012,33 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
           </Sec>
 
           <Sec title="Technology">
-            <div className="flex items-center gap-2">
-              <select value={reqTechType} onChange={e=>{const v=e.target.value as 'none'|'nuclear'|'ai';setReqTechType(v);setReqTechLevel(v==='none'?0:1)}}
-                className="bg-base border border-border rounded px-2 py-1 font-body text-caption">
-                <option value="none">None</option>
-                <option value="nuclear">Nuclear</option>
-                <option value="ai">AI</option>
-              </select>
-              {reqTechType!=='none'&&<>
-                <span className="font-body text-caption text-text-secondary">Level:</span>
-                <select value={reqTechLevel} onChange={e=>setReqTechLevel(parseInt(e.target.value))}
-                  className="bg-base border border-border rounded px-2 py-1 font-data text-caption">
-                  {[1,2,3].map(l=><option key={l} value={l}>{l}</option>)}
-                </select>
-              </>}
+            <div className="space-y-2">
+              <div>
+                <div className="font-body text-caption text-text-secondary mb-1">Nuclear</div>
+                <div className="flex gap-1">
+                  <button onClick={()=>{if(reqTechType==='nuclear')setReqTechType('none');setReqTechLevel(0)}}
+                    className={`font-data text-caption px-3 py-1 rounded border transition-colors ${reqTechType!=='nuclear'?'bg-base border-border text-text-secondary':'bg-base border-border text-text-secondary'}`}>None</button>
+                  {[1,2,3].map(l=>
+                    <button key={l} onClick={()=>{setReqTechType('nuclear');setReqTechLevel(l)}}
+                      className={`font-data text-caption px-3 py-1 rounded border transition-colors ${reqTechType==='nuclear'&&reqTechLevel===l?'bg-action text-white border-action':'bg-base border-border text-text-secondary hover:border-action/30'}`}>
+                      L{l}
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <div className="font-body text-caption text-text-secondary mb-1">AI</div>
+                <div className="flex gap-1">
+                  <button onClick={()=>{if(reqTechType==='ai')setReqTechType('none');setReqTechLevel(0)}}
+                    className={`font-data text-caption px-3 py-1 rounded border transition-colors ${reqTechType!=='ai'?'bg-base border-border text-text-secondary':'bg-base border-border text-text-secondary'}`}>None</button>
+                  {[1,2,3,4].map(l=>
+                    <button key={l} onClick={()=>{setReqTechType('ai');setReqTechLevel(l)}}
+                      className={`font-data text-caption px-3 py-1 rounded border transition-colors ${reqTechType==='ai'&&reqTechLevel===l?'bg-action text-white border-action':'bg-base border-border text-text-secondary hover:border-action/30'}`}>
+                      L{l}
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </Sec>
 
