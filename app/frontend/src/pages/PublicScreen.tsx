@@ -306,7 +306,7 @@ export function PublicScreen() {
           {/* Map iframe */}
           <div className="flex-1 relative">
             <iframe
-              src="/map/deployments.html?display=clean"
+              src={`/map/deployments.html?display=clean&sim_run_id=${simId}`}
               className="absolute inset-0 w-full h-full border-0"
               title="Global Map"
             />
@@ -382,7 +382,7 @@ export function PublicScreen() {
               </div>
               <div className="flex-1 relative">
                 <iframe
-                  src="/map/deployments.html?display=clean&theater=eastern_ereb"
+                  src={`/map/deployments.html?display=clean&theater=eastern_ereb&sim_run_id=${simId}`}
                   className="absolute inset-0 w-full h-full border-0"
                   title="Eastern Ereb Theater"
                 />
@@ -400,7 +400,7 @@ export function PublicScreen() {
               </div>
               <div className="flex-1 relative">
                 <iframe
-                  src="/map/deployments.html?display=clean&theater=mashriq"
+                  src={`/map/deployments.html?display=clean&theater=mashriq&sim_run_id=${simId}`}
                   className="absolute inset-0 w-full h-full border-0"
                   title="Mashriq Theater"
                 />

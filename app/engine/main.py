@@ -129,6 +129,119 @@ async def get_deployments(
     return APIResponse(data=[d.model_dump() for d in deployments], meta={"count": len(deployments)})
 
 
+@app.get("/api/sim/{sim_id}/map/units")
+async def get_map_units(sim_id: str):
+    """Get deployments formatted for the map renderer.
+
+    Returns {units: [...]} where each unit has global_row/global_col
+    coordinates resolved from the zone grid. Used by map iframe.
+    """
+    from engine.services.supabase import get_client
+    client = get_client()
+
+    deps = client.table("deployments") \
+        .select("unit_id, country_id, unit_type, zone_id, count") \
+        .eq("sim_run_id", sim_id) \
+        .execute().data or []
+
+    # Build zone_id → global hex coordinate mapping from the global grid
+    # The global grid JSON has each hex with an owner — zone_ids map to grid positions
+    # We need to find which hex(es) each zone_id occupies
+    zone_coords: dict[str, tuple[int, int]] = {}
+
+    # Method 1: Parse w(row,col) format zone_ids
+    # Method 2: Look up named zones from the global grid
+    try:
+        import httpx
+        global_grid = httpx.get("http://localhost:8888/api/map/global", timeout=5).json()
+        grid = global_grid.get("grid", [])
+        # Build a map of zone_id → first hex coordinate (1-indexed for the map renderer)
+        for r_idx, row in enumerate(grid):
+            for c_idx, hex_data in enumerate(row):
+                owner = hex_data.get("owner", "sea")
+                zone_id = hex_data.get("zone_id")
+                if zone_id and zone_id not in zone_coords:
+                    zone_coords[zone_id] = (r_idx + 1, c_idx + 1)
+                # Also map by owner name patterns (e.g., "columbia" hexes)
+                # Named zones like "col_main_1" won't be in the grid directly
+    except Exception as e:
+        logger.warning("Failed to load global grid for zone mapping: %s", e)
+
+    # Also build mapping for named zones by scanning zone_ids in deployments
+    # and matching to country home zones in the grid
+    # First pass: collect all zone_ids that need mapping
+    unmapped = set()
+    for d in deps:
+        zid = d["zone_id"]
+        if zid not in zone_coords:
+            # Try w(row,col) format
+            if zid.startswith("w(") and "," in zid:
+                try:
+                    coords = zid[2:-1].split(",")
+                    zone_coords[zid] = (int(coords[0]), int(coords[1]))
+                except (ValueError, IndexError):
+                    unmapped.add(zid)
+            else:
+                unmapped.add(zid)
+
+    # For unmapped named zones, find the centroid hex for that zone's country
+    # by looking at the grid for hexes owned by that country
+    if unmapped:
+        # Group grid hexes by owner
+        owner_hexes: dict[str, list[tuple[int, int]]] = {}
+        for r_idx, row in enumerate(grid):
+            for c_idx, hex_data in enumerate(row):
+                owner = hex_data.get("owner", "sea")
+                if owner != "sea":
+                    owner_hexes.setdefault(owner, []).append((r_idx + 1, c_idx + 1))
+
+        for zid in unmapped:
+            # Extract country from zone_id (e.g., "ruthenia_2" → "ruthenia", "col_main_1" → "columbia")
+            parts = zid.split("_")
+            # Try progressively shorter prefixes
+            for n in range(len(parts), 0, -1):
+                candidate = "_".join(parts[:n])
+                if candidate in owner_hexes:
+                    hexes = owner_hexes[candidate]
+                    # Use center hex of country's territory
+                    mid = hexes[len(hexes) // 2]
+                    zone_coords[zid] = mid
+                    break
+            # Special case: "col_*" → "columbia"
+            if zid not in zone_coords and zid.startswith("col_"):
+                if "columbia" in owner_hexes:
+                    hexes = owner_hexes["columbia"]
+                    zone_coords[zid] = hexes[len(hexes) // 2]
+            # Prefix matching for other abbreviated names
+            if zid not in zone_coords:
+                prefix = parts[0]
+                for owner, hexes in owner_hexes.items():
+                    if owner.startswith(prefix):
+                        zone_coords[zid] = hexes[len(hexes) // 2]
+                        break
+
+    units = []
+    for d in deps:
+        zid = d["zone_id"]
+        coords = zone_coords.get(zid)
+        units.append({
+            "unit_id": d.get("unit_id") or zid,
+            "country_id": d["country_id"],
+            "unit_type": d["unit_type"],
+            "zone_id": zid,
+            "global_row": coords[0] if coords else None,
+            "global_col": coords[1] if coords else None,
+            "theater": None,
+            "theater_row": None,
+            "theater_col": None,
+            "status": "active",
+            "count": d.get("count", 1),
+        })
+
+    mapped = sum(1 for u in units if u["global_row"] is not None)
+    return {"units": units, "count": len(units), "mapped": mapped, "unmapped": len(units) - mapped}
+
+
 @app.get("/api/sim/{sim_id}/world", response_model=APIResponse)
 async def get_world_state(sim_id: str, round_num: Optional[int] = None):
     """Get world state snapshot."""

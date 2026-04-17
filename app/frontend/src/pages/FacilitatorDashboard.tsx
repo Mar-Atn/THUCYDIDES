@@ -872,7 +872,7 @@ export function FacilitatorDashboard() {
             <DashboardSection title="Map & Data">
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() => window.open('/map/deployments.html', '_blank')}
+                  onClick={() => window.open(`/map/deployments.html?sim_run_id=${simId}`, '_blank')}
                   className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
                 >
                   Open Map

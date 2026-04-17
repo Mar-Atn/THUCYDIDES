@@ -92,12 +92,17 @@
       state.countries = cs;
 
       // Unit data (skip in geography mode)
+      // sim_run_id is required for unit display — always load from FastAPI
+      const SIM_RUN_ID = urlParams.get('sim_run_id');
       if (!geographyMode) {
-        const [dep, un] = await Promise.all([
-          fetchJson('/api/map/deployments'),
-          fetchJson('/api/map/units'),
-        ]);
-        state.deployments = dep;
+        let un;
+        if (SIM_RUN_ID) {
+          un = await fetchJson(`/api/sim/${SIM_RUN_ID}/map/units`);
+        } else {
+          // Fallback: try legacy endpoint (template editor, standalone viewer)
+          un = await fetchJson('/api/map/units');
+        }
+        state.deployments = { rows: [], by_hex: {} };
         // Fill in missing global coords only (respects canonical mapping as default)
         (un.units || []).forEach(u => {
           if (u.theater && u.theater_row != null && u.theater_col != null &&
