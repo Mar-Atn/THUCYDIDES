@@ -274,11 +274,8 @@ export function TabMapDeployments({ templateId: _templateId }: TabMapDeployments
                             <td className="font-body text-body-sm text-text-primary py-2 pr-4">
                               {UNIT_TYPE_LABELS[d.unit_type] ?? d.unit_type.replace(/_/g, ' ')}
                             </td>
-                            <td className="font-data text-data text-text-primary py-2 pr-4 text-right">
-                              {d.count}
-                            </td>
-                            <td className="font-data text-data text-text-secondary py-2">
-                              {d.zone_id}
+                            <td className="font-data text-data text-text-secondary py-2 text-center">
+                              {d.global_row && d.global_col ? `(${d.global_row},${d.global_col})` : d.unit_status ?? 'reserve'}
                             </td>
                           </tr>
                         ))}

@@ -227,11 +227,8 @@ export function TabDeployments({ templateId: _templateId }: TabDeploymentsProps)
                               {UNIT_LABELS[d.unit_type] ?? d.unit_type}
                             </span>
                           </td>
-                          <td className="font-data text-data text-text-primary px-3 py-1.5 text-right">
-                            {d.count}
-                          </td>
-                          <td className="font-data text-caption text-text-secondary px-3 py-1.5">
-                            {d.zone_id}
+                          <td className="font-data text-data text-text-secondary px-3 py-1.5 text-center">
+                            {d.global_row && d.global_col ? `(${d.global_row},${d.global_col})` : d.unit_status}
                           </td>
                           <td className="font-body text-caption text-text-secondary px-3 py-1.5">
                             {d.notes || '—'}

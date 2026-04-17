@@ -617,10 +617,17 @@ export interface Zone {
 export interface Deployment {
   id: string
   sim_run_id: string
+  unit_id: string | null
   country_id: string
   unit_type: string
+  global_row: number | null
+  global_col: number | null
+  theater: string | null
+  theater_row: number | null
+  theater_col: number | null
+  embarked_on: string | null
+  unit_status: string
   count: number
-  zone_id: string
   notes: string
 }
 
@@ -819,7 +826,7 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
     .from('deployments')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('country_id, zone_id, unit_type')
+    .order('country_id, unit_type, global_row, global_col')
   if (error) throw error
   return (data ?? []) as Deployment[]
 }

@@ -136,15 +136,18 @@ async def get_zone_adjacency(sim_id: str) -> list[ZoneAdjacency]:
 async def get_deployments(
     sim_id: str,
     country_id: Optional[str] = None,
-    zone_id: Optional[str] = None,
+    global_row: Optional[int] = None,
+    global_col: Optional[int] = None,
 ) -> list[Deployment]:
-    """Fetch deployments with optional filters."""
+    """Fetch deployments with optional filters (by country and/or hex coordinates)."""
     client = get_client()
     query = client.table("deployments").select("*").eq("sim_run_id", sim_id)
     if country_id:
         query = query.eq("country_id", country_id)
-    if zone_id:
-        query = query.eq("zone_id", zone_id)
+    if global_row is not None:
+        query = query.eq("global_row", global_row)
+    if global_col is not None:
+        query = query.eq("global_col", global_col)
     result = query.execute()
     return [Deployment(**row) for row in result.data]
 

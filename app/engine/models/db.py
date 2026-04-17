@@ -178,13 +178,25 @@ class ZoneAdjacency(BaseModel):
 
 
 class Deployment(BaseModel):
-    """deployments table."""
+    """deployments table — individual unit model (1 row = 1 unit).
+
+    Units are positioned by hex coordinates (global_row/col for global map,
+    theater_row/col for theater maps). zone_id is deprecated for positioning.
+    """
     id: str
     sim_run_id: str
+    unit_id: Optional[str] = None  # e.g. "sar_gnd_001"
     country_id: str
     unit_type: str  # ground | naval | tactical_air | strategic_missile | air_defense
-    count: int = 0
-    zone_id: str
+    global_row: Optional[int] = None  # 1-indexed hex row on global grid
+    global_col: Optional[int] = None  # 1-indexed hex col on global grid
+    theater: Optional[str] = None     # eastern_ereb | mashriq | None
+    theater_row: Optional[int] = None
+    theater_col: Optional[int] = None
+    embarked_on: Optional[str] = None  # unit_id of naval transport
+    unit_status: str = "active"  # active | reserve | embarked
+    zone_id: Optional[str] = None  # DEPRECATED for positioning — kept for legacy compat
+    count: int = 1
     notes: str = ""
 
 

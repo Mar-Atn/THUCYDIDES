@@ -122,10 +122,11 @@ async def get_zones(sim_id: str, theater: Optional[str] = None):
 async def get_deployments(
     sim_id: str,
     country_id: Optional[str] = None,
-    zone_id: Optional[str] = None,
+    global_row: Optional[int] = None,
+    global_col: Optional[int] = None,
 ):
-    """Get military deployments with optional filters."""
-    deployments = await db.get_deployments(sim_id, country_id, zone_id)
+    """Get military deployments with optional filters (by country, hex coordinates)."""
+    deployments = await db.get_deployments(sim_id, country_id, global_row, global_col)
     return APIResponse(data=[d.model_dump() for d in deployments], meta={"count": len(deployments)})
 
 
