@@ -357,12 +357,19 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
 
-  useEffect(()=>{
+  const loadPendingTxns = useCallback(()=>{
     supabase.from('exchange_transactions')
       .select('id,proposer,counterpart,offer,request,terms,created_at')
       .eq('sim_run_id',simId).eq('counterpart',countryId).eq('status','pending')
       .then(({data})=>setPendingTxns((data??[]) as typeof pendingTxns))
   },[simId,countryId])
+
+  useEffect(()=>{
+    loadPendingTxns()
+    // Poll every 10s for new proposals (Realtime may not cover all cases)
+    const interval = setInterval(loadPendingTxns, 10000)
+    return ()=>clearInterval(interval)
+  },[loadPendingTxns])
 
   // If reviewing a transaction, show the review screen
   const txnToReview = reviewTxn ? pendingTxns.find(t=>t.id===reviewTxn) : null
