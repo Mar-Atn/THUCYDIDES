@@ -235,7 +235,52 @@ System-generated notifications that appear in "Actions Expected Now":
 
 ---
 
-## 8. Responsive Design
+## 8. Historical Data & Round Navigation
+
+Participants must be able to access data from ANY completed round — not just the current one.
+
+### Pattern
+- **Default view:** Always shows CURRENT round data
+- **Round selector:** Small dropdown or stepper in the data area: `◄ R1  R2  [R3] ►`
+- **When viewing past round:** Data area shows that round's snapshot. Clear visual indicator "Viewing Round 2" so participant doesn't confuse with current state.
+- **What has history:** Country economic data, stability, military counts, world state (oil price, indexes), relationships, combat results, observatory events
+- **What doesn't:** Actions tab (always current), Artefacts (cumulative, not per-round)
+
+### Data Sources
+- `country_states_per_round` — economic/political snapshots per round
+- `world_state` — oil price, indexes per round
+- `observatory_events` — filterable by round_num
+- `deployments` — current only (no per-round snapshots yet; future: `unit_states_per_round`)
+
+### Trend Indicators
+Where numeric data is shown, include micro-trends:
+- GDP: `173.5 ↑ (+2.3%)` with green/red arrow
+- Stability: `6.2 ↓ (-0.8)`
+- Oil price: `$125 ↑`
+- Small sparkline charts where space allows (last 3-4 rounds)
+
+---
+
+## 9. UX Principles
+
+**Every screen must be:**
+- **Readable at a glance** — most important info largest, hierarchy clear
+- **Actionable in 1-2 taps** — no buried menus, no hunting for buttons
+- **Informative without overwhelming** — show what matters, hide details behind (i) icons
+- **Consistent** — same patterns across all tabs, all action forms, all data displays
+
+**Specific rules:**
+- Maximum 2 clicks to submit any action (open form → submit)
+- Maximum 1 click to see any country's public data
+- No horizontal scrolling on desktop
+- Numbers: always with context (GDP: 173.5B, not just 173.5)
+- Colors: country colors consistent everywhere (map, tables, charts)
+- Loading states: skeleton screens, never blank white pages
+- Errors: inline, specific, with suggested fix ("No units at this hex — select a hex where you have forces")
+
+---
+
+## 10. Responsive Design
 
 ### Desktop (primary)
 - Full layout: tabs + content area + Navigator sidebar
