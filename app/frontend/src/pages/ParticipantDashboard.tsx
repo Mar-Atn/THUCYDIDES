@@ -989,12 +989,33 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
             try {
               // Decline original
               await submitAction(simId,'accept_transaction',roleId,countryId,{transaction_id:txn.id, response:'decline', rationale:'Counteroffer sent'})
-              // Create new proposal (swap sides — we propose back to them)
+              // Create new proposal (swap sides — coins/tech/basing only, units need manual selection)
+              const counterOffer: Record<string,unknown> = {}
+              const counterRequest: Record<string,unknown> = {}
+              // Swap coins
+              if (txn.request.coins) counterOffer.coins = txn.request.coins
+              if (txn.offer.coins) counterRequest.coins = txn.offer.coins
+              // Swap tech
+              if (txn.request.technology && Object.keys(txn.request.technology as object).length>0) counterOffer.technology = txn.request.technology
+              if (txn.offer.technology && Object.keys(txn.offer.technology as object).length>0) counterRequest.technology = txn.offer.technology
+              // Swap basing
+              if (txn.request.basing_rights) counterOffer.basing_rights = txn.request.basing_rights
+              if (txn.offer.basing_rights) counterRequest.basing_rights = txn.offer.basing_rights
+              // Units: request as type+count (not swapped as unit_ids)
+              if (txn.offer.units && Array.isArray(txn.offer.units) && (txn.offer.units as unknown[]).length>0) {
+                // They offered specific units — we request same type+count back
+                const unitReqs = (txn.offer.units as string[]).reduce((acc:{type:string;count:number}[], uid)=>{
+                  // Can't determine type from unit_id alone — skip for now
+                  return acc
+                }, [])
+                if (unitReqs.length>0) counterRequest.units = unitReqs
+              }
+
               await submitAction(simId,'propose_transaction',roleId,countryId,{
                 proposer_country_code:countryId, counterpart_country_code:txn.proposer,
                 scope:'country',
-                offer: txn.request,   // what they wanted, we now offer (adjustable in future)
-                request: txn.offer,   // what they offered, we now request
+                offer: counterOffer,
+                request: counterRequest,
                 rationale: counterComment || 'Counteroffer',
                 visibility: 'public',
               })
