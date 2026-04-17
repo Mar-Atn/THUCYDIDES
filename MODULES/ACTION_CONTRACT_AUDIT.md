@@ -1,0 +1,164 @@
+# Action Contract Audit — Gap Analysis
+**Date:** 2026-04-16 | **Status:** DOCUMENTED — fixes scheduled per module
+
+---
+
+## Overview
+
+The 32 canonical action types are routed through the dispatcher and reach their engines.
+However, many actions use **simplified wiring** that doesn't match the full contract specifications.
+The contracts (in `3 DETAILED DESIGN/CONTRACTS/`) specify validators, schemas, adjacency checks,
+multi-step flows, and specific payload formats that are not yet enforced.
+
+This document tracks the gap between current implementation and contract spec for each action.
+
+---
+
+## Gap Summary
+
+### Severity Levels
+- **WORKING**: Fully matches contract, tested
+- **SIMPLIFIED**: Routes to engine but skips validation/contract details
+- **STUB**: Acknowledged, no engine processing
+- **NOT WIRED**: Engine exists but dispatcher doesn't call it correctly
+
+---
+
+## Military Actions
+
+### ground_attack — SIMPLIFIED
+**Contract:** `CONTRACT_GROUND_COMBAT.md` v1.0 (LOCKED)
+**Current:** Loads ALL units at target hex, fights all defenders. No source hex, no unit selection, no adjacency check, no chain attacks.
+**Contract requires:**
+- Source hex → Target hex (adjacent, validated)
+- Attacker selects specific unit_codes from source hex
+- Adjacency validation (hex neighbors)
+- Leave ≥1 unit on foreign hexes
+- Chain attack logic (winner continues to next adjacent hex)
+- Validator: `ground_combat_validator.py` (referenced in contract, may not exist)
+**Fix when:** M6 (humans submit attacks) or M5 (AI generates attack decisions)
+**Effort:** Medium — need validator + source/target flow + chain logic
+
+### air_strike — SIMPLIFIED
+**Current:** Loads all air units at hex, strikes all ground/naval defenders. Basic resolution.
+**Missing:** Sortie mechanics, target selection, air superiority contest, proper hit probability.
+**Fix when:** M5/M6
+
+### naval_combat — NOT WIRED
+**Current:** Passes unit counts but engine expects `unit_code` on attacker/defender dicts. Errors.
+**Fix when:** M5/M6
+
+### naval_bombardment, naval_blockade, launch_missile_conventional — STUB
+**Current:** Returns "acknowledged" message. Engine functions exist but need Input objects with zone/country data.
+**Fix when:** M5/M6
+
+### nuclear_test — NOT WIRED
+**Current:** Engine expects `NuclearTestInput` Pydantic model. Dispatcher passes kwargs.
+**Fix when:** M5 (AI agents may attempt nuclear tests)
+
+### nuclear_authorize, nuclear_intercept, nuclear_launch_initiate — WIRED
+**Current:** Connected to `NuclearChainOrchestrator`. Multi-step flow works.
+**Status:** OK for M4 purposes. Full testing at M10.
+
+### basing_rights — WORKING
+**Current:** Routes to engine correctly.
+
+### martial_law — WORKING
+**Current:** Routes to engine correctly.
+
+### move_units — STUB
+**Current:** Returns acknowledged. Unit movement is an inter-round mechanic.
+**Fix when:** M4 Phase 4 was deferred. Implement when inter-round flow is tested.
+
+---
+
+## Economic Actions
+
+### set_budget, set_tariffs, set_sanctions, set_opec — QUEUED
+**Current:** Written to `agent_decisions` table. Phase B orchestrator collects and processes.
+**Status:** Working for Phase B batch processing. No per-action validation.
+**Fix when:** M6 (validate budget percentages, tariff levels, etc.)
+
+### propose_transaction, accept_transaction — ROUTED
+**Current:** Routes to transaction_engine. Engine has its own validation.
+**Status:** Needs testing with real payloads.
+**Fix when:** M5/M6
+
+---
+
+## Diplomatic Actions
+
+### public_statement — WORKING
+**Current:** Logs to observatory. No engine processing needed.
+
+### propose_agreement, sign_agreement — ROUTED
+**Current:** Routes to agreement_engine. Added `visibility` field (public/secret).
+**Status:** Needs testing.
+**Fix when:** M5/M6
+
+### call_org_meeting, meet_freely — STUB
+**Current:** Returns acknowledged. Meeting system not built.
+**Fix when:** M6 (humans need meetings) or M7 (Navigator facilitates)
+
+---
+
+## Covert Actions
+
+### covert_operation — ROUTED
+**Current:** Routes by `op_type` (sabotage, propaganda, election_meddling).
+**Status:** Engines exist, need testing.
+**Fix when:** M5 (AI agents do covert ops)
+
+### intelligence — ROUTED
+**Current:** Routes to intelligence_engine. Known format bug in `_section_events`.
+**Fix when:** M5
+
+---
+
+## Political Actions
+
+### arrest — ROUTED (requires confirmation)
+**Current:** Routes to arrest_engine after moderator approval.
+**Status:** Needs target role validation.
+
+### assassination — ROUTED (requires confirmation)
+**Current:** Routes to assassination_engine after moderator approval.
+**Status:** Needs target validation, domestic/international check.
+
+### change_leader — WORKING
+**Current:** Full 3-phase voting flow (initiate → removal vote → election).
+**Status:** Tested end-to-end.
+
+### reassign_types — ROUTED
+**Current:** Routes to power_assignments. Missing `round_num` param.
+**Fix when:** M6
+
+### self_nominate, cast_vote — ROUTED
+**Current:** Routes to election_engine. Needs election context (type, round).
+**Fix when:** M4 key events trigger elections → these become usable.
+
+---
+
+## Combat Theater Issue
+
+**Problem:** All combat currently happens on global hex coordinates. But Eastern Ereb and Mashriq have detailed theater grids (10x10) where combat should be resolved at theater resolution, not global resolution.
+
+**Current:** `_resolve_combat` in dispatcher loads units by `global_row/col`. Units in the Eastern Ereb theater all share the same few global hexes, so combat mixes all units in the region.
+
+**Required:** Combat in theater regions should use `theater_row/theater_col`. The attacker specifies which theater they're fighting in and which theater hex they target.
+
+**Fix when:** M5/M6 — when real combat decisions need theater-level precision.
+
+---
+
+## Reconciliation Schedule
+
+| Phase | Actions to fix | Trigger |
+|---|---|---|
+| **M6 build** | ground_attack (full contract), set_budget (validation), public_statement (done), arrest, assassination | Humans submit these actions |
+| **M5 build** | All 32 — AI agents generate full contract-compliant payloads | AI needs proper schemas |
+| **M10** | Final sweep — every action verified against contract, edge cases, stress test | Pre-launch |
+
+---
+
+*This audit should be reviewed at the start of M6 and M5 to prioritize which actions to fix first.*
