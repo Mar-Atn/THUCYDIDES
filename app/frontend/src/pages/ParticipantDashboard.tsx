@@ -73,7 +73,7 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
   ]},
   { key:'economic', label:'Economic', actions:[
     {id:'set_budget',label:'Set Budget'},{id:'set_tariffs',label:'Set Tariffs'},
-    {id:'set_sanctions',label:'Set Sanctions'},{id:'set_opec',label:'Set OPEC Production'},
+    {id:'set_sanctions',label:'Set Sanctions'},{id:'set_opec',label:'Set Cartel Production'},
   ]},
   { key:'intl', label:'International Affairs', actions:[
     {id:'propose_transaction',label:'Propose Transaction'},{id:'accept_transaction',label:'Respond to Transaction'},

@@ -42,7 +42,7 @@ const ACTION_LABELS: Record<string, string> = {
   // HoS only
   reassign_types: 'Re-Assign Role Types', martial_law: 'Martial Law', arrest: 'Arrest',
   // Regular Economic
-  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions', set_opec: 'Set OPEC Production',
+  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions', set_opec: 'Set Cartel Production',
   // Military
   ground_attack: 'Ground Attack', air_strike: 'Air Strike', naval_combat: 'Naval Combat',
   naval_bombardment: 'Naval Bombardment', launch_missile_conventional: 'Launch Missile (conventional)',
