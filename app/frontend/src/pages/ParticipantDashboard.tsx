@@ -689,6 +689,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'set_budget') return <BudgetForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_tariffs') return <TariffSanctionForm type="tariffs" {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_sanctions') return <TariffSanctionForm type="sanctions" {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_opec') return <CartelProductionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -802,6 +803,148 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
   )
 }
 
+/* ── Cartel Production Form ─────────────────────────────────────────────── */
+
+const OIL_LEVELS: {v:string;l:string;pct:number}[] = [
+  {v:'min',l:'Minimum',pct:60},{v:'low',l:'Low',pct:80},{v:'normal',l:'Normal',pct:100},
+  {v:'high',l:'High',pct:120},{v:'max',l:'Maximum',pct:140},
+]
+
+function CartelProductionForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [producers, setProducers] = useState<{id:string;sim_name:string;mbpd:number;prod:string;cartel:boolean}[]>([])
+  const [myProd, setMyProd] = useState('normal')
+  const [oilPrice, setOilPrice] = useState(80)
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<string|null>(null)
+  const [error, setError] = useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('countries')
+      .select('id,sim_name,oil_producer,opec_member,opec_production,oil_production_mbpd')
+      .eq('sim_run_id',simId).eq('oil_producer',true)
+      .then(({data})=>{
+        const prods = (data??[]).map((c:Record<string,unknown>)=>({
+          id: c.id as string, sim_name: c.sim_name as string,
+          mbpd: Number(c.oil_production_mbpd??0),
+          prod: (c.opec_production as string)||'normal',
+          cartel: !!(c.opec_member),
+        }))
+        setProducers(prods)
+        const mine = prods.find(p=>p.id===countryId)
+        if (mine) setMyProd(mine.prod==='na'?'normal':mine.prod)
+      })
+    supabase.from('world_state').select('oil_price')
+      .eq('sim_run_id',simId).order('round_num',{ascending:false}).limit(1)
+      .then(({data})=>{if(data?.[0]) setOilPrice(Number(data[0].oil_price))})
+  },[simId,countryId])
+
+  // Calculate global production as % of normal
+  const totalNormal = producers.reduce((s,p)=>s+p.mbpd, 0)
+  const totalActual = producers.reduce((s,p)=>{
+    const pct = (p.id===countryId ? OIL_LEVELS.find(l=>l.v===myProd)?.pct??100 : OIL_LEVELS.find(l=>l.v===p.prod)?.pct??100)
+    return s + p.mbpd * pct / 100
+  }, 0)
+  const globalPct = totalNormal > 0 ? Math.round(totalActual / totalNormal * 100) : 100
+
+  const handleSubmit = async () => {
+    setSubmitting(true); setError(null)
+    try {
+      await submitAction(simId, 'set_opec', roleId, countryId, { production_level: myProd })
+      setResult('Production level submitted — will take effect in Phase B')
+    } catch(e) { setError(e instanceof Error?e.message:'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  const myData = producers.find(p=>p.id===countryId)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Set Cartel Production</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT: Your decision */}
+        <div className="space-y-4">
+          <div className="bg-card border-2 border-action/20 rounded-lg p-5">
+            <h3 className="font-heading text-body-sm text-action uppercase tracking-wider mb-4">Your Production Level</h3>
+            {myData && <p className="font-body text-caption text-text-secondary mb-3">
+              Your capacity: {myData.mbpd.toFixed(1)} million barrels/day
+            </p>}
+            <div className="flex gap-2">
+              {OIL_LEVELS.map(l=>
+                <button key={l.v} onClick={()=>setMyProd(l.v)}
+                  className={`flex-1 font-body text-caption py-2 rounded border transition-colors ${
+                    myProd===l.v?'bg-action text-white border-action font-medium':'bg-base border-border text-text-secondary hover:border-action/30'
+                  }`}>
+                  {l.l}<br/>
+                  <span className="font-data text-caption">{l.pct}%</span>
+                </button>
+              )}
+            </div>
+            {myData && <div className="mt-3 font-data text-body-sm text-text-primary">
+              Output: {(myData.mbpd * (OIL_LEVELS.find(l=>l.v===myProd)?.pct??100) / 100).toFixed(1)} mbpd
+            </div>}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={handleSubmit} disabled={submitting}
+              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+              {submitting?'Submitting...':'Submit Production Level'}</button>
+            <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+          </div>
+          {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-success">{result}</p>
+            <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+          </div>}
+          {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+        </div>
+
+        {/* RIGHT: Global context */}
+        <div className="space-y-3">
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Oil Market</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <div className="font-body text-caption text-text-secondary">Current Oil Price</div>
+                <div className="font-data text-data-lg text-text-primary">${oilPrice.toFixed(0)}</div>
+              </div>
+              <div>
+                <div className="font-body text-caption text-text-secondary">Global Production</div>
+                <div className={`font-data text-data-lg ${globalPct>105?'text-success':globalPct<95?'text-danger':'text-text-primary'}`}>{globalPct}%</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Global Producers</h3>
+            <div className="space-y-1">
+              {producers.sort((a,b)=>b.mbpd-a.mbpd).map(p=>{
+                const pct = OIL_LEVELS.find(l=>l.v===(p.id===countryId?myProd:p.prod))?.pct??100
+                const actual = (p.mbpd * pct / 100).toFixed(1)
+                return <div key={p.id} className={`flex items-center gap-2 py-1 ${p.id===countryId?'font-medium':''}`}>
+                  <span className="font-body text-caption text-text-primary w-20">{p.sim_name}</span>
+                  <span className="font-data text-caption text-text-secondary w-14">{p.mbpd.toFixed(1)}</span>
+                  <span className={`font-data text-caption w-12 ${pct>100?'text-success':pct<100?'text-warning':'text-text-secondary'}`}>{pct}%</span>
+                  <span className="font-data text-caption text-text-primary ml-auto">{actual} mbpd</span>
+                  {p.cartel&&<span className="font-body text-caption text-accent">C</span>}
+                </div>
+              })}
+              <div className="border-t border-border pt-1 flex justify-between">
+                <span className="font-body text-caption text-text-primary font-medium">Total</span>
+                <span className="font-data text-caption text-text-primary font-bold">{totalActual.toFixed(1)} mbpd</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Tariff / Sanction Form ─────────────────────────────────────────────── */
 
 function TariffSanctionForm({type,roleId,countryId,simId,onClose,onSubmitted}:{
@@ -813,7 +956,7 @@ function TariffSanctionForm({type,roleId,countryId,simId,onClose,onSubmitted}:{
   const maxLevel = type === 'tariffs' ? 3 : 3
   const levels = type === 'tariffs'
     ? [{v:0,l:'None'},{v:1,l:'Low'},{v:2,l:'Medium'},{v:3,l:'High'}]
-    : [{v:-1,l:'Support (-1)'},{v:0,l:'None'},{v:1,l:'Light'},{v:2,l:'Medium'},{v:3,l:'Heavy'}]
+    : [{v:-1,l:'Help Avoid'},{v:0,l:'None'},{v:1,l:'Light'},{v:2,l:'Medium'},{v:3,l:'Heavy'}]
 
   const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string|null}[]>([])
   const [existing, setExisting] = useState<{target:string;level:number}[]>([])
