@@ -535,8 +535,8 @@ This is a canonical convention for M4 implementation.
 | Role actions | ✅ 713 assignments, 32 action types |
 | Organizations + memberships + chairs | ✅ 7 orgs, 50 memberships |
 | Relationships (5 types) | ✅ 380 total |
-| Deployments | ✅ 146 entries, 338 units |
-| SimRun creation from template | ✅ Full 11-table copy via `POST /api/sim/create` (20 countries, 40 roles, 713 role_actions, 380 relationships, 57 zones, 146 deployments, 7 orgs, 50 memberships, 43 sanctions, 14 tariffs, 1 world_state) |
+| Deployments | ✅ **345 individual units** (1 row per unit, from canonical `units.csv`). Each with `unit_id`, `global_row/col`, `theater/row/col`, `unit_status`. zone_id deprecated for positioning. |
+| SimRun creation from template | ✅ Full 11-table copy via `POST /api/sim/create` (20 countries, 40 roles, 713 role_actions, 380 relationships, 57 zones, 345 deployments, 7 orgs, 50 memberships, 43 sanctions, 14 tariffs, 1 world_state) |
 | Sanctions + Tariffs | ✅ 43 + 14 |
 | Key events naming (no real-world) | ✅ All SIM names |
 

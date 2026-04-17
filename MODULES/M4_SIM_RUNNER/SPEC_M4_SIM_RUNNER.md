@@ -454,3 +454,22 @@ Participant submits action
 - Elections fire on correct rounds per DB config (Columbia R2, R6)
 - Mandatory meetings logged in round processing output
 - Source of truth: M9 wizard → sim_runs.key_events
+
+**Sprint 4.3: Change of Leader** — DONE (2026-04-16)
+**Sprint 4.4: Physical Dice** — DONE (2026-04-16)
+**Sprint 4.5: Nuclear Chain** — DONE (2026-04-16)
+
+### Phase 5: Polish — DONE (2026-04-16)
+- Participant assignment (KING pattern, position type badges, confirm dialogs)
+- Auto/manual mode toggle (military danger switch style)
+- Restart with full cleanup + rollback to round N
+- Two-column dashboard layout, 30vh events feed
+- Map + Public Screen links
+
+### Architecture Fixes (2026-04-16)
+- **Individual unit model:** deployments 1 row = 1 unit, from canonical `units.csv` (345 units)
+- **Coordinate-based positioning:** `(global_row, global_col)` replaces zone_id for deployment positioning
+- **Combat wired to DB:** ground + air attacks load units by hex coordinates, apply losses (delete rows)
+- **Blast markers:** map shows 💥 at combat hexes with pulsing glow
+- **Information visibility:** public screen filters out covert ops and secret agreements
+- **FK cascade:** all sim_run FK constraints now CASCADE on delete
