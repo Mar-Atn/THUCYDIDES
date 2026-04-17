@@ -377,11 +377,24 @@ function TabCountry({country}:{country:CountryData}) {
 
 /* ── Tab: World ────────────────────────────────────────────────────────── */
 
+interface WorldRole {
+  id: string; character_name: string; country_id: string; position_type: string
+  title: string; public_bio: string; is_ai_operated: boolean
+}
+
+interface CountryBrief {
+  id: string; public_bio: string
+}
+
 function TabWorld({simId,round}:{simId:string;round:number}) {
   const [countries,setCountries]=useState<CountryData[]>([])
   const [relationships,setRelationships]=useState<{from_country_id:string;to_country_id:string;relationship:string}[]>([])
   const [worldState,setWorldState]=useState<{oil_price:number;global_trade_volume_index:number;dollar_credibility:number}|null>(null)
-  const [view,setView]=useState<'overview'|'military'|'relationships'>('overview')
+  const [roles,setRoles]=useState<WorldRole[]>([])
+  const [countryBriefs,setCountryBriefs]=useState<Record<string,string>>({})
+  const [view,setView]=useState<'overview'|'military'|'relationships'|'countries'>('overview')
+  const [expandedCountry,setExpandedCountry]=useState<string|null>(null)
+  const [expandedRole,setExpandedRole]=useState<string|null>(null)
 
   useEffect(()=>{
     supabase.from('countries')
@@ -396,6 +409,18 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       .select('oil_price,global_trade_volume_index,dollar_credibility')
       .eq('sim_run_id',simId).order('round_num',{ascending:false}).limit(1)
       .then(({data})=>{if(data?.[0]) setWorldState(data[0])})
+    supabase.from('roles')
+      .select('id,character_name,country_id,position_type,title,public_bio,is_ai_operated')
+      .eq('sim_run_id',simId).eq('status','active').order('country_id,position_type')
+      .then(({data})=>setRoles((data??[]) as WorldRole[]))
+    supabase.from('countries')
+      .select('id,public_bio')
+      .eq('sim_run_id',simId)
+      .then(({data})=>{
+        const briefs:Record<string,string>={}
+        ;(data??[]).forEach((c:{id:string;public_bio:string})=>{if(c.public_bio)briefs[c.id]=c.public_bio})
+        setCountryBriefs(briefs)
+      })
   },[simId])
 
   const milTotal=(c:CountryData)=>c.mil_ground+c.mil_naval+c.mil_tactical_air+c.mil_strategic_missiles+c.mil_air_defense
@@ -407,10 +432,10 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-h2 text-text-primary">World Overview — R{round}</h2>
         <div className="flex gap-1">
-          {(['overview','military','relationships'] as const).map(v=>
+          {(['overview','military','relationships','countries'] as const).map(v=>
             <button key={v} onClick={()=>setView(v)}
               className={`font-body text-caption px-3 py-1 rounded transition-colors ${view===v?'bg-action/10 text-action font-medium':'text-text-secondary hover:text-text-primary'}`}>
-              {v==='overview'?'Economy':v==='military'?'Military':'Relations'}
+              {v==='overview'?'Economy':v==='military'?'Military':v==='relationships'?'Relations':'Countries & People'}
             </button>
           )}
         </div>
@@ -508,6 +533,59 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
             </div>
           })}
         </div>
+      </div>}
+
+      {/* Countries & People view */}
+      {view==='countries'&&<div className="space-y-2">
+        {countries.map(c=>{
+          const countryRoles=roles.filter(r=>r.country_id===c.id)
+          const isExpanded=expandedCountry===c.id
+          return <div key={c.id} className="bg-card border border-border rounded-lg overflow-hidden">
+            <button onClick={()=>setExpandedCountry(isExpanded?null:c.id)}
+              className="w-full text-left px-4 py-3 flex items-center justify-between hover:bg-base/50 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-4 h-4 rounded" style={{backgroundColor:c.color_ui??'#666'}}/>
+                <span className="font-heading text-body-sm text-text-primary font-medium">{c.sim_name}</span>
+                <span className="font-body text-caption text-text-secondary">{countryRoles.length} roles</span>
+              </div>
+              <span className="text-text-secondary text-sm">{isExpanded?'▲':'▼'}</span>
+            </button>
+
+            {isExpanded&&<div className="border-t border-border">
+              {/* Country brief */}
+              {countryBriefs[c.id]&&<div className="px-4 py-3 bg-base/50 border-b border-border">
+                <p className="font-body text-body-sm text-text-primary leading-relaxed">{countryBriefs[c.id]}</p>
+              </div>}
+
+              {/* Team members */}
+              <div className="px-4 py-3 space-y-2">
+                {countryRoles.map(role=>{
+                  const roleExpanded=expandedRole===role.id
+                  return <div key={role.id}>
+                    <button onClick={()=>setExpandedRole(roleExpanded?null:role.id)}
+                      className="w-full text-left flex items-center gap-3 py-1 hover:bg-base/30 rounded px-2 -mx-2 transition-colors">
+                      <span className="font-body text-body-sm text-text-primary font-medium w-28 shrink-0">{role.character_name}</span>
+                      <span className={`font-body text-caption px-1.5 py-0.5 rounded ${
+                        role.position_type==='head_of_state'?'bg-warning/10 text-warning':
+                        role.position_type==='military_chief'?'bg-danger/10 text-danger':
+                        role.position_type==='economy_officer'?'bg-accent/10 text-accent':
+                        role.position_type==='diplomat'?'bg-action/10 text-action':
+                        'bg-text-secondary/10 text-text-secondary'
+                      }`}>
+                        {POS[role.position_type]??role.position_type}
+                      </span>
+                      <span className="font-body text-caption text-text-secondary flex-1">{role.title}</span>
+                      {role.is_ai_operated&&<span className="font-body text-caption text-accent/60">AI</span>}
+                    </button>
+                    {roleExpanded&&role.public_bio&&<div className="ml-2 pl-4 border-l-2 border-border my-2">
+                      <p className="font-body text-caption text-text-secondary leading-relaxed">{role.public_bio}</p>
+                    </div>}
+                  </div>
+                })}
+              </div>
+            </div>}
+          </div>
+        })}
       </div>}
     </div>
   )
