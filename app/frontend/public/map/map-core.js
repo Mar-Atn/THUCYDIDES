@@ -263,8 +263,10 @@
 
     svg.innerHTML = '';
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
+    if (!DISPLAY_CLEAN) {
+      svg.setAttribute('width', width);
+      svg.setAttribute('height', height);
+    }
 
     // grid edge labels (col numbers on top, row numbers on left)
     for (let c = 0; c < cols; c++) {
@@ -483,8 +485,10 @@
     const height = PAD * 2 + rows * h + r * 0.5;
 
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
+    if (!DISPLAY_CLEAN) {
+      svg.setAttribute('width', width);
+      svg.setAttribute('height', height);
+    }
     svg.innerHTML = '';
 
     // grid edge labels
