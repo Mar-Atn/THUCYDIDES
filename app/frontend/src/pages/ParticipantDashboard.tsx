@@ -120,6 +120,7 @@ export function ParticipantDashboard() {
   const [objectives, setObjectives] = useState<string[]>([])
   const [myRelationships, setMyRelationships] = useState<{to_country_id:string;relationship:string;status:string}[]>([])
   const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
+  const [personalRels, setPersonalRels] = useState<{other_role:string;type:string;notes:string}[]>([])
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
@@ -168,6 +169,19 @@ export function ParticipantDashboard() {
           .select('org_id,role_in_org,has_veto')
           .eq('sim_run_id',simId).eq('country_id',role.country_id)
         setMyOrgMemberships((mems??[]) as typeof myOrgMemberships)
+
+        // Personal role relationships
+        const { data: prA } = await supabase.from('role_relationships')
+          .select('role_a_id,role_b_id,relationship_type,notes')
+          .eq('sim_run_id',simId).eq('role_a_id',role.id)
+        const { data: prB } = await supabase.from('role_relationships')
+          .select('role_a_id,role_b_id,relationship_type,notes')
+          .eq('sim_run_id',simId).eq('role_b_id',role.id)
+        const pRels = [
+          ...((prA??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_b_id,type:r.relationship_type,notes:r.notes||''}))),
+          ...((prB??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_a_id,type:r.relationship_type,notes:r.notes||''}))),
+        ]
+        setPersonalRels(pRels)
 
         // Sanctions (received + imposed)
         const { data: sr } = await supabase.from('sanctions')
@@ -304,12 +318,12 @@ export function ParticipantDashboard() {
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
         {tab==='actions'&&myRole&&<TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'}/>}
-        {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} relationships={myRelationships} orgMemberships={myOrgMemberships} onRead={id=>{
+        {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
             setArtefacts(p=>p.map(a=>a.id===id?{...a,is_read:true}:a))
           })
         }}/>}
-        {tab==='country'&&myCountry&&<TabCountry country={myCountry} fullCountry={fullCountry} sanctions={mySanctions} tariffs={myTariffs} simId={simId!}/>}
+        {tab==='country'&&myCountry&&<TabCountry country={myCountry} fullCountry={fullCountry} sanctions={mySanctions} tariffs={myTariffs} relationships={myRelationships} orgMemberships={myOrgMemberships} simId={simId!}/>}
         {tab==='world'&&<TabWorld simId={simId!} round={round}/>}
         {tab==='map'&&<div className="relative" style={{height:'calc(100vh - 180px)'}}>
           <iframe src={`/map/deployments.html?display=clean&sim_run_id=${simId}`} className="absolute inset-0 w-full h-full border-0 rounded-lg" title="Map"/>
@@ -353,15 +367,14 @@ function TabActions({roleActions, currentPhase}:{roleActions:string[]; currentPh
 
 /* ── Tab: Confidential ─────────────────────────────────────────────────── */
 
-function TabConf({role,artefacts,objectives,relationships,orgMemberships,onRead}:{
+function TabConf({role,artefacts,objectives,personalRels,orgMemberships,onRead}:{
   role:RoleData; artefacts:Artefact[]; objectives:string[]
-  relationships:{to_country_id:string;relationship:string;status:string}[]
+  personalRels:{other_role:string;type:string;notes:string}[]
   orgMemberships:{org_id:string;role_in_org:string;has_veto:boolean}[]
   onRead:(id:string)=>void
 }) {
   const [open,setOpen]=useState<string|null>(null)
-  const relColor=(r:string)=>({alliance:'text-success',economic_partnership:'text-action',neutral:'text-text-secondary',hostile:'text-warning',at_war:'text-danger'}[r]??'text-text-secondary')
-  const relLabel=(r:string)=>({alliance:'Allied',economic_partnership:'Partnership',neutral:'Neutral',hostile:'Hostile',at_war:'AT WAR'}[r]??r)
+  const pRelColor=(t:string)=>({ally:'text-success',patron:'text-action',reports_to:'text-text-secondary',rival:'text-warning',enemy:'text-danger',mentor:'text-accent'}[t]??'text-text-secondary')
 
   return (
     <div className="space-y-6">
@@ -382,21 +395,17 @@ function TabConf({role,artefacts,objectives,relationships,orgMemberships,onRead}
         </ul>
       </div>}
 
-      {/* Relationships */}
-      {relationships.length>0&&<div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="font-heading text-h3 text-text-primary mb-3">Our Relationships</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-          {relationships.filter(r=>r.relationship!=='neutral').map(r=>
-            <div key={r.to_country_id} className="flex items-center gap-2 bg-base rounded px-3 py-2">
-              <span className="font-body text-body-sm text-text-primary">{r.to_country_id}</span>
-              <span className={`font-body text-caption font-medium ${relColor(r.relationship)}`}>{relLabel(r.relationship)}</span>
+      {/* Personal Relationships */}
+      {personalRels.length>0&&<div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-heading text-h3 text-text-primary mb-3">Personal Relationships</h3>
+        <div className="space-y-2">
+          {personalRels.map((r,i)=>
+            <div key={i} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+              <span className="font-body text-body-sm text-text-primary font-medium w-28">{r.other_role}</span>
+              <span className={`font-body text-caption font-medium ${pRelColor(r.type)}`}>{r.type}</span>
+              {r.notes&&<span className="font-body text-caption text-text-secondary">— {r.notes}</span>}
             </div>
           )}
-        </div>
-        <div className="mt-2">
-          <span className="font-body text-caption text-text-secondary">
-            Neutral: {relationships.filter(r=>r.relationship==='neutral').map(r=>r.to_country_id).join(', ')}
-          </span>
         </div>
       </div>}
 
@@ -449,15 +458,19 @@ function TabConf({role,artefacts,objectives,relationships,orgMemberships,onRead}
 
 /* ── Tab: Country ──────────────────────────────────────────────────────── */
 
-function TabCountry({country,fullCountry,sanctions,tariffs,simId}:{
+function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemberships,simId}:{
   country:CountryData; fullCountry:Record<string,unknown>|null
   sanctions:{imposer:string;target:string;level:number}[]
   tariffs:{imposer:string;target:string;level:number}[]
+  relationships:{to_country_id:string;relationship:string;status:string}[]
+  orgMemberships:{org_id:string;role_in_org:string;has_veto:boolean}[]
   simId:string
 }) {
   const fc = fullCountry ?? {}
   const cc = country.id
-  const [section,setSection]=useState<'overview'|'military'|'trade'>('overview')
+  const [section,setSection]=useState<'overview'|'military'|'trade'|'diplomacy'>('overview')
+  const relColor=(r:string)=>({alliance:'text-success',economic_partnership:'text-action',neutral:'text-text-secondary',hostile:'text-warning',at_war:'text-danger'}[r]??'text-text-secondary')
+  const relLabel=(r:string)=>({alliance:'Allied',economic_partnership:'Partnership',neutral:'Neutral',hostile:'Hostile',at_war:'AT WAR'}[r]??r)
   const sanctionsOn = sanctions.filter(s=>s.target===cc)
   const sanctionsBy = sanctions.filter(s=>s.imposer===cc)
   const tariffsOn = tariffs.filter(t=>t.target===cc)
@@ -472,10 +485,10 @@ function TabCountry({country,fullCountry,sanctions,tariffs,simId}:{
           <span className="font-body text-caption text-text-secondary">{String(fc.regime_type??'')} · {String(fc.team_type??'')}</span>
         </div>
         <div className="flex gap-1">
-          {(['overview','military','trade'] as const).map(v=>
+          {(['overview','military','trade','diplomacy'] as const).map(v=>
             <button key={v} onClick={()=>setSection(v)}
               className={`font-body text-caption px-3 py-1 rounded transition-colors ${section===v?'bg-action/10 text-action font-medium':'text-text-secondary hover:text-text-primary'}`}>
-              {v==='overview'?'Economy':v==='military'?'Military':'Trade & Sanctions'}
+              {v==='overview'?'Economy':v==='military'?'Military':v==='trade'?'Trade & Sanctions':'Diplomacy'}
             </button>
           )}
         </div>
@@ -598,6 +611,38 @@ function TabCountry({country,fullCountry,sanctions,tariffs,simId}:{
         {sanctionsOn.length===0&&sanctionsBy.length===0&&tariffsOn.length===0&&tariffsBy.length===0&&
           <p className="font-body text-body-sm text-text-secondary">No active sanctions or tariffs.</p>
         }
+      </>}
+
+      {section==='diplomacy'&&<>
+        {/* Country relationships */}
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Relationships</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            {relationships.filter(r=>r.relationship!=='neutral').map(r=>
+              <div key={r.to_country_id} className="flex items-center gap-2 bg-base rounded px-3 py-2">
+                <span className="font-body text-body-sm text-text-primary">{r.to_country_id}</span>
+                <span className={`font-body text-caption font-medium ${relColor(r.relationship)}`}>{relLabel(r.relationship)}</span>
+              </div>
+            )}
+          </div>
+          {relationships.filter(r=>r.relationship==='neutral').length>0&&<div className="mt-2">
+            <span className="font-body text-caption text-text-secondary">
+              Neutral: {relationships.filter(r=>r.relationship==='neutral').map(r=>r.to_country_id).join(', ')}
+            </span>
+          </div>}
+        </div>
+
+        {/* Organization memberships */}
+        {orgMemberships.length>0&&<div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Organization Memberships</h3>
+          <div className="space-y-2">
+            {orgMemberships.map(m=><div key={m.org_id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+              <span className="font-body text-body-sm text-text-primary font-medium">{m.org_id.replace(/_/g,' ')}</span>
+              <span className="font-body text-caption text-text-secondary">{m.role_in_org}</span>
+              {m.has_veto&&<span className="font-body text-caption text-danger font-medium">VETO</span>}
+            </div>)}
+          </div>
+        </div>}
       </>}
     </div>
   )
