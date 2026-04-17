@@ -127,6 +127,8 @@ export function PublicScreen() {
   const [catPower, setCatPower] = useState(45)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const tickerRef = useRef<HTMLDivElement>(null)
+  // Map refresh key — changes when phase changes to force iframe reload
+  const [mapKey, setMapKey] = useState(0)
 
   /* Load data ------------------------------------------------------------- */
   const loadData = useCallback(async () => {
@@ -170,13 +172,21 @@ export function PublicScreen() {
         const row = payload.new as Record<string, unknown>
         if (row) {
           setSimRun((prev) => prev ? { ...prev, ...row } as SimRun : prev)
-          setSimState({
-            status: (row.status as string) ?? 'setup',
-            current_round: (row.current_round as number) ?? 0,
-            current_phase: (row.current_phase as string) ?? 'pre',
-            phase_started_at: (row.phase_started_at as string | null) ?? null,
-            phase_duration_seconds: (row.phase_duration_seconds as number | null) ?? 3600,
-            max_rounds: (row.max_rounds as number) ?? 8,
+          const newPhase = (row.current_phase as string) ?? 'pre'
+          const newRound = (row.current_round as number) ?? 0
+          setSimState((prev) => {
+            // Refresh map when phase or round changes
+            if (prev && (prev.current_phase !== newPhase || prev.current_round !== newRound)) {
+              setMapKey((k) => k + 1)
+            }
+            return {
+              status: (row.status as string) ?? 'setup',
+              current_round: newRound,
+              current_phase: newPhase,
+              phase_started_at: (row.phase_started_at as string | null) ?? null,
+              phase_duration_seconds: (row.phase_duration_seconds as number | null) ?? 3600,
+              max_rounds: (row.max_rounds as number) ?? 8,
+            }
           })
         }
       })
@@ -224,7 +234,18 @@ export function PublicScreen() {
   const currentRound = simState?.current_round ?? 0
   const currentPhase = simState?.current_phase ?? 'pre'
   const simDate = ROUND_TO_DATE[currentRound] ?? `R${currentRound}`
-  const significantEvents = events.filter((e) => SIGNIFICANT_EVENTS.has(e.event_type))
+  // Sort events by significance: military > political > covert > economic > diplomatic > system
+  const CATEGORY_WEIGHT: Record<string, number> = {
+    military: 0, political: 1, covert: 2, economic: 3, diplomatic: 4, system: 5,
+  }
+  const significantEvents = events
+    .filter((e) => SIGNIFICANT_EVENTS.has(e.event_type))
+    .sort((a, b) => {
+      const wa = CATEGORY_WEIGHT[a.category ?? 'system'] ?? 5
+      const wb = CATEGORY_WEIGHT[b.category ?? 'system'] ?? 5
+      if (wa !== wb) return wa - wb
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
 
   // Detect active combat in each theater (current round events)
   const COMBAT_TYPES = new Set(['ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade', 'launch_missile_conventional'])
@@ -306,6 +327,7 @@ export function PublicScreen() {
           {/* Map iframe */}
           <div className="flex-1 relative">
             <iframe
+              key={`map-${mapKey}`}
               src={`/map/deployments.html?display=clean&sim_run_id=${simId}`}
               className="absolute inset-0 w-full h-full border-0"
               title="Global Map"
@@ -382,6 +404,7 @@ export function PublicScreen() {
               </div>
               <div className="flex-1 relative">
                 <iframe
+                  key={`ee-${mapKey}`}
                   src={`/map/deployments.html?display=clean&theater=eastern_ereb&sim_run_id=${simId}`}
                   className="absolute inset-0 w-full h-full border-0"
                   title="Eastern Ereb Theater"
@@ -400,6 +423,7 @@ export function PublicScreen() {
               </div>
               <div className="flex-1 relative">
                 <iframe
+                  key={`mq-${mapKey}`}
                   src={`/map/deployments.html?display=clean&theater=mashriq&sim_run_id=${simId}`}
                   className="absolute inset-0 w-full h-full border-0"
                   title="Mashriq Theater"
