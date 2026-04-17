@@ -158,13 +158,13 @@ def validate_proposal(
         "round_num": payload.get("round_num"),
         "offer": {
             "coins": int(offer.get("coins") or 0),
-            "units": sorted(offer.get("units") or []),
+            "units": sorted(offer.get("units") or [], key=lambda x: str(x)),
             "technology": offer.get("technology") or {},
             "basing_rights": bool(offer.get("basing_rights")),
         },
         "request": {
             "coins": int(request.get("coins") or 0),
-            "units": sorted(request.get("units") or []),
+            "units": request.get("units") or [],  # type+count dicts, not unit_ids
             "technology": request.get("technology") or {},
             "basing_rights": bool(request.get("basing_rights")),
         },
