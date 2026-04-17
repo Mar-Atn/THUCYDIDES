@@ -16,8 +16,8 @@
   if (DISPLAY_CLEAN) {
     document.documentElement.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
     document.body.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
-    // Hide chrome after DOM ready
-    window.addEventListener('DOMContentLoaded', () => {
+    // Hide chrome — runs both immediately and on DOMContentLoaded for reliability
+    const applyClean = () => {
       const hide = (sel) => { const el = document.querySelector(sel); if (el) el.style.display = 'none'; };
       hide('.app-header');
       hide('.legend');
@@ -25,14 +25,17 @@
       hide('.edit-panel');
       hide('#editWarnings');
       hide('#editToast');
-      // Make map stage fill everything
       const main = document.querySelector('.app-main');
       if (main) main.style.cssText = 'display:block; height:100vh; width:100vw; padding:0; margin:0;';
       const stage = document.querySelector('.map-stage');
       if (stage) stage.style.cssText = 'width:100%; height:100%; padding:0; margin:0;';
       const svg = document.getElementById('mapSvg');
       if (svg) svg.style.cssText = 'width:100%; height:100%;';
-    });
+    };
+    // Try immediately (script at bottom of body — DOM likely ready)
+    applyClean();
+    // Also on DOMContentLoaded as fallback
+    document.addEventListener('DOMContentLoaded', applyClean);
   }
 
   // ---------- State ----------
