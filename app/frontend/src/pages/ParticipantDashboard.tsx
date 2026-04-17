@@ -880,8 +880,7 @@ function CartelProductionForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   className={`flex-1 font-body text-caption py-2 rounded border transition-colors ${
                     myProd===l.v?'bg-action text-white border-action font-medium':'bg-base border-border text-text-secondary hover:border-action/30'
                   }`}>
-                  {l.l}<br/>
-                  <span className="font-data text-caption">{l.pct}%</span>
+                  {l.l}
                 </button>
               )}
             </div>
