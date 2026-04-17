@@ -25,6 +25,10 @@ interface RoleData {
 interface CountryData {
   id: string; sim_name: string; color_ui: string | null
   gdp: number; stability: number; inflation: number; treasury: number
+  mil_ground: number; mil_naval: number; mil_tactical_air: number
+  mil_strategic_missiles: number; mil_air_defense: number
+  nuclear_level: number; nuclear_confirmed: boolean
+  ai_level: number; debt_burden: number
 }
 
 interface Artefact {
@@ -133,7 +137,7 @@ export function ParticipantDashboard() {
       if (roles?.[0]) {
         const role = roles[0] as RoleData; setMyRole(role)
         const { data: c } = await supabase.from('countries')
-          .select('id,sim_name,color_ui,gdp,stability,inflation,treasury')
+          .select('id,sim_name,color_ui,gdp,stability,inflation,treasury,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,nuclear_level,nuclear_confirmed,ai_level,debt_burden')
           .eq('sim_run_id',simId).eq('id',role.country_id).limit(1)
         if (c?.[0]) setMyCountry(c[0] as CountryData)
         const { data: arts } = await supabase.from('artefacts').select('*')
@@ -375,35 +379,136 @@ function TabCountry({country}:{country:CountryData}) {
 
 function TabWorld({simId,round}:{simId:string;round:number}) {
   const [countries,setCountries]=useState<CountryData[]>([])
+  const [relationships,setRelationships]=useState<{from_country_id:string;to_country_id:string;relationship:string}[]>([])
+  const [worldState,setWorldState]=useState<{oil_price:number;global_trade_volume_index:number;dollar_credibility:number}|null>(null)
+  const [view,setView]=useState<'overview'|'military'|'relationships'>('overview')
+
   useEffect(()=>{
-    supabase.from('countries').select('id,sim_name,color_ui,gdp,stability,inflation,treasury')
+    supabase.from('countries')
+      .select('id,sim_name,color_ui,gdp,stability,inflation,treasury,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,nuclear_level,nuclear_confirmed,ai_level,debt_burden')
       .eq('sim_run_id',simId).order('gdp',{ascending:false})
       .then(({data})=>setCountries((data??[]) as CountryData[]))
+    supabase.from('relationships')
+      .select('from_country_id,to_country_id,relationship')
+      .eq('sim_run_id',simId)
+      .then(({data})=>setRelationships((data??[]) as typeof relationships))
+    supabase.from('world_state')
+      .select('oil_price,global_trade_volume_index,dollar_credibility')
+      .eq('sim_run_id',simId).order('round_num',{ascending:false}).limit(1)
+      .then(({data})=>{if(data?.[0]) setWorldState(data[0])})
   },[simId])
+
+  const milTotal=(c:CountryData)=>c.mil_ground+c.mil_naval+c.mil_tactical_air+c.mil_strategic_missiles+c.mil_air_defense
+  const relColor=(r:string)=>({alliance:'text-success',economic_partnership:'text-action',neutral:'text-text-secondary',hostile:'text-warning',at_war:'text-danger'}[r]??'text-text-secondary')
+  const relLabel=(r:string)=>({alliance:'Allied',economic_partnership:'Partnership',neutral:'Neutral',hostile:'Hostile',at_war:'AT WAR'}[r]??r)
 
   return (
     <div className="space-y-4">
-      <h2 className="font-heading text-h2 text-text-primary">World Overview — R{round}</h2>
-      <div className="bg-card border border-border rounded-lg overflow-hidden">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">World Overview — R{round}</h2>
+        <div className="flex gap-1">
+          {(['overview','military','relationships'] as const).map(v=>
+            <button key={v} onClick={()=>setView(v)}
+              className={`font-body text-caption px-3 py-1 rounded transition-colors ${view===v?'bg-action/10 text-action font-medium':'text-text-secondary hover:text-text-primary'}`}>
+              {v==='overview'?'Economy':v==='military'?'Military':'Relations'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Global indicators */}
+      {worldState&&<div className="grid grid-cols-3 gap-3">
+        <div className="bg-card border border-border rounded-lg px-4 py-2">
+          <div className="font-body text-caption text-text-secondary">Oil Price</div>
+          <div className="font-data text-data-lg text-text-primary">${worldState.oil_price.toFixed(0)}</div>
+        </div>
+        <div className="bg-card border border-border rounded-lg px-4 py-2">
+          <div className="font-body text-caption text-text-secondary">Trade Volume</div>
+          <div className="font-data text-data-lg text-text-primary">{worldState.global_trade_volume_index.toFixed(0)}</div>
+        </div>
+        <div className="bg-card border border-border rounded-lg px-4 py-2">
+          <div className="font-body text-caption text-text-secondary">Dollar Index</div>
+          <div className="font-data text-data-lg text-text-primary">{worldState.dollar_credibility.toFixed(0)}</div>
+        </div>
+      </div>}
+
+      {/* Economy view */}
+      {view==='overview'&&<div className="bg-card border border-border rounded-lg overflow-hidden">
         <table className="w-full">
           <thead><tr className="border-b border-border bg-base">
-            {['Country','GDP ($B)','Stability','Inflation'].map(h=>
-              <th key={h} className={`font-body text-caption text-text-secondary uppercase px-4 py-2 ${h==='Country'?'text-left':'text-right'}`}>{h}</th>
+            {['Country','GDP','Stability','Inflation','Debt','Nuclear','AI'].map(h=>
+              <th key={h} className={`font-body text-caption text-text-secondary uppercase px-3 py-2 ${h==='Country'?'text-left':'text-right'}`}>{h}</th>
             )}
           </tr></thead>
           <tbody>{countries.map(c=>
             <tr key={c.id} className="border-b border-border/50 hover:bg-base/50">
-              <td className="px-4 py-2 flex items-center gap-2">
+              <td className="px-3 py-2 flex items-center gap-2">
                 <div className="w-3 h-3 rounded" style={{backgroundColor:c.color_ui??'#666'}}/>
                 <span className="font-body text-body-sm text-text-primary">{c.sim_name}</span>
               </td>
-              <td className="text-right font-data text-data text-text-primary px-4 py-2">{c.gdp.toFixed(1)}</td>
-              <td className="text-right font-data text-data text-text-primary px-4 py-2">{c.stability.toFixed(1)}</td>
-              <td className="text-right font-data text-data text-text-primary px-4 py-2">{c.inflation.toFixed(1)}%</td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.gdp.toFixed(0)}B</td>
+              <td className="text-right font-data text-caption px-3 py-2">
+                <span className={c.stability>=7?'text-success':c.stability>=4?'text-warning':'text-danger'}>{c.stability.toFixed(1)}</span>
+              </td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.inflation.toFixed(1)}%</td>
+              <td className="text-right font-data text-caption text-text-secondary px-3 py-2">{(c.debt_burden*100).toFixed(0)}%</td>
+              <td className="text-right font-data text-caption px-3 py-2">
+                {c.nuclear_level>0?<span className={c.nuclear_level>=3?'text-danger font-bold':'text-warning'}>L{c.nuclear_level}{c.nuclear_confirmed?'':'?'}</span>:<span className="text-text-secondary/30">—</span>}
+              </td>
+              <td className="text-right font-data text-caption px-3 py-2">
+                {c.ai_level>0?<span className="text-accent">L{c.ai_level}</span>:<span className="text-text-secondary/30">—</span>}
+              </td>
             </tr>
           )}</tbody>
         </table>
-      </div>
+      </div>}
+
+      {/* Military view */}
+      {view==='military'&&<div className="bg-card border border-border rounded-lg overflow-hidden">
+        <table className="w-full">
+          <thead><tr className="border-b border-border bg-base">
+            {['Country','Ground','Naval','Air','Missiles','AD','Total'].map(h=>
+              <th key={h} className={`font-body text-caption text-text-secondary uppercase px-3 py-2 ${h==='Country'?'text-left':'text-right'}`}>{h}</th>
+            )}
+          </tr></thead>
+          <tbody>{[...countries].sort((a,b)=>milTotal(b)-milTotal(a)).map(c=>
+            <tr key={c.id} className="border-b border-border/50 hover:bg-base/50">
+              <td className="px-3 py-2 flex items-center gap-2">
+                <div className="w-3 h-3 rounded" style={{backgroundColor:c.color_ui??'#666'}}/>
+                <span className="font-body text-body-sm text-text-primary">{c.sim_name}</span>
+              </td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.mil_ground||'—'}</td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.mil_naval||'—'}</td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.mil_tactical_air||'—'}</td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.mil_strategic_missiles||'—'}</td>
+              <td className="text-right font-data text-caption text-text-primary px-3 py-2">{c.mil_air_defense||'—'}</td>
+              <td className="text-right font-data text-data font-bold text-text-primary px-3 py-2">{milTotal(c)}</td>
+            </tr>
+          )}</tbody>
+        </table>
+      </div>}
+
+      {/* Relationships view */}
+      {view==='relationships'&&<div className="bg-card border border-border rounded-lg p-4">
+        <div className="space-y-1">
+          {countries.slice(0,12).map(c=>{
+            const rels=relationships.filter(r=>r.from_country_id===c.id&&r.relationship!=='neutral')
+            if(!rels.length) return null
+            return <div key={c.id} className="flex items-center gap-2 py-1">
+              <div className="w-3 h-3 rounded shrink-0" style={{backgroundColor:c.color_ui??'#666'}}/>
+              <span className="font-body text-caption text-text-primary w-24 shrink-0">{c.sim_name}</span>
+              <div className="flex flex-wrap gap-1">
+                {rels.map((r,i)=>{
+                  const target=countries.find(x=>x.id===r.to_country_id)
+                  return <span key={i} className={`font-body text-caption ${relColor(r.relationship)}`}>
+                    {target?.sim_name??r.to_country_id}({relLabel(r.relationship)})
+                  </span>
+                })}
+              </div>
+            </div>
+          })}
+        </div>
+      </div>}
     </div>
   )
 }
