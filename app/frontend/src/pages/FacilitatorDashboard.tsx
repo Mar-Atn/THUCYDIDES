@@ -1084,6 +1084,17 @@ function ParticipantPanel({
                           ))}
                         </select>
                       )}
+
+                      {/* View as participant (opens their interface) */}
+                      {role.user_id && !role.is_ai_operated && (
+                        <button
+                          onClick={() => window.open(`/play/${simId}`, '_blank')}
+                          className="font-body text-caption text-action hover:underline shrink-0"
+                          title={`View ${role.character_name}'s interface`}
+                        >
+                          view
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
