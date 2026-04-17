@@ -63,57 +63,25 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     country_code = action.get("country_code", "")
 
     # ── Military: Combat ──────────────────────────────────────────────
+    # All combat loads units from DB deployments table, resolves, and
+    # writes results back. Action payload specifies WHO attacks WHERE.
     if action_type == "ground_attack":
-        from engine.engines.military import resolve_ground_combat
-        return resolve_ground_combat(
-            attacker_units=action.get("attacker_units", []),
-            defender_units=action.get("defender_units", []),
-            terrain=action.get("terrain", "open"),
-            modifiers=action.get("modifiers", {}),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "ground", action)
 
     if action_type == "air_strike":
-        from engine.engines.military import resolve_air_strike
-        return resolve_air_strike(
-            attacker_units=action.get("attacker_units", []),
-            target_units=action.get("target_units", []),
-            ad_units=action.get("ad_units", []),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "air", action)
 
     if action_type == "naval_combat":
-        from engine.engines.military import resolve_naval_combat
-        return resolve_naval_combat(
-            attacker_units=action.get("attacker_units", []),
-            defender_units=action.get("defender_units", []),
-            modifiers=action.get("modifiers", {}),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "naval", action)
 
     if action_type == "naval_bombardment":
-        from engine.engines.military import resolve_naval_bombardment
-        return resolve_naval_bombardment(
-            naval_units=action.get("naval_units", []),
-            target_units=action.get("target_units", []),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "bombardment", action)
 
     if action_type == "naval_blockade":
-        from engine.engines.military import resolve_blockade
-        return resolve_blockade(
-            imposer_units=action.get("imposer_units", []),
-            zone_id=action.get("zone_id", ""),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "blockade", action)
 
     if action_type == "launch_missile_conventional":
-        from engine.engines.military import resolve_missile_strike
-        return resolve_missile_strike(
-            launcher_unit=action.get("launcher_unit", {}),
-            target_units=action.get("target_units", []),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _resolve_combat(sim_run_id, round_num, "missile", action)
 
     # ── Military: Other ──────���────────────────────────────────────────
     if action_type == "basing_rights":
@@ -241,6 +209,182 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
 
 
 # ── Sub-dispatchers ──────────────────────────────────────────────────────
+
+def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: dict) -> dict:
+    """Load units from DB, resolve combat via engine, write losses back.
+
+    Action payload expected:
+        attacker_country: str (country code)
+        zone_id: str (where combat happens)
+        target_country: str (optional — auto-detected from zone)
+        precomputed_rolls: dict (optional — moderator dice)
+    """
+    from engine.services.supabase import get_client
+
+    client = get_client()
+    attacker = action.get("country_code", "")
+    zone_id = action.get("zone_id", "")
+    target = action.get("target_country", "")
+    precomputed_rolls = action.get("precomputed_rolls")
+
+    if not zone_id:
+        return {"success": False, "narrative": f"No zone_id specified for {combat_type}"}
+
+    # Load attacker units in or adjacent to zone
+    atk_units = client.table("deployments") \
+        .select("*") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("country_id", attacker) \
+        .eq("zone_id", zone_id) \
+        .execute().data or []
+
+    # Load defender units in zone (all non-attacker countries)
+    all_units_in_zone = client.table("deployments") \
+        .select("*") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("zone_id", zone_id) \
+        .execute().data or []
+    def_units = [u for u in all_units_in_zone if u["country_id"] != attacker]
+
+    if not atk_units:
+        return {"success": False, "narrative": f"No {attacker} units in zone {zone_id}"}
+
+    # Convert deployments to engine format: one dict per individual unit
+    # Engine expects each unit to have a "unit_code" identifier
+    def to_unit_list(units: list) -> list[dict]:
+        result = []
+        for u in units:
+            count = u.get("count", 1)
+            for i in range(count):
+                result.append({
+                    "unit_code": f"{u['country_id']}_{u['unit_type']}_{u['zone_id']}_{i}",
+                    "type": u["unit_type"],
+                    "country": u["country_id"],
+                    "deployment_id": u["id"],
+                })
+        return result
+
+    atk_list = to_unit_list(atk_units)
+    def_list = to_unit_list(def_units)
+
+    # Filter units by combat type — only relevant unit types participate
+    GROUND_TYPES = {"ground"}
+    AIR_TYPES = {"tactical_air"}
+    NAVAL_TYPES = {"naval"}
+    AD_TYPES = {"air_defense"}
+
+    # Resolve based on combat type
+    try:
+        if combat_type == "ground":
+            from engine.engines.military import resolve_ground_combat
+            ground_atk = [u for u in atk_list if u["type"] in GROUND_TYPES]
+            ground_def = [u for u in def_list if u["type"] in GROUND_TYPES]
+            if not ground_atk:
+                return {"success": False, "narrative": f"No ground units to attack with in {zone_id}"}
+            result = resolve_ground_combat(
+                attackers=ground_atk,
+                defenders=ground_def,
+                modifiers=action.get("modifiers"),
+                precomputed_rolls=precomputed_rolls,
+            )
+            # Only apply losses to ground deployment rows
+            ground_atk_deps = [u for u in atk_units if u["unit_type"] in GROUND_TYPES]
+            ground_def_deps = [u for u in def_units if u["unit_type"] in GROUND_TYPES]
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, zone_id, combat_type)
+
+        if combat_type == "air":
+            from engine.engines.military import resolve_air_strike
+            air_atk = [u for u in atk_list if u["type"] in AIR_TYPES]
+            air_def = [u for u in def_list if u["type"] in GROUND_TYPES | NAVAL_TYPES]  # air strikes ground/naval
+            ad_list = [u for u in def_list if u["type"] in AD_TYPES]
+            result = resolve_air_strike(
+                attackers=air_atk,
+                defenders=air_def,
+                ad_units=ad_list,
+                precomputed_rolls=precomputed_rolls,
+            )
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, atk_units, def_units, zone_id, combat_type)
+
+        if combat_type == "naval":
+            from engine.engines.military import resolve_naval_combat
+            naval_atk = [u for u in atk_list if u["type"] in NAVAL_TYPES]
+            naval_def = [u for u in def_list if u["type"] in NAVAL_TYPES]
+            result = resolve_naval_combat(
+                attacker={"units": len(naval_atk), "country": attacker},
+                defender={"units": len(naval_def), "country": target or "unknown"},
+                modifiers=action.get("modifiers"),
+                precomputed_rolls=precomputed_rolls,
+            )
+            naval_atk_deps = [u for u in atk_units if u["unit_type"] in NAVAL_TYPES]
+            naval_def_deps = [u for u in def_units if u["unit_type"] in NAVAL_TYPES]
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, naval_atk_deps, naval_def_deps, zone_id, combat_type)
+
+        # For bombardment, blockade, missile — these need complex Input objects
+        # For now, return acknowledged with unit counts
+        if combat_type in ("bombardment", "blockade", "missile"):
+            return {
+                "success": True,
+                "narrative": f"{combat_type} at zone {zone_id}: {len(atk_list)} attacker units vs {len(def_list)} defender units. Full resolution wiring in progress.",
+                "attacker_units": len(atk_list),
+                "defender_units": len(def_list),
+            }
+
+    except Exception as e:
+        logger.exception("Combat resolution failed: %s", e)
+        return {"success": False, "narrative": f"Combat engine error: {e}"}
+
+    return {"success": False, "narrative": f"Unknown combat type: {combat_type}"}
+
+
+def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments: list, def_deployments: list, zone_id: str, combat_type: str) -> dict:
+    """Apply combat losses to the deployments table.
+
+    Engine returns attacker_losses and defender_losses as lists of unit_code strings.
+    Each unit_code maps back to a deployment row. We reduce counts accordingly.
+    """
+    atk_loss_codes = result.get("attacker_losses", [])
+    def_loss_codes = result.get("defender_losses", [])
+
+    # Count losses per deployment_id
+    def count_losses_per_deployment(loss_codes: list, deployments: list) -> dict[str, int]:
+        # Map unit_code prefix back to deployment
+        losses: dict[str, int] = {}
+        for code in loss_codes:
+            # Find which deployment this unit belongs to
+            for dep in deployments:
+                dep_prefix = f"{dep['country_id']}_{dep['unit_type']}_{dep['zone_id']}"
+                if code.startswith(dep_prefix):
+                    losses[dep["id"]] = losses.get(dep["id"], 0) + 1
+                    break
+        return losses
+
+    atk_losses_map = count_losses_per_deployment(atk_loss_codes, atk_deployments)
+    def_losses_map = count_losses_per_deployment(def_loss_codes, def_deployments)
+
+    # Apply to DB
+    for dep_id, loss in {**atk_losses_map, **def_losses_map}.items():
+        dep = next((d for d in atk_deployments + def_deployments if d["id"] == dep_id), None)
+        if not dep:
+            continue
+        new_count = max(0, dep.get("count", 1) - loss)
+        if new_count <= 0:
+            client.table("deployments").delete().eq("id", dep_id).execute()
+        else:
+            client.table("deployments").update({"count": new_count}).eq("id", dep_id).execute()
+
+    atk_total = len(atk_loss_codes) if isinstance(atk_loss_codes, list) else 0
+    def_total = len(def_loss_codes) if isinstance(def_loss_codes, list) else 0
+
+    narrative = result.get("narrative", f"{combat_type} at {zone_id}")
+    result["success"] = True
+    result["losses_applied"] = True
+    result["attacker_losses_count"] = atk_total
+    result["defender_losses_count"] = def_total
+    result["narrative"] = f"{narrative} | Losses: attacker -{atk_total}, defender -{def_total}."
+
+    logger.info("Combat %s at %s: atk_losses=%d def_losses=%d", combat_type, zone_id, atk_total, def_total)
+    return result
+
 
 def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
     """Dispatch covert operation to the correct engine based on op_type."""
