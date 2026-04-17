@@ -164,11 +164,16 @@ Right side (persistent):
 - Blast markers for current round combat
 - Click hex → unit info (own units detailed, enemy units counts only)
 
-### Navigator (persistent sidebar/floating)
-- Chat interface (text input → AI response)
-- Always visible as floating button on mobile, sidebar on desktop
-- Can ask about: rules, own role, strategy, what actions are available
-- Voice integration placeholder (added later)
+### Moderator Broadcast Strip
+- Persistent strip (below header or above footer) — shows latest moderator message
+- Appears when broadcast received, stays visible until next broadcast or dismissed
+- Distinct styling — stands out from game data (e.g., amber background)
+
+### Navigator (UI placeholder — logic in M7)
+- Floating button (bottom-right) → opens chat panel overlay
+- M6 delivers: the UI shell (input field, message display, open/close)
+- M7 delivers: the LLM intelligence behind it (rules, role context, strategy advice)
+- Architecture: Navigator reads same structured data as participant interface
 
 ---
 
@@ -219,9 +224,9 @@ System-generated notifications that appear in "Actions Expected Now":
 4. (Future: Press Report — public, newspaper style)
 
 ### Delivery
-- Round 0: Pre-SIM artefacts (role briefs, starting intelligence)
-- Round N: Triggered artefacts (intelligence updates based on world state)
-- LLM-generated: future capability — generate artefacts from world state changes
+- **v1:** Pre-loaded artefacts only (Round 0, from template)
+- **Future:** Intelligence operation results delivered as new artefacts (same DB table, same Confidential tab). LLM-generated artefacts from world state changes.
+- Architecture: `artefacts` table supports `round_delivered` — new artefacts can appear mid-SIM
 
 ### Current Content (3 in template)
 1. **Helmsman (Cathay):** Formosa blockade/invasion readiness — blockade feasible now, invasion needs years
@@ -264,7 +269,7 @@ Every action wired to contract spec. See `MODULES/ACTION_CONTRACT_AUDIT.md` for 
 | **6.8** | Diplomatic + Economic: agreements lifecycle, transactions lifecycle |
 | **6.9** | Political + Covert: arrest, assassination, change_leader, covert_ops, elections |
 | **6.10** | Incoming requests: "Actions Expected Now" system, notifications |
-| **6.11** | Navigator: chat interface (text), always visible |
+| **6.11** | Navigator UI shell (chat panel, floating button) — M7 fills the logic |
 | **6.12** | Systematic testing: ALL 32 actions validated against contracts |
 | **6.13** | Polish: mobile layout, loading states, error handling |
 
