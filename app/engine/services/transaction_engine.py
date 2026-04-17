@@ -366,24 +366,37 @@ def _grant_basing(client, sim_run_id, host_cc, guest_cc, changes):
 
 
 def _load_world_state(client, sim_run_id, round_num):
-    """Load units + country_state for validation."""
-    us = client.table("unit_states_per_round").select("*") \
-        .eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-        .order("round_num", desc=True).execute().data or []
-    units = {}
-    for r in us:
-        c = r.get("unit_code")
-        if c and c not in units:
-            units[c] = r
+    """Load units + country_state for validation.
 
-    cs = client.table("country_states_per_round").select("*") \
-        .eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-        .order("round_num", desc=True).execute().data or []
+    Uses live `countries` table (not per-round snapshots) to get current
+    treasury, tech levels, etc. Uses `deployments` for unit data.
+    """
+    # Units from deployments (individual unit model)
+    deps = client.table("deployments").select("unit_id, country_id, unit_type, unit_status") \
+        .eq("sim_run_id", sim_run_id).execute().data or []
+    units = {}
+    for d in deps:
+        uid = d.get("unit_id") or d.get("id")
+        if uid:
+            units[uid] = {
+                "unit_code": uid,
+                "country_code": d["country_id"],
+                "unit_type": d["unit_type"],
+                "status": d.get("unit_status", "active"),
+            }
+
+    # Country state from live countries table
+    cs_rows = client.table("countries").select("id, treasury, nuclear_level, nuclear_confirmed, ai_level") \
+        .eq("sim_run_id", sim_run_id).execute().data or []
     country_state = {}
-    for r in cs:
-        cc = r.get("country_code")
-        if cc and cc not in country_state:
-            country_state[cc] = r
+    for r in cs_rows:
+        country_state[r["id"]] = {
+            "country_code": r["id"],
+            "treasury": r.get("treasury", 0),
+            "nuclear_level": r.get("nuclear_level", 0),
+            "nuclear_confirmed": r.get("nuclear_confirmed", False),
+            "ai_level": r.get("ai_level", 0),
+        }
 
     return units, country_state
 
