@@ -416,9 +416,9 @@ export function PublicScreen() {
           {/* Global Power Index — always visible, pinned at bottom */}
           <div className="px-5 py-3 border-t border-white/10">
             <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
-              Global Power Index
+              Global Power Index — R{currentRound}
             </h3>
-            <PowerTrendGraph colPower={colPower} catPower={catPower} />
+            <PowerTrendGraph colPower={colPower} catPower={catPower} currentRound={currentRound} />
           </div>
         </div>
       </div>
@@ -535,29 +535,27 @@ function DoomsdayGauge({
   const angle = -120 + pct * 240
 
   // Arc color gradient stops
-  const arcColor = colorHigh === 'danger' ? '#C4A030'
+  const arcColor = colorHigh === 'danger' ? '#EF4444'
     : colorHigh === 'success' ? '#22C55E'
     : colorHigh === 'warning' ? '#F59E0B'
-    : '#3A6B9F'
+    : '#3B82F6'
 
   return (
     <div className="flex items-center gap-3">
       {/* Speedometer SVG with color zones */}
       <svg viewBox="0 0 100 60" className="w-20 h-12 shrink-0">
-        {/* Color zone arcs: green (0-25%), yellow (25-50%), red (50-75%), deep red (75-100%) */}
-        {/* Total arc length ~126px. Each zone = ~31.5px */}
-        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
-          stroke="#22C55E" strokeWidth="6" strokeLinecap="butt"
-          strokeDasharray="31.5 94.5" strokeDashoffset="0" opacity="0.25" />
-        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
-          stroke="#F59E0B" strokeWidth="6" strokeLinecap="butt"
-          strokeDasharray="31.5 94.5" strokeDashoffset="-31.5" opacity="0.25" />
-        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
-          stroke="#C4A030" strokeWidth="6" strokeLinecap="butt"
-          strokeDasharray="31.5 94.5" strokeDashoffset="-63" opacity="0.25" />
-        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
-          stroke="#991B1B" strokeWidth="6" strokeLinecap="butt"
-          strokeDasharray="31.5 94.5" strokeDashoffset="-94.5" opacity="0.35" />
+        {/* Color zone arcs — 4 zones, each ~31.5px of ~126px total arc */}
+        {/* dangerUp: green→yellow→red→deepred (high=bad) */}
+        {/* !dangerUp: deepred→red→yellow→green (high=good, e.g. Economic Health) */}
+        {(dangerUp
+          ? ['#22C55E', '#F59E0B', '#EF4444', '#991B1B']
+          : ['#991B1B', '#EF4444', '#F59E0B', '#22C55E']
+        ).map((color, i) => (
+          <path key={i} d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
+            stroke={color} strokeWidth="6" strokeLinecap="butt"
+            strokeDasharray="31.5 94.5" strokeDashoffset={-i * 31.5}
+            opacity={i === 3 ? 0.35 : 0.25} />
+        ))}
         {/* Needle */}
         <line
           x1="50" y1="55"
@@ -640,53 +638,98 @@ function PowerBalanceBar({ simId }: { simId: string }) {
 }
 
 /** Columbia vs Cathay historical power trend — two lines converging. */
-function PowerTrendGraph({ colPower, catPower }: { colPower: number; catPower: number }) {
+function PowerTrendGraph({ colPower, catPower, currentRound }: { colPower: number; catPower: number; currentRound: number }) {
   // Expert-estimated Global Power Index (arbitrary units, not %)
-  // Columbia: growing slowly. Cathay: growing fast, closing the gap.
-  // 2006-2026 historical, then SIM rounds extend the trend.
-  const labels = ['2006','','2010','','2014','','2018','','2022','','2026','SIM']
-  // Columbia: dominant but plateauing (100 → ~120)
-  const colData = [100, 104, 108, 110, 112, 114, 115, 116, 117, 118, 119, 115 + (colPower / 10)]
-  // Cathay: rapid catch-up (40 → ~95)
-  const catData = [40,  46,  52,  58,  65,  72,  78,  83,  87,  91,  95,  90 + (catPower / 10)]
+  // Columbia: dominant but plateauing. Cathay: rapid catch-up.
+  // Historical: 2006-2026 (10 data points), then SIM rounds (up to 8).
+  const historicalLabels = ['2006','2008','2010','2012','2014','2016','2018','2020','2022','2024','2026']
+  const historicalCol =    [100,   104,   108,   110,   112,   114,   115,   116,   117,   118,   119]
+  const historicalCat =    [40,    46,    52,    58,    65,    72,    78,    83,    87,    91,    95]
 
-  const maxVal = Math.max(...colData, ...catData) * 1.1
-  const w = 240
-  const h = 80
+  // SIM rounds extend from 2026 — each round = 6 months
+  // Current values from live data
+  const simLabels = currentRound > 0
+    ? Array.from({ length: currentRound }, (_, i) => `R${i + 1}`)
+    : []
+  const simCol = simLabels.map((_, i) => {
+    const progress = (i + 1) / Math.max(currentRound, 1)
+    return 119 + (115 + colPower / 10 - 119) * progress
+  })
+  const simCat = simLabels.map((_, i) => {
+    const progress = (i + 1) / Math.max(currentRound, 1)
+    return 95 + (90 + catPower / 10 - 95) * progress
+  })
+
+  const allLabels = [...historicalLabels, ...simLabels]
+  const allCol = [...historicalCol, ...simCol]
+  const allCat = [...historicalCat, ...simCat]
+
+  const maxVal = Math.max(...allCol, ...allCat) * 1.1
+  const w = 260
+  const h = 110
+  const n = allLabels.length
 
   const toPoints = (data: number[]) =>
-    data.map((v, i) => `${i * (w / (data.length - 1))},${h - (v / maxVal) * h}`).join(' ')
+    data.map((v, i) => `${i * (w / (n - 1))},${h - (v / maxVal) * h}`).join(' ')
+
+  const simStartX = (historicalLabels.length - 1) * (w / (n - 1))
 
   return (
     <div>
-      <svg viewBox={`0 0 ${w} ${h + 16}`} className="w-full h-24">
+      <svg viewBox={`0 0 ${w} ${h + 18}`} className="w-full h-36">
         {/* Grid lines */}
         {[0.25, 0.5, 0.75].map((f) => (
           <line key={f} x1="0" y1={h * f} x2={w} y2={h * f} stroke="white" strokeWidth="0.3" opacity="0.1" />
         ))}
 
-        {/* Columbia line (blue, thicker) */}
-        <polyline fill="none" stroke="#3A6B9F" strokeWidth="2.5" opacity="0.8" points={toPoints(colData)} />
-        {/* Cathay line (red, thicker) */}
-        <polyline fill="none" stroke="#C4A030" strokeWidth="2.5" opacity="0.8" points={toPoints(catData)} />
+        {/* SIM zone background */}
+        {simLabels.length > 0 && (
+          <rect x={simStartX} y="0" width={w - simStartX} height={h} fill="white" opacity="0.03" />
+        )}
 
         {/* SIM boundary line */}
-        <line x1={w * (10/11)} y1="0" x2={w * (10/11)} y2={h} stroke="white" strokeWidth="0.5" opacity="0.3" strokeDasharray="3,3" />
+        <line x1={simStartX} y1="0" x2={simStartX} y2={h} stroke="white" strokeWidth="0.5" opacity="0.3" strokeDasharray="3,3" />
 
-        {/* Labels */}
-        <text x="2" y={h - (colData[0] / maxVal) * h - 4} fill="#3A6B9F" fontSize="8" opacity="0.7">Columbia</text>
-        <text x="2" y={h - (catData[0] / maxVal) * h + 10} fill="#C4A030" fontSize="8" opacity="0.7">Cathay</text>
+        {/* Columbia line */}
+        <polyline fill="none" stroke="#3A6B9F" strokeWidth="2.5" opacity="0.85" points={toPoints(allCol)} />
+        {/* Cathay line */}
+        <polyline fill="none" stroke="#C4A030" strokeWidth="2.5" opacity="0.85" points={toPoints(allCat)} />
 
-        {/* End values */}
-        <circle cx={w} cy={h - (colData[colData.length-1] / maxVal) * h} r="3" fill="#3A6B9F" opacity="0.9" />
-        <circle cx={w} cy={h - (catData[catData.length-1] / maxVal) * h} r="3" fill="#C4A030" opacity="0.9" />
+        {/* Country labels at start */}
+        <text x="3" y={h - (allCol[0] / maxVal) * h - 4} fill="#3A6B9F" fontSize="8" fontWeight="bold" opacity="0.8">Columbia</text>
+        <text x="3" y={h - (allCat[0] / maxVal) * h + 10} fill="#C4A030" fontSize="8" fontWeight="bold" opacity="0.8">Cathay</text>
 
-        {/* Year labels at bottom */}
-        {labels.map((l, i) => l ? (
-          <text key={i} x={i * (w / (labels.length - 1))} y={h + 12} fill="white" fontSize="7" opacity="0.3" textAnchor="middle">
-            {l}
+        {/* Current round marker (pulsing dot) */}
+        {allCol.length > 0 && (
+          <>
+            <circle cx={(n - 1) * (w / (n - 1))} cy={h - (allCol[allCol.length - 1] / maxVal) * h} r="4" fill="#3A6B9F" opacity="0.9">
+              <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
+            </circle>
+            <circle cx={(n - 1) * (w / (n - 1))} cy={h - (allCat[allCat.length - 1] / maxVal) * h} r="4" fill="#C4A030" opacity="0.9">
+              <animate attributeName="r" values="3;5;3" dur="2s" repeatCount="indefinite" />
+            </circle>
+          </>
+        )}
+
+        {/* Year/round labels at bottom */}
+        {allLabels.map((l, i) => {
+          // Show every other historical label to avoid crowding, always show SIM labels
+          const isSimLabel = l.startsWith('R')
+          const isKeyYear = ['2006','2010','2014','2018','2022','2026'].includes(l)
+          if (!isSimLabel && !isKeyYear) return null
+          return (
+            <text key={i} x={i * (w / (n - 1))} y={h + 12} fill={isSimLabel ? 'white' : 'white'} fontSize="7" opacity={isSimLabel ? 0.6 : 0.3} textAnchor="middle" fontWeight={isSimLabel ? 'bold' : 'normal'}>
+              {l}
+            </text>
+          )
+        })}
+
+        {/* "SIM" label above the sim zone */}
+        {simLabels.length > 0 && (
+          <text x={(simStartX + w) / 2} y="8" fill="white" fontSize="7" opacity="0.25" textAnchor="middle" fontWeight="bold">
+            SIM
           </text>
-        ) : null)}
+        )}
       </svg>
     </div>
   )
