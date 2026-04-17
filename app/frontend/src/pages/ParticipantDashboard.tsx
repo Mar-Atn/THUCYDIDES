@@ -355,7 +355,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 }) {
   const avail = new Set(roleActions)
   const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
-  const [responding, setResponding] = useState<string|null>(null)
+  const [reviewTxn, setReviewTxn] = useState<string|null>(null)
 
   useEffect(()=>{
     supabase.from('exchange_transactions')
@@ -364,61 +364,31 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       .then(({data})=>setPendingTxns((data??[]) as typeof pendingTxns))
   },[simId,countryId])
 
-  const handleTxnResponse = async (txnId:string, response:'accept'|'decline') => {
-    setResponding(txnId)
-    try {
-      await submitAction(simId,'accept_transaction',roleId,countryId,{
-        transaction_id:txnId, response,
-      })
-      setPendingTxns(prev=>prev.filter(t=>t.id!==txnId))
-    } catch(e) { alert(e instanceof Error?e.message:'Failed') }
-    finally { setResponding(null) }
+  // If reviewing a transaction, show the review screen
+  const txnToReview = reviewTxn ? pendingTxns.find(t=>t.id===reviewTxn) : null
+  if (txnToReview) {
+    return <TransactionReview txn={txnToReview} simId={simId} countryId={countryId} roleId={roleId}
+      onClose={()=>setReviewTxn(null)}
+      onDone={()=>{setReviewTxn(null);setPendingTxns(prev=>prev.filter(t=>t.id!==txnToReview.id))}} />
   }
 
-  const summarizeAssets = (a:Record<string,unknown>) => {
-    const parts:string[] = []
-    if (a.coins) parts.push(`${a.coins} coins`)
-    if (a.units) parts.push(`${JSON.stringify(a.units)}`)
-    if (a.technology) parts.push(`Tech: ${JSON.stringify(a.technology)}`)
-    if (a.basing_rights) parts.push('Basing Rights')
-    return parts.length>0 ? parts.join(', ') : 'nothing'
-  }
+  const hasExpected = pendingTxns.length > 0
 
   return (
     <div className="space-y-4">
       {/* Actions Expected Now */}
-      <div className={`border rounded-lg p-4 ${pendingTxns.length>0?'bg-warning/10 border-warning/30':'bg-warning/5 border-warning/20'}`}>
-        <h3 className="font-heading text-h3 text-warning mb-2">Actions Expected Now</h3>
-        {pendingTxns.length===0
+      <div className={`border rounded-lg p-4 ${hasExpected?'bg-warning/10 border-warning/30':'bg-warning/5 border-warning/20'}`}>
+        <h3 className="font-heading text-h3 text-warning mb-2">Actions Expected Now{hasExpected?` (${pendingTxns.length})`:''}</h3>
+        {!hasExpected
           ? <p className="font-body text-caption text-text-secondary">No urgent actions at this time.</p>
-          : <div className="space-y-3">
-            {pendingTxns.map(txn=><div key={txn.id} className="bg-card border border-border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-body text-body-sm text-text-primary font-medium">Transaction Proposal from {txn.proposer}</span>
-                <span className="font-body text-caption text-text-secondary">{new Date(txn.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3 mb-2">
-                <div>
-                  <div className="font-body text-caption text-success uppercase mb-0.5">They Offer</div>
-                  <div className="font-body text-body-sm text-text-primary">{summarizeAssets(txn.offer as Record<string,unknown>)}</div>
-                </div>
-                <div>
-                  <div className="font-body text-caption text-action uppercase mb-0.5">They Request</div>
-                  <div className="font-body text-body-sm text-text-primary">{summarizeAssets(txn.request as Record<string,unknown>)}</div>
-                </div>
-              </div>
-              {txn.terms&&<p className="font-body text-caption text-text-secondary italic mb-2">"{txn.terms}"</p>}
-              <div className="flex gap-2">
-                <button onClick={()=>handleTxnResponse(txn.id,'accept')} disabled={responding===txn.id}
-                  className="font-body text-caption font-medium bg-success/10 text-success px-4 py-1.5 rounded hover:bg-success/20 transition-colors">
-                  {responding===txn.id?'...':'Accept'}
-                </button>
-                <button onClick={()=>handleTxnResponse(txn.id,'decline')} disabled={responding===txn.id}
-                  className="font-body text-caption font-medium bg-danger/10 text-danger px-4 py-1.5 rounded hover:bg-danger/20 transition-colors">
-                  Decline
-                </button>
-              </div>
-            </div>)}
+          : <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            {pendingTxns.map(txn=>
+              <button key={txn.id} onClick={()=>setReviewTxn(txn.id)}
+                className="text-left bg-card hover:bg-action/5 border border-warning/30 hover:border-action/30 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-text-primary font-medium block">Transaction from {txn.proposer}</span>
+                <span className="font-body text-caption text-text-secondary">Click to review</span>
+              </button>
+            )}
           </div>
         }
       </div>
@@ -866,6 +836,137 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+/* ── Transaction Review (counterpart response) ─────────────────────────── */
+
+function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
+  txn:{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string}
+  simId:string;countryId:string;roleId:string;onClose:()=>void;onDone:()=>void
+}) {
+  const [myCountry,setMyCountry]=useState<Record<string,unknown>|null>(null)
+  const [myReserves,setMyReserves]=useState<{unit_type:string;count:number}[]>([])
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
+      .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
+    // Count reserves by type
+    supabase.from('deployments').select('unit_type').eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','reserve')
+      .then(({data})=>{
+        const counts: Record<string,number> = {}
+        ;(data??[]).forEach((d:{unit_type:string})=>{counts[d.unit_type]=(counts[d.unit_type]||0)+1})
+        setMyReserves(Object.entries(counts).map(([unit_type,count])=>({unit_type,count})))
+      })
+  },[simId,countryId])
+
+  const summarize = (a:Record<string,unknown>) => {
+    const items: {label:string;ok?:boolean}[] = []
+    const coins = Number(a.coins||0)
+    if (coins>0) items.push({label:`${coins} coins`})
+    const units = a.units as {type:string;count:number}[]|string[]|undefined
+    if (units && Array.isArray(units) && units.length>0) {
+      if (typeof units[0]==='string') items.push({label:`${units.length} specific units`})
+      else (units as {type:string;count:number}[]).forEach(u=>items.push({label:`${u.count} ${u.type.replace('_',' ')}`}))
+    }
+    const tech = a.technology as {type:string;level:number}|undefined
+    if (tech && tech.type) items.push({label:`${tech.type} technology L${tech.level}`})
+    if (a.basing_rights) items.push({label:'Basing rights'})
+    return items.length>0 ? items : [{label:'Nothing'}]
+  }
+
+  // Check if we can fulfill what's requested
+  const requested = txn.request
+  const issues: string[] = []
+  if (myCountry) {
+    const reqCoins = Number(requested.coins||0)
+    if (reqCoins > 0 && reqCoins > Number(myCountry.treasury||0)) issues.push(`Insufficient treasury: need ${reqCoins}, have ${Number(myCountry.treasury||0).toFixed(0)}`)
+    const reqUnits = requested.units as {type:string;count:number}[]|undefined
+    if (reqUnits && Array.isArray(reqUnits)) {
+      reqUnits.forEach(ru=>{
+        if (typeof ru === 'object' && ru.type) {
+          const have = myReserves.find(r=>r.unit_type===ru.type)?.count||0
+          if (have < ru.count) issues.push(`Insufficient ${ru.type.replace('_',' ')}: need ${ru.count}, have ${have} in reserve`)
+        }
+      })
+    }
+    const reqTech = requested.technology as {type:string;level:number}|undefined
+    if (reqTech && reqTech.type) {
+      const myLevel = reqTech.type==='nuclear' ? Number(myCountry.nuclear_level||0) : Number(myCountry.ai_level||0)
+      if (myLevel < reqTech.level) issues.push(`Insufficient ${reqTech.type} technology: need L${reqTech.level}, have L${myLevel}`)
+    }
+  }
+  const canAccept = issues.length === 0
+
+  const handleResponse = async (response:'accept'|'decline') => {
+    setSubmitting(true); setError(null)
+    try {
+      await submitAction(simId,'accept_transaction',roleId,countryId,{transaction_id:txn.id, response})
+      setResult(response==='accept'?'Transaction accepted — assets transferred':'Transaction declined')
+    } catch(e) { setError(e instanceof Error?e.message:'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Transaction Proposal from {txn.proposer}</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {txn.terms&&<div className="bg-card border border-border rounded-lg p-4 italic">
+        <span className="font-body text-caption text-text-secondary">Message: </span>
+        <span className="font-body text-body-sm text-text-primary">"{txn.terms}"</span>
+      </div>}
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* What they offer us */}
+        <div className="bg-card border-2 border-success/20 rounded-lg p-5">
+          <h3 className="font-heading text-body-sm text-success uppercase tracking-wider mb-3">They Offer Us</h3>
+          <div className="space-y-2">
+            {summarize(txn.offer).map((item,i)=>
+              <div key={i} className="font-body text-body-sm text-text-primary bg-success/5 rounded px-3 py-2">{item.label}</div>
+            )}
+          </div>
+        </div>
+
+        {/* What they request from us */}
+        <div className="bg-card border-2 border-action/20 rounded-lg p-5">
+          <h3 className="font-heading text-body-sm text-action uppercase tracking-wider mb-3">They Request From Us</h3>
+          <div className="space-y-2">
+            {summarize(txn.request).map((item,i)=>
+              <div key={i} className="font-body text-body-sm text-text-primary bg-action/5 rounded px-3 py-2">{item.label}</div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Availability check */}
+      {issues.length>0&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+        <h3 className="font-heading text-caption text-danger uppercase tracking-wider mb-2">Cannot Accept — Missing Assets</h3>
+        {issues.map((issue,i)=><p key={i} className="font-body text-body-sm text-danger">{issue}</p>)}
+      </div>}
+
+      {/* Actions */}
+      <div className="flex items-center gap-3">
+        <button onClick={()=>handleResponse('accept')} disabled={submitting||!canAccept}
+          className="bg-success text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
+          {submitting?'Processing...':'Accept Deal'}</button>
+        <button onClick={()=>handleResponse('decline')} disabled={submitting}
+          className="bg-danger/10 text-danger font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-danger/20 transition-colors">
+          Decline</button>
+        <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+      </div>
+
+      {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+        <p className="font-body text-body-sm text-success">{result}</p>
+        <button onClick={onDone} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+      </div>}
+      {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
     </div>
   )
 }
