@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { getSimRun, type SimRun } from '@/lib/queries'
+import { getSimRun, submitAction, type SimRun } from '@/lib/queries'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -121,6 +121,7 @@ export function ParticipantDashboard() {
   const [myRelationships, setMyRelationships] = useState<{to_country_id:string;relationship:string;status:string}[]>([])
   const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
   const [personalRels, setPersonalRels] = useState<{other_role:string;type:string;notes:string}[]>([])
+  const [activeAction, setActiveAction] = useState<string|null>(null)
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
@@ -317,7 +318,19 @@ export function ParticipantDashboard() {
 
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
-        {tab==='actions'&&myRole&&<TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'}/>}
+        {tab==='actions'&&myRole&&(
+          activeAction
+            ? <ActionForm
+                actionType={activeAction}
+                roleId={myRole.id}
+                roleName={myRole.character_name}
+                countryId={myRole.country_id}
+                simId={simId!}
+                onClose={()=>setActiveAction(null)}
+                onSubmitted={()=>{setActiveAction(null); loadData()}}
+              />
+            : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}/>
+        )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
             setArtefacts(p=>p.map(a=>a.id===id?{...a,is_read:true}:a))
@@ -335,7 +348,7 @@ export function ParticipantDashboard() {
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase}:{roleActions:string[]; currentPhase: string}) {
+function TabActions({roleActions, currentPhase, onSelectAction}:{roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void}) {
   const avail = new Set(roleActions)
   return (
     <div className="space-y-4">
@@ -355,7 +368,7 @@ function TabActions({roleActions, currentPhase}:{roleActions:string[]; currentPh
         return <div key={cat.key} className="bg-card border border-border rounded-lg p-4">
           <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">{cat.label}</h3>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
-            {acts.map(a=><button key={a.id} className="text-left bg-base hover:bg-action/5 border border-border hover:border-action/30 rounded-lg px-4 py-3 transition-colors group">
+            {acts.map(a=><button key={a.id} onClick={()=>onSelectAction(a.id)} className="text-left bg-base hover:bg-action/5 border border-border hover:border-action/30 rounded-lg px-4 py-3 transition-colors group">
               <span className="font-body text-body-sm text-text-primary group-hover:text-action">{a.label}</span>
             </button>)}
           </div>
@@ -658,6 +671,135 @@ interface WorldRole {
 interface CountryBrief {
   id: string; public_bio: string
 }
+
+/* ── ActionForm — full-screen form for submitting an action ────────────── */
+
+const ACTION_LABELS: Record<string,string> = Object.fromEntries(
+  CATS.flatMap(c=>c.actions.map(a=>[a.id,a.label]))
+)
+
+function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmitted}:{
+  actionType:string; roleId:string; roleName:string; countryId:string; simId:string
+  onClose:()=>void; onSubmitted:()=>void
+}) {
+  const label = ACTION_LABELS[actionType] ?? actionType
+
+  // Route to specific form or generic placeholder
+  if (actionType === 'public_statement') return <PublicStatementForm {...{roleId,roleName,countryId,simId,onClose,onSubmitted}} />
+
+  // Generic "coming soon" for actions not yet wired
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">{label}</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border hover:border-action/30">
+          ← Back to Actions
+        </button>
+      </div>
+      <div className="bg-card border border-border rounded-lg p-8 text-center">
+        <p className="font-body text-body text-text-secondary">
+          Action form for <strong>{label}</strong> — coming in next sprint.
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Public Statement Form ─────────────────────────────────────────────── */
+
+function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitted}:{
+  roleId:string; roleName:string; countryId:string; simId:string
+  onClose:()=>void; onSubmitted:()=>void
+}) {
+  const [text, setText] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<string|null>(null)
+  const [error, setError] = useState<string|null>(null)
+
+  const handleSubmit = async () => {
+    if (!text.trim()) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      const res = await submitAction(simId, 'public_statement', roleId, countryId, { content: text.trim() })
+      setResult(res.narrative as string ?? 'Statement published')
+      setText('')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to submit')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Public Statement</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border hover:border-action/30">
+          ← Back to Actions
+        </button>
+      </div>
+
+      <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+        <div>
+          <label className="font-body text-caption text-text-secondary block mb-2">
+            Speaking as <strong className="text-text-primary">{roleName}</strong> ({countryId})
+          </label>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Address the world... Your statement will be visible to all participants and appear on the public screen."
+            rows={6}
+            className="w-full bg-base border border-border rounded-lg px-4 py-3 font-body text-body-sm text-text-primary resize-none focus:border-action/50 focus:outline-none transition-colors"
+            disabled={submitting}
+          />
+          <div className="flex items-center justify-between mt-1">
+            <span className="font-body text-caption text-text-secondary">
+              {text.length} characters
+            </span>
+            {text.length > 0 && text.length < 10 && (
+              <span className="font-body text-caption text-warning">Minimum 10 characters</span>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || text.trim().length < 10}
+            className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {submitting ? 'Publishing...' : 'Publish Statement'}
+          </button>
+          <button
+            onClick={onClose}
+            className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5"
+          >
+            Cancel
+          </button>
+        </div>
+
+        {result && (
+          <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+            <p className="font-body text-body-sm text-success">Statement published successfully.</p>
+            <p className="font-body text-caption text-text-secondary mt-1">{result}</p>
+            <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-2">
+              ← Return to Actions
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+            <p className="font-body text-body-sm text-danger">{error}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ── Tab: World ────────────────────────────────────────────────────────── */
 
 function TabWorld({simId,round}:{simId:string;round:number}) {
   const [countries,setCountries]=useState<CountryData[]>([])
