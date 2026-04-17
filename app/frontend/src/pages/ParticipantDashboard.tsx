@@ -851,6 +851,8 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
   const [submitting,setSubmitting]=useState(false)
   const [result,setResult]=useState<string|null>(null)
   const [error,setError]=useState<string|null>(null)
+  const [showCounter,setShowCounter]=useState(false)
+  const [counterComment,setCounterComment]=useState('')
 
   useEffect(()=>{
     supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
@@ -952,15 +954,52 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
       </div>}
 
       {/* Actions */}
-      <div className="flex items-center gap-3">
+      {!showCounter&&<div className="flex items-center gap-3">
         <button onClick={()=>handleResponse('accept')} disabled={submitting||!canAccept}
           className="bg-success text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
           {submitting?'Processing...':'Accept Deal'}</button>
         <button onClick={()=>handleResponse('decline')} disabled={submitting}
           className="bg-danger/10 text-danger font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-danger/20 transition-colors">
           Decline</button>
+        <button onClick={()=>setShowCounter(true)}
+          className="bg-warning/10 text-warning font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-warning/20 transition-colors">
+          Counteroffer</button>
         <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
-      </div>
+      </div>}
+
+      {/* Counteroffer form */}
+      {showCounter&&<div className="bg-card border-2 border-warning/30 rounded-lg p-5 space-y-3">
+        <h3 className="font-heading text-body-sm text-warning uppercase tracking-wider">Counteroffer</h3>
+        <p className="font-body text-caption text-text-secondary">
+          Adjust the terms and send back. The original proposal will be declined and a new proposal sent from you to {txn.proposer}.
+        </p>
+        <textarea value={counterComment} onChange={e=>setCounterComment(e.target.value)}
+          placeholder="Add a message explaining your counter-proposal..."
+          rows={2} className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary resize-none"/>
+        <div className="flex items-center gap-3">
+          <button disabled={submitting} onClick={async ()=>{
+            setSubmitting(true); setError(null)
+            try {
+              // Decline original
+              await submitAction(simId,'accept_transaction',roleId,countryId,{transaction_id:txn.id, response:'decline', rationale:'Counteroffer sent'})
+              // Create new proposal (swap sides — we propose back to them)
+              await submitAction(simId,'propose_transaction',roleId,countryId,{
+                proposer_country_code:countryId, counterpart_country_code:txn.proposer,
+                scope:'country',
+                offer: txn.request,   // what they wanted, we now offer (adjustable in future)
+                request: txn.offer,   // what they offered, we now request
+                rationale: counterComment || 'Counteroffer',
+                visibility: 'public',
+              })
+              setResult('Counteroffer sent — original proposal declined')
+            } catch(e) { setError(e instanceof Error?e.message:'Failed') }
+            finally { setSubmitting(false) }
+          }}
+            className="bg-warning text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-warning/90 disabled:opacity-50 transition-colors">
+            {submitting?'Sending...':'Send Counteroffer'}</button>
+          <button onClick={()=>setShowCounter(false)} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+        </div>
+      </div>}
 
       {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
         <p className="font-body text-body-sm text-success">{result}</p>
