@@ -20,6 +20,7 @@ import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 interface RoleData {
   id: string; character_name: string; country_id: string; position_type: string
   title: string; public_bio: string; confidential_brief: string | null
+  objectives: string[]; powers: string[]
 }
 
 interface CountryData {
@@ -116,6 +117,12 @@ export function ParticipantDashboard() {
   const [remaining, setRemaining] = useState<number | null>(null)
   const [broadcast, setBroadcast] = useState<string | null>(null)
   const [roleActions, setRoleActions] = useState<string[]>([])
+  const [objectives, setObjectives] = useState<string[]>([])
+  const [myRelationships, setMyRelationships] = useState<{to_country_id:string;relationship:string;status:string}[]>([])
+  const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
+  const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
+  const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
+  const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const loadData = useCallback(async () => {
@@ -129,7 +136,7 @@ export function ParticipantDashboard() {
 
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
-        .select('id,character_name,country_id,position_type,title,public_bio,confidential_brief')
+        .select('id,character_name,country_id,position_type,title,public_bio,confidential_brief,objectives,powers')
         .eq('sim_run_id',simId)
       const { data: roles } = proxyRoleId
         ? await roleQuery.eq('id', proxyRoleId).limit(1)
@@ -146,6 +153,41 @@ export function ParticipantDashboard() {
         const { data: ra } = await supabase.from('role_actions').select('action_id')
           .eq('sim_run_id',simId).eq('role_id',role.id)
         setRoleActions((ra??[]).map((r:{action_id:string})=>r.action_id))
+
+        // Objectives from role
+        setObjectives(Array.isArray(role.objectives) ? role.objectives as string[] : [])
+
+        // Relationships for own country
+        const { data: rels } = await supabase.from('relationships')
+          .select('to_country_id,relationship,status')
+          .eq('sim_run_id',simId).eq('from_country_id',role.country_id)
+        setMyRelationships((rels??[]) as typeof myRelationships)
+
+        // Org memberships
+        const { data: mems } = await supabase.from('org_memberships')
+          .select('org_id,role_in_org,has_veto')
+          .eq('sim_run_id',simId).eq('country_id',role.country_id)
+        setMyOrgMemberships((mems??[]) as typeof myOrgMemberships)
+
+        // Sanctions (received + imposed)
+        const { data: sr } = await supabase.from('sanctions')
+          .select('imposer_country_id,target_country_id,level')
+          .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`)
+        const sanctions = (sr??[]).map((s:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:s.imposer_country_id,target:s.target_country_id,level:s.level}))
+        setMySanctions(sanctions)
+
+        // Tariffs (received + imposed)
+        const { data: tr } = await supabase.from('tariffs')
+          .select('imposer_country_id,target_country_id,level')
+          .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`)
+        const tariffs = (tr??[]).map((t:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:t.imposer_country_id,target:t.target_country_id,level:t.level}))
+        setMyTariffs(tariffs)
+
+        // Full country data
+        const { data: fc } = await supabase.from('countries').select('*')
+          .eq('sim_run_id',simId).eq('id',role.country_id).limit(1)
+        if (fc?.[0]) setFullCountry(fc[0])
+
       } else { setTab('world') }
       setError(null)
     } catch(e) { setError(e instanceof Error?e.message:'Failed') }
@@ -262,12 +304,12 @@ export function ParticipantDashboard() {
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
         {tab==='actions'&&myRole&&<TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'}/>}
-        {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} onRead={id=>{
+        {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} relationships={myRelationships} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
             setArtefacts(p=>p.map(a=>a.id===id?{...a,is_read:true}:a))
           })
         }}/>}
-        {tab==='country'&&myCountry&&<TabCountry country={myCountry}/>}
+        {tab==='country'&&myCountry&&<TabCountry country={myCountry} fullCountry={fullCountry} sanctions={mySanctions} tariffs={myTariffs} simId={simId!}/>}
         {tab==='world'&&<TabWorld simId={simId!} round={round}/>}
         {tab==='map'&&<div className="relative" style={{height:'calc(100vh - 180px)'}}>
           <iframe src={`/map/deployments.html?display=clean&sim_run_id=${simId}`} className="absolute inset-0 w-full h-full border-0 rounded-lg" title="Map"/>
@@ -311,14 +353,66 @@ function TabActions({roleActions, currentPhase}:{roleActions:string[]; currentPh
 
 /* ── Tab: Confidential ─────────────────────────────────────────────────── */
 
-function TabConf({role,artefacts,onRead}:{role:RoleData;artefacts:Artefact[];onRead:(id:string)=>void}) {
+function TabConf({role,artefacts,objectives,relationships,orgMemberships,onRead}:{
+  role:RoleData; artefacts:Artefact[]; objectives:string[]
+  relationships:{to_country_id:string;relationship:string;status:string}[]
+  orgMemberships:{org_id:string;role_in_org:string;has_veto:boolean}[]
+  onRead:(id:string)=>void
+}) {
   const [open,setOpen]=useState<string|null>(null)
+  const relColor=(r:string)=>({alliance:'text-success',economic_partnership:'text-action',neutral:'text-text-secondary',hostile:'text-warning',at_war:'text-danger'}[r]??'text-text-secondary')
+  const relLabel=(r:string)=>({alliance:'Allied',economic_partnership:'Partnership',neutral:'Neutral',hostile:'Hostile',at_war:'AT WAR'}[r]??r)
+
   return (
     <div className="space-y-6">
+      {/* Confidential Brief */}
       {role.confidential_brief&&<div className="bg-card border border-border rounded-lg p-6">
         <h3 className="font-heading text-h3 text-text-primary mb-3">Confidential Brief</h3>
         <p className="font-body text-body-sm text-text-primary leading-relaxed whitespace-pre-wrap">{role.confidential_brief}</p>
       </div>}
+
+      {/* Objectives */}
+      {objectives.length>0&&<div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-heading text-h3 text-text-primary mb-3">Your Objectives</h3>
+        <ul className="space-y-2">
+          {objectives.map((obj,i)=><li key={i} className="flex items-start gap-2">
+            <span className="font-data text-caption text-action mt-0.5">{i+1}.</span>
+            <span className="font-body text-body-sm text-text-primary">{obj}</span>
+          </li>)}
+        </ul>
+      </div>}
+
+      {/* Relationships */}
+      {relationships.length>0&&<div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-heading text-h3 text-text-primary mb-3">Our Relationships</h3>
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+          {relationships.filter(r=>r.relationship!=='neutral').map(r=>
+            <div key={r.to_country_id} className="flex items-center gap-2 bg-base rounded px-3 py-2">
+              <span className="font-body text-body-sm text-text-primary">{r.to_country_id}</span>
+              <span className={`font-body text-caption font-medium ${relColor(r.relationship)}`}>{relLabel(r.relationship)}</span>
+            </div>
+          )}
+        </div>
+        <div className="mt-2">
+          <span className="font-body text-caption text-text-secondary">
+            Neutral: {relationships.filter(r=>r.relationship==='neutral').map(r=>r.to_country_id).join(', ')}
+          </span>
+        </div>
+      </div>}
+
+      {/* Organization Memberships */}
+      {orgMemberships.length>0&&<div className="bg-card border border-border rounded-lg p-6">
+        <h3 className="font-heading text-h3 text-text-primary mb-3">Organization Memberships</h3>
+        <div className="space-y-2">
+          {orgMemberships.map(m=><div key={m.org_id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+            <span className="font-body text-body-sm text-text-primary font-medium">{m.org_id.replace(/_/g,' ')}</span>
+            <span className="font-body text-caption text-text-secondary">{m.role_in_org}</span>
+            {m.has_veto&&<span className="font-body text-caption text-danger font-medium">VETO</span>}
+          </div>)}
+        </div>
+      </div>}
+
+      {/* Intelligence & Documents */}
       {artefacts.length>0&&<div className="space-y-3">
         <h3 className="font-heading text-h3 text-text-primary">Intelligence & Documents</h3>
         {artefacts.map(art=><div key={art.id} className="bg-card border border-border rounded-lg overflow-hidden">
@@ -355,22 +449,156 @@ function TabConf({role,artefacts,onRead}:{role:RoleData;artefacts:Artefact[];onR
 
 /* ── Tab: Country ──────────────────────────────────────────────────────── */
 
-function TabCountry({country}:{country:CountryData}) {
+function TabCountry({country,fullCountry,sanctions,tariffs,simId}:{
+  country:CountryData; fullCountry:Record<string,unknown>|null
+  sanctions:{imposer:string;target:string;level:number}[]
+  tariffs:{imposer:string;target:string;level:number}[]
+  simId:string
+}) {
+  const fc = fullCountry ?? {}
+  const cc = country.id
+  const [section,setSection]=useState<'overview'|'military'|'trade'>('overview')
+  const sanctionsOn = sanctions.filter(s=>s.target===cc)
+  const sanctionsBy = sanctions.filter(s=>s.imposer===cc)
+  const tariffsOn = tariffs.filter(t=>t.target===cc)
+  const tariffsBy = tariffs.filter(t=>t.imposer===cc)
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="w-6 h-6 rounded" style={{backgroundColor:country.color_ui??'#4A5568'}}/>
-        <h2 className="font-heading text-h2 text-text-primary">{country.sim_name}</h2>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded" style={{backgroundColor:country.color_ui??'#4A5568'}}/>
+          <h2 className="font-heading text-h2 text-text-primary">{country.sim_name}</h2>
+          <span className="font-body text-caption text-text-secondary">{String(fc.regime_type??'')} · {String(fc.team_type??'')}</span>
+        </div>
+        <div className="flex gap-1">
+          {(['overview','military','trade'] as const).map(v=>
+            <button key={v} onClick={()=>setSection(v)}
+              className={`font-body text-caption px-3 py-1 rounded transition-colors ${section===v?'bg-action/10 text-action font-medium':'text-text-secondary hover:text-text-primary'}`}>
+              {v==='overview'?'Economy':v==='military'?'Military':'Trade & Sanctions'}
+            </button>
+          )}
+        </div>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[{l:'GDP',v:`$${country.gdp.toFixed(1)}B`},{l:'Stability',v:`${country.stability.toFixed(1)}/10`},{l:'Inflation',v:`${country.inflation.toFixed(1)}%`},{l:'Treasury',v:`$${country.treasury.toFixed(1)}B`}].map(s=>
-          <div key={s.l} className="bg-card border border-border rounded-lg p-4">
-            <div className="font-body text-caption text-text-secondary uppercase tracking-wider mb-1">{s.l}</div>
-            <div className="font-data text-data-lg text-text-primary">{s.v}</div>
+
+      {/* Country brief */}
+      {fc.country_brief&&<div className="bg-card border border-border rounded-lg p-4">
+        <p className="font-body text-body-sm text-text-primary leading-relaxed">{String(fc.country_brief)}</p>
+      </div>}
+
+      {section==='overview'&&<>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            {l:'GDP',v:`$${country.gdp.toFixed(1)}B`},
+            {l:'Growth',v:`${Number(fc.gdp_growth_base??0).toFixed(1)}%`},
+            {l:'Stability',v:`${country.stability.toFixed(1)}/10`},
+            {l:'Inflation',v:`${country.inflation.toFixed(1)}%`},
+            {l:'Treasury',v:`$${country.treasury.toFixed(1)}B`},
+            {l:'Debt',v:`${(country.debt_burden*100).toFixed(0)}%`},
+            {l:'Tax Rate',v:`${(Number(fc.tax_rate??0)*100).toFixed(0)}%`},
+            {l:'Trade Balance',v:`$${Number(fc.trade_balance??0).toFixed(1)}B`},
+          ].map(s=><div key={s.l} className="bg-card border border-border rounded-lg p-3">
+            <div className="font-body text-caption text-text-secondary uppercase tracking-wider mb-0.5">{s.l}</div>
+            <div className="font-data text-data text-text-primary">{s.v}</div>
+          </div>)}
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Economic Sectors</h3>
+          <div className="flex gap-4">
+            {[{l:'Resources',v:fc.sector_resources},{l:'Industry',v:fc.sector_industry},{l:'Services',v:fc.sector_services},{l:'Technology',v:fc.sector_technology}].map(s=>
+              <div key={s.l}>
+                <div className="font-body text-caption text-text-secondary">{s.l}</div>
+                <div className="font-data text-data text-text-primary">{String(s.v??0)}%</div>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      <p className="font-body text-caption text-text-secondary italic">Full country dashboard — military, economic details, relationships — coming in Sprint 6.4.</p>
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Technology</h3>
+          <div className="flex gap-6">
+            <div>
+              <span className="font-body text-caption text-text-secondary">Nuclear: </span>
+              <span className={`font-data text-data ${country.nuclear_level>=3?'text-danger font-bold':country.nuclear_level>=1?'text-warning':'text-text-secondary'}`}>
+                L{country.nuclear_level}{country.nuclear_confirmed?' (confirmed)':country.nuclear_level>0?' (unconfirmed)':''}
+              </span>
+              {Number(fc.nuclear_rd_progress??0)>0&&<span className="font-body text-caption text-text-secondary ml-1">R&D: {(Number(fc.nuclear_rd_progress)*100).toFixed(0)}%</span>}
+            </div>
+            <div>
+              <span className="font-body text-caption text-text-secondary">AI: </span>
+              <span className={`font-data text-data ${country.ai_level>=4?'text-accent font-bold':country.ai_level>=1?'text-accent':'text-text-secondary'}`}>
+                L{country.ai_level}
+              </span>
+              {Number(fc.ai_rd_progress??0)>0&&<span className="font-body text-caption text-text-secondary ml-1">R&D: {(Number(fc.ai_rd_progress)*100).toFixed(0)}%</span>}
+            </div>
+          </div>
+        </div>
+      </>}
+
+      {section==='military'&&<>
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+          {[
+            {l:'Ground',v:country.mil_ground},{l:'Naval',v:country.mil_naval},
+            {l:'Tactical Air',v:country.mil_tactical_air},{l:'Strategic Missiles',v:country.mil_strategic_missiles},
+            {l:'Air Defense',v:country.mil_air_defense},
+          ].map(s=><div key={s.l} className="bg-card border border-border rounded-lg p-3">
+            <div className="font-body text-caption text-text-secondary uppercase tracking-wider mb-0.5">{s.l}</div>
+            <div className="font-data text-data-lg text-text-primary">{s.v}</div>
+          </div>)}
+        </div>
+        <div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Production</h3>
+          <div className="grid grid-cols-3 gap-4 font-body text-caption">
+            <div><span className="text-text-secondary">Ground:</span> <span className="text-text-primary">cap {String(fc.prod_cap_ground??0)}/rd, cost ${String(fc.prod_cost_ground??0)}</span></div>
+            <div><span className="text-text-secondary">Naval:</span> <span className="text-text-primary">cap {String(fc.prod_cap_naval??0)}/rd, cost ${String(fc.prod_cost_naval??0)}</span></div>
+            <div><span className="text-text-secondary">Air:</span> <span className="text-text-primary">cap {String(fc.prod_cap_tactical??0)}/rd, cost ${String(fc.prod_cost_tactical??0)}</span></div>
+          </div>
+          <div className="mt-2 font-body text-caption text-text-secondary">
+            Maintenance: ${String(fc.maintenance_per_unit??0)}/unit · Mobilization pool: {String(fc.mobilization_pool??0)}
+          </div>
+        </div>
+      </>}
+
+      {section==='trade'&&<>
+        {sanctionsOn.length>0&&<div className="bg-card border border-danger/20 rounded-lg p-4">
+          <h3 className="font-heading text-caption text-danger uppercase tracking-wider mb-2">Sanctions Against Us</h3>
+          <div className="space-y-1">
+            {sanctionsOn.map((s,i)=><div key={i} className="flex items-center gap-2 font-body text-body-sm">
+              <span className="text-text-primary">{s.imposer}</span>
+              <span className="text-danger font-data">Level {s.level}</span>
+            </div>)}
+          </div>
+        </div>}
+        {sanctionsBy.length>0&&<div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Sanctions We Impose</h3>
+          <div className="space-y-1">
+            {sanctionsBy.map((s,i)=><div key={i} className="flex items-center gap-2 font-body text-body-sm">
+              <span className="text-text-primary">{s.target}</span>
+              <span className="font-data text-warning">Level {s.level}</span>
+            </div>)}
+          </div>
+        </div>}
+        {tariffsOn.length>0&&<div className="bg-card border border-warning/20 rounded-lg p-4">
+          <h3 className="font-heading text-caption text-warning uppercase tracking-wider mb-2">Tariffs Against Us</h3>
+          <div className="space-y-1">
+            {tariffsOn.map((t,i)=><div key={i} className="flex items-center gap-2 font-body text-body-sm">
+              <span className="text-text-primary">{t.imposer}</span>
+              <span className="font-data text-warning">Level {t.level}</span>
+            </div>)}
+          </div>
+        </div>}
+        {tariffsBy.length>0&&<div className="bg-card border border-border rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Tariffs We Impose</h3>
+          <div className="space-y-1">
+            {tariffsBy.map((t,i)=><div key={i} className="flex items-center gap-2 font-body text-body-sm">
+              <span className="text-text-primary">{t.target}</span>
+              <span className="font-data text-text-secondary">Level {t.level}</span>
+            </div>)}
+          </div>
+        </div>}
+        {sanctionsOn.length===0&&sanctionsBy.length===0&&tariffsOn.length===0&&tariffsBy.length===0&&
+          <p className="font-body text-body-sm text-text-secondary">No active sanctions or tariffs.</p>
+        }
+      </>}
     </div>
   )
 }
