@@ -686,6 +686,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
 
   // Route to specific form or generic placeholder
   if (actionType === 'public_statement') return <PublicStatementForm {...{roleId,roleName,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_budget') return <BudgetForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -794,6 +795,186 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
             <p className="font-body text-body-sm text-danger">{error}</p>
           </div>
         )}
+      </div>
+    </div>
+  )
+}
+
+/* ── Budget Form ───────────────────────────────────────────────────────── */
+
+const PROD_LEVELS = [{v:0,l:'None'},{v:1,l:'Standard'},{v:2,l:'x2'},{v:3,l:'x3'}]
+const BRANCH_COST: Record<string,number> = {ground:3,naval:6,tactical_air:5,strategic_missile:8,air_defense:4}
+const PROD_COST_M: Record<number,number> = {0:0,1:1,2:2,3:4}
+const PROD_OUT_M: Record<number,number> = {0:0,1:1,2:2,3:3}
+const MAINT_MULT = 3.0
+
+function BudgetForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [c,setC]=useState<Record<string,unknown>|null>(null)
+  const [socialPct,setSocialPct]=useState(1.0)
+  const [prod,setProd]=useState<Record<string,number>>({ground:1,naval:0,tactical_air:1,strategic_missile:0,air_defense:0})
+  const [nucCoins,setNucCoins]=useState(0)
+  const [aiCoins,setAiCoins]=useState(0)
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
+      .then(({data})=>{if(data?.[0]) setC(data[0])})
+  },[simId,countryId])
+
+  if(!c) return <div className="font-body text-body-sm text-text-secondary p-8">Loading budget data...</div>
+
+  const gdp=Number(c.gdp??0), taxRate=Number(c.tax_rate??0.2)
+  const revenue=Math.round(gdp*taxRate*10)/10, treasury=Number(c.treasury??0)
+  const inflation=Number(c.inflation??0), stability=Number(c.stability??5)
+  const socialBaseline=Number(c.social_baseline??0.2)
+  const socialBase=Math.round(socialBaseline*revenue*10)/10
+  const totalUnits=Number(c.mil_ground??0)+Number(c.mil_naval??0)+Number(c.mil_tactical_air??0)+Number(c.mil_strategic_missiles??0)+Number(c.mil_air_defense??0)
+  const maintRate=Number(c.maintenance_per_unit??0.02)
+  const maintenance=Math.round(totalUnits*maintRate*MAINT_MULT*10)/10
+  const socialSpending=Math.round(socialBase*socialPct*10)/10
+
+  let totalProdCoins=0
+  const prodCosts: Record<string,{coins:number;units:number}>={}
+  for (const branch of ['ground','naval','tactical_air','strategic_missile','air_defense']) {
+    const capKey=branch==='tactical_air'?'prod_cap_tactical':`prod_cap_${branch}`
+    const cap=Number(c[capKey]??0)
+    const level=prod[branch]??0
+    const coins=Math.round(BRANCH_COST[branch]*cap*PROD_COST_M[level])
+    const units=Math.round(cap*PROD_OUT_M[level])
+    prodCosts[branch]={coins,units}
+    totalProdCoins+=coins
+  }
+  const techBudget=nucCoins+aiCoins
+  const totalSpending=maintenance+socialSpending+totalProdCoins+techBudget
+  const balance=revenue-totalSpending
+  const deficit=balance<0?-balance:0, surplus=balance>0?balance:0
+  const coveredByTreasury=Math.min(deficit,treasury)
+  const moneyPrinted=deficit>coveredByTreasury?deficit-coveredByTreasury:0
+  const expectedTreasury=treasury+surplus-coveredByTreasury
+
+  const handleSubmit=async()=>{
+    setSubmitting(true);setError(null)
+    try{
+      await submitAction(simId,'set_budget',roleId,countryId,{social_pct:socialPct,production:prod,research:{nuclear_coins:nucCoins,ai_coins:aiCoins}})
+      setResult('Budget submitted — will be processed in Phase B')
+    }catch(e){setError(e instanceof Error?e.message:'Failed')}
+    finally{setSubmitting(false)}
+  }
+
+  const R=({l,v,b,d,s}:{l:string;v:string;b?:boolean;d?:boolean;s?:boolean})=>(
+    <div className={`flex justify-between py-0.5 ${s?'pl-4':''}`}>
+      <span className={`font-body text-caption ${d?'text-danger':'text-text-primary'} ${b?'font-medium':''}`}>{l}</span>
+      <span className={`font-data text-caption ${d?'text-danger font-bold':'text-text-primary'} ${b?'font-bold':''}`}>{v}</span>
+    </div>
+  )
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">National Budget</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT */}
+        <div className="space-y-3">
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Economic Context</h3>
+            <div className="grid grid-cols-4 gap-2 font-data text-caption">
+              <div><div className="text-text-secondary">GDP</div><div className="text-text-primary">${gdp.toFixed(1)}B</div></div>
+              <div><div className="text-text-secondary">Treasury</div><div className="text-text-primary">${treasury.toFixed(1)}B</div></div>
+              <div><div className="text-text-secondary">Inflation</div><div className="text-text-primary">{inflation.toFixed(1)}%</div></div>
+              <div><div className="text-text-secondary">Stability</div><div className="text-text-primary">{stability.toFixed(1)}</div></div>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Revenue</h3>
+            <R l={`GDP $${gdp.toFixed(1)}B × Tax ${(taxRate*100).toFixed(0)}%`} v={`${revenue.toFixed(1)} coins`} b />
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Fixed: Maintenance</h3>
+            <R l={`${totalUnits} units × $${maintRate} × ${MAINT_MULT}`} v={`${maintenance.toFixed(1)} coins`} />
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Social Spending</h3>
+            <div className="flex items-center gap-3 mb-1">
+              <input type="range" min="0.5" max="1.5" step="0.1" value={socialPct} onChange={e=>setSocialPct(parseFloat(e.target.value))} className="flex-1 accent-action"/>
+              <span className="font-data text-data text-text-primary w-14 text-right">{(socialPct*100).toFixed(0)}%</span>
+            </div>
+            <R l={`Base ${socialBase.toFixed(1)} × ${(socialPct*100).toFixed(0)}%`} v={`${socialSpending.toFixed(1)} coins`} />
+            <div className="font-body text-caption text-text-secondary mt-0.5">
+              {socialPct>1?`Stability +${((socialPct-1)*4).toFixed(1)}`:socialPct<1?`Stability ${((socialPct-1)*4).toFixed(1)}`:'Normal level'}
+            </div>
+          </div>
+        </div>
+        {/* RIGHT */}
+        <div className="space-y-3">
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Military Production</h3>
+            <div className="space-y-1.5">
+              {['ground','naval','tactical_air'].map(br=>{
+                const capKey=br==='tactical_air'?'prod_cap_tactical':`prod_cap_${br}`
+                if(Number(c[capKey]??0)===0) return null
+                const pc=prodCosts[br]
+                return <div key={br} className="flex items-center gap-2">
+                  <span className="font-body text-caption text-text-primary w-16 capitalize">{br.replace('_',' ')}</span>
+                  <select value={prod[br]??0} onChange={e=>setProd(p=>({...p,[br]:parseInt(e.target.value)}))}
+                    className="bg-base border border-border rounded px-2 py-0.5 font-data text-caption w-24">{PROD_LEVELS.map(l=><option key={l.v} value={l.v}>{l.l}</option>)}</select>
+                  <span className="font-data text-caption text-text-secondary flex-1">{pc.units} units</span>
+                  <span className="font-data text-caption text-text-primary">{pc.coins}c</span>
+                </div>
+              })}
+              <div className="border-t border-border pt-1"><R l="Total Production" v={`${totalProdCoins} coins`} b/></div>
+            </div>
+          </div>
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Technology R&D</h3>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="font-body text-caption text-text-primary w-16">Nuclear</span>
+                <span className="font-data text-caption text-text-secondary">L{Number(c.nuclear_level??0)} {(Number(c.nuclear_rd_progress??0)*100).toFixed(0)}%</span>
+                <input type="number" min="0" max="99" value={nucCoins} onChange={e=>setNucCoins(Math.max(0,parseInt(e.target.value)||0))}
+                  className="w-16 bg-base border border-border rounded px-2 py-0.5 font-data text-caption text-right ml-auto"/>
+                <span className="font-body text-caption text-text-secondary">c</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-body text-caption text-text-primary w-16">AI</span>
+                <span className="font-data text-caption text-text-secondary">L{Number(c.ai_level??0)} {(Number(c.ai_rd_progress??0)*100).toFixed(0)}%</span>
+                <input type="number" min="0" max="99" value={aiCoins} onChange={e=>setAiCoins(Math.max(0,parseInt(e.target.value)||0))}
+                  className="w-16 bg-base border border-border rounded px-2 py-0.5 font-data text-caption text-right ml-auto"/>
+                <span className="font-body text-caption text-text-secondary">c</span>
+              </div>
+              <div className="border-t border-border pt-1"><R l="Total R&D" v={`${techBudget} coins`} b/></div>
+            </div>
+          </div>
+          <div className={`bg-card border rounded-lg p-4 ${deficit>0?'border-danger/30':'border-success/20'}`}>
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Summary</h3>
+            <R l="Revenue" v={`${revenue.toFixed(1)}`} b/>
+            <R l="Total Spending" v={`${totalSpending.toFixed(1)}`} b/>
+            <div className="border-t border-border my-1"/>
+            {surplus>0&&<R l="Surplus → Treasury" v={`+${surplus.toFixed(1)}`}/>}
+            {deficit>0&&<><R l="Deficit" v={`-${deficit.toFixed(1)}`} d/>
+              <R l={`From Treasury ($${treasury.toFixed(1)})`} v={`-${coveredByTreasury.toFixed(1)}`} s/>
+              {moneyPrinted>0&&<R l="Printed (→ inflation!)" v={`${moneyPrinted.toFixed(1)}`} s d/>}
+            </>}
+            <div className="border-t border-border my-1"/>
+            <R l="Expected Treasury" v={`$${Math.max(0,expectedTreasury).toFixed(1)}B`} b/>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={handleSubmit} disabled={submitting}
+              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+              {submitting?'Submitting...':'Submit Budget'}</button>
+            <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+          </div>
+          {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-success">{result}</p>
+            <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+          </div>}
+          {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+        </div>
       </div>
     </div>
   )
