@@ -211,43 +211,50 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
 # ── Sub-dispatchers ──────────────────────────────────────────────────────
 
 def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: dict) -> dict:
-    """Load units from DB, resolve combat via engine, write losses back.
+    """Load units from DB by hex coordinates, resolve combat, write losses back.
 
     Action payload expected:
-        attacker_country: str (country code)
-        zone_id: str (where combat happens)
-        target_country: str (optional — auto-detected from zone)
+        country_code: str (attacker)
+        target_row: int, target_col: int (hex coordinates where combat happens)
+        target_country: str (optional — auto-detected from hex)
         precomputed_rolls: dict (optional — moderator dice)
     """
     from engine.services.supabase import get_client
 
     client = get_client()
     attacker = action.get("country_code", "")
-    zone_id = action.get("zone_id", "")
+    target_row = action.get("target_row")
+    target_col = action.get("target_col")
     target = action.get("target_country", "")
     precomputed_rolls = action.get("precomputed_rolls")
 
-    if not zone_id:
-        return {"success": False, "narrative": f"No zone_id specified for {combat_type}"}
+    if target_row is None or target_col is None:
+        return {"success": False, "narrative": f"No target hex specified for {combat_type} (need target_row, target_col)"}
 
-    # Load attacker units in or adjacent to zone
+    hex_label = f"({target_row},{target_col})"
+
+    # Load attacker units at this hex
     atk_units = client.table("deployments") \
         .select("*") \
         .eq("sim_run_id", sim_run_id) \
         .eq("country_id", attacker) \
-        .eq("zone_id", zone_id) \
+        .eq("global_row", target_row) \
+        .eq("global_col", target_col) \
+        .eq("unit_status", "active") \
         .execute().data or []
 
-    # Load defender units in zone (all non-attacker countries)
-    all_units_in_zone = client.table("deployments") \
+    # Load all units at this hex (for defenders)
+    all_units_at_hex = client.table("deployments") \
         .select("*") \
         .eq("sim_run_id", sim_run_id) \
-        .eq("zone_id", zone_id) \
+        .eq("global_row", target_row) \
+        .eq("global_col", target_col) \
+        .eq("unit_status", "active") \
         .execute().data or []
-    def_units = [u for u in all_units_in_zone if u["country_id"] != attacker]
+    def_units = [u for u in all_units_at_hex if u["country_id"] != attacker]
 
     if not atk_units:
-        return {"success": False, "narrative": f"No {attacker} units in zone {zone_id}"}
+        return {"success": False, "narrative": f"No {attacker} units at hex {hex_label}"}
 
     # Convert DB rows to engine format — each DB row = 1 unit (individual unit model)
     def to_unit_list(units: list) -> list[dict]:
@@ -274,7 +281,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             ground_atk = [u for u in atk_list if u["type"] in GROUND_TYPES]
             ground_def = [u for u in def_list if u["type"] in GROUND_TYPES]
             if not ground_atk:
-                return {"success": False, "narrative": f"No ground units to attack with in {zone_id}"}
+                return {"success": False, "narrative": f"No ground units to attack with at {hex_label}"}
             result = resolve_ground_combat(
                 attackers=ground_atk,
                 defenders=ground_def,
@@ -284,7 +291,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             # Only apply losses to ground deployment rows
             ground_atk_deps = [u for u in atk_units if u["unit_type"] in GROUND_TYPES]
             ground_def_deps = [u for u in def_units if u["unit_type"] in GROUND_TYPES]
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, zone_id, combat_type)
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, hex_label, combat_type)
 
         if combat_type == "air":
             from engine.engines.military import resolve_air_strike
@@ -297,7 +304,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 ad_units=ad_list,
                 precomputed_rolls=precomputed_rolls,
             )
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, atk_units, def_units, zone_id, combat_type)
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, atk_units, def_units, hex_label, combat_type)
 
         if combat_type == "naval":
             from engine.engines.military import resolve_naval_combat
@@ -311,14 +318,14 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             )
             naval_atk_deps = [u for u in atk_units if u["unit_type"] in NAVAL_TYPES]
             naval_def_deps = [u for u in def_units if u["unit_type"] in NAVAL_TYPES]
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, naval_atk_deps, naval_def_deps, zone_id, combat_type)
+            return _apply_combat_losses(client, sim_run_id, result.__dict__, naval_atk_deps, naval_def_deps, hex_label, combat_type)
 
         # For bombardment, blockade, missile — these need complex Input objects
         # For now, return acknowledged with unit counts
         if combat_type in ("bombardment", "blockade", "missile"):
             return {
                 "success": True,
-                "narrative": f"{combat_type} at zone {zone_id}: {len(atk_list)} attacker units vs {len(def_list)} defender units. Full resolution wiring in progress.",
+                "narrative": f"{combat_type} at hex {hex_label}: {len(atk_list)} attacker units vs {len(def_list)} defender units. Full resolution wiring in progress.",
                 "attacker_units": len(atk_list),
                 "defender_units": len(def_list),
             }
@@ -330,7 +337,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
     return {"success": False, "narrative": f"Unknown combat type: {combat_type}"}
 
 
-def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments: list, def_deployments: list, zone_id: str, combat_type: str) -> dict:
+def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments: list, def_deployments: list, hex_label: str, combat_type: str) -> dict:
     """Apply combat losses to the deployments table.
 
     Individual unit model: each lost unit_code maps to a deployment row → delete it.
@@ -359,7 +366,7 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
     atk_total = len(atk_loss_codes) if isinstance(atk_loss_codes, list) else 0
     def_total = len(def_loss_codes) if isinstance(def_loss_codes, list) else 0
 
-    narrative = result.get("narrative", f"{combat_type} at {zone_id}")
+    narrative = result.get("narrative", f"{combat_type} at {hex_label}")
     result["success"] = True
     result["losses_applied"] = True
     result["attacker_losses_count"] = atk_total
@@ -367,7 +374,7 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
     result["narrative"] = f"{narrative} | Losses: attacker -{atk_total}, defender -{def_total}."
 
     logger.info("Combat %s at %s: atk_losses=%d def_losses=%d (deleted %d rows)",
-                combat_type, zone_id, atk_total, def_total, deleted)
+                combat_type, hex_label, atk_total, def_total, deleted)
     return result
 
 
