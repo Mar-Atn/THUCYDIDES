@@ -225,6 +225,35 @@ export function PublicScreen() {
   const simDate = ROUND_TO_DATE[currentRound] ?? `R${currentRound}`
   const significantEvents = events.filter((e) => SIGNIFICANT_EVENTS.has(e.event_type))
 
+  // Detect active combat in each theater (current round events)
+  const COMBAT_TYPES = new Set(['ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade', 'launch_missile_conventional'])
+  const combatEvents = events.filter((e) => COMBAT_TYPES.has(e.event_type))
+  const hasEasternEreb = combatEvents.some((e) => {
+    const payload = (e as unknown as { payload?: { theater?: string } }).payload
+    return payload?.theater === 'eastern_ereb'
+  })
+  const hasMashriq = combatEvents.some((e) => {
+    const payload = (e as unknown as { payload?: { theater?: string } }).payload
+    return payload?.theater === 'mashriq'
+  })
+
+  // Build rotation panels: always world status, + active theaters
+  const sidebarPanels: string[] = ['world_status']
+  if (hasEasternEreb) sidebarPanels.push('eastern_ereb')
+  if (hasMashriq) sidebarPanels.push('mashriq')
+
+  // Rotate every 15 seconds
+  const [sidebarIndex, setSidebarIndex] = useState(0)
+  useEffect(() => {
+    if (sidebarPanels.length <= 1) return
+    const interval = setInterval(() => {
+      setSidebarIndex((prev) => (prev + 1) % sidebarPanels.length)
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [sidebarPanels.length])
+
+  const activeSidebarPanel = sidebarPanels[sidebarIndex % sidebarPanels.length] ?? 'world_status'
+
   /* Render ---------------------------------------------------------------- */
   if (!simRun) {
     return (
@@ -294,58 +323,101 @@ export function PublicScreen() {
           </div>
         </div>
 
-        {/* ── RIGHT PANEL (~35%) ─────────────────────────────────────── */}
-        <div className="flex-[1] flex flex-col min-w-[280px]">
+        {/* ── RIGHT PANEL (~35%) — rotates between world status + theater maps */}
+        <div className="flex-[1] flex flex-col min-w-[280px] relative">
 
-          {/* Doomsday Indices */}
-          <div className="px-5 py-4 space-y-3 border-b border-white/10">
-            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest">
-              World Status
-            </h3>
-            <DoomsdayGauge
-              label="Geopolitical Tension"
-              value={indices.geopolitical_tension}
-              prev={indices.prev_geopolitical_tension}
-              max={10}
-              dangerUp
-              colorHigh="danger"
-            />
-            <DoomsdayGauge
-              label="Global Economic Health"
-              value={indices.economic_health}
-              prev={indices.prev_economic_health}
-              max={10}
-              dangerUp={false}
-              colorHigh="success"
-            />
-            <DoomsdayGauge
-              label="Doomsday Clock"
-              value={indices.nuclear_danger}
-              prev={indices.prev_nuclear_danger}
-              max={10}
-              dangerUp
-              colorHigh="danger"
-            />
-            <DoomsdayGauge
-              label="Distance to AGI"
-              value={indices.ai_race}
-              prev={indices.prev_ai_race}
-              max={10}
-              dangerUp
-              colorHigh="warning"
-            />
-          </div>
+          {/* Rotation indicator (dots) */}
+          {sidebarPanels.length > 1 && (
+            <div className="absolute top-2 right-3 flex gap-1 z-10">
+              {sidebarPanels.map((panel, i) => (
+                <span
+                  key={panel}
+                  className={`w-2 h-2 rounded-full transition-all ${
+                    i === sidebarIndex % sidebarPanels.length
+                      ? 'bg-white/60 scale-125'
+                      : 'bg-white/15'
+                  }`}
+                />
+              ))}
+            </div>
+          )}
 
-          {/* Columbia vs Cathay Historical Power Graph */}
-          <div className="px-5 py-4 border-b border-white/10">
-            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
-              Global Power Index
-            </h3>
-            <PowerTrendGraph colPower={colPower} catPower={catPower} />
-          </div>
+          {/* Panel: World Status */}
+          {activeSidebarPanel === 'world_status' && (
+            <div className="flex-1 flex flex-col animate-[fadeIn_0.5s_ease]">
+              <div className="px-5 py-4 space-y-3 border-b border-white/10">
+                <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest">
+                  World Status
+                </h3>
+                <DoomsdayGauge
+                  label="Geopolitical Tension"
+                  value={indices.geopolitical_tension}
+                  prev={indices.prev_geopolitical_tension}
+                  max={10} dangerUp colorHigh="danger"
+                />
+                <DoomsdayGauge
+                  label="Global Economic Health"
+                  value={indices.economic_health}
+                  prev={indices.prev_economic_health}
+                  max={10} dangerUp={false} colorHigh="success"
+                />
+                <DoomsdayGauge
+                  label="Doomsday Clock"
+                  value={indices.nuclear_danger}
+                  prev={indices.prev_nuclear_danger}
+                  max={10} dangerUp colorHigh="danger"
+                />
+                <DoomsdayGauge
+                  label="Distance to AGI"
+                  value={indices.ai_race}
+                  prev={indices.prev_ai_race}
+                  max={10} dangerUp colorHigh="warning"
+                />
+              </div>
+              <div className="px-5 py-4">
+                <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
+                  Global Power Index
+                </h3>
+                <PowerTrendGraph colPower={colPower} catPower={catPower} />
+              </div>
+            </div>
+          )}
 
-          {/* Empty space — future use */}
-          <div className="flex-1" />
+          {/* Panel: Eastern Ereb theater */}
+          {activeSidebarPanel === 'eastern_ereb' && (
+            <div className="flex-1 flex flex-col animate-[fadeIn_0.5s_ease]">
+              <div className="px-5 py-3 border-b border-white/10">
+                <h3 className="font-heading text-sm text-danger uppercase tracking-widest">
+                  Eastern Ereb — Active Combat
+                </h3>
+              </div>
+              <div className="flex-1 relative">
+                <iframe
+                  src="/map/deployments.html?display=clean&theater=eastern_ereb"
+                  className="absolute inset-0 w-full h-full border-0"
+                  title="Eastern Ereb Theater"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Panel: Mashriq theater */}
+          {activeSidebarPanel === 'mashriq' && (
+            <div className="flex-1 flex flex-col animate-[fadeIn_0.5s_ease]">
+              <div className="px-5 py-3 border-b border-white/10">
+                <h3 className="font-heading text-sm text-danger uppercase tracking-widest">
+                  Mashriq — Active Combat
+                </h3>
+              </div>
+              <div className="flex-1 relative">
+                <iframe
+                  src="/map/deployments.html?display=clean&theater=mashriq"
+                  className="absolute inset-0 w-full h-full border-0"
+                  title="Mashriq Theater"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -429,6 +501,10 @@ export function PublicScreen() {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
       `}</style>
     </div>
   )
@@ -464,26 +540,22 @@ function DoomsdayGauge({
 
   return (
     <div className="flex items-center gap-3">
-      {/* Speedometer SVG */}
+      {/* Speedometer SVG with color zones */}
       <svg viewBox="0 0 100 60" className="w-20 h-12 shrink-0">
-        {/* Background arc */}
-        <path
-          d="M 10 55 A 40 40 0 0 1 90 55"
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-        {/* Colored arc (filled to current value) */}
-        <path
-          d="M 10 55 A 40 40 0 0 1 90 55"
-          fill="none"
-          stroke={arcColor}
-          strokeWidth="6"
-          strokeLinecap="round"
-          strokeDasharray={`${pct * 126} 126`}
-          opacity="0.8"
-        />
+        {/* Color zone arcs: green (0-25%), yellow (25-50%), red (50-75%), deep red (75-100%) */}
+        {/* Total arc length ~126px. Each zone = ~31.5px */}
+        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
+          stroke="#22C55E" strokeWidth="6" strokeLinecap="butt"
+          strokeDasharray="31.5 94.5" strokeDashoffset="0" opacity="0.25" />
+        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
+          stroke="#F59E0B" strokeWidth="6" strokeLinecap="butt"
+          strokeDasharray="31.5 94.5" strokeDashoffset="-31.5" opacity="0.25" />
+        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
+          stroke="#EF4444" strokeWidth="6" strokeLinecap="butt"
+          strokeDasharray="31.5 94.5" strokeDashoffset="-63" opacity="0.25" />
+        <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
+          stroke="#991B1B" strokeWidth="6" strokeLinecap="butt"
+          strokeDasharray="31.5 94.5" strokeDashoffset="-94.5" opacity="0.35" />
         {/* Needle */}
         <line
           x1="50" y1="55"

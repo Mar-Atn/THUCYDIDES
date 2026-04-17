@@ -11,6 +11,8 @@
   // Used by public screen, participant interface, and any embed.
   const urlParams = new URLSearchParams(window.location.search);
   const DISPLAY_CLEAN = urlParams.get('display') === 'clean';
+  // ?theater=eastern_ereb or ?theater=mashriq — render only that theater
+  const FORCE_THEATER = urlParams.get('theater') || null;
   if (DISPLAY_CLEAN) {
     document.documentElement.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
     document.body.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
@@ -108,7 +110,8 @@
       }
 
       buildCountryLegend();
-      renderView('global');
+      // If a specific theater is requested, render it directly; otherwise global
+      renderView(FORCE_THEATER && state.theaters[FORCE_THEATER] ? FORCE_THEATER : 'global');
       const unitInfo = geographyMode ? '' : ` · ${state.deployments.rows.length} unit entries`;
       setStatus('ok', `${countLandHexes(g)} land hexes${unitInfo}`);
     } catch (err) {
