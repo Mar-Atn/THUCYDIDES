@@ -329,7 +329,8 @@ export function ParticipantDashboard() {
                 onClose={()=>setActiveAction(null)}
                 onSubmitted={()=>{setActiveAction(null); loadData()}}
               />
-            : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}/>
+            : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}
+                simId={simId!} countryId={myRole.country_id} roleId={myRole.id}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
@@ -348,13 +349,78 @@ export function ParticipantDashboard() {
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase, onSelectAction}:{roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void}) {
+function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId}:{
+  roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void
+  simId:string; countryId:string; roleId:string
+}) {
   const avail = new Set(roleActions)
+  const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
+  const [responding, setResponding] = useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('exchange_transactions')
+      .select('id,proposer,counterpart,offer,request,terms,created_at')
+      .eq('sim_run_id',simId).eq('counterpart',countryId).eq('status','pending')
+      .then(({data})=>setPendingTxns((data??[]) as typeof pendingTxns))
+  },[simId,countryId])
+
+  const handleTxnResponse = async (txnId:string, response:'accept'|'decline') => {
+    setResponding(txnId)
+    try {
+      await submitAction(simId,'accept_transaction',roleId,countryId,{
+        transaction_id:txnId, response,
+      })
+      setPendingTxns(prev=>prev.filter(t=>t.id!==txnId))
+    } catch(e) { alert(e instanceof Error?e.message:'Failed') }
+    finally { setResponding(null) }
+  }
+
+  const summarizeAssets = (a:Record<string,unknown>) => {
+    const parts:string[] = []
+    if (a.coins) parts.push(`${a.coins} coins`)
+    if (a.units) parts.push(`${JSON.stringify(a.units)}`)
+    if (a.technology) parts.push(`Tech: ${JSON.stringify(a.technology)}`)
+    if (a.basing_rights) parts.push('Basing Rights')
+    return parts.length>0 ? parts.join(', ') : 'nothing'
+  }
+
   return (
     <div className="space-y-4">
-      <div className="bg-warning/5 border border-warning/20 rounded-lg p-4">
-        <h3 className="font-heading text-h3 text-warning mb-1">Actions Expected Now</h3>
-        <p className="font-body text-caption text-text-secondary">No urgent actions at this time.</p>
+      {/* Actions Expected Now */}
+      <div className={`border rounded-lg p-4 ${pendingTxns.length>0?'bg-warning/10 border-warning/30':'bg-warning/5 border-warning/20'}`}>
+        <h3 className="font-heading text-h3 text-warning mb-2">Actions Expected Now</h3>
+        {pendingTxns.length===0
+          ? <p className="font-body text-caption text-text-secondary">No urgent actions at this time.</p>
+          : <div className="space-y-3">
+            {pendingTxns.map(txn=><div key={txn.id} className="bg-card border border-border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-body text-body-sm text-text-primary font-medium">Transaction Proposal from {txn.proposer}</span>
+                <span className="font-body text-caption text-text-secondary">{new Date(txn.created_at).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                  <div className="font-body text-caption text-success uppercase mb-0.5">They Offer</div>
+                  <div className="font-body text-body-sm text-text-primary">{summarizeAssets(txn.offer as Record<string,unknown>)}</div>
+                </div>
+                <div>
+                  <div className="font-body text-caption text-action uppercase mb-0.5">They Request</div>
+                  <div className="font-body text-body-sm text-text-primary">{summarizeAssets(txn.request as Record<string,unknown>)}</div>
+                </div>
+              </div>
+              {txn.terms&&<p className="font-body text-caption text-text-secondary italic mb-2">"{txn.terms}"</p>}
+              <div className="flex gap-2">
+                <button onClick={()=>handleTxnResponse(txn.id,'accept')} disabled={responding===txn.id}
+                  className="font-body text-caption font-medium bg-success/10 text-success px-4 py-1.5 rounded hover:bg-success/20 transition-colors">
+                  {responding===txn.id?'...':'Accept'}
+                </button>
+                <button onClick={()=>handleTxnResponse(txn.id,'decline')} disabled={responding===txn.id}
+                  className="font-body text-caption font-medium bg-danger/10 text-danger px-4 py-1.5 rounded hover:bg-danger/20 transition-colors">
+                  Decline
+                </button>
+              </div>
+            </div>)}
+          </div>
+        }
       </div>
       {CATS.map(cat=>{
         const acts=cat.actions.filter(a=>{
