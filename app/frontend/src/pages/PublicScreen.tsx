@@ -535,10 +535,10 @@ function DoomsdayGauge({
   const angle = -120 + pct * 240
 
   // Arc color gradient stops
-  const arcColor = colorHigh === 'danger' ? '#EF4444'
+  const arcColor = colorHigh === 'danger' ? '#C4A030'
     : colorHigh === 'success' ? '#22C55E'
     : colorHigh === 'warning' ? '#F59E0B'
-    : '#3B82F6'
+    : '#3A6B9F'
 
   return (
     <div className="flex items-center gap-3">
@@ -553,7 +553,7 @@ function DoomsdayGauge({
           stroke="#F59E0B" strokeWidth="6" strokeLinecap="butt"
           strokeDasharray="31.5 94.5" strokeDashoffset="-31.5" opacity="0.25" />
         <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
-          stroke="#EF4444" strokeWidth="6" strokeLinecap="butt"
+          stroke="#C4A030" strokeWidth="6" strokeLinecap="butt"
           strokeDasharray="31.5 94.5" strokeDashoffset="-63" opacity="0.25" />
         <path d="M 10 55 A 40 40 0 0 1 90 55" fill="none"
           stroke="#991B1B" strokeWidth="6" strokeLinecap="butt"
@@ -625,14 +625,14 @@ function PowerBalanceBar({ simId }: { simId: string }) {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="font-data text-xs text-action w-24 text-right">
+      <span className="font-data text-xs w-24 text-right" style={{ color: '#3A6B9F' }}>
         Columbia {col}%
       </span>
       <div className="flex-1 flex h-4 rounded-full overflow-hidden bg-white/5">
-        <div className="bg-action/70 transition-all duration-1000" style={{ width: `${col}%` }} />
-        <div className="bg-danger/70 transition-all duration-1000" style={{ width: `${cat}%` }} />
+        <div className="transition-all duration-1000" style={{ width: `${col}%`, backgroundColor: 'rgba(58,107,159,0.7)' }} />
+        <div className="transition-all duration-1000" style={{ width: `${cat}%`, backgroundColor: 'rgba(196,160,48,0.7)' }} />
       </div>
-      <span className="font-data text-xs text-danger w-24">
+      <span className="font-data text-xs w-24" style={{ color: '#C4A030' }}>
         {cat}% Cathay
       </span>
     </div>
@@ -666,20 +666,20 @@ function PowerTrendGraph({ colPower, catPower }: { colPower: number; catPower: n
         ))}
 
         {/* Columbia line (blue, thicker) */}
-        <polyline fill="none" stroke="#3B82F6" strokeWidth="2.5" opacity="0.8" points={toPoints(colData)} />
+        <polyline fill="none" stroke="#3A6B9F" strokeWidth="2.5" opacity="0.8" points={toPoints(colData)} />
         {/* Cathay line (red, thicker) */}
-        <polyline fill="none" stroke="#EF4444" strokeWidth="2.5" opacity="0.8" points={toPoints(catData)} />
+        <polyline fill="none" stroke="#C4A030" strokeWidth="2.5" opacity="0.8" points={toPoints(catData)} />
 
         {/* SIM boundary line */}
         <line x1={w * (10/11)} y1="0" x2={w * (10/11)} y2={h} stroke="white" strokeWidth="0.5" opacity="0.3" strokeDasharray="3,3" />
 
         {/* Labels */}
-        <text x="2" y={h - (colData[0] / maxVal) * h - 4} fill="#3B82F6" fontSize="8" opacity="0.7">Columbia</text>
-        <text x="2" y={h - (catData[0] / maxVal) * h + 10} fill="#EF4444" fontSize="8" opacity="0.7">Cathay</text>
+        <text x="2" y={h - (colData[0] / maxVal) * h - 4} fill="#3A6B9F" fontSize="8" opacity="0.7">Columbia</text>
+        <text x="2" y={h - (catData[0] / maxVal) * h + 10} fill="#C4A030" fontSize="8" opacity="0.7">Cathay</text>
 
         {/* End values */}
-        <circle cx={w} cy={h - (colData[colData.length-1] / maxVal) * h} r="3" fill="#3B82F6" opacity="0.9" />
-        <circle cx={w} cy={h - (catData[catData.length-1] / maxVal) * h} r="3" fill="#EF4444" opacity="0.9" />
+        <circle cx={w} cy={h - (colData[colData.length-1] / maxVal) * h} r="3" fill="#3A6B9F" opacity="0.9" />
+        <circle cx={w} cy={h - (catData[catData.length-1] / maxVal) * h} r="3" fill="#C4A030" opacity="0.9" />
 
         {/* Year labels at bottom */}
         {labels.map((l, i) => l ? (
