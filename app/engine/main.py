@@ -164,6 +164,63 @@ async def get_map_units(sim_id: str):
     return {"units": units, "count": len(units), "active": active, "mapped": mapped}
 
 
+@app.get("/api/sim/{sim_id}/map/combat-events")
+async def get_map_combat_events(sim_id: str, round_num: int = 1):
+    """Get combat events with hex coordinates for blast markers on the map."""
+    from engine.services.supabase import get_client
+    client = get_client()
+
+    COMBAT_TYPES = {'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade', 'launch_missile_conventional'}
+
+    evts = client.table("observatory_events") \
+        .select("event_type, payload, country_code") \
+        .eq("sim_run_id", sim_id) \
+        .eq("round_num", round_num) \
+        .execute().data or []
+
+    combat = []
+    seen_hexes = set()
+    for e in evts:
+        if e["event_type"] not in COMBAT_TYPES:
+            continue
+        p = e.get("payload") or {}
+        tr = p.get("target_row")
+        tc = p.get("target_col")
+        theater = p.get("theater")
+        if tr is None or tc is None:
+            continue
+        hex_key = (tr, tc)
+        if hex_key in seen_hexes:
+            continue  # One marker per hex
+        seen_hexes.add(hex_key)
+
+        # Resolve theater coords if possible
+        theater_row = None
+        theater_col = None
+        if theater:
+            # Look up from deployments at this global hex that have theater coords
+            dep = client.table("deployments") \
+                .select("theater_row, theater_col") \
+                .eq("sim_run_id", sim_id) \
+                .eq("global_row", tr).eq("global_col", tc) \
+                .eq("theater", theater) \
+                .limit(1).execute().data
+            if dep:
+                theater_row = dep[0].get("theater_row")
+                theater_col = dep[0].get("theater_col")
+
+        combat.append({
+            "event_type": e["event_type"],
+            "global_row": tr,
+            "global_col": tc,
+            "theater": theater,
+            "theater_row": theater_row,
+            "theater_col": theater_col,
+        })
+
+    return {"events": combat, "count": len(combat)}
+
+
 @app.get("/api/sim/{sim_id}/world", response_model=APIResponse)
 async def get_world_state(sim_id: str, round_num: Optional[int] = None):
     """Get world state snapshot."""

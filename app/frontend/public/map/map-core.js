@@ -117,6 +117,24 @@
         state.units = { units: [] };
       }
 
+      // Load combat events for blast markers (only with sim_run_id)
+      state.combatEvents = [];
+      if (SIM_RUN_ID) {
+        try {
+          const evtsResp = await fetch(`/api/sim/${SIM_RUN_ID}/state`).catch(() => null);
+          const simState = evtsResp && evtsResp.ok ? await evtsResp.json() : null;
+          const currentRound = simState?.current_round || 1;
+
+          const combatResp = await fetch(
+            `/api/sim/${SIM_RUN_ID}/map/combat-events?round_num=${currentRound}`
+          ).catch(() => null);
+          if (combatResp && combatResp.ok) {
+            const combatData = await combatResp.json();
+            state.combatEvents = combatData.events || [];
+          }
+        } catch (e) { console.debug('combat events load failed:', e); }
+      }
+
       buildCountryLegend();
       // If a specific theater is requested, render it directly; otherwise global
       renderView(FORCE_THEATER && state.theaters[FORCE_THEATER] ? FORCE_THEATER : 'global');
@@ -238,12 +256,14 @@
         const sub = document.getElementById('mapSubtitle');
         if (sub) sub.textContent = '— Global';
         renderGlobal(svg);
+        renderBlastMarkers(svg, 'global');
       } else {
         const backBtn = document.getElementById('backBtn');
         if (backBtn) backBtn.style.display = 'inline-block';
         const sub2 = document.getElementById('mapSubtitle');
         if (sub2) sub2.textContent = '— ' + THEATER_LABELS[viewName];
         renderTheater(svg, viewName);
+        renderBlastMarkers(svg, viewName);
       }
       svg.classList.remove('fading');
     }, 150);
@@ -571,6 +591,63 @@
   // ---------- Country name labels at centroid ----------
   // Groups land hexes by owner, computes centroid, renders country name.
   // Skips sea and single-hex countries where the hex label would collide.
+  // ---------- Blast markers (combat events) ----------
+  function renderBlastMarkers(svg, viewName) {
+    if (!state.combatEvents || state.combatEvents.length === 0) return;
+
+    const isGlobal = viewName === 'global';
+    const r = isGlobal ? HEX_R_GLOBAL : HEX_R_THEATER;
+
+    state.combatEvents.forEach((evt) => {
+      let row, col;
+      if (isGlobal) {
+        row = evt.global_row;
+        col = evt.global_col;
+      } else {
+        // Theater view — use theater coords if event matches this theater
+        if (evt.theater !== viewName) return;
+        row = evt.theater_row;
+        col = evt.theater_col;
+      }
+      if (row == null || col == null) return;
+
+      // Convert to 0-indexed for hexCenter
+      const center = hexCenter(row - 1, col - 1, r);
+
+      // Explosion burst SVG — starburst shape
+      const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      g.setAttribute('transform', `translate(${center.x},${center.y})`);
+      g.style.pointerEvents = 'none';
+
+      // Outer glow
+      const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      glow.setAttribute('r', r * 0.7);
+      glow.setAttribute('fill', 'rgba(255,60,20,0.25)');
+      glow.setAttribute('stroke', 'none');
+      g.appendChild(glow);
+
+      // Starburst
+      const burst = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      burst.setAttribute('text-anchor', 'middle');
+      burst.setAttribute('dominant-baseline', 'central');
+      burst.setAttribute('font-size', r * 0.9);
+      burst.setAttribute('fill', '#FF3C14');
+      burst.setAttribute('opacity', '0.9');
+      burst.textContent = '\u{1F4A5}';  // 💥 explosion emoji
+      g.appendChild(burst);
+
+      // Pulsing animation
+      const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+      anim.setAttribute('attributeName', 'opacity');
+      anim.setAttribute('values', '0.9;0.5;0.9');
+      anim.setAttribute('dur', '1.5s');
+      anim.setAttribute('repeatCount', 'indefinite');
+      glow.appendChild(anim);
+
+      svg.appendChild(g);
+    });
+  }
+
   function renderCountryLabels(svg, data, hexRadius) {
     const groups = {}; // owner -> [{x,y}]
     for (let rIdx = 0; rIdx < data.rows; rIdx++) {
