@@ -145,7 +145,12 @@ def create_sim_run(
                 id_field="id", id_is_text=False,
                 exclude_cols=["created_at"])
 
-    # ── 12. Copy world_state (round 0 only) ──────────────────────────────
+    # ── 12. Copy artefacts (text id → keep role_id references)
+    _copy_table(client, "artefacts", source_sim_id, new_id,
+                id_field="id", id_is_text=True,
+                exclude_cols=["created_at"])
+
+    # ── 13. Copy world_state (round 0 only) ──────────────────────────────
     _copy_world_state(client, source_sim_id, new_id)
 
     # ── 13. Count what we copied ─────────────────────────────────────────
