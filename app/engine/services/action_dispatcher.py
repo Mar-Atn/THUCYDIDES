@@ -155,22 +155,33 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     # ── Transactions / Agreements ──────────────────���──────────────────
     if action_type == "propose_transaction":
         from engine.services.transaction_engine import propose_exchange
-        return propose_exchange(sim_run_id, round_num, action)
+        action["round_num"] = round_num
+        return propose_exchange(action, sim_run_id)
 
     if action_type == "accept_transaction":
         from engine.services.transaction_engine import respond_to_exchange
         return respond_to_exchange(
-            sim_run_id, action.get("transaction_id"),
-            action.get("response", "accept"), action.get("counter_offer"))
+            transaction_id=action.get("transaction_id", ""),
+            response=action.get("response", "accept"),
+            sim_run_id=sim_run_id,
+            rationale=action.get("rationale", ""),
+            counter_offer=action.get("counter_offer"),
+        )
 
     if action_type == "propose_agreement":
         from engine.services.agreement_engine import propose_agreement
-        return propose_agreement(sim_run_id, round_num, action)
+        action["round_num"] = round_num
+        return propose_agreement(action, sim_run_id)
 
     if action_type == "sign_agreement":
         from engine.services.agreement_engine import sign_agreement
         return sign_agreement(
-            sim_run_id, action.get("agreement_id"), role_id)
+            agreement_id=action.get("agreement_id", ""),
+            country_code=country_code,
+            role_id=role_id,
+            confirm=action.get("confirm", True),
+            comments=action.get("comments", ""),
+        )
 
     # ── Diplomatic ────────────────────────────────────────────────────
     if action_type == "public_statement":
