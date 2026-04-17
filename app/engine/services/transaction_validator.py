@@ -214,11 +214,24 @@ def _check_assets(
         if coins > treasury:
             errors.append(f"{side.upper()}_INSUFFICIENT_COINS: needs {coins}, has {treasury:.0f}")
 
-    for code in (assets.get("units") or []):
-        u = units.get(code)
-        if not u:
-            errors.append(f"{side.upper()}_UNKNOWN_UNIT: {code!r}")
-        elif u.get("country_code") != cc:
-            errors.append(f"{side.upper()}_NOT_OWN_UNIT: {code!r}")
-        elif (u.get("status") or "").lower() == "destroyed":
-            errors.append(f"{side.upper()}_UNIT_DESTROYED: {code!r}")
+    for item in (assets.get("units") or []):
+        if isinstance(item, str):
+            # Specific unit_id
+            u = units.get(item)
+            if not u:
+                errors.append(f"{side.upper()}_UNKNOWN_UNIT: {item!r}")
+            elif u.get("country_code") != cc:
+                errors.append(f"{side.upper()}_NOT_OWN_UNIT: {item!r}")
+            elif (u.get("status") or "").lower() in ("destroyed", "active"):
+                if (u.get("status") or "").lower() != "reserve":
+                    errors.append(f"{side.upper()}_UNIT_NOT_RESERVE: {item!r} is {u.get('status')}")
+        elif isinstance(item, dict) and item.get("type") and item.get("count"):
+            # Type + count request — check sufficient reserves
+            utype = item["type"]
+            needed = int(item["count"])
+            available = sum(1 for u in units.values()
+                          if u.get("country_code") == cc
+                          and u.get("unit_type") == utype
+                          and u.get("status") == "reserve")
+            if available < needed:
+                errors.append(f"{side.upper()}_INSUFFICIENT_UNITS: needs {needed} {utype} reserve, has {available}")

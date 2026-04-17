@@ -118,7 +118,7 @@ def respond_to_exchange(
     txn = res.data[0]
 
     if txn["status"] not in ("pending", "countered"):
-        return {"status": txn["status"], "errors": ["Transaction not in respondable state"]}
+        return {"status": txn["status"], "errors": [f"Transaction is {txn['status']}, not respondable"]}
 
     round_num = txn["round_num"]
     scenario_id = txn.get("scenario_id")
@@ -183,6 +183,16 @@ def respond_to_exchange(
                          {"transaction_id": transaction_id, "errors": exec_report["errors"]})
 
             return {"status": "failed_validation", "errors": exec_report["errors"]}
+
+        # Lock: set status to 'executing' to prevent double-accept
+        client.table("exchange_transactions").update({
+            "status": "executing",
+        }).eq("id", transaction_id).in_("status", ["pending", "countered"]).execute()
+
+        # Re-verify we got the lock
+        recheck = client.table("exchange_transactions").select("status").eq("id", transaction_id).execute()
+        if recheck.data and recheck.data[0]["status"] != "executing":
+            return {"status": recheck.data[0]["status"], "errors": ["Transaction already processed"]}
 
         # EXECUTE atomically
         changes = _execute_transfers(
@@ -253,23 +263,25 @@ def _execute_transfers(
     for code in (offer.get("units") or []):
         _transfer_unit(client, sim_run_id, round_num, code, proposer_cc, counterpart_cc, changes)
 
-    # --- UNITS (counterpart gives via request) ---
-    for code in (request.get("units") or []):
-        _transfer_unit(client, sim_run_id, round_num, code, counterpart_cc, proposer_cc, changes)
+    # --- UNITS (counterpart gives via request — type+count, system picks) ---
+    req_units = request.get("units") or []
+    for item in req_units:
+        if isinstance(item, str):
+            # Specific unit_id (legacy format)
+            _transfer_unit(client, sim_run_id, round_num, item, counterpart_cc, proposer_cc, changes)
+        elif isinstance(item, dict) and item.get("type") and item.get("count"):
+            # Type + count — system auto-picks from reserve
+            _transfer_unit_by_type(client, sim_run_id, round_num, item["type"], int(item["count"]), counterpart_cc, proposer_cc, changes)
 
-    # --- TECHNOLOGY (proposer shares) ---
+    # --- TECHNOLOGY (proposer shares — sets recipient level) ---
     tech = offer.get("technology") or {}
-    if tech.get("nuclear"):
-        _transfer_tech(client, sim_run_id, round_num, counterpart_cc, "nuclear_rd_progress", NUCLEAR_TECH_BOOST, changes, f"{proposer_cc}→{counterpart_cc}")
-    if tech.get("ai"):
-        _transfer_tech(client, sim_run_id, round_num, counterpart_cc, "ai_rd_progress", AI_TECH_BOOST, changes, f"{proposer_cc}→{counterpart_cc}")
+    if tech.get("type") and tech.get("level"):
+        _transfer_tech(client, sim_run_id, round_num, counterpart_cc, tech["type"], int(tech["level"]), changes, f"{proposer_cc}→{counterpart_cc}")
 
     # --- TECHNOLOGY (counterpart shares via request) ---
     req_tech = request.get("technology") or {}
-    if req_tech.get("nuclear"):
-        _transfer_tech(client, sim_run_id, round_num, proposer_cc, "nuclear_rd_progress", NUCLEAR_TECH_BOOST, changes, f"{counterpart_cc}→{proposer_cc}")
-    if req_tech.get("ai"):
-        _transfer_tech(client, sim_run_id, round_num, proposer_cc, "ai_rd_progress", AI_TECH_BOOST, changes, f"{counterpart_cc}→{proposer_cc}")
+    if req_tech.get("type") and req_tech.get("level"):
+        _transfer_tech(client, sim_run_id, round_num, proposer_cc, req_tech["type"], int(req_tech["level"]), changes, f"{counterpart_cc}→{proposer_cc}")
 
     # --- BASING RIGHTS (proposer grants) ---
     if offer.get("basing_rights"):
@@ -283,27 +295,23 @@ def _execute_transfers(
 
 
 def _transfer_coins(client, sim_run_id, round_num, from_cc, to_cc, amount, changes):
-    """Move coins between country treasuries."""
+    """Move coins between country treasuries (live countries table)."""
     try:
         # Deduct from sender
-        row = client.table("country_states_per_round").select("treasury") \
-            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-            .eq("country_code", from_cc).limit(1).execute().data
+        row = client.table("countries").select("treasury") \
+            .eq("sim_run_id", sim_run_id).eq("id", from_cc).execute().data
         if row:
             new_val = max(0, float(row[0]["treasury"] or 0) - amount)
-            client.table("country_states_per_round").update({"treasury": round(new_val, 2)}) \
-                .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-                .eq("country_code", from_cc).execute()
+            client.table("countries").update({"treasury": round(new_val, 2)}) \
+                .eq("sim_run_id", sim_run_id).eq("id", from_cc).execute()
 
         # Add to receiver
-        row = client.table("country_states_per_round").select("treasury") \
-            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-            .eq("country_code", to_cc).limit(1).execute().data
+        row = client.table("countries").select("treasury") \
+            .eq("sim_run_id", sim_run_id).eq("id", to_cc).execute().data
         if row:
             new_val = float(row[0]["treasury"] or 0) + amount
-            client.table("country_states_per_round").update({"treasury": round(new_val, 2)}) \
-                .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-                .eq("country_code", to_cc).execute()
+            client.table("countries").update({"treasury": round(new_val, 2)}) \
+                .eq("sim_run_id", sim_run_id).eq("id", to_cc).execute()
 
         changes.append(f"{from_cc} → {to_cc}: {amount} coins")
     except Exception as e:
@@ -311,53 +319,80 @@ def _transfer_coins(client, sim_run_id, round_num, from_cc, to_cc, amount, chang
 
 
 def _transfer_unit(client, sim_run_id, round_num, unit_code, from_cc, to_cc, changes):
-    """Transfer a specific unit to new owner's reserve."""
+    """Transfer a specific unit to new owner's reserve (live deployments table)."""
     try:
-        client.table("unit_states_per_round").update({
-            "country_code": to_cc,
-            "status": "reserve",
+        client.table("deployments").update({
+            "country_id": to_cc,
+            "unit_status": "reserve",
             "global_row": None,
             "global_col": None,
             "theater": None,
             "theater_row": None,
             "theater_col": None,
             "embarked_on": None,
-        }).eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-          .eq("unit_code", unit_code).execute()
+        }).eq("sim_run_id", sim_run_id).eq("unit_id", unit_code).execute()
         changes.append(f"{from_cc} → {to_cc}: unit {unit_code}")
     except Exception as e:
         logger.warning("unit transfer failed %s: %s", unit_code, e)
 
 
-def _transfer_tech(client, sim_run_id, round_num, receiver_cc, field, boost, changes, label):
-    """Boost receiver's R&D progress."""
+def _transfer_unit_by_type(client, sim_run_id, round_num, unit_type, count, from_cc, to_cc, changes):
+    """Transfer N reserve units of a type from one country to another."""
     try:
-        row = client.table("country_states_per_round").select(field) \
-            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-            .eq("country_code", receiver_cc).limit(1).execute().data
-        if row:
-            old = float(row[0].get(field) or 0)
-            client.table("country_states_per_round").update({
-                field: round(old + boost, 4),
-            }).eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-              .eq("country_code", receiver_cc).execute()
-        changes.append(f"{label}: {field} +{boost}")
+        # Find reserve units of the requested type
+        available = client.table("deployments").select("id, unit_id") \
+            .eq("sim_run_id", sim_run_id).eq("country_id", from_cc) \
+            .eq("unit_type", unit_type).eq("unit_status", "reserve") \
+            .limit(count).execute().data or []
+
+        transferred = 0
+        for u in available[:count]:
+            client.table("deployments").update({
+                "country_id": to_cc,
+                "unit_status": "reserve",
+            }).eq("id", u["id"]).execute()
+            transferred += 1
+
+        if transferred > 0:
+            changes.append(f"{from_cc} → {to_cc}: {transferred} {unit_type} units")
+    except Exception as e:
+        logger.warning("unit type transfer failed %s %s: %s", unit_type, from_cc, e)
+
+
+def _transfer_tech(client, sim_run_id, round_num, receiver_cc, tech_type, level, changes, label):
+    """Set receiver's technology to specified level (live countries table).
+
+    Per CONTRACT_TRANSACTION v2: tech transfer SETS the level.
+    Nuclear: sets nuclear_level but nuclear_confirmed = false (needs test).
+    AI: sets ai_level directly.
+    """
+    try:
+        if tech_type == "nuclear":
+            client.table("countries").update({
+                "nuclear_level": level,
+                "nuclear_confirmed": False,  # Recipient must test to confirm
+            }).eq("sim_run_id", sim_run_id).eq("id", receiver_cc).execute()
+            changes.append(f"{label}: nuclear → L{level} (unconfirmed)")
+        elif tech_type == "ai":
+            client.table("countries").update({
+                "ai_level": level,
+            }).eq("sim_run_id", sim_run_id).eq("id", receiver_cc).execute()
+            changes.append(f"{label}: AI → L{level}")
     except Exception as e:
         logger.warning("tech transfer failed %s: %s", receiver_cc, e)
 
 
 def _grant_basing(client, sim_run_id, host_cc, guest_cc, changes):
-    """Grant basing rights via the canonical basing_rights_engine."""
-    from engine.services.basing_rights_engine import grant_basing_rights
-    result = grant_basing_rights(
-        sim_run_id=sim_run_id,
-        host_country=host_cc,
-        guest_country=guest_cc,
-        round_num=0,  # round_num not tracked per transaction — use 0
-        source="transaction",
-    )
-    if result.get("success"):
+    """Grant basing rights by updating relationships table directly."""
+    try:
+        # Update relationship: host grants basing to guest
+        client.table("relationships").update({
+            "basing_rights_a_to_b": True,
+        }).eq("sim_run_id", sim_run_id) \
+          .eq("from_country_id", host_cc).eq("to_country_id", guest_cc).execute()
         changes.append(f"{host_cc} grants basing rights to {guest_cc}")
+    except Exception as e:
+        logger.warning("basing rights grant failed %s→%s: %s", host_cc, guest_cc, e)
 
 
 # ---------------------------------------------------------------------------
