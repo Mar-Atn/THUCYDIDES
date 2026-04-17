@@ -105,6 +105,7 @@ class Country(BaseModel):
     # Technology
     nuclear_level: int = 0
     nuclear_rd_progress: float = 0
+    nuclear_confirmed: bool = False  # True when current level tested/confirmed — required for launch
     ai_level: int = 0
     ai_rd_progress: float = 0
 
