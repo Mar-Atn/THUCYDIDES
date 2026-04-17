@@ -119,9 +119,11 @@ export function PublicScreen() {
   const [events, setEvents] = useState<PublicEvent[]>([])
   const [remaining, setRemaining] = useState<number | null>(null)
   const [indices, setIndices] = useState<DoomsdayIndices>({
-    geopolitical_tension: 3, economic_health: 7, nuclear_danger: 1, ai_race: 3,
-    prev_geopolitical_tension: 3, prev_economic_health: 7, prev_nuclear_danger: 1, prev_ai_race: 3,
+    geopolitical_tension: 5, economic_health: 6, nuclear_danger: 4, ai_race: 4,
+    prev_geopolitical_tension: 5, prev_economic_health: 6, prev_nuclear_danger: 4, prev_ai_race: 4,
   })
+  const [colPower, setColPower] = useState(55)
+  const [catPower, setCatPower] = useState(45)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const tickerRef = useRef<HTMLDivElement>(null)
 
@@ -242,9 +244,16 @@ export function PublicScreen() {
           <span className="font-heading text-3xl text-white tracking-wide">
             R{currentRound}
           </span>
-          <span className="font-body text-lg text-white/60 uppercase tracking-widest">
-            {phaseLabel(currentPhase)}
-          </span>
+          {currentPhase === 'B' && (
+            <span className="font-body text-lg text-warning uppercase tracking-widest">
+              PROCESSING
+            </span>
+          )}
+          {simState?.status === 'paused' && (
+            <span className="font-body text-lg text-text-secondary uppercase tracking-widest">
+              PAUSED
+            </span>
+          )}
           {remaining !== null && (
             <span className={`font-data text-3xl ${
               remaining < 0 ? 'text-danger animate-pulse' : 'text-white'
@@ -268,13 +277,21 @@ export function PublicScreen() {
       {/* ================================================================ */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* ── MAP AREA (left, ~65%) ──────────────────────────────────── */}
-        <div className="flex-[2] relative border-r border-white/10">
-          <iframe
-            src="/map/deployments.html?display=clean"
-            className="absolute inset-0 w-full h-full border-0"
-            title="Global Map"
-          />
+        {/* ── LEFT: MAP + COLUMBIA-CATHAY (~65%) ─────────────────────── */}
+        <div className="flex-[2] flex flex-col border-r border-white/10">
+          {/* Map iframe */}
+          <div className="flex-1 relative">
+            <iframe
+              src="/map/deployments.html?display=clean"
+              className="absolute inset-0 w-full h-full border-0"
+              title="Global Map"
+            />
+          </div>
+
+          {/* Columbia vs Cathay Power Balance (below map) */}
+          <div className="px-6 py-2 border-t border-white/10">
+            <PowerBalanceBar simId={simId!} />
+          </div>
         </div>
 
         {/* ── RIGHT PANEL (~35%) ─────────────────────────────────────── */}
@@ -294,7 +311,7 @@ export function PublicScreen() {
               colorHigh="danger"
             />
             <DoomsdayGauge
-              label="Economic Health"
+              label="Global Economic Health"
               value={indices.economic_health}
               prev={indices.prev_economic_health}
               max={10}
@@ -302,7 +319,7 @@ export function PublicScreen() {
               colorHigh="success"
             />
             <DoomsdayGauge
-              label="Nuclear Danger"
+              label="Doomsday Clock"
               value={indices.nuclear_danger}
               prev={indices.prev_nuclear_danger}
               max={10}
@@ -310,7 +327,7 @@ export function PublicScreen() {
               colorHigh="danger"
             />
             <DoomsdayGauge
-              label="AI Race"
+              label="Distance to AGI"
               value={indices.ai_race}
               prev={indices.prev_ai_race}
               max={10}
@@ -319,88 +336,91 @@ export function PublicScreen() {
             />
           </div>
 
-          {/* Columbia vs Cathay Power Balance */}
+          {/* Columbia vs Cathay Historical Power Graph */}
           <div className="px-5 py-4 border-b border-white/10">
             <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
-              Columbia vs Cathay
+              Global Power Index
             </h3>
-            <PowerBalanceBar simId={simId!} />
+            <PowerTrendGraph colPower={colPower} catPower={catPower} />
           </div>
 
-          {/* World News (remaining space) */}
-          <div className="flex-1 px-5 py-3 overflow-y-auto">
-            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
-              World News
-            </h3>
-            <div className="space-y-2">
-              {significantEvents.length === 0 ? (
-                <p className="font-body text-xs text-white/20">Awaiting events...</p>
-              ) : (
-                significantEvents.slice(0, 15).map((evt) => (
-                  <div key={evt.id} className="flex items-start gap-2">
-                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                      evt.category === 'military' ? 'bg-danger' :
-                      evt.category === 'economic' ? 'bg-accent' :
-                      evt.category === 'diplomatic' ? 'bg-action' :
-                      evt.category === 'political' ? 'bg-warning' :
-                      'bg-white/30'
-                    }`} />
-                    <span className="font-body text-xs text-white/60 leading-tight">
-                      {evt.summary}
-                    </span>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
+          {/* Empty space — future use */}
+          <div className="flex-1" />
         </div>
       </div>
 
       {/* ================================================================ */}
       {/*  NEWS TICKER (bottom)                                            */}
       {/* ================================================================ */}
-      <footer className="border-t border-white/10 bg-[#0D1220] px-6 py-2 overflow-hidden">
-        <div
-          ref={tickerRef}
-          className="flex items-center gap-8 animate-[scroll_60s_linear_infinite] whitespace-nowrap"
-          style={{
-            animationName: 'tickerScroll',
-          }}
-        >
-          {significantEvents.length === 0 ? (
-            <span className="font-body text-sm text-white/30">
-              Awaiting events...
-            </span>
-          ) : (
-            <>
-              {significantEvents.map((evt) => (
-                <span key={evt.id} className="font-body text-sm text-white/70 inline-flex items-center gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    evt.category === 'military' ? 'bg-danger' :
-                    evt.category === 'economic' ? 'bg-accent' :
-                    evt.category === 'diplomatic' ? 'bg-action' :
-                    evt.category === 'political' ? 'bg-warning' :
-                    'bg-white/30'
-                  }`} />
-                  {evt.summary}
-                </span>
-              ))}
-              {/* Duplicate for seamless loop */}
-              {significantEvents.map((evt) => (
-                <span key={`dup-${evt.id}`} className="font-body text-sm text-white/70 inline-flex items-center gap-2">
-                  <span className={`w-1.5 h-1.5 rounded-full ${
-                    evt.category === 'military' ? 'bg-danger' :
-                    evt.category === 'economic' ? 'bg-accent' :
-                    evt.category === 'diplomatic' ? 'bg-action' :
-                    evt.category === 'political' ? 'bg-warning' :
-                    'bg-white/30'
-                  }`} />
-                  {evt.summary}
-                </span>
-              ))}
-            </>
-          )}
-        </div>
+      <footer className="border-t border-white/10 bg-[#0D1220] overflow-hidden" style={{ height: '56px' }}>
+        {significantEvents.length === 0 ? (
+          <div className="flex items-center justify-center h-full">
+            <span className="font-body text-sm text-white/30">Awaiting events...</span>
+          </div>
+        ) : (
+          <>
+            {/* Line 1 */}
+            <div className="overflow-hidden whitespace-nowrap px-6 py-1">
+              <div
+                className="inline-flex items-center gap-8"
+                style={{ animation: 'tickerScroll 80s linear infinite' }}
+              >
+                {significantEvents.filter((_, i) => i % 2 === 0).map((evt) => (
+                  <span key={evt.id} className="font-body text-sm text-white/70 inline-flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      evt.category === 'military' ? 'bg-danger' :
+                      evt.category === 'economic' ? 'bg-accent' :
+                      evt.category === 'diplomatic' ? 'bg-action' :
+                      evt.category === 'political' ? 'bg-warning' : 'bg-white/30'
+                    }`} />
+                    {evt.summary}
+                  </span>
+                ))}
+                {significantEvents.filter((_, i) => i % 2 === 0).map((evt) => (
+                  <span key={`d1-${evt.id}`} className="font-body text-sm text-white/70 inline-flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      evt.category === 'military' ? 'bg-danger' :
+                      evt.category === 'economic' ? 'bg-accent' :
+                      evt.category === 'diplomatic' ? 'bg-action' :
+                      evt.category === 'political' ? 'bg-warning' : 'bg-white/30'
+                    }`} />
+                    {evt.summary}
+                  </span>
+                ))}
+              </div>
+            </div>
+            {/* Line 2 */}
+            <div className="overflow-hidden whitespace-nowrap px-6 py-1">
+              <div
+                className="inline-flex items-center gap-8"
+                style={{ animation: 'tickerScroll 90s linear infinite reverse' }}
+              >
+                {significantEvents.filter((_, i) => i % 2 === 1).map((evt) => (
+                  <span key={evt.id} className="font-body text-sm text-white/60 inline-flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      evt.category === 'military' ? 'bg-danger' :
+                      evt.category === 'economic' ? 'bg-accent' :
+                      evt.category === 'diplomatic' ? 'bg-action' :
+                      evt.category === 'political' ? 'bg-warning' : 'bg-white/30'
+                    }`} />
+                    {evt.summary}
+                  </span>
+                ))}
+                {significantEvents.filter((_, i) => i % 2 === 1).map((evt) => (
+                  <span key={`d2-${evt.id}`} className="font-body text-sm text-white/60 inline-flex items-center gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      evt.category === 'military' ? 'bg-danger' :
+                      evt.category === 'economic' ? 'bg-accent' :
+                      evt.category === 'diplomatic' ? 'bg-action' :
+                      evt.category === 'political' ? 'bg-warning' : 'bg-white/30'
+                    }`} />
+                    {evt.summary}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </footer>
 
       {/* Ticker animation */}
@@ -496,10 +516,10 @@ function DoomsdayGauge({
   )
 }
 
-/** Columbia vs Cathay power balance — live bar + historical trend. */
+/** Columbia vs Cathay power balance — live bar. */
 function PowerBalanceBar({ simId }: { simId: string }) {
-  const [colPower, setColPower] = useState(55)
-  const [catPower, setCatPower] = useState(45)
+  const [col, setCol] = useState(55)
+  const [cat, setCat] = useState(45)
 
   useEffect(() => {
     if (!simId) return
@@ -510,78 +530,90 @@ function PowerBalanceBar({ simId }: { simId: string }) {
       .in('id', ['columbia', 'cathay'])
       .then(({ data }) => {
         if (!data || data.length < 2) return
-        const col = data.find((c) => c.id === 'columbia')
-        const cat = data.find((c) => c.id === 'cathay')
-        if (!col || !cat) return
+        const colD = data.find((c) => c.id === 'columbia')
+        const catD = data.find((c) => c.id === 'cathay')
+        if (!colD || !catD) return
 
-        const milScore = (c: typeof col) =>
+        const milScore = (c: typeof colD) =>
           (c.mil_ground ?? 0) + (c.mil_naval ?? 0) * 2 + (c.mil_tactical_air ?? 0) * 1.5 +
           (c.mil_strategic_missiles ?? 0) * 3 + (c.mil_air_defense ?? 0)
 
-        const power = (c: typeof col) =>
+        const power = (c: typeof colD) =>
           (c.gdp ?? 0) * 0.4 + milScore(c) * 0.3 + (c.nuclear_level ?? 0) * 10 + (c.ai_level ?? 0) * 8
 
-        const cp = power(col)
-        const tp = power(cat)
+        const cp = power(colD)
+        const tp = power(catD)
         const total = cp + tp || 1
-        setColPower(Math.round((cp / total) * 100))
-        setCatPower(Math.round((tp / total) * 100))
+        setCol(Math.round((cp / total) * 100))
+        setCat(Math.round((tp / total) * 100))
       })
   }, [simId])
 
-  // Historical trend data — expert estimate of US vs China global power (2006-2026)
-  // Normalized: US started ~70%, China ~30% in 2006, converging toward ~55/45 by 2026
-  const historicalYears = ['06','08','10','12','14','16','18','20','22','24','26','SIM']
-  const historicalCol =   [70,  68,  66,  64,  62,  60,  58,  57,  56,  55,  54, colPower]
-  const historicalCat =   [30,  32,  34,  36,  38,  40,  42,  43,  44,  45,  46, catPower]
+  return (
+    <div className="flex items-center gap-3">
+      <span className="font-data text-xs text-action w-24 text-right">
+        Columbia {col}%
+      </span>
+      <div className="flex-1 flex h-4 rounded-full overflow-hidden bg-white/5">
+        <div className="bg-action/70 transition-all duration-1000" style={{ width: `${col}%` }} />
+        <div className="bg-danger/70 transition-all duration-1000" style={{ width: `${cat}%` }} />
+      </div>
+      <span className="font-data text-xs text-danger w-24">
+        {cat}% Cathay
+      </span>
+    </div>
+  )
+}
+
+/** Columbia vs Cathay historical power trend — two lines converging. */
+function PowerTrendGraph({ colPower, catPower }: { colPower: number; catPower: number }) {
+  // Expert-estimated Global Power Index (arbitrary units, not %)
+  // Columbia: growing slowly. Cathay: growing fast, closing the gap.
+  // 2006-2026 historical, then SIM rounds extend the trend.
+  const labels = ['2006','','2010','','2014','','2018','','2022','','2026','SIM']
+  // Columbia: dominant but plateauing (100 → ~120)
+  const colData = [100, 104, 108, 110, 112, 114, 115, 116, 117, 118, 119, 115 + (colPower / 10)]
+  // Cathay: rapid catch-up (40 → ~95)
+  const catData = [40,  46,  52,  58,  65,  72,  78,  83,  87,  91,  95,  90 + (catPower / 10)]
+
+  const maxVal = Math.max(...colData, ...catData) * 1.1
+  const w = 240
+  const h = 80
+
+  const toPoints = (data: number[]) =>
+    data.map((v, i) => `${i * (w / (data.length - 1))},${h - (v / maxVal) * h}`).join(' ')
 
   return (
-    <div className="space-y-2">
-      {/* Live power bar */}
-      <div className="flex items-center gap-3">
-        <span className="font-data text-sm text-action w-24 text-right">
-          Columbia {colPower}%
-        </span>
-        <div className="flex-1 flex h-5 rounded-full overflow-hidden bg-white/5">
-          <div
-            className="bg-action/70 transition-all duration-1000"
-            style={{ width: `${colPower}%` }}
-          />
-          <div
-            className="bg-danger/70 transition-all duration-1000"
-            style={{ width: `${catPower}%` }}
-          />
-        </div>
-        <span className="font-data text-sm text-danger w-24">
-          {catPower}% Cathay
-        </span>
-      </div>
+    <div>
+      <svg viewBox={`0 0 ${w} ${h + 16}`} className="w-full h-24">
+        {/* Grid lines */}
+        {[0.25, 0.5, 0.75].map((f) => (
+          <line key={f} x1="0" y1={h * f} x2={w} y2={h * f} stroke="white" strokeWidth="0.3" opacity="0.1" />
+        ))}
 
-      {/* Historical trend (mini SVG chart) */}
-      <div className="flex items-end gap-0.5">
-        <span className="font-data text-[10px] text-white/20 w-10 shrink-0">20yr</span>
-        <svg viewBox="0 0 240 40" className="flex-1 h-8" preserveAspectRatio="none">
-          {/* Columbia line (blue) */}
-          <polyline
-            fill="none"
-            stroke="var(--action, #3B82F6)"
-            strokeWidth="2"
-            opacity="0.7"
-            points={historicalCol.map((v, i) => `${i * (240 / (historicalCol.length - 1))},${40 - (v / 100) * 40}`).join(' ')}
-          />
-          {/* Cathay line (red) */}
-          <polyline
-            fill="none"
-            stroke="var(--danger, #EF4444)"
-            strokeWidth="2"
-            opacity="0.7"
-            points={historicalCat.map((v, i) => `${i * (240 / (historicalCat.length - 1))},${40 - (v / 100) * 40}`).join(' ')}
-          />
-          {/* Convergence zone highlight */}
-          <line x1="220" y1="0" x2="220" y2="40" stroke="white" strokeWidth="0.5" opacity="0.2" strokeDasharray="2,2" />
-        </svg>
-        <span className="font-data text-[10px] text-white/20 w-8 shrink-0 text-right">now</span>
-      </div>
+        {/* Columbia line (blue, thicker) */}
+        <polyline fill="none" stroke="#3B82F6" strokeWidth="2.5" opacity="0.8" points={toPoints(colData)} />
+        {/* Cathay line (red, thicker) */}
+        <polyline fill="none" stroke="#EF4444" strokeWidth="2.5" opacity="0.8" points={toPoints(catData)} />
+
+        {/* SIM boundary line */}
+        <line x1={w * (10/11)} y1="0" x2={w * (10/11)} y2={h} stroke="white" strokeWidth="0.5" opacity="0.3" strokeDasharray="3,3" />
+
+        {/* Labels */}
+        <text x="2" y={h - (colData[0] / maxVal) * h - 4} fill="#3B82F6" fontSize="8" opacity="0.7">Columbia</text>
+        <text x="2" y={h - (catData[0] / maxVal) * h + 10} fill="#EF4444" fontSize="8" opacity="0.7">Cathay</text>
+
+        {/* End values */}
+        <circle cx={w} cy={h - (colData[colData.length-1] / maxVal) * h} r="3" fill="#3B82F6" opacity="0.9" />
+        <circle cx={w} cy={h - (catData[catData.length-1] / maxVal) * h} r="3" fill="#EF4444" opacity="0.9" />
+
+        {/* Year labels at bottom */}
+        {labels.map((l, i) => l ? (
+          <text key={i} x={i * (w / (labels.length - 1))} y={h + 12} fill="white" fontSize="7" opacity="0.3" textAnchor="middle">
+            {l}
+          </text>
+        ) : null)}
+      </svg>
     </div>
   )
 }
