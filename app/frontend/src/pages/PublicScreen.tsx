@@ -246,7 +246,14 @@ export function PublicScreen() {
     military: 0, political: 1, covert: 2, economic: 3, diplomatic: 4, system: 5,
   }
   const significantEvents = events
-    .filter((e) => PUBLIC_NEWS_EVENTS.has(e.event_type))
+    .filter((e) => {
+      if (!PUBLIC_NEWS_EVENTS.has(e.event_type)) return false
+      // Agreements and transactions only if public (not secret)
+      if (e.event_type === 'propose_agreement' || e.event_type === 'sign_agreement') {
+        return e.payload?.visibility !== 'secret'
+      }
+      return true
+    })
     .sort((a, b) => {
       const wa = CATEGORY_WEIGHT[a.category ?? 'system'] ?? 5
       const wb = CATEGORY_WEIGHT[b.category ?? 'system'] ?? 5
