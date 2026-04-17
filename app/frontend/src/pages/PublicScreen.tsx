@@ -269,36 +269,22 @@ export function PublicScreen() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── MAP AREA (left, ~65%) ──────────────────────────────────── */}
-        <div className="flex-[2] flex flex-col border-r border-white/10">
-          {/* Map iframe */}
-          <div className="flex-1 relative">
-            <iframe
-              src="/map/deployments.html?display=clean"
-              className="absolute inset-0 w-full h-full border-0"
-              title="Global Map"
-            />
-          </div>
-
-          {/* Columbia vs Cathay Power Balance */}
-          <div className="px-6 py-3 border-t border-white/10">
-            <div className="flex items-center gap-3 mb-1">
-              <span className="font-body text-caption text-white/60 uppercase tracking-wider">
-                Columbia vs Cathay — Power Balance
-              </span>
-            </div>
-            <PowerBalanceBar simId={simId!} />
-          </div>
+        <div className="flex-[2] relative border-r border-white/10">
+          <iframe
+            src="/map/deployments.html?display=clean"
+            className="absolute inset-0 w-full h-full border-0"
+            title="Global Map"
+          />
         </div>
 
         {/* ── RIGHT PANEL (~35%) ─────────────────────────────────────── */}
-        <div className="flex-[1] flex flex-col min-w-[300px]">
+        <div className="flex-[1] flex flex-col min-w-[280px]">
 
           {/* Doomsday Indices */}
-          <div className="flex-1 px-5 py-4 space-y-4 overflow-hidden">
-            <h3 className="font-heading text-sm text-white/40 uppercase tracking-widest mb-2">
+          <div className="px-5 py-4 space-y-3 border-b border-white/10">
+            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest">
               World Status
             </h3>
-
             <DoomsdayGauge
               label="Geopolitical Tension"
               value={indices.geopolitical_tension}
@@ -331,6 +317,41 @@ export function PublicScreen() {
               dangerUp
               colorHigh="warning"
             />
+          </div>
+
+          {/* Columbia vs Cathay Power Balance */}
+          <div className="px-5 py-4 border-b border-white/10">
+            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
+              Columbia vs Cathay
+            </h3>
+            <PowerBalanceBar simId={simId!} />
+          </div>
+
+          {/* World News (remaining space) */}
+          <div className="flex-1 px-5 py-3 overflow-y-auto">
+            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
+              World News
+            </h3>
+            <div className="space-y-2">
+              {significantEvents.length === 0 ? (
+                <p className="font-body text-xs text-white/20">Awaiting events...</p>
+              ) : (
+                significantEvents.slice(0, 15).map((evt) => (
+                  <div key={evt.id} className="flex items-start gap-2">
+                    <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                      evt.category === 'military' ? 'bg-danger' :
+                      evt.category === 'economic' ? 'bg-accent' :
+                      evt.category === 'diplomatic' ? 'bg-action' :
+                      evt.category === 'political' ? 'bg-warning' :
+                      'bg-white/30'
+                    }`} />
+                    <span className="font-body text-xs text-white/60 leading-tight">
+                      {evt.summary}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       </div>
