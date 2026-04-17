@@ -854,16 +854,10 @@ export function FacilitatorDashboard() {
             <DashboardSection title="Public Screen">
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() => { /* M8 */ }}
+                  onClick={() => window.open(`/screen/${simId}`, '_blank')}
                   className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
                 >
-                  View
-                </button>
-                <button
-                  onClick={() => { /* M8 */ }}
-                  className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
-                >
-                  Customize
+                  View Public Screen
                 </button>
                 <button
                   onClick={() => { /* Broadcast */ }}
