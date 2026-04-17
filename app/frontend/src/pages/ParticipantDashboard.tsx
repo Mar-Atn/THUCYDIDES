@@ -980,8 +980,8 @@ function BudgetForm({roleId,countryId,simId,onClose,onSubmitted}:{
           <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Economic Context</h3>
             <div className="grid grid-cols-2 gap-3 font-data text-caption">
-              <div><div className="text-text-secondary">GDP</div><div className="text-data text-text-primary">${gdp.toFixed(1)}B</div></div>
-              <div><div className="text-text-secondary">Treasury</div><div className="text-data text-text-primary">${treasury.toFixed(1)}B</div></div>
+              <div><div className="text-text-secondary">GDP</div><div className="text-data text-text-primary">{gdp.toFixed(1)}</div></div>
+              <div><div className="text-text-secondary">Treasury</div><div className="text-data text-text-primary">{treasury.toFixed(1)} coins</div></div>
               <div><div className="text-text-secondary">Inflation</div><div className="text-data text-text-primary">{inflation.toFixed(1)}%</div></div>
               <div><div className="text-text-secondary">Stability</div><div className="text-data text-text-primary">{stability.toFixed(1)}/10</div></div>
             </div>
@@ -990,7 +990,7 @@ function BudgetForm({roleId,countryId,simId,onClose,onSubmitted}:{
           {/* Revenue */}
           <div className="bg-card border border-border rounded-lg p-4">
             <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Expected Revenue</h3>
-            <R l={`GDP $${gdp.toFixed(1)}B × Tax ${(taxRate*100).toFixed(0)}%`} v={`${revenue.toFixed(1)} coins`} b />
+            <R l={`GDP ${gdp.toFixed(1)} × Tax ${(taxRate*100).toFixed(0)}%`} v={`${revenue.toFixed(1)} coins`} b />
           </div>
 
           {/* Budget Summary */}
@@ -1012,7 +1012,7 @@ function BudgetForm({roleId,countryId,simId,onClose,onSubmitted}:{
               {moneyPrinted>0&&<R l="Money printed" v={`${moneyPrinted.toFixed(1)}`} s d/>}
             </>}
             <div className="border-t border-border my-1"/>
-            <R l="Expected Treasury" v={`$${Math.max(0,expectedTreasury).toFixed(1)}B`} b/>
+            <R l="Expected Treasury" v={`${Math.max(0,expectedTreasury).toFixed(1)} coins`} b/>
             {moneyPrinted>0&&<p className="font-body text-caption text-danger mt-2">Warning: money printing will increase inflation.</p>}
           </div>
 
