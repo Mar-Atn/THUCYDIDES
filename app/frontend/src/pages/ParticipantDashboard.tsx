@@ -878,94 +878,148 @@ function BudgetForm({roleId,countryId,simId,onClose,onSubmitted}:{
         <h2 className="font-heading text-h2 text-text-primary">National Budget</h2>
         <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* LEFT */}
-        <div className="space-y-3">
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Economic Context</h3>
-            <div className="grid grid-cols-4 gap-2 font-data text-caption">
-              <div><div className="text-text-secondary">GDP</div><div className="text-text-primary">${gdp.toFixed(1)}B</div></div>
-              <div><div className="text-text-secondary">Treasury</div><div className="text-text-primary">${treasury.toFixed(1)}B</div></div>
-              <div><div className="text-text-secondary">Inflation</div><div className="text-text-primary">{inflation.toFixed(1)}%</div></div>
-              <div><div className="text-text-secondary">Stability</div><div className="text-text-primary">{stability.toFixed(1)}</div></div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* LEFT (3 cols): Budget Decisions */}
+        <div className="lg:col-span-3 space-y-3">
+          <p className="font-body text-caption text-text-secondary">Set your country's spending priorities. Changes take effect at Phase B.</p>
+
+          {/* Decision 1: Social Spending */}
+          <div className="bg-card border-2 border-action/20 rounded-lg p-4">
+            <h3 className="font-heading text-body-sm text-action uppercase tracking-wider mb-3">1. Social Spending</h3>
+            <div className="flex items-center gap-3 mb-2">
+              <span className="font-body text-caption text-text-secondary w-8">50%</span>
+              <input type="range" min="0.5" max="1.5" step="0.1" value={socialPct} onChange={e=>setSocialPct(parseFloat(e.target.value))} className="flex-1 accent-action h-2"/>
+              <span className="font-body text-caption text-text-secondary w-10">150%</span>
+              <span className="font-data text-data-lg text-text-primary w-16 text-right">{(socialPct*100).toFixed(0)}%</span>
+            </div>
+            <div className="flex justify-between">
+              <R l={`Baseline ${socialBase.toFixed(1)} × ${(socialPct*100).toFixed(0)}%`} v={`${socialSpending.toFixed(1)} coins`}/>
+              <span className={`font-body text-caption ${socialPct>1?'text-success':socialPct<1?'text-danger':'text-text-secondary'}`}>
+                {socialPct>1?`Stability +${((socialPct-1)*4).toFixed(1)}`:socialPct<1?`Stability ${((socialPct-1)*4).toFixed(1)}`:'Neutral'}
+              </span>
             </div>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Revenue</h3>
-            <R l={`GDP $${gdp.toFixed(1)}B × Tax ${(taxRate*100).toFixed(0)}%`} v={`${revenue.toFixed(1)} coins`} b />
+
+          {/* Fixed: Maintenance (not a decision — informational) */}
+          <div className="bg-base border border-border rounded-lg p-3">
+            <R l={`Fixed: Military Maintenance (${totalUnits} units)`} v={`${maintenance.toFixed(1)} coins`}/>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Fixed: Maintenance</h3>
-            <R l={`${totalUnits} units × $${maintRate} × ${MAINT_MULT}`} v={`${maintenance.toFixed(1)} coins`} />
-          </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Social Spending</h3>
-            <div className="flex items-center gap-3 mb-1">
-              <input type="range" min="0.5" max="1.5" step="0.1" value={socialPct} onChange={e=>setSocialPct(parseFloat(e.target.value))} className="flex-1 accent-action"/>
-              <span className="font-data text-data text-text-primary w-14 text-right">{(socialPct*100).toFixed(0)}%</span>
-            </div>
-            <R l={`Base ${socialBase.toFixed(1)} × ${(socialPct*100).toFixed(0)}%`} v={`${socialSpending.toFixed(1)} coins`} />
-            <div className="font-body text-caption text-text-secondary mt-0.5">
-              {socialPct>1?`Stability +${((socialPct-1)*4).toFixed(1)}`:socialPct<1?`Stability ${((socialPct-1)*4).toFixed(1)}`:'Normal level'}
-            </div>
-          </div>
-        </div>
-        {/* RIGHT */}
-        <div className="space-y-3">
-          <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Military Production</h3>
-            <div className="space-y-1.5">
+
+          {/* Decision 2: Military Production */}
+          <div className="bg-card border-2 border-action/20 rounded-lg p-4">
+            <h3 className="font-heading text-body-sm text-action uppercase tracking-wider mb-3">2. Military Production</h3>
+            <div className="space-y-2">
               {['ground','naval','tactical_air'].map(br=>{
                 const capKey=br==='tactical_air'?'prod_cap_tactical':`prod_cap_${br}`
                 if(Number(c[capKey]??0)===0) return null
                 const pc=prodCosts[br]
-                return <div key={br} className="flex items-center gap-2">
-                  <span className="font-body text-caption text-text-primary w-16 capitalize">{br.replace('_',' ')}</span>
-                  <select value={prod[br]??0} onChange={e=>setProd(p=>({...p,[br]:parseInt(e.target.value)}))}
-                    className="bg-base border border-border rounded px-2 py-0.5 font-data text-caption w-24">{PROD_LEVELS.map(l=><option key={l.v} value={l.v}>{l.l}</option>)}</select>
-                  <span className="font-data text-caption text-text-secondary flex-1">{pc.units} units</span>
-                  <span className="font-data text-caption text-text-primary">{pc.coins}c</span>
+                return <div key={br} className="flex items-center gap-3">
+                  <span className="font-body text-body-sm text-text-primary w-20 capitalize">{br.replace('_',' ')}</span>
+                  <div className="flex gap-1">
+                    {PROD_LEVELS.map(l=>
+                      <button key={l.v} onClick={()=>setProd(p=>({...p,[br]:l.v}))}
+                        className={`font-data text-caption px-3 py-1 rounded border transition-colors ${
+                          (prod[br]??0)===l.v?'bg-action text-white border-action':'bg-base border-border text-text-secondary hover:border-action/30'
+                        }`}>{l.l}</button>
+                    )}
+                  </div>
+                  <span className="font-data text-caption text-text-secondary ml-auto">{pc.units>0?`${pc.units} units`:''}</span>
+                  <span className="font-data text-body-sm text-text-primary w-14 text-right">{pc.coins}c</span>
                 </div>
               })}
-              <div className="border-t border-border pt-1"><R l="Total Production" v={`${totalProdCoins} coins`} b/></div>
+              <div className="border-t border-border pt-2"><R l="Total Production" v={`${totalProdCoins} coins`} b/></div>
             </div>
           </div>
+
+          {/* Decision 3: Technology R&D */}
+          <div className="bg-card border-2 border-action/20 rounded-lg p-4">
+            <h3 className="font-heading text-body-sm text-action uppercase tracking-wider mb-3">3. Technology Investment</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-body text-body-sm text-text-primary">Nuclear</span>
+                    <span className="font-data text-caption text-text-secondary">Level {Number(c.nuclear_level??0)}</span>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-1.5">
+                    <div className="bg-warning h-1.5 rounded-full" style={{width:`${Number(c.nuclear_rd_progress??0)*100}%`}}/>
+                  </div>
+                  <span className="font-data text-caption text-text-secondary">{(Number(c.nuclear_rd_progress??0)*100).toFixed(0)}% to next level</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <input type="number" min="0" max="99" value={nucCoins} onChange={e=>setNucCoins(Math.max(0,parseInt(e.target.value)||0))}
+                    className="w-16 bg-base border border-border rounded px-2 py-1 font-data text-body-sm text-text-primary text-right"/>
+                  <span className="font-body text-caption text-text-secondary">coins</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-body text-body-sm text-text-primary">AI / Semiconductors</span>
+                    <span className="font-data text-caption text-text-secondary">Level {Number(c.ai_level??0)}</span>
+                  </div>
+                  <div className="w-full bg-border rounded-full h-1.5">
+                    <div className="bg-accent h-1.5 rounded-full" style={{width:`${Number(c.ai_rd_progress??0)*100}%`}}/>
+                  </div>
+                  <span className="font-data text-caption text-text-secondary">{(Number(c.ai_rd_progress??0)*100).toFixed(0)}% to next level</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <input type="number" min="0" max="99" value={aiCoins} onChange={e=>setAiCoins(Math.max(0,parseInt(e.target.value)||0))}
+                    className="w-16 bg-base border border-border rounded px-2 py-1 font-data text-body-sm text-text-primary text-right"/>
+                  <span className="font-body text-caption text-text-secondary">coins</span>
+                </div>
+              </div>
+              <div className="border-t border-border pt-2"><R l="Total R&D" v={`${techBudget} coins`} b/></div>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT (2 cols): Context + Summary */}
+        <div className="lg:col-span-2 space-y-3">
+          {/* Economic Context */}
           <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Technology R&D</h3>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <span className="font-body text-caption text-text-primary w-16">Nuclear</span>
-                <span className="font-data text-caption text-text-secondary">L{Number(c.nuclear_level??0)} {(Number(c.nuclear_rd_progress??0)*100).toFixed(0)}%</span>
-                <input type="number" min="0" max="99" value={nucCoins} onChange={e=>setNucCoins(Math.max(0,parseInt(e.target.value)||0))}
-                  className="w-16 bg-base border border-border rounded px-2 py-0.5 font-data text-caption text-right ml-auto"/>
-                <span className="font-body text-caption text-text-secondary">c</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-body text-caption text-text-primary w-16">AI</span>
-                <span className="font-data text-caption text-text-secondary">L{Number(c.ai_level??0)} {(Number(c.ai_rd_progress??0)*100).toFixed(0)}%</span>
-                <input type="number" min="0" max="99" value={aiCoins} onChange={e=>setAiCoins(Math.max(0,parseInt(e.target.value)||0))}
-                  className="w-16 bg-base border border-border rounded px-2 py-0.5 font-data text-caption text-right ml-auto"/>
-                <span className="font-body text-caption text-text-secondary">c</span>
-              </div>
-              <div className="border-t border-border pt-1"><R l="Total R&D" v={`${techBudget} coins`} b/></div>
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Economic Context</h3>
+            <div className="grid grid-cols-2 gap-3 font-data text-caption">
+              <div><div className="text-text-secondary">GDP</div><div className="text-data text-text-primary">${gdp.toFixed(1)}B</div></div>
+              <div><div className="text-text-secondary">Treasury</div><div className="text-data text-text-primary">${treasury.toFixed(1)}B</div></div>
+              <div><div className="text-text-secondary">Inflation</div><div className="text-data text-text-primary">{inflation.toFixed(1)}%</div></div>
+              <div><div className="text-text-secondary">Stability</div><div className="text-data text-text-primary">{stability.toFixed(1)}/10</div></div>
             </div>
           </div>
-          <div className={`bg-card border rounded-lg p-4 ${deficit>0?'border-danger/30':'border-success/20'}`}>
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Summary</h3>
+
+          {/* Revenue */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Expected Revenue</h3>
+            <R l={`GDP $${gdp.toFixed(1)}B × Tax ${(taxRate*100).toFixed(0)}%`} v={`${revenue.toFixed(1)} coins`} b />
+          </div>
+
+          {/* Budget Summary */}
+          <div className={`bg-card border-2 rounded-lg p-4 ${deficit>0?'border-danger/30':'border-success/20'}`}>
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Budget Summary</h3>
             <R l="Revenue" v={`${revenue.toFixed(1)}`} b/>
+            <div className="border-t border-border/50 my-1"/>
+            <R l="Social" v={`${socialSpending.toFixed(1)}`} s/>
+            <R l="Maintenance" v={`${maintenance.toFixed(1)}`} s/>
+            <R l="Production" v={`${totalProdCoins}`} s/>
+            <R l="R&D" v={`${techBudget}`} s/>
+            <div className="border-t border-border my-1"/>
             <R l="Total Spending" v={`${totalSpending.toFixed(1)}`} b/>
             <div className="border-t border-border my-1"/>
             {surplus>0&&<R l="Surplus → Treasury" v={`+${surplus.toFixed(1)}`}/>}
-            {deficit>0&&<><R l="Deficit" v={`-${deficit.toFixed(1)}`} d/>
-              <R l={`From Treasury ($${treasury.toFixed(1)})`} v={`-${coveredByTreasury.toFixed(1)}`} s/>
-              {moneyPrinted>0&&<R l="Printed (→ inflation!)" v={`${moneyPrinted.toFixed(1)}`} s d/>}
+            {deficit>0&&<>
+              <R l="Deficit" v={`-${deficit.toFixed(1)}`} d/>
+              <R l={`From Treasury`} v={`-${coveredByTreasury.toFixed(1)}`} s/>
+              {moneyPrinted>0&&<R l="Money printed" v={`${moneyPrinted.toFixed(1)}`} s d/>}
             </>}
             <div className="border-t border-border my-1"/>
             <R l="Expected Treasury" v={`$${Math.max(0,expectedTreasury).toFixed(1)}B`} b/>
+            {moneyPrinted>0&&<p className="font-body text-caption text-danger mt-2">Warning: money printing will increase inflation.</p>}
           </div>
+
+          {/* Submit */}
           <div className="flex items-center gap-3">
             <button onClick={handleSubmit} disabled={submitting}
-              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors flex-1">
               {submitting?'Submitting...':'Submit Budget'}</button>
             <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
           </div>
