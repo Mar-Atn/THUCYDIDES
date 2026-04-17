@@ -147,7 +147,7 @@ export function PublicScreen() {
       // Load significant events
       const { data: evts } = await supabase
         .from('observatory_events')
-        .select('id, event_type, summary, role_name, category, country_code, created_at')
+        .select('id, event_type, summary, role_name, category, country_code, payload, created_at')
         .eq('sim_run_id', simId)
         .order('created_at', { ascending: false })
         .limit(30)
