@@ -345,7 +345,7 @@ export function PublicScreen() {
           {/* Panel: World Status */}
           {activeSidebarPanel === 'world_status' && (
             <div className="flex-1 flex flex-col animate-[fadeIn_0.5s_ease]">
-              <div className="px-5 py-4 space-y-3 border-b border-white/10">
+              <div className="flex-1 px-5 py-4 space-y-3">
                 <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest">
                   World Status
                 </h3>
@@ -373,12 +373,6 @@ export function PublicScreen() {
                   prev={indices.prev_ai_race}
                   max={10} dangerUp colorHigh="warning"
                 />
-              </div>
-              <div className="px-5 py-4">
-                <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
-                  Global Power Index
-                </h3>
-                <PowerTrendGraph colPower={colPower} catPower={catPower} />
               </div>
             </div>
           )}
@@ -418,6 +412,14 @@ export function PublicScreen() {
               </div>
             </div>
           )}
+
+          {/* Global Power Index — always visible, pinned at bottom */}
+          <div className="px-5 py-3 border-t border-white/10">
+            <h3 className="font-heading text-xs text-white/40 uppercase tracking-widest mb-2">
+              Global Power Index
+            </h3>
+            <PowerTrendGraph colPower={colPower} catPower={catPower} />
+          </div>
         </div>
       </div>
 
