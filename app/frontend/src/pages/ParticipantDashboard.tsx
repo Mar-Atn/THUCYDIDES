@@ -1172,15 +1172,24 @@ function BasingRightsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         setTheyGrant([...new Set(received)])
       })
 
-    // Count foreign units on our territory (to block revocation)
-    supabase.from('deployments').select('country_id')
-      .eq('sim_run_id',simId).neq('country_id',countryId).eq('unit_status','active')
-      .then(({data})=>{
-        // We need to check which of these are on OUR hexes
-        // For simplicity, count all foreign active units (they could only be here via basing)
-        const counts:Record<string,number>={}
-        ;(data??[]).forEach((d:{country_id:string})=>{counts[d.country_id]=(counts[d.country_id]||0)+1})
-        setForeignUnits(counts)
+    // Count foreign units on our territory
+    // Get our country's hex positions first, then count foreign units at those hexes
+    supabase.from('deployments').select('global_row,global_col')
+      .eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','active')
+      .then(({data:ourUnits})=>{
+        const ourHexes = new Set((ourUnits??[]).filter((u:{global_row:number|null})=>u.global_row!=null).map((u:{global_row:number;global_col:number})=>`${u.global_row},${u.global_col}`))
+        // Now get all foreign active units and check if they're at our hexes
+        supabase.from('deployments').select('country_id,global_row,global_col')
+          .eq('sim_run_id',simId).neq('country_id',countryId).eq('unit_status','active')
+          .then(({data:foreignData})=>{
+            const counts:Record<string,number>={}
+            ;(foreignData??[]).forEach((d:{country_id:string;global_row:number|null;global_col:number|null})=>{
+              if(d.global_row!=null && d.global_col!=null && ourHexes.has(`${d.global_row},${d.global_col}`)){
+                counts[d.country_id]=(counts[d.country_id]||0)+1
+              }
+            })
+            setForeignUnits(counts)
+          })
       })
   },[simId,countryId])
 
