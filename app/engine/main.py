@@ -261,7 +261,9 @@ def _append_targets(targets: list, utype: str, enemies: list, row: int, col: int
         if ground:
             targets.append({"row": row, "col": col, **theater_info, "attack_type": "naval_bombardment", "enemies": ground})
     elif utype == "strategic_missile":
-        targets.append({"row": row, "col": col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies})
+        from engine.config.map_config import NUCLEAR_SITES
+        nuc_site = any(pos == (row, col) for pos in NUCLEAR_SITES.values())
+        targets.append({"row": row, "col": col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies, "has_nuclear_site": nuc_site})
 
 
 @app.get("/api/sim/{sim_id}/attack/valid-targets")
@@ -387,8 +389,10 @@ async def get_valid_attack_targets(
                 # Empty land hex — ground can advance (no combat)
                 targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "ground_move", "enemies": []})
             elif utype == "strategic_missile" and not is_sea_hex(r, c, theater):
-                # Missiles can target any enemy land hex in theater
-                targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": []})
+                from engine.config.map_config import NUCLEAR_SITES
+                # Theater: need to resolve global coords for nuclear site check
+                nuc_site = False  # theater hexes don't have direct nuclear site mapping yet
+                targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": [], "has_nuclear_site": nuc_site})
     else:
         enemy_by_hex = {}
         for e in all_enemies:
@@ -405,11 +409,11 @@ async def get_valid_attack_targets(
                 # Empty land hex — ground can advance
                 targets.append({"row": r, "col": c, "attack_type": "ground_move", "enemies": []})
             elif utype == "strategic_missile" and not is_sea_hex(r, c):
-                # Missiles can target any enemy land hex (infrastructure/nuclear_site)
-                from engine.config.map_config import hex_owner as get_hex_owner
+                from engine.config.map_config import hex_owner as get_hex_owner, NUCLEAR_SITES
                 owner = get_hex_owner(r, c)
                 if owner != "sea" and owner != country:
-                    targets.append({"row": r, "col": c, "attack_type": "launch_missile_conventional", "enemies": []})
+                    nuc_site = any(pos == (r, c) for pos in NUCLEAR_SITES.values())
+                    targets.append({"row": r, "col": c, "attack_type": "launch_missile_conventional", "enemies": [], "has_nuclear_site": nuc_site})
 
     # Friendlies at source (single query)
     if use_theater:

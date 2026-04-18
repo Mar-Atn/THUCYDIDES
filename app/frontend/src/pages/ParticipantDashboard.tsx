@@ -2002,9 +2002,9 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   {([
                     {v:'military',l:'Military unit'},
                     {v:'infrastructure',l:'Infrastructure (-2% GDP)'},
-                    {v:'nuclear_site',l:'Nuclear site (halve R&D)'},
+                    ...((selectedTarget as Record<string,unknown>)?.has_nuclear_site ? [{v:'nuclear_site' as const,l:'Nuclear site (halve R&D)'}] : []),
                     {v:'ad',l:'Air defense unit'},
-                  ] as const).map(o=>
+                  ]).map(o=>
                     <label key={o.v} className="flex items-center gap-2 font-body text-caption cursor-pointer">
                       <input type="radio" name="missile_target" value={o.v} checked={missileTarget===o.v}
                         onChange={()=>setMissileTarget(o.v)}
@@ -2070,12 +2070,20 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 {(result.defender_losses as string[]||[]).length > 0 && (
                   <div className="flex items-center gap-1 flex-wrap">
                     <span className="font-body text-caption text-text-secondary mr-1">Enemy losses:</span>
-                    {(result.defender_losses as string[]).map((uid,i)=>
-                      <span key={i} title={uid} className="relative inline-block text-danger">
-                        <UnitIcon type={attackType==='naval_combat'?'naval':attackType==='air_strike'?'ground':'ground'} size={22}/>
+                    {(result.defender_losses as string[]).map((uid,i)=>{
+                      // Infer unit type from unit_id convention: _g_=ground, _a_=tactical_air, _d_=air_defense, _n_=naval, _m_=strategic_missile
+                      const inferType = (id:string) => {
+                        if (id.includes('_a_') || id.includes('_a0')) return 'tactical_air'
+                        if (id.includes('_d_') || id.includes('_d0')) return 'air_defense'
+                        if (id.includes('_n_') || id.includes('_n0') || id.includes('_nr')) return 'naval'
+                        if (id.includes('_m_') || id.includes('_m0')) return 'strategic_missile'
+                        return 'ground'
+                      }
+                      return <span key={i} title={uid} className="relative inline-block text-danger">
+                        <UnitIcon type={inferType(uid)} size={22}/>
                         <span className="absolute inset-0 flex items-center justify-center text-danger font-bold text-lg leading-none">✕</span>
                       </span>
-                    )}
+                    })}
                   </div>
                 )}
               </div>
