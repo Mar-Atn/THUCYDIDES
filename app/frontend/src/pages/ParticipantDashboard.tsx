@@ -2694,13 +2694,11 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 <div key={type} className="space-y-1">
                   <span className="font-body text-caption text-text-secondary">{UNIT_TYPE_LABELS[type]??type}</span>
                   <div className="flex flex-wrap gap-1">
-                    {units.map(u => {
+                    {units.filter(u => !moves.some(m => m.unit_id === u.unit_id)).map(u => {
                       const isSelected = selectedUnit?.unit_id === u.unit_id
-                      const isQueued = moves.some(m => m.unit_id === u.unit_id && m.action === 'deploy')
-                      return <button key={u.unit_id} title={u.unit_id} disabled={isQueued}
-                        onClick={()=>{if(!isQueued){setSelectedUnit({unit_id:u.unit_id,unit_type:u.unit_type});setMode('deploy');setError(null)}}}
+                      return <button key={u.unit_id} title={u.unit_id}
+                        onClick={()=>{setSelectedUnit({unit_id:u.unit_id,unit_type:u.unit_type});setMode('deploy');setError(null)}}
                         className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
-                          isQueued?'border-border/30 text-text-secondary/30 cursor-not-allowed':
                           isSelected?'bg-action/10 border-action text-action':
                           'border-border text-text-secondary hover:border-action/30 hover:text-action'}`}>
                         <UnitIcon type={type} size={20}/>
@@ -2733,7 +2731,7 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                     <div className="flex items-center gap-1.5 min-w-0">
                       <UnitIcon type={m.unit_type} size={16} className="text-text-secondary"/>
                       <span className="font-body text-caption text-text-primary truncate">
-                        {m.action==='withdraw'?'→ reserve':`→ (${m.target_row},${m.target_col})`}
+                        {m.action==='withdraw'?'→ reserve': m.theater ? `→ theater (${m.theater_row},${m.theater_col})` : `→ (${m.target_row},${m.target_col})`}
                       </span>
                     </div>
                     <button onClick={()=>removeMove(m.unit_id)} className="text-danger/60 hover:text-danger text-sm px-1">✕</button>
