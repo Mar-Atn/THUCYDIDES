@@ -357,7 +357,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
   const [reviewAgr, setReviewAgr] = useState<string|null>(null)
-
+  const [signingAgr, setSigningAgr] = useState<string|null>(null)
   const [pendingAgreements, setPendingAgreements] = useState<{id:string;agreement_name:string;agreement_type:string;proposer_country_code:string;signatories:string[];terms:string;signatures:Record<string,unknown>}[]>([])
 
   const loadPendingTxns = useCallback(()=>{
@@ -454,8 +454,6 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       </div>
     )
   }
-
-  const [signingAgr, setSigningAgr] = useState<string|null>(null)
 
   const handleSignAgreement = async (agrId:string, confirm:boolean) => {
     setSigningAgr(agrId)
