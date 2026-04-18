@@ -10,9 +10,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Header } from '@/components/Header'
 import {
-  getSimRun,
   getSimRunRoles,
-  getSimState,
   simAction,
   submitAction,
   getAllUsers,
@@ -23,6 +21,7 @@ import {
   type UserRecord,
 } from '@/lib/queries'
 import { supabase } from '@/lib/supabase'
+import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -204,85 +203,47 @@ export function FacilitatorDashboard() {
   const navigate = useNavigate()
 
   /* State ----------------------------------------------------------------- */
-  const [simRun, setSimRun] = useState<SimRun | null>(null)
   const [roles, setRoles] = useState<SimRunRole[]>([])
-  const [simState, setSimState] = useState<SimState | null>(null)
-  const [events, setEvents] = useState<ObservatoryEvent[]>([])
   const [keyEvents, setKeyEvents] = useState<KeyEvent[]>([])
-  const [pendingActions, setPendingActions] = useState<PendingAction[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [remaining, setRemaining] = useState<number | null>(null)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  /* Data loading ---------------------------------------------------------- */
-  const loadData = useCallback(async () => {
+  /* Realtime hooks — replace manual channels + polling -------------------- */
+  const { data: simRunRT, loading: simRunLoading } = useRealtimeRow<SimRun>('sim_runs', simId)
+  const { data: pendingActions } = useRealtimeTable<PendingAction>(
+    'pending_actions', simId,
+    { filter: 'status=eq.pending', orderBy: 'submitted_at.desc' },
+  )
+  const { data: events } = useRealtimeTable<ObservatoryEvent>(
+    'observatory_events', simId,
+    { orderBy: 'created_at.desc', limit: 100 },
+  )
+
+  const simRun = simRunRT
+
+  /* Derive simState from the realtime sim_runs row ----------------------- */
+  const simState: SimState | null = simRun ? {
+    status: simRun.status,
+    current_round: simRun.current_round,
+    current_phase: simRun.current_phase,
+    phase_started_at: simRun.started_at,
+    phase_duration_seconds: (simRun.schedule as Record<string, number>)?.phase_a_minutes
+      ? (simRun.schedule as Record<string, number>).phase_a_minutes * 60
+      : 3600,
+    mode: 'manual',
+    paused: simRun.status === 'paused',
+    pending_actions: [],
+  } : null
+
+  /* One-time data loading (roles, key_events) — not polled --------------- */
+  const loadRoles = useCallback(async () => {
     if (!simId) return
     try {
-      const [run, runRoles] = await Promise.all([
-        getSimRun(simId),
-        getSimRunRoles(simId),
-      ])
-      if (!run) {
-        setError('Simulation not found')
-        setLoading(false)
-        return
-      }
-      setSimRun(run)
+      const runRoles = await getSimRunRoles(simId)
       setRoles(runRoles)
-
-      // Try loading state from API — graceful fallback
-      try {
-        const state = (await getSimState(simId)) as unknown as SimState
-        setSimState(state)
-      } catch {
-        // API not available yet — build state from sim_run
-        setSimState({
-          status: run.status,
-          current_round: run.current_round,
-          current_phase: run.current_phase,
-          phase_started_at: run.started_at,
-          phase_duration_seconds: run.schedule?.phase_a_minutes
-            ? run.schedule.phase_a_minutes * 60
-            : 3600,
-          mode: 'manual',
-          paused: false,
-          pending_actions: [],
-        })
-      }
-
-      // Load observatory events
-      try {
-        const { data: evts } = await supabase
-          .from('observatory_events')
-          .select('*')
-          .eq('sim_run_id', simId)
-          .order('created_at', { ascending: false })
-          .limit(50)
-        setEvents((evts ?? []) as ObservatoryEvent[])
-      } catch {
-        setEvents([])
-      }
-
-      // Load pending actions
-      try {
-        const { data: pa } = await supabase
-          .from('pending_actions')
-          .select('*')
-          .eq('sim_run_id', simId)
-          .eq('status', 'pending')
-          .order('submitted_at', { ascending: false })
-        setPendingActions((pa ?? []) as PendingAction[])
-      } catch {
-        setPendingActions([])
-      }
-
-      // Load key events from sim run
-      if (run.key_events && Array.isArray(run.key_events)) {
-        setKeyEvents(run.key_events as KeyEvent[])
-      }
-
       setError(null)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load simulation')
@@ -292,109 +253,29 @@ export function FacilitatorDashboard() {
   }, [simId])
 
   useEffect(() => {
-    loadData()
+    loadRoles()
     // Retry after 3s if still loading (auth token may not be ready on first render)
     const retry = setTimeout(() => {
-      if (loading) loadData()
+      if (loading) loadRoles()
     }, 3000)
     return () => clearTimeout(retry)
-  }, [loadData])
+  }, [loadRoles])
 
-  /* Supabase Realtime subscriptions --------------------------------------- */
+  // Sync key_events from the realtime sim_runs row
   useEffect(() => {
-    if (!simId) return
-
-    // Channel 1: sim_runs changes — phase transitions, timer, status
-    const simRunChannel = supabase
-      .channel(`sim_run:${simId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'sim_runs',
-          filter: `id=eq.${simId}`,
-        },
-        (payload) => {
-          const row = payload.new as Record<string, unknown>
-          if (row) {
-            setSimRun((prev) => prev ? { ...prev, ...row } as SimRun : prev)
-            setSimState((prev) => ({
-              status: (row.status as string) ?? prev?.status ?? 'setup',
-              current_round: (row.current_round as number) ?? prev?.current_round ?? 0,
-              current_phase: (row.current_phase as string) ?? prev?.current_phase ?? 'pre',
-              phase_started_at: (row.phase_started_at as string | null) ?? prev?.phase_started_at ?? null,
-              phase_duration_seconds: (row.phase_duration_seconds as number) ?? prev?.phase_duration_seconds ?? 3600,
-              mode: prev?.mode ?? 'manual',
-              paused: (row.status as string) === 'paused',
-              pending_actions: prev?.pending_actions ?? [],
-            }))
-            // Reload all data on any sim state change
-            loadData()
-          }
-        },
-      )
-      .subscribe()
-
-    // Channel 2: observatory_events inserts — live action feed
-    const eventsChannel = supabase
-      .channel(`events:${simId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'observatory_events',
-          filter: `sim_run_id=eq.${simId}`,
-        },
-        (payload) => {
-          const newEvent = payload.new as ObservatoryEvent
-          if (newEvent) {
-            setEvents((prev) => [newEvent, ...prev].slice(0, 100))
-          }
-        },
-      )
-      .subscribe()
-
-    // Channel 3: pending_actions changes — confirmation queue
-    const pendingChannel = supabase
-      .channel(`pending:${simId}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pending_actions',
-          filter: `sim_run_id=eq.${simId}`,
-        },
-        () => {
-          // Reload pending actions on any change
-          supabase.from('pending_actions').select('*')
-            .eq('sim_run_id', simId).eq('status', 'pending')
-            .then(({ data }) => setPendingActions((data ?? []) as PendingAction[]))
-        },
-      )
-      .subscribe()
-
-    // Poll pending actions every 2s, full data every 15s
-    const fallbackInterval = setInterval(loadData, 15000)
-    const pendingPoll = setInterval(() => {
-      supabase.from('pending_actions').select('*')
-        .eq('sim_run_id', simId).eq('status', 'pending')
-        .then(({ data, error: err }) => {
-          if (err) console.warn('pending poll error:', err)
-          else setPendingActions((data ?? []) as PendingAction[])
-        })
-    }, 2000)
-
-    return () => {
-      supabase.removeChannel(simRunChannel)
-      supabase.removeChannel(eventsChannel)
-      supabase.removeChannel(pendingChannel)
-      clearInterval(fallbackInterval)
-      clearInterval(pendingPoll)
+    if (simRun?.key_events && Array.isArray(simRun.key_events)) {
+      setKeyEvents(simRun.key_events as KeyEvent[])
     }
-  }, [simId, loadData])
+  }, [simRun?.key_events])
+
+  // Update loading state once sim_run is resolved
+  useEffect(() => {
+    if (!simRunLoading && simRun) setLoading(false)
+    else if (!simRunLoading && !simRun && simId) {
+      setError('Simulation not found')
+      setLoading(false)
+    }
+  }, [simRunLoading, simRun, simId])
 
   /* Timer countdown ------------------------------------------------------- */
   useEffect(() => {
@@ -426,7 +307,7 @@ export function FacilitatorDashboard() {
     setActionLoading(action)
     try {
       await simAction(simId, action, params)
-      await loadData()
+      // Realtime hooks will pick up DB changes automatically — no manual reload needed
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Action failed')
     } finally {
@@ -548,7 +429,7 @@ export function FacilitatorDashboard() {
                     }
                     // Then start the simulation
                     await simAction(simId, 'start')
-                    await loadData()
+                    // Realtime hooks will pick up state changes
                   } catch (e) {
                     alert(e instanceof Error ? e.message : 'Start failed')
                   } finally {
@@ -600,7 +481,7 @@ export function FacilitatorDashboard() {
                 onClick={() => {
                   const target = currentRound - 1
                   if (confirm(`Roll back to Round ${target}? All data from Round ${currentRound} will be deleted.`)) {
-                    simAction(simId!, 'rollback', { target_round: target }).then(() => loadData())
+                    simAction(simId!, 'rollback', { target_round: target })
                   }
                 }}
                 loading={actionLoading === 'rollback'}
@@ -775,7 +656,7 @@ export function FacilitatorDashboard() {
                     <PendingActionCard key={pa.id} pa={pa} simRun={simRun}
                       onConfirm={async (rolls) => {
                         const res = await simAction(simId!, `pending/${pa.id}/confirm`, rolls ? {precomputed_rolls: rolls} : {})
-                        await loadData()
+                        // Realtime hooks will remove confirmed action from pending list
                         return res
                       }}
                       onReject={() => doAction(`pending/${pa.id}/reject`)} />
@@ -829,10 +710,10 @@ export function FacilitatorDashboard() {
             </div>
 
             {/* Test Action Panel */}
-            <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadData} />
+            <TestActionPanel simId={simId!} roles={roles} onActionSubmitted={loadRoles} />
 
             {/* Participants & Role Assignment */}
-            <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadData} />
+            <ParticipantPanel simId={simId!} roles={roles} onRolesChanged={loadRoles} />
           </div>
 
           {/* ── RIGHT COLUMN: Monitoring & Tools ─────────────────────── */}

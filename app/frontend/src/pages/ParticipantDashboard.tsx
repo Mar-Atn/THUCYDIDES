@@ -12,8 +12,9 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { getSimRun, submitAction, type SimRun } from '@/lib/queries'
+import { submitAction, type SimRun } from '@/lib/queries'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
+import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -106,11 +107,9 @@ export function ParticipantDashboard() {
   const proxyRoleId = urlParams.get('role')
   const isProxyMode = !!proxyRoleId
 
-  const [simRun, setSimRun] = useState<SimRun | null>(null)
   const [myRole, setMyRole] = useState<RoleData | null>(null)
   const [myCountry, setMyCountry] = useState<CountryData | null>(null)
   const [artefacts, setArtefacts] = useState<Artefact[]>([])
-  const [simState, setSimState] = useState<SimState | null>(null)
   const [tab, setTab] = useState<TabId>('actions')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -127,16 +126,27 @@ export function ParticipantDashboard() {
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const prevRoundRef = useRef<number | null>(null)
 
+  /* Realtime hook for sim_runs — replaces manual channel + polling -------- */
+  const { data: simRun } = useRealtimeRow<SimRun>('sim_runs', simId)
+
+  /* Derive simState from the realtime sim_runs row ----------------------- */
+  const simState: SimState | null = simRun ? {
+    status: simRun.status,
+    current_round: simRun.current_round,
+    current_phase: simRun.current_phase,
+    phase_started_at: simRun.started_at,
+    phase_duration_seconds: (simRun.schedule as Record<string, number>)?.phase_a_minutes
+      ? (simRun.schedule as Record<string, number>).phase_a_minutes * 60
+      : 3600,
+  } : null
+
+  /* loadData — fetches role, country, artefacts, etc. Called once on mount
+     and again when the round changes (not on every sim_runs update). ------ */
   const loadData = useCallback(async () => {
     if (!simId || !user) return
     try {
-      const run = await getSimRun(simId)
-      if (!run) { setError('Simulation not found'); setLoading(false); return }
-      setSimRun(run)
-      setSimState({ status:run.status, current_round:run.current_round, current_phase:run.current_phase,
-        phase_started_at:run.started_at, phase_duration_seconds:run.schedule?.phase_a_minutes?run.schedule.phase_a_minutes*60:3600 })
-
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
         .select('id,character_name,country_id,position_type,title,public_bio,confidential_brief,objectives,powers')
@@ -210,35 +220,20 @@ export function ParticipantDashboard() {
     finally { setLoading(false); setDataVersion(v => v + 1) }
   }, [simId, user])
 
+  // Initial data load — once on mount
   useEffect(() => { loadData() }, [loadData])
 
-  // Global refresh poll — catches all state changes not covered by realtime
-  // 30s interval to avoid overwhelming the server
+  // Reload data when round changes (new round means new country stats, artefacts, etc.)
   useEffect(() => {
-    const poll = setInterval(loadData, 30000)
-    return () => clearInterval(poll)
-  }, [loadData])
+    if (simRun === null) return
+    const newRound = simRun.current_round
+    if (prevRoundRef.current !== null && prevRoundRef.current !== newRound) {
+      loadData()
+    }
+    prevRoundRef.current = newRound
+  }, [simRun?.current_round, loadData])
 
-  useEffect(() => {
-    if (!simId) return
-    const ch = supabase.channel(`part:${simId}`)
-      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'sim_runs',filter:`id=eq.${simId}`},(p)=>{
-        const r=p.new as Record<string,unknown>
-        if(r){
-          const newStatus = (r.status as string) ?? 'setup'
-          const newRound = (r.current_round as number) ?? 0
-          const newPhase = (r.current_phase as string) ?? 'pre'
-          setSimRun(prev=>prev?{...prev,...r}as SimRun:prev)
-          setSimState({status:newStatus,current_round:newRound,current_phase:newPhase,
-            phase_started_at:(r.phase_started_at as string|null)??null,
-            phase_duration_seconds:(r.phase_duration_seconds as number|null)??3600})
-          // Reload all data on status/round/phase change
-          loadData()
-        }
-      }).subscribe()
-    return ()=>{supabase.removeChannel(ch)}
-  }, [simId])
-
+  /* Timer countdown ------------------------------------------------------- */
   useEffect(() => {
     if(timerRef.current)clearInterval(timerRef.current)
     if(!simState?.phase_started_at||simState.status==='paused'){setRemaining(null);return}
@@ -369,44 +364,35 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   simId:string; countryId:string; roleId:string; dataVersion?:number
 }) {
   const avail = new Set(roleActions)
-  const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
   const [reviewAgr, setReviewAgr] = useState<string|null>(null)
   const [signingAgr, setSigningAgr] = useState<string|null>(null)
-  const [pendingAgreements, setPendingAgreements] = useState<{id:string;agreement_name:string;agreement_type:string;proposer_country_code:string;signatories:string[];terms:string;signatures:Record<string,unknown>}[]>([])
 
-  const loadPendingTxns = useCallback(()=>{
-    supabase.from('exchange_transactions')
-      .select('id,proposer,counterpart,offer,request,terms,created_at')
-      .eq('sim_run_id',simId).eq('counterpart',countryId).eq('status','pending')
-      .then(({data})=>setPendingTxns((data??[]) as typeof pendingTxns))
-    // Also load agreements awaiting our signature
-    supabase.from('agreements')
-      .select('id,agreement_name,agreement_type,proposer_country_code,signatories,terms,signatures')
-      .eq('sim_run_id',simId).eq('status','proposed').contains('signatories',[countryId])
-      .then(({data})=>{
-        // Filter to ones we haven't signed yet
-        const unsigned = (data??[]).filter((a:Record<string,unknown>)=>{
-          const sigs = (a.signatures as Record<string,{confirmed?:boolean}>)||{}
-          return !sigs[countryId]?.confirmed
-        })
-        setPendingAgreements(unsigned as typeof pendingAgreements)
-      })
-  },[simId,countryId])
+  /* Realtime hooks replace 5s polling for pending transactions + agreements */
+  const { data: pendingTxnsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'exchange_transactions', simId,
+    { columns: 'id,proposer,counterpart,offer,request,terms,created_at', filter: 'status=eq.pending', eq: { counterpart: countryId } },
+  )
+  const pendingTxns = pendingTxnsRaw as unknown as {id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]
 
-  useEffect(()=>{
-    loadPendingTxns()
-    // Poll every 5s for new proposals
-    const interval = setInterval(loadPendingTxns, 5000)
-    return ()=>clearInterval(interval)
-  },[loadPendingTxns, dataVersion])
+  const { data: allProposedAgr } = useRealtimeTable<Record<string, unknown>>(
+    'agreements', simId,
+    { columns: 'id,agreement_name,agreement_type,proposer_country_code,signatories,terms,signatures', eq: { status: 'proposed' } },
+  )
+  // Client-side filter: only agreements where this country is a signatory and hasn't signed yet
+  const pendingAgreements = (allProposedAgr as unknown as {id:string;agreement_name:string;agreement_type:string;proposer_country_code:string;signatories:string[];terms:string;signatures:Record<string,unknown>}[])
+    .filter(a => {
+      if (!Array.isArray(a.signatories) || !a.signatories.includes(countryId)) return false
+      const sigs = (a.signatures as Record<string,{confirmed?:boolean}>) || {}
+      return !sigs[countryId]?.confirmed
+    })
 
   // If reviewing a transaction, show the review screen
   const txnToReview = reviewTxn ? pendingTxns.find(t=>t.id===reviewTxn) : null
   if (txnToReview) {
     return <TransactionReview txn={txnToReview} simId={simId} countryId={countryId} roleId={roleId}
       onClose={()=>setReviewTxn(null)}
-      onDone={()=>{setReviewTxn(null);setPendingTxns(prev=>prev.filter(t=>t.id!==txnToReview.id))}} />
+      onDone={()=>{setReviewTxn(null)}} />
   }
 
   // Agreement signing handler (must be before early return)
@@ -416,7 +402,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       await submitAction(simId,'sign_agreement',roleId,countryId,{
         agreement_id:agrId, confirm, comments:'',
       })
-      setPendingAgreements(prev=>prev.filter(a=>a.id!==agrId))
+      // Realtime hook will auto-update pendingAgreements
     } catch(e) { alert(e instanceof Error?e.message:'Failed') }
     finally { setSigningAgr(null) }
   }
@@ -465,14 +451,14 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           <button onClick={async()=>{
             setSigningAgr(agrToReview.id)
             await handleSignAgreement(agrToReview.id,true)
-            setReviewAgr(null); setPendingAgreements(prev=>prev.filter(a=>a.id!==agrToReview.id))
+            setReviewAgr(null)
           }} disabled={signingAgr===agrToReview.id}
             className="bg-success text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
             {signingAgr===agrToReview.id?'Signing...':'Sign Agreement'}</button>
           <button onClick={async()=>{
             setSigningAgr(agrToReview.id)
             await handleSignAgreement(agrToReview.id,false)
-            setReviewAgr(null); setPendingAgreements(prev=>prev.filter(a=>a.id!==agrToReview.id))
+            setReviewAgr(null)
           }} disabled={signingAgr===agrToReview.id}
             className="bg-danger/10 text-danger font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-danger/20 transition-colors">
             Decline</button>
