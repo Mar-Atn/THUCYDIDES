@@ -1459,6 +1459,7 @@ function PendingResultPoller({simId, pendingActionId, countryId, actionType, onR
 
   useEffect(()=>{
     let stopped = false
+    console.log('[PendingResultPoller] started, pendingActionId:', pendingActionId, 'countryId:', countryId)
     const poll = async () => {
       while (!stopped) {
         try {
@@ -1472,11 +1473,13 @@ function PendingResultPoller({simId, pendingActionId, countryId, actionType, onR
               .in('status', ['approved', 'rejected'])
               .order('submitted_at', {ascending: false}).limit(1)
           }
-          const {data} = await query
+          const {data, error: qErr} = await query
+          if (qErr) console.warn('[PendingResultPoller] query error:', qErr)
           if (stopped) break
           if (data?.[0]) {
             const pa = data[0]
             if (pa.status === 'approved' && pa.result) {
+              console.log('[PendingResultPoller] RESOLVED:', pa.status)
               setWaiting(false)
               onResolvedRef.current({...(pa.result as Record<string,unknown>), pending: false})
               return
