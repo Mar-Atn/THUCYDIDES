@@ -1960,17 +1960,20 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
       target_col: selectedTarget.col,
     }
 
-    // CANONICAL: every combat action sends attacker_unit_codes as string[]
+    // CANONICAL: every combat action sends attacker_unit_codes, source hex, and theater info
     let actionType = attackType
     params.attacker_unit_codes = selectedUnits
-    // Ground: source hex + theater coords
-    if (attackType === 'ground_attack' || attackType === 'ground_move') {
-      params.source_global_row = sourceHex?.row
-      params.source_global_col = sourceHex?.col
+    params.source_global_row = sourceHex?.row
+    params.source_global_col = sourceHex?.col
+    // Theater info: if attack was initiated from a theater map, include theater coords
+    // This tells the dispatcher to resolve combat in theater coordinate space
+    if (sourceHex?.theater) {
+      params.theater = sourceHex.theater
+      params.source_theater_row = sourceHex.theater_row
+      params.source_theater_col = sourceHex.theater_col
       if (selectedTarget?.theater_row) {
-        params.theater = selectedTarget.theater
-        params.theater_row = selectedTarget.theater_row
-        params.theater_col = selectedTarget.theater_col
+        params.target_theater_row = selectedTarget.theater_row
+        params.target_theater_col = selectedTarget.theater_col
       }
     }
     // Missile: target choice

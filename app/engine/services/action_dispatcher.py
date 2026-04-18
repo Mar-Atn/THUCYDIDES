@@ -337,13 +337,28 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             .execute().data or []
 
     # Load defender units at target hex
-    all_units_at_target = client.table("deployments") \
-        .select("*") \
-        .eq("sim_run_id", sim_run_id) \
-        .eq("global_row", target_row) \
-        .eq("global_col", target_col) \
-        .eq("unit_status", "active") \
-        .execute().data or []
+    # Theater mode: use theater coords (multiple theater cells share same global hex)
+    theater = action.get("theater")
+    target_theater_row = action.get("target_theater_row")
+    target_theater_col = action.get("target_theater_col")
+
+    if theater and target_theater_row is not None and target_theater_col is not None:
+        all_units_at_target = client.table("deployments") \
+            .select("*") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("theater", theater) \
+            .eq("theater_row", target_theater_row) \
+            .eq("theater_col", target_theater_col) \
+            .eq("unit_status", "active") \
+            .execute().data or []
+    else:
+        all_units_at_target = client.table("deployments") \
+            .select("*") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("global_row", target_row) \
+            .eq("global_col", target_col) \
+            .eq("unit_status", "active") \
+            .execute().data or []
     def_units = [u for u in all_units_at_target if u["country_id"] != attacker]
 
     if not atk_units:
@@ -400,8 +415,8 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 for dep in survivors:
                     update: dict = {"global_row": target_row, "global_col": target_col}
                     # Theater coords: use target's theater position if available from action
-                    t_row = action.get("theater_row")
-                    t_col = action.get("theater_col")
+                    t_row = action.get("target_theater_row") or action.get("theater_row")
+                    t_col = action.get("target_theater_col") or action.get("theater_col")
                     if t_row and t_col:
                         update["theater_row"] = t_row
                         update["theater_col"] = t_col
@@ -743,8 +758,8 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
         return {"success": False, "narrative": "Units not found"}
 
     # Resolve theater target coords if provided
-    theater_row = action.get("theater_row")
-    theater_col = action.get("theater_col")
+    theater_row = action.get("target_theater_row") or action.get("theater_row")
+    theater_col = action.get("target_theater_col") or action.get("theater_col")
     theater = action.get("theater") or units[0].get("theater")
 
     # Check for non-ground enemy units at target hex (trophies to capture)

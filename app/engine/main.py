@@ -236,11 +236,10 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
             continue  # One marker per hex
         seen_hexes.add(hex_key)
 
-        # Resolve theater coords if possible
-        theater_row = None
-        theater_col = None
-        if theater:
-            # Look up from deployments at this global hex that have theater coords
+        # Theater coords: from action payload first, then deployment lookup
+        theater_row = action.get("target_theater_row")
+        theater_col = action.get("target_theater_col")
+        if theater and not theater_row:
             dep = client.table("deployments") \
                 .select("theater_row, theater_col") \
                 .eq("sim_run_id", sim_id) \
