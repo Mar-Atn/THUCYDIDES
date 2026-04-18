@@ -189,6 +189,15 @@ NUCLEAR_SITES: dict[str, tuple[int, int]] = {
     "choson": (3, 18),
 }
 
+# ---------------------------------------------------------------------------
+# CHOKEPOINTS — naval blockade locations on global map
+# ---------------------------------------------------------------------------
+CHOKEPOINTS: dict[str, dict] = {
+    "cp_caribe": {"hex": (8, 4), "name": "Caribe Passage", "ground_ok": False},
+    "cp_gulf_gate": {"hex": (8, 12), "name": "Gulf Gate", "ground_ok": True},
+    "cp_formosa": {"hex": (7, 17), "name": "Formosa Strait", "ground_ok": False},
+}
+
 
 # ---------------------------------------------------------------------------
 # THEATER <-> GLOBAL LINKAGE (canonical mapping, Marat-approved 2026-04-05)
@@ -385,6 +394,7 @@ __all__ = [
     "UNIT_TYPES",
     "UNIT_STATUSES",
     "NUCLEAR_SITES",
+    "CHOKEPOINTS",
     "ATTACK_RANGE",
     "global_hex_for_theater_cell",
     "theater_link_hexes",

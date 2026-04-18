@@ -790,6 +790,56 @@ async def create_sim_run(body: SimRunCreateRequest, user: AuthUser = Depends(req
 
 _state_cache: dict[str, tuple[float, dict]] = {}
 
+@app.get("/api/sim/{sim_id}/blockades", response_model=APIResponse)
+async def get_blockades(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Return all active blockades and per-chokepoint capability for the user's country."""
+    from engine.services.supabase import get_client
+    from engine.services.blockade_engine import get_blockade_status, _qualifying_units
+    from engine.config.map_config import CHOKEPOINTS
+
+    client = get_client()
+
+    # Resolve user's country
+    role = client.table("roles").select("country_id") \
+        .eq("sim_run_id", sim_id).eq("user_id", user.id) \
+        .limit(1).execute().data
+    user_country = role[0]["country_id"] if role else None
+
+    active_blockades = get_blockade_status(sim_id)
+
+    # Build per-chokepoint info
+    chokepoints = []
+    for cp_id, cp in CHOKEPOINTS.items():
+        entry: dict = {
+            "id": cp_id,
+            "name": cp["name"],
+            "hex": list(cp["hex"]),
+            "ground_ok": cp["ground_ok"],
+            "blockade": None,
+            "can_establish": False,
+        }
+        # Check if there's an active blockade here
+        for b in active_blockades:
+            if b["zone_id"] == cp_id:
+                entry["blockade"] = {
+                    "imposer": b["imposer_country_id"],
+                    "level": b["level"],
+                    "established_round": b["established_round"],
+                }
+                break
+        # Check if user's country can establish here
+        if user_country and not entry["blockade"]:
+            units = _qualifying_units(client, sim_id, user_country, cp_id)
+            entry["can_establish"] = len(units["naval"]) > 0 or len(units["ground"]) > 0
+        chokepoints.append(entry)
+
+    return APIResponse(data={
+        "blockades": active_blockades,
+        "chokepoints": chokepoints,
+        "user_country": user_country,
+    })
+
+
 @app.get("/api/sim/{sim_id}/state", response_model=APIResponse)
 async def get_sim_state(sim_id: str):
     """Get current simulation runtime state (round, phase, timer). Public — cached 5s."""
@@ -1159,7 +1209,7 @@ ACTIONS_REQUIRING_CONFIRMATION = {
 # Combat actions that use dice (queue when dice_mode is on)
 COMBAT_DICE_ACTIONS = {
     "ground_attack", "air_strike", "naval_combat",
-    "naval_bombardment", "naval_blockade", "launch_missile_conventional",
+    "naval_bombardment", "launch_missile_conventional",
 }
 
 ACTION_CATEGORIES: dict[str, str] = {

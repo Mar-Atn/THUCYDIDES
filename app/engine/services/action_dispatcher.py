@@ -102,7 +102,20 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return _resolve_combat(sim_run_id, round_num, "bombardment", action)
 
     if action_type == "naval_blockade":
-        return _resolve_combat(sim_run_id, round_num, "blockade", action)
+        from engine.services.blockade_engine import establish_blockade, lift_blockade, reduce_blockade
+        operation = action.get("operation", "establish")
+        zone_id = action.get("zone_id", "")
+        level = action.get("level", "full")
+        role_id = action.get("role_id", "")
+        country_code = action.get("country_code", "")
+        if operation == "establish":
+            return establish_blockade(sim_run_id, country_code, zone_id, level, round_num, role_id)
+        elif operation == "lift":
+            return lift_blockade(sim_run_id, country_code, zone_id, round_num, role_id)
+        elif operation == "reduce":
+            return reduce_blockade(sim_run_id, country_code, zone_id, round_num, role_id)
+        else:
+            return {"success": False, "narrative": f"Unknown blockade operation: {operation}"}
 
     if action_type == "launch_missile_conventional":
         return _resolve_combat(sim_run_id, round_num, "missile", action)
@@ -598,11 +611,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 "narrative": narrative,
             }
 
-        if combat_type == "blockade":
-            return {
-                "success": True,
-                "narrative": f"Blockade at {hex_label}: implementation pending (chokepoint mechanics).",
-            }
+
 
     except Exception as e:
         logger.exception("Combat resolution failed: %s", e)
@@ -652,6 +661,14 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
 
     logger.info("Combat %s at %s: atk_losses=%d def_losses=%d (deleted %d rows)",
                 combat_type, hex_label, atk_total, def_total, deleted)
+
+    # Auto-check blockade integrity after combat losses
+    if deleted > 0:
+        from engine.services.blockade_engine import check_blockade_integrity
+        blockade_changes = check_blockade_integrity(sim_run_id)
+        if blockade_changes:
+            result["blockade_changes"] = blockade_changes
+
     return result
 
 

@@ -837,6 +837,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'propose_agreement') return <ProposeAgreementForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'basing_rights') return <BasingRightsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'declare_war') return <DeclareWarForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'naval_blockade') return <BlockadeForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -1304,6 +1305,176 @@ function BasingRightsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
       </div>}
       {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+    </div>
+  )
+}
+
+/* ── Blockade Form ────────────────────────────────────────────────────── */
+
+interface ChokepointInfo {
+  id: string
+  name: string
+  hex: number[]
+  ground_ok: boolean
+  blockade: { imposer: string; level: string; established_round: number } | null
+  can_establish: boolean
+}
+
+function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [chokepoints,setChokepoints]=useState<ChokepointInfo[]>([])
+  const [loading,setLoading]=useState(true)
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+  const [selectedLevel,setSelectedLevel]=useState<Record<string,string>>({})
+
+  const loadData = async () => {
+    setLoading(true)
+    try {
+      const token = await getToken()
+      const resp = await fetch(`/api/sim/${simId}/blockades`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (!resp.ok) throw new Error('Failed to load blockade data')
+      const json = await resp.json()
+      setChokepoints(json.data?.chokepoints ?? [])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { loadData() }, [simId])
+
+  const handleEstablish = async (zoneId: string) => {
+    const level = selectedLevel[zoneId] || 'full'
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'naval_blockade', roleId, countryId, {
+        operation: 'establish', zone_id: zoneId, level,
+      })
+      setResult(res.narrative as string ?? 'Blockade established')
+      await loadData()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  const handleLift = async (zoneId: string) => {
+    if (!confirm('Lift this blockade? Maritime traffic will resume.')) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'naval_blockade', roleId, countryId, {
+        operation: 'lift', zone_id: zoneId,
+      })
+      setResult(res.narrative as string ?? 'Blockade lifted')
+      await loadData()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  const handleReduce = async (zoneId: string) => {
+    if (!confirm('Reduce this blockade to partial? Some traffic will be allowed through.')) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'naval_blockade', roleId, countryId, {
+        operation: 'reduce', zone_id: zoneId,
+      })
+      setResult(res.narrative as string ?? 'Blockade reduced to partial')
+      await loadData()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Naval Blockade</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {loading ? (
+        <p className="font-body text-body-sm text-text-secondary">Loading chokepoint data...</p>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {chokepoints.map(cp => (
+            <div key={cp.id} className="bg-card border border-border rounded-lg p-4 space-y-3">
+              <div>
+                <h3 className="font-heading text-body-sm text-text-primary">{cp.name}</h3>
+                <p className="font-mono text-caption text-text-secondary">Hex ({cp.hex[0]}, {cp.hex[1]}){cp.ground_ok ? ' — ground support OK' : ''}</p>
+              </div>
+
+              {/* Status */}
+              {cp.blockade ? (
+                <div className={`rounded p-2 ${cp.blockade.imposer === countryId ? 'bg-action/10 border border-action/30' : 'bg-danger/10 border border-danger/30'}`}>
+                  <p className="font-body text-caption">
+                    <span className={cp.blockade.imposer === countryId ? 'text-action' : 'text-danger'}>
+                      {cp.blockade.level.toUpperCase()} BLOCKADE
+                    </span>
+                    {' '}by {cp.blockade.imposer === countryId ? 'YOU' : cp.blockade.imposer}
+                  </p>
+                  <p className="font-body text-caption text-text-secondary">Since round {cp.blockade.established_round}</p>
+                </div>
+              ) : (
+                <div className="rounded p-2 bg-background border border-border">
+                  <p className="font-body text-caption text-text-secondary">No active blockade</p>
+                </div>
+              )}
+
+              {/* Actions */}
+              {cp.blockade && cp.blockade.imposer === countryId ? (
+                <div className="flex gap-2">
+                  {cp.blockade.level === 'full' && (
+                    <button onClick={() => handleReduce(cp.id)} disabled={submitting}
+                      className="font-body text-caption px-3 py-1.5 rounded border border-warning/30 text-warning hover:bg-warning/10 transition-colors">
+                      Reduce to Partial
+                    </button>
+                  )}
+                  <button onClick={() => handleLift(cp.id)} disabled={submitting}
+                    className="font-body text-caption px-3 py-1.5 rounded border border-danger/30 text-danger hover:bg-danger/10 transition-colors">
+                    Lift Blockade
+                  </button>
+                </div>
+              ) : cp.blockade ? (
+                <p className="font-body text-caption text-text-secondary">Use Attack to break enemy blockade.</p>
+              ) : cp.can_establish ? (
+                <div className="space-y-2">
+                  <div className="flex gap-3">
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name={`level-${cp.id}`} value="full"
+                        checked={(selectedLevel[cp.id] || 'full') === 'full'}
+                        onChange={() => setSelectedLevel(prev => ({...prev, [cp.id]: 'full'}))}
+                        className="accent-action" />
+                      <span className="font-body text-caption text-text-primary">Full</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer">
+                      <input type="radio" name={`level-${cp.id}`} value="partial"
+                        checked={selectedLevel[cp.id] === 'partial'}
+                        onChange={() => setSelectedLevel(prev => ({...prev, [cp.id]: 'partial'}))}
+                        className="accent-action" />
+                      <span className="font-body text-caption text-text-primary">Partial</span>
+                    </label>
+                  </div>
+                  <button onClick={() => handleEstablish(cp.id)} disabled={submitting}
+                    className="w-full font-body text-caption px-3 py-1.5 rounded bg-action/20 border border-action/30 text-action hover:bg-action/30 transition-colors">
+                    Establish Blockade
+                  </button>
+                </div>
+              ) : (
+                <p className="font-body text-caption text-text-secondary">No qualifying units at this chokepoint.</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {result && <div className="bg-success/5 border border-success/20 rounded-lg p-3">
+        <p className="font-body text-body-sm text-success">{result}</p>
+        <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+      </div>}
+      {error && <div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
     </div>
   )
 }
