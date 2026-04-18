@@ -748,12 +748,21 @@ async def create_sim_run(body: SimRunCreateRequest, user: AuthUser = Depends(req
 # M4: Sim Runner — Facilitator Control Endpoints
 # ---------------------------------------------------------------------------
 
+_state_cache: dict[str, tuple[float, dict]] = {}
+
 @app.get("/api/sim/{sim_id}/state", response_model=APIResponse)
 async def get_sim_state(sim_id: str):
-    """Get current simulation runtime state (round, phase, timer). Public — no auth needed (used by map iframe)."""
+    """Get current simulation runtime state (round, phase, timer). Public — cached 5s."""
+    import time
+    now = time.time()
+    cached = _state_cache.get(sim_id)
+    if cached and now - cached[0] < 5:
+        return APIResponse(data=cached[1])
     from engine.services.sim_run_manager import get_timer_info
     try:
-        return APIResponse(data=get_timer_info(sim_id))
+        data = get_timer_info(sim_id)
+        _state_cache[sim_id] = (now, data)
+        return APIResponse(data=data)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 

@@ -213,8 +213,9 @@ export function ParticipantDashboard() {
   useEffect(() => { loadData() }, [loadData])
 
   // Global refresh poll — catches all state changes not covered by realtime
+  // 30s interval to avoid overwhelming the server
   useEffect(() => {
-    const poll = setInterval(loadData, 10000)
+    const poll = setInterval(loadData, 30000)
     return () => clearInterval(poll)
   }, [loadData])
 
