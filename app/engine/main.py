@@ -1346,8 +1346,10 @@ async def submit_action(
         })
 
     # 4b. Check if combat action needs physical dice input
+    # Only ground_attack and naval_combat use dice. Only when auto_attack is OFF.
     dice_mode = run.get("dice_mode", False)
-    if body.action_type in COMBAT_DICE_ACTIONS and dice_mode:
+    DICE_COMBAT_TYPES = {"ground_attack", "naval_combat"}
+    if body.action_type in DICE_COMBAT_TYPES and dice_mode and not auto_attack:
         target_info = f"{role['character_name']}: {body.action_type}"
 
         pa_result2 = client.table("pending_actions").insert({
