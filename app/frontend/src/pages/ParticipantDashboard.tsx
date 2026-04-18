@@ -468,16 +468,25 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
-  const hasExpected = pendingTxns.length > 0 || pendingAgreements.length > 0
+  const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
+  const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
+  const hasExpected = expectedCount > 0
 
   return (
     <div className="space-y-4">
       {/* Actions Expected Now */}
       <div className={`border rounded-lg p-4 ${hasExpected?'bg-warning/10 border-warning/30':'bg-warning/5 border-warning/20'}`}>
-        <h3 className="font-heading text-h3 text-warning mb-2">Actions Expected Now{hasExpected?` (${pendingTxns.length})`:''}</h3>
+        <h3 className="font-heading text-h3 text-warning mb-2">Actions Expected Now{hasExpected?` (${expectedCount})`:''}</h3>
         {!hasExpected
           ? <p className="font-body text-caption text-text-secondary">No urgent actions at this time.</p>
           : <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            {showMoveUnits && (
+              <button onClick={()=>onSelectAction('move_units')}
+                className="text-left bg-card hover:bg-action/5 border-2 border-action/40 hover:border-action/60 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-action font-bold block">Deploy & Move Units</span>
+                <span className="font-body text-caption text-text-secondary">Position your forces for the next round</span>
+              </button>
+            )}
             {pendingTxns.map(txn=>
               <button key={txn.id} onClick={()=>setReviewTxn(txn.id)}
                 className="text-left bg-card hover:bg-action/5 border border-warning/30 hover:border-action/30 rounded-lg px-4 py-3 transition-colors">
