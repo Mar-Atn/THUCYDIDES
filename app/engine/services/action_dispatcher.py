@@ -363,9 +363,18 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 modifiers=action.get("modifiers"),
                 precomputed_rolls=precomputed_rolls,
             )
+            # Convert naval result format: {winner, destroyed_unit} → {attacker_losses, defender_losses}
+            r = result.__dict__
+            destroyed = r.get("destroyed_unit", "")
+            if r.get("winner") == "attacker":
+                r["attacker_losses"] = []
+                r["defender_losses"] = [destroyed]
+            else:
+                r["attacker_losses"] = [destroyed]
+                r["defender_losses"] = []
             naval_atk_deps = [u for u in atk_units if u["unit_type"] in NAVAL_TYPES]
             naval_def_deps = [u for u in def_units if u["unit_type"] in NAVAL_TYPES]
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, naval_atk_deps, naval_def_deps, hex_label, combat_type)
+            return _apply_combat_losses(client, sim_run_id, r, naval_atk_deps, naval_def_deps, hex_label, combat_type)
 
         if combat_type == "bombardment":
             from engine.engines.military import resolve_naval_bombardment_units, UnitNavalBombardmentInput, UnitSnapshot
