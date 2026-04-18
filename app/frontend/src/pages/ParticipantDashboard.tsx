@@ -1516,6 +1516,7 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [unitsUsedThisRound,setUnitsUsedThisRound]=useState<Set<string>>(new Set())
   const [submitting,setSubmitting]=useState(false)
   const [result,setResult]=useState<Record<string,unknown>|null>(null)
+  const [missileTarget,setMissileTarget]=useState<string>('military')
   const [error,setError]=useState<string|null>(null)
   const [preview,setPreview]=useState<{win_probability:number;modifiers:{attacker:{label:string;value:unknown}[];defender:{label:string;value:unknown}[]};attacker:{units:number;modifier_total:number};defender:{units:number;modifier_total:number};has_air_defense:boolean}|null>(null)
   const mapRef = useRef<HTMLIFrameElement>(null)
@@ -1708,6 +1709,10 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
         params.theater_row = selectedTarget.theater_row
         params.theater_col = selectedTarget.theater_col
       }
+    }
+    // Missile: target choice
+    if (attackType === 'launch_missile_conventional') {
+      params.target_choice = missileTarget
     }
     // Naval combat: target ship
     if (attackType === 'naval_combat' && selectedEnemyUnit) {
@@ -1985,6 +1990,28 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                       <UnitIcon type="naval" size={24}/>
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Missile: target choice */}
+            {attackType === 'launch_missile_conventional' && (
+              <div>
+                <span className="font-body text-caption text-text-secondary block mb-1">Target:</span>
+                <div className="flex flex-col gap-1">
+                  {([
+                    {v:'military',l:'Military unit'},
+                    {v:'infrastructure',l:'Infrastructure (-2% GDP)'},
+                    {v:'nuclear_site',l:'Nuclear site (halve R&D)'},
+                    {v:'ad',l:'Air defense unit'},
+                  ] as const).map(o=>
+                    <label key={o.v} className="flex items-center gap-2 font-body text-caption cursor-pointer">
+                      <input type="radio" name="missile_target" value={o.v} checked={missileTarget===o.v}
+                        onChange={()=>setMissileTarget(o.v)}
+                        className="accent-action" />
+                      <span className={missileTarget===o.v?'text-text-primary':'text-text-secondary'}>{o.l}</span>
+                    </label>
+                  )}
                 </div>
               </div>
             )}

@@ -490,43 +490,113 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             return r
 
         if combat_type == "missile":
-            from engine.engines.military import resolve_missile_strike_units, UnitMissileStrikeInput, UnitSnapshot, WarheadType, StrategicAttackTier
+            import random as _random
+            from engine.engines.military import MISSILE_HIT_PROB, MISSILE_AD_INTERCEPT_PROB
             missile_atk = [u for u in atk_list if u["type"] == "strategic_missile"]
             if not missile_atk:
                 return {"success": False, "narrative": "No missile units to launch"}
             missile = missile_atk[0]
             ad_at_target = [u for u in def_list if u["type"] in AD_TYPES]
-            def_countries = list(set(u["country"] for u in def_list))
-            inp = UnitMissileStrikeInput(
-                missile_unit=UnitSnapshot(unit_code=missile["unit_code"], country_code=attacker, unit_type="strategic_missile"),
-                target_global_row=target_row,
-                target_global_col=target_col,
-                warhead_type=WarheadType.CONVENTIONAL,
-                attack_tier=StrategicAttackTier.T1_MIDRANGE,
-                defender_units=[UnitSnapshot(unit_code=u["unit_code"], country_code=u["country"], unit_type=u["type"]) for u in def_list],
-                ad_units_covering_zone=[UnitSnapshot(unit_code=u["unit_code"], country_code=u["country"], unit_type="air_defense") for u in ad_at_target],
-                target_country=def_countries[0] if def_countries else "",
-            )
-            result = resolve_missile_strike_units(inp)
-            r = result.model_dump()
-            # Missile is always consumed
-            r["attacker_losses"] = [missile["unit_code"]]
-            r["success"] = True
-            r["attacker_won"] = result.success
-            # Delete the missile unit
+            target_choice = action.get("target_choice", "military")
+
+            # --- Phase 1: AD Interception (50% per AD unit, independent rolls) ---
+            intercepted = False
+            intercept_rolls = []
+            for ad in ad_at_target:
+                roll = _random.random()
+                intercept_rolls.append({"ad_unit": ad["unit_code"], "roll": round(roll, 3), "intercepted": roll < MISSILE_AD_INTERCEPT_PROB})
+                if roll < MISSILE_AD_INTERCEPT_PROB:
+                    intercepted = True
+                    break  # first successful intercept stops the missile
+
+            # --- Missile always consumed ---
             missile_dep = next((d for d in atk_units if (d.get("unit_id") or d["id"]) == missile["unit_code"]), None)
             if missile_dep:
                 client.table("deployments").delete().eq("id", missile_dep["id"]).execute()
-            # Apply defender losses
-            for code in r.get("defender_losses", []):
+
+            if intercepted:
+                narrative = (f"Missile {missile['unit_code']} INTERCEPTED by AD at {hex_label}. "
+                             f"Missile consumed. {len(intercept_rolls)} AD roll(s).")
+                logger.info("Missile at %s: INTERCEPTED by AD", hex_label)
+                return {
+                    "success": True, "attacker_won": False, "losses_applied": True,
+                    "attacker_losses": [missile["unit_code"]], "defender_losses": [],
+                    "intercepted": True, "intercept_rolls": intercept_rolls,
+                    "narrative": narrative,
+                }
+
+            # --- Phase 2: Hit Roll (flat 75%, same for all target choices) ---
+            hit_roll = _random.random()
+            hit = hit_roll < MISSILE_HIT_PROB
+
+            if not hit:
+                narrative = (f"Missile {missile['unit_code']} → {hex_label}: MISSED "
+                             f"(roll {hit_roll:.2f} vs {MISSILE_HIT_PROB:.0%}). Missile consumed.")
+                logger.info("Missile at %s: MISSED", hex_label)
+                return {
+                    "success": True, "attacker_won": False, "losses_applied": True,
+                    "attacker_losses": [missile["unit_code"]], "defender_losses": [],
+                    "intercepted": False, "hit": False, "hit_roll": round(hit_roll, 3),
+                    "narrative": narrative,
+                }
+
+            # --- Hit: apply damage per target_choice ---
+            defender_losses = []
+            damage_desc = ""
+            def_countries = list(set(u["country"] for u in def_list))
+            target_country = def_countries[0] if def_countries else ""
+
+            if target_choice == "military":
+                # Destroy 1 military unit (prefer non-AD, random)
+                targets = [u for u in def_list if u["type"] != "air_defense"] or list(def_list)
+                if targets:
+                    victim = _random.choice(targets)
+                    defender_losses.append(victim["unit_code"])
+                    damage_desc = f"1 {victim['type']} destroyed"
+
+            elif target_choice == "ad":
+                # Destroy 1 AD unit
+                if ad_at_target:
+                    victim = ad_at_target[0]
+                    defender_losses.append(victim["unit_code"])
+                    damage_desc = "1 air_defense destroyed"
+
+            elif target_choice == "infrastructure":
+                # -2% GDP
+                if target_country:
+                    country_data = client.table("countries").select("gdp").eq("sim_run_id", sim_run_id).eq("id", target_country).limit(1).execute().data
+                    if country_data:
+                        old_gdp = country_data[0]["gdp"]
+                        new_gdp = round(old_gdp * 0.98, 2)
+                        client.table("countries").update({"gdp": new_gdp}).eq("sim_run_id", sim_run_id).eq("id", target_country).execute()
+                        damage_desc = f"Infrastructure hit: {target_country} GDP {old_gdp:.1f} → {new_gdp:.1f} (-2%)"
+
+            elif target_choice == "nuclear_site":
+                # Halve nuclear R&D progress
+                if target_country:
+                    country_data = client.table("countries").select("nuclear_rd_progress").eq("sim_run_id", sim_run_id).eq("id", target_country).limit(1).execute().data
+                    if country_data:
+                        old_prog = country_data[0].get("nuclear_rd_progress", 0)
+                        new_prog = round(old_prog / 2, 2)
+                        client.table("countries").update({"nuclear_rd_progress": new_prog}).eq("sim_run_id", sim_run_id).eq("id", target_country).execute()
+                        damage_desc = f"Nuclear site hit: {target_country} R&D {old_prog:.0%} → {new_prog:.0%}"
+
+            # Delete destroyed defender units
+            for code in defender_losses:
                 dep_match = next((d for d in def_units if (d.get("unit_id") or d["id"]) == code), None)
                 if dep_match:
                     client.table("deployments").delete().eq("id", dep_match["id"]).execute()
-            r["losses_applied"] = True
-            def_losses = len(r.get("defender_losses", []))
-            r["narrative"] = result.narrative + f" | Missile consumed. Defender losses: {def_losses}."
-            logger.info("Missile at %s: hit=%s, def_losses=%d", hex_label, result.success, def_losses)
-            return r
+
+            narrative = (f"Missile {missile['unit_code']} → {hex_label}: HIT ({target_choice}). "
+                         f"{damage_desc or 'No valid target found'}. Missile consumed.")
+            logger.info("Missile at %s: HIT (%s), %s", hex_label, target_choice, damage_desc)
+            return {
+                "success": True, "attacker_won": True, "losses_applied": True,
+                "attacker_losses": [missile["unit_code"]], "defender_losses": defender_losses,
+                "intercepted": False, "hit": True, "hit_roll": round(hit_roll, 3),
+                "target_choice": target_choice, "damage": damage_desc,
+                "narrative": narrative,
+            }
 
         if combat_type == "blockade":
             return {

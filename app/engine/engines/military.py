@@ -2308,8 +2308,13 @@ AIR_STRIKE_CLAMP_LOW: float = 0.03
 AIR_STRIKE_CLAMP_HIGH: float = 0.20
 AIR_STRIKE_MAX_RANGE: int = 2                       # hex distance
 
-MISSILE_BASE_HIT_PROB_V2: float = 0.80
-MISSILE_AD_HIT_PROB_V2: float = 0.30
+# Conventional missile: flat 75% hit (after surviving AD interception)
+MISSILE_HIT_PROB: float = 0.75
+# AD interception: 50% per AD unit, rolled BEFORE hit (two-phase model)
+MISSILE_AD_INTERCEPT_PROB: float = 0.50
+# Legacy aliases (referenced by v1 code)
+MISSILE_BASE_HIT_PROB_V2: float = MISSILE_HIT_PROB
+MISSILE_AD_HIT_PROB_V2: float = MISSILE_HIT_PROB  # no longer reduced by AD
 
 GROUND_COMBAT_MAX_EXCHANGES: int = 50               # safety bound
 

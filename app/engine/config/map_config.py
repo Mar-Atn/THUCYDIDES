@@ -345,8 +345,24 @@ ATTACK_RANGE: dict[str, int] = {
     "tactical_air": 2,        # ≤2 hex Manhattan
     "naval": 1,               # same or adjacent sea hex
     "naval_bombardment": 1,   # adjacent sea→land
-    "strategic_missile": 99,  # global (effectively unlimited)
+    "strategic_missile": 2,   # default T1 — use missile_range() for tier-aware range
 }
+
+# Missile range per tier (derived from country nuclear_level)
+MISSILE_RANGE_BY_TIER: dict[str, int] = {
+    "T1": 2,     # nuclear_level 0-1
+    "T2": 4,     # nuclear_level 2-3
+    "T3": 99,    # nuclear_level 4+ (global)
+}
+
+
+def missile_range(nuclear_level: int) -> int:
+    """Return missile range based on country's nuclear technology level."""
+    if nuclear_level >= 4:
+        return MISSILE_RANGE_BY_TIER["T3"]
+    if nuclear_level >= 2:
+        return MISSILE_RANGE_BY_TIER["T2"]
+    return MISSILE_RANGE_BY_TIER["T1"]
 
 
 __all__ = [

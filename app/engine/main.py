@@ -322,6 +322,12 @@ async def get_valid_attack_targets(
 
     # Get attack range and compute reachable hexes (pure math, instant)
     attack_range = ATTACK_RANGE.get(utype, 1)
+    # Missile range depends on country's nuclear_level
+    if utype == "strategic_missile":
+        from engine.config.map_config import missile_range
+        nuc_data = client.table("countries").select("nuclear_level").eq("sim_run_id", sim_id).eq("id", country).limit(1).execute().data
+        nuc_level = nuc_data[0].get("nuclear_level", 0) if nuc_data else 0
+        attack_range = missile_range(nuc_level)
     from engine.config.map_config import THEATERS
 
     use_theater = theater and unit.get("theater") == theater and unit.get("theater_row") is not None
