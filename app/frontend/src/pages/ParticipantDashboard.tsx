@@ -1524,26 +1524,37 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const mapRef = useRef<HTMLIFrameElement>(null)
 
   // Load units that already attacked this round (naval/air: once per round)
-  useEffect(()=>{
-    supabase.from('sim_runs').select('current_round').eq('id',simId).limit(1)
-      .then(({data:sr})=>{
-        const round = sr?.[0]?.current_round ?? 0
-        supabase.from('observatory_events').select('payload')
-          .eq('sim_run_id',simId).eq('round_num',round).eq('country_code',countryId)
-          .in('event_type',['naval_combat','naval_bombardment','air_strike'])
-          .then(({data:evts})=>{
-            const used = new Set<string>()
-            for (const evt of evts??[]) {
-              const action = (evt.payload as Record<string,unknown>)?.action as Record<string,unknown> || {}
-              const codes = (action.attacker_unit_codes as string[]) || []
-              const code = action.attacker_unit_code as string
-              if (code) used.add(code)
-              codes.forEach(c => used.add(c))
-            }
-            setUnitsUsedThisRound(used)
-          })
-      })
+  // Also includes pending (submitted but not yet resolved) attacks
+  const loadUsedUnits = useCallback(async ()=>{
+    const {data:sr} = await supabase.from('sim_runs').select('current_round').eq('id',simId).limit(1)
+    const round = sr?.[0]?.current_round ?? 0
+    const used = new Set<string>()
+    // From resolved events
+    const {data:evts} = await supabase.from('observatory_events').select('payload')
+      .eq('sim_run_id',simId).eq('round_num',round).eq('country_code',countryId)
+      .in('event_type',['naval_combat','naval_bombardment','air_strike'])
+    for (const evt of evts??[]) {
+      const action = (evt.payload as Record<string,unknown>)?.action as Record<string,unknown> || {}
+      const codes = (action.attacker_unit_codes as string[]) || []
+      const code = action.attacker_unit_code as string
+      if (code) used.add(code)
+      codes.forEach(c => used.add(c))
+    }
+    // From pending actions (submitted, not yet resolved)
+    const {data:pa} = await supabase.from('pending_actions').select('payload')
+      .eq('sim_run_id',simId).eq('country_code',countryId).eq('round_num',round)
+      .in('action_type',['naval_combat','naval_bombardment','air_strike'])
+      .in('status',['pending','approved'])
+    for (const p of pa??[]) {
+      const pl = p.payload as Record<string,unknown> || {}
+      const codes = (pl.attacker_unit_codes as string[]) || []
+      const code = pl.attacker_unit_code as string
+      if (code) used.add(code)
+      codes.forEach(c => used.add(c))
+    }
+    setUnitsUsedThisRound(used)
   },[simId,countryId])
+  useEffect(()=>{ loadUsedUnits() },[loadUsedUnits])
 
   // Listen for postMessage from map iframe
   useEffect(()=>{
@@ -1735,6 +1746,7 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
     setTargets([]); setSelectedTarget(null); setSelectedEnemyUnit(null)
     setAttackType(null); setError(null); setResult(null); setPreview(null)
     mapRef.current?.contentWindow?.postMessage({type:'clear-highlights'},'*')
+    loadUsedUnits() // refresh used-units list after attacking
   }
 
   // Determine which unit types can be selected at source hex
