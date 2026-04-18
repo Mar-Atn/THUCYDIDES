@@ -12,10 +12,12 @@ See CONTRACT_ROUND_FLOW.md for the canonical round flow.
 from __future__ import annotations
 
 import logging
+import random
 from typing import Any
 
 from engine.services.supabase import get_client
 from engine.services.common import get_scenario_id, write_event
+from engine.config.map_config import hex_neighbors_bounded, GLOBAL_HEX_OWNERS
 
 logger = logging.getLogger(__name__)
 
@@ -151,12 +153,7 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return execute_martial_law(sim_run_id, round_num, role_id, country_code)
 
     if action_type == "nuclear_test":
-        from engine.engines.military import resolve_nuclear_test
-        return resolve_nuclear_test(
-            country_code=country_code,
-            nuclear_level=action.get("nuclear_level", 0),
-            precomputed_rolls=action.get("precomputed_rolls"),
-        ).__dict__
+        return _execute_nuclear_test(sim_run_id, round_num, action)
 
     # ── Covert Ops ────────────────────────────────���───────────────────
     if action_type == "covert_operation":
@@ -1057,6 +1054,239 @@ def _process_movement(sim_run_id: str, round_num: int, action: dict) -> dict:
         "results": results,
         "warnings": vr.get("warnings", []),
     }
+
+
+# ---------------------------------------------------------------------------
+# Nuclear Test — HoS-only, no authorization chain (simplified)
+# ---------------------------------------------------------------------------
+
+# Success probabilities (CARD_FORMULAS D.7)
+_NUKE_TEST_PROB_L1 = 0.70
+_NUKE_TEST_PROB_L2_PLUS = 0.95
+
+# Stability / GDP costs
+_NUKE_STAB_UNDERGROUND = -0.2
+_NUKE_STAB_SURFACE_GLOBAL = -0.4
+_NUKE_STAB_SURFACE_ADJACENT = -0.6
+_NUKE_GDP_SURFACE = -0.05  # -5%
+
+
+def _execute_nuclear_test(sim_run_id: str, round_num: int, action: dict) -> dict:
+    """Execute a nuclear test directly (HoS decides alone, no chain).
+
+    Reads country's nuclear_level and nuclear_confirmed from countries table.
+    Validates, rolls for success, applies effects, writes events + artefacts.
+    """
+    client = get_client()
+    country_code = action.get("country_code", "")
+    role_id = action.get("role_id", "")
+    test_type = action.get("test_type", "underground")  # "underground" or "surface"
+    target_row = action.get("target_row")
+    target_col = action.get("target_col")
+
+    # 1. Read country state
+    cs_rows = client.table("countries").select(
+        "nuclear_level, nuclear_confirmed"
+    ).eq("sim_run_id", sim_run_id).eq("id", country_code).limit(1).execute().data
+    if not cs_rows:
+        return {"success": False, "narrative": f"Country {country_code} not found"}
+
+    cs = cs_rows[0]
+    nuclear_level = int(cs.get("nuclear_level") or 0)
+    nuclear_confirmed = cs.get("nuclear_confirmed", False)
+
+    # 2. Validate
+    if nuclear_level < 1:
+        return {"success": False, "narrative": "Must have nuclear_level >= 1 to test"}
+    if nuclear_confirmed:
+        return {"success": False, "narrative": "Nuclear capability already confirmed at this level"}
+
+    # 3. Roll for success
+    prob = _NUKE_TEST_PROB_L2_PLUS if nuclear_level >= 2 else _NUKE_TEST_PROB_L1
+    precomputed = action.get("precomputed_rolls") or {}
+    roll = precomputed.get("test_success_roll", random.random())
+    test_success = roll < prob
+
+    # 4. On success: set nuclear_confirmed = true
+    if test_success:
+        try:
+            client.table("countries").update({
+                "nuclear_confirmed": True,
+            }).eq("sim_run_id", sim_run_id).eq("id", country_code).execute()
+        except Exception as e:
+            logger.warning("nuclear_confirmed update failed: %s", e)
+
+    # 5. Apply stability effects to ALL countries
+    stability_effects: dict[str, float] = {}
+    gdp_effects: dict[str, float] = {}
+
+    try:
+        all_countries = client.table("countries").select(
+            "id, stability, gdp"
+        ).eq("sim_run_id", sim_run_id).execute().data or []
+    except Exception as e:
+        logger.warning("Failed to load countries for nuclear effects: %s", e)
+        all_countries = []
+
+    if test_type == "underground":
+        # Global stability -0.2
+        for c in all_countries:
+            cc = c["id"]
+            new_stab = max(0.0, (c.get("stability") or 5.0) + _NUKE_STAB_UNDERGROUND)
+            stability_effects[cc] = _NUKE_STAB_UNDERGROUND
+            try:
+                client.table("countries").update({
+                    "stability": round(new_stab, 2),
+                }).eq("sim_run_id", sim_run_id).eq("id", cc).execute()
+            except Exception as e:
+                logger.warning("stability update failed for %s: %s", cc, e)
+    else:
+        # Surface: global stability -0.4, own GDP -5%
+        adjacent_countries: set[str] = set()
+        if target_row is not None and target_col is not None:
+            adj_hexes = hex_neighbors_bounded(int(target_row), int(target_col))
+            for r, c in adj_hexes:
+                owner = GLOBAL_HEX_OWNERS.get((r, c))
+                if owner and owner != country_code and owner != "sea":
+                    adjacent_countries.add(owner)
+
+        for c in all_countries:
+            cc = c["id"]
+            stab_delta = _NUKE_STAB_SURFACE_GLOBAL
+            if cc in adjacent_countries:
+                stab_delta += _NUKE_STAB_SURFACE_ADJACENT
+            new_stab = max(0.0, (c.get("stability") or 5.0) + stab_delta)
+            stability_effects[cc] = stab_delta
+            updates: dict[str, Any] = {"stability": round(new_stab, 2)}
+
+            # Own GDP -5%
+            if cc == country_code:
+                old_gdp = c.get("gdp") or 0
+                new_gdp = round(old_gdp * (1.0 + _NUKE_GDP_SURFACE), 2)
+                updates["gdp"] = new_gdp
+                gdp_effects[cc] = _NUKE_GDP_SURFACE
+
+            try:
+                client.table("countries").update(updates).eq(
+                    "sim_run_id", sim_run_id
+                ).eq("id", cc).execute()
+            except Exception as e:
+                logger.warning("nuclear surface effects update failed for %s: %s", cc, e)
+
+    # 6. Build result
+    result = {
+        "success": True,
+        "test_success": test_success,
+        "test_type": test_type,
+        "nuclear_level": nuclear_level,
+        "success_probability": prob,
+        "success_roll": round(roll, 4),
+        "stability_effects": stability_effects,
+        "gdp_effects": gdp_effects,
+        "narrative": (
+            f"{country_code} {test_type} nuclear test: "
+            f"{'SUCCESS — Level {0} CONFIRMED'.format(nuclear_level) if test_success else 'FAILURE — level not confirmed'} "
+            f"(prob={prob}, roll={roll:.4f})"
+        ),
+    }
+    if test_type == "surface" and target_row is not None:
+        result["target_row"] = target_row
+        result["target_col"] = target_col
+
+    # 7. Write observatory event
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(
+        client, sim_run_id, scenario_id, round_num, country_code,
+        "nuclear_test", result["narrative"],
+        {
+            "test_type": test_type,
+            "test_success": test_success,
+            "nuclear_level": nuclear_level,
+            "success_probability": prob,
+            "success_roll": round(roll, 4),
+            "target_row": target_row,
+            "target_col": target_col,
+            "stability_effects": stability_effects,
+            "gdp_effects": gdp_effects,
+        },
+        category="military", role_name=role_id,
+    )
+
+    # 8. Generate classified artefacts for T3+ countries
+    _generate_nuclear_test_artefacts(
+        client, sim_run_id, round_num, country_code, test_type, test_success, nuclear_level,
+    )
+
+    logger.info("[dispatch] nuclear_test by %s (%s): %s",
+                role_id, country_code, "SUCCESS" if test_success else "FAILURE")
+    return result
+
+
+def _generate_nuclear_test_artefacts(
+    client, sim_run_id: str, round_num: int,
+    testing_country: str, test_type: str, test_success: bool, nuclear_level: int,
+) -> None:
+    """Insert classified artefacts for T3+ countries' HoS and military roles."""
+    try:
+        # Find T3+ countries (nuclear_level >= 3 AND confirmed)
+        t3_rows = client.table("countries").select(
+            "id, nuclear_level, nuclear_confirmed"
+        ).eq("sim_run_id", sim_run_id).execute().data or []
+
+        t3_countries = [
+            r["id"] for r in t3_rows
+            if int(r.get("nuclear_level") or 0) >= 3
+            and r.get("nuclear_confirmed")
+            and r["id"] != testing_country
+        ]
+
+        if not t3_countries:
+            return
+
+        # Find HoS + military roles for these countries
+        roles_rows = client.table("roles").select(
+            "id, country_id, is_head_of_state, domain"
+        ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
+            "country_id", t3_countries
+        ).execute().data or []
+
+        target_role_ids: list[str] = []
+        for r in roles_rows:
+            if r.get("is_head_of_state") or r.get("domain") == "military":
+                target_role_ids.append(r["id"])
+
+        if not target_role_ids:
+            return
+
+        outcome_word = "SUCCESSFUL" if test_success else "FAILED"
+        artefacts = []
+        for rid in target_role_ids:
+            artefacts.append({
+                "sim_run_id": sim_run_id,
+                "role_id": rid,
+                "artefact_type": "classified_report",
+                "title": "NUCLEAR TEST ALERT",
+                "subtitle": f"Detected: {test_type} nuclear test",
+                "classification": "TOP SECRET",
+                "from_entity": "Global Monitoring Systems",
+                "date_label": f"Round {round_num}",
+                "content_html": (
+                    f"<p>Global nuclear monitoring systems have detected a <strong>{test_type}</strong> "
+                    f"nuclear detonation originating from <strong>{testing_country.upper()}</strong>.</p>"
+                    f"<p>Assessment: Test appears <strong>{outcome_word}</strong>. "
+                    f"Estimated nuclear capability: Level {nuclear_level}.</p>"
+                    f"<p>Recommend immediate strategic review and intelligence briefing.</p>"
+                ),
+                "round_delivered": round_num,
+                "is_read": False,
+            })
+
+        if artefacts:
+            client.table("artefacts").insert(artefacts).execute()
+            logger.info("[nuclear_test] Generated %d artefacts for T3+ countries", len(artefacts))
+
+    except Exception as e:
+        logger.warning("Nuclear test artefact generation failed: %s", e)
 
 
 def _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result):

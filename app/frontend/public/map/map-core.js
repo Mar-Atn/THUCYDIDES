@@ -620,38 +620,79 @@
       }
       if (row == null || col == null) return;
 
+      // Nuclear test surface events get a radiation trefoil instead of explosion
+      const isNuclearTest = evt.combat_type === 'nuclear_test' && evt.test_type === 'surface';
+
       // Convert to 0-indexed for hexCenter
       const center = hexCenter(row - 1, col - 1, r);
 
-      // Explosion burst SVG — starburst shape
       const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       g.setAttribute('transform', `translate(${center.x},${center.y})`);
       g.style.pointerEvents = 'none';
 
-      // Outer glow
-      const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-      glow.setAttribute('r', r * 0.7);
-      glow.setAttribute('fill', 'rgba(255,60,20,0.25)');
-      glow.setAttribute('stroke', 'none');
-      g.appendChild(glow);
+      if (isNuclearTest) {
+        // ☢ Radiation trefoil — larger, orange/yellow, pulsing glow
+        const glowSize = r * 1.2;
 
-      // Starburst
-      const burst = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      burst.setAttribute('text-anchor', 'middle');
-      burst.setAttribute('dominant-baseline', 'central');
-      burst.setAttribute('font-size', r * 0.9);
-      burst.setAttribute('fill', '#FF3C14');
-      burst.setAttribute('opacity', '0.9');
-      burst.textContent = '\u{1F4A5}';  // 💥 explosion emoji
-      g.appendChild(burst);
+        // Outer radiation glow
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('r', String(glowSize));
+        glow.setAttribute('fill', 'rgba(255,165,0,0.2)');
+        glow.setAttribute('stroke', 'rgba(255,165,0,0.4)');
+        glow.setAttribute('stroke-width', '2');
+        g.appendChild(glow);
 
-      // Pulsing animation
-      const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-      anim.setAttribute('attributeName', 'opacity');
-      anim.setAttribute('values', '0.9;0.5;0.9');
-      anim.setAttribute('dur', '1.5s');
-      anim.setAttribute('repeatCount', 'indefinite');
-      glow.appendChild(anim);
+        // Pulsing glow animation
+        const glowAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        glowAnim.setAttribute('attributeName', 'r');
+        glowAnim.setAttribute('values', (glowSize * 0.9) + ';' + (glowSize * 1.1) + ';' + (glowSize * 0.9));
+        glowAnim.setAttribute('dur', '2s');
+        glowAnim.setAttribute('repeatCount', 'indefinite');
+        glow.appendChild(glowAnim);
+
+        var opacAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        opacAnim.setAttribute('attributeName', 'opacity');
+        opacAnim.setAttribute('values', '0.8;0.4;0.8');
+        opacAnim.setAttribute('dur', '2s');
+        opacAnim.setAttribute('repeatCount', 'indefinite');
+        glow.appendChild(opacAnim);
+
+        // Trefoil symbol ☢
+        const trefoil = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        trefoil.setAttribute('text-anchor', 'middle');
+        trefoil.setAttribute('dominant-baseline', 'central');
+        trefoil.setAttribute('font-size', String(r * 1.4));
+        trefoil.setAttribute('fill', '#FFA500');
+        trefoil.setAttribute('opacity', '0.95');
+        trefoil.textContent = '\u2622';  // ☢ radiation trefoil
+        g.appendChild(trefoil);
+      } else {
+        // Standard explosion burst
+        // Outer glow
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('r', r * 0.7);
+        glow.setAttribute('fill', 'rgba(255,60,20,0.25)');
+        glow.setAttribute('stroke', 'none');
+        g.appendChild(glow);
+
+        // Starburst
+        const burst = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        burst.setAttribute('text-anchor', 'middle');
+        burst.setAttribute('dominant-baseline', 'central');
+        burst.setAttribute('font-size', r * 0.9);
+        burst.setAttribute('fill', '#FF3C14');
+        burst.setAttribute('opacity', '0.9');
+        burst.textContent = '\u{1F4A5}';  // 💥 explosion emoji
+        g.appendChild(burst);
+
+        // Pulsing animation
+        const anim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        anim.setAttribute('attributeName', 'opacity');
+        anim.setAttribute('values', '0.9;0.5;0.9');
+        anim.setAttribute('dur', '1.5s');
+        anim.setAttribute('repeatCount', 'indefinite');
+        glow.appendChild(anim);
+      }
 
       svg.appendChild(g);
     });

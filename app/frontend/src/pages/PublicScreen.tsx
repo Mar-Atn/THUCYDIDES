@@ -136,6 +136,9 @@ export function PublicScreen() {
   const tickerRef = useRef<HTMLDivElement>(null)
   // Map refresh key — changes when phase changes to force iframe reload
   const [mapKey, setMapKey] = useState(0)
+  // Nuclear alert banner state
+  const [nuclearAlert, setNuclearAlert] = useState<{country:string, testType:string}|null>(null)
+  const nuclearAlertTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
 
   /* Load data ------------------------------------------------------------- */
   const loadData = useCallback(async () => {
@@ -206,7 +209,16 @@ export function PublicScreen() {
         filter: `sim_run_id=eq.${simId}`,
       }, (payload) => {
         const evt = payload.new as PublicEvent
-        if (evt) setEvents((prev) => [evt, ...prev].slice(0, 50))
+        if (evt) {
+          setEvents((prev) => [evt, ...prev].slice(0, 50))
+          // Nuclear surface test alert — show full-width red banner for 30s
+          if (evt.event_type === 'nuclear_test' && evt.payload?.test_type === 'surface') {
+            const cc = evt.country_code ?? 'UNKNOWN'
+            setNuclearAlert({ country: cc.toUpperCase(), testType: 'Surface Test' })
+            if (nuclearAlertTimerRef.current) clearTimeout(nuclearAlertTimerRef.current)
+            nuclearAlertTimerRef.current = setTimeout(() => setNuclearAlert(null), 30000)
+          }
+        }
       })
       .subscribe()
 
@@ -330,6 +342,38 @@ export function PublicScreen() {
           </span>
         </div>
       </header>
+
+      {/* ── Nuclear Alert Banner ── */}
+      {nuclearAlert && (
+        <div style={{
+          width: '100%',
+          backgroundColor: '#991B1B',
+          padding: '0.75rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          animation: 'nuclearBannerFlash 2s ease-in-out infinite',
+          zIndex: 40,
+        }}>
+          <span style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '1.25rem',
+            fontWeight: 700,
+            color: '#FFFFFF',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}>
+            {'\u26A0'} NUCLEAR TEST DETECTED {'\u2014'} {nuclearAlert.country} {'\u2014'} {nuclearAlert.testType}
+          </span>
+        </div>
+      )}
+      <style>{`
+        @keyframes nuclearBannerFlash {
+          0%, 100% { background-color: #991B1B; }
+          50% { background-color: #DC2626; }
+        }
+      `}</style>
 
       {/* ================================================================ */}
       {/*  MAIN AREA                                                       */}

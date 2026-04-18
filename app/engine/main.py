@@ -260,7 +260,7 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
     from engine.services.supabase import get_client
     client = get_client()
 
-    COMBAT_TYPES = {'ground_attack', 'ground_move', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional'}
+    COMBAT_TYPES = {'ground_attack', 'ground_move', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional', 'nuclear_test'}
 
     evts = client.table("observatory_events") \
         .select("event_type, payload, country_code") \
@@ -301,14 +301,19 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
                 theater_row = dep[0].get("theater_row")
                 theater_col = dep[0].get("theater_col")
 
-        combat.append({
+        entry = {
             "event_type": e["event_type"],
             "global_row": tr,
             "global_col": tc,
             "theater": theater,
             "theater_row": theater_row,
             "theater_col": theater_col,
-        })
+        }
+        # Nuclear test: pass combat_type + test_type so map renders ☢ for surface tests
+        if e["event_type"] == "nuclear_test":
+            entry["combat_type"] = "nuclear_test"
+            entry["test_type"] = p.get("test_type", "underground")
+        combat.append(entry)
 
     return {"events": combat, "count": len(combat)}
 

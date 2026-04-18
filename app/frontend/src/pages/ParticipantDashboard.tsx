@@ -886,6 +886,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'declare_war') return <DeclareWarForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'naval_blockade') return <BlockadeForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'martial_law') return <MartialLawForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'nuclear_test') return <NuclearTestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -1450,6 +1451,310 @@ function MartialLawForm({roleId,countryId,simId,onClose,onSubmitted}:{
             {submitting ? 'Declaring...' : 'Declare Martial Law'}
           </button>
           {error && <p className="font-body text-caption text-danger">{error}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Nuclear Test Form — dramatic 3-state UX ─────────────────────────────── */
+
+function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [phase, setPhase] = useState<'idle'|'countdown'|'result'>('idle')
+  const [nuclearLevel, setNuclearLevel] = useState<number>(0)
+  const [nuclearConfirmed, setNuclearConfirmed] = useState<boolean>(false)
+  const [loading, setLoading] = useState(true)
+  const [testType, setTestType] = useState<'underground'|'surface'>('underground')
+  const [targetHex, setTargetHex] = useState<{row:number,col:number}|null>(null)
+  const [countdownNum, setCountdownNum] = useState(5)
+  const [result, setResult] = useState<Record<string,unknown>|null>(null)
+  const [error, setError] = useState<string|null>(null)
+
+  useEffect(() => {
+    supabase.from('countries').select('nuclear_level, nuclear_confirmed')
+      .eq('sim_run_id', simId).eq('id', countryId).limit(1)
+      .then(({data, error: err}) => {
+        if (err) { setError('Failed to load nuclear status'); setLoading(false); return }
+        const row = data?.[0]
+        setNuclearLevel(row?.nuclear_level ?? 0)
+        setNuclearConfirmed(row?.nuclear_confirmed === true)
+        setLoading(false)
+      })
+  }, [simId, countryId])
+
+  const startTest = async (type: 'underground'|'surface') => {
+    setTestType(type)
+    setPhase('countdown')
+    setCountdownNum(5)
+
+    // Countdown animation
+    for (let i = 4; i >= 0; i--) {
+      await new Promise(r => setTimeout(r, 1000))
+      setCountdownNum(i)
+    }
+
+    // Submit to engine
+    try {
+      const params: Record<string,unknown> = { test_type: type }
+      if (type === 'surface' && targetHex) {
+        params.target_row = targetHex.row
+        params.target_col = targetHex.col
+      }
+      const res = await submitAction(simId, 'nuclear_test', roleId, countryId, params)
+      setResult(res)
+      setPhase('result')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Test failed')
+      setPhase('idle')
+    }
+  }
+
+  // Countdown overlay — full-screen dark, device-independent
+  if (phase === 'countdown') {
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        backgroundColor: '#0A0E1A',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexDirection: 'column',
+      }}>
+        <div style={{
+          fontFamily: '"JetBrains Mono", "Courier New", monospace',
+          color: countdownNum === 0 ? '#FF3C14' : '#00FF41',
+          fontSize: '12rem',
+          fontWeight: 700,
+          lineHeight: 1,
+          textShadow: countdownNum === 0
+            ? '0 0 60px rgba(255,60,20,0.6), 0 0 120px rgba(255,60,20,0.3)'
+            : '0 0 40px rgba(0,255,65,0.4), 0 0 80px rgba(0,255,65,0.2)',
+          animation: 'nuclearPulse 1s ease-in-out infinite',
+          userSelect: 'none',
+        }}>
+          {countdownNum === 0 ? 'DETONATION' : countdownNum}
+        </div>
+        <div style={{
+          fontFamily: '"JetBrains Mono", monospace',
+          color: '#00FF41',
+          fontSize: '1rem',
+          opacity: 0.5,
+          marginTop: '2rem',
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+        }}>
+          {testType} nuclear test in progress
+        </div>
+        <style>{`
+          @keyframes nuclearPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // Result overlay — full-screen dark, matrix-style reveal
+  if (phase === 'result' && result) {
+    const testSuccess = result.test_success as boolean
+    return (
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: 50,
+        backgroundColor: '#0A0E1A',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '2rem',
+      }}>
+        <div style={{
+          fontFamily: '"JetBrains Mono", "Courier New", monospace',
+          color: testSuccess ? '#00FF41' : '#FF6B35',
+          fontSize: '3rem',
+          fontWeight: 700,
+          letterSpacing: '0.15em',
+          textAlign: 'center',
+          textShadow: testSuccess
+            ? '0 0 30px rgba(0,255,65,0.5)'
+            : '0 0 30px rgba(255,107,53,0.5)',
+          animation: 'nuclearReveal 1s ease-out forwards',
+          maxWidth: '90vw',
+        }}>
+          {testSuccess
+            ? `TEST SUCCESSFUL — LEVEL ${result.nuclear_level} CONFIRMED`
+            : 'TEST FAILED — LEVEL NOT CONFIRMED'
+          }
+        </div>
+
+        {/* Effects summary */}
+        <div style={{
+          fontFamily: '"JetBrains Mono", monospace',
+          color: 'rgba(255,255,255,0.6)',
+          fontSize: '0.875rem',
+          textAlign: 'center',
+          maxWidth: '600px',
+          lineHeight: 1.8,
+        }}>
+          <div>Type: {(result.test_type as string || '').toUpperCase()}</div>
+          <div>Probability: {((result.success_probability as number) * 100).toFixed(0)}% | Roll: {(result.success_roll as number)?.toFixed(4)}</div>
+          {Object.keys(result.stability_effects as Record<string,number> || {}).length > 0 && (
+            <div style={{color:'#FF6B35', marginTop:'0.5rem'}}>
+              Global stability impact applied
+            </div>
+          )}
+          {Object.keys(result.gdp_effects as Record<string,number> || {}).length > 0 && (
+            <div style={{color:'#FF6B35'}}>
+              GDP impact: -5% ({countryId})
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => { setPhase('idle'); onSubmitted() }}
+          style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            color: '#00FF41',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(0,255,65,0.3)',
+            padding: '0.75rem 2rem',
+            fontSize: '0.875rem',
+            cursor: 'pointer',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            marginTop: '1rem',
+          }}
+        >
+          Return to Actions
+        </button>
+
+        <style>{`
+          @keyframes nuclearReveal {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `}</style>
+      </div>
+    )
+  }
+
+  // Idle state — nuclear status + test options
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Nuclear Test</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {loading ? (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <p className="font-body text-caption text-text-secondary">Loading nuclear status...</p>
+        </div>
+      ) : nuclearLevel < 1 ? (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <p className="font-body text-body-sm text-text-secondary">Your country does not have nuclear capability (level 0). Invest in nuclear R&D first.</p>
+        </div>
+      ) : nuclearConfirmed ? (
+        <div className="bg-card border border-border rounded-lg p-6" style={{backgroundColor:'rgba(0,255,65,0.05)', borderColor:'rgba(0,255,65,0.2)'}}>
+          <p className="font-body text-body-sm" style={{color:'#00FF41', fontFamily:'JetBrains Mono, monospace'}}>
+            NUCLEAR CAPABILITY CONFIRMED AT LEVEL {nuclearLevel}
+          </p>
+          <p className="font-body text-caption text-text-secondary mt-2">
+            No further testing required at this level. A new test is needed if your nuclear level increases.
+          </p>
+        </div>
+      ) : (
+        <div style={{backgroundColor:'#0A0E1A', borderRadius:'0.5rem', padding:'1.5rem'}}>
+          {/* Status */}
+          <div style={{
+            display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1.5rem',
+          }}>
+            <div style={{backgroundColor:'rgba(255,255,255,0.05)', borderRadius:'0.5rem', padding:'1rem', textAlign:'center'}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'2rem', color:'#F59E0B'}}>{nuclearLevel}</div>
+              <div style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)'}}>Nuclear Level</div>
+            </div>
+            <div style={{backgroundColor:'rgba(255,255,255,0.05)', borderRadius:'0.5rem', padding:'1rem', textAlign:'center'}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'2rem', color:'#FF6B35'}}>
+                {nuclearLevel >= 2 ? '95%' : '70%'}
+              </div>
+              <div style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)'}}>Success Probability</div>
+            </div>
+          </div>
+
+          {/* Effects info */}
+          <div style={{
+            backgroundColor:'rgba(255,60,20,0.05)', border:'1px solid rgba(255,60,20,0.2)',
+            borderRadius:'0.5rem', padding:'1rem', marginBottom:'1.5rem',
+            fontFamily:'DM Sans, sans-serif', fontSize:'0.85rem', color:'rgba(255,255,255,0.7)',
+          }}>
+            <div style={{fontWeight:600, color:'#FF3C14', marginBottom:'0.5rem'}}>Test Effects</div>
+            <div>Underground: Global stability -0.2</div>
+            <div>Surface: Global stability -0.4, own GDP -5%, adjacent countries stability -0.6</div>
+          </div>
+
+          {/* Surface hex selector */}
+          {testType === 'surface' && (
+            <div style={{marginBottom:'1rem'}}>
+              <label style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)', display:'block', marginBottom:'0.5rem'}}>
+                Target Hex (row, col) — must be own territory
+              </label>
+              <div style={{display:'flex', gap:'0.5rem'}}>
+                <input type="number" min={1} max={10} placeholder="Row"
+                  style={{
+                    width:'80px', padding:'0.5rem', backgroundColor:'rgba(255,255,255,0.05)',
+                    border:'1px solid rgba(255,255,255,0.15)', borderRadius:'4px',
+                    color:'white', fontFamily:'JetBrains Mono, monospace',
+                  }}
+                  onChange={e => setTargetHex(prev => ({row: parseInt(e.target.value)||0, col: prev?.col||0}))}
+                />
+                <input type="number" min={1} max={20} placeholder="Col"
+                  style={{
+                    width:'80px', padding:'0.5rem', backgroundColor:'rgba(255,255,255,0.05)',
+                    border:'1px solid rgba(255,255,255,0.15)', borderRadius:'4px',
+                    color:'white', fontFamily:'JetBrains Mono, monospace',
+                  }}
+                  onChange={e => setTargetHex(prev => ({row: prev?.row||0, col: parseInt(e.target.value)||0}))}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Action buttons */}
+          <div style={{display:'flex', gap:'1rem'}}>
+            <button
+              onClick={() => { setTestType('underground'); startTest('underground') }}
+              style={{
+                flex:1, padding:'1rem', borderRadius:'0.5rem', cursor:'pointer',
+                backgroundColor:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.4)',
+                color:'#F59E0B', fontFamily:'JetBrains Mono, monospace',
+                fontSize:'0.85rem', fontWeight:600, textTransform:'uppercase',
+                letterSpacing:'0.1em',
+              }}
+            >
+              Underground Test
+            </button>
+            <button
+              onClick={() => {
+                if (testType !== 'surface') { setTestType('surface'); return }
+                if (!targetHex || !targetHex.row || !targetHex.col) {
+                  setError('Select a target hex for surface test')
+                  return
+                }
+                startTest('surface')
+              }}
+              style={{
+                flex:1, padding:'1rem', borderRadius:'0.5rem', cursor:'pointer',
+                backgroundColor:'rgba(255,60,20,0.15)', border:'1px solid rgba(255,60,20,0.4)',
+                color:'#FF3C14', fontFamily:'JetBrains Mono, monospace',
+                fontSize:'0.85rem', fontWeight:600, textTransform:'uppercase',
+                letterSpacing:'0.1em',
+              }}
+            >
+              {testType === 'surface' ? 'Confirm Surface Test' : 'Surface Test'}
+            </button>
+          </div>
+
+          {error && (
+            <p style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.8rem', color:'#FF3C14', marginTop:'0.75rem'}}>{error}</p>
+          )}
         </div>
       )}
     </div>
