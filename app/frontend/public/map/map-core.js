@@ -830,10 +830,14 @@
   // Return the active list of units (editable copy in edit mode, raw otherwise).
   function currentUnits() {
     if (state.editMode && state.editableUnits) return state.editableUnits;
-    const all = (state.units && state.units.units) || [];
-    // Filter out temporarily hidden units (withdrawn but not yet submitted)
+    let all = (state.units && state.units.units) || [];
+    // Filter out hidden units (withdrawn/repositioned, not yet submitted)
     if (state._hiddenUnits && state._hiddenUnits.size > 0) {
-      return all.filter(u => !state._hiddenUnits.has(u.unit_id));
+      all = all.filter(u => !state._hiddenUnits.has(u.unit_id));
+    }
+    // Add preview units (deployed but not yet submitted)
+    if (state._previewUnits && state._previewUnits.length > 0) {
+      all = [...all, ...state._previewUnits];
     }
     return all;
   }
@@ -2242,16 +2246,28 @@
     if (msg.type === 'navigate-theater') {
       renderView(msg.theater || 'global');
     }
-    if (msg.type === 'hide-unit') {
-      state._hiddenUnits = state._hiddenUnits || new Set();
-      state._hiddenUnits.add(msg.unit_id);
+    if (msg.type === 'preview-moves') {
+      // Show proposed deployment state: hide withdrawn units, add preview units for deploys
+      const movesArr = msg.moves || [];
+      state._hiddenUnits = new Set();
+      state._previewUnits = [];
+      movesArr.forEach(m => {
+        if (m.action === 'withdraw') {
+          state._hiddenUnits.add(m.unit_id);
+        } else if (m.action === 'deploy' && m.target_row != null) {
+          state._hiddenUnits.add(m.unit_id); // hide from original position
+          state._previewUnits.push({
+            unit_id: m.unit_id,
+            country_id: m.country_id,
+            unit_type: m.unit_type,
+            global_row: m.target_row,
+            global_col: m.target_col,
+            status: 'active',
+            _preview: true,
+          });
+        }
+      });
       renderView(state.view);
-    }
-    if (msg.type === 'show-unit') {
-      if (state._hiddenUnits) {
-        state._hiddenUnits.delete(msg.unit_id);
-        renderView(state.view);
-      }
     }
     if (msg.type === 'refresh-units') {
       // Re-fetch units from API and re-render

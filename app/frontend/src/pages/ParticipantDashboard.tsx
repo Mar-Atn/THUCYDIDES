@@ -2492,7 +2492,9 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
           setError('Unit already queued for deployment'); return
         }
-        setMoves(prev => [...prev, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy', target_row: row, target_col: col}])
+        const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
+        setMoves(newMoves)
+        syncMapPreview(newMoves)
         setSelectedUnit(null); setError(null)
       } else if (mode === 'withdraw') {
         // Show own units at this hex for withdrawal selection
@@ -2503,25 +2505,46 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     }
     window.addEventListener('message', handler)
     return () => window.removeEventListener('message', handler)
-  }, [mode, selectedUnit, moves, countryId])
+  }, [mode, selectedUnit, moves, countryId, syncMapPreview])
+
+  // Send all pending moves to map for preview rendering
+  const syncMapPreview = useCallback((newMoves: MoveEntry[]) => {
+    mapRef.current?.contentWindow?.postMessage({
+      type: 'preview-moves',
+      moves: newMoves.map(m => ({
+        unit_id: m.unit_id,
+        unit_type: m.unit_type,
+        action: m.action,
+        target_row: m.target_row,
+        target_col: m.target_col,
+        country_id: countryId,
+      })),
+    }, '*')
+  }, [countryId])
 
   const withdrawUnit = (u: {unit_id:string;unit_type:string}) => {
-    setMoves(prev => [...prev, {unit_id: u.unit_id, unit_type: u.unit_type, action: 'withdraw'}])
+    const newMoves = [...moves, {unit_id: u.unit_id, unit_type: u.unit_type, action: 'withdraw' as const}]
+    setMoves(newMoves)
     setHexUnits(prev => prev.filter(x => x.unit_id !== u.unit_id))
-    // Hide unit on map
-    mapRef.current?.contentWindow?.postMessage({type: 'hide-unit', unit_id: u.unit_id}, '*')
+    syncMapPreview(newMoves)
     // Auto-switch to deploy mode with this unit ready
     setSelectedUnit({unit_id: u.unit_id, unit_type: u.unit_type})
     setMode('deploy')
   }
 
   const removeMove = (unitId: string) => {
-    const removed = moves.find(m => m.unit_id === unitId)
-    setMoves(prev => prev.filter(m => m.unit_id !== unitId))
-    // If undoing a withdraw, show unit on map again
-    if (removed?.action === 'withdraw') {
-      mapRef.current?.contentWindow?.postMessage({type: 'show-unit', unit_id: unitId}, '*')
-    }
+    const newMoves = moves.filter(m => m.unit_id !== unitId)
+    setMoves(newMoves)
+    syncMapPreview(newMoves)
+  }
+
+  const discardAll = () => {
+    setMoves([])
+    setSelectedUnit(null)
+    setHexUnits([])
+    setError(null)
+    // Restore map to original state
+    mapRef.current?.contentWindow?.postMessage({type: 'preview-moves', moves: []}, '*')
   }
 
   const handleSubmit = async () => {
@@ -2655,6 +2678,10 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
               <button onClick={handleSubmit} disabled={submitting}
                 className="w-full font-body text-caption font-bold uppercase py-2 rounded bg-action text-white hover:bg-action/80 disabled:opacity-50 mt-1">
                 {submitting ? 'Submitting...' : `Submit ${moves.length} Change(s)`}
+              </button>
+              <button onClick={discardAll}
+                className="w-full font-body text-caption py-1.5 rounded border border-danger/30 text-danger/70 hover:bg-danger/5 hover:text-danger transition-colors mt-1">
+                Discard All
               </button>
             )}
           </div>
