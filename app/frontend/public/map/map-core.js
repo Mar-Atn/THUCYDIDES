@@ -2262,6 +2262,9 @@
             unit_type: m.unit_type,
             global_row: m.target_row,
             global_col: m.target_col,
+            theater: m.theater || null,
+            theater_row: m.theater_row || null,
+            theater_col: m.theater_col || null,
             status: 'active',
             _preview: true,
           });

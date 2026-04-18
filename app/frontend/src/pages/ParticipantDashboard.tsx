@@ -2436,7 +2436,7 @@ interface QueuedMove {
 function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
 }) {
-  type MoveEntry = {unit_id:string;unit_type:string;action:'deploy'|'withdraw';target_row?:number;target_col?:number}
+  type MoveEntry = {unit_id:string;unit_type:string;action:'deploy'|'withdraw';target_row?:number;target_col?:number;theater?:string;theater_row?:number;theater_col?:number}
   const [activeUnits,setActiveUnits]=useState<{unit_id:string;unit_type:string;global_row:number|null;global_col:number|null}[]>([])
   const [reserveUnits,setReserveUnits]=useState<{unit_id:string;unit_type:string}[]>([])
   const [embarkedUnits,setEmbarkedUnits]=useState<{unit_id:string;unit_type:string;embarked_on:string|null}[]>([])
@@ -2499,6 +2499,9 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         action: m.action,
         target_row: m.target_row,
         target_col: m.target_col,
+        theater: m.theater,
+        theater_row: m.theater_row,
+        theater_col: m.theater_col,
         country_id: countryId,
       })),
     }, '*')
@@ -2511,38 +2514,55 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       if (!msg || msg.type !== 'hex-click') return
       const row = msg.row as number, col = msg.col as number
 
-      if (selectedUnit && hexUnits.length === 0) {
-        // Deploying: place selected reserve unit at this hex
+      // Territory check: hex owner must be own country, or has own units, or sea (naval only)
+      const hexOwner = msg.owner as string || 'sea'
+      const view = msg.view as string
+      const theaterName = view !== 'global' ? view : undefined
+      const theaterRow = msg.theater_row as number | undefined
+      const theaterCol = msg.theater_col as number | undefined
+
+      const tryDeploy = () => {
+        if (!selectedUnit) return false
         if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
-          setError('Unit already queued for deployment'); return
+          setError('Unit already queued'); return true
         }
-        const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
+        // Validate territory: own territory, or hex with own units
+        const isOwnTerritory = hexOwner === countryId
+        const isSea = hexOwner === 'sea'
+        const hasOwnUnits = (msg.units || []).some((u:{country_id:string}) => u.country_id === countryId)
+        const isNaval = selectedUnit.unit_type === 'naval'
+        const isLand = !isNaval
+
+        if (isSea && isLand) { setError('Land units cannot deploy to sea'); return true }
+        if (!isSea && isNaval) { setError('Naval units can only deploy to sea'); return true }
+        if (!isOwnTerritory && !hasOwnUnits && !isSea) { setError('Can only deploy to own territory or hexes with your units'); return true }
+
+        const newMoves = [...moves, {
+          unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type,
+          action: 'deploy' as const, target_row: row, target_col: col,
+          theater: theaterName, theater_row: theaterRow, theater_col: theaterCol,
+        }]
         setMoves(newMoves)
         syncMapPreview(newMoves)
         setSelectedUnit(null); setHexUnits([]); setError(null)
+        return true
+      }
+
+      if (selectedUnit && hexUnits.length === 0) {
+        tryDeploy()
       } else {
-        // Show all own units at this hex after pending moves applied:
-        // Original units (from map) minus withdrawn, plus units deployed here
-        const row = msg.row as number, col = msg.col as number
+        // Show own units at this hex for withdrawal
         const mapUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
-        // Exclude already-withdrawn units
         const afterWithdraw = mapUnits.filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id && m.action === 'withdraw'))
-        // Add units deployed to THIS hex
         const deployedHere = moves.filter(m => m.action === 'deploy' && m.target_row === row && m.target_col === col)
           .map(m => ({unit_id: m.unit_id, unit_type: m.unit_type}))
-        // Combine, deduplicate
         const allHere = [...afterWithdraw, ...deployedHere.filter(d => !afterWithdraw.some((u:{unit_id:string}) => u.unit_id === d.unit_id))]
-        // Exclude units already in moves queue (either direction)
         const available = allHere.filter(u => !moves.some(m => m.unit_id === u.unit_id))
         if (available.length > 0) {
           setHexUnits(available)
           setMode('withdraw')
         } else if (selectedUnit) {
-          // No units to withdraw but have a unit selected — deploy here
-          const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
-          setMoves(newMoves)
-          syncMapPreview(newMoves)
-          setSelectedUnit(null); setHexUnits([]); setError(null)
+          tryDeploy()
         }
       }
     }
