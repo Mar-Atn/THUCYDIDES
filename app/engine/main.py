@@ -386,6 +386,9 @@ async def get_valid_attack_targets(
             elif utype == "ground" and (r, c) not in own_hexes and not is_sea_hex(r, c, theater):
                 # Empty land hex — ground can advance (no combat)
                 targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "ground_move", "enemies": []})
+            elif utype == "strategic_missile" and not is_sea_hex(r, c, theater):
+                # Missiles can target any enemy land hex in theater
+                targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": []})
     else:
         enemy_by_hex = {}
         for e in all_enemies:
@@ -401,6 +404,12 @@ async def get_valid_attack_targets(
             elif utype == "ground" and (r, c) not in own_hexes and not is_sea_hex(r, c):
                 # Empty land hex — ground can advance
                 targets.append({"row": r, "col": c, "attack_type": "ground_move", "enemies": []})
+            elif utype == "strategic_missile" and not is_sea_hex(r, c):
+                # Missiles can target any enemy land hex (infrastructure/nuclear_site)
+                from engine.config.map_config import hex_owner as get_hex_owner
+                owner = get_hex_owner(r, c)
+                if owner != "sea" and owner != country:
+                    targets.append({"row": r, "col": c, "attack_type": "launch_missile_conventional", "enemies": []})
 
     # Friendlies at source (single query)
     if use_theater:
