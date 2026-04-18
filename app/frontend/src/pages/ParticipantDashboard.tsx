@@ -1596,18 +1596,7 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           maxWidth: '600px',
           lineHeight: 1.8,
         }}>
-          <div>Type: {(result.test_type as string || '').toUpperCase()}</div>
-          <div>Probability: {((result.success_probability as number) * 100).toFixed(0)}% | Roll: {(result.success_roll as number)?.toFixed(4)}</div>
-          {Object.keys(result.stability_effects as Record<string,number> || {}).length > 0 && (
-            <div style={{color:'#FF6B35', marginTop:'0.5rem'}}>
-              Global stability impact applied
-            </div>
-          )}
-          {Object.keys(result.gdp_effects as Record<string,number> || {}).length > 0 && (
-            <div style={{color:'#FF6B35'}}>
-              GDP impact: -5% ({countryId})
-            </div>
-          )}
+          <div>{(result.test_type as string || '').toUpperCase()} TEST</div>
         </div>
 
         <button
@@ -1691,9 +1680,6 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
             borderRadius:'0.5rem', padding:'1rem', marginBottom:'1.5rem',
             fontFamily:'DM Sans, sans-serif', fontSize:'0.85rem', color:'rgba(255,255,255,0.7)',
           }}>
-            <div style={{fontWeight:600, color:'#FF3C14', marginBottom:'0.5rem'}}>Test Effects</div>
-            <div>Underground: Global stability -0.2</div>
-            <div>Surface: Global stability -0.4, own GDP -5%, adjacent countries stability -0.6</div>
           </div>
 
           {/* Surface hex selector */}
@@ -1726,7 +1712,7 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           {/* Action buttons */}
           <div style={{display:'flex', gap:'1rem'}}>
             <button
-              onClick={() => { setTestType('underground'); startTest('underground') }}
+              onClick={() => { if(!confirm('Conduct UNDERGROUND nuclear test? This action cannot be undone.')) return; setTestType('underground'); startTest('underground') }}
               style={{
                 flex:1, padding:'1rem', borderRadius:'0.5rem', cursor:'pointer',
                 backgroundColor:'rgba(245,158,11,0.15)', border:'1px solid rgba(245,158,11,0.4)',
@@ -1744,6 +1730,7 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   setError('Select a target hex for surface test')
                   return
                 }
+                if(!confirm('Conduct SURFACE nuclear test? This will be visible to ALL countries.')) return
                 startTest('surface')
               }}
               style={{
