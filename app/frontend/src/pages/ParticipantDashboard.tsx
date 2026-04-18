@@ -2487,8 +2487,8 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       if (!msg || msg.type !== 'hex-click') return
       const row = msg.row as number, col = msg.col as number
 
-      if (mode === 'deploy' && selectedUnit) {
-        // Deploy selected reserve unit to this hex
+      if (selectedUnit) {
+        // Deploying: place selected reserve unit at this hex
         if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
           setError('Unit already queued for deployment'); return
         }
@@ -2496,11 +2496,14 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         setMoves(newMoves)
         syncMapPreview(newMoves)
         setSelectedUnit(null); setError(null)
-      } else if (mode === 'withdraw') {
-        // Show own units at this hex for withdrawal selection
+      } else {
+        // No unit selected — clicking hex with own units = withdraw mode
         const myUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
           .filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id))
-        setHexUnits(myUnits)
+        if (myUnits.length > 0) {
+          setHexUnits(myUnits)
+          setMode('withdraw')
+        }
       }
     }
     window.addEventListener('message', handler)
@@ -2674,7 +2677,7 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   </div>
                 ))}
               </div>}
-            {moves.length > 0 && (
+            {moves.length > 0 && (<>
               <button onClick={handleSubmit} disabled={submitting}
                 className="w-full font-body text-caption font-bold uppercase py-2 rounded bg-action text-white hover:bg-action/80 disabled:opacity-50 mt-1">
                 {submitting ? 'Submitting...' : `Submit ${moves.length} Change(s)`}
@@ -2683,7 +2686,7 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 className="w-full font-body text-caption py-1.5 rounded border border-danger/30 text-danger/70 hover:bg-danger/5 hover:text-danger transition-colors mt-1">
                 Discard All
               </button>
-            )}
+            </>)}
           </div>
         </>)}
 
