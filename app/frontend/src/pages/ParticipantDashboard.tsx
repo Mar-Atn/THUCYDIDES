@@ -1612,6 +1612,10 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
           if (!match) return
           setSelectedTarget(match)
           setAttackType(match.attack_type)
+          // Reset missile target choice if nuclear_site not available on new hex
+          if (missileTarget === 'nuclear_site' && !(match as Record<string,unknown>).has_nuclear_site) {
+            setMissileTarget('military')
+          }
           fetchPreview(match.attack_type, match.row, match.col)
           if (match.attack_type === 'naval_combat' && match.enemies.length > 1) {
             setStep('confirm')
