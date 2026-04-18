@@ -2667,7 +2667,7 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                       return <button key={u.unit_id} title={u.unit_id} disabled={isQueued}
                         onClick={()=>{if(!isQueued){setSelectedUnit({unit_id:u.unit_id,unit_type:u.unit_type});setMode('deploy');setError(null)}}}
                         className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
-                          isQueued?'border-success/30 text-success/40 cursor-not-allowed':
+                          isQueued?'border-border/30 text-text-secondary/30 cursor-not-allowed':
                           isSelected?'bg-action/10 border-action text-action':
                           'border-border text-text-secondary hover:border-action/30 hover:text-action'}`}>
                         <UnitIcon type={type} size={20}/>
@@ -2682,13 +2682,23 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
           {/* Queued changes */}
           <div className="bg-card border border-border rounded-lg p-3 space-y-2">
             <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Changes ({moves.length})</h3>
+            {moves.length > 0 && (<>
+              <button onClick={handleSubmit} disabled={submitting}
+                className="w-full font-body text-caption font-bold uppercase py-2 rounded bg-action text-white hover:bg-action/80 disabled:opacity-50">
+                {submitting ? 'Submitting...' : `Submit ${moves.length} Change(s)`}
+              </button>
+              <button onClick={discardAll}
+                className="w-full font-body text-caption py-1 rounded border border-danger/30 text-danger/70 hover:bg-danger/5 hover:text-danger transition-colors">
+                Discard All
+              </button>
+            </>)}
             {moves.length === 0
               ? <p className="font-body text-caption text-text-secondary/50">No changes queued yet.</p>
               : <div className="space-y-1">
                 {moves.map(m => (
                   <div key={m.unit_id} className="flex items-center justify-between gap-1 py-1 border-b border-border/30 last:border-0">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <UnitIcon type={m.unit_type} size={16} className={m.action==='withdraw'?'text-warning':'text-action'}/>
+                      <UnitIcon type={m.unit_type} size={16} className="text-text-secondary"/>
                       <span className="font-body text-caption text-text-primary truncate">
                         {m.action==='withdraw'?'→ reserve':`→ (${m.target_row},${m.target_col})`}
                       </span>
@@ -2697,16 +2707,6 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   </div>
                 ))}
               </div>}
-            {moves.length > 0 && (<>
-              <button onClick={handleSubmit} disabled={submitting}
-                className="w-full font-body text-caption font-bold uppercase py-2 rounded bg-action text-white hover:bg-action/80 disabled:opacity-50 mt-1">
-                {submitting ? 'Submitting...' : `Submit ${moves.length} Change(s)`}
-              </button>
-              <button onClick={discardAll}
-                className="w-full font-body text-caption py-1.5 rounded border border-danger/30 text-danger/70 hover:bg-danger/5 hover:text-danger transition-colors mt-1">
-                Discard All
-              </button>
-            </>)}
           </div>
         </>)}
 
