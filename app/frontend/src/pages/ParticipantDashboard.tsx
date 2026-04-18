@@ -1529,16 +1529,21 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
     const {data:sr} = await supabase.from('sim_runs').select('current_round').eq('id',simId).limit(1)
     const round = sr?.[0]?.current_round ?? 0
     const used = new Set<string>()
+    // Extract unit IDs from any combat payload (handles all key variants)
+    const extractUnits = (pl: Record<string,unknown>) => {
+      const ids: string[] = []
+      if (pl.attacker_unit_codes) ids.push(...(pl.attacker_unit_codes as string[]))
+      if (pl.attacker_unit_code && typeof pl.attacker_unit_code === 'string') ids.push(pl.attacker_unit_code)
+      if (pl.naval_unit_codes) ids.push(...(pl.naval_unit_codes as string[]))
+      return ids
+    }
     // From resolved events
     const {data:evts} = await supabase.from('observatory_events').select('payload')
       .eq('sim_run_id',simId).eq('round_num',round).eq('country_code',countryId)
       .in('event_type',['naval_combat','naval_bombardment','air_strike'])
     for (const evt of evts??[]) {
       const action = (evt.payload as Record<string,unknown>)?.action as Record<string,unknown> || {}
-      const codes = (action.attacker_unit_codes as string[]) || []
-      const code = action.attacker_unit_code as string
-      if (code) used.add(code)
-      codes.forEach(c => used.add(c))
+      extractUnits(action).forEach(c => used.add(c))
     }
     // From pending actions (submitted, not yet resolved)
     const {data:pa} = await supabase.from('pending_actions').select('payload')
@@ -1546,11 +1551,7 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
       .in('action_type',['naval_combat','naval_bombardment','air_strike'])
       .in('status',['pending','approved'])
     for (const p of pa??[]) {
-      const pl = p.payload as Record<string,unknown> || {}
-      const codes = (pl.attacker_unit_codes as string[]) || []
-      const code = pl.attacker_unit_code as string
-      if (code) used.add(code)
-      codes.forEach(c => used.add(c))
+      extractUnits(p.payload as Record<string,unknown> || {}).forEach(c => used.add(c))
     }
     setUnitsUsedThisRound(used)
   },[simId,countryId])
