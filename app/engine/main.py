@@ -1241,50 +1241,58 @@ async def submit_action(
     category = ACTION_CATEGORIES.get(body.action_type, "system")
     scenario_id = run.get("scenario_id")
 
-    # 4a. Check if action requires moderator confirmation
+    # 4a. Compute combat modifiers (needed for both pending and immediate paths)
+    if body.action_type in ("ground_attack", "naval_combat"):
+        tr = body.params.get("target_row")
+        tc = body.params.get("target_col")
+        if tr is not None and tc is not None:
+            def_deps = client.table("deployments").select("id,country_id,unit_type") \
+                .eq("sim_run_id", sim_id).eq("global_row", int(tr)).eq("global_col", int(tc)) \
+                .eq("unit_status", "active") \
+                .neq("country_id", body.country_code).execute().data or []
+            def_ground = [d for d in def_deps if d["unit_type"] == "ground"]
+            action_payload["_defender_ground_count"] = len(def_ground)
+            # Compute modifiers
+            def_countries = list(set(d["country_id"] for d in def_deps))
+            atk_c = client.table("countries").select("stability,ai_level") \
+                .eq("sim_run_id", sim_id).eq("id", body.country_code).limit(1).execute().data
+            def_c = client.table("countries").select("stability,ai_level") \
+                .eq("sim_run_id", sim_id).eq("id", def_countries[0]).limit(1).execute().data if def_countries else []
+            mods_atk, mods_def = [], []
+            atk_ai = atk_c[0].get("ai_level", 0) if atk_c else 0
+            atk_stab = atk_c[0].get("stability", 5) if atk_c else 5
+            def_ai = def_c[0].get("ai_level", 0) if def_c else 0
+            def_stab = def_c[0].get("stability", 5) if def_c else 5
+            if atk_ai >= 4: mods_atk.append({"label": "AI L4", "value": +1})
+            if atk_stab <= 3: mods_atk.append({"label": "Low morale", "value": -1})
+            if def_ai >= 4: mods_def.append({"label": "AI L4", "value": +1})
+            if def_stab <= 3: mods_def.append({"label": "Low morale", "value": -1})
+            def_air = [d for d in def_deps if d["unit_type"] == "tactical_air"]
+            if def_air: mods_def.append({"label": "Air support", "value": +1})
+            action_payload["_modifiers"] = {"attacker": mods_atk, "defender": mods_def}
+            action_payload["_atk_mod_total"] = sum(m["value"] for m in mods_atk)
+            action_payload["_def_mod_total"] = sum(m["value"] for m in mods_def)
+            # Engine format: [{side, value, reason}]
+            engine_mods = []
+            for m in mods_atk:
+                engine_mods.append({"side": "attacker", "value": m["value"], "reason": m["label"]})
+            for m in mods_def:
+                engine_mods.append({"side": "defender", "value": m["value"], "reason": m["label"]})
+            action_payload["modifiers"] = engine_mods
+
+    # 4b. Check if action requires moderator confirmation
     auto_approve = run.get("auto_approve", False)
     auto_attack = run.get("auto_attack", False)
-    # Combat actions require confirmation unless auto_attack is ON
     needs_confirmation = (
         (body.action_type in ACTIONS_REQUIRING_CONFIRMATION and not auto_approve)
         or (body.action_type in COMBAT_DICE_ACTIONS and not auto_attack)
     )
     if needs_confirmation:
-        # Queue for moderator approval instead of immediate dispatch
         target = body.params.get("target_role", body.params.get("target_country", ""))
-        # Build descriptive target_info for combat actions
         if body.action_type in COMBAT_DICE_ACTIONS:
             tr = body.params.get("target_row", "?")
             tc = body.params.get("target_col", "?")
             target_info = f"{role['character_name']} ({body.country_code}) → ({tr},{tc})"
-            # Count defenders + compute modifiers for dice UI
-            if body.action_type in ("ground_attack", "naval_combat") and tr != "?" and tc != "?":
-                def_deps = client.table("deployments").select("id,country_id,unit_type") \
-                    .eq("sim_run_id", sim_id).eq("global_row", int(tr)).eq("global_col", int(tc)) \
-                    .eq("unit_status", "active") \
-                    .neq("country_id", body.country_code).execute().data or []
-                def_ground = [d for d in def_deps if d["unit_type"] == "ground"]
-                action_payload["_defender_ground_count"] = len(def_ground)
-                # Compute modifiers for display
-                def_countries = list(set(d["country_id"] for d in def_deps))
-                atk_c = client.table("countries").select("stability,ai_level") \
-                    .eq("sim_run_id", sim_id).eq("id", body.country_code).limit(1).execute().data
-                def_c = client.table("countries").select("stability,ai_level") \
-                    .eq("sim_run_id", sim_id).eq("id", def_countries[0]).limit(1).execute().data if def_countries else []
-                mods_atk, mods_def = [], []
-                atk_ai = atk_c[0].get("ai_level", 0) if atk_c else 0
-                atk_stab = atk_c[0].get("stability", 5) if atk_c else 5
-                def_ai = def_c[0].get("ai_level", 0) if def_c else 0
-                def_stab = def_c[0].get("stability", 5) if def_c else 5
-                if atk_ai >= 4: mods_atk.append({"label": "AI L4", "value": +1})
-                if atk_stab <= 3: mods_atk.append({"label": "Low morale", "value": -1})
-                if def_ai >= 4: mods_def.append({"label": "AI L4", "value": +1})
-                if def_stab <= 3: mods_def.append({"label": "Low morale", "value": -1})
-                def_air = [d for d in def_deps if d["unit_type"] == "tactical_air"]
-                if def_air: mods_def.append({"label": "Air support", "value": +1})
-                action_payload["_modifiers"] = {"attacker": mods_atk, "defender": mods_def}
-                action_payload["_atk_mod_total"] = sum(m["value"] for m in mods_atk)
-                action_payload["_def_mod_total"] = sum(m["value"] for m in mods_def)
         else:
             target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
 
