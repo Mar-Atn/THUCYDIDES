@@ -82,7 +82,7 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
   ]},
   { key:'military', label:'Military', actions:[
     {id:'attack',label:'Attack'},
-    {id:'naval_blockade',label:'Naval Blockade'},{id:'move_units',label:'Move Units (inter-round)'},
+    {id:'naval_blockade',label:'Blockade'},{id:'move_units',label:'Move Units (inter-round)'},
     {id:'martial_law',label:'Martial Law'},{id:'nuclear_test',label:'Nuclear Test'},
     {id:'nuclear_launch_initiate',label:'Nuclear Launch'},{id:'nuclear_authorize',label:'Authorize Nuclear'},
     {id:'nuclear_intercept',label:'Intercept Missiles'},
@@ -1334,7 +1334,7 @@ function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
     setLoading(true)
     try {
       const token = await getToken()
-      const resp = await fetch(`/api/sim/${simId}/blockades`, {
+      const resp = await fetch(`/api/sim/${simId}/blockades?country=${countryId}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       })
       if (!resp.ok) throw new Error('Failed to load blockade data')
@@ -1391,7 +1391,7 @@ function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-h2 text-text-primary">Naval Blockade</h2>
+        <h2 className="font-heading text-h2 text-text-primary">Blockade</h2>
         <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
       </div>
 

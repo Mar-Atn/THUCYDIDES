@@ -791,7 +791,7 @@ async def create_sim_run(body: SimRunCreateRequest, user: AuthUser = Depends(req
 _state_cache: dict[str, tuple[float, dict]] = {}
 
 @app.get("/api/sim/{sim_id}/blockades", response_model=APIResponse)
-async def get_blockades(sim_id: str, user: AuthUser = Depends(get_current_user)):
+async def get_blockades(sim_id: str, country: Optional[str] = None, user: AuthUser = Depends(get_current_user)):
     """Return all active blockades and per-chokepoint capability for the user's country."""
     from engine.services.supabase import get_client
     from engine.services.blockade_engine import get_blockade_status, _qualifying_units
@@ -799,11 +799,13 @@ async def get_blockades(sim_id: str, user: AuthUser = Depends(get_current_user))
 
     client = get_client()
 
-    # Resolve user's country
-    role = client.table("roles").select("country_id") \
-        .eq("sim_run_id", sim_id).eq("user_id", user.id) \
-        .limit(1).execute().data
-    user_country = role[0]["country_id"] if role else None
+    # Resolve user's country (from query param or user_id lookup)
+    user_country = country
+    if not user_country:
+        role = client.table("roles").select("country_id") \
+            .eq("sim_run_id", sim_id).eq("user_id", user.id) \
+            .limit(1).execute().data
+        user_country = role[0]["country_id"] if role else None
 
     active_blockades = get_blockade_status(sim_id)
 
