@@ -7,7 +7,7 @@ import logging
 from contextlib import asynccontextmanager
 from typing import Optional
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from engine.auth.models import AuthUser
@@ -989,11 +989,15 @@ async def sim_abort(sim_id: str, user: AuthUser = Depends(require_moderator)):
 @app.post("/api/sim/{sim_id}/mode", response_model=APIResponse)
 async def sim_set_mode(
     sim_id: str,
-    body: dict = {},
+    request: Request,
     user: AuthUser = Depends(require_moderator),
 ):
     """Set automatic/manual mode and dice mode. Accepts JSON body."""
     from engine.services.sim_run_manager import set_mode
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     auto_advance = body.get("auto_advance", False)
     auto_approve = body.get("auto_approve", False)
     dice_mode = body.get("dice_mode", False)
@@ -1244,10 +1248,38 @@ async def submit_action(
             tr = body.params.get("target_row", "?")
             tc = body.params.get("target_col", "?")
             target_info = f"{role['character_name']} ({body.country_code}) → ({tr},{tc})"
+            # Count defenders + compute modifiers for dice UI
+            if body.action_type in ("ground_attack", "naval_combat") and tr != "?" and tc != "?":
+                def_deps = client.table("deployments").select("id,country_id,unit_type") \
+                    .eq("sim_run_id", sim_id).eq("global_row", int(tr)).eq("global_col", int(tc)) \
+                    .eq("unit_status", "active") \
+                    .neq("country_id", body.country_code).execute().data or []
+                def_ground = [d for d in def_deps if d["unit_type"] == "ground"]
+                action_payload["_defender_ground_count"] = len(def_ground)
+                # Compute modifiers for display
+                def_countries = list(set(d["country_id"] for d in def_deps))
+                atk_c = client.table("countries").select("stability,ai_level") \
+                    .eq("sim_run_id", sim_id).eq("id", body.country_code).limit(1).execute().data
+                def_c = client.table("countries").select("stability,ai_level") \
+                    .eq("sim_run_id", sim_id).eq("id", def_countries[0]).limit(1).execute().data if def_countries else []
+                mods_atk, mods_def = [], []
+                atk_ai = atk_c[0].get("ai_level", 0) if atk_c else 0
+                atk_stab = atk_c[0].get("stability", 5) if atk_c else 5
+                def_ai = def_c[0].get("ai_level", 0) if def_c else 0
+                def_stab = def_c[0].get("stability", 5) if def_c else 5
+                if atk_ai >= 4: mods_atk.append({"label": "AI L4", "value": +1})
+                if atk_stab <= 3: mods_atk.append({"label": "Low morale", "value": -1})
+                if def_ai >= 4: mods_def.append({"label": "AI L4", "value": +1})
+                if def_stab <= 3: mods_def.append({"label": "Low morale", "value": -1})
+                def_air = [d for d in def_deps if d["unit_type"] == "tactical_air"]
+                if def_air: mods_def.append({"label": "Air support", "value": +1})
+                action_payload["_modifiers"] = {"attacker": mods_atk, "defender": mods_def}
+                action_payload["_atk_mod_total"] = sum(m["value"] for m in mods_atk)
+                action_payload["_def_mod_total"] = sum(m["value"] for m in mods_def)
         else:
             target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
 
-        client.table("pending_actions").insert({
+        pa_result = client.table("pending_actions").insert({
             "sim_run_id": sim_id,
             "round_num": round_num,
             "action_type": body.action_type,
@@ -1257,6 +1289,7 @@ async def submit_action(
             "payload": action_payload,
             "status": "pending",
         }).execute()
+        pa_id = pa_result.data[0]["id"] if pa_result.data else None
 
         write_event(
             client, sim_id, scenario_id, round_num,
@@ -1266,10 +1299,11 @@ async def submit_action(
             phase=current_phase, category=category, role_name=role["character_name"],
         )
 
-        logger.info("Action %s by %s queued for confirmation", body.action_type, role["character_name"])
+        logger.info("Action %s by %s queued for confirmation (pa=%s)", body.action_type, role["character_name"], pa_id)
         return APIResponse(data={
             "success": True,
             "status": "pending",
+            "pending_action_id": pa_id,
             "narrative": f"{body.action_type} submitted — awaiting moderator approval",
         })
 
@@ -1278,7 +1312,7 @@ async def submit_action(
     if body.action_type in COMBAT_DICE_ACTIONS and dice_mode:
         target_info = f"{role['character_name']}: {body.action_type}"
 
-        client.table("pending_actions").insert({
+        pa_result2 = client.table("pending_actions").insert({
             "sim_run_id": sim_id,
             "round_num": round_num,
             "action_type": body.action_type,
@@ -1288,6 +1322,7 @@ async def submit_action(
             "payload": {**action_payload, "_requires_dice": True},
             "status": "pending",
         }).execute()
+        pa_id2 = pa_result2.data[0]["id"] if pa_result2.data else None
 
         write_event(
             client, sim_id, scenario_id, round_num,
@@ -1297,10 +1332,11 @@ async def submit_action(
             phase=current_phase, category=category, role_name=role["character_name"],
         )
 
-        logger.info("Combat %s by %s queued for dice input", body.action_type, role["character_name"])
+        logger.info("Combat %s by %s queued for dice input (pa=%s)", body.action_type, role["character_name"], pa_id2)
         return APIResponse(data={
             "success": True,
             "status": "awaiting_dice",
+            "pending_action_id": pa_id2,
             "narrative": f"{body.action_type} submitted — moderator must input dice rolls",
         })
 
@@ -1351,14 +1387,18 @@ async def get_pending_actions(sim_id: str, user: AuthUser = Depends(get_current_
 @app.post("/api/sim/{sim_id}/pending/{action_id}/confirm", response_model=APIResponse)
 async def confirm_pending_action(
     sim_id: str, action_id: str,
+    request: Request,
     user: AuthUser = Depends(require_moderator),
-    body: Optional[dict] = None,
 ):
     """Approve a pending action — dispatches it to the engine.
 
     For combat actions with dice_mode, pass body:
       {"precomputed_rolls": {"attacker": [[5,3,2], [6,4]], "defender": [[6,2], [4,1]]}}
     """
+    try:
+        body = await request.json()
+    except Exception:
+        body = {}
     precomputed_rolls = body.get("precomputed_rolls") if body else None
     from engine.services.action_dispatcher import dispatch_action
     from engine.services.common import write_event
@@ -1394,6 +1434,7 @@ async def confirm_pending_action(
         "status": "approved",
         "resolved_at": "now()",
         "resolved_by": user.id,
+        "result": result,
     }).eq("id", action_id).execute()
 
     run = get_state(sim_id)

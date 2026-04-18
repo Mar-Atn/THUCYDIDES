@@ -345,19 +345,43 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             ground_def = [u for u in def_list if u["type"] in GROUND_TYPES]
             if not ground_atk:
                 return {"success": False, "narrative": f"No ground units to attack with at {hex_label}"}
+            # When dice are provided, resolve only 1 exchange (moderator controls pace)
+            max_ex = 1 if precomputed_rolls else 50
             result = resolve_ground_combat(
                 attackers=ground_atk,
                 defenders=ground_def,
                 modifiers=action.get("modifiers"),
                 precomputed_rolls=precomputed_rolls,
+                max_exchanges=max_ex,
             )
             # Only apply losses to ground deployment rows
             ground_atk_deps = [u for u in atk_units if u["unit_type"] in GROUND_TYPES]
             ground_def_deps = [u for u in def_units if u["unit_type"] in GROUND_TYPES]
             combat_result = _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, hex_label, combat_type)
 
-            # If attacker won: capture non-ground enemy units as trophies
+            # If attacker won: move survivors forward, capture non-ground, occupy territory
             if combat_result.get("attacker_won"):
+                # 1. Move surviving attacker ground units to captured hex
+                atk_losses = set(combat_result.get("attacker_losses", []))
+                survivors = [d for d in ground_atk_deps if (d.get("unit_id") or d["id"]) not in atk_losses]
+                moved_units = []
+                src_row = action.get("source_global_row", target_row)
+                src_col = action.get("source_global_col", target_col)
+                for dep in survivors:
+                    update: dict = {"global_row": target_row, "global_col": target_col}
+                    # Theater coords: use target's theater position if available from action
+                    t_row = action.get("theater_row")
+                    t_col = action.get("theater_col")
+                    if t_row and t_col:
+                        update["theater_row"] = t_row
+                        update["theater_col"] = t_col
+                    client.table("deployments").update(update).eq("id", dep["id"]).execute()
+                    moved_units.append(dep.get("unit_id") or dep["id"])
+                if moved_units:
+                    combat_result["narrative"] += f" | {len(moved_units)} unit(s) advance to {hex_label}"
+                    combat_result["moved_forward"] = moved_units
+
+                # 2. Capture non-ground enemy units as trophies
                 non_ground_def = [u for u in def_units if u["unit_type"] not in GROUND_TYPES]
                 captured = []
                 for dep in non_ground_def:
@@ -376,7 +400,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                     combat_result["narrative"] += f" | Captured: {cap_desc}"
                     logger.info("Ground victory at %s: captured %d trophies", hex_label, len(captured))
 
-                # Record hex occupation
+                # 3. Record hex occupation
                 from engine.config.map_config import hex_owner as get_hex_owner
                 owner = get_hex_owner(target_row, target_col)
                 if owner != "sea" and owner != attacker:

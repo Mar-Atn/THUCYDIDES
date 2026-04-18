@@ -293,6 +293,11 @@ export function FacilitatorDashboard() {
 
   useEffect(() => {
     loadData()
+    // Retry after 3s if still loading (auth token may not be ready on first render)
+    const retry = setTimeout(() => {
+      if (loading) loadData()
+    }, 3000)
+    return () => clearTimeout(retry)
   }, [loadData])
 
   /* Supabase Realtime subscriptions --------------------------------------- */
@@ -313,7 +318,6 @@ export function FacilitatorDashboard() {
         (payload) => {
           const row = payload.new as Record<string, unknown>
           if (row) {
-            // Update sim run state directly from realtime payload
             setSimRun((prev) => prev ? { ...prev, ...row } as SimRun : prev)
             setSimState((prev) => ({
               status: (row.status as string) ?? prev?.status ?? 'setup',
@@ -325,6 +329,8 @@ export function FacilitatorDashboard() {
               paused: (row.status as string) === 'paused',
               pending_actions: prev?.pending_actions ?? [],
             }))
+            // Reload all data on any sim state change
+            loadData()
           }
         },
       )
@@ -362,26 +368,31 @@ export function FacilitatorDashboard() {
           filter: `sim_run_id=eq.${simId}`,
         },
         () => {
-          // Reload pending actions on any change (insert, update, delete)
-          supabase
-            .from('pending_actions')
-            .select('*')
-            .eq('sim_run_id', simId)
-            .eq('status', 'pending')
-            .order('submitted_at', { ascending: false })
+          // Reload pending actions on any change
+          supabase.from('pending_actions').select('*')
+            .eq('sim_run_id', simId).eq('status', 'pending')
             .then(({ data }) => setPendingActions((data ?? []) as PendingAction[]))
         },
       )
       .subscribe()
 
-    // Fallback poll every 30s for resilience (connection drops, missed events)
-    const fallbackInterval = setInterval(loadData, 30000)
+    // Poll pending actions every 2s, full data every 15s
+    const fallbackInterval = setInterval(loadData, 15000)
+    const pendingPoll = setInterval(() => {
+      supabase.from('pending_actions').select('*')
+        .eq('sim_run_id', simId).eq('status', 'pending')
+        .then(({ data, error: err }) => {
+          if (err) console.warn('pending poll error:', err)
+          else setPendingActions((data ?? []) as PendingAction[])
+        })
+    }, 2000)
 
     return () => {
       supabase.removeChannel(simRunChannel)
       supabase.removeChannel(eventsChannel)
       supabase.removeChannel(pendingChannel)
       clearInterval(fallbackInterval)
+      clearInterval(pendingPoll)
     }
   }, [simId, loadData])
 
@@ -574,9 +585,10 @@ export function FacilitatorDashboard() {
             />
             <ControlButton
               label="Restart"
-              onClick={() => {
+              onClick={async () => {
                 if (confirm('RESTART simulation? All runtime data (events, decisions, world state changes) will be deleted. Only initial setup preserved.')) {
-                  doAction('restart')
+                  await doAction('restart')
+                  window.location.reload()
                 }
               }}
               loading={actionLoading === 'restart'}
@@ -761,7 +773,11 @@ export function FacilitatorDashboard() {
                 <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                   {pendingActions.map((pa) => (
                     <PendingActionCard key={pa.id} pa={pa} simRun={simRun}
-                      onConfirm={(rolls) => doAction(`pending/${pa.id}/confirm`, rolls ? {precomputed_rolls: rolls} : {})}
+                      onConfirm={async (rolls) => {
+                        const res = await simAction(simId!, `pending/${pa.id}/confirm`, rolls ? {precomputed_rolls: rolls} : {})
+                        await loadData()
+                        return res
+                      }}
                       onReject={() => doAction(`pending/${pa.id}/reject`)} />
                   ))}
                 </div>
@@ -949,22 +965,24 @@ const COMBAT_LABELS: Record<string,string> = {
 
 function PendingActionCard({pa, simRun, onConfirm, onReject}:{
   pa: PendingAction; simRun: SimRun | null
-  onConfirm: (rolls?: Record<string,unknown>) => void; onReject: () => void
+  onConfirm: (rolls?: Record<string,unknown>) => Promise<Record<string,unknown>>; onReject: () => void
 }) {
   const isCombat = COMBAT_ACTIONS.has(pa.action_type)
   const diceMode = simRun?.dice_mode ?? false
-  // Only ground and naval use physical dice — air/bombardment/missile are probability-based
   const DICE_COMBAT = new Set(['ground_attack', 'naval_combat'])
   const needsDice = isCombat && diceMode && DICE_COMBAT.has(pa.action_type)
   const [expanded, setExpanded] = useState(false)
   const [diceValues, setDiceValues] = useState<Record<string,number>>({})
+  const [combatResult, setCombatResult] = useState<Record<string,unknown>|null>(null)
+  const [resolving, setResolving] = useState(false)
   const payload = pa.payload || {}
 
   // For ground combat: need attacker dice (up to 3) and defender dice (up to 2) per exchange
   // Simplified: moderator enters one set of dice, engine handles the rest
   const attackerUnits = (payload.attacker_unit_codes as string[])?.length ?? 1
+  const defenderUnits = (payload._defender_ground_count as number) ?? 2
   const atkDiceCount = pa.action_type === 'ground_attack' ? Math.min(3, attackerUnits) : 1
-  const defDiceCount = pa.action_type === 'ground_attack' ? 2 : 1
+  const defDiceCount = pa.action_type === 'ground_attack' ? Math.min(2, defenderUnits) : 1
 
   const setDie = (key: string, val: string) => {
     const n = parseInt(val)
@@ -977,20 +995,25 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
       && Array.from({length: defDiceCount}, (_,i) => `def_${i}`).every(k => diceValues[k] >= 1 && diceValues[k] <= 6)
     : true
 
-  const handleConfirmWithDice = () => {
-    if (!needsDice) { onConfirm(); return }
-    const atkRolls = Array.from({length: atkDiceCount}, (_,i) => diceValues[`atk_${i}`] || 1)
-    const defRolls = Array.from({length: defDiceCount}, (_,i) => diceValues[`def_${i}`] || 1)
-
-    if (pa.action_type === 'ground_attack') {
-      // Ground: attacker and defender as arrays of arrays (one exchange)
-      onConfirm({attacker: [atkRolls], defender: [defRolls]})
-    } else if (pa.action_type === 'naval_combat') {
-      // Naval: single int per side
-      onConfirm({attacker: atkRolls[0], defender: defRolls[0]})
-    } else {
-      // Air/bombardment/missile: probability-based, no dice needed
-      onConfirm()
+  const handleConfirmWithDice = async () => {
+    setResolving(true)
+    try {
+      let rolls: Record<string,unknown> | undefined
+      if (needsDice) {
+        const atkRolls = Array.from({length: atkDiceCount}, (_,i) => diceValues[`atk_${i}`] || 1)
+        const defRolls = Array.from({length: defDiceCount}, (_,i) => diceValues[`def_${i}`] || 1)
+        if (pa.action_type === 'ground_attack') {
+          rolls = {attacker: [atkRolls], defender: [defRolls]}
+        } else if (pa.action_type === 'naval_combat') {
+          rolls = {attacker: atkRolls[0], defender: defRolls[0]}
+        }
+      }
+      const res = await onConfirm(rolls)
+      if (isCombat) setCombatResult(res)
+    } catch(e) {
+      alert(e instanceof Error ? e.message : 'Failed')
+    } finally {
+      setResolving(false)
     }
   }
 
@@ -1051,6 +1074,30 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
             </div>
           </div>
 
+          {/* Modifiers */}
+          {payload._modifiers && (
+            <div className="grid grid-cols-2 gap-3 text-caption font-body">
+              <div>
+                <span className="text-text-secondary">Atk mod: </span>
+                {(payload._modifiers as {attacker:{label:string;value:number}[];defender:{label:string;value:number}[]}).attacker.length > 0
+                  ? (payload._modifiers as {attacker:{label:string;value:number}[]}).attacker.map((m,i) =>
+                      <span key={i} className={m.value > 0 ? 'text-success' : 'text-danger'}> {m.label} {m.value > 0 ? '+' : ''}{m.value}</span>
+                    )
+                  : <span className="text-text-secondary/50">none</span>
+                }
+              </div>
+              <div>
+                <span className="text-text-secondary">Def mod: </span>
+                {(payload._modifiers as {attacker:{label:string;value:number}[];defender:{label:string;value:number}[]}).defender.length > 0
+                  ? (payload._modifiers as {defender:{label:string;value:number}[]}).defender.map((m,i) =>
+                      <span key={i} className={m.value > 0 ? 'text-success' : 'text-danger'}> {m.label} {m.value > 0 ? '+' : ''}{m.value}</span>
+                    )
+                  : <span className="text-text-secondary/50">none</span>
+                }
+              </div>
+            </div>
+          )}
+
           {/* Dice input — only for ground/naval in dice mode */}
           {needsDice && (pa.action_type === 'ground_attack' || pa.action_type === 'naval_combat') ? (
             <div className="space-y-2">
@@ -1101,15 +1148,30 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
           {/* Action buttons */}
           <div className="flex gap-2 pt-1">
             <button onClick={handleConfirmWithDice}
-              disabled={needsDice && (pa.action_type === 'ground_attack' || pa.action_type === 'naval_combat') && !allDiceFilled}
+              disabled={resolving || (needsDice && (pa.action_type === 'ground_attack' || pa.action_type === 'naval_combat') && !allDiceFilled)}
               className="font-body text-caption font-bold uppercase bg-success/10 text-success px-4 py-2 rounded hover:bg-success/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-              {needsDice ? 'Resolve with Dice' : 'Confirm Attack'}
+              {resolving ? 'Resolving...' : needsDice ? 'Resolve with Dice' : 'Confirm Attack'}
             </button>
-            <button onClick={onReject}
+            {!combatResult && <button onClick={onReject}
               className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-2 rounded hover:bg-danger/20 transition-colors">
               Reject
-            </button>
+            </button>}
           </div>
+
+          {/* Combat outcome */}
+          {combatResult && (
+            <div className={`mt-2 p-3 rounded border ${combatResult.attacker_won ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
+              <h4 className={`font-body text-caption font-bold uppercase ${combatResult.attacker_won ? 'text-success' : 'text-danger'}`}>
+                {combatResult.attacker_won ? 'Attacker Victory' : 'Defender Holds'}
+              </h4>
+              <p className="font-body text-caption text-text-primary mt-1">{String(combatResult.narrative??'')}</p>
+              {(combatResult.captured as {unit_id:string;type:string;from:string}[]||[]).length > 0 && (
+                <p className="font-body text-caption text-action mt-1">
+                  Captured: {(combatResult.captured as {unit_id:string;type:string;from:string}[]).map(c=>`${c.type} (${c.from})`).join(', ')}
+                </p>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

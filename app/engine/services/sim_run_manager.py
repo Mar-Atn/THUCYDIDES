@@ -265,16 +265,53 @@ def go_back_to_phase_a(sim_id: str, phase_duration_seconds: int = 3600) -> dict:
 
 
 def restart_simulation(sim_id: str) -> dict:
-    """Restart from Round 0. Preserves template data, deletes all runtime data.
+    """Full restart — delete ALL runtime data and re-copy state tables from source.
 
-    Cleans up: observatory_events, agent_decisions, pending_actions,
-    leadership_votes, nuclear_actions, world_state (rounds > 0).
-    Countries table is preserved (engines will overwrite on next Phase B).
+    Resets everything to initial template state:
+    - Re-copies: countries, deployments, relationships, sanctions, tariffs,
+      zones, organizations, org_memberships, artefacts
+    - Deletes: agreements, exchange_transactions, hex_control,
+      observatory_events, agent_decisions, pending_actions, leadership_votes,
+      nuclear_actions, world_state
+    - Preserves: roles, role_actions (user assignments don't change)
     """
     client = _get_client()
+    source_id = "00000000-0000-0000-0000-000000000001"  # canonical template sim
 
-    # Delete runtime data
+    # 1. Delete ALL runtime-only data
     _cleanup_runtime_data(client, sim_id, after_round=0)
+
+    # 2. Delete tables that don't exist in template (runtime-created)
+    for table in ["agreements", "exchange_transactions", "hex_control"]:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).execute()
+        except Exception as e:
+            logger.warning("Restart: delete %s failed: %s", table, e)
+
+    # 3. Delete and re-copy state tables from template source
+    from engine.services.sim_create import _copy_table
+
+    STATE_TABLES = [
+        ("countries", True),
+        ("deployments", False),
+        ("relationships", False),
+        ("sanctions", False),
+        ("tariffs", False),
+        ("zones", True),
+        ("organizations", True),
+        ("org_memberships", False),
+        ("artefacts", True),
+    ]
+    for table, id_is_text in STATE_TABLES:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).execute()
+            _copy_table(client, table, source_id, sim_id,
+                        id_field="id", id_is_text=id_is_text,
+                        exclude_cols=["created_at"])
+        except Exception as e:
+            logger.warning("Restart: reset %s failed: %s", table, e)
+
+    logger.info("Simulation %s RESTARTED — all state re-copied from template", sim_id)
 
     return _update_run(client, sim_id, {
         "status": "pre_start",

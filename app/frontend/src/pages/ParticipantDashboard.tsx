@@ -117,6 +117,7 @@ export function ParticipantDashboard() {
   const [remaining, setRemaining] = useState<number | null>(null)
   const [broadcast, setBroadcast] = useState<string | null>(null)
   const [roleActions, setRoleActions] = useState<string[]>([])
+  const [dataVersion, setDataVersion] = useState(0) // increments on every loadData — children use as refresh trigger
   const [objectives, setObjectives] = useState<string[]>([])
   const [myRelationships, setMyRelationships] = useState<{to_country_id:string;relationship:string;status:string}[]>([])
   const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
@@ -206,20 +207,33 @@ export function ParticipantDashboard() {
       } else { setTab('world') }
       setError(null)
     } catch(e) { setError(e instanceof Error?e.message:'Failed') }
-    finally { setLoading(false) }
+    finally { setLoading(false); setDataVersion(v => v + 1) }
   }, [simId, user])
 
   useEffect(() => { loadData() }, [loadData])
+
+  // Global refresh poll — catches all state changes not covered by realtime
+  useEffect(() => {
+    const poll = setInterval(loadData, 10000)
+    return () => clearInterval(poll)
+  }, [loadData])
 
   useEffect(() => {
     if (!simId) return
     const ch = supabase.channel(`part:${simId}`)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'sim_runs',filter:`id=eq.${simId}`},(p)=>{
         const r=p.new as Record<string,unknown>
-        if(r){setSimRun(prev=>prev?{...prev,...r}as SimRun:prev);setSimState({
-          status:(r.status as string)??'setup',current_round:(r.current_round as number)??0,
-          current_phase:(r.current_phase as string)??'pre',phase_started_at:(r.phase_started_at as string|null)??null,
-          phase_duration_seconds:(r.phase_duration_seconds as number|null)??3600})}
+        if(r){
+          const newStatus = (r.status as string) ?? 'setup'
+          const newRound = (r.current_round as number) ?? 0
+          const newPhase = (r.current_phase as string) ?? 'pre'
+          setSimRun(prev=>prev?{...prev,...r}as SimRun:prev)
+          setSimState({status:newStatus,current_round:newRound,current_phase:newPhase,
+            phase_started_at:(r.phase_started_at as string|null)??null,
+            phase_duration_seconds:(r.phase_duration_seconds as number|null)??3600})
+          // Reload all data on status/round/phase change
+          loadData()
+        }
       }).subscribe()
     return ()=>{supabase.removeChannel(ch)}
   }, [simId])
@@ -330,7 +344,7 @@ export function ParticipantDashboard() {
                 onSubmitted={()=>{setActiveAction(null); loadData()}}
               />
             : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}
-                simId={simId!} countryId={myRole.country_id} roleId={myRole.id}/>
+                simId={simId!} countryId={myRole.country_id} roleId={myRole.id} dataVersion={dataVersion}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
@@ -349,9 +363,9 @@ export function ParticipantDashboard() {
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId}:{
+function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion}:{
   roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void
-  simId:string; countryId:string; roleId:string
+  simId:string; countryId:string; roleId:string; dataVersion?:number
 }) {
   const avail = new Set(roleActions)
   const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
@@ -381,10 +395,10 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
   useEffect(()=>{
     loadPendingTxns()
-    // Poll every 10s for new proposals (Realtime may not cover all cases)
-    const interval = setInterval(loadPendingTxns, 10000)
+    // Poll every 5s for new proposals
+    const interval = setInterval(loadPendingTxns, 5000)
     return ()=>clearInterval(interval)
-  },[loadPendingTxns])
+  },[loadPendingTxns, dataVersion])
 
   // If reviewing a transaction, show the review screen
   const txnToReview = reviewTxn ? pendingTxns.find(t=>t.id===reviewTxn) : null
@@ -1446,6 +1460,64 @@ function UnitIcon({type, size=28, className=''}:{type:string;size?:number;classN
   )
 }
 
+/** Polls pending_action row for result after moderator confirms. */
+function PendingResultPoller({simId, pendingActionId, countryId, actionType, onResolved}:{
+  simId:string; pendingActionId?:string; countryId:string; actionType:string
+  onResolved:(result:Record<string,unknown>)=>void
+}) {
+  const [waiting, setWaiting] = useState(true)
+  // Stable ref to avoid useEffect restart on every render
+  const onResolvedRef = useRef(onResolved)
+  onResolvedRef.current = onResolved
+
+  useEffect(()=>{
+    let stopped = false
+    const poll = async () => {
+      while (!stopped) {
+        try {
+          let query
+          if (pendingActionId) {
+            query = supabase.from('pending_actions').select('status,result')
+              .eq('id', pendingActionId).limit(1)
+          } else {
+            query = supabase.from('pending_actions').select('status,result')
+              .eq('sim_run_id', simId).eq('country_code', countryId).eq('action_type', actionType)
+              .in('status', ['approved', 'rejected'])
+              .order('submitted_at', {ascending: false}).limit(1)
+          }
+          const {data} = await query
+          if (stopped) break
+          if (data?.[0]) {
+            const pa = data[0]
+            if (pa.status === 'approved' && pa.result) {
+              setWaiting(false)
+              onResolvedRef.current({...(pa.result as Record<string,unknown>), pending: false})
+              return
+            } else if (pa.status === 'rejected') {
+              setWaiting(false)
+              onResolvedRef.current({pending: false, rejected: true, narrative: 'Attack rejected by moderator'})
+              return
+            }
+          }
+        } catch { /* ignore poll errors */ }
+        // Wait 2 seconds before next poll
+        await new Promise(r => setTimeout(r, 2000))
+      }
+    }
+    poll()
+    return () => { stopped = true }
+  },[simId, pendingActionId, countryId, actionType]) // NO onResolved in deps
+
+  return (
+    <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-4 border-2 border-warning border-t-transparent rounded-full animate-spin"/>
+        <h3 className="font-body text-caption font-medium text-warning uppercase">Awaiting Moderator</h3>
+      </div>
+    </div>
+  )
+}
+
 function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
 }) {
@@ -1914,9 +1986,10 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
         {step === 'result' && result && (
           <div className="space-y-3">
             {result.pending ? (
-              <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">
-                <h3 className="font-body text-caption font-medium text-warning uppercase">Awaiting Approval</h3>
-              </div>
+              <PendingResultPoller simId={simId} pendingActionId={result.pending_action_id as string|undefined}
+                countryId={countryId} actionType={attackType??'ground_attack'} onResolved={(res)=>{
+                setResult(res); mapRef.current?.contentWindow?.postMessage({type:'refresh-units'},'*')
+              }} />
             ) : (
               <div className={`p-3 rounded-lg border ${result.attacker_won ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
                 <h3 className={`font-body text-body-sm font-bold uppercase ${result.attacker_won ? 'text-success' : 'text-danger'}`}>
