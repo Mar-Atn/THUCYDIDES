@@ -2606,10 +2606,25 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const handleSubmit = async () => {
     if (moves.length === 0) return
     setSubmitting(true); setError(null)
-    const payload = moves.map(m => m.action === 'withdraw'
-      ? {unit_code: m.unit_id, target: 'reserve' as const}
-      : {unit_code: m.unit_id, target: 'hex' as const, target_global_row: m.target_row!, target_global_col: m.target_col!}
-    )
+    // Merge withdraw+deploy of same unit into single reposition move
+    // withdraw-only = target:reserve, deploy-only = target:hex, both = target:hex (reposition)
+    const withdraws = new Map(moves.filter(m => m.action === 'withdraw').map(m => [m.unit_id, m]))
+    const deploys = new Map(moves.filter(m => m.action === 'deploy').map(m => [m.unit_id, m]))
+    const payload: {unit_code:string;target:string;target_global_row?:number;target_global_col?:number}[] = []
+    const seen = new Set<string>()
+    for (const m of moves) {
+      if (seen.has(m.unit_id)) continue
+      seen.add(m.unit_id)
+      const dep = deploys.get(m.unit_id)
+      const wth = withdraws.get(m.unit_id)
+      if (dep) {
+        // Has deploy (possibly with withdraw) → reposition to hex
+        payload.push({unit_code: m.unit_id, target: 'hex', target_global_row: dep.target_row!, target_global_col: dep.target_col!})
+      } else if (wth) {
+        // Withdraw only → reserve
+        payload.push({unit_code: m.unit_id, target: 'reserve'})
+      }
+    }
     try {
       const res = await submitAction(simId, 'move_units', roleId, countryId, {moves: payload})
       setResult(res)
