@@ -279,11 +279,15 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
     src_row = action.get("source_global_row", target_row)
     src_col = action.get("source_global_col", target_col)
 
-    # For specific unit selection (from AttackForm)
+    # CANONICAL: attacker_unit_codes is always a string[] (standardized in frontend)
+    # Legacy fallback handles older payloads with singular/alternate keys
     attacker_unit_codes = action.get("attacker_unit_codes") or []
-    attacker_unit_code = action.get("attacker_unit_code")
-    if attacker_unit_code and not attacker_unit_codes:
-        attacker_unit_codes = [attacker_unit_code]
+    if not attacker_unit_codes:
+        legacy = action.get("attacker_unit_code") or action.get("naval_unit_codes")
+        if isinstance(legacy, str):
+            attacker_unit_codes = [legacy]
+        elif isinstance(legacy, list):
+            attacker_unit_codes = legacy
 
     # Load attacker units — from source hex, or by specific unit_ids
     if attacker_unit_codes:
@@ -629,8 +633,10 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
     target_row = action.get("target_row")
     target_col = action.get("target_col")
     unit_codes = action.get("attacker_unit_codes") or []
-    if action.get("attacker_unit_code"):
-        unit_codes = [action["attacker_unit_code"]]
+    if not unit_codes:
+        legacy = action.get("attacker_unit_code")
+        if isinstance(legacy, str):
+            unit_codes = [legacy]
 
     if not unit_codes or target_row is None or target_col is None:
         return {"success": False, "narrative": "Missing units or target hex"}

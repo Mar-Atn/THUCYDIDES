@@ -1529,13 +1529,17 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
     const {data:sr} = await supabase.from('sim_runs').select('current_round').eq('id',simId).limit(1)
     const round = sr?.[0]?.current_round ?? 0
     const used = new Set<string>()
-    // Extract unit IDs from any combat payload (handles all key variants)
-    const extractUnits = (pl: Record<string,unknown>) => {
-      const ids: string[] = []
-      if (pl.attacker_unit_codes) ids.push(...(pl.attacker_unit_codes as string[]))
-      if (pl.attacker_unit_code && typeof pl.attacker_unit_code === 'string') ids.push(pl.attacker_unit_code)
-      if (pl.naval_unit_codes) ids.push(...(pl.naval_unit_codes as string[]))
-      return ids
+    // CANONICAL: attacker_unit_codes is always a string[] in all combat payloads
+    // Legacy keys checked for backward compatibility with older events
+    const extractUnits = (pl: Record<string,unknown>): string[] => {
+      const codes = pl.attacker_unit_codes as string[] | undefined
+      if (codes?.length) return codes
+      // Legacy fallback
+      const singular = pl.attacker_unit_code as string | undefined
+      if (singular) return [singular]
+      const naval = pl.naval_unit_codes as string[] | undefined
+      if (naval?.length) return naval
+      return []
     }
     // From resolved events
     const {data:evts} = await supabase.from('observatory_events').select('payload')
@@ -1695,10 +1699,11 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
       target_col: selectedTarget.col,
     }
 
-    // Set correct action type based on attack
+    // CANONICAL: every combat action sends attacker_unit_codes as string[]
     let actionType = attackType
+    params.attacker_unit_codes = selectedUnits
+    // Ground: source hex + theater coords
     if (attackType === 'ground_attack' || attackType === 'ground_move') {
-      params.attacker_unit_codes = selectedUnits
       params.source_global_row = sourceHex?.row
       params.source_global_col = sourceHex?.col
       if (selectedTarget?.theater_row) {
@@ -1707,18 +1712,9 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
         params.theater_col = selectedTarget.theater_col
       }
     }
+    // Naval combat: target ship
     if (attackType === 'naval_combat' && selectedEnemyUnit) {
       params.target_unit_code = selectedEnemyUnit
-      params.attacker_unit_code = selectedUnits[0]
-    }
-    if (attackType === 'air_strike') {
-      params.attacker_unit_codes = selectedUnits
-    }
-    if (attackType === 'naval_bombardment') {
-      params.naval_unit_codes = selectedUnits
-    }
-    if (attackType === 'launch_missile_conventional') {
-      params.attacker_unit_code = selectedUnits[0]
     }
 
     try {
