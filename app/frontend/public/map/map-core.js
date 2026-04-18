@@ -126,23 +126,8 @@
         state.units = { units: [] };
       }
 
-      // Load combat events for blast markers (only with sim_run_id)
-      state.combatEvents = [];
-      if (SIM_RUN_ID) {
-        try {
-          const evtsResp = await fetch(`/api/sim/${SIM_RUN_ID}/state`).catch(() => null);
-          const simState = evtsResp && evtsResp.ok ? await evtsResp.json() : null;
-          const currentRound = simState?.current_round || 1;
-
-          const combatResp = await fetch(
-            `/api/sim/${SIM_RUN_ID}/map/combat-events?round_num=${currentRound}`
-          ).catch(() => null);
-          if (combatResp && combatResp.ok) {
-            const combatData = await combatResp.json();
-            state.combatEvents = combatData.events || [];
-          }
-        } catch (e) { console.debug('combat events load failed:', e); }
-      }
+      // Load combat events for blast markers
+      await loadCombatEvents();
 
       buildCountryLegend();
       // If a specific theater is requested, render it directly; otherwise global
@@ -909,6 +894,23 @@
    * Load active blockades and store on state for rendering.
    * Blockade hexes get a red border during render.
    */
+  async function loadCombatEvents() {
+    state.combatEvents = [];
+    if (!SIM_RUN_ID_PARAM) return;
+    try {
+      const stResp = await fetch(`/api/sim/${SIM_RUN_ID_PARAM}/state`).catch(() => null);
+      const simState = stResp && stResp.ok ? await stResp.json() : null;
+      const currentRound = simState?.data?.current_round || simState?.current_round || 1;
+      const combatResp = await fetch(
+        `/api/sim/${SIM_RUN_ID_PARAM}/map/combat-events?round_num=${currentRound}`
+      ).catch(() => null);
+      if (combatResp && combatResp.ok) {
+        const combatData = await combatResp.json();
+        state.combatEvents = combatData.events || [];
+      }
+    } catch (e) { console.debug('combat events load failed:', e); }
+  }
+
   async function loadBlockades() {
     if (!SIM_RUN_ID_PARAM) return;
     state.activeBlockades = {};
@@ -2244,7 +2246,7 @@
             }
           });
           state.units = un;
-          loadHexControl().then(() => loadBlockades()).then(() => renderView(state.view));
+          Promise.all([loadHexControl(), loadBlockades(), loadCombatEvents()]).then(() => renderView(state.view));
         });
       }
     }

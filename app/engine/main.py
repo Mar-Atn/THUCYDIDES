@@ -209,7 +209,7 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
     from engine.services.supabase import get_client
     client = get_client()
 
-    COMBAT_TYPES = {'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade', 'launch_missile_conventional'}
+    COMBAT_TYPES = {'ground_attack', 'ground_move', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional'}
 
     evts = client.table("observatory_events") \
         .select("event_type, payload, country_code") \
@@ -223,9 +223,12 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         if e["event_type"] not in COMBAT_TYPES:
             continue
         p = e.get("payload") or {}
-        tr = p.get("target_row")
-        tc = p.get("target_col")
-        theater = p.get("theater")
+        # Target coords can be at payload root, in action, or in result
+        action = p.get("action", {})
+        result = p.get("result", {})
+        tr = p.get("target_row") or action.get("target_row") or result.get("target_global_row")
+        tc = p.get("target_col") or action.get("target_col") or result.get("target_global_col")
+        theater = p.get("theater") or action.get("theater")
         if tr is None or tc is None:
             continue
         hex_key = (tr, tc)
