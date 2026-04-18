@@ -2256,18 +2256,42 @@
           state._hiddenUnits.add(m.unit_id);
         } else if (m.action === 'deploy' && m.target_row != null) {
           state._hiddenUnits.add(m.unit_id); // hide from original position
-          state._previewUnits.push({
-            unit_id: m.unit_id,
-            country_id: m.country_id,
-            unit_type: m.unit_type,
-            global_row: m.target_row,
-            global_col: m.target_col,
-            theater: m.theater || null,
-            theater_row: m.theater_row || null,
-            theater_col: m.theater_col || null,
-            status: 'active',
-            _preview: true,
-          });
+          // Check if deploying ground/air to a sea hex with a carrier → embark
+          const isLand = m.unit_type !== 'naval';
+          const allUnits = currentUnits();
+          const carrierAtHex = isLand ? allUnits.find(u =>
+            u.unit_type === 'naval' && u.country_id === m.country_id && u.status === 'active' &&
+            u.global_row === m.target_row && u.global_col === m.target_col
+          ) : null;
+          if (carrierAtHex) {
+            // Embark on carrier — use carrier's position, standard embarked rendering
+            state._previewUnits.push({
+              unit_id: m.unit_id,
+              country_id: m.country_id,
+              unit_type: m.unit_type,
+              global_row: null,
+              global_col: null,
+              theater: null,
+              theater_row: null,
+              theater_col: null,
+              embarked_on: carrierAtHex.unit_id,
+              status: 'embarked',
+              _preview: true,
+            });
+          } else {
+            state._previewUnits.push({
+              unit_id: m.unit_id,
+              country_id: m.country_id,
+              unit_type: m.unit_type,
+              global_row: m.target_row,
+              global_col: m.target_col,
+              theater: m.theater || null,
+              theater_row: m.theater_row || null,
+              theater_col: m.theater_col || null,
+              status: 'active',
+              _preview: true,
+            });
+          }
         }
       });
       renderView(state.view);
