@@ -361,7 +361,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             # Only apply losses to ground deployment rows
             ground_atk_deps = [u for u in atk_units if u["unit_type"] in GROUND_TYPES]
             ground_def_deps = [u for u in def_units if u["unit_type"] in GROUND_TYPES]
-            combat_result = _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, hex_label, combat_type)
+            combat_result = _apply_combat_losses(client, sim_run_id, result.model_dump(), ground_atk_deps, ground_def_deps, hex_label, combat_type)
 
             # If attacker won: move survivors forward, capture non-ground, occupy territory
             if combat_result.get("attacker_won"):
@@ -424,7 +424,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 ad_units=ad_list,
                 precomputed_rolls=precomputed_rolls,
             )
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, atk_units, def_units, hex_label, combat_type)
+            return _apply_combat_losses(client, sim_run_id, result.model_dump(), atk_units, def_units, hex_label, combat_type)
 
         if combat_type == "naval":
             from engine.engines.military import resolve_naval_combat
@@ -445,7 +445,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 precomputed_rolls=precomputed_rolls,
             )
             # Convert naval result format: {winner, destroyed_unit} → {attacker_losses, defender_losses}
-            r = result.__dict__
+            r = result.model_dump()
             destroyed = r.get("destroyed_unit", "")
             if r.get("winner") == "attacker":
                 r["attacker_losses"] = []
