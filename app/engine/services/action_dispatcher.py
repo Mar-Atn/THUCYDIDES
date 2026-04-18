@@ -86,13 +86,15 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     # ── Military: Other ──────���────────────────────────────────────────
     if action_type == "basing_rights":
         from engine.services.basing_rights_engine import grant_basing_rights, revoke_basing_rights
+        guest = action.get("guest_country", "")
         if action.get("operation") == "revoke":
             return revoke_basing_rights(
-                sim_run_id, round_num, role_id, country_code,
-                action.get("guest_country"), action.get("zone_id"))
+                sim_run_id=sim_run_id, host_country=country_code,
+                guest_country=guest, round_num=round_num)
         return grant_basing_rights(
-            sim_run_id, round_num, role_id, country_code,
-            action.get("guest_country"), action.get("zone_id"))
+            sim_run_id=sim_run_id, host_country=country_code,
+            guest_country=guest, round_num=round_num,
+            granted_by_role=role_id)
 
     if action_type == "martial_law":
         from engine.services.martial_law_engine import execute_martial_law
