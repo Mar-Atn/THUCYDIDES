@@ -412,11 +412,32 @@ async def get_valid_attack_targets(
             .in_("unit_status", ["active", "embarked"]) \
             .execute().data or []
 
+    # Check which units at source already attacked this round (naval/air: once per round)
+    units_attacked_this_round: list[str] = []
+    if utype in ("naval", "tactical_air"):
+        run_data = client.table("sim_runs").select("current_round").eq("id", sim_id).limit(1).execute().data
+        current_round = run_data[0]["current_round"] if run_data else 0
+        combat_types = ["naval_combat", "naval_bombardment"] if utype == "naval" else ["air_strike"]
+        combat_evts = client.table("observatory_events") \
+            .select("payload") \
+            .eq("sim_run_id", sim_id).eq("round_num", current_round) \
+            .eq("country_code", country) \
+            .in_("event_type", combat_types) \
+            .execute().data or []
+        for evt in combat_evts:
+            action = (evt.get("payload") or {}).get("action", {})
+            codes = action.get("attacker_unit_codes") or []
+            code = action.get("attacker_unit_code")
+            if code: codes = [code] if isinstance(code, str) else codes
+            units_attacked_this_round.extend(codes)
+        units_attacked_this_round = list(set(units_attacked_this_round))
+
     return {
         "source": {"row": src_row, "col": src_col,
                    "theater": unit.get("theater"), "theater_row": unit.get("theater_row"), "theater_col": unit.get("theater_col")},
         "unit": {"unit_id": unit["unit_id"], "unit_type": utype, "country_id": country},
         "friendlies_at_source": friendlies_at_source,
+        "units_attacked_this_round": units_attacked_this_round,
         "targets": targets,
     }
 

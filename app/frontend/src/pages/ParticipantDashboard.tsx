@@ -1516,11 +1516,34 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [selectedTarget,setSelectedTarget]=useState<AttackTarget|null>(null)
   const [selectedEnemyUnit,setSelectedEnemyUnit]=useState<string|null>(null)
   const [attackType,setAttackType]=useState<string|null>(null)
+  const [unitsUsedThisRound,setUnitsUsedThisRound]=useState<Set<string>>(new Set())
   const [submitting,setSubmitting]=useState(false)
   const [result,setResult]=useState<Record<string,unknown>|null>(null)
   const [error,setError]=useState<string|null>(null)
   const [preview,setPreview]=useState<{win_probability:number;modifiers:{attacker:{label:string;value:unknown}[];defender:{label:string;value:unknown}[]};attacker:{units:number;modifier_total:number};defender:{units:number;modifier_total:number};has_air_defense:boolean}|null>(null)
   const mapRef = useRef<HTMLIFrameElement>(null)
+
+  // Load units that already attacked this round (naval/air: once per round)
+  useEffect(()=>{
+    supabase.from('sim_runs').select('current_round').eq('id',simId).limit(1)
+      .then(({data:sr})=>{
+        const round = sr?.[0]?.current_round ?? 0
+        supabase.from('observatory_events').select('payload')
+          .eq('sim_run_id',simId).eq('round_num',round).eq('country_code',countryId)
+          .in('event_type',['naval_combat','naval_bombardment','air_strike'])
+          .then(({data:evts})=>{
+            const used = new Set<string>()
+            for (const evt of evts??[]) {
+              const action = (evt.payload as Record<string,unknown>)?.action as Record<string,unknown> || {}
+              const codes = (action.attacker_unit_codes as string[]) || []
+              const code = action.attacker_unit_code as string
+              if (code) used.add(code)
+              codes.forEach(c => used.add(c))
+            }
+            setUnitsUsedThisRound(used)
+          })
+      })
+  },[simId,countryId])
 
   // Listen for postMessage from map iframe
   useEffect(()=>{
@@ -1615,6 +1638,9 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
       const data = await resp.json()
 
       setTargets(data.targets || [])
+      if (data.units_attacked_this_round?.length) {
+        setUnitsUsedThisRound(new Set(data.units_attacked_this_round))
+      }
       setStep('select_target')
 
       // Highlight valid target hexes on map (include theater coords for theater view)
@@ -1807,15 +1833,18 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                     })()}
                   </div>
                 ) : (
-                  /* Others: single select */
+                  /* Others: single select — naval/air disabled if already attacked this round */
                   <div className="flex flex-wrap gap-2 items-center">
                     {units.map(u => {
                       const sel = selectedUnits.includes(u.unit_id)
+                      const used = unitsUsedThisRound.has(u.unit_id)
                       return <button key={u.unit_id} onClick={()=>{
-                        setSelectedUnits([u.unit_id])
+                        if (!used) setSelectedUnits([u.unit_id])
                       }}
-                        title={u.unit_id}
+                        title={used ? `${u.unit_id} — already attacked this round` : u.unit_id}
+                        disabled={used}
                         className={`inline-flex items-center justify-center w-10 h-10 rounded border-2 transition-colors ${
+                          used?'border-border/20 text-text-secondary/20 cursor-not-allowed opacity-40':
                           sel?'bg-action/10 border-action text-action':'border-border text-text-secondary hover:border-action/30 hover:text-action'
                         }`}>
                         <UnitIcon type={type} size={24} />
@@ -1978,7 +2007,15 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
             ) : (
               <div className={`p-3 rounded-lg border ${result.attacker_won ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
                 <h3 className={`font-body text-body-sm font-bold uppercase ${result.attacker_won ? 'text-success' : 'text-danger'}`}>
-                  {result.attacker_won ? 'Victory' : 'Defeat'}
+                  {attackType === 'naval_bombardment'
+                    ? (result.attacker_won ? 'Target Hit' : 'No Targets Hit')
+                    : attackType === 'air_strike'
+                    ? (result.attacker_won ? 'Target Hit' : 'Missed')
+                    : attackType === 'launch_missile_conventional'
+                    ? (result.attacker_won ? 'Impact' : 'Missed')
+                    : attackType === 'ground_move'
+                    ? 'Advanced'
+                    : (result.attacker_won ? 'Victory' : 'Defeat')}
                 </h3>
               </div>
             )}
