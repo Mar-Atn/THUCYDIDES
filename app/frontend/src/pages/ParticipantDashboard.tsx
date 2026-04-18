@@ -2529,11 +2529,15 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         // Validate territory: own territory, or hex with own units
         const isOwnTerritory = hexOwner === countryId
         const isSea = hexOwner === 'sea'
-        const hasOwnUnits = (msg.units || []).some((u:{country_id:string}) => u.country_id === countryId)
+        const ownUnitsHere = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+        const hasOwnUnits = ownUnitsHere.length > 0
         const isNaval = selectedUnit.unit_type === 'naval'
         const isLand = !isNaval
+        // Check for friendly carrier at sea hex (ground: 1 per ship, air: 2 per ship)
+        const ownNavalHere = ownUnitsHere.filter((u:{unit_type:string}) => u.unit_type === 'naval')
+        const hasCarrier = ownNavalHere.length > 0
 
-        if (isSea && isLand) { setError('Land units cannot deploy to sea'); return true }
+        if (isSea && isLand && !hasCarrier) { setError('Land units need a carrier to deploy to sea'); return true }
         if (!isSea && isNaval) { setError('Naval units can only deploy to sea'); return true }
         if (!isOwnTerritory && !hasOwnUnits && !isSea) { setError('Can only deploy to own territory or hexes with your units'); return true }
 
