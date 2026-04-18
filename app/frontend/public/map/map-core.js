@@ -14,7 +14,10 @@
   // ?theater=eastern_ereb or ?theater=mashriq — render only that theater
   const FORCE_THEATER = urlParams.get('theater') || null;
   // ?mode=attack&country=X — attack mode: clicks send postMessage to parent
-  const ATTACK_MODE = urlParams.get('mode') === 'attack';
+  // ?mode=move&country=X — move mode: same hex-click postMessage, no target highlighting
+  const MAP_MODE = urlParams.get('mode') || null;
+  const ATTACK_MODE = MAP_MODE === 'attack';
+  const MOVE_MODE = MAP_MODE === 'move';
   const ATTACK_COUNTRY = urlParams.get('country') || null;
   // sim_run_id at module scope (needed by message listener)
   const SIM_RUN_ID_PARAM = urlParams.get('sim_run_id') || null;
@@ -991,8 +994,8 @@
 
   // ---------- Interaction / Inspector ----------
   function selectHex(rIdx, cIdx) {
-    // Attack mode: send hex click to parent via postMessage
-    if (ATTACK_MODE) {
+    // Attack/move mode: send hex click to parent via postMessage
+    if (ATTACK_MODE || MOVE_MODE) {
       handleAttackHexClick(rIdx, cIdx);
       return;
     }

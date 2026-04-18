@@ -267,8 +267,12 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     if action_type == "declare_war":
         return _declare_war(sim_run_id, round_num, country_code, role_id, action.get("target_country", ""))
 
+    # ── Movement ─────────────────────────────────────────────────────
+    if action_type == "move_units":
+        return _process_movement(sim_run_id, round_num, action)
+
     # ── Not Yet Implemented ───────────────────────────────────────────
-    if action_type in ("move_units", "call_org_meeting", "meet_freely"):
+    if action_type in ("call_org_meeting", "meet_freely"):
         return {"success": True, "narrative": f"{action_type} acknowledged — implementation pending"}
 
     # ── Unknown ───────────────────────────────────────────────────────
@@ -931,6 +935,128 @@ def _log_public_statement(sim_run_id: str, round_num: int, action: dict) -> dict
                 phase="A", category="diplomatic", role_name=role_id)
 
     return {"success": True, "narrative": narrative}
+
+
+def _dep_to_unit(dep: dict) -> dict:
+    """Convert a deployments DB row to the in-memory unit dict shape the movement engine expects."""
+    return {
+        **dep,
+        "unit_code": dep["unit_id"],
+        "country_code": dep["country_id"],
+        "status": dep["unit_status"],
+    }
+
+
+def _process_movement(sim_run_id: str, round_num: int, action: dict) -> dict:
+    """Validate and apply a batch of unit moves.
+
+    Loads units from deployments, converts field names for the in-memory engine,
+    runs validation + processing, then writes updated positions back to DB.
+    """
+    from engine.engines.movement import process_movements
+    from engine.services.movement_validator import validate_movement_decision
+    from engine.services.movement_data import load_global_grid_zones, load_basing_rights
+
+    client = get_client()
+    country_code = action.get("country_code", "")
+    role_id = action.get("role_id", "")
+    moves = action.get("moves", [])
+
+    if not moves:
+        return {"success": False, "narrative": "No moves provided"}
+
+    # 1. Load all country's units from deployments
+    deps = client.table("deployments") \
+        .select("unit_id, country_id, unit_type, unit_status, global_row, global_col, "
+                "theater, theater_row, theater_col, embarked_on") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("country_id", country_code) \
+        .execute().data or []
+
+    if not deps:
+        return {"success": False, "narrative": f"No units found for {country_code}"}
+
+    # 2. Convert to in-memory dict (unit_code keyed)
+    units: dict[str, dict] = {}
+    for dep in deps:
+        u = _dep_to_unit(dep)
+        units[u["unit_code"]] = u
+
+    # 3. Load zones and basing rights
+    zones = load_global_grid_zones()
+    basing_rights = load_basing_rights(client, sim_run_id)
+
+    # 4. Build validator payload
+    payload = {
+        "action_type": "move_units",
+        "country_code": country_code,
+        "round_num": round_num,
+        "decision": "change",
+        "rationale": action.get("rationale", "Player-submitted unit movement batch"),
+        "changes": {"moves": moves},
+    }
+
+    # 5. Validate
+    vr = validate_movement_decision(payload, units, zones, basing_rights)
+    if not vr["valid"]:
+        return {
+            "success": False,
+            "narrative": f"Movement validation failed: {'; '.join(vr['errors'])}",
+            "errors": vr["errors"],
+            "warnings": vr.get("warnings", []),
+        }
+
+    # 6. Apply moves (mutates units dict in place)
+    normalized = vr["normalized"]
+    norm_moves = normalized["changes"]["moves"]
+    results = process_movements(norm_moves, country_code, units, zones)
+
+    # 7. Write back to deployments for each moved unit
+    moved_count = 0
+    for move_result in results:
+        uc = move_result["unit_code"]
+        u = units.get(uc)
+        if u is None:
+            continue
+        update = {
+            "global_row": u.get("global_row"),
+            "global_col": u.get("global_col"),
+            "unit_status": u["status"],
+            "embarked_on": u.get("embarked_on"),
+            "theater": u.get("theater"),
+            "theater_row": u.get("theater_row"),
+            "theater_col": u.get("theater_col"),
+        }
+        client.table("deployments").update(update) \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("unit_id", uc) \
+            .execute()
+        moved_count += 1
+
+    # 8. Write observatory event
+    scenario_id = get_scenario_id(client, sim_run_id)
+    summary_parts = []
+    for r in results:
+        summary_parts.append(f"{r['unit_code']}: {r['action']}")
+    summary = f"{country_code} moves {moved_count} unit(s): {', '.join(summary_parts[:5])}"
+    if len(summary_parts) > 5:
+        summary += f" (+{len(summary_parts)-5} more)"
+
+    write_event(
+        client, sim_run_id, scenario_id, round_num, country_code,
+        "move_units", summary,
+        {"action": action, "results": results, "moved_count": moved_count},
+        category="military", role_name=role_id,
+    )
+
+    logger.info("[dispatch] move_units: %s moved %d units", country_code, moved_count)
+    return {
+        "success": True,
+        "narrative": summary,
+        "moved_count": moved_count,
+        "results": results,
+        "warnings": vr.get("warnings", []),
+    }
 
 
 def _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result):

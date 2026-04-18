@@ -842,6 +842,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'move_units') return <MoveUnitsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -2405,6 +2406,360 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
             src={`/map/deployments.html?display=clean&mode=attack&country=${countryId}&sim_run_id=${simId}`}
             className="absolute inset-0 w-full h-full border-0"
             title="Attack Map"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── Move Units Form ───────────────────────────────────────────────────── */
+
+interface QueuedMove {
+  unit_code: string
+  unit_type: string
+  target: string
+  target_global_row?: number
+  target_global_col?: number
+  label: string
+}
+
+function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [activeUnits,setActiveUnits]=useState<{unit_id:string;unit_type:string;status:string;global_row:number|null;global_col:number|null}[]>([])
+  const [reserveUnits,setReserveUnits]=useState<{unit_id:string;unit_type:string;status:string}[]>([])
+  const [embarkedUnits,setEmbarkedUnits]=useState<{unit_id:string;unit_type:string;status:string;embarked_on:string|null}[]>([])
+  const [queuedMoves,setQueuedMoves]=useState<QueuedMove[]>([])
+  const [deployingUnit,setDeployingUnit]=useState<{unit_id:string;unit_type:string}|null>(null)
+  const [repositioningUnit,setRepositioningUnit]=useState<{unit_id:string;unit_type:string}|null>(null)
+  const [loading,setLoading]=useState(true)
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<Record<string,unknown>|null>(null)
+  const [error,setError]=useState<string|null>(null)
+  const mapRef = useRef<HTMLIFrameElement>(null)
+
+  // Load units
+  const loadUnits = useCallback(async () => {
+    setLoading(true)
+    try {
+      const token = await getToken()
+      const resp = await fetch(`/api/sim/${simId}/units/my?country=${encodeURIComponent(countryId)}`, {
+        headers: token ? {'Authorization':`Bearer ${token}`} : {},
+      })
+      if (!resp.ok) throw new Error('Failed to load units')
+      const data = await resp.json()
+      setActiveUnits(data.active ?? [])
+      setReserveUnits(data.reserve ?? [])
+      setEmbarkedUnits(data.embarked ?? [])
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load units')
+    } finally {
+      setLoading(false)
+    }
+  }, [simId, countryId])
+
+  useEffect(() => { loadUnits() }, [loadUnits])
+
+  // Listen for hex clicks from map
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const msg = event.data
+      if (!msg || msg.type !== 'hex-click') return
+
+      const row = msg.row as number
+      const col = msg.col as number
+
+      // If we're deploying a reserve unit, add move to queue
+      if (deployingUnit) {
+        const already = queuedMoves.some(m => m.unit_code === deployingUnit.unit_id)
+        if (already) {
+          setError(`${deployingUnit.unit_id} already has a queued move`)
+          setDeployingUnit(null)
+          return
+        }
+        setQueuedMoves(prev => [...prev, {
+          unit_code: deployingUnit.unit_id,
+          unit_type: deployingUnit.unit_type,
+          target: 'hex',
+          target_global_row: row,
+          target_global_col: col,
+          label: `Deploy ${deployingUnit.unit_id} to (${row},${col})`,
+        }])
+        setDeployingUnit(null)
+        setError(null)
+        return
+      }
+
+      // If we're repositioning an active unit, add move to queue
+      if (repositioningUnit) {
+        const already = queuedMoves.some(m => m.unit_code === repositioningUnit.unit_id)
+        if (already) {
+          setError(`${repositioningUnit.unit_id} already has a queued move`)
+          setRepositioningUnit(null)
+          return
+        }
+        setQueuedMoves(prev => [...prev, {
+          unit_code: repositioningUnit.unit_id,
+          unit_type: repositioningUnit.unit_type,
+          target: 'hex',
+          target_global_row: row,
+          target_global_col: col,
+          label: `Move ${repositioningUnit.unit_id} to (${row},${col})`,
+        }])
+        setRepositioningUnit(null)
+        setError(null)
+        return
+      }
+
+      // Otherwise: if clicking a hex with own active units, offer to reposition
+      const myUnits = (msg.units || []).filter((u: {country_id: string}) => u.country_id === countryId)
+      if (myUnits.length > 0) {
+        // Show units at this hex — user can click one in the sidebar to select for reposition
+        // For now, auto-select first non-queued unit
+        const available = myUnits.filter((u: {unit_id: string}) => !queuedMoves.some(m => m.unit_code === u.unit_id))
+        if (available.length > 0) {
+          setRepositioningUnit({unit_id: available[0].unit_id, unit_type: available[0].unit_type})
+          setError(null)
+        }
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [deployingUnit, repositioningUnit, queuedMoves, countryId])
+
+  const removeMove = (unitCode: string) => {
+    setQueuedMoves(prev => prev.filter(m => m.unit_code !== unitCode))
+  }
+
+  const handleSubmit = async () => {
+    if (queuedMoves.length === 0) return
+    setSubmitting(true)
+    setError(null)
+
+    const moves = queuedMoves.map(m => ({
+      unit_code: m.unit_code,
+      target: m.target,
+      ...(m.target === 'hex' ? {target_global_row: m.target_global_row, target_global_col: m.target_global_col} : {}),
+    }))
+
+    try {
+      const res = await submitAction(simId, 'move_units', roleId, countryId, {moves})
+      setResult(res)
+      if (res.success) {
+        // Refresh map
+        mapRef.current?.contentWindow?.postMessage({type: 'refresh-units'}, '*')
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Move failed')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  // Group reserve units by type
+  const reserveByType: Record<string, {unit_id:string;unit_type:string}[]> = {}
+  reserveUnits.forEach(u => {
+    reserveByType[u.unit_type] = reserveByType[u.unit_type] || []
+    reserveByType[u.unit_type].push(u)
+  })
+
+  return (
+    <div className="flex gap-3" style={{height:'calc(100vh - 180px)'}}>
+      {/* LEFT SIDEBAR — controls (1/4) */}
+      <div className="w-1/4 min-w-[240px] flex flex-col gap-2 overflow-y-auto pr-1">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h3 text-text-primary">Deploy & Move Units</h2>
+          <div className="flex gap-1">
+            <button onClick={onClose}
+              className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">
+              ← Back
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <p className="font-body text-body-sm text-text-secondary">Loading units...</p>
+        ) : result ? (
+          <div className="bg-card border border-border rounded-lg p-3 space-y-3">
+            <div className={`p-3 rounded-lg border ${result.success ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
+              <h3 className={`font-body text-body-sm font-bold uppercase ${result.success ? 'text-success' : 'text-danger'}`}>
+                {result.success ? 'Moves Applied' : 'Move Failed'}
+              </h3>
+              <p className="font-body text-caption text-text-secondary mt-1">{result.narrative as string}</p>
+              {result.moved_count !== undefined && (
+                <p className="font-data text-caption text-text-primary mt-1">{result.moved_count as number} unit(s) moved</p>
+              )}
+              {result.errors && (result.errors as string[]).length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {(result.errors as string[]).map((e, i) => (
+                    <p key={i} className="font-body text-caption text-danger">{e}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setResult(null); setQueuedMoves([]); loadUnits() }}
+                className="font-body text-caption px-3 py-1.5 rounded bg-action/10 text-action border border-action/30 hover:bg-action/20">
+                Move More
+              </button>
+              <button onClick={onSubmitted}
+                className="font-body text-caption px-3 py-1.5 rounded border border-border text-text-secondary hover:text-text-primary">
+                ← Done
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Mode indicator */}
+            {deployingUnit && (
+              <div className="bg-action/10 border border-action/30 rounded-lg p-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UnitIcon type={deployingUnit.unit_type} size={20} className="text-action" />
+                  <span className="font-body text-caption text-action">Click a hex to deploy {deployingUnit.unit_id}</span>
+                </div>
+                <button onClick={() => setDeployingUnit(null)} className="text-text-secondary hover:text-text-primary text-sm">X</button>
+              </div>
+            )}
+            {repositioningUnit && (
+              <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <UnitIcon type={repositioningUnit.unit_type} size={20} className="text-accent" />
+                  <span className="font-body text-caption text-accent">Click a hex to move {repositioningUnit.unit_id}</span>
+                </div>
+                <button onClick={() => setRepositioningUnit(null)} className="text-text-secondary hover:text-text-primary text-sm">X</button>
+              </div>
+            )}
+
+            {/* Reserve units */}
+            {Object.keys(reserveByType).length > 0 && (
+              <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+                <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Reserve ({reserveUnits.length})</h3>
+                {Object.entries(reserveByType).map(([type, units]) => (
+                  <div key={type} className="space-y-1">
+                    <span className="font-body text-caption text-text-secondary">{UNIT_TYPE_LABELS[type] ?? type}</span>
+                    <div className="flex flex-wrap gap-1">
+                      {units.map(u => {
+                        const queued = queuedMoves.some(m => m.unit_code === u.unit_id)
+                        const deploying = deployingUnit?.unit_id === u.unit_id
+                        return (
+                          <button key={u.unit_id} title={u.unit_id}
+                            disabled={queued}
+                            onClick={() => {
+                              if (!queued) {
+                                setDeployingUnit({unit_id: u.unit_id, unit_type: u.unit_type})
+                                setRepositioningUnit(null)
+                                setError(null)
+                              }
+                            }}
+                            className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
+                              queued ? 'border-success/30 bg-success/5 text-success/50 cursor-not-allowed' :
+                              deploying ? 'bg-action/10 border-action text-action' :
+                              'border-border text-text-secondary hover:border-action/30 hover:text-action'
+                            }`}>
+                            <UnitIcon type={type} size={20} />
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Embarked units */}
+            {embarkedUnits.length > 0 && (
+              <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+                <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Embarked ({embarkedUnits.length})</h3>
+                <div className="flex flex-wrap gap-1">
+                  {embarkedUnits.map(u => {
+                    const queued = queuedMoves.some(m => m.unit_code === u.unit_id)
+                    return (
+                      <button key={u.unit_id} title={`${u.unit_id} on ${u.embarked_on}`}
+                        disabled={queued}
+                        onClick={() => {
+                          if (!queued) {
+                            setDeployingUnit({unit_id: u.unit_id, unit_type: u.unit_type})
+                            setRepositioningUnit(null)
+                            setError(null)
+                          }
+                        }}
+                        className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
+                          queued ? 'border-success/30 bg-success/5 text-success/50 cursor-not-allowed' :
+                          'border-border text-text-secondary hover:border-action/30 hover:text-action'
+                        }`}>
+                        <UnitIcon type={u.unit_type} size={20} />
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Queued Moves */}
+            <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+              <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">
+                Queued Moves ({queuedMoves.length})
+              </h3>
+              {queuedMoves.length === 0 ? (
+                <p className="font-body text-caption text-text-secondary/50">
+                  Select a reserve unit above to deploy, or click an active unit on the map to reposition.
+                </p>
+              ) : (
+                <div className="space-y-1">
+                  {queuedMoves.map(m => (
+                    <div key={m.unit_code} className="flex items-center justify-between gap-2 py-1 border-b border-border/30 last:border-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <UnitIcon type={m.unit_type} size={18} className="text-action shrink-0" />
+                        <span className="font-body text-caption text-text-primary truncate">{m.label}</span>
+                      </div>
+                      <button onClick={() => removeMove(m.unit_code)}
+                        className="text-danger/60 hover:text-danger text-sm shrink-0 px-1">X</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {queuedMoves.length > 0 && (
+                <button onClick={handleSubmit} disabled={submitting}
+                  className="w-full font-body text-caption font-bold uppercase px-4 py-2 rounded bg-action text-white hover:bg-action/80 transition-colors disabled:opacity-50 mt-2">
+                  {submitting ? 'Submitting...' : `Submit ${queuedMoves.length} Move(s)`}
+                </button>
+              )}
+            </div>
+
+            {/* Active units hint */}
+            <div className="bg-card border border-border rounded-lg p-3">
+              <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider mb-1">Active Units ({activeUnits.length})</h3>
+              <p className="font-body text-caption text-text-secondary/50">Click an active unit on the map to reposition it.</p>
+            </div>
+          </>
+        )}
+
+        {error && !result && (
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-danger">{error}</p>
+          </div>
+        )}
+      </div>
+
+      {/* RIGHT — Map (3/4), always visible */}
+      <div className="flex-1 flex flex-col gap-1">
+        <div className="flex gap-1">
+          {(['global','eastern_ereb','mashriq'] as const).map(v=>(
+            <button key={v} onClick={()=>mapRef.current?.contentWindow?.postMessage({type:'navigate-theater',theater:v==='global'?'global':v},'*')}
+              className="font-body text-caption px-2 py-0.5 rounded border border-border text-text-secondary hover:border-action/30 hover:text-action transition-colors">
+              {v==='global'?'Global':v==='eastern_ereb'?'E. Ereb':'Mashriq'}
+            </button>
+          ))}
+        </div>
+        <div className="relative flex-1 rounded-lg overflow-hidden border border-border">
+          <iframe
+            ref={mapRef}
+            src={`/map/deployments.html?display=clean&mode=move&country=${countryId}&sim_run_id=${simId}`}
+            className="absolute inset-0 w-full h-full border-0"
+            title="Move Units Map"
           />
         </div>
       </div>

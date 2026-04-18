@@ -130,6 +130,57 @@ async def get_deployments(
     return APIResponse(data=[d.model_dump() for d in deployments], meta={"count": len(deployments)})
 
 
+@app.get("/api/sim/{sim_id}/units/my")
+async def get_my_units(
+    sim_id: str,
+    country: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Get all units for a country grouped by status — active, reserve, embarked.
+
+    Used by the move_units UI to show available units for deployment/reposition.
+    """
+    from engine.services.supabase import get_client
+    client = get_client()
+
+    deps = client.table("deployments") \
+        .select("unit_id, country_id, unit_type, unit_status, global_row, global_col, "
+                "theater, theater_row, theater_col, embarked_on") \
+        .eq("sim_run_id", sim_id) \
+        .eq("country_id", country) \
+        .neq("unit_status", "destroyed") \
+        .execute().data or []
+
+    active = []
+    reserve = []
+    embarked = []
+    for d in deps:
+        item = {
+            "unit_id": d["unit_id"],
+            "unit_type": d["unit_type"],
+            "status": d["unit_status"],
+            "global_row": d.get("global_row"),
+            "global_col": d.get("global_col"),
+            "theater": d.get("theater"),
+            "theater_row": d.get("theater_row"),
+            "theater_col": d.get("theater_col"),
+            "embarked_on": d.get("embarked_on"),
+        }
+        if d["unit_status"] == "active":
+            active.append(item)
+        elif d["unit_status"] == "reserve":
+            reserve.append(item)
+        elif d["unit_status"] == "embarked":
+            embarked.append(item)
+
+    return {
+        "active": active,
+        "reserve": reserve,
+        "embarked": embarked,
+        "total": len(deps),
+    }
+
+
 @app.get("/api/sim/{sim_id}/map/units")
 async def get_map_units(sim_id: str):
     """Get deployments for the map renderer — coordinates stored directly on each unit.
