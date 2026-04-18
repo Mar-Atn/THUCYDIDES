@@ -883,7 +883,7 @@ export async function submitAction(
 // Cache auth token to avoid getSession() blocking during heavy realtime traffic
 let _cachedToken: string | null = null
 let _tokenExpiry = 0
-async function getToken(): Promise<string> {
+export async function getToken(): Promise<string> {
   if (_cachedToken && Date.now() < _tokenExpiry) return _cachedToken
   const { data } = await supabase.auth.getSession()
   _cachedToken = data.session?.access_token ?? ''

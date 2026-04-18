@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { submitAction, type SimRun } from '@/lib/queries'
+import { submitAction, getToken, type SimRun } from '@/lib/queries'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 
@@ -1602,12 +1602,10 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
     setError(null)
     setLoadingTargets(true)
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token
+      const token = await getToken()
       const theaterParam = sourceHex?.theater ? `&theater=${encodeURIComponent(sourceHex.theater)}` : ''
       const resp = await fetch(`/api/sim/${simId}/attack/valid-targets?unit_id=${encodeURIComponent(primaryUnit)}${theaterParam}`,{
-        headers: {
-          ...(token ? {'Authorization':`Bearer ${token}`} : {}),
-        },
+        headers: token ? {'Authorization':`Bearer ${token}`} : {},
       })
       if (!resp.ok) {
         const errData = await resp.json().catch(() => ({}))
@@ -1641,7 +1639,7 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const fetchPreview = async (aType: string, tRow: number, tCol: number) => {
     setPreview(null)
     try {
-      const token = (await supabase.auth.getSession()).data.session?.access_token
+      const token = await getToken()
       const resp = await fetch(
         `/api/sim/${simId}/attack/preview?attacker_unit_ids=${encodeURIComponent(selectedUnits.join(','))}&target_row=${tRow}&target_col=${tCol}&attack_type=${aType}`,
         {headers: token ? {'Authorization':`Bearer ${token}`} : {}},
