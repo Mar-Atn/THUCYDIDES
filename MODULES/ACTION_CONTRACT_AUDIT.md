@@ -29,7 +29,7 @@ This document tracks the gap between current implementation and contract spec fo
 
 ### ground_attack — WORKING (2026-04-18)
 **Contract:** `CONTRACT_GROUND_COMBAT.md` v1.0 (LOCKED)
-**Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex (max = min(3, count-1) — must leave 1 behind). RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input). **Territory occupation:** `hex_control` upserted on victory (controlled_by = attacker). **Unit capture (CONTRACT §unattended):** on victory, surviving non-ground enemy units captured as trophies (country_id changed to attacker, status=reserve, position cleared; naval units excluded; type preserved). Map shows diagonal stripe overlay for occupied hexes (owner + occupier colors). Captured trophies shown as icons + "-> reserve" in combat results.
+**Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex (max = min(3, count-1) — must leave 1 behind). RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input). **Territory occupation:** `hex_control` upserted on victory (controlled_by = attacker). **Unit capture (CONTRACT §unattended):** on victory, surviving non-ground enemy units captured as trophies (country_id changed to attacker, status=reserve, position cleared; naval units excluded; type preserved). Map shows diagonal stripe overlay for occupied hexes (owner + occupier colors). Captured trophies shown as icons + "-> reserve" in combat results. **Modifier fix (2026-04-18):** Modifiers (AI L4, low morale, air support) were displayed in preview but NOT passed to engine — now computed before pending/immediate branch, stored in engine format, applied in both paths (pending confirm + immediate dispatch).
 **Remaining gaps:** Chain attack logic not yet implemented.
 **Effort:** Small — chain logic only
 
@@ -230,6 +230,10 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 | Duplicate org memberships | Countries appeared twice in org lists | Fixed at template source data |
 | ground_move had non-100% probability | Movement could randomly fail | Set to 100% probability (always succeeds) |
 | Basing rights units treated as occupiers | Foreign allied units triggered occupation overlay | Added basing agreement check — basing units are NOT occupiers |
+| Combat modifiers not passed to engine | AI L4, low morale, air support displayed in preview but ignored in resolution | Computed before pending/immediate branch, stored in engine format, applied in both paths |
+| `body: dict = {}` never parsed as JSON | FastAPI treated dict default as query param — `/mode`, `/confirm` endpoints silently received empty body | All endpoints now use `Request.json()` |
+| Pending action race condition | Realtime hook removed card mid-confirm, result never displayed | Keep resolved actions visible 30s, result stored on pending_action row |
+| Restart simulation incomplete | Old sim state persisted after restart (stale hex_control, agreements, etc.) | Full reset: re-copy 11 tables + delete transient data; page reload clears frontend |
 
 ---
 
