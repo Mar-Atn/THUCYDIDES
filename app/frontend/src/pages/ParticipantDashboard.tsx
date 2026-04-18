@@ -2436,19 +2436,20 @@ interface QueuedMove {
 function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
 }) {
-  const [activeUnits,setActiveUnits]=useState<{unit_id:string;unit_type:string;status:string;global_row:number|null;global_col:number|null}[]>([])
-  const [reserveUnits,setReserveUnits]=useState<{unit_id:string;unit_type:string;status:string}[]>([])
-  const [embarkedUnits,setEmbarkedUnits]=useState<{unit_id:string;unit_type:string;status:string;embarked_on:string|null}[]>([])
-  const [queuedMoves,setQueuedMoves]=useState<QueuedMove[]>([])
-  const [deployingUnit,setDeployingUnit]=useState<{unit_id:string;unit_type:string}|null>(null)
-  const [repositioningUnit,setRepositioningUnit]=useState<{unit_id:string;unit_type:string}|null>(null)
+  type MoveEntry = {unit_id:string;unit_type:string;action:'deploy'|'withdraw';target_row?:number;target_col?:number}
+  const [activeUnits,setActiveUnits]=useState<{unit_id:string;unit_type:string;global_row:number|null;global_col:number|null}[]>([])
+  const [reserveUnits,setReserveUnits]=useState<{unit_id:string;unit_type:string}[]>([])
+  const [embarkedUnits,setEmbarkedUnits]=useState<{unit_id:string;unit_type:string;embarked_on:string|null}[]>([])
+  const [moves,setMoves]=useState<MoveEntry[]>([])
+  const [mode,setMode]=useState<'withdraw'|'deploy'>('deploy')
+  const [selectedUnit,setSelectedUnit]=useState<{unit_id:string;unit_type:string}|null>(null)
+  const [hexUnits,setHexUnits]=useState<{unit_id:string;unit_type:string}[]>([]) // units at clicked hex for withdraw selection
   const [loading,setLoading]=useState(true)
   const [submitting,setSubmitting]=useState(false)
   const [result,setResult]=useState<Record<string,unknown>|null>(null)
   const [error,setError]=useState<string|null>(null)
   const mapRef = useRef<HTMLIFrameElement>(null)
 
-  // Load units
   const loadUnits = useCallback(async () => {
     setLoading(true)
     try {
@@ -2457,303 +2458,208 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         headers: token ? {'Authorization':`Bearer ${token}`} : {},
       })
       if (!resp.ok) throw new Error('Failed to load units')
-      const data = await resp.json()
+      const data = (await resp.json()).data || await resp.json()
       setActiveUnits(data.active ?? [])
       setReserveUnits(data.reserve ?? [])
       setEmbarkedUnits(data.embarked ?? [])
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load units')
-    } finally {
-      setLoading(false)
-    }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setLoading(false) }
   }, [simId, countryId])
 
   useEffect(() => { loadUnits() }, [loadUnits])
 
-  // Listen for hex clicks from map
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const msg = event.data
-      if (!msg || msg.type !== 'hex-click') return
-
-      const row = msg.row as number
-      const col = msg.col as number
-
-      // If we're deploying a reserve unit, add move to queue
-      if (deployingUnit) {
-        const already = queuedMoves.some(m => m.unit_code === deployingUnit.unit_id)
-        if (already) {
-          setError(`${deployingUnit.unit_id} already has a queued move`)
-          setDeployingUnit(null)
-          return
-        }
-        setQueuedMoves(prev => [...prev, {
-          unit_code: deployingUnit.unit_id,
-          unit_type: deployingUnit.unit_type,
-          target: 'hex',
-          target_global_row: row,
-          target_global_col: col,
-          label: `Deploy ${deployingUnit.unit_id} to (${row},${col})`,
-        }])
-        setDeployingUnit(null)
-        setError(null)
-        return
-      }
-
-      // If we're repositioning an active unit, add move to queue
-      if (repositioningUnit) {
-        const already = queuedMoves.some(m => m.unit_code === repositioningUnit.unit_id)
-        if (already) {
-          setError(`${repositioningUnit.unit_id} already has a queued move`)
-          setRepositioningUnit(null)
-          return
-        }
-        setQueuedMoves(prev => [...prev, {
-          unit_code: repositioningUnit.unit_id,
-          unit_type: repositioningUnit.unit_type,
-          target: 'hex',
-          target_global_row: row,
-          target_global_col: col,
-          label: `Move ${repositioningUnit.unit_id} to (${row},${col})`,
-        }])
-        setRepositioningUnit(null)
-        setError(null)
-        return
-      }
-
-      // Otherwise: if clicking a hex with own active units, offer to reposition
-      const myUnits = (msg.units || []).filter((u: {country_id: string}) => u.country_id === countryId)
-      if (myUnits.length > 0) {
-        // Show units at this hex — user can click one in the sidebar to select for reposition
-        // For now, auto-select first non-queued unit
-        const available = myUnits.filter((u: {unit_id: string}) => !queuedMoves.some(m => m.unit_code === u.unit_id))
-        if (available.length > 0) {
-          setRepositioningUnit({unit_id: available[0].unit_id, unit_type: available[0].unit_type})
-          setError(null)
-        }
-      }
-    }
-    window.addEventListener('message', handler)
-    return () => window.removeEventListener('message', handler)
-  }, [deployingUnit, repositioningUnit, queuedMoves, countryId])
-
-  const removeMove = (unitCode: string) => {
-    setQueuedMoves(prev => prev.filter(m => m.unit_code !== unitCode))
-  }
-
-  const handleSubmit = async () => {
-    if (queuedMoves.length === 0) return
-    setSubmitting(true)
-    setError(null)
-
-    const moves = queuedMoves.map(m => ({
-      unit_code: m.unit_code,
-      target: m.target,
-      ...(m.target === 'hex' ? {target_global_row: m.target_global_row, target_global_col: m.target_global_col} : {}),
-    }))
-
-    try {
-      const res = await submitAction(simId, 'move_units', roleId, countryId, {moves})
-      setResult(res)
-      if (res.success) {
-        // Refresh map
-        mapRef.current?.contentWindow?.postMessage({type: 'refresh-units'}, '*')
-      }
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Move failed')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  // Group reserve units by type
+  // Effective reserve: original reserve + withdrawn units - deployed units
+  const effectiveReserve = [
+    ...reserveUnits.filter(u => !moves.some(m => m.unit_id === u.unit_id && m.action === 'deploy')),
+    ...moves.filter(m => m.action === 'withdraw').map(m => ({unit_id: m.unit_id, unit_type: m.unit_type})),
+  ]
   const reserveByType: Record<string, {unit_id:string;unit_type:string}[]> = {}
-  reserveUnits.forEach(u => {
+  effectiveReserve.forEach(u => {
     reserveByType[u.unit_type] = reserveByType[u.unit_type] || []
     reserveByType[u.unit_type].push(u)
   })
 
+  // Hex click handler
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const msg = event.data
+      if (!msg || msg.type !== 'hex-click') return
+      const row = msg.row as number, col = msg.col as number
+
+      if (mode === 'deploy' && selectedUnit) {
+        // Deploy selected reserve unit to this hex
+        if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
+          setError('Unit already queued for deployment'); return
+        }
+        setMoves(prev => [...prev, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy', target_row: row, target_col: col}])
+        setSelectedUnit(null); setError(null)
+      } else if (mode === 'withdraw') {
+        // Show own units at this hex for withdrawal selection
+        const myUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+          .filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id))
+        setHexUnits(myUnits)
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [mode, selectedUnit, moves, countryId])
+
+  const withdrawUnit = (u: {unit_id:string;unit_type:string}) => {
+    setMoves(prev => [...prev, {unit_id: u.unit_id, unit_type: u.unit_type, action: 'withdraw'}])
+    setHexUnits(prev => prev.filter(x => x.unit_id !== u.unit_id))
+    // Auto-switch to deploy mode with this unit type ready
+    setSelectedUnit({unit_id: u.unit_id, unit_type: u.unit_type})
+    setMode('deploy')
+  }
+
+  const removeMove = (unitId: string) => {
+    setMoves(prev => prev.filter(m => m.unit_id !== unitId))
+  }
+
+  const handleSubmit = async () => {
+    if (moves.length === 0) return
+    setSubmitting(true); setError(null)
+    const payload = moves.map(m => m.action === 'withdraw'
+      ? {unit_code: m.unit_id, target: 'reserve' as const}
+      : {unit_code: m.unit_id, target: 'hex' as const, target_global_row: m.target_row!, target_global_col: m.target_col!}
+    )
+    try {
+      const res = await submitAction(simId, 'move_units', roleId, countryId, {moves: payload})
+      setResult(res)
+      if (res.success) mapRef.current?.contentWindow?.postMessage({type: 'refresh-units'}, '*')
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
   return (
     <div className="flex gap-3" style={{height:'calc(100vh - 180px)'}}>
-      {/* LEFT SIDEBAR — controls (1/4) */}
+      {/* LEFT SIDEBAR */}
       <div className="w-1/4 min-w-[240px] flex flex-col gap-2 overflow-y-auto pr-1">
-        {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-h3 text-text-primary">Deploy & Move Units</h2>
-          <div className="flex gap-1">
-            <button onClick={onClose}
-              className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">
-              ← Back
-            </button>
-          </div>
+          <h2 className="font-heading text-h3 text-text-primary">Deploy & Move</h2>
+          <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">← Back</button>
         </div>
 
-        {loading ? (
-          <p className="font-body text-body-sm text-text-secondary">Loading units...</p>
-        ) : result ? (
+        {loading ? <p className="font-body text-caption text-text-secondary">Loading...</p>
+        : result ? (
           <div className="bg-card border border-border rounded-lg p-3 space-y-3">
             <div className={`p-3 rounded-lg border ${result.success ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
               <h3 className={`font-body text-body-sm font-bold uppercase ${result.success ? 'text-success' : 'text-danger'}`}>
                 {result.success ? 'Moves Applied' : 'Move Failed'}
               </h3>
-              <p className="font-body text-caption text-text-secondary mt-1">{result.narrative as string}</p>
-              {result.moved_count !== undefined && (
-                <p className="font-data text-caption text-text-primary mt-1">{result.moved_count as number} unit(s) moved</p>
-              )}
-              {result.errors && (result.errors as string[]).length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {(result.errors as string[]).map((e, i) => (
-                    <p key={i} className="font-body text-caption text-danger">{e}</p>
-                  ))}
-                </div>
-              )}
+              <p className="font-body text-caption text-text-secondary mt-1">{String(result.narrative??'')}</p>
             </div>
             <div className="flex gap-2">
-              <button onClick={() => { setResult(null); setQueuedMoves([]); loadUnits() }}
-                className="font-body text-caption px-3 py-1.5 rounded bg-action/10 text-action border border-action/30 hover:bg-action/20">
-                Move More
-              </button>
+              <button onClick={() => { setResult(null); setMoves([]); setHexUnits([]); loadUnits() }}
+                className="font-body text-caption px-3 py-1.5 rounded bg-action/10 text-action border border-action/30">Move More</button>
               <button onClick={onSubmitted}
-                className="font-body text-caption px-3 py-1.5 rounded border border-border text-text-secondary hover:text-text-primary">
-                ← Done
-              </button>
+                className="font-body text-caption px-3 py-1.5 rounded border border-border text-text-secondary">← Done</button>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Mode indicator */}
-            {deployingUnit && (
-              <div className="bg-action/10 border border-action/30 rounded-lg p-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UnitIcon type={deployingUnit.unit_type} size={20} className="text-action" />
-                  <span className="font-body text-caption text-action">Click a hex to deploy {deployingUnit.unit_id}</span>
-                </div>
-                <button onClick={() => setDeployingUnit(null)} className="text-text-secondary hover:text-text-primary text-sm">X</button>
-              </div>
-            )}
-            {repositioningUnit && (
-              <div className="bg-accent/10 border border-accent/30 rounded-lg p-2 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UnitIcon type={repositioningUnit.unit_type} size={20} className="text-accent" />
-                  <span className="font-body text-caption text-accent">Click a hex to move {repositioningUnit.unit_id}</span>
-                </div>
-                <button onClick={() => setRepositioningUnit(null)} className="text-text-secondary hover:text-text-primary text-sm">X</button>
-              </div>
-            )}
+        ) : (<>
+          {/* Mode toggle */}
+          <div className="flex gap-1">
+            <button onClick={()=>{setMode('withdraw');setSelectedUnit(null)}}
+              className={`flex-1 font-body text-caption py-1.5 rounded transition-colors ${
+                mode==='withdraw'?'bg-warning/10 text-warning border border-warning/40 font-medium':'bg-card border border-border text-text-secondary hover:text-text-primary'}`}>
+              Withdraw
+            </button>
+            <button onClick={()=>{setMode('deploy');setHexUnits([])}}
+              className={`flex-1 font-body text-caption py-1.5 rounded transition-colors ${
+                mode==='deploy'?'bg-action/10 text-action border border-action/40 font-medium':'bg-card border border-border text-text-secondary hover:text-text-primary'}`}>
+              Deploy
+            </button>
+          </div>
 
-            {/* Reserve units */}
-            {Object.keys(reserveByType).length > 0 && (
-              <div className="bg-card border border-border rounded-lg p-3 space-y-2">
-                <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Reserve ({reserveUnits.length})</h3>
-                {Object.entries(reserveByType).map(([type, units]) => (
-                  <div key={type} className="space-y-1">
-                    <span className="font-body text-caption text-text-secondary">{UNIT_TYPE_LABELS[type] ?? type}</span>
-                    <div className="flex flex-wrap gap-1">
-                      {units.map(u => {
-                        const queued = queuedMoves.some(m => m.unit_code === u.unit_id)
-                        const deploying = deployingUnit?.unit_id === u.unit_id
-                        return (
-                          <button key={u.unit_id} title={u.unit_id}
-                            disabled={queued}
-                            onClick={() => {
-                              if (!queued) {
-                                setDeployingUnit({unit_id: u.unit_id, unit_type: u.unit_type})
-                                setRepositioningUnit(null)
-                                setError(null)
-                              }
-                            }}
-                            className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
-                              queued ? 'border-success/30 bg-success/5 text-success/50 cursor-not-allowed' :
-                              deploying ? 'bg-action/10 border-action text-action' :
-                              'border-border text-text-secondary hover:border-action/30 hover:text-action'
-                            }`}>
-                            <UnitIcon type={type} size={20} />
-                          </button>
-                        )
-                      })}
+          {/* Mode instruction */}
+          {mode === 'withdraw' ? (
+            <p className="font-body text-caption text-warning/80">Click a hex on the map to withdraw units to reserve.</p>
+          ) : selectedUnit ? (
+            <div className="bg-action/10 border border-action/30 rounded-lg p-2 flex items-center gap-2">
+              <UnitIcon type={selectedUnit.unit_type} size={20} className="text-action"/>
+              <span className="font-body text-caption text-action flex-1">Click hex to deploy</span>
+              <button onClick={()=>setSelectedUnit(null)} className="text-text-secondary text-sm">✕</button>
+            </div>
+          ) : (
+            <p className="font-body text-caption text-action/80">Select a unit from reserve to deploy.</p>
+          )}
+
+          {/* Withdraw: units at clicked hex */}
+          {mode === 'withdraw' && hexUnits.length > 0 && (
+            <div className="bg-card border border-warning/30 rounded-lg p-3 space-y-1">
+              <span className="font-body text-caption text-text-secondary">Units at hex:</span>
+              <div className="flex flex-wrap gap-1">
+                {hexUnits.map(u =>
+                  <button key={u.unit_id} title={u.unit_id} onClick={()=>withdrawUnit(u)}
+                    className="inline-flex items-center justify-center w-10 h-10 rounded border-2 border-warning/40 text-text-secondary hover:bg-warning/10 hover:text-warning transition-colors">
+                    <UnitIcon type={u.unit_type} size={22}/>
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Reserve pool */}
+          {Object.keys(reserveByType).length > 0 && (
+            <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+              <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Reserve ({effectiveReserve.length})</h3>
+              {Object.entries(reserveByType).map(([type, units]) => (
+                <div key={type} className="space-y-1">
+                  <span className="font-body text-caption text-text-secondary">{UNIT_TYPE_LABELS[type]??type}</span>
+                  <div className="flex flex-wrap gap-1">
+                    {units.map(u => {
+                      const isSelected = selectedUnit?.unit_id === u.unit_id
+                      const isQueued = moves.some(m => m.unit_id === u.unit_id && m.action === 'deploy')
+                      return <button key={u.unit_id} title={u.unit_id} disabled={isQueued}
+                        onClick={()=>{if(!isQueued){setSelectedUnit({unit_id:u.unit_id,unit_type:u.unit_type});setMode('deploy');setError(null)}}}
+                        className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
+                          isQueued?'border-success/30 text-success/40 cursor-not-allowed':
+                          isSelected?'bg-action/10 border-action text-action':
+                          'border-border text-text-secondary hover:border-action/30 hover:text-action'}`}>
+                        <UnitIcon type={type} size={20}/>
+                      </button>
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Queued changes */}
+          <div className="bg-card border border-border rounded-lg p-3 space-y-2">
+            <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Changes ({moves.length})</h3>
+            {moves.length === 0
+              ? <p className="font-body text-caption text-text-secondary/50">No changes queued yet.</p>
+              : <div className="space-y-1">
+                {moves.map(m => (
+                  <div key={m.unit_id} className="flex items-center justify-between gap-1 py-1 border-b border-border/30 last:border-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <UnitIcon type={m.unit_type} size={16} className={m.action==='withdraw'?'text-warning':'text-action'}/>
+                      <span className="font-body text-caption text-text-primary truncate">
+                        {m.action==='withdraw'?'→ reserve':`→ (${m.target_row},${m.target_col})`}
+                      </span>
                     </div>
+                    <button onClick={()=>removeMove(m.unit_id)} className="text-danger/60 hover:text-danger text-sm px-1">✕</button>
                   </div>
                 ))}
-              </div>
+              </div>}
+            {moves.length > 0 && (
+              <button onClick={handleSubmit} disabled={submitting}
+                className="w-full font-body text-caption font-bold uppercase py-2 rounded bg-action text-white hover:bg-action/80 disabled:opacity-50 mt-1">
+                {submitting ? 'Submitting...' : `Submit ${moves.length} Change(s)`}
+              </button>
             )}
-
-            {/* Embarked units */}
-            {embarkedUnits.length > 0 && (
-              <div className="bg-card border border-border rounded-lg p-3 space-y-2">
-                <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">Embarked ({embarkedUnits.length})</h3>
-                <div className="flex flex-wrap gap-1">
-                  {embarkedUnits.map(u => {
-                    const queued = queuedMoves.some(m => m.unit_code === u.unit_id)
-                    return (
-                      <button key={u.unit_id} title={`${u.unit_id} on ${u.embarked_on}`}
-                        disabled={queued}
-                        onClick={() => {
-                          if (!queued) {
-                            setDeployingUnit({unit_id: u.unit_id, unit_type: u.unit_type})
-                            setRepositioningUnit(null)
-                            setError(null)
-                          }
-                        }}
-                        className={`inline-flex items-center justify-center w-9 h-9 rounded border-2 transition-colors ${
-                          queued ? 'border-success/30 bg-success/5 text-success/50 cursor-not-allowed' :
-                          'border-border text-text-secondary hover:border-action/30 hover:text-action'
-                        }`}>
-                        <UnitIcon type={u.unit_type} size={20} />
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Queued Moves */}
-            <div className="bg-card border border-border rounded-lg p-3 space-y-2">
-              <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider">
-                Queued Moves ({queuedMoves.length})
-              </h3>
-              {queuedMoves.length === 0 ? (
-                <p className="font-body text-caption text-text-secondary/50">
-                  Select a reserve unit above to deploy, or click an active unit on the map to reposition.
-                </p>
-              ) : (
-                <div className="space-y-1">
-                  {queuedMoves.map(m => (
-                    <div key={m.unit_code} className="flex items-center justify-between gap-2 py-1 border-b border-border/30 last:border-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <UnitIcon type={m.unit_type} size={18} className="text-action shrink-0" />
-                        <span className="font-body text-caption text-text-primary truncate">{m.label}</span>
-                      </div>
-                      <button onClick={() => removeMove(m.unit_code)}
-                        className="text-danger/60 hover:text-danger text-sm shrink-0 px-1">X</button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {queuedMoves.length > 0 && (
-                <button onClick={handleSubmit} disabled={submitting}
-                  className="w-full font-body text-caption font-bold uppercase px-4 py-2 rounded bg-action text-white hover:bg-action/80 transition-colors disabled:opacity-50 mt-2">
-                  {submitting ? 'Submitting...' : `Submit ${queuedMoves.length} Move(s)`}
-                </button>
-              )}
-            </div>
-
-            {/* Active units hint */}
-            <div className="bg-card border border-border rounded-lg p-3">
-              <h3 className="font-body text-caption text-text-secondary uppercase tracking-wider mb-1">Active Units ({activeUnits.length})</h3>
-              <p className="font-body text-caption text-text-secondary/50">Click an active unit on the map to reposition it.</p>
-            </div>
-          </>
-        )}
+          </div>
+        </>)}
 
         {error && !result && (
-          <div className="bg-danger/5 border border-danger/20 rounded-lg p-3">
-            <p className="font-body text-body-sm text-danger">{error}</p>
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-2">
+            <p className="font-body text-caption text-danger">{error}</p>
           </div>
         )}
       </div>
 
-      {/* RIGHT — Map (3/4), always visible */}
+      {/* RIGHT — Map */}
       <div className="flex-1 flex flex-col gap-1">
         <div className="flex gap-1">
           {(['global','eastern_ereb','mashriq'] as const).map(v=>(
@@ -2764,12 +2670,9 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
           ))}
         </div>
         <div className="relative flex-1 rounded-lg overflow-hidden border border-border">
-          <iframe
-            ref={mapRef}
+          <iframe ref={mapRef}
             src={`/map/deployments.html?display=clean&mode=move&country=${countryId}&sim_run_id=${simId}`}
-            className="absolute inset-0 w-full h-full border-0"
-            title="Move Units Map"
-          />
+            className="absolute inset-0 w-full h-full border-0" title="Move Units Map"/>
         </div>
       </div>
     </div>
