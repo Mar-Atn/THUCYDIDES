@@ -299,7 +299,7 @@ export function ParticipantDashboard() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex">
             {tabs.map(t=>(
-              <button key={t.id} onClick={()=>!t.off&&setTab(t.id)} disabled={t.off}
+              <button key={t.id} onClick={()=>{if(!t.off){setTab(t.id);setActiveAction(null)}}} disabled={t.off}
                 className={`relative px-5 py-3 font-body text-body-sm font-medium transition-colors ${tab===t.id?'text-text-primary':t.off?'text-text-secondary/30 cursor-not-allowed':'text-text-secondary hover:text-text-primary'}`}>
                 {t.label}
                 {t.badge?<span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-danger text-white text-[10px] font-bold rounded-full flex items-center justify-center">{t.badge}</span>:null}
@@ -568,7 +568,7 @@ function TabConf({role,artefacts,objectives,personalRels,orgMemberships,onRead}:
       {orgMemberships.length>0&&<div className="bg-card border border-border rounded-lg p-6">
         <h3 className="font-heading text-h3 text-text-primary mb-3">Organization Memberships</h3>
         <div className="space-y-2">
-          {orgMemberships.map(m=><div key={m.org_id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+          {orgMemberships.map(m=><div key={`${m.org_id}_${m.role_in_org}`} className="flex items-center gap-3 bg-base rounded px-3 py-2">
             <span className="font-body text-body-sm text-text-primary font-medium">{m.org_id.replace(/_/g,' ')}</span>
             <span className="font-body text-caption text-text-secondary">{m.role_in_org}</span>
             {m.has_veto&&<span className="font-body text-caption text-danger font-medium">VETO</span>}
@@ -791,7 +791,7 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
         {orgMemberships.length>0&&<div className="bg-card border border-border rounded-lg p-4">
           <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Organization Memberships</h3>
           <div className="space-y-2">
-            {orgMemberships.map(m=><div key={m.org_id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+            {orgMemberships.map(m=><div key={`${m.org_id}_${m.role_in_org}`} className="flex items-center gap-3 bg-base rounded px-3 py-2">
               <span className="font-body text-body-sm text-text-primary font-medium">{m.org_id.replace(/_/g,' ')}</span>
               <span className="font-body text-caption text-text-secondary">{m.role_in_org}</span>
               {m.has_veto&&<span className="font-body text-caption text-danger font-medium">VETO</span>}
@@ -1417,7 +1417,8 @@ interface AttackTarget {
 }
 
 const ATTACK_TYPE_LABELS: Record<string,string> = {
-  ground_attack: 'Ground Attack', air_strike: 'Air Strike',
+  ground_attack: 'Ground Attack', ground_move: 'Advance',
+  air_strike: 'Air Strike',
   naval_combat: 'Naval Combat', naval_bombardment: 'Naval Bombardment',
   launch_missile_conventional: 'Missile Launch',
 }
@@ -1425,6 +1426,24 @@ const ATTACK_TYPE_LABELS: Record<string,string> = {
 const UNIT_TYPE_LABELS: Record<string,string> = {
   ground: 'Ground', tactical_air: 'Tactical Air', naval: 'Naval',
   strategic_missile: 'Strategic Missile', air_defense: 'Air Defense',
+}
+
+/** Inline SVG paths for unit type icons (same as map-core.js symbols) */
+const UNIT_ICON_PATHS: Record<string,string> = {
+  ground: 'M10 8 L18 8 L22 10 L22 11 L10 11 ZM2 13 L5 11 L20 11 L21 13 L21 15 L3 15 ZM2 15 L22 15 C22 18 20 19 18 19 L6 19 C4 19 2 18 2 15 Z',
+  tactical_air: 'M12 6 L13 9 L22 12 L22 14 L13 12 L13 16 L15 18 L15 19 L12 18 L9 19 L9 18 L11 16 L11 12 L2 14 L2 12 L11 9 Z',
+  naval: 'M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z',
+  strategic_missile: 'M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z',
+  air_defense: 'M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z M11 9 L13 9 L13 20 L11 20 Z M7 20 L17 20 L17 22 L7 22 Z',
+}
+
+function UnitIcon({type, size=28, className=''}:{type:string;size?:number;className?:string}) {
+  const path = UNIT_ICON_PATHS[type] || UNIT_ICON_PATHS.ground
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} className={className} style={{display:'inline-block',verticalAlign:'middle'}}>
+      <path d={path} fill="currentColor"/>
+    </svg>
+  )
 }
 
 function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
@@ -1450,49 +1469,62 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
       const msg = event.data
       if (!msg || msg.type !== 'hex-click') return
 
-      if (step === 'select_source') {
-        // Filter for own units only
+      // Helper: try to select a new source hex from any step
+      const trySelectSource = () => {
         const myUnits = (msg.units || []).filter((u:{country_id:string})=>u.country_id===countryId)
-        if (myUnits.length === 0) return // ignore clicks on hexes without our units
-
-        setSourceHex({row:msg.row,col:msg.col,
-          theater:msg.theater||undefined,theater_row:msg.theater_row||undefined,theater_col:msg.theater_col||undefined})
-
-        // Filter to combat-capable units (not air_defense)
+        if (myUnits.length === 0) return false
         const combatUnits = myUnits.filter((u:{unit_type:string;status?:string})=>
           ['ground','tactical_air','naval','strategic_missile'].includes(u.unit_type)
         )
-        if (combatUnits.length === 0) {
-          setError('No combat-capable units on this hex')
-          return
-        }
-        setError(null)
+        if (combatUnits.length === 0) return false
+
+        // Reset all state and select new source
+        setSourceHex({row:msg.row,col:msg.col,
+          theater:msg.theater||undefined,theater_row:msg.theater_row||undefined,theater_col:msg.theater_col||undefined})
         setSourceUnits(combatUnits)
+        setSelectedUnits([])
+        setTargets([]); setSelectedTarget(null); setSelectedEnemyUnit(null)
+        setAttackType(null); setError(null); setPreview(null)
         setStep('select_units')
-        // Highlight source hex (with theater coords for theater view)
+        mapRef.current?.contentWindow?.postMessage({type:'clear-highlights'},'*')
         mapRef.current?.contentWindow?.postMessage({type:'highlight-hexes',hexes:[{
           row:msg.row,col:msg.col,
           theater:msg.theater,theater_row:msg.theater_row,theater_col:msg.theater_col,
         }],style:'source'},'*')
+        return true
       }
 
-      if (step === 'select_target') {
-        // Check if clicked hex is a valid target
-        const match = targets.find(t=>t.row===msg.row && t.col===msg.col)
-        if (!match) return // ignore non-target clicks
+      if (step === 'select_source') {
+        trySelectSource()
+        return
+      }
 
-        setSelectedTarget(match)
-        setAttackType(match.attack_type)
-        fetchPreview(match.attack_type, match.row, match.col)
+      if (step === 'select_units' || step === 'select_target' || step === 'confirm') {
+        // If clicking a hex with own combat units → re-select source
+        const myUnits = (msg.units || []).filter((u:{country_id:string})=>u.country_id===countryId)
+        const hasCombat = myUnits.some((u:{unit_type:string})=>
+          ['ground','tactical_air','naval','strategic_missile'].includes(u.unit_type)
+        )
+        if (hasCombat) {
+          trySelectSource()
+          return
+        }
 
-        // Naval combat requires picking a specific enemy ship
-        if (match.attack_type === 'naval_combat' && match.enemies.length > 1) {
-          setStep('confirm')
-        } else if (match.attack_type === 'naval_combat' && match.enemies.length === 1) {
-          setSelectedEnemyUnit(match.enemies[0].unit_id)
-          setStep('confirm')
-        } else {
-          setStep('confirm')
+        // In select_target: check if clicked hex is a valid target
+        if (step === 'select_target') {
+          const match = targets.find(t=>t.row===msg.row && t.col===msg.col)
+          if (!match) return
+          setSelectedTarget(match)
+          setAttackType(match.attack_type)
+          fetchPreview(match.attack_type, match.row, match.col)
+          if (match.attack_type === 'naval_combat' && match.enemies.length > 1) {
+            setStep('confirm')
+          } else if (match.attack_type === 'naval_combat' && match.enemies.length === 1) {
+            setSelectedEnemyUnit(match.enemies[0].unit_id)
+            setStep('confirm')
+          } else {
+            setStep('confirm')
+          }
         }
       }
     }
@@ -1570,10 +1602,15 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
     // Set correct action type based on attack
     let actionType = attackType
-    if (attackType === 'ground_attack') {
+    if (attackType === 'ground_attack' || attackType === 'ground_move') {
       params.attacker_unit_codes = selectedUnits
       params.source_global_row = sourceHex?.row
       params.source_global_col = sourceHex?.col
+      if (selectedTarget?.theater_row) {
+        params.theater = selectedTarget.theater
+        params.theater_row = selectedTarget.theater_row
+        params.theater_col = selectedTarget.theater_col
+      }
     }
     if (attackType === 'naval_combat' && selectedEnemyUnit) {
       params.target_unit_code = selectedEnemyUnit
@@ -1625,41 +1662,43 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
   })
 
   return (
-    <div className="space-y-3">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-h2 text-text-primary">Attack</h2>
-        <div className="flex gap-2">
-          {step !== 'select_source' && step !== 'result' && (
-            <button onClick={resetToSource}
-              className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
-              Reset
+    <div className="flex gap-3" style={{height:'calc(100vh - 180px)'}}>
+      {/* LEFT SIDEBAR — controls (1/3) */}
+      <div className="w-1/4 min-w-[240px] flex flex-col gap-2 overflow-y-auto pr-1">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h3 text-text-primary">Attack</h2>
+          <div className="flex gap-1">
+            {step !== 'select_source' && step !== 'result' && (
+              <button onClick={resetToSource}
+                className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">
+                Reset
+              </button>
+            )}
+            <button onClick={onClose}
+              className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">
+              ← Back
             </button>
-          )}
-          <button onClick={onClose}
-            className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
-            ← Back
-          </button>
-        </div>
-      </div>
-
-      {/* Step indicator */}
-      <div className="flex gap-2 text-caption font-body">
-        {(['select_source','select_units','select_target','confirm'] as AttackStep[]).map((s,i)=>(
-          <div key={s} className={`flex items-center gap-1 ${step===s?'text-action font-medium':
-            (['select_source','select_units','select_target','confirm'].indexOf(step)>i?'text-success':'text-text-secondary/50')}`}>
-            <span className={`w-5 h-5 rounded-full flex items-center justify-center text-xs border ${
-              step===s?'border-action bg-action/10':
-              (['select_source','select_units','select_target','confirm'].indexOf(step)>i?'border-success bg-success/10':'border-border')
-            }`}>{i+1}</span>
-            <span className="hidden sm:inline">{s==='select_source'?'Source':s==='select_units'?'Units':s==='select_target'?'Target':'Confirm'}</span>
-            {i<3&&<span className="text-text-secondary/30 mx-1">→</span>}
           </div>
-        ))}
-      </div>
+        </div>
 
-      {/* Step content panel */}
-      <div className="bg-card border border-border rounded-lg p-4 min-h-[60px]">
+        {/* Step indicator */}
+        <div className="flex gap-1 text-caption font-body flex-wrap">
+          {(['select_source','select_units','select_target','confirm'] as AttackStep[]).map((s,i)=>(
+            <div key={s} className={`flex items-center gap-0.5 ${step===s?'text-action font-medium':
+              (['select_source','select_units','select_target','confirm'].indexOf(step)>i?'text-success':'text-text-secondary/50')}`}>
+              <span className={`w-4 h-4 rounded-full flex items-center justify-center text-xs border ${
+                step===s?'border-action bg-action/10':
+                (['select_source','select_units','select_target','confirm'].indexOf(step)>i?'border-success bg-success/10':'border-border')
+              }`}>{i+1}</span>
+              <span className="text-xs">{s==='select_source'?'Hex':s==='select_units'?'Units':s==='select_target'?'Target':'Go'}</span>
+              {i<3&&<span className="text-text-secondary/30">→</span>}
+            </div>
+          ))}
+        </div>
+
+        {/* Step content */}
+        <div className="bg-card border border-border rounded-lg p-3 min-h-[60px] flex-1">
         {step === 'select_source' && (
           <p className="font-body text-body-sm text-text-secondary">
             Click a hex on the map that contains your military units.
@@ -1681,38 +1720,49 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   {UNIT_TYPE_LABELS[type]??type} ({units.length})
                 </h4>
                 {type === 'ground' ? (
-                  /* Ground: multi-select up to 3 */
-                  <div className="flex flex-wrap gap-2">
-                    {units.map(u => {
-                      const sel = selectedUnits.includes(u.unit_id)
-                      return <button key={u.unit_id} onClick={()=>{
-                        if (sel) setSelectedUnits(prev=>prev.filter(x=>x!==u.unit_id))
-                        else if (selectedUnits.filter(x=>sourceUnits.find(s=>s.unit_id===x)?.unit_type==='ground').length<3)
-                          setSelectedUnits(prev=>[...prev,u.unit_id])
-                      }}
-                        className={`font-data text-caption px-3 py-1.5 rounded border transition-colors ${
-                          sel?'bg-action/10 border-action text-action':'border-border text-text-secondary hover:border-action/30'
-                        }`}>
-                        {u.unit_id}{u.status==='embarked'?' ⚓':''}
-                      </button>
-                    })}
-                    <span className="font-body text-caption text-text-secondary/50 self-center">
-                      {selectedUnits.filter(x=>sourceUnits.find(s=>s.unit_id===x)?.unit_type==='ground').length}/3 max
-                    </span>
+                  /* Ground: multi-select, max 3, must leave 1 behind */
+                  <div className="flex flex-wrap gap-2 items-center">
+                    {(()=>{
+                      const groundCount = units.length
+                      const maxSelect = Math.min(3, Math.max(1, groundCount - 1))
+                      const selectedGround = selectedUnits.filter(x=>sourceUnits.find(s=>s.unit_id===x)?.unit_type==='ground').length
+                      return <>
+                        {units.map(u => {
+                          const sel = selectedUnits.includes(u.unit_id)
+                          return <button key={u.unit_id} onClick={()=>{
+                            if (sel) setSelectedUnits(prev=>prev.filter(x=>x!==u.unit_id))
+                            else if (selectedGround < maxSelect)
+                              setSelectedUnits(prev=>[...prev,u.unit_id])
+                          }}
+                            title={u.unit_id}
+                            className={`inline-flex items-center justify-center w-10 h-10 rounded border-2 transition-colors ${
+                              sel?'bg-action/10 border-action text-action':
+                              selectedGround >= maxSelect?'border-border/30 text-text-secondary/30 cursor-not-allowed':
+                              'border-border text-text-secondary hover:border-action/30 hover:text-action'
+                            }`}>
+                            <UnitIcon type={type} size={24} />
+                          </button>
+                        })}
+                        <span className="font-body text-caption text-text-secondary/50">
+                          {selectedGround}/{maxSelect}{groundCount > 1 && <span className="text-text-secondary/30 ml-1">(1 stays)</span>}
+                        </span>
+                      </>
+                    })()}
                   </div>
                 ) : (
                   /* Others: single select */
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 items-center">
                     {units.map(u => {
                       const sel = selectedUnits.includes(u.unit_id)
                       return <button key={u.unit_id} onClick={()=>{
-                        // Single select — replace any previous of same type
                         setSelectedUnits([u.unit_id])
                       }}
-                        className={`font-data text-caption px-3 py-1.5 rounded border transition-colors ${
-                          sel?'bg-action/10 border-action text-action':'border-border text-text-secondary hover:border-action/30'
+                        title={u.unit_id}
+                        className={`inline-flex items-center justify-center w-10 h-10 rounded border-2 transition-colors ${
+                          sel?'bg-action/10 border-action text-action':'border-border text-text-secondary hover:border-action/30 hover:text-action'
                         }`}>
-                        {u.unit_id}{u.status==='embarked'?' ⚓':''}
+                        <UnitIcon type={type} size={24} />
+                        {u.status==='embarked'&&<span className="text-xs absolute -bottom-1 -right-1">⚓</span>}
                       </button>
                     })}
                   </div>
@@ -1765,13 +1815,20 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
               </div>
               <div>
                 <span className="font-body text-caption text-text-secondary block">Our Units</span>
-                <span className="font-data text-caption text-action">{selectedUnits.join(', ')}</span>
+                <div className="flex gap-1 flex-wrap mt-0.5">
+                  {selectedUnits.map(uid=>{
+                    const utype = sourceUnits.find(s=>s.unit_id===uid)?.unit_type||'ground'
+                    return <span key={uid} title={uid} className="text-action"><UnitIcon type={utype} size={20}/></span>
+                  })}
+                </div>
               </div>
               <div>
                 <span className="font-body text-caption text-text-secondary block">Enemy Units</span>
-                <span className="font-data text-caption text-danger">
-                  {selectedTarget.enemies.map(e=>e.unit_id).join(', ')}
-                </span>
+                <div className="flex gap-1 flex-wrap mt-0.5">
+                  {selectedTarget.enemies.map(e=>
+                    <span key={e.unit_id} title={`${e.unit_id} (${e.country_id})`} className="text-danger"><UnitIcon type={e.unit_type} size={20}/></span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -1780,11 +1837,14 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
               <div className="bg-base border border-border rounded-lg p-3 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="font-body text-caption text-text-secondary uppercase tracking-wider">Combat Assessment</span>
-                  <span className={`font-data text-data-lg font-bold ${
-                    preview.win_probability >= 60 ? 'text-success' : preview.win_probability >= 40 ? 'text-warning' : 'text-danger'
-                  }`}>
-                    {preview.win_probability}% chance
-                  </span>
+                </div>
+                <div className="flex gap-0.5">
+                  {[15,30,45,60,75].map(t =>
+                    <div key={t} className="w-3 h-3 rounded-sm border" style={{
+                      borderColor: '#1A5276',
+                      backgroundColor: preview.win_probability >= t ? '#1A5276' : 'transparent',
+                    }}/>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -1826,10 +1886,11 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 <div className="flex gap-2">
                   {selectedTarget.enemies.map(e=>(
                     <button key={e.unit_id} onClick={()=>setSelectedEnemyUnit(e.unit_id)}
-                      className={`font-data text-caption px-3 py-1.5 rounded border transition-colors ${
+                      title={`${e.unit_id} (${e.country_id})`}
+                      className={`inline-flex items-center justify-center w-10 h-10 rounded border-2 transition-colors ${
                         selectedEnemyUnit===e.unit_id?'bg-danger/10 border-danger text-danger':'border-border text-text-secondary hover:border-danger/30'
                       }`}>
-                      {e.unit_id} ({e.country_id})
+                      <UnitIcon type="naval" size={24}/>
                     </button>
                   ))}
                 </div>
@@ -1853,64 +1914,90 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
         {step === 'result' && result && (
           <div className="space-y-3">
             {result.pending ? (
-              <div className="p-4 rounded-lg border bg-warning/5 border-warning/20">
-                <h3 className="font-heading text-body-sm font-medium text-warning">ATTACK SUBMITTED</h3>
-                <p className="font-body text-body-sm text-text-primary mt-1">
-                  Awaiting moderator {result.status === 'awaiting_dice' ? 'dice input' : 'approval'}. You will see the result once confirmed.
-                </p>
+              <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">
+                <h3 className="font-body text-caption font-medium text-warning uppercase">Awaiting Approval</h3>
               </div>
             ) : (
-              <div className={`p-4 rounded-lg border ${result.attacker_won ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
-                <h3 className={`font-heading text-body-sm font-medium ${result.attacker_won ? 'text-success' : 'text-danger'}`}>
-                  {result.attacker_won ? 'VICTORY — Target Taken' : 'DEFEAT — Attack Repelled'}
+              <div className={`p-3 rounded-lg border ${result.attacker_won ? 'bg-success/5 border-success/20' : 'bg-danger/5 border-danger/20'}`}>
+                <h3 className={`font-body text-body-sm font-bold uppercase ${result.attacker_won ? 'text-success' : 'text-danger'}`}>
+                  {result.attacker_won ? 'Victory' : 'Defeat'}
                 </h3>
-                <p className="font-body text-body-sm text-text-primary mt-1">{String(result.narrative??'')}</p>
               </div>
             )}
 
-            {/* Loss summary */}
-            {(result.attacker_losses as string[]||[]).length > 0 && (
-              <div className="font-body text-caption text-text-secondary">
-                Our losses: <span className="text-danger font-medium">{(result.attacker_losses as string[]).join(', ')}</span>
-              </div>
-            )}
-            {(result.defender_losses as string[]||[]).length > 0 && (
-              <div className="font-body text-caption text-text-secondary">
-                Enemy losses: <span className="text-success font-medium">{(result.defender_losses as string[]).join(', ')}</span>
+            {/* Casualties — icons with cross overlay */}
+            {((result.attacker_losses as string[]||[]).length > 0 || (result.defender_losses as string[]||[]).length > 0) && (
+              <div className="space-y-2">
+                {(result.attacker_losses as string[]||[]).length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="font-body text-caption text-text-secondary mr-1">Our losses:</span>
+                    {(result.attacker_losses as string[]).map((uid,i)=>
+                      <span key={i} title={uid} className="relative inline-block text-action">
+                        <UnitIcon type={attackType==='naval_combat'?'naval':attackType==='air_strike'?'tactical_air':attackType==='launch_missile_conventional'?'strategic_missile':'ground'} size={22}/>
+                        <span className="absolute inset-0 flex items-center justify-center text-danger font-bold text-lg leading-none">✕</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+                {(result.defender_losses as string[]||[]).length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap">
+                    <span className="font-body text-caption text-text-secondary mr-1">Enemy losses:</span>
+                    {(result.defender_losses as string[]).map((uid,i)=>
+                      <span key={i} title={uid} className="relative inline-block text-danger">
+                        <UnitIcon type={attackType==='naval_combat'?'naval':attackType==='air_strike'?'ground':'ground'} size={22}/>
+                        <span className="absolute inset-0 flex items-center justify-center text-danger font-bold text-lg leading-none">✕</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
-            <div className="flex gap-3">
+            {/* Captured trophies */}
+            {(result.captured as {unit_id:string;type:string;from:string}[]||[]).length > 0 && (
+              <div className="flex items-center gap-1 flex-wrap">
+                <span className="font-body text-caption text-text-secondary mr-1">Captured:</span>
+                {(result.captured as {unit_id:string;type:string;from:string}[]).map((c,i)=>
+                  <span key={i} title={`${c.unit_id} (${c.type} from ${c.from})`} className="relative inline-block text-action">
+                    <UnitIcon type={c.type} size={22}/>
+                  </span>
+                )}
+                <span className="font-body text-caption text-action/60 ml-1">→ reserve</span>
+              </div>
+            )}
+
+            <div className="flex gap-2">
               <button onClick={resetToSource}
-                className="font-body text-caption px-4 py-2 rounded bg-action/10 text-action border border-action/30 hover:bg-action/20">
+                className="font-body text-caption px-3 py-1.5 rounded bg-action/10 text-action border border-action/30 hover:bg-action/20">
                 Attack Again
               </button>
               <button onClick={onSubmitted}
-                className="font-body text-caption px-4 py-2 rounded border border-border text-text-secondary hover:text-text-primary">
-                ← Return to Actions
+                className="font-body text-caption px-3 py-1.5 rounded border border-border text-text-secondary hover:text-text-primary">
+                ← Done
               </button>
             </div>
           </div>
         )}
       </div>
 
-      {error && step !== 'result' && (
-        <div className="bg-danger/5 border border-danger/20 rounded-lg p-3">
-          <p className="font-body text-body-sm text-danger">{error}</p>
-        </div>
-      )}
+        {error && step !== 'result' && (
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-danger">{error}</p>
+          </div>
+        )}
+      </div>
 
-      {/* Map — full width below the control panel */}
-      {step !== 'result' && (<>
-        <div className="flex items-center gap-2">
+      {/* RIGHT — Map (3/4), always visible */}
+      <div className="flex-1 flex flex-col gap-1">
+        <div className="flex gap-1">
           {(['global','eastern_ereb','mashriq'] as const).map(v=>(
             <button key={v} onClick={()=>mapRef.current?.contentWindow?.postMessage({type:'navigate-theater',theater:v==='global'?'global':v},'*')}
-              className="font-body text-caption px-3 py-1 rounded border border-border text-text-secondary hover:border-action/30 hover:text-action transition-colors">
-              {v==='global'?'Global Map':v==='eastern_ereb'?'Eastern Ereb':'Mashriq'}
+              className="font-body text-caption px-2 py-0.5 rounded border border-border text-text-secondary hover:border-action/30 hover:text-action transition-colors">
+              {v==='global'?'Global':v==='eastern_ereb'?'E. Ereb':'Mashriq'}
             </button>
           ))}
         </div>
-        <div className="relative rounded-lg overflow-hidden border border-border" style={{height:'calc(100vh - 300px)', minHeight:'500px'}}>
+        <div className="relative flex-1 rounded-lg overflow-hidden border border-border">
           <iframe
             ref={mapRef}
             src={`/map/deployments.html?display=clean&mode=attack&country=${countryId}&sim_run_id=${simId}`}
@@ -1918,7 +2005,7 @@ function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
             title="Attack Map"
           />
         </div>
-      </>)}
+      </div>
     </div>
   )
 }
@@ -2131,7 +2218,7 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
   useEffect(()=>{
     supabase.from('exchange_transactions').select('id,counterpart,status')
-      .eq('sim_run_id',simId).eq('proposer',countryId).in_('status',['pending','countered'])
+      .eq('sim_run_id',simId).eq('proposer',countryId).in('status',['pending','countered'])
       .then(({data})=>setOutgoing((data??[]) as typeof outgoing))
   },[simId,countryId])
 

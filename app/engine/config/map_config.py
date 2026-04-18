@@ -115,6 +115,71 @@ UNIT_TYPES: list[str] = [
 UNIT_STATUSES: list[str] = ["active", "reserve", "embarked", "destroyed"]
 
 # ---------------------------------------------------------------------------
+# SEA HEXES — 1-indexed coordinates of water hexes (ground cannot enter)
+# ---------------------------------------------------------------------------
+GLOBAL_SEA_HEXES: frozenset[tuple[int, int]] = frozenset([
+    (1,1),(1,2),(1,3),(1,4),(1,5),(1,6),(1,7),(1,8),(1,9),(1,10),(1,11),(1,12),(1,13),(1,14),(1,15),(1,16),(1,17),(1,18),(1,19),(1,20),
+    (2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),(2,8),(2,9),(2,13),(2,14),(2,15),(2,17),(2,18),(2,19),(2,20),
+    (3,1),(3,2),(3,4),(3,5),(3,7),(3,9),(3,17),(3,19),(3,20),
+    (4,1),(4,4),(4,5),(4,6),(4,8),(4,15),(4,18),(4,20),
+    (5,1),(5,2),(5,6),(5,7),(5,8),(5,12),(5,13),(5,18),(5,20),
+    (6,1),(6,2),(6,5),(6,6),(6,7),(6,9),(6,17),(6,18),(6,19),(6,20),
+    (7,1),(7,2),(7,3),(7,5),(7,6),(7,7),(7,8),(7,10),(7,12),(7,17),(7,19),(7,20),
+    (8,1),(8,2),(8,3),(8,4),(8,5),(8,6),(8,7),(8,8),(8,9),(8,12),(8,16),(8,17),(8,18),(8,19),(8,20),
+    (9,1),(9,2),(9,3),(9,4),(9,6),(9,7),(9,8),(9,9),(9,11),(9,12),(9,13),(9,14),(9,16),(9,17),(9,18),(9,19),(9,20),
+    (10,1),(10,2),(10,3),(10,4),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),(10,11),(10,12),(10,13),(10,14),(10,15),(10,16),(10,17),(10,18),(10,19),(10,20),
+])
+
+THEATER_SEA_HEXES: dict[str, frozenset[tuple[int, int]]] = {
+    "eastern_ereb": frozenset([
+        (8,4),(8,6),(8,7),(8,8),(9,4),(9,7),(9,8),(9,9),(9,10),
+        (10,3),(10,4),(10,5),(10,6),(10,7),(10,8),(10,9),(10,10),
+    ]),
+    "mashriq": frozenset([
+        (3,2),(3,3),(4,2),(4,3),(5,2),(5,3),(5,4),(5,5),(6,2),(6,3),(6,4),(6,5),
+        (7,2),(7,3),(7,4),(7,5),(7,6),(8,2),(8,3),(8,4),(8,5),(8,7),
+        (9,4),(9,5),(9,6),(9,7),(9,8),(10,6),(10,7),(10,8),
+    ]),
+}
+
+
+def is_sea_hex(row: int, col: int, theater: Optional[str] = None) -> bool:
+    """True if the hex is a sea hex (ground cannot enter)."""
+    if theater:
+        return (row, col) in THEATER_SEA_HEXES.get(theater, frozenset())
+    return (row, col) in GLOBAL_SEA_HEXES
+
+
+# ---------------------------------------------------------------------------
+# HEX OWNERS — canonical territory ownership (from map grid data)
+# ---------------------------------------------------------------------------
+GLOBAL_HEX_OWNERS: dict[tuple[int, int], str] = {
+    (2,10):"freeland",(2,11):"sarmatia",(2,12):"sarmatia",(2,16):"sarmatia",
+    (3,3):"columbia",(3,6):"thule",(3,8):"albion",(3,10):"freeland",
+    (3,11):"ruthenia",(3,12):"sarmatia",(3,13):"sarmatia",(3,14):"sarmatia",
+    (3,15):"sarmatia",(3,16):"sarmatia",(3,18):"choson",
+    (4,2):"columbia",(4,3):"columbia",(4,7):"albion",(4,9):"teutonia",
+    (4,10):"teutonia",(4,11):"ruthenia",(4,12):"sarmatia",(4,13):"sarmatia",
+    (4,14):"sarmatia",(4,16):"sarmatia",(4,17):"hanguk",(4,19):"yamato",
+    (5,3):"columbia",(5,4):"columbia",(5,5):"columbia",(5,9):"gallia",
+    (5,10):"gallia",(5,11):"phrygia",(5,14):"sogdiana",(5,15):"cathay",
+    (5,16):"cathay",(5,17):"cathay",(5,19):"yamato",
+    (6,3):"columbia",(6,4):"columbia",(6,8):"ponte",(6,10):"levantia",
+    (6,11):"phrygia",(6,12):"persia",(6,13):"sogdiana",(6,14):"sogdiana",
+    (6,15):"cathay",(6,16):"cathay",
+    (7,4):"columbia",(7,9):"ponte",(7,11):"solaria",(7,13):"persia",
+    (7,14):"bharata",(7,15):"bharata",(7,16):"cathay",(7,18):"formosa",
+    (8,10):"solaria",(8,11):"mirage",(8,13):"persia",(8,14):"bharata",
+    (8,15):"bharata",
+    (9,5):"caribe",(9,10):"horn",(9,15):"bharata",
+}
+
+
+def hex_owner(row: int, col: int) -> str:
+    """Return the canonical territory owner for a global hex, or 'sea'."""
+    return GLOBAL_HEX_OWNERS.get((row, col), "sea")
+
+# ---------------------------------------------------------------------------
 # NUCLEAR SITES — physical hex locations on global map
 # Only countries with map-located nuclear programs. Others are abstract.
 # Canonical source: sim_templates.map_config.nuclear_sites (DB)
@@ -306,4 +371,7 @@ __all__ = [
     "theater_for_global_hex",
     "in_global_bounds",
     "in_theater_bounds",
+    "GLOBAL_SEA_HEXES",
+    "THEATER_SEA_HEXES",
+    "is_sea_hex",
 ]

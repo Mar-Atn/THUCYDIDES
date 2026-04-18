@@ -1,14 +1,14 @@
 # Action Contract Audit — Gap Analysis
-**Date:** 2026-04-16 | **Status:** DOCUMENTED — fixes scheduled per module
+**Date:** 2026-04-17 | **Status:** ACTIVE — major combat fixes landed 2026-04-17
 
 ---
 
 ## Overview
 
 The 33 canonical action types are routed through the dispatcher and reach their engines.
-However, many actions use **simplified wiring** that doesn't match the full contract specifications.
-The contracts (in `3 DETAILED DESIGN/CONTRACTS/`) specify validators, schemas, adjacency checks,
-multi-step flows, and specific payload formats that are not yet enforced.
+As of 2026-04-17, **all 5 combat types are fully wired** (engine → dispatcher → DB losses) with
+a unified map-based Attack UX, theater-level adjacency, and moderator controls.
+Remaining gaps are primarily in validation strictness and non-combat action flows.
 
 This document tracks the gap between current implementation and contract spec for each action.
 
@@ -26,31 +26,28 @@ This document tracks the gap between current implementation and contract spec fo
 
 ## Military Actions
 
-### ground_attack — SIMPLIFIED
+### ground_attack — WORKING (2026-04-17)
 **Contract:** `CONTRACT_GROUND_COMBAT.md` v1.0 (LOCKED)
-**Current:** Loads ALL units at target hex, fights all defenders. No source hex, no unit selection, no adjacency check, no chain attacks.
-**Contract requires:**
-- Source hex → Target hex (adjacent, validated)
-- Attacker selects specific unit_codes from source hex
-- Adjacency validation (hex neighbors)
-- Leave ≥1 unit on foreign hexes
-- Chain attack logic (winner continues to next adjacent hex)
-- Validator: `ground_combat_validator.py` (referenced in contract, may not exist)
-**Fix when:** M6 (humans submit attacks) or M5 (AI generates attack decisions)
-**Effort:** Medium — need validator + source/target flow + chain logic
+**Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex. RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input).
+**Remaining gaps:** Chain attack logic not yet implemented. Leave-1-unit-on-foreign-hex rule not enforced.
+**Effort:** Small — chain logic + leave-1 validation
 
-### air_strike — SIMPLIFIED
-**Current:** Loads all air units at hex, strikes all ground/naval defenders. Basic resolution.
-**Missing:** Sortie mechanics, target selection, air superiority contest, proper hit probability.
-**Fix when:** M5/M6
+### air_strike — WORKING (2026-04-17)
+**Current:** Map-based UX. Source hex air units selected (including embarked on carriers). 12%/6% hit probability. 15% chance downed by AD. DB losses applied. Probability-based (no dice input).
+**Remaining gaps:** Sortie mechanics, air superiority contest.
 
-### naval_combat — NOT WIRED
-**Current:** Passes unit counts but engine expects `unit_code` on attacker/defender dicts. Errors.
-**Fix when:** M5/M6
+### naval_combat — WORKING (2026-04-17)
+**Current:** Map-based UX. 1v1 dice per pair, ties → defender wins. DB losses applied. Physical dice mode supported (1+1 dice input). Fixed: unit_code format (was count dict, now unit dict).
 
-### naval_bombardment, naval_blockade, launch_missile_conventional — STUB
-**Current:** Returns "acknowledged" message. Engine functions exist but need Input objects with zone/country data.
-**Fix when:** M5/M6
+### naval_bombardment — WORKING (2026-04-17)
+**Current:** 10% hit per naval unit. DB losses applied. Probability-based (no dice).
+
+### launch_missile_conventional — WORKING (2026-04-17)
+**Current:** 80% accuracy, AD halving, missile consumed on use. DB losses applied. Probability-based (no dice).
+
+### naval_blockade — STUB
+**Current:** Returns "acknowledged" message. Engine function exists but needs Input objects with zone/country data.
+**Fix when:** M6 remaining sprints
 
 ### nuclear_test — NOT WIRED
 **Current:** Engine expects `NuclearTestInput` Pydantic model. Dispatcher passes kwargs.
@@ -96,11 +93,12 @@ This document tracks the gap between current implementation and contract spec fo
 **Status:** Needs testing.
 **Fix when:** M5/M6
 
-### declare_war — WORKING
-**Current:** Unilateral action. Sets both directions of the relationship to `at_war` in the `relationships` table. Writes observatory event. No moderator confirmation needed.
+### declare_war — WORKING (2026-04-17)
+**Current:** Unilateral action. Sets both directions of the relationship to `at_war` in the `relationships` table. Writes observatory event. No moderator confirmation needed. Category: diplomatic.
 **Roles:** diplomat, head_of_state (all countries)
 **Location:** `action_dispatcher.py` → `_declare_war()`, `ParticipantDashboard.tsx` → `DeclareWarForm`
 **Wired to:** relationships table (both directions), observatory_events
+**Status:** Fully working, tested.
 
 ### call_org_meeting, meet_freely — STUB
 **Current:** Returns acknowledged. Meeting system not built.
@@ -145,15 +143,13 @@ This document tracks the gap between current implementation and contract spec fo
 
 ---
 
-## Combat Theater Issue
+## Combat Theater Issue — RESOLVED (2026-04-17)
 
-**Problem:** All combat currently happens on global hex coordinates. But Eastern Ereb and Mashriq have detailed theater grids (10x10) where combat should be resolved at theater resolution, not global resolution.
+**Problem (was):** All combat happened on global hex coordinates. Theater grids (10x10) were ignored, mixing all units in a region.
 
-**Current:** `_resolve_combat` in dispatcher loads units by `global_row/col`. Units in the Eastern Ereb theater all share the same few global hexes, so combat mixes all units in the region.
+**Solution:** `GET /api/sim/{id}/attack/valid-targets` accepts `theater=` parameter. When theater is specified, adjacency is computed in theater coordinates (`theater_row/theater_col`) on the 10x10 grid, not global. Map iframe sends theater context via postMessage. Theater view resolves coordinates correctly (was matching global coords instead of theater coords — bug fixed).
 
-**Required:** Combat in theater regions should use `theater_row/theater_col`. The attacker specifies which theater they're fighting in and which theater hex they target.
-
-**Fix when:** M5/M6 — when real combat decisions need theater-level precision.
+**Status:** Fully working for Eastern Ereb and Mashriq theaters. Global map combat also works.
 
 ---
 
@@ -170,14 +166,14 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 
 | Category | Actions | What M6 delivers |
 |---|---|---|
-| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, naval_blockade, launch_missile | Full contract: source→target hex, unit selection, adjacency, theater-level combat, chain attacks, validators |
+| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, ~~naval_blockade~~, launch_missile | ✅ **DONE (2026-04-17):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. **Remaining:** chain attacks, naval_blockade |
 | **Military: Movement** | move_units | Inter-round unit repositioning with adjacency validation |
 | **Military: Nuclear** | nuclear_test, nuclear_launch_initiate, nuclear_authorize, nuclear_intercept | Already wired — M6 adds participant UI + testing |
 | **Military: Other** | basing_rights, martial_law | Already working — M6 adds participant UI |
 | **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
 | **Economic: Transactions** | propose_transaction, accept_transaction | Full flow: propose → counterparty sees → accept/reject → asset transfer. Visibility (public/secret). |
 | **Diplomatic** | propose_agreement, sign_agreement | Full flow: propose → signatories → sign → active. Visibility (public/secret). Terms enforcement. |
-| **Diplomatic** | declare_war | Already working — M6 adds participant UI |
+| **Diplomatic** | declare_war | ✅ **DONE (2026-04-17):** Unilateral, sets both directions at_war, DeclareWarForm in ParticipantDashboard |
 | **Diplomatic** | public_statement, call_org_meeting, meet_freely | Statement UI, meeting creation, participant notification |
 | **Covert** | covert_operation, intelligence | Op type selection, target country, detection probability, outcome display |
 | **Political** | arrest, assassination, change_leader, reassign_types | Confirmation queue verified, 3-phase voting tested, target validation |
@@ -207,4 +203,21 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 
 ---
 
-*This audit should be reviewed at the start of M6. It defines the scope of M6 as much as the UI does.*
+---
+
+## Bugs Fixed (2026-04-17)
+
+| Bug | Impact | Fix |
+|---|---|---|
+| Hex parity inverted (odd/even) | All adjacency calculations wrong | Fixed even rows (1-indexed) shifted right to match renderer |
+| Attacker units loaded from wrong hex | Attacker got target's units | Load from source hex, not target hex |
+| Naval combat wrong argument format | Errors on naval combat | Changed from count dict to unit dict |
+| SIM_RUN_ID not defined in map listener | Map postMessage handler crashed | Passed SIM_RUN_ID into message listener scope |
+| Theater view matched global coords | Unit selection failed in theater | Match theater_row/theater_col instead of global |
+| Theater target highlighting wrong coords | Highlights on wrong hexes | Resolve theater coords correctly |
+| Pending combat showed "DEFEAT" | Misleading UI | Show "ATTACK SUBMITTED — awaiting approval" for pending |
+| Air/bombardment/missile required dice input | Unnecessary moderator friction | Only ground_attack and naval_combat use dice; others probability-based |
+
+---
+
+*This audit should be reviewed at the start of each M6 sprint. It defines the scope of M6 as much as the UI does.*

@@ -117,6 +117,8 @@
           }
         });
         state.units = un;
+        // Load occupation from DB (authoritative — respects basing rights)
+        await loadHexControl();
       } else {
         state.deployments = { rows: [], by_hex: {} };
         state.units = { units: [] };
@@ -319,7 +321,12 @@
 
         const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
         poly.setAttribute('points', hexPoints(center.x, center.y, r));
-        poly.setAttribute('fill', colorFor(hex.owner));
+        if (hex.occupied_by) {
+          const patId = ensurePattern(svg, hex.owner, hex.occupied_by);
+          poly.setAttribute('fill', `url(#${patId})`);
+        } else {
+          poly.setAttribute('fill', colorFor(hex.owner));
+        }
         let cls = 'hex';
         if (hex.owner === 'sea') cls += ' sea';
         if (theaterKey) cls += ' theater-link';
@@ -858,6 +865,96 @@
       else out[key].push({ country_id: u.country_id, unit_type: u.unit_type, count: 1 });
     }
     return out;
+  }
+
+  /**
+   * Load persisted hex occupation from DB (hex_control table).
+   * Sets occupied_by on grid cells from authoritative DB state.
+   */
+  async function loadHexControl() {
+    if (!SIM_RUN_ID_PARAM) return;
+    try {
+      const resp = await fetch(`/api/sim/${SIM_RUN_ID_PARAM}/map/hex-control`);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      (data.hexes || []).forEach(h => {
+        // Apply to global grid
+        if (state.global && state.global.grid) {
+          const rIdx = h.global_row - 1, cIdx = h.global_col - 1;
+          if (state.global.grid[rIdx] && state.global.grid[rIdx][cIdx]) {
+            state.global.grid[rIdx][cIdx].occupied_by = h.controlled_by;
+          }
+        }
+        // Apply to theater grid
+        if (h.theater && h.theater_row && state.theaters[h.theater] && state.theaters[h.theater].grid) {
+          const trIdx = h.theater_row - 1, tcIdx = h.theater_col - 1;
+          if (state.theaters[h.theater].grid[trIdx] && state.theaters[h.theater].grid[trIdx][tcIdx]) {
+            state.theaters[h.theater].grid[trIdx][tcIdx].occupied_by = h.controlled_by;
+          }
+        }
+      });
+    } catch (e) { console.debug('hex-control load failed:', e); }
+  }
+
+  /**
+   * Derive occupied_by on hex grid from unit positions.
+   * A hex is "occupied" when a country has active ground units on a hex
+   * whose owner is a different country (and not 'sea').
+   * Updates grid cells in-place for both global and theater views.
+   */
+  function deriveOccupation() {
+    const units = currentUnits();
+    if (!units || !units.length) return;
+
+    // Build occupier map: hex → strongest foreign ground presence
+    function applyToGrid(gridData, getCoords) {
+      if (!gridData || !gridData.grid) return;
+      // Clear previous occupation
+      for (const row of gridData.grid) {
+        for (const cell of row) {
+          if (cell) cell.occupied_by = null;
+        }
+      }
+      // Group ground units by hex
+      const groundByHex = {};
+      for (const u of units) {
+        if (u.status !== 'active' || u.unit_type !== 'ground') continue;
+        const coords = getCoords(u);
+        if (!coords) continue;
+        const key = `${coords[0]},${coords[1]}`;
+        groundByHex[key] = groundByHex[key] || {};
+        groundByHex[key][u.country_id] = (groundByHex[key][u.country_id] || 0) + 1;
+      }
+      // Mark occupation
+      for (const [key, countries] of Object.entries(groundByHex)) {
+        const [r, c] = key.split(',').map(Number);
+        const rIdx = r - 1, cIdx = c - 1;
+        if (!gridData.grid[rIdx] || !gridData.grid[rIdx][cIdx]) continue;
+        const cell = gridData.grid[rIdx][cIdx];
+        if (cell.owner === 'sea') continue;
+        // Find strongest foreign country on this hex
+        let occupier = null, maxCount = 0;
+        for (const [cc, count] of Object.entries(countries)) {
+          if (cc !== cell.owner && count > maxCount) {
+            occupier = cc;
+            maxCount = count;
+          }
+        }
+        if (occupier) cell.occupied_by = occupier;
+      }
+    }
+
+    // Apply to global grid
+    applyToGrid(state.global, u => (u.global_row != null ? [u.global_row, u.global_col] : null));
+
+    // Apply to theater grids
+    for (const tName of ['eastern_ereb', 'mashriq']) {
+      if (state.theaters[tName]) {
+        applyToGrid(state.theaters[tName], u => (
+          u.theater === tName && u.theater_row != null ? [u.theater_row, u.theater_col] : null
+        ));
+      }
+    }
   }
 
   // ---------- Interaction / Inspector ----------
@@ -2117,7 +2214,7 @@
             }
           });
           state.units = un;
-          renderView(state.view);
+          loadHexControl().then(() => renderView(state.view));
         });
       }
     }

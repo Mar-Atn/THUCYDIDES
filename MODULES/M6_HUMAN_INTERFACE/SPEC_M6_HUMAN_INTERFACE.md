@@ -1,7 +1,7 @@
 # M6 — Human Participant Interface SPEC
 
-**Version:** 1.0 | **Date:** 2026-04-17
-**Status:** DRAFT — Marat review before coding
+**Version:** 1.1 | **Date:** 2026-04-17
+**Status:** DRAFT — Marat review before coding. **Sprint 6.7 (military map UX) substantially complete.**
 **Dependencies:** M4 (sim runner), M3 (data), M10.1 (auth), M8 (map embed)
 
 ---
@@ -110,8 +110,7 @@ Right side (persistent):
 │  · Call Organization Meeting (i)                              │
 ├──────────────────────────────────────────────────────────────┤
 │ MILITARY                                                      │
-│  · Ground Attack (i)  · Air Strike (i)  · Naval Combat (i)  │
-│  · Naval Bombardment (i)  · Missile Launch (i)               │
+│  · ★ ATTACK (i) — unified map-based combat                  │
 │  · Naval Blockade (i)  · Move Units (inter-round)            │
 │  · Martial Law (i)  · Nuclear Test (i)                       │
 ├──────────────────────────────────────────────────────────────┤
@@ -120,6 +119,7 @@ Right side (persistent):
 │  · Set OPEC Production (i)                                    │
 ├──────────────────────────────────────────────────────────────┤
 │ INTERNATIONAL AFFAIRS                                         │
+│  · Declare War (i)                                            │
 │  · Propose Transaction (i)  · Propose Agreement (i)          │
 ├──────────────────────────────────────────────────────────────┤
 │ SECRET OPS                                                    │
@@ -186,13 +186,47 @@ Right side (persistent):
 - Submit button + cancel (back to list)
 - Confirmation dialog for irreversible actions
 
-### Type B: Map-based (ground attack, air strike, naval combat, move units)
-- Full-screen map embed
-- Click source hex (your units) → click target hex (adjacent enemy)
-- Unit selection panel (which units to send)
-- Adjacency validation (highlighted valid targets)
-- Submit button overlaid on map
-- Per CONTRACT_GROUND_COMBAT: source → target, unit selection, chain option
+### Type B: Map-based — Unified Attack System (BUILT 2026-04-17)
+
+**Single "Attack" button** replaces 5 individual military action buttons (ground_attack, air_strike, naval_combat, naval_bombardment, launch_missile_conventional). Combat type is determined automatically from the unit types involved.
+
+**Flow:**
+1. Click "Attack" → map enters attack mode
+2. Click source hex (your units) → unit selection panel appears
+3. Select unit(s) — including embarked units (air from carrier = air strike, ground from carrier = landing)
+4. Valid target hexes highlighted (red glow) based on `ATTACK_RANGE` per unit type + `hex_range()` BFS adjacency
+5. Click target hex → combat preview: modifiers + win probability shown
+6. Confirm → action submitted → pending moderator approval (or auto-resolved if auto-attack enabled)
+7. "ATTACK SUBMITTED — awaiting moderator approval" state shown
+
+**Map integration:**
+- Works on global map AND theater maps (Eastern Ereb, Mashriq)
+- Theater switcher buttons: Global Map / Eastern Ereb / Mashriq
+- Theater-level adjacency computed in theater coordinates (10x10), not global
+- `postMessage` protocol between React app and map iframe:
+  - `hex-click` — hex selected by user
+  - `highlight-hexes` — show valid targets (red glow) or source (blue glow)
+  - `clear-highlights` — reset map highlights
+  - `navigate-theater` — switch theater view
+  - `refresh-units` — reload unit positions after combat
+
+**Combat types (all wired engine → dispatcher → DB losses):**
+- Ground Attack: RISK dice, 1-3 units, iterative exchanges
+- Air Strike: 12%/6% hit probability, 15% downed by AD
+- Naval Combat: 1v1 dice, ties → defender wins
+- Naval Bombardment: 10% per naval unit
+- Missile Launch: 80% accuracy, AD halving, missile consumed
+
+**Moderator controls for combat:**
+- Auto-Attack toggle (red pulsing when active) — combat skips moderator confirmation
+- Dice Mode toggle (red pulsing when active) — ground/naval pause for physical dice entry
+- Combat pending cards with expandable dice input (ground: 3 atk + 2 def dice, naval: 1+1 dice)
+- Only ground_attack and naval_combat use dice; air/bombardment/missile are probability-based
+
+**APIs:**
+- `GET /api/sim/{id}/attack/valid-targets?hex_row=&hex_col=&theater=` — BFS adjacency targets
+- `GET /api/sim/{id}/attack/preview` — modifiers + win probability before confirming
+- `GET /api/sim/{id}/state` — public (no auth), used by map iframe
 
 ---
 
@@ -310,7 +344,7 @@ Every action wired to contract spec. See `MODULES/ACTION_CONTRACT_AUDIT.md` for 
 | **6.4** | Country view: own country confidential data |
 | **6.5** | Actions catalog: all available actions listed with (i) descriptions |
 | **6.6** | Simple actions: public_statement, set_budget, set_tariffs, set_sanctions, set_opec |
-| **6.7** | Military actions: ground_attack (full contract), air_strike, naval_combat — MAP INTERFACE |
+| **6.7** | ~~Military actions~~ **DONE 2026-04-17**: Unified Attack system (map UX, 5 combat types, theater adjacency, postMessage protocol, moderator auto-attack/dice mode, combat preview). Declare War action. |
 | **6.8** | Diplomatic + Economic: agreements lifecycle, transactions lifecycle |
 | **6.9** | Political + Covert: arrest, assassination, change_leader, covert_ops, elections |
 | **6.10** | Incoming requests: "Actions Expected Now" system, notifications |

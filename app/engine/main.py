@@ -164,6 +164,23 @@ async def get_map_units(sim_id: str):
     return {"units": units, "count": len(units), "active": active, "mapped": mapped}
 
 
+@app.get("/api/sim/{sim_id}/map/hex-control")
+async def get_hex_control(sim_id: str):
+    """Get all occupied hexes for the map renderer.
+
+    Returns list of hexes where controlled_by differs from owner.
+    Used by map-core.js to render occupation stripes.
+    """
+    from engine.services.supabase import get_client
+    client = get_client()
+    rows = client.table("hex_control") \
+        .select("global_row, global_col, theater, theater_row, theater_col, owner, controlled_by") \
+        .eq("sim_run_id", sim_id) \
+        .not_.is_("controlled_by", "null") \
+        .execute().data or []
+    return {"hexes": rows, "count": len(rows)}
+
+
 @app.get("/api/sim/{sim_id}/map/combat-events")
 async def get_map_combat_events(sim_id: str, round_num: int = 1):
     """Get combat events with hex coordinates for blast markers on the map."""
@@ -221,6 +238,32 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
     return {"events": combat, "count": len(combat)}
 
 
+def _append_targets(targets: list, utype: str, enemies: list, row: int, col: int, theater_info: dict, is_sea: bool = False):
+    """Append valid attack targets based on attacker unit type."""
+    if utype == "ground":
+        if is_sea:
+            return  # ground cannot enter sea hexes
+        ground_enemies = [e for e in enemies if e["unit_type"] == "ground"]
+        non_ground = [e for e in enemies if e["unit_type"] != "ground" and e["unit_type"] != "naval"]  # can't capture naval
+        if ground_enemies:
+            # Contested — ground combat (non-ground captured on victory)
+            targets.append({"row": row, "col": col, **theater_info, "attack_type": "ground_attack", "enemies": enemies})
+        elif non_ground:
+            # Undefended — walk in, capture non-ground units as trophies
+            targets.append({"row": row, "col": col, **theater_info, "attack_type": "ground_move", "enemies": non_ground})
+    elif utype == "tactical_air":
+        targets.append({"row": row, "col": col, **theater_info, "attack_type": "air_strike", "enemies": enemies})
+    elif utype == "naval":
+        naval = [e for e in enemies if e["unit_type"] == "naval"]
+        ground = [e for e in enemies if e["unit_type"] == "ground"]
+        if naval:
+            targets.append({"row": row, "col": col, **theater_info, "attack_type": "naval_combat", "enemies": naval})
+        if ground:
+            targets.append({"row": row, "col": col, **theater_info, "attack_type": "naval_bombardment", "enemies": ground})
+    elif utype == "strategic_missile":
+        targets.append({"row": row, "col": col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies})
+
+
 @app.get("/api/sim/{sim_id}/attack/valid-targets")
 async def get_valid_attack_targets(
     sim_id: str,
@@ -241,7 +284,7 @@ async def get_valid_attack_targets(
     Response: {source, unit, attack_type, targets: [{row, col, enemies: [...]}]}
     """
     from engine.services.supabase import get_client
-    from engine.config.map_config import hex_range, ATTACK_RANGE
+    from engine.config.map_config import hex_range, ATTACK_RANGE, is_sea_hex
 
     client = get_client()
 
@@ -277,76 +320,84 @@ async def get_valid_attack_targets(
     if src_row is None or src_col is None:
         raise HTTPException(status_code=400, detail="Unit has no map position (and no carrier found)")
 
-    # Check air unit already attacked this round
-    if utype == "tactical_air":
-        run = client.table("sim_runs").select("current_round").eq("id", sim_id).limit(1).execute().data
-        round_num = run[0]["current_round"] if run else 0
-        already = client.table("observatory_events") \
-            .select("id") \
-            .eq("sim_run_id", sim_id) \
-            .eq("round_num", round_num) \
-            .eq("event_type", "air_strike") \
-            .execute().data or []
-        # Check if THIS unit was in any air strike this round
-        for evt in already:
-            pass  # TODO: check payload for unit_id match — for now allow
-        # Simplified: check if country already used air from this hex
-        # Full tracking deferred to combat resolution
-
-    # Get attack range
+    # Get attack range and compute reachable hexes (pure math, instant)
     attack_range = ATTACK_RANGE.get(utype, 1)
     from engine.config.map_config import THEATERS
 
-    # Theater mode: compute adjacency in theater coordinates (10x10)
     use_theater = theater and unit.get("theater") == theater and unit.get("theater_row") is not None
+
     if use_theater:
         t_row = unit["theater_row"]
         t_col = unit["theater_col"]
         t_info = THEATERS.get(theater, {"rows": 10, "cols": 10})
-        reachable_theater = hex_range(t_row, t_col, attack_range, t_info["rows"], t_info["cols"])
+        reachable = hex_range(t_row, t_col, attack_range, t_info["rows"], t_info["cols"])
+    else:
+        reachable = hex_range(src_row, src_col, attack_range)
 
-        # Load enemies in this theater
-        all_enemies = client.table("deployments") \
-            .select("unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col") \
+    # Load enemies — filter by theater or sim, then intersect with reachable set in Python
+    sel_cols = "unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col"
+    reachable_set = set(reachable)
+    if use_theater:
+        all_in_theater = client.table("deployments").select(sel_cols) \
             .eq("sim_run_id", sim_id).eq("theater", theater) \
             .neq("country_id", country).eq("unit_status", "active") \
             .execute().data or []
+        all_enemies = [e for e in all_in_theater if (e.get("theater_row"), e.get("theater_col")) in reachable_set]
+    else:
+        all_in_sim = client.table("deployments").select(sel_cols) \
+            .eq("sim_run_id", sim_id) \
+            .neq("country_id", country).eq("unit_status", "active") \
+            .execute().data or []
+        all_enemies = [e for e in all_in_sim if (e.get("global_row"), e.get("global_col")) in reachable_set]
 
-        enemy_by_theater_hex: dict[tuple[int, int], list[dict]] = {}
+    # For ground units: also load own units at reachable hexes (to exclude own-occupied hexes for advance)
+    own_hexes: set[tuple[int, int]] = set()
+    if utype == "ground":
+        if use_theater:
+            own_in_theater = client.table("deployments").select("theater_row, theater_col") \
+                .eq("sim_run_id", sim_id).eq("theater", theater) \
+                .eq("country_id", country).eq("unit_status", "active").execute().data or []
+            own_hexes = {(u["theater_row"], u["theater_col"]) for u in own_in_theater if u.get("theater_row")}
+        else:
+            own_in_sim = client.table("deployments").select("global_row, global_col") \
+                .eq("sim_run_id", sim_id).eq("country_id", country).eq("unit_status", "active").execute().data or []
+            own_hexes = {(u["global_row"], u["global_col"]) for u in own_in_sim if u.get("global_row")}
+
+    # Group enemies by hex
+    targets = []
+    if use_theater:
+        enemy_by_hex: dict[tuple[int, int], list[dict]] = {}
         for e in all_enemies:
-            tr, tc = e.get("theater_row"), e.get("theater_col")
-            if tr is None or tc is None:
-                continue
-            enemy_by_theater_hex.setdefault((tr, tc), []).append(e)
-
-        targets = []
-        for r, c in reachable_theater:
-            enemies_here = enemy_by_theater_hex.get((r, c), [])
-            if not enemies_here:
-                continue
+            enemy_by_hex.setdefault((e.get("theater_row", 0), e.get("theater_col", 0)), []).append(e)
+        for r, c in reachable:
+            enemies_here = enemy_by_hex.get((r, c), [])
             theater_info = {"theater": theater, "theater_row": r, "theater_col": c}
-            # Use global coords from first enemy for engine dispatch
-            sample = enemies_here[0]
-            g_row = sample.get("global_row", src_row)
-            g_col = sample.get("global_col", src_col)
+            if enemies_here:
+                sample = enemies_here[0]
+                g_row = sample.get("global_row", src_row)
+                g_col = sample.get("global_col", src_col)
+                _append_targets(targets, utype, enemies_here, g_row, g_col, theater_info, is_sea=is_sea_hex(r, c, theater))
+            elif utype == "ground" and (r, c) not in own_hexes and not is_sea_hex(r, c, theater):
+                # Empty land hex — ground can advance (no combat)
+                targets.append({"row": src_row, "col": src_col, **theater_info, "attack_type": "ground_move", "enemies": []})
+    else:
+        enemy_by_hex = {}
+        for e in all_enemies:
+            enemy_by_hex.setdefault((e.get("global_row", 0), e.get("global_col", 0)), []).append(e)
+        for r, c in reachable:
+            enemies_here = enemy_by_hex.get((r, c), [])
+            if enemies_here:
+                sample = enemies_here[0]
+                theater_info = {}
+                if sample.get("theater"):
+                    theater_info = {"theater": sample["theater"], "theater_row": sample.get("theater_row"), "theater_col": sample.get("theater_col")}
+                _append_targets(targets, utype, enemies_here, r, c, theater_info, is_sea=is_sea_hex(r, c))
+            elif utype == "ground" and (r, c) not in own_hexes and not is_sea_hex(r, c):
+                # Empty land hex — ground can advance
+                targets.append({"row": r, "col": c, "attack_type": "ground_move", "enemies": []})
 
-            if utype == "ground":
-                valid = [e for e in enemies_here if e["unit_type"] == "ground"]
-                if valid:
-                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "ground_attack", "enemies": valid})
-            elif utype == "tactical_air":
-                targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "air_strike", "enemies": enemies_here})
-            elif utype == "naval":
-                naval_enemies = [e for e in enemies_here if e["unit_type"] == "naval"]
-                ground_enemies = [e for e in enemies_here if e["unit_type"] == "ground"]
-                if naval_enemies:
-                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "naval_combat", "enemies": naval_enemies})
-                if ground_enemies:
-                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "naval_bombardment", "enemies": ground_enemies})
-            elif utype == "strategic_missile":
-                targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies_here})
-
-        # Friendlies at same theater cell
+    # Friendlies at source (single query)
+    if use_theater:
         friendlies_at_source = client.table("deployments") \
             .select("unit_id, unit_type") \
             .eq("sim_run_id", sim_id).eq("country_id", country) \
@@ -354,49 +405,6 @@ async def get_valid_attack_targets(
             .in_("unit_status", ["active", "embarked"]) \
             .execute().data or []
     else:
-        # Global mode: compute adjacency in global coordinates
-        reachable = hex_range(src_row, src_col, attack_range)
-
-        all_enemies = client.table("deployments") \
-            .select("unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col") \
-            .eq("sim_run_id", sim_id) \
-            .neq("country_id", country) \
-            .eq("unit_status", "active") \
-            .execute().data or []
-
-        enemy_by_hex: dict[tuple[int, int], list[dict]] = {}
-        for e in all_enemies:
-            er, ec = e.get("global_row"), e.get("global_col")
-            if er is None or ec is None:
-                continue
-            enemy_by_hex.setdefault((er, ec), []).append(e)
-
-        targets = []
-        for r, c in reachable:
-            enemies_here = enemy_by_hex.get((r, c), [])
-            if not enemies_here:
-                continue
-            sample = enemies_here[0]
-            theater_info = {}
-            if sample.get("theater"):
-                theater_info = {"theater": sample["theater"], "theater_row": sample.get("theater_row"), "theater_col": sample.get("theater_col")}
-
-            if utype == "ground":
-                valid = [e for e in enemies_here if e["unit_type"] == "ground"]
-                if valid:
-                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "ground_attack", "enemies": valid})
-            elif utype == "tactical_air":
-                targets.append({"row": r, "col": c, **theater_info, "attack_type": "air_strike", "enemies": enemies_here})
-            elif utype == "naval":
-                naval_enemies = [e for e in enemies_here if e["unit_type"] == "naval"]
-                ground_enemies = [e for e in enemies_here if e["unit_type"] == "ground"]
-                if naval_enemies:
-                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "naval_combat", "enemies": naval_enemies})
-                if ground_enemies:
-                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "naval_bombardment", "enemies": ground_enemies})
-            elif utype == "strategic_missile":
-                targets.append({"row": r, "col": c, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies_here})
-
         friendlies_at_source = client.table("deployments") \
             .select("unit_id, unit_type") \
             .eq("sim_run_id", sim_id).eq("country_id", country) \
@@ -510,7 +518,11 @@ async def get_attack_preview(
 
     # Estimate win probability
     win_pct = 50  # base
-    if attack_type == "ground_attack":
+    if attack_type == "ground_move":
+        win_pct = 100  # unopposed advance
+    elif attack_type == "ground_attack" and def_count == 0:
+        win_pct = 100  # no defenders
+    elif attack_type == "ground_attack":
         # RISK dice: documented rates from contract
         # No mods: ~42% attacker. Def+1: ~28%. Def+2: ~17%. Atk-1 + Def+2: ~8%
         net_mod = atk_total - def_total  # positive favors attacker
@@ -1100,6 +1112,7 @@ COMBAT_DICE_ACTIONS = {
 ACTION_CATEGORIES: dict[str, str] = {
     # Military
     "ground_attack": "military",
+    "ground_move": "military",
     "air_strike": "military",
     "naval_combat": "military",
     "naval_bombardment": "military",
@@ -1185,12 +1198,16 @@ async def submit_action(
     role = role_check.data[0]
 
     # 3. Validate role has this action type (check role_actions table)
+    # ground_move is authorized by ground_attack permission (same capability)
+    check_action = body.action_type
+    if check_action == "ground_move":
+        check_action = "ground_attack"
     action_check = (
         client.table("role_actions")
         .select("id")
         .eq("sim_run_id", sim_id)
         .eq("role_id", body.role_id)
-        .eq("action_id", body.action_type)
+        .eq("action_id", check_action)
         .execute()
     )
     if not action_check.data:

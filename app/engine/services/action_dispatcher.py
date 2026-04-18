@@ -20,6 +20,27 @@ from engine.services.common import get_scenario_id, write_event
 logger = logging.getLogger(__name__)
 
 
+def _update_hex_control(
+    client, sim_run_id: str, row: int, col: int,
+    owner: str, controlled_by: str, round_num: int, action: str,
+    theater: str | None = None, theater_row: int | None = None, theater_col: int | None = None,
+) -> None:
+    """Record hex occupation change in hex_control table (upsert)."""
+    client.table("hex_control").upsert({
+        "sim_run_id": sim_run_id,
+        "global_row": row,
+        "global_col": col,
+        "owner": owner,
+        "controlled_by": controlled_by if controlled_by != owner else None,
+        "captured_round": round_num,
+        "captured_by_action": action,
+        "theater": theater,
+        "theater_row": theater_row,
+        "theater_col": theater_col,
+        "updated_at": "now()",
+    }, on_conflict="sim_run_id,global_row,global_col").execute()
+
+
 def dispatch_action(
     sim_run_id: str,
     round_num: int,
@@ -67,6 +88,9 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     # writes results back. Action payload specifies WHO attacks WHERE.
     if action_type == "ground_attack":
         return _resolve_combat(sim_run_id, round_num, "ground", action)
+
+    if action_type == "ground_move":
+        return _ground_advance(sim_run_id, round_num, action)
 
     if action_type == "air_strike":
         return _resolve_combat(sim_run_id, round_num, "air", action)
@@ -330,7 +354,36 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             # Only apply losses to ground deployment rows
             ground_atk_deps = [u for u in atk_units if u["unit_type"] in GROUND_TYPES]
             ground_def_deps = [u for u in def_units if u["unit_type"] in GROUND_TYPES]
-            return _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, hex_label, combat_type)
+            combat_result = _apply_combat_losses(client, sim_run_id, result.__dict__, ground_atk_deps, ground_def_deps, hex_label, combat_type)
+
+            # If attacker won: capture non-ground enemy units as trophies
+            if combat_result.get("attacker_won"):
+                non_ground_def = [u for u in def_units if u["unit_type"] not in GROUND_TYPES]
+                captured = []
+                for dep in non_ground_def:
+                    client.table("deployments").update({
+                        "country_id": attacker,
+                        "unit_status": "reserve",
+                        "global_row": None, "global_col": None,
+                        "theater": None, "theater_row": None, "theater_col": None,
+                        "embarked_on": None,
+                    }).eq("id", dep["id"]).execute()
+                    captured.append({"unit_id": dep.get("unit_id") or dep["id"], "type": dep["unit_type"],
+                                     "from": dep["country_id"]})
+                if captured:
+                    cap_desc = ", ".join(f"{c['type']} from {c['from']}" for c in captured)
+                    combat_result["captured"] = captured
+                    combat_result["narrative"] += f" | Captured: {cap_desc}"
+                    logger.info("Ground victory at %s: captured %d trophies", hex_label, len(captured))
+
+                # Record hex occupation
+                from engine.config.map_config import hex_owner as get_hex_owner
+                owner = get_hex_owner(target_row, target_col)
+                if owner != "sea" and owner != attacker:
+                    _update_hex_control(client, sim_run_id, target_row, target_col,
+                                        owner, attacker, round_num, "ground_attack")
+
+            return combat_result
 
         if combat_type == "air":
             from engine.engines.military import resolve_air_strike
@@ -537,6 +590,116 @@ def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
             action.get("candidate", ""))
 
     return {"success": False, "narrative": f"Unknown covert op_type: {op_type}"}
+
+
+def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
+    """Move ground units to an adjacent hex — capture any unprotected non-ground enemy units.
+
+    CONTRACT_GROUND_COMBAT §unattended:
+    - No enemy ground → walk in without dice
+    - Non-ground enemies (air, AD, missiles) become attacker's RESERVE (trophies)
+    - Original unit type preserved
+    """
+    client = get_client()
+    country = action.get("country_code", "")
+    target_row = action.get("target_row")
+    target_col = action.get("target_col")
+    unit_codes = action.get("attacker_unit_codes") or []
+    if action.get("attacker_unit_code"):
+        unit_codes = [action["attacker_unit_code"]]
+
+    if not unit_codes or target_row is None or target_col is None:
+        return {"success": False, "narrative": "Missing units or target hex"}
+
+    # Load attacker units (active or embarked — landing from carrier)
+    units = client.table("deployments").select("id, unit_id, global_row, global_col, theater, theater_row, theater_col, unit_status, embarked_on") \
+        .eq("sim_run_id", sim_run_id).eq("country_id", country) \
+        .in_("unit_status", ["active", "embarked"]).in_("unit_id", unit_codes).execute().data or []
+
+    if not units:
+        return {"success": False, "narrative": "Units not found"}
+
+    # Resolve theater target coords if provided
+    theater_row = action.get("theater_row")
+    theater_col = action.get("theater_col")
+    theater = action.get("theater") or units[0].get("theater")
+
+    # Check for non-ground enemy units at target hex (trophies to capture)
+    enemy_at_target = client.table("deployments") \
+        .select("id, unit_id, unit_type, country_id") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("global_row", target_row).eq("global_col", target_col) \
+        .neq("country_id", country).eq("unit_status", "active") \
+        .execute().data or []
+
+    # Capture non-ground enemies: change owner to attacker, set to reserve
+    captured = []
+    for enemy in enemy_at_target:
+        if enemy["unit_type"] != "ground":
+            client.table("deployments").update({
+                "country_id": country,
+                "unit_status": "reserve",
+                "global_row": None, "global_col": None,
+                "theater": None, "theater_row": None, "theater_col": None,
+                "embarked_on": None,
+            }).eq("id", enemy["id"]).execute()
+            captured.append({"unit_id": enemy["unit_id"], "type": enemy["unit_type"], "from": enemy["country_id"]})
+
+    # Move attacker units to target hex (disembark if embarked)
+    for u in units:
+        update: dict = {
+            "global_row": target_row, "global_col": target_col,
+            "unit_status": "active", "embarked_on": None,
+        }
+        if theater_row and theater_col:
+            update["theater_row"] = theater_row
+            update["theater_col"] = theater_col
+        client.table("deployments").update(update).eq("id", u["id"]).execute()
+
+    # Build narrative
+    parts = [f"{country} advances {len(units)} unit(s) to ({target_row},{target_col})"]
+    if captured:
+        cap_desc = ", ".join(f"{c['type']} from {c['from']}" for c in captured)
+        parts.append(f"Captured: {cap_desc}")
+
+    # Write event
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(
+        client, sim_run_id, scenario_id, round_num,
+        country, "ground_move",
+        " | ".join(parts),
+        {"units": unit_codes, "target_row": target_row, "target_col": target_col,
+         "captured": captured},
+        category="military", role_name=action.get("role_id"),
+    )
+
+    # Record hex occupation (only if this is foreign territory, not basing)
+    from engine.config.map_config import hex_owner as get_hex_owner
+    owner = get_hex_owner(target_row, target_col)
+    if owner != "sea" and owner != country:
+        # Check if we have basing rights (guests don't occupy)
+        has_basing = client.table("relationships") \
+            .select("basing_rights_a_to_b,basing_rights_b_to_a") \
+            .eq("sim_run_id", sim_run_id) \
+            .or_(f"and(from_country_id.eq.{owner},to_country_id.eq.{country}),and(from_country_id.eq.{country},to_country_id.eq.{owner})") \
+            .limit(1).execute().data
+        is_guest = False
+        if has_basing:
+            r = has_basing[0]
+            is_guest = r.get("basing_rights_a_to_b") or r.get("basing_rights_b_to_a")
+        if not is_guest:
+            _update_hex_control(client, sim_run_id, target_row, target_col,
+                                owner, country, round_num, "ground_move",
+                                theater, theater_row, theater_col)
+
+    logger.info("[dispatch] %s advances %d units to (%s,%s), captured %d trophies",
+                country, len(units), target_row, target_col, len(captured))
+    return {
+        "success": True, "attacker_won": True,
+        "narrative": " | ".join(parts),
+        "attacker_losses": [], "defender_losses": [],
+        "captured": captured,
+    }
 
 
 def _declare_war(sim_run_id: str, round_num: int, country_code: str, role_id: str, target_country: str) -> dict:
