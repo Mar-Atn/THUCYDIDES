@@ -830,7 +830,12 @@
   // Return the active list of units (editable copy in edit mode, raw otherwise).
   function currentUnits() {
     if (state.editMode && state.editableUnits) return state.editableUnits;
-    return (state.units && state.units.units) || [];
+    const all = (state.units && state.units.units) || [];
+    // Filter out temporarily hidden units (withdrawn but not yet submitted)
+    if (state._hiddenUnits && state._hiddenUnits.size > 0) {
+      return all.filter(u => !state._hiddenUnits.has(u.unit_id));
+    }
+    return all;
   }
 
   // Aggregate active units onto theater cells by (theater_row, theater_col).
@@ -2236,6 +2241,17 @@
     }
     if (msg.type === 'navigate-theater') {
       renderView(msg.theater || 'global');
+    }
+    if (msg.type === 'hide-unit') {
+      state._hiddenUnits = state._hiddenUnits || new Set();
+      state._hiddenUnits.add(msg.unit_id);
+      renderView(state.view);
+    }
+    if (msg.type === 'show-unit') {
+      if (state._hiddenUnits) {
+        state._hiddenUnits.delete(msg.unit_id);
+        renderView(state.view);
+      }
     }
     if (msg.type === 'refresh-units') {
       // Re-fetch units from API and re-render

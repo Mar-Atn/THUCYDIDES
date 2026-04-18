@@ -2458,7 +2458,8 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         headers: token ? {'Authorization':`Bearer ${token}`} : {},
       })
       if (!resp.ok) throw new Error('Failed to load units')
-      const data = (await resp.json()).data || await resp.json()
+      const json = await resp.json()
+      const data = json.data || json
       setActiveUnits(data.active ?? [])
       setReserveUnits(data.reserve ?? [])
       setEmbarkedUnits(data.embarked ?? [])
@@ -2507,13 +2508,20 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const withdrawUnit = (u: {unit_id:string;unit_type:string}) => {
     setMoves(prev => [...prev, {unit_id: u.unit_id, unit_type: u.unit_type, action: 'withdraw'}])
     setHexUnits(prev => prev.filter(x => x.unit_id !== u.unit_id))
-    // Auto-switch to deploy mode with this unit type ready
+    // Hide unit on map
+    mapRef.current?.contentWindow?.postMessage({type: 'hide-unit', unit_id: u.unit_id}, '*')
+    // Auto-switch to deploy mode with this unit ready
     setSelectedUnit({unit_id: u.unit_id, unit_type: u.unit_type})
     setMode('deploy')
   }
 
   const removeMove = (unitId: string) => {
+    const removed = moves.find(m => m.unit_id === unitId)
     setMoves(prev => prev.filter(m => m.unit_id !== unitId))
+    // If undoing a withdraw, show unit on map again
+    if (removed?.action === 'withdraw') {
+      mapRef.current?.contentWindow?.postMessage({type: 'show-unit', unit_id: unitId}, '*')
+    }
   }
 
   const handleSubmit = async () => {
