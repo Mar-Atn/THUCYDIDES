@@ -1338,9 +1338,11 @@ function MartialLawForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [error,setError]=useState<string|null>(null)
 
   useEffect(()=>{
-    // Check if already declared this sim
     supabase.from('countries').select('martial_law_declared').eq('sim_run_id',simId).eq('id',countryId).limit(1)
-      .then(({data})=>setAlreadyDeclared(data?.[0]?.martial_law_declared ?? false))
+      .then(({data, error: err})=>{
+        if (err) { console.warn('martial_law check error:', err); setAlreadyDeclared(false); return }
+        setAlreadyDeclared(data?.[0]?.martial_law_declared === true)
+      })
   },[simId,countryId])
 
   const handleDeclare = async () => {
@@ -1349,6 +1351,7 @@ function MartialLawForm({roleId,countryId,simId,onClose,onSubmitted}:{
     try {
       const res = await submitAction(simId,'martial_law',roleId,countryId,{})
       setResult(res)
+      setAlreadyDeclared(true)
     } catch(e) { setError(e instanceof Error ? e.message : 'Failed') }
     finally { setSubmitting(false) }
   }
@@ -1364,20 +1367,14 @@ function MartialLawForm({roleId,countryId,simId,onClose,onSubmitted}:{
         <div className="bg-card border border-border rounded-lg p-6">
           <p className="font-body text-body-sm text-text-secondary">Your country is not eligible for martial law declaration.</p>
         </div>
-      ) : alreadyDeclared ? (
-        <div className="bg-warning/5 border border-warning/20 rounded-lg p-6">
-          <p className="font-body text-body-sm text-warning font-medium">Martial law has already been declared this simulation.</p>
+      ) : alreadyDeclared === null ? (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <p className="font-body text-caption text-text-secondary">Loading...</p>
         </div>
-      ) : result ? (
-        <div className="bg-success/5 border border-success/20 rounded-lg p-6 space-y-2">
-          <h3 className="font-heading text-body-sm text-success font-bold uppercase">Martial Law Declared</h3>
-          <p className="font-body text-body-sm text-text-primary">{String(result.narrative??'')}</p>
-          <div className="font-body text-caption text-text-secondary space-y-1">
-            <div>Units spawned: <span className="text-action font-medium">{String(result.units_spawned??pool)} ground conscripts → reserve</span></div>
-            <div>Stability cost: <span className="text-danger font-medium">-1.0</span></div>
-            <div>War tiredness: <span className="text-warning font-medium">+1.0</span></div>
-          </div>
-          <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-2">← Return to Actions</button>
+      ) : alreadyDeclared || result ? (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <p className="font-body text-body-sm text-text-primary font-medium">Martial law declared.</p>
+          <p className="font-body text-caption text-text-secondary mt-1">{pool} conscript ground units mobilized to reserve.</p>
         </div>
       ) : (
         <div className="bg-card border border-border rounded-lg p-6 space-y-4">

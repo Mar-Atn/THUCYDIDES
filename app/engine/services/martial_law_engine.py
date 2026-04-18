@@ -64,7 +64,6 @@ def execute_martial_law(
         unit_id = f"{prefix}_conscript_{i:02d}"
         new_units.append({
             "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
             "unit_id": unit_id,
             "country_id": country_code,
             "unit_type": "ground",
