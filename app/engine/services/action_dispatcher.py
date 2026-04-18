@@ -69,6 +69,19 @@ def dispatch_action(
         logger.exception("[dispatch] %s failed: %s", action_type, e)
         result = {"success": False, "narrative": f"Engine error: {e}"}
 
+    # After any action that may destroy units, check blockade integrity
+    COMBAT_ACTIONS = {"ground_attack", "ground_move", "air_strike", "naval_combat",
+                      "naval_bombardment", "launch_missile_conventional"}
+    if action_type in COMBAT_ACTIONS and result.get("success"):
+        try:
+            from engine.services.blockade_engine import check_blockade_integrity
+            blockade_changes = check_blockade_integrity(sim_run_id)
+            if blockade_changes:
+                result["blockade_changes"] = blockade_changes
+                logger.info("[dispatch] Blockade integrity: %s", blockade_changes)
+        except Exception as e:
+            logger.warning("Blockade integrity check failed: %s", e)
+
     # Log to observatory
     _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result)
 
@@ -661,13 +674,6 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
 
     logger.info("Combat %s at %s: atk_losses=%d def_losses=%d (deleted %d rows)",
                 combat_type, hex_label, atk_total, def_total, deleted)
-
-    # Auto-check blockade integrity after combat losses
-    if deleted > 0:
-        from engine.services.blockade_engine import check_blockade_integrity
-        blockade_changes = check_blockade_integrity(sim_run_id)
-        if blockade_changes:
-            result["blockade_changes"] = blockade_changes
 
     return result
 

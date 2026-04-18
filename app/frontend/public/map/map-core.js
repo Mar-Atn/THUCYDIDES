@@ -913,18 +913,15 @@
     if (!SIM_RUN_ID_PARAM) return;
     state.activeBlockades = {};
     try {
-      const resp = await fetch(`/api/sim/${SIM_RUN_ID_PARAM}/blockades`);
+      const resp = await fetch(`/api/sim/${SIM_RUN_ID_PARAM}/map/blockades`);
       if (!resp.ok) return;
       const json = await resp.json();
-      const cps = json.data?.chokepoints || [];
-      cps.forEach(cp => {
-        if (cp.blockade && cp.blockade.status === 'active') {
-          // Store by hex coords (0-indexed for renderer)
-          state.activeBlockades[`${cp.hex[0]-1},${cp.hex[1]-1}`] = {
-            imposer: cp.blockade.imposer,
-            level: cp.blockade.level,
-          };
-        }
+      (json.blockades || []).forEach(b => {
+        // Store by hex coords (0-indexed for renderer)
+        state.activeBlockades[`${b.hex[0]-1},${b.hex[1]-1}`] = {
+          imposer: b.imposer,
+          level: b.level,
+        };
       });
     } catch (e) { console.debug('blockades load failed:', e); }
   }

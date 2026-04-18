@@ -181,6 +181,28 @@ async def get_hex_control(sim_id: str):
     return {"hexes": rows, "count": len(rows)}
 
 
+@app.get("/api/sim/{sim_id}/map/blockades")
+async def get_map_blockades(sim_id: str):
+    """Get active blockades for map rendering. Public — no auth needed."""
+    from engine.services.supabase import get_client
+    from engine.config.map_config import CHOKEPOINTS
+    client = get_client()
+    blockades = client.table("blockades").select("zone_id, imposer_country_id, level") \
+        .eq("sim_run_id", sim_id).eq("status", "active").execute().data or []
+    result = []
+    for b in blockades:
+        cp = CHOKEPOINTS.get(b["zone_id"])
+        if cp:
+            result.append({
+                "zone_id": b["zone_id"],
+                "name": cp["name"],
+                "hex": list(cp["hex"]),
+                "imposer": b["imposer_country_id"],
+                "level": b["level"],
+            })
+    return {"blockades": result, "count": len(result)}
+
+
 @app.get("/api/sim/{sim_id}/map/combat-events")
 async def get_map_combat_events(sim_id: str, round_num: int = 1):
     """Get combat events with hex coordinates for blast markers on the map."""

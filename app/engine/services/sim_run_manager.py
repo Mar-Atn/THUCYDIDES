@@ -282,7 +282,7 @@ def restart_simulation(sim_id: str) -> dict:
     _cleanup_runtime_data(client, sim_id, after_round=0)
 
     # 2. Delete tables that don't exist in template (runtime-created)
-    for table in ["agreements", "exchange_transactions", "hex_control"]:
+    for table in ["agreements", "exchange_transactions", "hex_control", "blockades"]:
         try:
             client.table(table).delete().eq("sim_run_id", sim_id).execute()
         except Exception as e:
