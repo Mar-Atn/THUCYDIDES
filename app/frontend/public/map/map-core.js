@@ -119,6 +119,8 @@
         state.units = un;
         // Load occupation from DB (authoritative — respects basing rights)
         await loadHexControl();
+        // Load active blockades for visual markers
+        await loadBlockades();
       } else {
         state.deployments = { rows: [], by_hex: {} };
         state.units = { units: [] };
@@ -339,14 +341,21 @@
       }
     }
 
-    // Chokepoints labels
+    // Chokepoints labels + blockade markers
     const cps = data.chokepoints || {};
     Object.keys(cps).forEach(k => {
       const cp = cps[k];
       const center = hexCenter(cp.row, cp.col, r);
-      // replace fill with cp styling
       const poly = svg.querySelector(`polygon[data-row="${cp.row}"][data-col="${cp.col}"]`);
-      if (poly) poly.classList.add('chokepoint');
+      if (poly) {
+        poly.classList.add('chokepoint');
+        // Active blockade visual
+        const bKey = `${cp.row},${cp.col}`;
+        if (state.activeBlockades && state.activeBlockades[bKey]) {
+          poly.classList.add('blockade-active');
+          if (state.activeBlockades[bKey].level === 'full') poly.classList.add('blockade-full');
+        }
+      }
       addText(svg, center.x, center.y - 2, cp.name.toUpperCase(), 'chokepoint-label');
     });
 
@@ -894,6 +903,30 @@
         }
       });
     } catch (e) { console.debug('hex-control load failed:', e); }
+  }
+
+  /**
+   * Load active blockades and store on state for rendering.
+   * Blockade hexes get a red border during render.
+   */
+  async function loadBlockades() {
+    if (!SIM_RUN_ID_PARAM) return;
+    state.activeBlockades = {};
+    try {
+      const resp = await fetch(`/api/sim/${SIM_RUN_ID_PARAM}/blockades`);
+      if (!resp.ok) return;
+      const json = await resp.json();
+      const cps = json.data?.chokepoints || [];
+      cps.forEach(cp => {
+        if (cp.blockade && cp.blockade.status === 'active') {
+          // Store by hex coords (0-indexed for renderer)
+          state.activeBlockades[`${cp.hex[0]-1},${cp.hex[1]-1}`] = {
+            imposer: cp.blockade.imposer,
+            level: cp.blockade.level,
+          };
+        }
+      });
+    } catch (e) { console.debug('blockades load failed:', e); }
   }
 
   /**
@@ -2214,7 +2247,7 @@
             }
           });
           state.units = un;
-          loadHexControl().then(() => renderView(state.view));
+          loadHexControl().then(() => loadBlockades()).then(() => renderView(state.view));
         });
       }
     }

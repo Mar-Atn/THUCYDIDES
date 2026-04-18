@@ -246,6 +246,20 @@ html, body {
   stroke-dasharray: 3 2;
 }
 
+/* Active blockade — bold red dashed border */
+.hex.blockade-active {
+  stroke: #EF4444 !important;
+  stroke-width: 3 !important;
+  stroke-dasharray: 6 3 !important;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.5));
+}
+
+/* Full blockade — solid red border */
+.hex.blockade-full {
+  stroke-dasharray: none !important;
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.7));
+}
+
 .unit-count-badge {
   font-family: var(--font-mono);
   font-size: 9px;
