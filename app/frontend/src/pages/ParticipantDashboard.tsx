@@ -831,6 +831,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'set_opec') return <CartelProductionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'propose_transaction') return <ProposeTransactionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'propose_agreement') return <ProposeAgreementForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'basing_rights') return <BasingRightsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -1132,6 +1133,158 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
       {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
         <p className="font-body text-body-sm text-success">{result}</p>
         <button onClick={onDone} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+      </div>}
+      {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+    </div>
+  )
+}
+
+/* ── Basing Rights Form ────────────────────────────────────────────────── */
+
+function BasingRightsForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [countries,setCountries]=useState<{id:string;sim_name:string;color_ui:string|null}[]>([])
+  const [weGrant,setWeGrant]=useState<string[]>([])   // countries we grant basing to
+  const [theyGrant,setTheyGrant]=useState<string[]>([]) // countries that grant us basing
+  const [foreignUnits,setForeignUnits]=useState<Record<string,number>>({}) // country → unit count on our soil
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+
+  useEffect(()=>{
+    supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
+      .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
+
+    // Load current basing rights from relationships
+    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+      .eq('sim_run_id',simId)
+      .or(`from_country_id.eq.${countryId},to_country_id.eq.${countryId}`)
+      .then(({data})=>{
+        const granted:string[]=[], received:string[]=[]
+        ;(data??[]).forEach((r:Record<string,unknown>)=>{
+          if(r.from_country_id===countryId && r.basing_rights_a_to_b) granted.push(r.to_country_id as string)
+          if(r.to_country_id===countryId && r.basing_rights_b_to_a) granted.push(r.from_country_id as string)
+          if(r.from_country_id===countryId && r.basing_rights_b_to_a) received.push(r.to_country_id as string)
+          if(r.to_country_id===countryId && r.basing_rights_a_to_b) received.push(r.from_country_id as string)
+        })
+        setWeGrant([...new Set(granted)])
+        setTheyGrant([...new Set(received)])
+      })
+
+    // Count foreign units on our territory (to block revocation)
+    supabase.from('deployments').select('country_id')
+      .eq('sim_run_id',simId).neq('country_id',countryId).eq('unit_status','active')
+      .then(({data})=>{
+        // We need to check which of these are on OUR hexes
+        // For simplicity, count all foreign active units (they could only be here via basing)
+        const counts:Record<string,number>={}
+        ;(data??[]).forEach((d:{country_id:string})=>{counts[d.country_id]=(counts[d.country_id]||0)+1})
+        setForeignUnits(counts)
+      })
+  },[simId,countryId])
+
+  const handleGrant = async (guestCountry:string) => {
+    if(!confirm(`Grant basing rights to ${guestCountry}? They will be able to place military units on your territory.`)) return
+    setSubmitting(true);setError(null)
+    try {
+      await submitAction(simId,'basing_rights',roleId,countryId,{
+        operation:'grant', guest_country:guestCountry,
+      })
+      setWeGrant(prev=>[...prev,guestCountry])
+      setResult(`Basing rights granted to ${guestCountry}`)
+    } catch(e){setError(e instanceof Error?e.message:'Failed')}
+    finally{setSubmitting(false)}
+  }
+
+  const handleRevoke = async (guestCountry:string) => {
+    const unitsPresent = foreignUnits[guestCountry]||0
+    if(unitsPresent>0) {
+      alert(`Cannot revoke basing rights from ${guestCountry} — they have ${unitsPresent} units on your territory. They must withdraw first.`)
+      return
+    }
+    if(!confirm(`Revoke basing rights from ${guestCountry}?`)) return
+    setSubmitting(true);setError(null)
+    try {
+      await submitAction(simId,'basing_rights',roleId,countryId,{
+        operation:'revoke', guest_country:guestCountry,
+      })
+      setWeGrant(prev=>prev.filter(c=>c!==guestCountry))
+      setResult(`Basing rights revoked from ${guestCountry}`)
+    } catch(e){setError(e instanceof Error?e.message:'Failed')}
+    finally{setSubmitting(false)}
+  }
+
+  const notGranted = countries.filter(c=>!weGrant.includes(c.id))
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Basing Rights</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* LEFT: Rights we grant */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-text-primary">We Grant Access To</h3>
+
+          {weGrant.length===0
+            ? <p className="font-body text-caption text-text-secondary bg-card border border-border rounded-lg p-4">No countries have basing rights on our territory.</p>
+            : <div className="bg-card border border-border rounded-lg divide-y divide-border">
+              {weGrant.map(cc=>{
+                const c=countries.find(x=>x.id===cc)
+                const units=foreignUnits[cc]||0
+                return <div key={cc} className="flex items-center gap-3 px-4 py-2">
+                  <div className="w-3 h-3 rounded" style={{backgroundColor:c?.color_ui??'#666'}}/>
+                  <span className="font-body text-body-sm text-text-primary flex-1">{c?.sim_name??cc}</span>
+                  {units>0&&<span className="font-body text-caption text-warning">{units} units present</span>}
+                  <button onClick={()=>handleRevoke(cc)} disabled={submitting||units>0}
+                    className={`font-body text-caption px-3 py-1 rounded transition-colors ${
+                      units>0?'text-text-secondary/30 cursor-not-allowed':'text-danger hover:bg-danger/10'
+                    }`}>Revoke</button>
+                </div>
+              })}
+            </div>
+          }
+
+          {/* Grant to new country */}
+          {notGranted.length>0&&<div className="bg-card border-2 border-action/20 rounded-lg p-4">
+            <h3 className="font-heading text-caption text-action uppercase tracking-wider mb-2">Grant Basing Rights</h3>
+            <div className="flex flex-wrap gap-2">
+              {notGranted.map(c=>
+                <button key={c.id} onClick={()=>handleGrant(c.id)} disabled={submitting}
+                  className="inline-flex items-center gap-1.5 font-body text-caption px-3 py-1.5 rounded border border-border text-text-secondary hover:border-action/30 hover:text-action transition-colors">
+                  <div className="w-2.5 h-2.5 rounded" style={{backgroundColor:c.color_ui??'#666'}}/>
+                  {c.sim_name}
+                </button>
+              )}
+            </div>
+          </div>}
+        </div>
+
+        {/* RIGHT: Rights we receive */}
+        <div className="space-y-3">
+          <h3 className="font-heading text-body-sm text-text-primary">We Have Access To</h3>
+          {theyGrant.length===0
+            ? <p className="font-body text-caption text-text-secondary bg-card border border-border rounded-lg p-4">No countries have granted us basing rights.</p>
+            : <div className="bg-card border border-border rounded-lg divide-y divide-border">
+              {theyGrant.map(cc=>{
+                const c=countries.find(x=>x.id===cc)
+                return <div key={cc} className="flex items-center gap-3 px-4 py-2">
+                  <div className="w-3 h-3 rounded" style={{backgroundColor:c?.color_ui??'#666'}}/>
+                  <span className="font-body text-body-sm text-text-primary">{c?.sim_name??cc}</span>
+                  <span className="font-body text-caption text-success ml-auto">Access granted</span>
+                </div>
+              })}
+            </div>
+          }
+        </div>
+      </div>
+
+      {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+        <p className="font-body text-body-sm text-success">{result}</p>
+        <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
       </div>}
       {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
     </div>
