@@ -150,6 +150,9 @@ def sign_agreement(
             "status": "active",
         }).eq("id", agreement_id).execute()
 
+        # Auto-update bilateral relationships based on agreement type
+        _update_relationships_for_agreement(client, sim_run_id, agr["agreement_type"], agr["signatories"] or [])
+
         _write_event(client, sim_run_id, scenario_id, agr["round_num"],
                      "agreement_activated", agr.get("proposer_country_code", ""),
                      f"Agreement ACTIVE: '{agr['agreement_name']}' ({agr['agreement_type']}) — "
@@ -217,6 +220,67 @@ def _get_scenario_id(client, sim_run_id):
         return r.data[0]["scenario_id"] if r.data else None
     except Exception:
         return None
+
+
+# Agreement type → relationship status mapping (SIMPLIFICATION_CHANGE_PLAN §C)
+AGREEMENT_TO_RELATION: dict[str, str] = {
+    "military_alliance": "alliance",
+    "trade_agreement": "economic_partnership",
+    "peace_treaty": "neutral",
+    "ceasefire": "hostile",
+}
+
+# Relationship priority (higher = stronger, dominates lower)
+RELATION_PRIORITY: dict[str, int] = {
+    "alliance": 5,
+    "economic_partnership": 4,
+    "neutral": 3,
+    "hostile": 2,
+    "at_war": 1,
+}
+
+
+def _update_relationships_for_agreement(client, sim_run_id: str, agreement_type: str, signatories: list[str]):
+    """Auto-update bilateral relationships when agreement is activated.
+
+    Rules (SIMPLIFICATION_CHANGE_PLAN §C):
+    - Military Alliance → alliance (highest priority)
+    - Trade Agreement → economic_partnership (unless alliance exists)
+    - Peace Treaty → neutral (from war/hostile)
+    - Ceasefire → hostile (from war)
+    - Higher priority agreement dominates
+    """
+    new_relation = AGREEMENT_TO_RELATION.get(agreement_type)
+    if not new_relation:
+        return
+
+    new_priority = RELATION_PRIORITY.get(new_relation, 0)
+
+    # Update all bilateral pairs among signatories
+    for i, a in enumerate(signatories):
+        for b in signatories[i+1:]:
+            try:
+                # Check current relationship
+                rel = client.table("relationships").select("relationship") \
+                    .eq("sim_run_id", sim_run_id) \
+                    .eq("from_country_id", a).eq("to_country_id", b).execute()
+
+                current = rel.data[0]["relationship"] if rel.data else "neutral"
+                current_priority = RELATION_PRIORITY.get(current, 0)
+
+                # Only upgrade (higher priority agreement dominates)
+                if new_priority >= current_priority:
+                    client.table("relationships").update({"relationship": new_relation}) \
+                        .eq("sim_run_id", sim_run_id) \
+                        .eq("from_country_id", a).eq("to_country_id", b).execute()
+                    # Also update reverse direction
+                    client.table("relationships").update({"relationship": new_relation}) \
+                        .eq("sim_run_id", sim_run_id) \
+                        .eq("from_country_id", b).eq("to_country_id", a).execute()
+
+                    logger.info("[agreement] Relationship %s↔%s → %s (was %s)", a, b, new_relation, current)
+            except Exception as e:
+                logger.warning("Failed to update relationship %s↔%s: %s", a, b, e)
 
 
 def _write_event(client, sim_run_id, scenario_id, round_num, event_type, country_code, summary, payload):

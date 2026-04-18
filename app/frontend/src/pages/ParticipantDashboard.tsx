@@ -357,11 +357,25 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [pendingTxns, setPendingTxns] = useState<{id:string;proposer:string;offer:Record<string,unknown>;request:Record<string,unknown>;terms:string;created_at:string}[]>([])
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
 
+  const [pendingAgreements, setPendingAgreements] = useState<{id:string;agreement_name:string;agreement_type:string;proposer_country_code:string;signatories:string[];terms:string;signatures:Record<string,unknown>}[]>([])
+
   const loadPendingTxns = useCallback(()=>{
     supabase.from('exchange_transactions')
       .select('id,proposer,counterpart,offer,request,terms,created_at')
       .eq('sim_run_id',simId).eq('counterpart',countryId).eq('status','pending')
       .then(({data})=>setPendingTxns((data??[]) as typeof pendingTxns))
+    // Also load agreements awaiting our signature
+    supabase.from('agreements')
+      .select('id,agreement_name,agreement_type,proposer_country_code,signatories,terms,signatures')
+      .eq('sim_run_id',simId).eq('status','proposed').contains('signatories',[countryId])
+      .then(({data})=>{
+        // Filter to ones we haven't signed yet
+        const unsigned = (data??[]).filter((a:Record<string,unknown>)=>{
+          const sigs = (a.signatures as Record<string,{confirmed?:boolean}>)||{}
+          return !sigs[countryId]?.confirmed
+        })
+        setPendingAgreements(unsigned as typeof pendingAgreements)
+      })
   },[simId,countryId])
 
   useEffect(()=>{
@@ -379,7 +393,20 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       onDone={()=>{setReviewTxn(null);setPendingTxns(prev=>prev.filter(t=>t.id!==txnToReview.id))}} />
   }
 
-  const hasExpected = pendingTxns.length > 0
+  const [signingAgr, setSigningAgr] = useState<string|null>(null)
+
+  const handleSignAgreement = async (agrId:string, confirm:boolean) => {
+    setSigningAgr(agrId)
+    try {
+      await submitAction(simId,'sign_agreement',roleId,countryId,{
+        agreement_id:agrId, confirm, comments:'',
+      })
+      setPendingAgreements(prev=>prev.filter(a=>a.id!==agrId))
+    } catch(e) { alert(e instanceof Error?e.message:'Failed') }
+    finally { setSigningAgr(null) }
+  }
+
+  const hasExpected = pendingTxns.length > 0 || pendingAgreements.length > 0
 
   return (
     <div className="space-y-4">
@@ -395,6 +422,20 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 <span className="font-body text-body-sm text-text-primary font-medium block">Transaction from {txn.proposer}</span>
                 <span className="font-body text-caption text-text-secondary">Click to review</span>
               </button>
+            )}
+            {pendingAgreements.map(agr=>
+              <div key={agr.id} className="bg-card border border-action/30 rounded-lg px-4 py-3">
+                <span className="font-body text-body-sm text-text-primary font-medium block">{agr.agreement_type.replace('_',' ')}</span>
+                <span className="font-body text-caption text-text-secondary block">"{agr.agreement_name}" — by {agr.proposer_country_code}</span>
+                <div className="flex gap-2 mt-2">
+                  <button onClick={()=>handleSignAgreement(agr.id,true)} disabled={signingAgr===agr.id}
+                    className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors">
+                    {signingAgr===agr.id?'...':'Sign'}</button>
+                  <button onClick={()=>handleSignAgreement(agr.id,false)} disabled={signingAgr===agr.id}
+                    className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors">
+                    Decline</button>
+                </div>
+              </div>
             )}
           </div>
         }
@@ -734,6 +775,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'set_sanctions') return <TariffSanctionForm type="sanctions" {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'set_opec') return <CartelProductionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'propose_transaction') return <ProposeTransactionForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'propose_agreement') return <ProposeAgreementForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Generic "coming soon" for actions not yet wired
   return (
@@ -1037,6 +1079,171 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
         <button onClick={onDone} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
       </div>}
       {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+    </div>
+  )
+}
+
+/* ── Propose Agreement Form ─────────────────────────────────────────────── */
+
+const AGREEMENT_TYPES = [
+  {value:'military_alliance', label:'Military Alliance', relation:'alliance'},
+  {value:'trade_agreement', label:'Trade Agreement', relation:'economic_partnership'},
+  {value:'peace_treaty', label:'Peace Treaty', relation:'neutral'},
+  {value:'ceasefire', label:'Ceasefire', relation:'hostile'},
+]
+
+function ProposeAgreementForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [countries,setCountries]=useState<{id:string;sim_name:string;color_ui:string|null}[]>([])
+  const [agrType,setAgrType]=useState('trade_agreement')
+  const [agrName,setAgrName]=useState('')
+  const [terms,setTerms]=useState('')
+  const [signatories,setSignatories]=useState<Set<string>>(new Set())
+  const [secret,setSecret]=useState(false)
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<string|null>(null)
+  const [error,setError]=useState<string|null>(null)
+  const [pendingAgr,setPendingAgr]=useState<{id:string;agreement_name:string;signatories:string[];status:string;signatures:Record<string,unknown>}[]>([])
+
+  useEffect(()=>{
+    supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
+      .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
+    // Load pending/active agreements involving our country
+    supabase.from('agreements').select('id,agreement_name,agreement_type,signatories,status,signatures')
+      .eq('sim_run_id',simId).contains('signatories',[countryId])
+      .then(({data})=>setPendingAgr((data??[]) as typeof pendingAgr))
+  },[simId,countryId])
+
+  const toggleSignatory=(id:string)=>{
+    setSignatories(prev=>{const n=new Set(prev);if(n.has(id))n.delete(id);else n.add(id);return n})
+  }
+
+  const canSubmit = agrName.trim().length>=3 && signatories.size>=1 && agrType
+
+  const handleSubmit = async()=>{
+    setSubmitting(true);setError(null)
+    try {
+      const allSignatories = [countryId, ...Array.from(signatories)]
+      await submitAction(simId,'propose_agreement',roleId,countryId,{
+        proposer_country_code:countryId, proposer_role_id:roleId,
+        agreement_name:agrName.trim(),
+        agreement_type:agrType,
+        signatories:allSignatories,
+        terms:terms.trim(),
+        visibility:secret?'secret':'public',
+        round_num:1,
+      })
+      setResult(`Agreement "${agrName}" proposed — awaiting signatures from ${signatories.size} countr${signatories.size>1?'ies':'y'}`)
+    } catch(e){setError(e instanceof Error?e.message:'Failed')}
+    finally{setSubmitting(false)}
+  }
+
+  const typeInfo = AGREEMENT_TYPES.find(t=>t.value===agrType)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Propose Agreement</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        {/* LEFT: Agreement form */}
+        <div className="lg:col-span-3 space-y-3">
+          {/* Type */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Agreement Type</h3>
+            <div className="flex gap-2">
+              {AGREEMENT_TYPES.map(t=>
+                <button key={t.value} onClick={()=>setAgrType(t.value)}
+                  className={`flex-1 font-body text-caption py-2 px-3 rounded border transition-colors text-center ${
+                    agrType===t.value?'bg-action text-white border-action font-medium':'bg-base border-border text-text-secondary hover:border-action/30'
+                  }`}>{t.label}</button>
+              )}
+            </div>
+            {typeInfo&&<p className="font-body text-caption text-text-secondary mt-2">
+              Sets bilateral relationship to: <strong className="text-text-primary">{typeInfo.relation}</strong>
+            </p>}
+          </div>
+
+          {/* Name */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Agreement Name</h3>
+            <input type="text" value={agrName} onChange={e=>setAgrName(e.target.value)}
+              placeholder="e.g. Columbia-Cathay Trade Framework 2027"
+              className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary"/>
+          </div>
+
+          {/* Signatories */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Signatories (select countries)</h3>
+            <div className="flex flex-wrap gap-2">
+              {countries.map(c=>{
+                const sel=signatories.has(c.id)
+                return <button key={c.id} onClick={()=>toggleSignatory(c.id)}
+                  className={`inline-flex items-center gap-1.5 font-body text-caption px-3 py-1.5 rounded border transition-colors ${
+                    sel?'bg-action/10 text-action border-action/30 font-medium':'bg-base border-border text-text-secondary hover:border-action/20'
+                  }`}>
+                  <div className="w-2.5 h-2.5 rounded" style={{backgroundColor:c.color_ui??'#666'}}/>
+                  {c.sim_name}
+                </button>
+              })}
+            </div>
+          </div>
+
+          {/* Terms */}
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Terms</h3>
+            <textarea value={terms} onChange={e=>setTerms(e.target.value)}
+              placeholder="Describe the terms of the agreement..."
+              rows={4} className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary resize-none"/>
+          </div>
+
+          {/* Options + Submit */}
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked={secret} onChange={e=>setSecret(e.target.checked)} className="accent-danger"/>
+              <span className="font-body text-caption text-text-secondary">Secret agreement</span>
+            </label>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={handleSubmit} disabled={submitting||!canSubmit}
+              className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 transition-colors">
+              {submitting?'Sending...':'Propose Agreement'}</button>
+            <button onClick={onClose} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+          </div>
+          {result&&<div className="bg-success/5 border border-success/20 rounded-lg p-3">
+            <p className="font-body text-body-sm text-success">{result}</p>
+            <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-1">← Return to Actions</button>
+          </div>}
+          {error&&<div className="bg-danger/5 border border-danger/20 rounded-lg p-3"><p className="font-body text-body-sm text-danger">{error}</p></div>}
+        </div>
+
+        {/* RIGHT: Existing agreements */}
+        <div className="lg:col-span-2 space-y-3">
+          <h3 className="font-heading text-body-sm text-text-primary">Our Agreements</h3>
+          {pendingAgr.length===0
+            ? <p className="font-body text-caption text-text-secondary bg-card border border-border rounded-lg p-4">No agreements yet.</p>
+            : <div className="space-y-2">
+              {pendingAgr.map(a=>{
+                const sigs = a.signatures as Record<string,{confirmed?:boolean}>
+                const signedCount = Object.values(sigs).filter(s=>s?.confirmed).length
+                const totalNeeded = (a.signatories||[]).length
+                return <div key={a.id} className={`bg-card border rounded-lg p-3 ${a.status==='active'?'border-success/30':'border-border'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-body text-body-sm text-text-primary font-medium">{a.agreement_name}</span>
+                    <span className={`font-data text-caption ${a.status==='active'?'text-success':'text-warning'}`}>{a.status}</span>
+                  </div>
+                  <div className="font-body text-caption text-text-secondary mt-1">
+                    {(a.signatories||[]).join(', ')} · {signedCount}/{totalNeeded} signed
+                  </div>
+                </div>
+              })}
+            </div>
+          }
+        </div>
+      </div>
     </div>
   )
 }
