@@ -1,14 +1,16 @@
 # Action Contract Audit — Gap Analysis
-**Date:** 2026-04-18 | **Status:** ACTIVE — territory occupation + unit capture landed 2026-04-18
+**Date:** 2026-04-18 | **Status:** ACTIVE — missile, blockade, martial law, blast markers, theater-aware combat, M2 realtime all landed 2026-04-18
 
 ---
 
 ## Overview
 
 The 33 canonical action types are routed through the dispatcher and reach their engines.
-As of 2026-04-18, **all 5 combat types are fully wired** (engine → dispatcher → DB losses) with
+As of 2026-04-18, **all 5 combat types + blockade + martial law are fully working** (engine → dispatcher → DB losses) with
 a unified map-based Attack UX, theater-level adjacency, moderator controls, territory occupation
-(`hex_control` table), and unit capture mechanics (CONTRACT_GROUND_COMBAT compliant).
+(`hex_control` table), unit capture mechanics, conventional missile (two-phase AD+hit model),
+naval blockade (3 chokepoints with auto-integrity), martial law (4 eligible countries),
+blast markers on all maps, and theater-aware combat across all types.
 Remaining gaps are primarily in validation strictness and non-combat action flows.
 
 This document tracks the gap between current implementation and contract spec for each action.
@@ -30,6 +32,7 @@ This document tracks the gap between current implementation and contract spec fo
 ### ground_attack — WORKING (2026-04-18)
 **Contract:** `CONTRACT_GROUND_COMBAT.md` v1.0 (LOCKED)
 **Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex (max = min(3, count-1) — must leave 1 behind). RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input). **Territory occupation:** `hex_control` upserted on victory (controlled_by = attacker). **Unit capture (CONTRACT §unattended):** on victory, surviving non-ground enemy units captured as trophies (country_id changed to attacker, status=reserve, position cleared; naval units excluded; type preserved). Map shows diagonal stripe overlay for occupied hexes (owner + occupier colors). Captured trophies shown as icons + "-> reserve" in combat results. **Modifier fix (2026-04-18):** Modifiers (AI L4, low morale, air support) were displayed in preview but NOT passed to engine — now computed before pending/immediate branch, stored in engine format, applied in both paths (pending confirm + immediate dispatch).
+**Theater-aware (2026-04-18):** All combat types now send theater info when initiated from theater map. Dispatcher loads defenders by theater coords when theater context present. Blast markers include theater coords.
 **Remaining gaps:** Chain attack logic not yet implemented.
 **Effort:** Small — chain logic only
 
@@ -43,12 +46,12 @@ This document tracks the gap between current implementation and contract spec fo
 ### naval_bombardment — WORKING (2026-04-17)
 **Current:** 10% hit per naval unit. DB losses applied. Probability-based (no dice).
 
-### launch_missile_conventional — WORKING (2026-04-17)
-**Current:** 80% accuracy, AD halving, missile consumed on use. DB losses applied. Probability-based (no dice).
+### launch_missile_conventional — WORKING (2026-04-18)
+**Current:** Two-phase model: (1) AD interception at 50% per AD unit (`MISSILE_AD_INTERCEPT_PROB=0.50`) BEFORE (2) hit roll at 75% flat (`MISSILE_HIT_PROB=0.75`). 4 target choices: military (destroy unit), infrastructure (-2% GDP), nuclear_site (halve R&D progress), AD (destroy AD unit). Range per nuclear tier: T1 (nuc 0-1) ≤2 hexes, T2 (nuc 2) ≤4 hexes, T3 (nuc 3+) global. Missile always consumed on use. Frontend: target choice radio buttons, nuclear_site conditional on target having R&D. Probability-based (no dice).
 
-### naval_blockade — STUB
-**Current:** Returns "acknowledged" message. Engine function exists but needs Input objects with zone/country data.
-**Fix when:** M6 remaining sprints
+### naval_blockade — WORKING (2026-04-18)
+**Current:** `blockade_engine.py` with establish/lift/reduce/integrity check operations. 3 chokepoints supported. Auto-integrity check runs after ALL combat in a round (blockades degrade if controlling units destroyed). Map visual: red border (dashed for partial, solid for full blockade). Frontend: BlockadeForm with 3 chokepoint cards for establish/lift actions. Restart simulation cleans all blockades.
+**Remaining gaps:** None critical.
 
 ### nuclear_test — NOT WIRED
 **Current:** Engine expects `NuclearTestInput` Pydantic model. Dispatcher passes kwargs.
@@ -61,8 +64,8 @@ This document tracks the gap between current implementation and contract spec fo
 ### basing_rights — WORKING
 **Current:** Routes to engine correctly.
 
-### martial_law — WORKING
-**Current:** Routes to engine correctly.
+### martial_law — WORKING (2026-04-18)
+**Current:** 4 eligible countries with military personnel thresholds (Sarmatia 10, Cathay 10, Persia 8, Ruthenia 6). Engine rewired to use `deployments` + `countries` tables (was old per-round tables). One-time enforcement with `martial_law_declared` flag — cannot redeclare. Frontend: MartialLawForm with eligibility check showing qualifying countries only.
 
 ### ground_move — WORKING (2026-04-18)
 **Current:** Ground advance to adjacent LAND hex. Sea hexes filtered via `GLOBAL_SEA_HEXES` + `THEATER_SEA_HEXES` frozensets + `is_sea_hex()` helper. Must leave 1 unit behind (max = min(3, count-1)). Authorized by `ground_attack` permission. 100% probability (always succeeds). Embarked units can land (disembark from carrier). `hex_control` upserted on advance. Undefended hex: non-ground enemies captured as trophies. `GLOBAL_HEX_OWNERS` (64 land hexes) + `hex_owner()` for canonical territory ownership.
@@ -170,10 +173,10 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 
 | Category | Actions | What M6 delivers |
 |---|---|---|
-| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, ~~naval_blockade~~, launch_missile | ✅ **DONE (2026-04-18):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. Territory occupation (`hex_control`). Unit capture (non-ground trophies). Ground movement (land-only, leave-1-behind). **Remaining:** chain attacks, naval_blockade |
+| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, naval_blockade, launch_missile | ✅ **DONE (2026-04-18):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. Territory occupation (`hex_control`). Unit capture (non-ground trophies). Ground movement (land-only, leave-1-behind). Naval blockade (3 chokepoints, establish/lift/reduce/integrity, map visual). Conventional missile (two-phase AD+hit, 4 targets, range by nuc tier). **Remaining:** chain attacks |
 | **Military: Movement** | move_units, ground_move | `ground_move` DONE (2026-04-18) — attack-phase advance. `move_units` inter-round repositioning still stub. |
 | **Military: Nuclear** | nuclear_test, nuclear_launch_initiate, nuclear_authorize, nuclear_intercept | Already wired — M6 adds participant UI + testing |
-| **Military: Other** | basing_rights, martial_law | Already working — M6 adds participant UI |
+| **Military: Other** | basing_rights, martial_law | ✅ Martial law **DONE (2026-04-18):** MartialLawForm, 4 eligible countries, one-time enforcement. Basing rights already working — M6 adds participant UI |
 | **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
 | **Economic: Transactions** | propose_transaction, accept_transaction | Full flow: propose → counterparty sees → accept/reject → asset transfer. Visibility (public/secret). |
 | **Diplomatic** | propose_agreement, sign_agreement | Full flow: propose → signatories → sign → active. Visibility (public/secret). Terms enforcement. |
@@ -234,6 +237,21 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 | `body: dict = {}` never parsed as JSON | FastAPI treated dict default as query param — `/mode`, `/confirm` endpoints silently received empty body | All endpoints now use `Request.json()` |
 | Pending action race condition | Realtime hook removed card mid-confirm, result never displayed | Keep resolved actions visible 30s, result stored on pending_action row |
 | Restart simulation incomplete | Old sim state persisted after restart (stale hex_control, agreements, etc.) | Full reset: re-copy 11 tables + delete transient data; page reload clears frontend |
+| Pydantic results not serializable | Combat result objects passed raw to DB | All combat results now use `model_dump()` |
+| `attacker_unit_codes` inconsistent | Different combat types used different formats | Standardized across all combat types |
+| Auto-attack ON still queued dice | Moderator had to click confirm even with auto-attack | Auto-attack ON now skips dice queue entirely |
+| Naval/air could fire multiple times | No per-round enforcement | Once-per-round enforcement added for naval and air attacks |
+| Blockade naming inconsistent | "Naval Blockade" vs "Blockade" across UI | Renamed to just "Blockade" everywhere |
+
+---
+
+## Systemic Fixes (2026-04-18)
+
+| Fix | Scope | Detail |
+|---|---|---|
+| Theater-aware combat | All 5 combat types | All combat sends theater info from theater map; dispatcher loads defenders by theater coords; blast markers include theater coords |
+| Blast markers | All map instances | `loadCombatEvents()` function loads action+result payload paths, current round only, refreshes on unit changes |
+| Result labels | All combat types | Per-type result labels: Victory/Defeat (ground/naval), Target Hit/Missed (air/bombardment/missile), Blockade Established/Lifted (blockade) |
 
 ---
 
