@@ -2486,7 +2486,24 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [submitting,setSubmitting]=useState(false)
   const [result,setResult]=useState<Record<string,unknown>|null>(null)
   const [error,setError]=useState<string|null>(null)
+  const [basingCountries,setBasingCountries]=useState<Set<string>>(new Set()) // countries where we have basing rights
   const mapRef = useRef<HTMLIFrameElement>(null)
+
+  // Load basing rights
+  useEffect(()=>{
+    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+      .eq('sim_run_id',simId)
+      .or(`from_country_id.eq.${countryId},to_country_id.eq.${countryId}`)
+      .then(({data})=>{
+        const countries = new Set<string>()
+        ;(data??[]).forEach((r:Record<string,unknown>)=>{
+          // We receive basing FROM them
+          if(r.from_country_id===countryId && r.basing_rights_b_to_a) countries.add(r.to_country_id as string)
+          if(r.to_country_id===countryId && r.basing_rights_a_to_b) countries.add(r.from_country_id as string)
+        })
+        setBasingCountries(countries)
+      })
+  },[simId,countryId])
 
   const loadUnits = useCallback(async () => {
     setLoading(true)
@@ -2575,9 +2592,11 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         const ownNavalHere = ownUnitsHere.filter((u:{unit_type:string}) => u.unit_type === 'naval')
         const hasCarrier = ownNavalHere.length > 0
 
+        const hasBasing = basingCountries.has(hexOwner)
+
         if (isSea && isLand && !hasCarrier) { setError('Land units need a carrier to deploy to sea'); return true }
         if (!isSea && isNaval) { setError('Naval units can only deploy to sea'); return true }
-        if (!isOwnTerritory && !hasOwnUnits && !isSea) { setError('Can only deploy to own territory or hexes with your units'); return true }
+        if (!isOwnTerritory && !hasOwnUnits && !hasBasing && !isSea) { setError('Can only deploy to own territory, basing rights, or hexes with your units'); return true }
 
         const newMoves = [...moves, {
           unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type,
