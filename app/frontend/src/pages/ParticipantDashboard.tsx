@@ -634,6 +634,25 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
   const fc = fullCountry ?? {}
   const cc = country.id
   const [section,setSection]=useState<'overview'|'military'|'trade'|'diplomacy'>('overview')
+  const [basingWeGrant,setBasingWeGrant]=useState<string[]>([])
+  const [basingWeReceive,setBasingWeReceive]=useState<string[]>([])
+
+  useEffect(()=>{
+    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+      .eq('sim_run_id',simId)
+      .or(`from_country_id.eq.${cc},to_country_id.eq.${cc}`)
+      .then(({data})=>{
+        const granted:string[]=[], received:string[]=[]
+        ;(data??[]).forEach((r:Record<string,unknown>)=>{
+          if(r.from_country_id===cc && r.basing_rights_a_to_b) granted.push(r.to_country_id as string)
+          if(r.to_country_id===cc && r.basing_rights_b_to_a) granted.push(r.from_country_id as string)
+          if(r.from_country_id===cc && r.basing_rights_b_to_a) received.push(r.to_country_id as string)
+          if(r.to_country_id===cc && r.basing_rights_a_to_b) received.push(r.from_country_id as string)
+        })
+        setBasingWeGrant([...new Set(granted)])
+        setBasingWeReceive([...new Set(received)])
+      })
+  },[simId,cc])
   const relColor=(r:string)=>({alliance:'text-success',economic_partnership:'text-action',neutral:'text-text-secondary',hostile:'text-warning',at_war:'text-danger'}[r]??'text-text-secondary')
   const relLabel=(r:string)=>({alliance:'Allied',economic_partnership:'Partnership',neutral:'Neutral',hostile:'Hostile',at_war:'AT WAR'}[r]??r)
   const sanctionsOn = sanctions.filter(s=>s.target===cc)
@@ -734,6 +753,25 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
             Maintenance: ${String(fc.maintenance_per_unit??0)}/unit · Mobilization pool: {String(fc.mobilization_pool??0)}
           </div>
         </div>
+        {(basingWeGrant.length > 0 || basingWeReceive.length > 0) && (
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Basing Rights</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <span className="font-body text-caption text-text-secondary block mb-1">We grant access to:</span>
+                {basingWeGrant.length > 0
+                  ? basingWeGrant.map(c=><div key={c} className="font-body text-body-sm text-text-primary">{c}</div>)
+                  : <span className="font-body text-caption text-text-secondary/50">None</span>}
+              </div>
+              <div>
+                <span className="font-body text-caption text-text-secondary block mb-1">We have access to:</span>
+                {basingWeReceive.length > 0
+                  ? basingWeReceive.map(c=><div key={c} className="font-body text-body-sm text-text-primary">{c}</div>)
+                  : <span className="font-body text-caption text-text-secondary/50">None</span>}
+              </div>
+            </div>
+          </div>
+        )}
       </>}
 
       {section==='trade'&&<>
