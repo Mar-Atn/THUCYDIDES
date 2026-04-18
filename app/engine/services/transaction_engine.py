@@ -370,14 +370,16 @@ def _transfer_tech(client, sim_run_id, round_num, receiver_cc, tech_type, level,
         if tech_type == "nuclear":
             client.table("countries").update({
                 "nuclear_level": level,
+                "nuclear_rd_progress": 0.0,  # Reset — new level, research starts fresh
                 "nuclear_confirmed": False,  # Recipient must test to confirm
             }).eq("sim_run_id", sim_run_id).eq("id", receiver_cc).execute()
-            changes.append(f"{label}: nuclear → L{level} (unconfirmed)")
+            changes.append(f"{label}: nuclear → L{level} (unconfirmed, R&D reset)")
         elif tech_type == "ai":
             client.table("countries").update({
                 "ai_level": level,
+                "ai_rd_progress": 0.0,  # Reset — new level, research starts fresh
             }).eq("sim_run_id", sim_run_id).eq("id", receiver_cc).execute()
-            changes.append(f"{label}: AI → L{level}")
+            changes.append(f"{label}: AI → L{level} (R&D reset)")
     except Exception as e:
         logger.warning("tech transfer failed %s: %s", receiver_cc, e)
 

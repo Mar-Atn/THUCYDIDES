@@ -575,6 +575,15 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
         phase="B", category="system",
     )
 
+    # Expire pending transactions at end of round
+    try:
+        expired = client.table("exchange_transactions").update({"status": "expired"}) \
+            .eq("sim_run_id", sim_id).eq("status", "pending").execute()
+        if expired.data:
+            logger.info("Expired %d pending transactions at end of R%d", len(expired.data), round_num)
+    except Exception as e:
+        logger.warning("Transaction cleanup failed: %s", e)
+
     logger.info("Phase B complete for sim %s R%d: %s", sim_id, round_num, summary_lines[0])
 
 

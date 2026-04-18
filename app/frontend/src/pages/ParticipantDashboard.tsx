@@ -923,7 +923,10 @@ function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="font-heading text-h2 text-text-primary">Transaction Proposal from {txn.proposer}</h2>
+        <div className="flex items-center gap-4">
+          <h2 className="font-heading text-h2 text-text-primary">Transaction Proposal from {txn.proposer}</h2>
+          {myCountry&&<span className="font-body text-caption text-text-secondary bg-card border border-border rounded px-3 py-1">Our Treasury: <span className="font-data text-text-primary">{Number(myCountry.treasury??0).toFixed(0)} coins</span></span>}
+        </div>
         <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
       </div>
 
@@ -1077,6 +1080,22 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
       .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
   },[simId,countryId])
 
+  const [outgoing, setOutgoing] = useState<{id:string;counterpart:string;status:string}[]>([])
+
+  useEffect(()=>{
+    supabase.from('exchange_transactions').select('id,counterpart,status')
+      .eq('sim_run_id',simId).eq('proposer',countryId).in_('status',['pending','countered'])
+      .then(({data})=>setOutgoing((data??[]) as typeof outgoing))
+  },[simId,countryId])
+
+  const handleWithdraw = async (txnId:string) => {
+    if (!confirm('Withdraw this transaction proposal?')) return
+    try {
+      await supabase.from('exchange_transactions').update({status:'withdrawn'}).eq('id',txnId)
+      setOutgoing(prev=>prev.filter(t=>t.id!==txnId))
+    } catch { /* ignore */ }
+  }
+
   const treasury = Number(myCountry?.treasury??0)
   const myNuclear = Number(myCountry?.nuclear_level??0)
   const myAI = Number(myCountry?.ai_level??0)
@@ -1129,6 +1148,23 @@ function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitted}:{
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-h2 text-text-primary">Propose Transaction</h2>
         <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {/* Treasury + outgoing offers */}
+      <div className="flex items-center gap-4">
+        <div className="bg-card border border-border rounded-lg px-4 py-2">
+          <span className="font-body text-caption text-text-secondary">Our Treasury: </span>
+          <span className="font-data text-data text-text-primary">{treasury.toFixed(0)} coins</span>
+        </div>
+        {outgoing.length>0&&<div className="flex items-center gap-2 flex-1">
+          <span className="font-body text-caption text-text-secondary">Pending offers:</span>
+          {outgoing.map(o=>
+            <span key={o.id} className="inline-flex items-center gap-1 bg-card border border-border rounded px-2 py-1">
+              <span className="font-body text-caption text-text-primary">→ {o.counterpart}</span>
+              <button onClick={()=>handleWithdraw(o.id)} className="text-danger/50 hover:text-danger text-sm leading-none" title="Withdraw">✕</button>
+            </span>
+          )}
+        </div>}
       </div>
 
       {/* Counterpart + options */}
