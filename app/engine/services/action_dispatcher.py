@@ -4,7 +4,7 @@ This is the GLUE between agent/human action submissions and the engine layer.
 Every action submitted during Phase A is dispatched here for immediate resolution.
 
 Action type names are CANONICAL — they match role_actions.action_id in the DB.
-Source of truth: M9 role_actions table (32 action types as of 2026-04-16).
+Source of truth: M9 role_actions table (33 action types as of 2026-04-17).
 
 See CONTRACT_ROUND_FLOW.md for the canonical round flow.
 """
@@ -213,6 +213,10 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         intercept = action.get("intercept", True)
         return orch.submit_interception(action_id, country_code, intercept, action.get("rationale", ""))
 
+    # ── Declare War ────────────────────────────────────────────────────
+    if action_type == "declare_war":
+        return _declare_war(sim_run_id, round_num, country_code, role_id, action.get("target_country", ""))
+
     # ── Not Yet Implemented ───────────────────────────────────────────
     if action_type in ("move_units", "call_org_meeting", "meet_freely"):
         return {"success": True, "narrative": f"{action_type} acknowledged — implementation pending"}
@@ -246,28 +250,50 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
 
     hex_label = f"({target_row},{target_col})"
 
-    # Load attacker units at this hex
-    atk_units = client.table("deployments") \
-        .select("*") \
-        .eq("sim_run_id", sim_run_id) \
-        .eq("country_id", attacker) \
-        .eq("global_row", target_row) \
-        .eq("global_col", target_col) \
-        .eq("unit_status", "active") \
-        .execute().data or []
+    # Attacker source hex: ground/air/bombardment attack FROM a different hex
+    # Naval attacks may be at same hex. Missiles are global.
+    src_row = action.get("source_global_row", target_row)
+    src_col = action.get("source_global_col", target_col)
 
-    # Load all units at this hex (for defenders)
-    all_units_at_hex = client.table("deployments") \
+    # For specific unit selection (from AttackForm)
+    attacker_unit_codes = action.get("attacker_unit_codes") or []
+    attacker_unit_code = action.get("attacker_unit_code")
+    if attacker_unit_code and not attacker_unit_codes:
+        attacker_unit_codes = [attacker_unit_code]
+
+    # Load attacker units — from source hex, or by specific unit_ids
+    if attacker_unit_codes:
+        # Load specific units by unit_id
+        atk_units = client.table("deployments") \
+            .select("*") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("country_id", attacker) \
+            .in_("unit_status", ["active", "embarked"]) \
+            .in_("unit_id", attacker_unit_codes) \
+            .execute().data or []
+    else:
+        # Fallback: load all attacker units at source hex
+        atk_units = client.table("deployments") \
+            .select("*") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("country_id", attacker) \
+            .eq("global_row", src_row) \
+            .eq("global_col", src_col) \
+            .eq("unit_status", "active") \
+            .execute().data or []
+
+    # Load defender units at target hex
+    all_units_at_target = client.table("deployments") \
         .select("*") \
         .eq("sim_run_id", sim_run_id) \
         .eq("global_row", target_row) \
         .eq("global_col", target_col) \
         .eq("unit_status", "active") \
         .execute().data or []
-    def_units = [u for u in all_units_at_hex if u["country_id"] != attacker]
+    def_units = [u for u in all_units_at_target if u["country_id"] != attacker]
 
     if not atk_units:
-        return {"success": False, "narrative": f"No {attacker} units at hex {hex_label}"}
+        return {"success": False, "narrative": f"No {attacker} units found for attack at {hex_label}"}
 
     # Convert DB rows to engine format — each DB row = 1 unit (individual unit model)
     def to_unit_list(units: list) -> list[dict]:
@@ -323,9 +349,17 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             from engine.engines.military import resolve_naval_combat
             naval_atk = [u for u in atk_list if u["type"] in NAVAL_TYPES]
             naval_def = [u for u in def_list if u["type"] in NAVAL_TYPES]
+            if not naval_atk:
+                return {"success": False, "narrative": f"No naval units to attack with"}
+            if not naval_def:
+                return {"success": False, "narrative": f"No enemy naval units at {hex_label}"}
+            # 1v1: pick specific target or first available
+            target_unit_code = action.get("target_unit_code")
+            atk_unit = naval_atk[0]
+            def_unit = next((u for u in naval_def if u["unit_code"] == target_unit_code), naval_def[0]) if target_unit_code else naval_def[0]
             result = resolve_naval_combat(
-                attacker={"units": len(naval_atk), "country": attacker},
-                defender={"units": len(naval_def), "country": target or "unknown"},
+                attacker=atk_unit,
+                defender=def_unit,
                 modifiers=action.get("modifiers"),
                 precomputed_rolls=precomputed_rolls,
             )
@@ -333,14 +367,81 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             naval_def_deps = [u for u in def_units if u["unit_type"] in NAVAL_TYPES]
             return _apply_combat_losses(client, sim_run_id, result.__dict__, naval_atk_deps, naval_def_deps, hex_label, combat_type)
 
-        # For bombardment, blockade, missile — these need complex Input objects
-        # For now, return acknowledged with unit counts
-        if combat_type in ("bombardment", "blockade", "missile"):
+        if combat_type == "bombardment":
+            from engine.engines.military import resolve_naval_bombardment_units, UnitNavalBombardmentInput, UnitSnapshot
+            naval_atk = [u for u in atk_list if u["type"] in NAVAL_TYPES]
+            ground_def = [u for u in def_list if u["type"] in GROUND_TYPES]
+            if not naval_atk:
+                return {"success": False, "narrative": f"No naval units to bombard with"}
+            if not ground_def:
+                return {"success": False, "narrative": f"No enemy ground units at {hex_label}"}
+            def_countries = list(set(u["country"] for u in ground_def))
+            inp = UnitNavalBombardmentInput(
+                attacker_country=attacker,
+                defender_country=def_countries[0] if def_countries else "unknown",
+                target_global_row=target_row,
+                target_global_col=target_col,
+                naval_units=[UnitSnapshot(unit_code=u["unit_code"], country_code=attacker, unit_type="naval") for u in naval_atk],
+                defender_ground_units=[UnitSnapshot(unit_code=u["unit_code"], country_code=u["country"], unit_type="ground") for u in ground_def],
+            )
+            result = resolve_naval_bombardment_units(inp)
+            r = result.model_dump()
+            r["attacker_losses"] = []
+            r["success"] = True
+            r["attacker_won"] = len(r.get("defender_losses", [])) > 0
+            # Apply defender losses
+            for code in r.get("defender_losses", []):
+                dep_match = next((d for d in def_units if (d.get("unit_id") or d["id"]) == code), None)
+                if dep_match:
+                    client.table("deployments").delete().eq("id", dep_match["id"]).execute()
+            r["losses_applied"] = True
+            r["narrative"] = result.narrative + f" | Losses: defender -{len(r.get('defender_losses', []))}."
+            logger.info("Bombardment at %s: %d shots, %d destroyed", hex_label, result.shots_fired, len(result.defender_losses))
+            return r
+
+        if combat_type == "missile":
+            from engine.engines.military import resolve_missile_strike_units, UnitMissileStrikeInput, UnitSnapshot, WarheadType, StrategicAttackTier
+            missile_atk = [u for u in atk_list if u["type"] == "strategic_missile"]
+            if not missile_atk:
+                return {"success": False, "narrative": "No missile units to launch"}
+            missile = missile_atk[0]
+            ad_at_target = [u for u in def_list if u["type"] in AD_TYPES]
+            def_countries = list(set(u["country"] for u in def_list))
+            inp = UnitMissileStrikeInput(
+                missile_unit=UnitSnapshot(unit_code=missile["unit_code"], country_code=attacker, unit_type="strategic_missile"),
+                target_global_row=target_row,
+                target_global_col=target_col,
+                warhead_type=WarheadType.CONVENTIONAL,
+                attack_tier=StrategicAttackTier.T1_MIDRANGE,
+                defender_units=[UnitSnapshot(unit_code=u["unit_code"], country_code=u["country"], unit_type=u["type"]) for u in def_list],
+                ad_units_covering_zone=[UnitSnapshot(unit_code=u["unit_code"], country_code=u["country"], unit_type="air_defense") for u in ad_at_target],
+                target_country=def_countries[0] if def_countries else "",
+            )
+            result = resolve_missile_strike_units(inp)
+            r = result.model_dump()
+            # Missile is always consumed
+            r["attacker_losses"] = [missile["unit_code"]]
+            r["success"] = True
+            r["attacker_won"] = result.success
+            # Delete the missile unit
+            missile_dep = next((d for d in atk_units if (d.get("unit_id") or d["id"]) == missile["unit_code"]), None)
+            if missile_dep:
+                client.table("deployments").delete().eq("id", missile_dep["id"]).execute()
+            # Apply defender losses
+            for code in r.get("defender_losses", []):
+                dep_match = next((d for d in def_units if (d.get("unit_id") or d["id"]) == code), None)
+                if dep_match:
+                    client.table("deployments").delete().eq("id", dep_match["id"]).execute()
+            r["losses_applied"] = True
+            def_losses = len(r.get("defender_losses", []))
+            r["narrative"] = result.narrative + f" | Missile consumed. Defender losses: {def_losses}."
+            logger.info("Missile at %s: hit=%s, def_losses=%d", hex_label, result.success, def_losses)
+            return r
+
+        if combat_type == "blockade":
             return {
                 "success": True,
-                "narrative": f"{combat_type} at hex {hex_label}: {len(atk_list)} attacker units vs {len(def_list)} defender units. Full resolution wiring in progress.",
-                "attacker_units": len(atk_list),
-                "defender_units": len(def_list),
+                "narrative": f"Blockade at {hex_label}: implementation pending (chokepoint mechanics).",
             }
 
     except Exception as e:
@@ -380,7 +481,10 @@ def _apply_combat_losses(client, sim_run_id: str, result: dict, atk_deployments:
     def_total = len(def_loss_codes) if isinstance(def_loss_codes, list) else 0
 
     narrative = result.get("narrative", f"{combat_type} at {hex_label}")
-    result["success"] = True
+    # Preserve the engine's attacker_won verdict; success=True means "resolved without error"
+    result["resolved"] = True
+    result["attacker_won"] = result.get("success", def_total > 0 and atk_total == 0)
+    result["success"] = True  # engine executed ok
     result["losses_applied"] = True
     result["attacker_losses_count"] = atk_total
     result["defender_losses_count"] = def_total
@@ -424,6 +528,47 @@ def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
             action.get("candidate", ""))
 
     return {"success": False, "narrative": f"Unknown covert op_type: {op_type}"}
+
+
+def _declare_war(sim_run_id: str, round_num: int, country_code: str, role_id: str, target_country: str) -> dict:
+    """Declare war — unilateral, sets both directions to at_war."""
+    if not target_country:
+        return {"success": False, "narrative": "No target country specified"}
+    if target_country == country_code:
+        return {"success": False, "narrative": "Cannot declare war on yourself"}
+
+    client = get_client()
+
+    # Check current relationship
+    rel = client.table("relationships").select("relationship") \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("from_country_id", country_code).eq("to_country_id", target_country) \
+        .execute()
+    current = rel.data[0]["relationship"] if rel.data else "neutral"
+
+    if current == "at_war":
+        return {"success": False, "narrative": f"Already at war with {target_country}"}
+
+    # Set both directions to at_war
+    client.table("relationships").update({"relationship": "at_war"}) \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("from_country_id", country_code).eq("to_country_id", target_country).execute()
+    client.table("relationships").update({"relationship": "at_war"}) \
+        .eq("sim_run_id", sim_run_id) \
+        .eq("from_country_id", target_country).eq("to_country_id", country_code).execute()
+
+    # Write observatory event
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(
+        client, sim_run_id, scenario_id, round_num,
+        country_code, "declare_war",
+        f"{country_code} declares WAR on {target_country}",
+        {"target": target_country, "previous_relationship": current},
+        category="diplomatic", role_name=role_id,
+    )
+
+    logger.info("[dispatch] %s declares war on %s (was %s)", country_code, target_country, current)
+    return {"success": True, "narrative": f"War declared on {target_country}. Previous relationship: {current}"}
 
 
 def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, action: dict) -> dict:

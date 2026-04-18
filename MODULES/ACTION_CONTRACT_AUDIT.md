@@ -5,7 +5,7 @@
 
 ## Overview
 
-The 32 canonical action types are routed through the dispatcher and reach their engines.
+The 33 canonical action types are routed through the dispatcher and reach their engines.
 However, many actions use **simplified wiring** that doesn't match the full contract specifications.
 The contracts (in `3 DETAILED DESIGN/CONTRACTS/`) specify validators, schemas, adjacency checks,
 multi-step flows, and specific payload formats that are not yet enforced.
@@ -96,6 +96,12 @@ This document tracks the gap between current implementation and contract spec fo
 **Status:** Needs testing.
 **Fix when:** M5/M6
 
+### declare_war — WORKING
+**Current:** Unilateral action. Sets both directions of the relationship to `at_war` in the `relationships` table. Writes observatory event. No moderator confirmation needed.
+**Roles:** diplomat, head_of_state (all countries)
+**Location:** `action_dispatcher.py` → `_declare_war()`, `ParticipantDashboard.tsx` → `DeclareWarForm`
+**Wired to:** relationships table (both directions), observatory_events
+
 ### call_org_meeting, meet_freely — STUB
 **Current:** Returns acknowledged. Meeting system not built.
 **Fix when:** M6 (humans need meetings) or M7 (Navigator facilitates)
@@ -160,7 +166,7 @@ wired to contract spec, with submission interface, validation, engine resolution
 and systematic testing. The human interface forces honesty: if a participant clicks "Attack," it
 must work exactly per CONTRACT_GROUND_COMBAT.
 
-**Scope: ALL 32 action types wired and tested during M6.**
+**Scope: ALL 33 action types wired and tested during M6.**
 
 | Category | Actions | What M6 delivers |
 |---|---|---|
@@ -171,6 +177,7 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 | **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
 | **Economic: Transactions** | propose_transaction, accept_transaction | Full flow: propose → counterparty sees → accept/reject → asset transfer. Visibility (public/secret). |
 | **Diplomatic** | propose_agreement, sign_agreement | Full flow: propose → signatories → sign → active. Visibility (public/secret). Terms enforcement. |
+| **Diplomatic** | declare_war | Already working — M6 adds participant UI |
 | **Diplomatic** | public_statement, call_org_meeting, meet_freely | Statement UI, meeting creation, participant notification |
 | **Covert** | covert_operation, intelligence | Op type selection, target country, detection probability, outcome display |
 | **Political** | arrest, assassination, change_leader, reassign_types | Confirmation queue verified, 3-phase voting tested, target validation |
@@ -189,12 +196,12 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 ### M5 (AI Participant)
 - AI agents use the same validated pipeline from M6
 - Focus: generating proper contract-compliant payloads via LLM
-- All 32 schemas tested with AI-generated decisions
+- All 33 schemas tested with AI-generated decisions
 
 ### M10 (Final Assembly)
 - Full sweep: every action, every edge case, stress test
 - Mixed mode: 25 humans + AI agents playing simultaneously
-- Performance: 32 concurrent action submissions
+- Performance: 33 concurrent action submissions
 - Data integrity: verify all DB state changes are correct
 - Error recovery: what happens when engine fails mid-action?
 

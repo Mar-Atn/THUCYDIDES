@@ -41,12 +41,14 @@ HEX_OFFSET = "odd_r"
 def hex_neighbors(row: int, col: int) -> list[tuple[int, int]]:
     """Return the 6 adjacent hex coordinates for a given (row, col).
 
-    Uses odd-r offset convention (pointy-top, odd rows shifted right).
-    Coordinates are 1-indexed. Does NOT check bounds — caller must filter.
+    Uses odd-r offset convention (pointy-top). Coordinates are 1-indexed.
+    In 1-indexed coords, EVEN rows are visually shifted right (they map to
+    0-indexed odd rows in the renderer which applies the half-hex offset).
+    Does NOT check bounds — caller must filter.
     """
-    if row % 2 == 1:  # odd row
+    if row % 2 == 0:  # even row (1-indexed) = shifted right in renderer
         deltas = [(-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0), (1, 1)]
-    else:  # even row
+    else:  # odd row (1-indexed) = NOT shifted
         deltas = [(-1, -1), (-1, 0), (0, -1), (0, 1), (1, -1), (1, 0)]
     return [(row + dr, col + dc) for dr, dc in deltas]
 
@@ -246,12 +248,49 @@ def in_theater_bounds(theater: str, row: int, col: int) -> bool:
     return 1 <= row <= t["rows"] and 1 <= col <= t["cols"]
 
 
+def hex_range(
+    row: int, col: int, distance: int,
+    max_rows: int = GLOBAL_ROWS, max_cols: int = GLOBAL_COLS,
+) -> list[tuple[int, int]]:
+    """Return all hexes within ``distance`` steps of (row, col), excluding origin.
+
+    BFS expansion using hex adjacency.  1-indexed coordinates.
+    """
+    if distance <= 0:
+        return []
+    visited: set[tuple[int, int]] = {(row, col)}
+    frontier: set[tuple[int, int]] = {(row, col)}
+    for _ in range(distance):
+        next_ring: set[tuple[int, int]] = set()
+        for r, c in frontier:
+            for nr, nc in hex_neighbors_bounded(r, c, max_rows, max_cols):
+                if (nr, nc) not in visited:
+                    next_ring.add((nr, nc))
+                    visited.add((nr, nc))
+        frontier = next_ring
+    visited.discard((row, col))  # exclude origin
+    return sorted(visited)
+
+
+# ---------------------------------------------------------------------------
+# COMBAT RANGE RULES (per action contracts)
+# ---------------------------------------------------------------------------
+ATTACK_RANGE: dict[str, int] = {
+    "ground": 1,              # adjacent only
+    "tactical_air": 2,        # ≤2 hex Manhattan
+    "naval": 1,               # same or adjacent sea hex
+    "naval_bombardment": 1,   # adjacent sea→land
+    "strategic_missile": 99,  # global (effectively unlimited)
+}
+
+
 __all__ = [
     "MAP_CONFIG_VERSION",
     "HEX_TYPE",
     "HEX_OFFSET",
     "hex_neighbors",
     "hex_neighbors_bounded",
+    "hex_range",
     "GLOBAL_ROWS",
     "GLOBAL_COLS",
     "THEATERS",
@@ -260,6 +299,7 @@ __all__ = [
     "UNIT_TYPES",
     "UNIT_STATUSES",
     "NUCLEAR_SITES",
+    "ATTACK_RANGE",
     "global_hex_for_theater_cell",
     "theater_link_hexes",
     "is_theater_link_hex",

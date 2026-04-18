@@ -13,6 +13,11 @@
   const DISPLAY_CLEAN = urlParams.get('display') === 'clean';
   // ?theater=eastern_ereb or ?theater=mashriq — render only that theater
   const FORCE_THEATER = urlParams.get('theater') || null;
+  // ?mode=attack&country=X — attack mode: clicks send postMessage to parent
+  const ATTACK_MODE = urlParams.get('mode') === 'attack';
+  const ATTACK_COUNTRY = urlParams.get('country') || null;
+  // sim_run_id at module scope (needed by message listener)
+  const SIM_RUN_ID_PARAM = urlParams.get('sim_run_id') || null;
   if (DISPLAY_CLEAN) {
     document.documentElement.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
     document.body.style.cssText = 'margin:0; padding:0; overflow:hidden; background:#0A0E1A;';
@@ -857,6 +862,11 @@
 
   // ---------- Interaction / Inspector ----------
   function selectHex(rIdx, cIdx) {
+    // Attack mode: send hex click to parent via postMessage
+    if (ATTACK_MODE) {
+      handleAttackHexClick(rIdx, cIdx);
+      return;
+    }
     // Edit-mode with armed unit: handle placement routing instead of inspector.
     if (state.editMode && state.armedUnitId) {
       handleArmedHexClick(rIdx, cIdx);
@@ -1965,6 +1975,172 @@
     });
     if (total === 0) lines.push('<em style="color:var(--text-muted)">(all deployed)</em>');
     el.innerHTML = lines.join('<br>');
+  }
+
+  // ---------- Attack Mode (postMessage integration) ----------
+
+  function handleAttackHexClick(rIdx, cIdx) {
+    // Convert 0-indexed (renderer) to 1-indexed (engine)
+    const row = rIdx + 1, col = cIdx + 1;
+
+    // Get units at this hex — match by global coords (global view) or theater coords (theater view)
+    const allUnits = currentUnits() || [];
+    const isTheater = state.view !== 'global';
+    const activeHere = allUnits.filter(u => {
+      if (u.status !== 'active') return false;
+      if (isTheater) return u.theater === state.view && u.theater_row === row && u.theater_col === col;
+      return u.global_row === row && u.global_col === col;
+    });
+    // Find carrier unit_ids at this hex
+    const carrierIds = new Set(activeHere.filter(u => u.unit_type === 'naval').map(u => u.unit_id));
+    // Include embarked units whose carrier is at this hex
+    const embarkedHere = carrierIds.size > 0
+      ? allUnits.filter(u => u.status === 'embarked' && u.embarked_on && carrierIds.has(u.embarked_on))
+      : [];
+    const units = [...activeHere, ...embarkedHere];
+
+    // Get hex owner from grid
+    const data = state.view === 'global' ? state.global : state.theaters[state.view];
+    const hex = data && data.grid && data.grid[rIdx] ? data.grid[rIdx][cIdx] : null;
+    const owner = hex ? hex.owner : null;
+
+    // For theater view: resolve global coords to send to parent (engine uses global)
+    let globalRow = row, globalCol = col;
+    if (isTheater && units.length > 0 && units[0].global_row != null) {
+      globalRow = units[0].global_row;
+      globalCol = units[0].global_col;
+    } else if (isTheater) {
+      // Try to resolve from theater linkage
+      const g = globalHexForTheaterCell(state.view, row, col);
+      if (g) { globalRow = g[0]; globalCol = g[1]; }
+    }
+
+    // Visual selection
+    document.querySelectorAll('.hex.selected').forEach(el => el.classList.remove('selected'));
+    const poly = document.querySelector(
+      `#mapSvg polygon[data-row="${rIdx}"][data-col="${cIdx}"]`
+    );
+    if (poly) poly.classList.add('selected');
+    state.selected = { row: rIdx, col: cIdx };
+
+    // Send to parent — always global coordinates (engine uses global)
+    // Also include theater info for highlighting in theater view
+    window.parent.postMessage({
+      type: 'hex-click',
+      row: globalRow,
+      col: globalCol,
+      theater: isTheater ? state.view : null,
+      theater_row: isTheater ? row : null,
+      theater_col: isTheater ? col : null,
+      owner: owner,
+      view: state.view,
+      units: units.map(u => ({
+        unit_id: u.unit_id,
+        country_id: u.country_id,
+        unit_type: u.unit_type,
+        status: u.status || 'active',
+      })),
+    }, '*');
+  }
+
+  /**
+   * Highlight a set of hexes on the map (used by parent to show valid targets).
+   * hexes: [{row, col}] — 1-indexed GLOBAL coordinates (engine convention).
+   * style: 'target' (red glow) | 'source' (blue glow) | 'clear'
+   * When in theater view, resolves global → theater coords via unit data.
+   */
+  function highlightHexes(hexes, style) {
+    // Clear previous highlights
+    document.querySelectorAll('polygon.hex.attack-target, polygon.hex.attack-source').forEach(el => {
+      el.classList.remove('attack-target', 'attack-source');
+    });
+
+    if (style === 'clear' || !hexes || !hexes.length) return;
+
+    const cls = style === 'source' ? 'attack-source' : 'attack-target';
+    const isTheater = state.view !== 'global';
+
+    hexes.forEach(h => {
+      let rIdx, cIdx;
+      if (isTheater) {
+        // Use theater coords if provided by API, otherwise resolve via unit data
+        if (h.theater === state.view && h.theater_row != null && h.theater_col != null) {
+          rIdx = h.theater_row - 1;
+          cIdx = h.theater_col - 1;
+        } else {
+          const allUnits = currentUnits() || [];
+          const match = allUnits.find(u =>
+            u.global_row === h.row && u.global_col === h.col &&
+            u.theater === state.view && u.theater_row != null
+          );
+          if (match) {
+            rIdx = match.theater_row - 1;
+            cIdx = match.theater_col - 1;
+          } else {
+            return; // hex not in this theater
+          }
+        }
+      } else {
+        rIdx = h.row - 1;
+        cIdx = h.col - 1;
+      }
+      const poly = document.querySelector(
+        `#mapSvg polygon.hex[data-row="${rIdx}"][data-col="${cIdx}"]`
+      );
+      if (poly) poly.classList.add(cls);
+    });
+  }
+
+  // Listen for messages from parent (React)
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
+    if (!msg || !msg.type) return;
+
+    if (msg.type === 'highlight-hexes') {
+      highlightHexes(msg.hexes, msg.style || 'target');
+    }
+    if (msg.type === 'clear-highlights') {
+      highlightHexes(null, 'clear');
+    }
+    if (msg.type === 'navigate-theater') {
+      renderView(msg.theater || 'global');
+    }
+    if (msg.type === 'refresh-units') {
+      // Re-fetch units from API and re-render
+      if (SIM_RUN_ID_PARAM) {
+        fetchJson(`/api/sim/${SIM_RUN_ID_PARAM}/map/units`).then(un => {
+          (un.units || []).forEach(u => {
+            if (u.theater && u.theater_row != null && u.theater_col != null &&
+                (u.global_row == null || u.global_col == null)) {
+              const g = globalHexForTheaterCell(u.theater, u.theater_row, u.theater_col);
+              if (g) { u.global_row = g[0]; u.global_col = g[1]; }
+            }
+          });
+          state.units = un;
+          renderView(state.view);
+        });
+      }
+    }
+  });
+
+  // Inject attack-mode CSS for hex highlights
+  if (ATTACK_MODE) {
+    const style = document.createElement('style');
+    style.textContent = `
+      polygon.hex.attack-target {
+        stroke: #FF3C14 !important;
+        stroke-width: 2.5 !important;
+        filter: drop-shadow(0 0 6px rgba(255,60,20,0.6));
+        cursor: crosshair !important;
+      }
+      polygon.hex.attack-source {
+        stroke: #3B82F6 !important;
+        stroke-width: 2.5 !important;
+        filter: drop-shadow(0 0 6px rgba(59,130,246,0.6));
+      }
+      polygon.hex { cursor: pointer; }
+    `;
+    document.head.appendChild(style);
   }
 
 })();

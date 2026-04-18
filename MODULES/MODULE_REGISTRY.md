@@ -1,5 +1,5 @@
 # MODULE REGISTRY — Live Status
-**Last updated:** 2026-04-16
+**Last updated:** 2026-04-17
 
 | Module | Status | SPEC | Progress |
 |---|---|---|---|
@@ -8,7 +8,7 @@
 | M3 Data Foundation | ✅ ALIGNED | N/A | **Individual unit model**: 345 units (1 row per unit) with hex coordinates from canonical `units.csv`. SimRun creation copies 11 tables. `deployments` table has `global_row/col`, `theater/row/col`, `unit_id`, `unit_status`. `zone_id` deprecated for positioning. |
 | M10.1 Auth | ✅ DONE | ✅ | Email/password + Google OAuth, RLS, GDPR consent. All FK constraints CASCADE on sim_run delete. |
 | M9 Sim Setup | ✅ v2 DONE | ✅ | 10-tab Template Editor, SimRun wizard (server-side data inheritance, 11 tables), User Mgmt, AI Setup. 40 roles (5 position types), 32 action types, country/role briefs. |
-| M4 Sim Runner | ✅ DONE | ✅ | All 5 phases. 43+ API endpoints, Supabase Realtime, confirmation queue, change_leader voting, nuclear chain, physical dice, AI stub, participant assignment, restart/rollback, two-column dashboard. |
+| M4 Sim Runner | ✅ DONE | ✅ | All 5 phases. 43+ API endpoints, Supabase Realtime, confirmation queue, change_leader voting, nuclear chain, physical dice, AI stub, participant assignment, restart/rollback, two-column dashboard. **Post-phase:** auto-attack toggle, dice mode toggle, attack targeting API (`hex_range` BFS + `ATTACK_RANGE`), map attack mode (postMessage protocol). |
 | M8 Public Screen | ⚠️ ~90% | ✅ | Global map (sim-run-aware, blast markers 💥, clean embed mode), theater rotation on combat, 4 doomsday gauges (placeholder — LLM calculation TODO at Phase B), Columbia-Cathay power trend, 2-line news ticker (public events only, sorted by significance). **Remaining: LLM indices (wired at Phase B engine review).** |
 | M6 Human Interface | ❌ NOT STARTED | — | Clean map embed ready (`?display=clean&sim_run_id=`). |
 | M5 AI Participant | ⚠️ STUB | — | AI stub submits default decisions (budget, public_statement, OPEC). Agent tool names need reconciliation. Full LLM agent wiring pending. |

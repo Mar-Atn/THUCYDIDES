@@ -40,6 +40,9 @@ export interface SimRun {
   created_at: string
   started_at: string | null
   completed_at: string | null
+  auto_approve?: boolean
+  auto_attack?: boolean
+  dice_mode?: boolean
 }
 
 export interface SimRunRole {

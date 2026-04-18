@@ -93,15 +93,19 @@ Some participant actions require moderator approval before execution:
 
 **Auto-approve mode:** for testing and AI-only runs, moderator can toggle "auto-approve all" which bypasses the confirmation queue.
 
+**Auto-attack mode:** separate toggle next to auto-approve. When OFF (default), all combat actions (ground_attack, naval_combat, air_strike) go through the moderator confirmation queue (pending_actions). When ON, combat actions execute immediately without moderator approval. DB column: `sim_runs.auto_attack` (BOOLEAN DEFAULT FALSE). Toggled via `POST /api/sim/{id}/mode` with `auto_attack: true/false`.
+
 **Timeout:** if moderator doesn't respond within 5 minutes, system can auto-approve (configurable).
 
 ---
 
 ## 4. Combat Dice
 
+**Dice Mode Toggle** (Facilitator Dashboard, Pending Actions area): button next to auto-attack toggle. DB column: `sim_runs.dice_mode` (BOOLEAN). Toggled via `POST /api/sim/{id}/mode` with `dice_mode: true/false`.
+
 Two modes:
-- **Automatic** (default): engine rolls probabilistic dice internally
-- **Physical dice:** moderator enables this per combat. When combat is submitted:
+- **Automatic** (default, label "Dice: Auto"): engine rolls probabilistic dice internally
+- **Physical dice** (label "Dice: REAL", red pulsing): moderator enables this globally. When combat is submitted:
   1. System calculates how many dice each side rolls (based on units + modifiers)
   2. Moderator sees: "Attacker rolls 3 dice, Defender rolls 2 dice"
   3. Participants physically roll at the table
@@ -153,7 +157,7 @@ Phase control bar with full functionality: go back one phase, restart sim, pause
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│  ⚠ PENDING ACTIONS (2)                              [Auto ○]│
+│  ⚠ PENDING ACTIONS (2)        [Auto ○] [Attack ○] [Dice ○] │
 │  ┌────────────────────────────────────────────────────────┐  │
 │  │ ☠ Assassination: Shadow → Furnace     [Confirm][Reject]│  │
 │  │ 🔄 Change Leader: Ironhand (Sarmatia) [Confirm][Reject]│  │
@@ -347,7 +351,7 @@ Participant submits action
 | `/api/sim/{id}/phase/pause` | POST | Moderator | Pause timer |
 | `/api/sim/{id}/phase/resume` | POST | Moderator | Resume timer |
 | `/api/sim/{id}/end` | POST | Moderator | End simulation |
-| `/api/sim/{id}/mode` | PUT | Moderator | Toggle manual/automatic |
+| `/api/sim/{id}/mode` | POST | Moderator | Toggle modes: `auto_approve`, `auto_attack`, `dice_mode` (bool fields in body) |
 
 ### Actions
 | Endpoint | Method | Who | What |
@@ -377,6 +381,27 @@ Participant submits action
 | `/api/sim/{id}/ai/trigger` | POST | Moderator/System | Trigger AI agent round |
 | `/api/sim/{id}/ai/status` | GET | Moderator | Get all AI agent statuses |
 | `/api/sim/{id}/ai/{role_id}/pause` | POST | Moderator | Pause specific AI agent |
+
+### Attack Targeting
+| Endpoint | Method | Who | What |
+|---|---|---|---|
+| `/api/sim/{id}/attack/valid-targets` | GET | Moderator | Returns valid target hexes for a unit (`?unit_id=X`). Uses `hex_range()` BFS + `ATTACK_RANGE` per unit type. |
+
+### Map Attack Mode
+The map supports an attack interaction mode via query parameters and postMessage API:
+- **Entry:** `?mode=attack&country=X` — enables attack mode for a country
+- **postMessage commands (parent → map):**
+  - `highlight-hexes` — highlight valid target hexes on the map
+  - `clear-highlights` — remove all highlights
+  - `navigate-theater` — pan map to a theater
+  - `refresh-units` — reload unit positions after combat
+- **postMessage events (map → parent):**
+  - `hex-click` — user clicked a hex, returns coordinates
+
+### Attack Infrastructure (engine)
+- **`hex_range(row, col, distance)`** in `engine/map_config.py` — BFS range calculator returning all hexes within `distance` steps
+- **`ATTACK_RANGE`** dict in `engine/map_config.py` — canonical attack range per unit type (e.g., infantry: 1, artillery: 2, fighter: 3, etc.)
+- Valid targets computed server-side: units within range that belong to a different country
 
 ---
 
@@ -465,6 +490,14 @@ Participant submits action
 - Restart with full cleanup + rollback to round N
 - Two-column dashboard layout, 30vh events feed
 - Map + Public Screen links
+
+### Post-Phase Additions (2026-04-17)
+- **Auto-Attack toggle:** `sim_runs.auto_attack` (BOOLEAN DEFAULT FALSE). When ON, combat bypasses confirmation queue. Red pulsing danger style.
+- **Dice Mode toggle:** `sim_runs.dice_mode` toggle in Pending Actions area. "Dice: Auto" (OFF) vs "Dice: REAL" (ON, red pulsing). Ground + naval combat pause for physical dice input when ON.
+- **Attack targeting API:** `GET /api/sim/{id}/attack/valid-targets?unit_id=X` returns valid hexes
+- **`hex_range()` BFS:** range calculator in `map_config.py` + `ATTACK_RANGE` dict per unit type
+- **Map attack mode:** `?mode=attack&country=X` with postMessage protocol (hex-click, highlight-hexes, clear-highlights, navigate-theater, refresh-units)
+- All three toggles (auto-approve, auto-attack, dice mode) share red danger styling (`animate-pulse`, red glow shadow) via `POST /api/sim/{id}/mode`
 
 ### Architecture Fixes (2026-04-16)
 - **Individual unit model:** deployments 1 row = 1 unit, from canonical `units.csv` (345 units)

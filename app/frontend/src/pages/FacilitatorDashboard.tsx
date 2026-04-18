@@ -722,39 +722,47 @@ export function FacilitatorDashboard() {
                   }`} />
                   {simRun?.auto_approve ? 'AUTO' : 'Manual'}
                 </button>
+                <button
+                  onClick={() => {
+                    const newVal = !simRun?.auto_attack
+                    doAction('mode', { auto_advance: false, auto_approve: simRun?.auto_approve ?? false, auto_attack: newVal, dice_mode: simRun?.dice_mode ?? false })
+                  }}
+                  className={`relative inline-flex items-center gap-2 font-body text-caption font-bold uppercase tracking-wider px-3 py-1 rounded border transition-all ${
+                    simRun?.auto_attack
+                      ? 'bg-danger/30 text-danger border-danger/60 shadow-[0_0_8px_rgba(220,38,38,0.4)] animate-pulse'
+                      : 'bg-text-secondary/5 text-text-secondary border-border hover:border-text-secondary/40'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${
+                    simRun?.auto_attack ? 'bg-danger' : 'bg-text-secondary/40'
+                  }`} />
+                  {simRun?.auto_attack ? 'Auto-Attack' : 'Attack: Manual'}
+                </button>
+                <button
+                  onClick={() => {
+                    const newVal = !simRun?.dice_mode
+                    doAction('mode', { auto_advance: false, auto_approve: simRun?.auto_approve ?? false, auto_attack: simRun?.auto_attack ?? false, dice_mode: newVal })
+                  }}
+                  className={`relative inline-flex items-center gap-2 font-body text-caption font-bold uppercase tracking-wider px-3 py-1 rounded border transition-all ${
+                    simRun?.dice_mode
+                      ? 'bg-danger/30 text-danger border-danger/60 shadow-[0_0_8px_rgba(220,38,38,0.4)] animate-pulse'
+                      : 'bg-text-secondary/5 text-text-secondary border-border hover:border-text-secondary/40'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${
+                    simRun?.dice_mode ? 'bg-danger' : 'bg-text-secondary/40'
+                  }`} />
+                  {simRun?.dice_mode ? 'Dice: REAL' : 'Dice: Auto'}
+                </button>
               </div>
               {pendingActions.length === 0 ? (
                 <EmptyState message="No pending actions" />
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
                   {pendingActions.map((pa) => (
-                    <div
-                      key={pa.id}
-                      className="flex items-center justify-between bg-base rounded-lg px-4 py-3 border border-border"
-                    >
-                      <div>
-                        <span className="font-body text-body-sm text-text-primary font-medium">
-                          {pa.action_type}
-                        </span>
-                        <span className="font-body text-caption text-text-secondary ml-2">
-                          {pa.target_info || `${pa.role_id} (${pa.country_code})`}
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => doAction(`pending/${pa.id}/confirm`)}
-                          className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors"
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          onClick={() => doAction(`pending/${pa.id}/reject`)}
-                          className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors"
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </div>
+                    <PendingActionCard key={pa.id} pa={pa} simRun={simRun}
+                      onConfirm={(rolls) => doAction(`pending/${pa.id}/confirm`, rolls ? {precomputed_rolls: rolls} : {})}
+                      onReject={() => doAction(`pending/${pa.id}/reject`)} />
                   ))}
                 </div>
               )}
@@ -925,6 +933,186 @@ function DashboardSection({
       </div>
       {children}
     </section>
+  )
+}
+
+/* ── Pending Action Card — combat resolution with dice input ────────────── */
+
+const COMBAT_ACTIONS = new Set([
+  'ground_attack','air_strike','naval_combat','naval_bombardment','naval_blockade','launch_missile_conventional',
+])
+
+const COMBAT_LABELS: Record<string,string> = {
+  ground_attack:'Ground Attack', air_strike:'Air Strike', naval_combat:'Naval Combat',
+  naval_bombardment:'Naval Bombardment', launch_missile_conventional:'Missile Launch',
+}
+
+function PendingActionCard({pa, simRun, onConfirm, onReject}:{
+  pa: PendingAction; simRun: SimRun | null
+  onConfirm: (rolls?: Record<string,unknown>) => void; onReject: () => void
+}) {
+  const isCombat = COMBAT_ACTIONS.has(pa.action_type)
+  const diceMode = simRun?.dice_mode ?? false
+  // Only ground and naval use physical dice — air/bombardment/missile are probability-based
+  const DICE_COMBAT = new Set(['ground_attack', 'naval_combat'])
+  const needsDice = isCombat && diceMode && DICE_COMBAT.has(pa.action_type)
+  const [expanded, setExpanded] = useState(false)
+  const [diceValues, setDiceValues] = useState<Record<string,number>>({})
+  const payload = pa.payload || {}
+
+  // For ground combat: need attacker dice (up to 3) and defender dice (up to 2) per exchange
+  // Simplified: moderator enters one set of dice, engine handles the rest
+  const attackerUnits = (payload.attacker_unit_codes as string[])?.length ?? 1
+  const atkDiceCount = pa.action_type === 'ground_attack' ? Math.min(3, attackerUnits) : 1
+  const defDiceCount = pa.action_type === 'ground_attack' ? 2 : 1
+
+  const setDie = (key: string, val: string) => {
+    const n = parseInt(val)
+    if (n >= 1 && n <= 6) setDiceValues(prev => ({...prev, [key]: n}))
+    else if (val === '') setDiceValues(prev => {const c = {...prev}; delete c[key]; return c})
+  }
+
+  const allDiceFilled = needsDice && expanded
+    ? Array.from({length: atkDiceCount}, (_,i) => `atk_${i}`).every(k => diceValues[k] >= 1 && diceValues[k] <= 6)
+      && Array.from({length: defDiceCount}, (_,i) => `def_${i}`).every(k => diceValues[k] >= 1 && diceValues[k] <= 6)
+    : true
+
+  const handleConfirmWithDice = () => {
+    if (!needsDice) { onConfirm(); return }
+    const atkRolls = Array.from({length: atkDiceCount}, (_,i) => diceValues[`atk_${i}`] || 1)
+    const defRolls = Array.from({length: defDiceCount}, (_,i) => diceValues[`def_${i}`] || 1)
+
+    if (pa.action_type === 'ground_attack') {
+      // Ground: attacker and defender as arrays of arrays (one exchange)
+      onConfirm({attacker: [atkRolls], defender: [defRolls]})
+    } else if (pa.action_type === 'naval_combat') {
+      // Naval: single int per side
+      onConfirm({attacker: atkRolls[0], defender: defRolls[0]})
+    } else {
+      // Air/bombardment/missile: probability-based, no dice needed
+      onConfirm()
+    }
+  }
+
+  // Non-combat or auto-dice: simple card
+  if (!isCombat) {
+    return (
+      <div className="flex items-center justify-between bg-base rounded-lg px-4 py-3 border border-border">
+        <div>
+          <span className="font-body text-body-sm text-text-primary font-medium">{pa.action_type}</span>
+          <span className="font-body text-caption text-text-secondary ml-2">
+            {pa.target_info || `${pa.role_id} (${pa.country_code})`}
+          </span>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={() => onConfirm()} className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors">Confirm</button>
+          <button onClick={onReject} className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors">Reject</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Combat card
+  const targetRow = payload.target_row as number
+  const targetCol = payload.target_col as number
+
+  return (
+    <div className="bg-base rounded-lg border border-danger/30 overflow-hidden">
+      {/* Header — always visible */}
+      <div className="flex items-center justify-between px-4 py-3 cursor-pointer hover:bg-danger/5" onClick={() => setExpanded(!expanded)}>
+        <div className="flex items-center gap-2">
+          <span className="font-body text-caption font-bold text-danger uppercase">{COMBAT_LABELS[pa.action_type] ?? pa.action_type}</span>
+          <span className="font-body text-caption text-text-primary">{pa.country_code}</span>
+          {targetRow && <span className="font-data text-caption text-text-secondary">→ ({targetRow},{targetCol})</span>}
+          {needsDice && <span className="font-body text-caption text-warning bg-warning/10 px-1.5 py-0.5 rounded">DICE</span>}
+        </div>
+        <div className="flex items-center gap-2">
+          {!expanded && !needsDice && (
+            <>
+              <button onClick={(e) => {e.stopPropagation(); onConfirm()}} className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20">Confirm</button>
+              <button onClick={(e) => {e.stopPropagation(); onReject()}} className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20">Reject</button>
+            </>
+          )}
+          <span className="font-body text-caption text-text-secondary">{expanded ? '▲' : '▼'}</span>
+        </div>
+      </div>
+
+      {/* Expanded: combat details + dice input */}
+      {expanded && (
+        <div className="border-t border-border px-4 py-3 space-y-3">
+          {/* Details */}
+          <div className="grid grid-cols-3 gap-3 text-caption font-body">
+            <div><span className="text-text-secondary block">Attacker</span><span className="text-text-primary font-medium">{pa.country_code}</span></div>
+            <div><span className="text-text-secondary block">Target</span><span className="font-data text-danger">({targetRow},{targetCol})</span></div>
+            <div><span className="text-text-secondary block">Units</span>
+              <span className="font-data text-text-primary">
+                {(payload.attacker_unit_codes as string[])?.join(', ') || payload.attacker_unit_code as string || '?'}
+              </span>
+            </div>
+          </div>
+
+          {/* Dice input — only for ground/naval in dice mode */}
+          {needsDice && (pa.action_type === 'ground_attack' || pa.action_type === 'naval_combat') ? (
+            <div className="space-y-2">
+              <div className="bg-warning/5 border border-warning/20 rounded p-2">
+                <span className="font-body text-caption text-warning font-medium">Roll physical dice and enter results:</span>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="font-body text-caption text-text-secondary block mb-1">
+                    Attacker ({atkDiceCount} {atkDiceCount===1?'die':'dice'})
+                  </span>
+                  <div className="flex gap-2">
+                    {Array.from({length: atkDiceCount}, (_,i) => (
+                      <input key={`atk_${i}`} type="number" min={1} max={6}
+                        value={diceValues[`atk_${i}`] ?? ''}
+                        onChange={e => setDie(`atk_${i}`, e.target.value)}
+                        className="w-12 h-10 text-center font-data text-data-lg bg-base border border-border rounded focus:border-action focus:outline-none"
+                        placeholder="?" />
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <span className="font-body text-caption text-text-secondary block mb-1">
+                    Defender ({defDiceCount} {defDiceCount===1?'die':'dice'})
+                  </span>
+                  <div className="flex gap-2">
+                    {Array.from({length: defDiceCount}, (_,i) => (
+                      <input key={`def_${i}`} type="number" min={1} max={6}
+                        value={diceValues[`def_${i}`] ?? ''}
+                        onChange={e => setDie(`def_${i}`, e.target.value)}
+                        className="w-12 h-10 text-center font-data text-data-lg bg-base border border-border rounded focus:border-action focus:outline-none"
+                        placeholder="?" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : needsDice ? (
+            <div className="bg-base border border-border rounded p-2">
+              <span className="font-body text-caption text-text-secondary">
+                {pa.action_type === 'air_strike' ? 'Air strike uses probability — no dice needed.' :
+                 pa.action_type === 'naval_bombardment' ? 'Bombardment uses probability — no dice needed.' :
+                 'This combat type uses auto-generated rolls.'}
+              </span>
+            </div>
+          ) : null}
+
+          {/* Action buttons */}
+          <div className="flex gap-2 pt-1">
+            <button onClick={handleConfirmWithDice}
+              disabled={needsDice && (pa.action_type === 'ground_attack' || pa.action_type === 'naval_combat') && !allDiceFilled}
+              className="font-body text-caption font-bold uppercase bg-success/10 text-success px-4 py-2 rounded hover:bg-success/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              {needsDice ? 'Resolve with Dice' : 'Confirm Attack'}
+            </button>
+            <button onClick={onReject}
+              className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-2 rounded hover:bg-danger/20 transition-colors">
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 

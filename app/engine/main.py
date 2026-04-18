@@ -221,6 +221,333 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
     return {"events": combat, "count": len(combat)}
 
 
+@app.get("/api/sim/{sim_id}/attack/valid-targets")
+async def get_valid_attack_targets(
+    sim_id: str,
+    unit_id: str,
+    theater: Optional[str] = None,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Return hexes a unit can attack, plus units at source hex for selection.
+
+    When ``theater`` is provided, adjacency is computed in theater coordinates
+    (10x10 grid) instead of global coordinates. This is required for theater-level
+    combat where multiple theater cells map to the same global hex.
+
+    For ground/naval/air: returns reachable hexes that contain enemy units.
+    For naval: also distinguishes naval_combat vs bombardment targets.
+    For strategic_missile: all hexes with enemy units (global range).
+
+    Response: {source, unit, attack_type, targets: [{row, col, enemies: [...]}]}
+    """
+    from engine.services.supabase import get_client
+    from engine.config.map_config import hex_range, ATTACK_RANGE
+
+    client = get_client()
+
+    # Load the selected unit (active or embarked)
+    dep = client.table("deployments") \
+        .select("*") \
+        .eq("sim_run_id", sim_id) \
+        .eq("unit_id", unit_id) \
+        .in_("unit_status", ["active", "embarked"]) \
+        .limit(1).execute().data
+    if not dep:
+        raise HTTPException(status_code=404, detail=f"Unit {unit_id} not found or not active/embarked")
+    unit = dep[0]
+
+    utype = unit["unit_type"]
+    country = unit["country_id"]
+    src_row = unit.get("global_row")
+    src_col = unit.get("global_col")
+
+    # Embarked units: resolve position from carrier
+    if src_row is None or src_col is None:
+        carrier_id = unit.get("embarked_on")
+        if carrier_id:
+            carrier = client.table("deployments") \
+                .select("global_row,global_col") \
+                .eq("sim_run_id", sim_id) \
+                .eq("unit_id", carrier_id) \
+                .eq("unit_status", "active") \
+                .limit(1).execute().data
+            if carrier:
+                src_row = carrier[0]["global_row"]
+                src_col = carrier[0]["global_col"]
+    if src_row is None or src_col is None:
+        raise HTTPException(status_code=400, detail="Unit has no map position (and no carrier found)")
+
+    # Check air unit already attacked this round
+    if utype == "tactical_air":
+        run = client.table("sim_runs").select("current_round").eq("id", sim_id).limit(1).execute().data
+        round_num = run[0]["current_round"] if run else 0
+        already = client.table("observatory_events") \
+            .select("id") \
+            .eq("sim_run_id", sim_id) \
+            .eq("round_num", round_num) \
+            .eq("event_type", "air_strike") \
+            .execute().data or []
+        # Check if THIS unit was in any air strike this round
+        for evt in already:
+            pass  # TODO: check payload for unit_id match — for now allow
+        # Simplified: check if country already used air from this hex
+        # Full tracking deferred to combat resolution
+
+    # Get attack range
+    attack_range = ATTACK_RANGE.get(utype, 1)
+    from engine.config.map_config import THEATERS
+
+    # Theater mode: compute adjacency in theater coordinates (10x10)
+    use_theater = theater and unit.get("theater") == theater and unit.get("theater_row") is not None
+    if use_theater:
+        t_row = unit["theater_row"]
+        t_col = unit["theater_col"]
+        t_info = THEATERS.get(theater, {"rows": 10, "cols": 10})
+        reachable_theater = hex_range(t_row, t_col, attack_range, t_info["rows"], t_info["cols"])
+
+        # Load enemies in this theater
+        all_enemies = client.table("deployments") \
+            .select("unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col") \
+            .eq("sim_run_id", sim_id).eq("theater", theater) \
+            .neq("country_id", country).eq("unit_status", "active") \
+            .execute().data or []
+
+        enemy_by_theater_hex: dict[tuple[int, int], list[dict]] = {}
+        for e in all_enemies:
+            tr, tc = e.get("theater_row"), e.get("theater_col")
+            if tr is None or tc is None:
+                continue
+            enemy_by_theater_hex.setdefault((tr, tc), []).append(e)
+
+        targets = []
+        for r, c in reachable_theater:
+            enemies_here = enemy_by_theater_hex.get((r, c), [])
+            if not enemies_here:
+                continue
+            theater_info = {"theater": theater, "theater_row": r, "theater_col": c}
+            # Use global coords from first enemy for engine dispatch
+            sample = enemies_here[0]
+            g_row = sample.get("global_row", src_row)
+            g_col = sample.get("global_col", src_col)
+
+            if utype == "ground":
+                valid = [e for e in enemies_here if e["unit_type"] == "ground"]
+                if valid:
+                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "ground_attack", "enemies": valid})
+            elif utype == "tactical_air":
+                targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "air_strike", "enemies": enemies_here})
+            elif utype == "naval":
+                naval_enemies = [e for e in enemies_here if e["unit_type"] == "naval"]
+                ground_enemies = [e for e in enemies_here if e["unit_type"] == "ground"]
+                if naval_enemies:
+                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "naval_combat", "enemies": naval_enemies})
+                if ground_enemies:
+                    targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "naval_bombardment", "enemies": ground_enemies})
+            elif utype == "strategic_missile":
+                targets.append({"row": g_row, "col": g_col, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies_here})
+
+        # Friendlies at same theater cell
+        friendlies_at_source = client.table("deployments") \
+            .select("unit_id, unit_type") \
+            .eq("sim_run_id", sim_id).eq("country_id", country) \
+            .eq("theater", theater).eq("theater_row", t_row).eq("theater_col", t_col) \
+            .in_("unit_status", ["active", "embarked"]) \
+            .execute().data or []
+    else:
+        # Global mode: compute adjacency in global coordinates
+        reachable = hex_range(src_row, src_col, attack_range)
+
+        all_enemies = client.table("deployments") \
+            .select("unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col") \
+            .eq("sim_run_id", sim_id) \
+            .neq("country_id", country) \
+            .eq("unit_status", "active") \
+            .execute().data or []
+
+        enemy_by_hex: dict[tuple[int, int], list[dict]] = {}
+        for e in all_enemies:
+            er, ec = e.get("global_row"), e.get("global_col")
+            if er is None or ec is None:
+                continue
+            enemy_by_hex.setdefault((er, ec), []).append(e)
+
+        targets = []
+        for r, c in reachable:
+            enemies_here = enemy_by_hex.get((r, c), [])
+            if not enemies_here:
+                continue
+            sample = enemies_here[0]
+            theater_info = {}
+            if sample.get("theater"):
+                theater_info = {"theater": sample["theater"], "theater_row": sample.get("theater_row"), "theater_col": sample.get("theater_col")}
+
+            if utype == "ground":
+                valid = [e for e in enemies_here if e["unit_type"] == "ground"]
+                if valid:
+                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "ground_attack", "enemies": valid})
+            elif utype == "tactical_air":
+                targets.append({"row": r, "col": c, **theater_info, "attack_type": "air_strike", "enemies": enemies_here})
+            elif utype == "naval":
+                naval_enemies = [e for e in enemies_here if e["unit_type"] == "naval"]
+                ground_enemies = [e for e in enemies_here if e["unit_type"] == "ground"]
+                if naval_enemies:
+                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "naval_combat", "enemies": naval_enemies})
+                if ground_enemies:
+                    targets.append({"row": r, "col": c, **theater_info, "attack_type": "naval_bombardment", "enemies": ground_enemies})
+            elif utype == "strategic_missile":
+                targets.append({"row": r, "col": c, **theater_info, "attack_type": "launch_missile_conventional", "enemies": enemies_here})
+
+        friendlies_at_source = client.table("deployments") \
+            .select("unit_id, unit_type") \
+            .eq("sim_run_id", sim_id).eq("country_id", country) \
+            .eq("global_row", src_row).eq("global_col", src_col) \
+            .in_("unit_status", ["active", "embarked"]) \
+            .execute().data or []
+
+    return {
+        "source": {"row": src_row, "col": src_col,
+                   "theater": unit.get("theater"), "theater_row": unit.get("theater_row"), "theater_col": unit.get("theater_col")},
+        "unit": {"unit_id": unit["unit_id"], "unit_type": utype, "country_id": country},
+        "friendlies_at_source": friendlies_at_source,
+        "targets": targets,
+    }
+
+
+@app.get("/api/sim/{sim_id}/attack/preview")
+async def get_attack_preview(
+    sim_id: str,
+    attacker_unit_ids: str,
+    target_row: int,
+    target_col: int,
+    attack_type: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Return combat modifiers and estimated win probability for a planned attack.
+
+    Query params:
+        attacker_unit_ids: comma-separated unit_ids (e.g. "sar_g_15,sar_g_16")
+        target_row, target_col: target hex (1-indexed)
+        attack_type: ground_attack | air_strike | naval_combat | naval_bombardment | launch_missile_conventional
+    """
+    from engine.services.supabase import get_client
+
+    client = get_client()
+    unit_ids = [u.strip() for u in attacker_unit_ids.split(",") if u.strip()]
+
+    # Load attacker units (active or embarked)
+    atk_deps = client.table("deployments").select("unit_id,country_id,unit_type,global_row,global_col") \
+        .eq("sim_run_id", sim_id).in_("unit_status", ["active", "embarked"]).in_("unit_id", unit_ids).execute().data or []
+    if not atk_deps:
+        raise HTTPException(status_code=404, detail="Attacker units not found")
+
+    attacker_country = atk_deps[0]["country_id"]
+    atk_count = len(atk_deps)
+
+    # Load defender units at target hex
+    def_deps = client.table("deployments").select("unit_id,country_id,unit_type,global_row,global_col") \
+        .eq("sim_run_id", sim_id).eq("global_row", target_row).eq("global_col", target_col) \
+        .eq("unit_status", "active").neq("country_id", attacker_country).execute().data or []
+
+    # Filter by attack type
+    if attack_type == "ground_attack":
+        def_ground = [d for d in def_deps if d["unit_type"] == "ground"]
+        def_count = len(def_ground)
+    elif attack_type == "naval_combat":
+        def_naval = [d for d in def_deps if d["unit_type"] == "naval"]
+        def_count = len(def_naval)
+    elif attack_type == "air_strike":
+        def_count = len(def_deps)  # air can hit anything
+    else:
+        def_count = len(def_deps)
+
+    # Load country data for modifiers
+    atk_country = client.table("countries").select("stability,ai_level,nuclear_level") \
+        .eq("sim_run_id", sim_id).eq("id", attacker_country).limit(1).execute().data
+    atk_stability = atk_country[0]["stability"] if atk_country else 5.0
+    atk_ai = atk_country[0].get("ai_level", 0) if atk_country else 0
+
+    defender_countries = list(set(d["country_id"] for d in def_deps))
+    def_stability = 5.0
+    def_ai = 0
+    if defender_countries:
+        def_country = client.table("countries").select("stability,ai_level") \
+            .eq("sim_run_id", sim_id).eq("id", defender_countries[0]).limit(1).execute().data
+        if def_country:
+            def_stability = def_country[0]["stability"]
+            def_ai = def_country[0].get("ai_level", 0)
+
+    # Check for air defense at target hex
+    ad_at_target = [d for d in def_deps if d["unit_type"] == "air_defense"]
+    has_ad = len(ad_at_target) > 0
+
+    # Build modifier breakdown
+    modifiers = {"attacker": [], "defender": []}
+    atk_total = 0
+    def_total = 0
+
+    if attack_type in ("ground_attack", "naval_combat"):
+        # AI L4 bonus
+        if atk_ai >= 4:
+            modifiers["attacker"].append({"label": "AI Level 4", "value": +1})
+            atk_total += 1
+        if def_ai >= 4:
+            modifiers["defender"].append({"label": "AI Level 4", "value": +1})
+            def_total += 1
+        # Low morale
+        if atk_stability <= 3:
+            modifiers["attacker"].append({"label": "Low morale (stability ≤3)", "value": -1})
+            atk_total -= 1
+        if def_stability <= 3:
+            modifiers["defender"].append({"label": "Low morale (stability ≤3)", "value": -1})
+            def_total -= 1
+        # Die hard / air support (ground only, simplified — would need zone data)
+        if attack_type == "ground_attack":
+            # Check for defender air at target
+            def_air_at_target = [d for d in def_deps if d["unit_type"] == "tactical_air"]
+            if def_air_at_target:
+                modifiers["defender"].append({"label": "Air support", "value": +1})
+                def_total += 1
+
+    # Estimate win probability
+    win_pct = 50  # base
+    if attack_type == "ground_attack":
+        # RISK dice: documented rates from contract
+        # No mods: ~42% attacker. Def+1: ~28%. Def+2: ~17%. Atk-1 + Def+2: ~8%
+        net_mod = atk_total - def_total  # positive favors attacker
+        base_rates = {0: 42, 1: 55, 2: 65, -1: 28, -2: 17, -3: 8}
+        win_pct = base_rates.get(net_mod, max(5, min(85, 42 + net_mod * 13)))
+        # Adjust for unit count advantage
+        if atk_count > def_count:
+            win_pct = min(90, win_pct + (atk_count - def_count) * 8)
+        elif def_count > atk_count:
+            win_pct = max(5, win_pct - (def_count - atk_count) * 10)
+    elif attack_type == "air_strike":
+        hit_pct = 6 if has_ad else 12  # per aircraft
+        downed_pct = 15 if has_ad else 0
+        win_pct = min(95, hit_pct * atk_count)
+        modifiers["attacker"].append({"label": f"Hit chance per aircraft", "value": f"{hit_pct}%"})
+        if has_ad:
+            modifiers["attacker"].append({"label": f"Downed chance per aircraft", "value": f"-{downed_pct}%"})
+            modifiers["defender"].append({"label": "Air Defense present", "value": "halves hit rate"})
+    elif attack_type == "naval_combat":
+        # 1v1 dice — ~42% attacker without mods
+        net_mod = atk_total - def_total
+        base_rates = {0: 42, 1: 58, -1: 28, 2: 72, -2: 17}
+        win_pct = base_rates.get(net_mod, max(5, min(85, 42 + net_mod * 15)))
+    elif attack_type == "naval_bombardment":
+        win_pct = min(95, 10 * atk_count)
+        modifiers["attacker"].append({"label": "Hit chance per naval unit", "value": "10%"})
+
+    return {
+        "attack_type": attack_type,
+        "attacker": {"country": attacker_country, "units": atk_count, "modifier_total": atk_total},
+        "defender": {"countries": defender_countries, "units": def_count, "modifier_total": def_total},
+        "modifiers": modifiers,
+        "win_probability": win_pct,
+        "has_air_defense": has_ad,
+    }
+
+
 @app.get("/api/sim/{sim_id}/world", response_model=APIResponse)
 async def get_world_state(sim_id: str, round_num: Optional[int] = None):
     """Get world state snapshot."""
@@ -410,8 +737,8 @@ async def create_sim_run(body: SimRunCreateRequest, user: AuthUser = Depends(req
 # ---------------------------------------------------------------------------
 
 @app.get("/api/sim/{sim_id}/state", response_model=APIResponse)
-async def get_sim_state(sim_id: str, user: AuthUser = Depends(get_current_user)):
-    """Get current simulation runtime state (round, phase, timer)."""
+async def get_sim_state(sim_id: str):
+    """Get current simulation runtime state (round, phase, timer). Public — no auth needed (used by map iframe)."""
     from engine.services.sim_run_manager import get_timer_info
     try:
         return APIResponse(data=get_timer_info(sim_id))
@@ -658,13 +985,18 @@ async def sim_set_mode(
     auto_advance = body.get("auto_advance", False)
     auto_approve = body.get("auto_approve", False)
     dice_mode = body.get("dice_mode", False)
+    auto_attack = body.get("auto_attack", False)
     try:
         state = set_mode(sim_id, auto_advance=auto_advance, auto_approve=auto_approve)
         from engine.services.supabase import get_client
-        get_client().table("sim_runs").update({"dice_mode": dice_mode}).eq("id", sim_id).execute()
+        get_client().table("sim_runs").update({
+            "dice_mode": dice_mode,
+            "auto_attack": auto_attack,
+        }).eq("id", sim_id).execute()
         state["dice_mode"] = dice_mode
-        logger.info("Sim %s mode: auto_advance=%s auto_approve=%s dice_mode=%s by %s",
-                     sim_id, auto_advance, auto_approve, dice_mode, user.id)
+        state["auto_attack"] = auto_attack
+        logger.info("Sim %s mode: auto_advance=%s auto_approve=%s dice_mode=%s auto_attack=%s by %s",
+                     sim_id, auto_advance, auto_approve, dice_mode, auto_attack, user.id)
         return APIResponse(data=state)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -803,6 +1135,8 @@ ACTION_CATEGORIES: dict[str, str] = {
     "reassign_types": "political",
     "self_nominate": "political",
     "cast_vote": "political",
+    # Diplomatic — war
+    "declare_war": "diplomatic",
 }
 
 
@@ -879,10 +1213,22 @@ async def submit_action(
 
     # 4a. Check if action requires moderator confirmation
     auto_approve = run.get("auto_approve", False)
-    if body.action_type in ACTIONS_REQUIRING_CONFIRMATION and not auto_approve:
+    auto_attack = run.get("auto_attack", False)
+    # Combat actions require confirmation unless auto_attack is ON
+    needs_confirmation = (
+        (body.action_type in ACTIONS_REQUIRING_CONFIRMATION and not auto_approve)
+        or (body.action_type in COMBAT_DICE_ACTIONS and not auto_attack)
+    )
+    if needs_confirmation:
         # Queue for moderator approval instead of immediate dispatch
         target = body.params.get("target_role", body.params.get("target_country", ""))
-        target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
+        # Build descriptive target_info for combat actions
+        if body.action_type in COMBAT_DICE_ACTIONS:
+            tr = body.params.get("target_row", "?")
+            tc = body.params.get("target_col", "?")
+            target_info = f"{role['character_name']} ({body.country_code}) → ({tr},{tc})"
+        else:
+            target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
 
         client.table("pending_actions").insert({
             "sim_run_id": sim_id,
@@ -989,13 +1335,14 @@ async def get_pending_actions(sim_id: str, user: AuthUser = Depends(get_current_
 async def confirm_pending_action(
     sim_id: str, action_id: str,
     user: AuthUser = Depends(require_moderator),
-    precomputed_rolls: Optional[dict] = None,
+    body: Optional[dict] = None,
 ):
     """Approve a pending action — dispatches it to the engine.
 
-    For combat actions with dice_mode, pass precomputed_rolls:
-      {"attacker": [[5,3,2], [6,4]], "defender": [[6,2], [4,1]]}
+    For combat actions with dice_mode, pass body:
+      {"precomputed_rolls": {"attacker": [[5,3,2], [6,4]], "defender": [[6,2], [4,1]]}}
     """
+    precomputed_rolls = body.get("precomputed_rolls") if body else None
     from engine.services.action_dispatcher import dispatch_action
     from engine.services.common import write_event
     from engine.services.supabase import get_client
