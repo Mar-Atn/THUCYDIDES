@@ -838,6 +838,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'basing_rights') return <BasingRightsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'declare_war') return <DeclareWarForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'naval_blockade') return <BlockadeForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'martial_law') return <MartialLawForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -1318,6 +1319,96 @@ interface ChokepointInfo {
   ground_ok: boolean
   blockade: { imposer: string; level: string; established_round: number } | null
   can_establish: boolean
+}
+
+/* ── Martial Law Form ──────────────────────────────────────────────────── */
+
+const MARTIAL_LAW_POOLS: Record<string,number> = {
+  sarmatia: 10, cathay: 10, persia: 8, ruthenia: 6,
+}
+
+function MartialLawForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const pool = MARTIAL_LAW_POOLS[countryId]
+  const eligible = pool !== undefined
+  const [alreadyDeclared,setAlreadyDeclared]=useState<boolean|null>(null)
+  const [submitting,setSubmitting]=useState(false)
+  const [result,setResult]=useState<Record<string,unknown>|null>(null)
+  const [error,setError]=useState<string|null>(null)
+
+  useEffect(()=>{
+    // Check if already declared this sim
+    supabase.from('countries').select('martial_law_declared').eq('sim_run_id',simId).eq('id',countryId).limit(1)
+      .then(({data})=>setAlreadyDeclared(data?.[0]?.martial_law_declared ?? false))
+  },[simId,countryId])
+
+  const handleDeclare = async () => {
+    if(!confirm(`Declare MARTIAL LAW?\n\n• ${pool} conscript ground units added to reserve\n• Stability: -1.0\n• War tiredness: +1.0\n• One-time only — cannot be undone`)) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId,'martial_law',roleId,countryId,{})
+      setResult(res)
+    } catch(e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Martial Law</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+
+      {!eligible ? (
+        <div className="bg-card border border-border rounded-lg p-6">
+          <p className="font-body text-body-sm text-text-secondary">Your country is not eligible for martial law declaration.</p>
+        </div>
+      ) : alreadyDeclared ? (
+        <div className="bg-warning/5 border border-warning/20 rounded-lg p-6">
+          <p className="font-body text-body-sm text-warning font-medium">Martial law has already been declared this simulation.</p>
+        </div>
+      ) : result ? (
+        <div className="bg-success/5 border border-success/20 rounded-lg p-6 space-y-2">
+          <h3 className="font-heading text-body-sm text-success font-bold uppercase">Martial Law Declared</h3>
+          <p className="font-body text-body-sm text-text-primary">{String(result.narrative??'')}</p>
+          <div className="font-body text-caption text-text-secondary space-y-1">
+            <div>Units spawned: <span className="text-action font-medium">{String(result.units_spawned??pool)} ground conscripts → reserve</span></div>
+            <div>Stability cost: <span className="text-danger font-medium">-1.0</span></div>
+            <div>War tiredness: <span className="text-warning font-medium">+1.0</span></div>
+          </div>
+          <button onClick={onSubmitted} className="font-body text-caption text-action hover:underline mt-2">← Return to Actions</button>
+        </div>
+      ) : (
+        <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+            <p className="font-body text-body-sm text-text-primary">
+              Declaring martial law is a <strong className="text-danger">one-time, irreversible</strong> action.
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-action">{pool}</div>
+              <div className="font-body text-caption text-text-secondary">Conscript units</div>
+            </div>
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-danger">-1.0</div>
+              <div className="font-body text-caption text-text-secondary">Stability</div>
+            </div>
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-warning">+1.0</div>
+              <div className="font-body text-caption text-text-secondary">War tiredness</div>
+            </div>
+          </div>
+          <button onClick={handleDeclare} disabled={submitting}
+            className="w-full font-body text-caption font-bold uppercase py-3 rounded bg-danger text-white hover:bg-danger/80 transition-colors disabled:opacity-50">
+            {submitting ? 'Declaring...' : 'Declare Martial Law'}
+          </button>
+          {error && <p className="font-body text-caption text-danger">{error}</p>}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
