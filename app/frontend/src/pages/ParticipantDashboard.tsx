@@ -1465,6 +1465,7 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [phase, setPhase] = useState<'idle'|'countdown'|'result'>('idle')
   const [nuclearLevel, setNuclearLevel] = useState<number>(0)
   const [nuclearConfirmed, setNuclearConfirmed] = useState<boolean>(false)
+  const [nuclearProgress, setNuclearProgress] = useState<number>(0)
   const [loading, setLoading] = useState(true)
   const [testType, setTestType] = useState<'underground'|'surface'>('underground')
   const [targetHex, setTargetHex] = useState<{row:number,col:number}|null>(null)
@@ -1473,13 +1474,14 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [error, setError] = useState<string|null>(null)
 
   useEffect(() => {
-    supabase.from('countries').select('nuclear_level, nuclear_confirmed')
+    supabase.from('countries').select('nuclear_level, nuclear_confirmed, nuclear_rd_progress')
       .eq('sim_run_id', simId).eq('id', countryId).limit(1)
       .then(({data, error: err}) => {
         if (err) { setError('Failed to load nuclear status'); setLoading(false); return }
         const row = data?.[0]
         setNuclearLevel(row?.nuclear_level ?? 0)
         setNuclearConfirmed(row?.nuclear_confirmed === true)
+        setNuclearProgress(row?.nuclear_rd_progress ?? 0)
         setLoading(false)
       })
   }, [simId, countryId])
@@ -1652,33 +1654,37 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
         <div className="bg-card border border-border rounded-lg p-6">
           <p className="font-body text-body-sm text-text-secondary">Your country does not have nuclear capability (level 0). Invest in nuclear R&D first.</p>
         </div>
-      ) : nuclearConfirmed ? (
-        <div className="bg-card border border-border rounded-lg p-6" style={{backgroundColor:'rgba(0,255,65,0.05)', borderColor:'rgba(0,255,65,0.2)'}}>
-          <p className="font-body text-body-sm" style={{color:'#00FF41', fontFamily:'JetBrains Mono, monospace'}}>
-            NUCLEAR CAPABILITY CONFIRMED AT LEVEL {nuclearLevel}
-          </p>
-          <p className="font-body text-caption text-text-secondary mt-2">
-            No further testing required at this level. A new test is needed if your nuclear level increases.
-          </p>
-        </div>
       ) : (
         <div style={{backgroundColor:'#0A0E1A', borderRadius:'0.5rem', padding:'1.5rem'}}>
-          {/* Status */}
+          {/* Nuclear Status Panel */}
           <div style={{
-            display:'grid', gridTemplateColumns:'1fr 1fr', gap:'1rem', marginBottom:'1.5rem',
+            display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'1rem', marginBottom:'1.5rem',
+            padding:'1rem', borderRadius:'0.375rem', border:'1px solid rgba(255,255,255,0.1)',
           }}>
-            <div style={{backgroundColor:'rgba(255,255,255,0.05)', borderRadius:'0.5rem', padding:'1rem', textAlign:'center'}}>
+            <div style={{textAlign:'center'}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'0.7rem', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.1em'}}>Technology Level</div>
               <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'2rem', color:'#F59E0B'}}>{nuclearLevel}</div>
-              <div style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)'}}>Nuclear Level</div>
             </div>
-            <div style={{backgroundColor:'rgba(255,255,255,0.05)', borderRadius:'0.5rem', padding:'1rem', textAlign:'center'}}>
-              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'2rem', color:'#FF6B35'}}>
-                {nuclearLevel >= 2 ? '95%' : '70%'}
+            <div style={{textAlign:'center'}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'0.7rem', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.1em'}}>Status</div>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'1rem', marginTop:'0.5rem', color: nuclearConfirmed ? '#00FF41' : '#F59E0B'}}>
+                {nuclearConfirmed ? 'CONFIRMED' : 'NOT CONFIRMED'}
               </div>
-              <div style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)'}}>Success Probability</div>
+            </div>
+            <div style={{textAlign:'center'}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'0.7rem', color:'#9CA3AF', textTransform:'uppercase', letterSpacing:'0.1em'}}>Progress to Next</div>
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'1rem', marginTop:'0.5rem', color:'#60A5FA'}}>
+                {(nuclearProgress * 100).toFixed(0)}%
+              </div>
             </div>
           </div>
 
+          {/* Test options — always available */}
+          <div style={{marginBottom:'0.5rem', fontFamily:'JetBrains Mono, monospace', fontSize:'0.75rem', color:'#9CA3AF'}}>
+            {nuclearConfirmed
+              ? 'Level confirmed. A test can still be conducted as a political signal.'
+              : 'A successful test is required to confirm current technology level.'}
+          </div>
           {/* Effects info */}
           <div style={{
             backgroundColor:'rgba(255,60,20,0.05)', border:'1px solid rgba(255,60,20,0.2)',

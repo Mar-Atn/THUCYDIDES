@@ -1098,8 +1098,7 @@ def _execute_nuclear_test(sim_run_id: str, round_num: int, action: dict) -> dict
     # 2. Validate
     if nuclear_level < 1:
         return {"success": False, "narrative": "Must have nuclear_level >= 1 to test"}
-    if nuclear_confirmed:
-        return {"success": False, "narrative": "Nuclear capability already confirmed at this level"}
+    # Confirmed countries CAN still test as a political signal (stability effects apply)
 
     # 3. Roll for success
     prob = _NUKE_TEST_PROB_L2_PLUS if nuclear_level >= 2 else _NUKE_TEST_PROB_L1
