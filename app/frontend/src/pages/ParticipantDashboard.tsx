@@ -394,6 +394,18 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       onDone={()=>{setReviewTxn(null);setPendingTxns(prev=>prev.filter(t=>t.id!==txnToReview.id))}} />
   }
 
+  // Agreement signing handler (must be before early return)
+  const handleSignAgreement = async (agrId:string, confirm:boolean) => {
+    setSigningAgr(agrId)
+    try {
+      await submitAction(simId,'sign_agreement',roleId,countryId,{
+        agreement_id:agrId, confirm, comments:'',
+      })
+      setPendingAgreements(prev=>prev.filter(a=>a.id!==agrId))
+    } catch(e) { alert(e instanceof Error?e.message:'Failed') }
+    finally { setSigningAgr(null) }
+  }
+
   // If reviewing an agreement, show the review screen
   const agrToReview = reviewAgr ? pendingAgreements.find(a=>a.id===reviewAgr) : null
   if (agrToReview) {
@@ -453,17 +465,6 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
         </div>
       </div>
     )
-  }
-
-  const handleSignAgreement = async (agrId:string, confirm:boolean) => {
-    setSigningAgr(agrId)
-    try {
-      await submitAction(simId,'sign_agreement',roleId,countryId,{
-        agreement_id:agrId, confirm, comments:'',
-      })
-      setPendingAgreements(prev=>prev.filter(a=>a.id!==agrId))
-    } catch(e) { alert(e instanceof Error?e.message:'Failed') }
-    finally { setSigningAgr(null) }
   }
 
   const hasExpected = pendingTxns.length > 0 || pendingAgreements.length > 0
