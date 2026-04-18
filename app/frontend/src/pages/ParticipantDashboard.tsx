@@ -393,7 +393,69 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       onDone={()=>{setReviewTxn(null);setPendingTxns(prev=>prev.filter(t=>t.id!==txnToReview.id))}} />
   }
 
+  // If reviewing an agreement, show the review screen
+  const agrToReview = reviewAgr ? pendingAgreements.find(a=>a.id===reviewAgr) : null
+  if (agrToReview) {
+    const typeLabel = AGREEMENT_TYPES.find(t=>t.value===agrToReview.agreement_type)?.label ?? agrToReview.agreement_type
+    const relationLabel = AGREEMENT_TYPES.find(t=>t.value===agrToReview.agreement_type)?.relation ?? ''
+    const sigs = agrToReview.signatures as Record<string,{confirmed?:boolean;role_id?:string;signed_at?:string}>
+    const signedCountries = Object.entries(sigs).filter(([,s])=>s?.confirmed).map(([cc])=>cc)
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h2 text-text-primary">Agreement Proposal</h2>
+          <button onClick={()=>setReviewAgr(null)} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+        </div>
+
+        <div className="bg-card border-2 border-action/20 rounded-lg p-6 space-y-4">
+          <div className="flex items-center gap-3">
+            <span className="font-heading text-h3 text-text-primary">{agrToReview.agreement_name}</span>
+            <span className="font-body text-caption bg-action/10 text-action px-2 py-0.5 rounded capitalize">{typeLabel}</span>
+          </div>
+
+          <div className="font-body text-caption text-text-secondary">
+            Proposed by <strong className="text-text-primary">{agrToReview.proposer_country_code}</strong> ·
+            Sets relationship to <strong className="text-text-primary">{relationLabel}</strong>
+          </div>
+
+          <div className="font-body text-caption text-text-secondary">
+            Signatories: {(agrToReview.signatories||[]).map(s=>
+              <span key={s} className={`inline-block mr-2 ${signedCountries.includes(s)?'text-success':'text-text-primary'}`}>
+                {s}{signedCountries.includes(s)?' ✓':''}
+              </span>
+            )}
+          </div>
+
+          {agrToReview.terms&&<div className="bg-base border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-2">Terms</h3>
+            <p className="font-body text-body-sm text-text-primary leading-relaxed whitespace-pre-wrap">{agrToReview.terms}</p>
+          </div>}
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button onClick={async()=>{
+            setSigningAgr(agrToReview.id)
+            await handleSignAgreement(agrToReview.id,true)
+            setReviewAgr(null); setPendingAgreements(prev=>prev.filter(a=>a.id!==agrToReview.id))
+          }} disabled={signingAgr===agrToReview.id}
+            className="bg-success text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-success/90 disabled:opacity-50 transition-colors">
+            {signingAgr===agrToReview.id?'Signing...':'Sign Agreement'}</button>
+          <button onClick={async()=>{
+            setSigningAgr(agrToReview.id)
+            await handleSignAgreement(agrToReview.id,false)
+            setReviewAgr(null); setPendingAgreements(prev=>prev.filter(a=>a.id!==agrToReview.id))
+          }} disabled={signingAgr===agrToReview.id}
+            className="bg-danger/10 text-danger font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-danger/20 transition-colors">
+            Decline</button>
+          <button onClick={()=>setReviewAgr(null)} className="font-body text-body-sm text-text-secondary hover:text-text-primary px-4 py-2.5">Cancel</button>
+        </div>
+      </div>
+    )
+  }
+
   const [signingAgr, setSigningAgr] = useState<string|null>(null)
+  const [reviewAgr, setReviewAgr] = useState<string|null>(null)
 
   const handleSignAgreement = async (agrId:string, confirm:boolean) => {
     setSigningAgr(agrId)
@@ -424,18 +486,12 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
               </button>
             )}
             {pendingAgreements.map(agr=>
-              <div key={agr.id} className="bg-card border border-action/30 rounded-lg px-4 py-3">
-                <span className="font-body text-body-sm text-text-primary font-medium block">{agr.agreement_type.replace('_',' ')}</span>
+              <button key={agr.id} onClick={()=>setReviewAgr(agr.id)}
+                className="text-left bg-card hover:bg-action/5 border border-action/30 hover:border-action/50 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-text-primary font-medium block capitalize">{agr.agreement_type.replace('_',' ')}</span>
                 <span className="font-body text-caption text-text-secondary block">"{agr.agreement_name}" — by {agr.proposer_country_code}</span>
-                <div className="flex gap-2 mt-2">
-                  <button onClick={()=>handleSignAgreement(agr.id,true)} disabled={signingAgr===agr.id}
-                    className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors">
-                    {signingAgr===agr.id?'...':'Sign'}</button>
-                  <button onClick={()=>handleSignAgreement(agr.id,false)} disabled={signingAgr===agr.id}
-                    className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors">
-                    Decline</button>
-                </div>
-              </div>
+                <span className="font-body text-caption text-action mt-1 block">Click to review</span>
+              </button>
             )}
           </div>
         }
