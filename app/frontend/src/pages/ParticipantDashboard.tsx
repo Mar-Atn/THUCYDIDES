@@ -2512,12 +2512,28 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         syncMapPreview(newMoves)
         setSelectedUnit(null); setHexUnits([]); setError(null)
       } else {
-        // No unit selected — clicking hex with own units = withdraw mode
-        const myUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
-          .filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id))
-        if (myUnits.length > 0) {
-          setHexUnits(myUnits)
+        // Show all own units at this hex after pending moves applied:
+        // Original units (from map) minus withdrawn, plus units deployed here
+        const row = msg.row as number, col = msg.col as number
+        const mapUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+        // Exclude already-withdrawn units
+        const afterWithdraw = mapUnits.filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id && m.action === 'withdraw'))
+        // Add units deployed to THIS hex
+        const deployedHere = moves.filter(m => m.action === 'deploy' && m.target_row === row && m.target_col === col)
+          .map(m => ({unit_id: m.unit_id, unit_type: m.unit_type}))
+        // Combine, deduplicate
+        const allHere = [...afterWithdraw, ...deployedHere.filter(d => !afterWithdraw.some((u:{unit_id:string}) => u.unit_id === d.unit_id))]
+        // Exclude units already in moves queue (either direction)
+        const available = allHere.filter(u => !moves.some(m => m.unit_id === u.unit_id))
+        if (available.length > 0) {
+          setHexUnits(available)
           setMode('withdraw')
+        } else if (selectedUnit) {
+          // No units to withdraw but have a unit selected — deploy here
+          const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
+          setMoves(newMoves)
+          syncMapPreview(newMoves)
+          setSelectedUnit(null); setHexUnits([]); setError(null)
         }
       }
     }
