@@ -60,7 +60,7 @@ Category map: `engine/main.py:ACTION_CATEGORIES` — fully aligned.
 | `basing_rights` | military | `services/basing_rights_engine` | Routed |
 | `martial_law` | military | `services/martial_law_engine` | **Working** — 4 eligible countries (Sarmatia 10, Cathay 10, Persia 8, Ruthenia 6), deployments+countries tables, one-time enforcement with martial_law_declared flag |
 | `nuclear_test` | military | `engines/military.resolve_nuclear_test` | Routed (Input object needed) |
-| `move_units` | military | — | Stub (inter-round only) |
+| `move_units` | military | `services/action_dispatcher._process_movement` → `engines/movement.process_movements` | **Working** — dispatcher adapter (deployments ↔ movement engine field mapping), validator (`movement_validator.validate_movement_decision`), batch processing. Deploy from reserve, withdraw to reserve, reposition (hex→hex). Auto-embark on friendly carrier (1 ground + 2 tactical_air capacity). Auto-debark on land move. Basing rights respected. Territory validation (own/basing/previously-occupied). Batch-level: duplicate unit detection, destroyed/not-owned checks. Phase restriction: inter_round only. 18 L2 tests passing. |
 | `nuclear_authorize` | military | `orchestrators/nuclear_chain` | Wired |
 | `nuclear_intercept` | military | `orchestrators/nuclear_chain` | Wired |
 | `nuclear_launch_initiate` | military | `orchestrators/nuclear_chain` | Wired |

@@ -70,9 +70,9 @@ This document tracks the gap between current implementation and contract spec fo
 ### ground_move — WORKING (2026-04-18)
 **Current:** Ground advance to adjacent LAND hex. Sea hexes filtered via `GLOBAL_SEA_HEXES` + `THEATER_SEA_HEXES` frozensets + `is_sea_hex()` helper. Must leave 1 unit behind (max = min(3, count-1)). Authorized by `ground_attack` permission. 100% probability (always succeeds). Embarked units can land (disembark from carrier). `hex_control` upserted on advance. Undefended hex: non-ground enemies captured as trophies. `GLOBAL_HEX_OWNERS` (64 land hexes) + `hex_owner()` for canonical territory ownership.
 
-### move_units — STUB
-**Current:** Returns acknowledged. General unit movement is an inter-round mechanic (ground_move covers attack-phase advance).
-**Fix when:** M4 Phase 4 was deferred. Implement when inter-round flow is tested.
+### move_units — WORKING (2026-04-18)
+**Current:** Full dispatcher wiring via `action_dispatcher._process_movement()` with field mapping adapter (deployments DB schema ↔ movement engine in-memory dict). Validator: `movement_validator.validate_movement_decision` (batch-level: duplicate unit detection, destroyed/not-owned checks; per-move: territory ownership, basing rights, sea hex + carrier capacity). Engine: `engines/movement.process_movements` (pure state-mutation, atomic batch). **Deploy from reserve:** ground/naval/air to valid hex. **Withdraw to reserve:** status=reserve, coords cleared. **Reposition:** active unit hex→hex (single move, or withdraw then redeploy). **Auto-embark:** ground/tactical_air deployed to sea hex with friendly carrier auto-embark (1 ground + 2 tactical_air = 3 max per carrier). **Auto-debark:** embarked unit moved to land hex auto-debarks (status=active, embarked_on cleared). **Basing rights:** respected via `load_basing_rights()` from relationships table. **Territory validation:** own territory, basing rights territory, or previously-occupied hex. **Phase restriction:** inter_round only (ground_move covers attack-phase advance). **Frontend:** Withdraw/Deploy model, map preview, territory validation with basing rights display, Actions Expected Now card during inter_round phase. **DB write-back:** updated positions written to deployments table per moved unit. Observatory event logged. **Testing:** 18 L2 tests passing (deploy, withdraw, reposition, carrier embark/debark, batch validation).
+**Remaining gaps:** None critical. Frontend inter-round UX pending integration.
 
 ---
 
@@ -174,7 +174,7 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 | Category | Actions | What M6 delivers |
 |---|---|---|
 | **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, naval_blockade, launch_missile | ✅ **DONE (2026-04-18):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. Territory occupation (`hex_control`). Unit capture (non-ground trophies). Ground movement (land-only, leave-1-behind). Naval blockade (3 chokepoints, establish/lift/reduce/integrity, map visual). Conventional missile (two-phase AD+hit, 4 targets, range by nuc tier). **Remaining:** chain attacks |
-| **Military: Movement** | move_units, ground_move | `ground_move` DONE (2026-04-18) — attack-phase advance. `move_units` inter-round repositioning still stub. |
+| **Military: Movement** | move_units, ground_move | `ground_move` DONE (2026-04-18) — attack-phase advance. `move_units` **WORKING (2026-04-18)** — full dispatcher wiring with field mapping adapter (deployments ↔ movement engine). Withdraw/Deploy model, territory validation with basing rights, auto-embark/debark on carrier, batch merge. Phase restriction: inter_round only. Frontend: map preview, Actions Expected Now card during inter_round. 18 L2 tests passing. |
 | **Military: Nuclear** | nuclear_test, nuclear_launch_initiate, nuclear_authorize, nuclear_intercept | Already wired — M6 adds participant UI + testing |
 | **Military: Other** | basing_rights, martial_law | ✅ Martial law **DONE (2026-04-18):** MartialLawForm, 4 eligible countries, one-time enforcement. Basing rights already working — M6 adds participant UI |
 | **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
