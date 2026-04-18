@@ -2480,36 +2480,6 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     reserveByType[u.unit_type].push(u)
   })
 
-  // Hex click handler
-  useEffect(() => {
-    const handler = (event: MessageEvent) => {
-      const msg = event.data
-      if (!msg || msg.type !== 'hex-click') return
-      const row = msg.row as number, col = msg.col as number
-
-      if (selectedUnit) {
-        // Deploying: place selected reserve unit at this hex
-        if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
-          setError('Unit already queued for deployment'); return
-        }
-        const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
-        setMoves(newMoves)
-        syncMapPreview(newMoves)
-        setSelectedUnit(null); setError(null)
-      } else {
-        // No unit selected — clicking hex with own units = withdraw mode
-        const myUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
-          .filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id))
-        if (myUnits.length > 0) {
-          setHexUnits(myUnits)
-          setMode('withdraw')
-        }
-      }
-    }
-    window.addEventListener('message', handler)
-    return () => window.removeEventListener('message', handler)
-  }, [mode, selectedUnit, moves, countryId, syncMapPreview])
-
   // Send all pending moves to map for preview rendering
   const syncMapPreview = useCallback((newMoves: MoveEntry[]) => {
     mapRef.current?.contentWindow?.postMessage({
@@ -2525,14 +2495,48 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     }, '*')
   }, [countryId])
 
+  // Hex click handler
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      const msg = event.data
+      if (!msg || msg.type !== 'hex-click') return
+      const row = msg.row as number, col = msg.col as number
+
+      if (selectedUnit && hexUnits.length === 0) {
+        // Deploying: place selected reserve unit at this hex
+        if (moves.some(m => m.unit_id === selectedUnit.unit_id && m.action === 'deploy')) {
+          setError('Unit already queued for deployment'); return
+        }
+        const newMoves = [...moves, {unit_id: selectedUnit.unit_id, unit_type: selectedUnit.unit_type, action: 'deploy' as const, target_row: row, target_col: col}]
+        setMoves(newMoves)
+        syncMapPreview(newMoves)
+        setSelectedUnit(null); setHexUnits([]); setError(null)
+      } else {
+        // No unit selected — clicking hex with own units = withdraw mode
+        const myUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+          .filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id))
+        if (myUnits.length > 0) {
+          setHexUnits(myUnits)
+          setMode('withdraw')
+        }
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [mode, selectedUnit, moves, countryId, syncMapPreview])
+
   const withdrawUnit = (u: {unit_id:string;unit_type:string}) => {
     const newMoves = [...moves, {unit_id: u.unit_id, unit_type: u.unit_type, action: 'withdraw' as const}]
     setMoves(newMoves)
-    setHexUnits(prev => prev.filter(x => x.unit_id !== u.unit_id))
+    const remaining = hexUnits.filter(x => x.unit_id !== u.unit_id)
+    setHexUnits(remaining)
     syncMapPreview(newMoves)
-    // Auto-switch to deploy mode with this unit ready
+    // Last withdrawn unit becomes ready for deployment
     setSelectedUnit({unit_id: u.unit_id, unit_type: u.unit_type})
-    setMode('deploy')
+    // Stay in withdraw mode if more units at this hex, otherwise switch to deploy
+    if (remaining.length === 0) {
+      setMode('deploy')
+    }
   }
 
   const removeMove = (unitId: string) => {
