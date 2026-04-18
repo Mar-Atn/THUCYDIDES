@@ -2470,10 +2470,19 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   useEffect(() => { loadUnits() }, [loadUnits])
 
   // Effective reserve: original reserve + withdrawn units - deployed units
-  const effectiveReserve = [
-    ...reserveUnits.filter(u => !moves.some(m => m.unit_id === u.unit_id && m.action === 'deploy')),
-    ...moves.filter(m => m.action === 'withdraw').map(m => ({unit_id: m.unit_id, unit_type: m.unit_type})),
-  ]
+  // Effective reserve: original reserve (minus deployed) + withdrawn units, deduplicated
+  const seen = new Set<string>()
+  const effectiveReserve: {unit_id:string;unit_type:string}[] = []
+  for (const u of reserveUnits) {
+    if (!moves.some(m => m.unit_id === u.unit_id && m.action === 'deploy') && !seen.has(u.unit_id)) {
+      effectiveReserve.push(u); seen.add(u.unit_id)
+    }
+  }
+  for (const m of moves) {
+    if (m.action === 'withdraw' && !seen.has(m.unit_id)) {
+      effectiveReserve.push({unit_id: m.unit_id, unit_type: m.unit_type}); seen.add(m.unit_id)
+    }
+  }
   const reserveByType: Record<string, {unit_id:string;unit_type:string}[]> = {}
   effectiveReserve.forEach(u => {
     reserveByType[u.unit_type] = reserveByType[u.unit_type] || []
@@ -2695,8 +2704,8 @@ function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
             {moves.length === 0
               ? <p className="font-body text-caption text-text-secondary/50">No changes queued yet.</p>
               : <div className="space-y-1">
-                {moves.map(m => (
-                  <div key={m.unit_id} className="flex items-center justify-between gap-1 py-1 border-b border-border/30 last:border-0">
+                {moves.map((m, idx) => (
+                  <div key={`${m.unit_id}_${m.action}_${idx}`} className="flex items-center justify-between gap-1 py-1 border-b border-border/30 last:border-0">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <UnitIcon type={m.unit_type} size={16} className="text-text-secondary"/>
                       <span className="font-body text-caption text-text-primary truncate">
