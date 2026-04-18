@@ -1458,45 +1458,39 @@ function PendingResultPoller({simId, pendingActionId, countryId, actionType, onR
   onResolvedRef.current = onResolved
 
   useEffect(()=>{
-    let stopped = false
     console.log('[PendingResultPoller] started, pendingActionId:', pendingActionId, 'countryId:', countryId)
-    const poll = async () => {
-      while (!stopped) {
-        try {
-          let query
-          if (pendingActionId) {
-            query = supabase.from('pending_actions').select('status,result')
-              .eq('id', pendingActionId).limit(1)
-          } else {
-            query = supabase.from('pending_actions').select('status,result')
-              .eq('sim_run_id', simId).eq('country_code', countryId).eq('action_type', actionType)
-              .in('status', ['approved', 'rejected'])
-              .order('submitted_at', {ascending: false}).limit(1)
-          }
-          const {data, error: qErr} = await query
-          if (qErr) console.warn('[PendingResultPoller] query error:', qErr)
-          if (stopped) break
-          if (data?.[0]) {
-            const pa = data[0]
-            if (pa.status === 'approved' && pa.result) {
-              console.log('[PendingResultPoller] RESOLVED:', pa.status)
-              setWaiting(false)
-              onResolvedRef.current({...(pa.result as Record<string,unknown>), pending: false})
-              return
-            } else if (pa.status === 'rejected') {
-              setWaiting(false)
-              onResolvedRef.current({pending: false, rejected: true, narrative: 'Attack rejected by moderator'})
-              return
-            }
-          }
-        } catch { /* ignore poll errors */ }
-        // Wait 2 seconds before next poll
-        await new Promise(r => setTimeout(r, 2000))
-      }
+    // Poll via authenticated fetch (uses cached token, bypasses RLS issues)
+    const checkResult = async (): Promise<boolean> => {
+      try {
+        const token = await getToken()
+        const id = pendingActionId
+        if (!id) return false
+        const url = `/api/sim/${simId}/pending/${id}/status`
+        const resp = await fetch(url, {headers: token ? {'Authorization': `Bearer ${token}`} : {}})
+        if (!resp.ok) return false
+        const body = await resp.json()
+        const pa = body.data
+        if (pa?.status === 'approved' && pa?.result) {
+          console.log('[PendingResultPoller] RESOLVED:', pa.status)
+          setWaiting(false)
+          onResolvedRef.current({...(pa.result as Record<string,unknown>), pending: false})
+          return true
+        } else if (pa?.status === 'rejected') {
+          console.log('[PendingResultPoller] REJECTED')
+          setWaiting(false)
+          onResolvedRef.current({pending: false, rejected: true, narrative: 'Attack rejected by moderator'})
+          return true
+        }
+      } catch (e) { console.warn('[PendingResultPoller] error:', e) }
+      return false
     }
-    poll()
-    return () => { stopped = true }
-  },[simId, pendingActionId, countryId, actionType]) // NO onResolved in deps
+    // Immediate first check + interval
+    checkResult()
+    const interval = setInterval(async () => {
+      if (await checkResult()) clearInterval(interval)
+    }, 2000)
+    return () => clearInterval(interval)
+  },[simId, pendingActionId, countryId, actionType])
 
   return (
     <div className="p-3 rounded-lg border bg-warning/5 border-warning/20">

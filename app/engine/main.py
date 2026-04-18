@@ -1490,6 +1490,21 @@ async def confirm_pending_action(
     return APIResponse(data=result)
 
 
+@app.get("/api/sim/{sim_id}/pending/{action_id}/status", response_model=APIResponse)
+async def get_pending_action_status(
+    sim_id: str, action_id: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Get status + result of a pending action. Used by participant poller."""
+    from engine.services.supabase import get_client
+    client = get_client()
+    pa = client.table("pending_actions").select("status,result") \
+        .eq("id", action_id).eq("sim_run_id", sim_id).limit(1).execute()
+    if not pa.data:
+        raise HTTPException(status_code=404, detail="Pending action not found")
+    return APIResponse(data=pa.data[0])
+
+
 @app.post("/api/sim/{sim_id}/pending/{action_id}/reject", response_model=APIResponse)
 async def reject_pending_action(
     sim_id: str, action_id: str,
