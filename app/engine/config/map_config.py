@@ -357,8 +357,13 @@ MISSILE_RANGE_BY_TIER: dict[str, int] = {
 
 
 def missile_range(nuclear_level: int) -> int:
-    """Return missile range based on country's nuclear technology level."""
-    if nuclear_level >= 4:
+    """Return missile range based on country's nuclear technology level.
+
+    T1 (level 0-1): ≤2 hexes
+    T2 (level 2):   ≤4 hexes
+    T3 (level 3+):  global
+    """
+    if nuclear_level >= 3:
         return MISSILE_RANGE_BY_TIER["T3"]
     if nuclear_level >= 2:
         return MISSILE_RANGE_BY_TIER["T2"]
