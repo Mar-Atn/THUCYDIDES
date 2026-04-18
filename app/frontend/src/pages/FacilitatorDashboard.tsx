@@ -661,16 +661,8 @@ export function FacilitatorDashboard() {
                   {pendingActions.map((pa) => (
                     <PendingActionCard key={pa.id} pa={pa} simRun={simRun}
                       onConfirm={async (rolls) => {
-                        // Use fetch directly to avoid race with realtime hook removing this card
-                        const token = (await supabase.auth.getSession()).data.session?.access_token
-                        const resp = await fetch(`/api/sim/${simId}/pending/${pa.id}/confirm`, {
-                          method: 'POST',
-                          headers: {'Content-Type': 'application/json', ...(token ? {'Authorization': `Bearer ${token}`} : {})},
-                          body: JSON.stringify(rolls ? {precomputed_rolls: rolls} : {}),
-                        })
-                        if (!resp.ok) throw new Error((await resp.json().catch(()=>({}))).detail || 'Confirm failed')
-                        const data = await resp.json()
-                        return data.data
+                        const res = await simAction(simId!, `pending/${pa.id}/confirm`, rolls ? {precomputed_rolls: rolls} : {})
+                        return res
                       }}
                       onReject={() => doAction(`pending/${pa.id}/reject`)} />
                   ))}

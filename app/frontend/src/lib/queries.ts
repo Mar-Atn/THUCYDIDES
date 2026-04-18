@@ -137,7 +137,7 @@ export async function createSimRun(params: {
   description?: string
   role_customizations?: RoleCustomization[]
 }): Promise<SimRun> {
-  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const token = await getToken()
   const resp = await fetch('/api/sim/create', {
     method: 'POST',
     headers: {
@@ -840,7 +840,7 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
 
 /** Fetch live sim state from the Sim Runner API. */
 export async function getSimState(simId: string): Promise<Record<string, unknown>> {
-  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const token = await getToken()
   const resp = await fetch(`/api/sim/${simId}/state`, {
     headers: token ? { 'Authorization': `Bearer ${token}` } : {},
   })
@@ -857,7 +857,7 @@ export async function submitAction(
   countryCode: string,
   params?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const token = await getToken()
   const resp = await fetch(`/api/sim/${simId}/action`, {
     method: 'POST',
     headers: {
@@ -880,12 +880,28 @@ export async function submitAction(
 }
 
 /** Execute a sim control action (start, pause, resume, phase/end, etc.). */
+// Cache auth token to avoid getSession() blocking during heavy realtime traffic
+let _cachedToken: string | null = null
+let _tokenExpiry = 0
+async function getToken(): Promise<string> {
+  if (_cachedToken && Date.now() < _tokenExpiry) return _cachedToken
+  const { data } = await supabase.auth.getSession()
+  _cachedToken = data.session?.access_token ?? ''
+  _tokenExpiry = Date.now() + 300000 // 5 min cache
+  return _cachedToken
+}
+// Refresh token on auth state change
+supabase.auth.onAuthStateChange((_event, session) => {
+  _cachedToken = session?.access_token ?? null
+  _tokenExpiry = session ? Date.now() + 300000 : 0
+})
+
 export async function simAction(
   simId: string,
   action: string,
   params?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
-  const token = (await supabase.auth.getSession()).data.session?.access_token
+  const token = await getToken()
   const resp = await fetch(`/api/sim/${simId}/${action}`, {
     method: 'POST',
     headers: {
