@@ -1,13 +1,14 @@
 # Action Contract Audit — Gap Analysis
-**Date:** 2026-04-17 | **Status:** ACTIVE — major combat fixes landed 2026-04-17
+**Date:** 2026-04-18 | **Status:** ACTIVE — territory occupation + unit capture landed 2026-04-18
 
 ---
 
 ## Overview
 
 The 33 canonical action types are routed through the dispatcher and reach their engines.
-As of 2026-04-17, **all 5 combat types are fully wired** (engine → dispatcher → DB losses) with
-a unified map-based Attack UX, theater-level adjacency, and moderator controls.
+As of 2026-04-18, **all 5 combat types are fully wired** (engine → dispatcher → DB losses) with
+a unified map-based Attack UX, theater-level adjacency, moderator controls, territory occupation
+(`hex_control` table), and unit capture mechanics (CONTRACT_GROUND_COMBAT compliant).
 Remaining gaps are primarily in validation strictness and non-combat action flows.
 
 This document tracks the gap between current implementation and contract spec for each action.
@@ -26,11 +27,11 @@ This document tracks the gap between current implementation and contract spec fo
 
 ## Military Actions
 
-### ground_attack — WORKING (2026-04-17)
+### ground_attack — WORKING (2026-04-18)
 **Contract:** `CONTRACT_GROUND_COMBAT.md` v1.0 (LOCKED)
-**Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex. RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input).
-**Remaining gaps:** Chain attack logic not yet implemented. Leave-1-unit-on-foreign-hex rule not enforced.
-**Effort:** Small — chain logic + leave-1 validation
+**Current:** Full map-based UX. Source hex → Target hex with BFS adjacency validation (`hex_range()`). Attacker selects specific units from source hex (max = min(3, count-1) — must leave 1 behind). RISK dice mechanics (1-3 units, iterative exchanges). DB losses applied. Moderator approval flow (or auto-attack bypass). Physical dice mode supported (3 atk + 2 def dice input). **Territory occupation:** `hex_control` upserted on victory (controlled_by = attacker). **Unit capture (CONTRACT §unattended):** on victory, surviving non-ground enemy units captured as trophies (country_id changed to attacker, status=reserve, position cleared; naval units excluded; type preserved). Map shows diagonal stripe overlay for occupied hexes (owner + occupier colors). Captured trophies shown as icons + "-> reserve" in combat results.
+**Remaining gaps:** Chain attack logic not yet implemented.
+**Effort:** Small — chain logic only
 
 ### air_strike — WORKING (2026-04-17)
 **Current:** Map-based UX. Source hex air units selected (including embarked on carriers). 12%/6% hit probability. 15% chance downed by AD. DB losses applied. Probability-based (no dice input).
@@ -63,8 +64,11 @@ This document tracks the gap between current implementation and contract spec fo
 ### martial_law — WORKING
 **Current:** Routes to engine correctly.
 
+### ground_move — WORKING (2026-04-18)
+**Current:** Ground advance to adjacent LAND hex. Sea hexes filtered via `GLOBAL_SEA_HEXES` + `THEATER_SEA_HEXES` frozensets + `is_sea_hex()` helper. Must leave 1 unit behind (max = min(3, count-1)). Authorized by `ground_attack` permission. 100% probability (always succeeds). Embarked units can land (disembark from carrier). `hex_control` upserted on advance. Undefended hex: non-ground enemies captured as trophies. `GLOBAL_HEX_OWNERS` (64 land hexes) + `hex_owner()` for canonical territory ownership.
+
 ### move_units — STUB
-**Current:** Returns acknowledged. Unit movement is an inter-round mechanic.
+**Current:** Returns acknowledged. General unit movement is an inter-round mechanic (ground_move covers attack-phase advance).
 **Fix when:** M4 Phase 4 was deferred. Implement when inter-round flow is tested.
 
 ---
@@ -166,8 +170,8 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 
 | Category | Actions | What M6 delivers |
 |---|---|---|
-| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, ~~naval_blockade~~, launch_missile | ✅ **DONE (2026-04-17):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. **Remaining:** chain attacks, naval_blockade |
-| **Military: Movement** | move_units | Inter-round unit repositioning with adjacency validation |
+| **Military** | ground_attack, air_strike, naval_combat, naval_bombardment, ~~naval_blockade~~, launch_missile | ✅ **DONE (2026-04-18):** Unified Attack UX, source→target hex, unit selection, BFS adjacency, theater-level combat, moderator approval/auto-attack, dice mode. Territory occupation (`hex_control`). Unit capture (non-ground trophies). Ground movement (land-only, leave-1-behind). **Remaining:** chain attacks, naval_blockade |
+| **Military: Movement** | move_units, ground_move | `ground_move` DONE (2026-04-18) — attack-phase advance. `move_units` inter-round repositioning still stub. |
 | **Military: Nuclear** | nuclear_test, nuclear_launch_initiate, nuclear_authorize, nuclear_intercept | Already wired — M6 adds participant UI + testing |
 | **Military: Other** | basing_rights, martial_law | Already working — M6 adds participant UI |
 | **Economic** | set_budget, set_tariffs, set_sanctions, set_opec | Validation (ranges, allowed targets), submission UI, Phase B integration verified |
@@ -217,6 +221,15 @@ must work exactly per CONTRACT_GROUND_COMBAT.
 | Theater target highlighting wrong coords | Highlights on wrong hexes | Resolve theater coords correctly |
 | Pending combat showed "DEFEAT" | Misleading UI | Show "ATTACK SUBMITTED — awaiting approval" for pending |
 | Air/bombardment/missile required dice input | Unnecessary moderator friction | Only ground_attack and naval_combat use dice; others probability-based |
+
+## Bugs Fixed (2026-04-18)
+
+| Bug | Impact | Fix |
+|---|---|---|
+| `.in_()` used instead of `.in()` in JS | Runtime error in frontend filtering | Changed to `.in()` |
+| Duplicate org memberships | Countries appeared twice in org lists | Fixed at template source data |
+| ground_move had non-100% probability | Movement could randomly fail | Set to 100% probability (always succeeds) |
+| Basing rights units treated as occupiers | Foreign allied units triggered occupation overlay | Added basing agreement check — basing units are NOT occupiers |
 
 ---
 

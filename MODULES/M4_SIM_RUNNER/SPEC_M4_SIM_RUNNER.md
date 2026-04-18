@@ -1,6 +1,6 @@
 # M4 — Sim Runner & Facilitator Controls SPEC
 
-**Version:** 1.0 | **Date:** 2026-04-16
+**Version:** 1.1 | **Date:** 2026-04-18
 **Status:** DRAFT — awaiting Marat review
 **Dependencies:** M1 (engines), M2 (contracts/dispatcher), M3 (data), M9 (template/SimRun), M10.1 (auth)
 
@@ -386,6 +386,7 @@ Participant submits action
 | Endpoint | Method | Who | What |
 |---|---|---|---|
 | `/api/sim/{id}/attack/valid-targets` | GET | Moderator | Returns valid target hexes for a unit (`?unit_id=X`). Uses `hex_range()` BFS + `ATTACK_RANGE` per unit type. |
+| `/api/sim/{id}/map/hex-control` | GET | Any | Returns occupied hexes (from `hex_control` table) for territory overlay on map. |
 
 ### Map Attack Mode
 The map supports an attack interaction mode via query parameters and postMessage API:
@@ -498,6 +499,15 @@ The map supports an attack interaction mode via query parameters and postMessage
 - **`hex_range()` BFS:** range calculator in `map_config.py` + `ATTACK_RANGE` dict per unit type
 - **Map attack mode:** `?mode=attack&country=X` with postMessage protocol (hex-click, highlight-hexes, clear-highlights, navigate-theater, refresh-units)
 - All three toggles (auto-approve, auto-attack, dice mode) share red danger styling (`animate-pulse`, red glow shadow) via `POST /api/sim/{id}/mode`
+
+### Post-Phase Additions (2026-04-18)
+- **`hex_control` table:** persistent territory occupation — schema: `sim_run_id, global_row, global_col, theater_row, theater_col, theater, owner, controlled_by, captured_round, captured_by_action`. Upserted on ground_attack victory and ground_move advance.
+- **API:** `GET /api/sim/{id}/map/hex-control` returns occupied hexes for map overlay
+- **Unit capture mechanics:** ground advance into undefended hex or combat victory captures non-ground enemies as trophies (country_id changed to attacker, status=reserve, position cleared; naval excluded; type preserved)
+- **Ground movement:** `ground_move` action — advance to adjacent LAND hex, sea filtered via `GLOBAL_SEA_HEXES` + `THEATER_SEA_HEXES` frozensets + `is_sea_hex()`, must leave 1 unit behind (max = min(3, count-1)), authorized by `ground_attack` permission, 100% probability, embarked units can land
+- **Map config:** `GLOBAL_HEX_OWNERS` (64 land hexes) + `hex_owner()` helper for canonical territory ownership
+- **Basing rights:** foreign units with basing agreement NOT treated as occupiers
+- **Map display:** occupied hexes shown with diagonal stripes (owner color + occupier color)
 
 ### Architecture Fixes (2026-04-16)
 - **Individual unit model:** deployments 1 row = 1 unit, from canonical `units.csv` (345 units)

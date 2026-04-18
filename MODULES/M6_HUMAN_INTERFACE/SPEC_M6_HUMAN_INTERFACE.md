@@ -1,7 +1,7 @@
 # M6 — Human Participant Interface SPEC
 
-**Version:** 1.1 | **Date:** 2026-04-17
-**Status:** DRAFT — Marat review before coding. **Sprint 6.7 (military map UX) substantially complete.**
+**Version:** 1.2 | **Date:** 2026-04-18
+**Status:** DRAFT — Marat review before coding. **Sprint 6.7 (military map UX + territory/capture) substantially complete.**
 **Dependencies:** M4 (sim runner), M3 (data), M10.1 (auth), M8 (map embed)
 
 ---
@@ -186,7 +186,7 @@ Right side (persistent):
 - Submit button + cancel (back to list)
 - Confirmation dialog for irreversible actions
 
-### Type B: Map-based — Unified Attack System (BUILT 2026-04-17)
+### Type B: Map-based — Unified Attack System (BUILT 2026-04-17, extended 2026-04-18)
 
 **Single "Attack" button** replaces 5 individual military action buttons (ground_attack, air_strike, naval_combat, naval_bombardment, launch_missile_conventional). Combat type is determined automatically from the unit types involved.
 
@@ -211,11 +211,25 @@ Right side (persistent):
   - `refresh-units` — reload unit positions after combat
 
 **Combat types (all wired engine → dispatcher → DB losses):**
-- Ground Attack: RISK dice, 1-3 units, iterative exchanges
+- Ground Attack: RISK dice, 1-3 units (max = min(3, count-1) — must leave 1 behind), iterative exchanges
 - Air Strike: 12%/6% hit probability, 15% downed by AD
 - Naval Combat: 1v1 dice, ties → defender wins
 - Naval Bombardment: 10% per naval unit
 - Missile Launch: 80% accuracy, AD halving, missile consumed
+
+**Territory & Capture (2026-04-18):**
+- **hex_control table:** persistent territory occupation (sim_run_id, global_row/col, theater coords, owner, controlled_by, captured_round, captured_by_action). Upserted on ground_attack victory and ground_move advance.
+- **Unit capture:** ground advance into undefended hex captures non-ground enemies as trophies (country_id changed to attacker, status=reserve, position cleared). Naval units excluded from capture. Type preserved (captured AD stays AD).
+- **Basing rights:** foreign units with basing agreement are NOT treated as occupiers.
+- **Occupation display:** map shows diagonal stripes (owner color + occupier color) for occupied hexes.
+- **API:** `GET /api/sim/{id}/map/hex-control` returns occupied hexes.
+
+**Ground movement rules (2026-04-18):**
+- Can advance to any adjacent LAND hex (sea hexes filtered via `GLOBAL_SEA_HEXES` + `THEATER_SEA_HEXES` frozensets + `is_sea_hex()` helper)
+- Must leave 1 unit behind when attacking/moving (max = min(3, count-1))
+- `ground_move` authorized by `ground_attack` permission
+- Embarked units can land (disembark from carrier)
+- `GLOBAL_HEX_OWNERS`: canonical territory ownership (64 land hexes) + `hex_owner()` helper
 
 **Moderator controls for combat:**
 - Auto-Attack toggle (red pulsing when active) — combat skips moderator confirmation
@@ -223,10 +237,22 @@ Right side (persistent):
 - Combat pending cards with expandable dice input (ground: 3 atk + 2 def dice, naval: 1+1 dice)
 - Only ground_attack and naval_combat use dice; air/bombardment/missile are probability-based
 
+**Attack UX improvements (2026-04-18):**
+- Side-by-side layout: 25% sidebar, 75% map (stable)
+- Unit icons (SVG pictograms) replace text IDs everywhere
+- Combat assessment: 5 navy-blue squares, no percentages
+- Victory/Defeat labels based on `attacker_won` (not engine success)
+- Pending shows "ATTACK SUBMITTED"
+- Tab clicks reset to initial page
+- Click own hex at any step to re-select
+- Theater switcher compact in header
+- Captured trophies shown as icons + "-> reserve"
+
 **APIs:**
 - `GET /api/sim/{id}/attack/valid-targets?hex_row=&hex_col=&theater=` — BFS adjacency targets
 - `GET /api/sim/{id}/attack/preview` — modifiers + win probability before confirming
 - `GET /api/sim/{id}/state` — public (no auth), used by map iframe
+- `GET /api/sim/{id}/map/hex-control` — occupied hexes for territory overlay
 
 ---
 
@@ -344,7 +370,7 @@ Every action wired to contract spec. See `MODULES/ACTION_CONTRACT_AUDIT.md` for 
 | **6.4** | Country view: own country confidential data |
 | **6.5** | Actions catalog: all available actions listed with (i) descriptions |
 | **6.6** | Simple actions: public_statement, set_budget, set_tariffs, set_sanctions, set_opec |
-| **6.7** | ~~Military actions~~ **DONE 2026-04-17**: Unified Attack system (map UX, 5 combat types, theater adjacency, postMessage protocol, moderator auto-attack/dice mode, combat preview). Declare War action. |
+| **6.7** | ~~Military actions~~ **DONE 2026-04-18**: Unified Attack system (map UX, 5 combat types, theater adjacency, postMessage protocol, moderator auto-attack/dice mode, combat preview). Declare War action. Territory occupation (`hex_control` table, diagonal stripes on map). Unit capture mechanics (non-ground trophies on advance/victory). Ground movement (land-only adjacency, leave-1-behind). SVG unit icons, combat assessment squares, attack UX polish. |
 | **6.8** | Diplomatic + Economic: agreements lifecycle, transactions lifecycle |
 | **6.9** | Political + Covert: arrest, assassination, change_leader, covert_ops, elections |
 | **6.10** | Incoming requests: "Actions Expected Now" system, notifications |
