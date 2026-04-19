@@ -727,69 +727,57 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
     if (activeVote.phase === 'removal') {
       return (
-        <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'2px solid rgba(245,158,11,0.4)'}}>
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
-            <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#F59E0B',
-              textTransform:'uppercase',letterSpacing:'0.1em'}}>⚠ Remove Head of State</h2>
-            <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#F59E0B'}}>{mm}:{ss}</span>
+        <div className="bg-card border border-warning/30 rounded-lg p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-heading text-h3 text-warning uppercase tracking-wider">⚠ Remove Head of State</h2>
+            <span className="font-data text-data-lg text-warning">{mm}:{ss}</span>
           </div>
-          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',marginBottom:'1.5rem'}}>
-            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Vote to remove</div>
-            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#F59E0B'}}>{hosName}</div>
-            <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',marginTop:'0.5rem'}}>
+          <div className="border border-border rounded p-3 mb-4">
+            <div className="font-data text-caption text-text-secondary uppercase">Vote to remove</div>
+            <div className="font-data text-data text-warning">{hosName}</div>
+            <div className="font-body text-caption text-text-secondary mt-1">
               {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} YES to remove
             </div>
           </div>
-          <div style={{display:'flex',gap:'1rem'}}>
+          <div className="flex gap-3">
             <button onClick={() => handleLeaderVote(activeVote.id, 'yes')} disabled={leaderVoteSubmitting}
-              style={{flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
-                backgroundColor:'rgba(245,158,11,0.2)',border:'2px solid #F59E0B',
-                color:'#F59E0B',fontFamily:'JetBrains Mono, monospace',
-                fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
-                opacity:leaderVoteSubmitting?0.5:1}}>YES — REMOVE</button>
+              className={`flex-1 py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-warning bg-warning/10 text-warning hover:bg-warning/20 transition-colors ${leaderVoteSubmitting?'opacity-50':''}`}>
+              YES — REMOVE
+            </button>
             <button onClick={() => handleLeaderVote(activeVote.id, 'no')} disabled={leaderVoteSubmitting}
-              style={{flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
-                backgroundColor:'rgba(0,255,65,0.1)',border:'2px solid #00FF41',
-                color:'#00FF41',fontFamily:'JetBrains Mono, monospace',
-                fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
-                opacity:leaderVoteSubmitting?0.5:1}}>NO — KEEP</button>
+              className={`flex-1 py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-success bg-success/10 text-success hover:bg-success/20 transition-colors ${leaderVoteSubmitting?'opacity-50':''}`}>
+              NO — KEEP
+            </button>
           </div>
-          <button onClick={() => setVotingOnLeader(null)} style={{
-            marginTop:'1rem',fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
-            cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
-            padding:'0.25rem 0.5rem',backgroundColor:'transparent',
-          }}>{'\u2190'} Back</button>
+          <button onClick={() => setVotingOnLeader(null)}
+            className="mt-3 font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">
+            ← Back
+          </button>
         </div>
       )
     }
 
     // Election phase
     return (
-      <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'2px solid rgba(59,130,246,0.4)'}}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
-          <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#3B82F6',
-            textTransform:'uppercase',letterSpacing:'0.1em'}}>🗳 Elect New Head of State</h2>
-          <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#3B82F6'}}>{mm}:{ss}</span>
+      <div className="bg-card border border-action/30 rounded-lg p-5">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-heading text-h3 text-action uppercase tracking-wider">🗳 Elect New Head of State</h2>
+          <span className="font-data text-data-lg text-action">{mm}:{ss}</span>
         </div>
-        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',marginBottom:'1rem'}}>
-          <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF'}}>
+        <div className="border border-border rounded p-3 mb-3">
+          <div className="font-body text-caption text-text-secondary">
             {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} for majority
           </div>
         </div>
-        <div style={{display:'flex',flexDirection:'column',gap:'0.5rem',marginBottom:'1.5rem'}}>
+        <div className="flex flex-col gap-2 mb-4">
           {countryRoles.map(r => (
-            <label key={r.id} style={{
-              display:'flex',alignItems:'center',gap:'0.75rem',padding:'0.5rem 0.75rem',
-              borderRadius:'0.25rem',cursor:'pointer',
-              border: selectedCandidate === r.id ? '2px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
-              backgroundColor: selectedCandidate === r.id ? 'rgba(59,130,246,0.1)' : 'transparent',
-            }}>
+            <label key={r.id} className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-colors ${
+              selectedCandidate === r.id ? 'border-2 border-action bg-action/10' : 'border border-border hover:bg-card'
+            }`}>
               <input type="radio" name="candidate" value={r.id} checked={selectedCandidate === r.id}
-                onChange={() => setSelectedCandidate(r.id)} style={{accentColor:'#3B82F6'}}/>
-              <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#D1D5DB'}}>
-                {r.character_name}
-              </span>
-              <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.65rem',color:'#6B7280',marginLeft:'auto'}}>
+                onChange={() => setSelectedCandidate(r.id)} className="accent-action"/>
+              <span className="font-data text-body-sm text-text-primary">{r.character_name}</span>
+              <span className="font-body text-caption text-text-secondary ml-auto capitalize">
                 {r.position_type?.replace('_',' ')}
               </span>
             </label>
@@ -797,18 +785,15 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
         </div>
         <button onClick={() => { if (selectedCandidate) handleLeaderVote(activeVote.id, selectedCandidate) }}
           disabled={!selectedCandidate || leaderVoteSubmitting}
-          style={{width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
-            backgroundColor: selectedCandidate ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.05)',
-            border:'2px solid #3B82F6', color:'#3B82F6',fontFamily:'JetBrains Mono, monospace',
-            fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
-            opacity:(!selectedCandidate||leaderVoteSubmitting)?0.5:1}}>
+          className={`w-full py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-action text-action transition-colors ${
+            selectedCandidate ? 'bg-action/10 hover:bg-action/20' : 'bg-action/5 opacity-50'
+          } ${leaderVoteSubmitting ? 'opacity-50' : ''}`}>
           CAST VOTE
         </button>
-        <button onClick={() => setVotingOnLeader(null)} style={{
-          marginTop:'0.75rem',fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
-          cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
-          padding:'0.25rem 0.5rem',backgroundColor:'transparent',
-        }}>{'\u2190'} Back</button>
+        <button onClick={() => setVotingOnLeader(null)}
+          className="mt-3 font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">
+          ← Back
+        </button>
       </div>
     )
   }
@@ -3792,47 +3777,46 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
 
   return (
-    <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'1px solid rgba(245,158,11,0.3)'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
-        <h2 style={{fontFamily:'Playfair Display, serif',fontSize:'1.2rem',color:'#F59E0B'}}>Change Leader</h2>
-        <button onClick={onClose} style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',padding:'0.25rem 0.5rem',backgroundColor:'transparent'}}>✕ Close</button>
+    <div className="bg-card border border-warning/30 rounded-lg p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="font-heading text-h3 text-warning">Change Leader</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">✕ Close</button>
       </div>
 
-      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1.5rem'}}>
-        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
-          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Current HoS</div>
-          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#F59E0B'}}>{hosName}</div>
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="border border-border rounded p-3">
+          <div className="font-data text-caption text-text-secondary uppercase">Current HoS</div>
+          <div className="font-data text-data text-warning">{hosName}</div>
         </div>
-        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:`1px solid ${canInitiate ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}`}}>
-          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Stability</div>
-          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color: canInitiate ? '#F59E0B' : '#9CA3AF'}}>
+        <div className={`border rounded p-3 ${canInitiate ? 'border-warning/40' : 'border-border'}`}>
+          <div className="font-data text-caption text-text-secondary uppercase">Stability</div>
+          <div className={`font-data text-data ${canInitiate ? 'text-warning' : 'text-text-secondary'}`}>
             {stability.toFixed(1)} / {threshold.toFixed(1)}
           </div>
-          <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.65rem',color: canInitiate ? '#F59E0B' : '#6B7280',marginTop:'0.25rem'}}>
+          <div className={`font-body text-caption mt-1 ${canInitiate ? 'text-warning' : 'text-text-secondary/60'}`}>
             {canInitiate ? 'Below threshold — change allowed' : `Must be ≤ ${threshold} to initiate`}
           </div>
         </div>
       </div>
 
       {success ? (
-        <div style={{padding:'1rem',borderRadius:'0.25rem',backgroundColor:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.3)'}}>
-          <p style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#F59E0B'}}>{success}</p>
-          <p style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',marginTop:'0.5rem'}}>
+        <div className="bg-warning/10 border border-warning/30 rounded p-4">
+          <p className="font-data text-body-sm text-warning">{success}</p>
+          <p className="font-body text-caption text-text-secondary mt-2">
             Vote is now open in Actions Expected Now for all citizens.
           </p>
         </div>
       ) : (
         <button onClick={handleInitiate} disabled={!canInitiate || submitting}
-          style={{width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor: canInitiate ? 'pointer' : 'not-allowed',
-            backgroundColor: canInitiate ? 'rgba(245,158,11,0.2)' : 'rgba(100,100,100,0.1)',
-            border: `2px solid ${canInitiate ? '#F59E0B' : '#4B5563'}`,
-            color: canInitiate ? '#F59E0B' : '#6B7280',fontFamily:'JetBrains Mono, monospace',
-            fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
-            opacity: submitting ? 0.5 : 1}}>
+          className={`w-full py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 transition-colors ${
+            canInitiate
+              ? 'border-warning bg-warning/10 text-warning hover:bg-warning/20 cursor-pointer'
+              : 'border-border bg-card text-text-secondary/50 cursor-not-allowed'
+          } ${submitting ? 'opacity-50' : ''}`}>
           {canInitiate ? 'INITIATE LEADERSHIP CHANGE' : `STABILITY TOO HIGH (${stability.toFixed(1)} > ${threshold})`}
         </button>
       )}
-      {error && <p style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#FF3C14',marginTop:'0.5rem'}}>{error}</p>}
+      {error && <p className="font-body text-caption text-danger mt-2">{error}</p>}
     </div>
   )
 }
