@@ -726,6 +726,137 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
   const visibleInterceptions = myNuclearLevel >= 2 ? pendingInterceptions : []
 
+  // ── Columbia Elections ──────────────────────────────────────────────
+  const isColumbia = countryId === 'columbia'
+
+  // Realtime: nominations for this sim
+  const { data: electionNominationsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_nominations', simId,
+    { columns: '*', enabled: isColumbia },
+  )
+  const electionNominations = electionNominationsRaw as unknown as {
+    id:string; election_type:string; election_round:number; role_id:string; camp:string
+  }[]
+
+  // Realtime: votes for this sim (just to check if I voted)
+  const { data: electionVotesRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_votes', simId,
+    { columns: 'id,election_type,voter_role_id', enabled: isColumbia },
+  )
+  const electionVotes = electionVotesRaw as unknown as {
+    id:string; election_type:string; voter_role_id:string
+  }[]
+
+  // Realtime: results
+  const { data: electionResultsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_results', simId,
+    { columns: '*', enabled: isColumbia },
+  )
+  const electionResults = electionResultsRaw as unknown as {
+    id:string; election_type:string; election_round:number; winner_role_id:string|null
+  }[]
+
+  // Load key_events to find active elections
+  const [keyEventsData, setKeyEventsData] = useState<{type:string;subtype:string;round:number;nominations_round:number;name:string}[]>([])
+  useEffect(() => {
+    if (!simId) return
+    supabase.from('sim_runs').select('key_events').eq('id', simId).limit(1)
+      .then(({ data }) => {
+        if (data?.[0]?.key_events) {
+          const evts = (data[0].key_events as {type:string;subtype?:string;round?:number;nominations_round?:number;name?:string}[])
+            .filter(e => e.type === 'election')
+            .map(e => ({
+              type: e.type,
+              subtype: e.subtype ?? '',
+              round: e.round ?? 0,
+              nominations_round: e.nominations_round ?? 0,
+              name: e.name ?? '',
+            }))
+          setKeyEventsData(evts)
+        }
+      })
+  }, [simId])
+
+  // Determine current round from sim state (passed indirectly via dataVersion or from parent)
+  const [currentRound, setCurrentRound] = useState(0)
+  useEffect(() => {
+    if (!simId) return
+    supabase.from('sim_runs').select('current_round').eq('id', simId).limit(1)
+      .then(({ data }) => { if (data?.[0]) setCurrentRound(data[0].current_round) })
+  }, [simId, dataVersion])
+
+  // Find active election events for this round
+  const activeNominationEvent = isColumbia ? keyEventsData.find(e => e.nominations_round === currentRound) : undefined
+  const activeElectionEvent = isColumbia ? keyEventsData.find(e => e.round === currentRound) : undefined
+
+  // Check if already nominated
+  const myNomination = activeNominationEvent
+    ? electionNominations.find(n => n.role_id === roleId && n.election_type === activeNominationEvent.subtype)
+    : undefined
+
+  // Check if already voted
+  const myElectionVote = activeElectionEvent
+    ? electionVotes.find(v => v.voter_role_id === roleId && v.election_type === activeElectionEvent.subtype)
+    : undefined
+
+  // Check if election already resolved
+  const electionResolved = activeElectionEvent
+    ? electionResults.find(r => r.election_type === activeElectionEvent.subtype && r.election_round === activeElectionEvent.round)
+    : undefined
+
+  // Candidates for the active election
+  const electionCandidates = activeElectionEvent
+    ? electionNominations.filter(n => n.election_type === activeElectionEvent.subtype && n.election_round === activeElectionEvent.round)
+    : []
+
+  // Election UI state
+  const [showElectionPanel, setShowElectionPanel] = useState<'nominate'|'vote'|null>(null)
+  const [electionSubmitting, setElectionSubmitting] = useState(false)
+  const [selectedElectionCandidate, setSelectedElectionCandidate] = useState<string>('')
+
+  // Show election in expected actions
+  const showNomination = isColumbia && activeNominationEvent && !myNomination
+  const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0
+
+  const handleSelfNominate = async () => {
+    if (!activeNominationEvent) return
+    setElectionSubmitting(true)
+    try {
+      await submitAction(simId, 'self_nominate', roleId, countryId, {
+        election_type: activeNominationEvent.subtype,
+        election_round: activeNominationEvent.round,
+      })
+      setShowElectionPanel(null)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Nomination failed') }
+    finally { setElectionSubmitting(false) }
+  }
+
+  const handleWithdrawNomination = async () => {
+    if (!activeNominationEvent) return
+    setElectionSubmitting(true)
+    try {
+      await submitAction(simId, 'withdraw_nomination', roleId, countryId, {
+        election_type: activeNominationEvent.subtype,
+      })
+      setShowElectionPanel(null)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Withdrawal failed') }
+    finally { setElectionSubmitting(false) }
+  }
+
+  const handleCastElectionVote = async () => {
+    if (!activeElectionEvent || !selectedElectionCandidate) return
+    setElectionSubmitting(true)
+    try {
+      await submitAction(simId, 'cast_election_vote', roleId, countryId, {
+        candidate_role_id: selectedElectionCandidate,
+        election_type: activeElectionEvent.subtype,
+      })
+      setShowElectionPanel(null)
+      setSelectedElectionCandidate('')
+    } catch (e) { alert(e instanceof Error ? e.message : 'Vote failed') }
+    finally { setElectionSubmitting(false) }
+  }
+
   const handleAuthorize = async (actionId: string, confirm: boolean, rationale: string) => {
     setAuthSubmitting(true)
     try {
@@ -997,10 +1128,125 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
+  // ── Election Detail Panels (rendered before main actions list) ────────
+  if (showElectionPanel === 'nominate' && activeNominationEvent) {
+    const elType = activeNominationEvent.subtype === 'presidential' ? 'Presidential Election' : 'Mid-Term Parliamentary Election'
+    const currentNominees = electionNominations.filter(n =>
+      n.election_type === activeNominationEvent.subtype && n.election_round === activeNominationEvent.round
+    )
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h2 text-text-primary">Columbia Elections — Nominations</h2>
+          <button onClick={() => setShowElectionPanel(null)}
+            className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+            ← Back
+          </button>
+        </div>
+
+        <div className="bg-action/5 border border-action/20 rounded-lg p-4 space-y-2">
+          <p className="font-body text-body-sm text-text-primary">
+            <strong className="text-action">{elType}</strong> — Election Round {activeNominationEvent.round}
+          </p>
+          <p className="font-body text-caption text-text-secondary">
+            Nominations are open this round. The election will take place in Round {activeNominationEvent.round}.
+          </p>
+          <p className="font-body text-caption text-text-secondary">
+            Opposition candidates represent 2 votes each. Under certain political and economic circumstances, their popular support may grow to 3 votes each.
+          </p>
+        </div>
+
+        {currentNominees.length > 0 && (
+          <div className="bg-card border border-border rounded-lg p-4">
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Current Nominees</h3>
+            <div className="space-y-2">
+              {currentNominees.map(n => (
+                <div key={n.id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
+                  <span className="font-body text-body-sm text-text-primary font-medium capitalize">{n.role_id}</span>
+                  <span className={`font-body text-caption px-2 py-0.5 rounded ${
+                    n.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
+                  }`}>{n.camp === 'opposition' ? 'Opposition' : 'Government'}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!myNomination ? (
+          <button onClick={handleSelfNominate} disabled={electionSubmitting}
+            className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            {electionSubmitting ? 'Submitting...' : 'Nominate Yourself'}
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <div className="bg-success/10 border border-success/20 rounded-lg p-3">
+              <p className="font-body text-body-sm text-success">You are nominated for this election.</p>
+            </div>
+            <button onClick={handleWithdrawNomination} disabled={electionSubmitting}
+              className="w-full bg-danger/10 text-danger font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-danger/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              {electionSubmitting ? 'Withdrawing...' : 'Withdraw Nomination'}
+            </button>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (showElectionPanel === 'vote' && activeElectionEvent && !electionResolved) {
+    const elType = activeElectionEvent.subtype === 'presidential' ? 'Presidential Election' : 'Mid-Term Parliamentary Election'
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h2 text-text-primary">Columbia Elections — Cast Your Vote</h2>
+          <button onClick={() => setShowElectionPanel(null)}
+            className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+            ← Back
+          </button>
+        </div>
+
+        <div className="bg-action/5 border border-action/20 rounded-lg p-4 space-y-2">
+          <p className="font-body text-body-sm text-text-primary">
+            <strong className="text-action">{elType}</strong> — Secret Ballot
+          </p>
+          <p className="font-body text-caption text-text-secondary">
+            Select a candidate and cast your vote. Your choice will not be revealed to other participants.
+          </p>
+          <p className="font-body text-caption text-text-secondary">
+            Opposition candidates carry 2 votes each (may increase to 3 under economic hardship). All other roles carry 1 vote each.
+          </p>
+        </div>
+
+        <div className="bg-card border border-border rounded-lg divide-y divide-border">
+          {electionCandidates.map(c => (
+            <label key={c.role_id} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+              selectedElectionCandidate === c.role_id ? 'bg-action/5' : 'hover:bg-base'
+            }`}>
+              <input type="radio" name="electionCandidate" value={c.role_id}
+                checked={selectedElectionCandidate === c.role_id}
+                onChange={() => setSelectedElectionCandidate(c.role_id)}
+                className="accent-action"/>
+              <span className="font-body text-body-sm text-text-primary flex-1 capitalize">{c.role_id}</span>
+              <span className={`font-body text-caption px-2 py-0.5 rounded ${
+                c.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
+              }`}>{c.camp === 'opposition' ? 'Opposition (2+ votes)' : 'Government (1 vote)'}</span>
+            </label>
+          ))}
+        </div>
+
+        <button onClick={handleCastElectionVote}
+          disabled={!selectedElectionCandidate || electionSubmitting}
+          className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          {electionSubmitting ? 'Submitting...' : 'Cast Vote'}
+        </button>
+      </div>
+    )
+  }
+
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
   const showLeaderVote = activeVote && !hasVotedInActiveVote ? 1 : 0
+  const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (myNomination ? 1 : 0)
   const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
-    + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote
+    + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote + electionExpected
   const hasExpected = expectedCount > 0
 
   return (
@@ -1057,6 +1303,37 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 <span className="font-body text-caption text-text-secondary">
                   {leaderVoteCountdown !== null && `${Math.floor(leaderVoteCountdown/60)}:${String(Math.floor(leaderVoteCountdown%60)).padStart(2,'0')} remaining — `}
                   Click to vote
+                </span>
+              </button>
+            )}
+            {showNomination && activeNominationEvent && (
+              <button onClick={() => setShowElectionPanel('nominate')}
+                className="text-left bg-card hover:bg-action/5 border-2 border-action/40 hover:border-action/60 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-action font-bold block">
+                  Columbia Elections — Nominations Open
+                </span>
+                <span className="font-body text-caption text-text-secondary">
+                  {activeNominationEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'} — Click to nominate
+                </span>
+              </button>
+            )}
+            {myNomination && activeNominationEvent && (
+              <button onClick={() => setShowElectionPanel('nominate')}
+                className="text-left bg-success/5 border border-success/30 rounded-lg px-4 py-3 transition-colors hover:bg-success/10">
+                <span className="font-body text-body-sm text-success font-medium block">
+                  You are nominated — {activeNominationEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                </span>
+                <span className="font-body text-caption text-text-secondary">Click to view or withdraw</span>
+              </button>
+            )}
+            {showElectionVote && activeElectionEvent && (
+              <button onClick={() => setShowElectionPanel('vote')}
+                className="text-left bg-card hover:bg-action/5 border-2 border-action/40 hover:border-action/60 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-action font-bold block">
+                  Columbia Elections — Cast Your Vote
+                </span>
+                <span className="font-body text-caption text-text-secondary">
+                  {activeElectionEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'} — {electionCandidates.length} candidate{electionCandidates.length !== 1 ? 's' : ''}
                 </span>
               </button>
             )}
