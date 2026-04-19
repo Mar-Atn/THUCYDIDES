@@ -127,9 +127,16 @@ export function ParticipantDashboard() {
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevRoundRef = useRef<number | null>(null)
+  const [nuclearBannerDismissed, setNuclearBannerDismissed] = useState(false)
+  const nuclearBannerTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
 
   /* Realtime hook for sim_runs — replaces manual channel + polling -------- */
   const { data: simRun } = useRealtimeRow<SimRun>('sim_runs', simId)
+
+  /* Realtime hook for nuclear_actions — global flight banner ------------- */
+  const { data: globalNuclearActions } = useRealtimeTable<Record<string, unknown>>(
+    'nuclear_actions', simId,
+  )
 
   /* Derive simState from the realtime sim_runs row ----------------------- */
   const simState: SimState | null = simRun ? {
@@ -301,8 +308,86 @@ export function ParticipantDashboard() {
       {broadcast&&<div className="bg-warning/10 border-b border-warning/30 px-6 py-2"><div className="max-w-7xl mx-auto flex items-center gap-3">
         <span className="font-body text-caption font-bold text-warning uppercase">Broadcast</span>
         <span className="font-body text-body-sm text-text-primary flex-1">{broadcast}</span>
-        <button onClick={()=>setBroadcast(null)} className="text-text-secondary hover:text-text-primary">✕</button>
+        <button onClick={()=>setBroadcast(null)} className="text-text-secondary hover:text-text-primary">{'\u2715'}</button>
       </div></div>}
+
+      {/* Nuclear Flight Banner — shown to ALL participants during Phase 3 */}
+      {(() => {
+        const flightAction = (globalNuclearActions as unknown as {
+          id:string; status:string; country_code:string; payload:Record<string,unknown>;
+          timer_started_at:string|null; timer_duration_sec:number|null;
+        }[])?.find(a => a.status === 'awaiting_interception')
+        const resolvedAction = !flightAction && !nuclearBannerDismissed && (globalNuclearActions as unknown as {
+          id:string; status:string; country_code:string; resolved_at:string|null;
+        }[])?.find(a => {
+          if (a.status !== 'resolved') return false
+          if (!a.resolved_at) return false
+          const resolvedAt = new Date(a.resolved_at).getTime()
+          return (Date.now() - resolvedAt) < 30000 // Show for 30s after resolution
+        })
+
+        if (flightAction) {
+          const missiles = ((flightAction.payload?.changes as Record<string,unknown>)?.missiles as unknown[]) ?? []
+          const timerStart = flightAction.timer_started_at ? new Date(flightAction.timer_started_at).getTime() : 0
+          const timerDuration = flightAction.timer_duration_sec ?? 600
+          const now = Date.now()
+          const remaining = Math.max(0, timerDuration - (now - timerStart) / 1000)
+          const mm = String(Math.floor(remaining / 60)).padStart(2, '0')
+          const ss = String(Math.floor(remaining % 60)).padStart(2, '0')
+
+          return (
+            <div style={{
+              width:'100%',backgroundColor:'#991B1B',padding:'0.75rem 1.5rem',
+              display:'flex',alignItems:'center',justifyContent:'center',gap:'1.5rem',
+              animation:'nuclearBannerFlash 2s ease-in-out infinite',zIndex:40,
+            }}>
+              <span style={{
+                fontFamily:'"JetBrains Mono",monospace',fontSize:'1.1rem',fontWeight:700,
+                color:'#FFFFFF',letterSpacing:'0.1em',textTransform:'uppercase',
+              }}>
+                {'\u26A0'} BALLISTIC MISSILE LAUNCH DETECTED {'\u2014'} {flightAction.country_code.toUpperCase()}
+              </span>
+              <span style={{
+                fontFamily:'"JetBrains Mono",monospace',fontSize:'1.1rem',fontWeight:700,
+                color:'#FFFFFF',letterSpacing:'0.1em',
+              }}>
+                {missiles.length} MISSILE{missiles.length > 1 ? 'S' : ''} INBOUND {'\u2014'} Impact in {mm}:{ss}
+              </span>
+            </div>
+          )
+        }
+
+        if (resolvedAction) {
+          // Auto-dismiss after 30s
+          if (!nuclearBannerTimerRef.current) {
+            nuclearBannerTimerRef.current = setTimeout(() => {
+              setNuclearBannerDismissed(true)
+              nuclearBannerTimerRef.current = null
+            }, 30000)
+          }
+          return (
+            <div style={{
+              width:'100%',backgroundColor:'#1E3A5F',padding:'0.75rem 1.5rem',
+              display:'flex',alignItems:'center',justifyContent:'center',gap:'1rem',
+              zIndex:40,
+            }}>
+              <span style={{
+                fontFamily:'"JetBrains Mono",monospace',fontSize:'1rem',fontWeight:700,
+                color:'#FFFFFF',letterSpacing:'0.1em',textTransform:'uppercase',
+              }}>
+                NUCLEAR STRIKE RESOLVED
+              </span>
+            </div>
+          )
+        }
+        return null
+      })()}
+      <style>{`
+        @keyframes nuclearBannerFlash {
+          0%, 100% { background-color: #991B1B; }
+          50% { background-color: #DC2626; }
+        }
+      `}</style>
 
       {/* TABS */}
       <nav className="bg-card border-b border-border px-6">
@@ -468,8 +553,230 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
+  // Nuclear authorization/interception pending actions (realtime)
+  const { data: nuclearActionsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'nuclear_actions', simId,
+  )
+  const nuclearActions = nuclearActionsRaw as unknown as {
+    id:string; action_type:string; country_code:string; status:string;
+    authorizer_1_role:string|null; authorizer_2_role:string|null;
+    authorizer_1_response:string|null; authorizer_2_response:string|null;
+    payload:Record<string,unknown>; timer_started_at:string|null;
+    timer_duration_sec:number|null; interception_responses:Record<string,unknown>|null;
+  }[]
+
+  // Authorization cards: pending nuclear actions where this role is an authorizer and hasn't responded
+  const [authRoleForCountry, setAuthRoleForCountry] = useState<string|null>(null)
+  const [authorizingId, setAuthorizingId] = useState<string|null>(null)
+  const [authSubmitting, setAuthSubmitting] = useState(false)
+  const [interceptingId, setInterceptingId] = useState<string|null>(null)
+  const [interceptSubmitting, setInterceptSubmitting] = useState(false)
+
+  // Determine what role name this role maps to for authorization
+  useEffect(() => {
+    // Load the role's position_type to check against authorizer roles
+    supabase.from('roles').select('id, position_type')
+      .eq('sim_run_id', simId).eq('id', roleId).limit(1)
+      .then(({ data }) => {
+        if (data?.[0]) {
+          // The authorizer roles in nuclear_actions are character role IDs like 'shield', 'rampart' etc.
+          // For the human interface, we match by role ID directly
+          setAuthRoleForCountry(data[0].id)
+        }
+      })
+  }, [simId, roleId])
+
+  const pendingAuthorizations = nuclearActions.filter(a =>
+    a.status === 'awaiting_authorization' &&
+    a.country_code === countryId &&
+    ((a.authorizer_1_role === roleId && !a.authorizer_1_response) ||
+     (a.authorizer_2_role === roleId && !a.authorizer_2_response))
+  )
+
+  // Interception cards: T3+ countries with pending interception
+  const pendingInterceptions = nuclearActions.filter(a =>
+    a.status === 'awaiting_interception' &&
+    a.country_code !== countryId && // not the launcher
+    !(a.interception_responses && (a.interception_responses as Record<string,unknown>)[countryId]) // haven't responded
+  )
+  // Only show if our country is T3+ — check nuclearLevel from parent state via simple query
+  const [myNuclearLevel, setMyNuclearLevel] = useState(0)
+  useEffect(() => {
+    supabase.from('countries').select('nuclear_level, nuclear_confirmed')
+      .eq('sim_run_id', simId).eq('id', countryId).limit(1)
+      .then(({ data }) => {
+        if (data?.[0]?.nuclear_confirmed && (data[0].nuclear_level ?? 0) >= 3) {
+          setMyNuclearLevel(data[0].nuclear_level)
+        }
+      })
+  }, [simId, countryId, dataVersion])
+
+  const visibleInterceptions = myNuclearLevel >= 3 ? pendingInterceptions : []
+
+  const handleAuthorize = async (actionId: string, confirm: boolean, rationale: string) => {
+    setAuthSubmitting(true)
+    try {
+      await submitAction(simId, 'nuclear_authorize', roleId, countryId, {
+        nuclear_action_id: actionId, confirm, rationale,
+      })
+      setAuthorizingId(null)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Failed') }
+    finally { setAuthSubmitting(false) }
+  }
+
+  const handleIntercept = async (actionId: string, intercept: boolean, rationale: string) => {
+    setInterceptSubmitting(true)
+    try {
+      await submitAction(simId, 'nuclear_intercept', roleId, countryId, {
+        nuclear_action_id: actionId, intercept, rationale,
+      })
+      setInterceptingId(null)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Failed') }
+    finally { setInterceptSubmitting(false) }
+  }
+
+  // Authorization detail panel
+  const authAction = authorizingId ? nuclearActions.find(a => a.id === authorizingId) : null
+  if (authAction) {
+    const missiles = (authAction.payload?.changes as Record<string,unknown>)?.missiles as {missile_unit_code:string;target_global_row:number;target_global_col:number}[] ?? []
+    return (
+      <div style={{
+        backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',
+        border:'2px solid rgba(255,60,20,0.4)',
+      }}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
+          <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#FF3C14',
+            textTransform:'uppercase',letterSpacing:'0.1em'}}>{'\u26A0'} Nuclear Launch Authorization</h2>
+          <button onClick={() => setAuthorizingId(null)} style={{
+            fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
+            cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
+            padding:'0.25rem 0.5rem',backgroundColor:'transparent',
+          }}>{'\u2190'} Back</button>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1.5rem'}}>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Launcher</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#FF3C14'}}>{authAction.country_code.toUpperCase()}</div>
+          </div>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Missiles</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#FF3C14'}}>{missiles.length}</div>
+          </div>
+        </div>
+
+        <div style={{marginBottom:'1.5rem'}}>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase',marginBottom:'0.5rem'}}>Targets</div>
+          {missiles.map((m, i) => (
+            <div key={i} style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.25rem'}}>
+              {m.missile_unit_code} {'\u2192'} ({m.target_global_row},{m.target_global_col})
+            </div>
+          ))}
+        </div>
+
+        <div style={{display:'flex',gap:'1rem'}}>
+          <button onClick={() => handleAuthorize(authAction.id, true, 'Authorization confirmed by authorized officer')}
+            disabled={authSubmitting}
+            style={{
+              flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+              backgroundColor:'rgba(255,60,20,0.2)',border:'2px solid #FF3C14',
+              color:'#FF3C14',fontFamily:'JetBrains Mono, monospace',
+              fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+              letterSpacing:'0.1em',opacity:authSubmitting?0.5:1,
+            }}>AUTHORIZE</button>
+          <button onClick={() => handleAuthorize(authAction.id, false, 'Authorization rejected by authorized officer')}
+            disabled={authSubmitting}
+            style={{
+              flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+              backgroundColor:'rgba(0,255,65,0.1)',border:'2px solid #00FF41',
+              color:'#00FF41',fontFamily:'JetBrains Mono, monospace',
+              fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+              letterSpacing:'0.1em',opacity:authSubmitting?0.5:1,
+            }}>REJECT</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Interception detail panel
+  const intAction = interceptingId ? nuclearActions.find(a => a.id === interceptingId) : null
+  if (intAction) {
+    const missiles = (intAction.payload?.changes as Record<string,unknown>)?.missiles as {missile_unit_code:string;target_global_row:number;target_global_col:number}[] ?? []
+    return (
+      <div style={{
+        backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',
+        border:'2px solid rgba(255,60,20,0.4)',
+      }}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
+          <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#FF3C14',
+            textTransform:'uppercase',letterSpacing:'0.1em'}}>{'\u26A0'} Nuclear Interception Decision</h2>
+          <button onClick={() => setInterceptingId(null)} style={{
+            fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
+            cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
+            padding:'0.25rem 0.5rem',backgroundColor:'transparent',
+          }}>{'\u2190'} Back</button>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:'1rem',marginBottom:'1.5rem'}}>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Launcher</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#FF3C14'}}>{intAction.country_code.toUpperCase()}</div>
+          </div>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Missiles</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#FF3C14'}}>{missiles.length}</div>
+          </div>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Intercept Prob</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#F59E0B'}}>25% / AD</div>
+          </div>
+        </div>
+
+        <div style={{marginBottom:'1rem'}}>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase',marginBottom:'0.5rem'}}>Targets</div>
+          {missiles.map((m, i) => (
+            <div key={i} style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.25rem'}}>
+              {m.missile_unit_code} {'\u2192'} ({m.target_global_row},{m.target_global_col})
+            </div>
+          ))}
+        </div>
+
+        <div style={{
+          padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(245,158,11,0.3)',
+          backgroundColor:'rgba(245,158,11,0.05)',marginBottom:'1.5rem',
+        }}>
+          <p style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#F59E0B'}}>
+            WARNING: Intercepting reveals your AD capability and sides you against {intAction.country_code.toUpperCase()}.
+          </p>
+        </div>
+
+        <div style={{display:'flex',gap:'1rem'}}>
+          <button onClick={() => handleIntercept(intAction.id, true, 'Interception ordered')}
+            disabled={interceptSubmitting}
+            style={{
+              flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+              backgroundColor:'rgba(255,60,20,0.2)',border:'2px solid #FF3C14',
+              color:'#FF3C14',fontFamily:'JetBrains Mono, monospace',
+              fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+              letterSpacing:'0.1em',opacity:interceptSubmitting?0.5:1,
+            }}>INTERCEPT</button>
+          <button onClick={() => handleIntercept(intAction.id, false, 'Declined interception')}
+            disabled={interceptSubmitting}
+            style={{
+              flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+              backgroundColor:'rgba(255,255,255,0.05)',border:'2px solid rgba(255,255,255,0.2)',
+              color:'#9CA3AF',fontFamily:'JetBrains Mono, monospace',
+              fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+              letterSpacing:'0.1em',opacity:interceptSubmitting?0.5:1,
+            }}>DECLINE</button>
+        </div>
+      </div>
+    )
+  }
+
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
   const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
+    + pendingAuthorizations.length + visibleInterceptions.length
   const hasExpected = expectedCount > 0
 
   return (
@@ -487,6 +794,36 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 <span className="font-body text-caption text-text-secondary">Position your forces for the next round</span>
               </button>
             )}
+            {pendingAuthorizations.map(na => (
+              <button key={na.id} onClick={() => setAuthorizingId(na.id)}
+                style={{
+                  textAlign:'left',backgroundColor:'rgba(255,60,20,0.08)',
+                  border:'2px solid rgba(255,60,20,0.5)',borderRadius:'0.5rem',
+                  padding:'0.75rem 1rem',cursor:'pointer',
+                }}>
+                <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#FF3C14',fontWeight:700,display:'block'}}>
+                  {'\u26A0'} NUCLEAR LAUNCH AUTHORIZATION
+                </span>
+                <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#D1D5DB',display:'block',marginTop:'0.25rem'}}>
+                  {na.country_code.toUpperCase()} requests launch authorization — click to review
+                </span>
+              </button>
+            ))}
+            {visibleInterceptions.map(na => (
+              <button key={na.id} onClick={() => setInterceptingId(na.id)}
+                style={{
+                  textAlign:'left',backgroundColor:'rgba(255,60,20,0.08)',
+                  border:'2px solid rgba(255,60,20,0.5)',borderRadius:'0.5rem',
+                  padding:'0.75rem 1rem',cursor:'pointer',
+                }}>
+                <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#FF3C14',fontWeight:700,display:'block'}}>
+                  {'\u26A0'} NUCLEAR INTERCEPTION DECISION
+                </span>
+                <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#D1D5DB',display:'block',marginTop:'0.25rem'}}>
+                  {na.country_code.toUpperCase()} launched missiles — intercept?
+                </span>
+              </button>
+            ))}
             {pendingTxns.map(txn=>
               <button key={txn.id} onClick={()=>setReviewTxn(txn.id)}
                 className="text-left bg-card hover:bg-action/5 border border-warning/30 hover:border-action/30 rounded-lg px-4 py-3 transition-colors">
@@ -887,6 +1224,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'naval_blockade') return <BlockadeForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'martial_law') return <MartialLawForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'nuclear_test') return <NuclearTestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'nuclear_launch_initiate') return <NuclearLaunchForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -1764,6 +2102,426 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+/* ── Nuclear Launch Form — 4-phase multi-player action ─────────────────── */
+
+interface MissilePair { missileId: string; targetRow: number; targetCol: number }
+
+function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [phase, setPhase] = useState<'select'|'authorizing'|'flight'|'resolved'>('select')
+  const [nuclearLevel, setNuclearLevel] = useState(0)
+  const [nuclearConfirmed, setNuclearConfirmed] = useState(false)
+  const [missiles, setMissiles] = useState<{unit_id:string;unit_type:string;global_row?:number;global_col?:number}[]>([])
+  const [pairs, setPairs] = useState<MissilePair[]>([])
+  const [selectedMissile, setSelectedMissile] = useState<string|null>(null)
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [nuclearAction, setNuclearAction] = useState<Record<string,unknown>|null>(null)
+  const [countdown, setCountdown] = useState<number|null>(null)
+  const [result, setResult] = useState<Record<string,unknown>|null>(null)
+  const mapRef = useRef<HTMLIFrameElement>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval>|null>(null)
+
+  // Load nuclear status + deployed missiles
+  useEffect(() => {
+    (async () => {
+      const { data: cs } = await supabase.from('countries')
+        .select('nuclear_level, nuclear_confirmed')
+        .eq('sim_run_id', simId).eq('id', countryId).limit(1)
+      const row = cs?.[0]
+      setNuclearLevel(row?.nuclear_level ?? 0)
+      setNuclearConfirmed(row?.nuclear_confirmed === true)
+
+      // Load deployed strategic_missile units
+      const { data: deps } = await supabase.from('deployments')
+        .select('unit_id, unit_type, unit_status, global_row, global_col')
+        .eq('sim_run_id', simId).eq('country_id', countryId)
+        .eq('unit_type', 'strategic_missile').eq('unit_status', 'active')
+      setMissiles((deps ?? []) as typeof missiles)
+      setLoading(false)
+    })()
+  }, [simId, countryId])
+
+  // Listen for hex clicks (target assignment)
+  useEffect(() => {
+    if (phase !== 'select' || !selectedMissile) return
+    const handler = (event: MessageEvent) => {
+      const msg = event.data
+      if (!msg || msg.type !== 'hex-click') return
+      const owner = msg.owner as string
+      if (owner === countryId) {
+        setError('Cannot target your own territory')
+        return
+      }
+      setPairs(prev => [...prev, { missileId: selectedMissile, targetRow: msg.row, targetCol: msg.col }])
+      setSelectedMissile(null)
+      setError(null)
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [phase, selectedMissile, countryId])
+
+  // Poll nuclear action status during authorizing/flight phases
+  useEffect(() => {
+    if (phase !== 'authorizing' && phase !== 'flight') return
+    const poll = async () => {
+      try {
+        const token = await getToken()
+        const resp = await fetch(`/api/sim/${simId}/nuclear/active`, {
+          headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+        })
+        if (!resp.ok) return
+        const json = await resp.json()
+        const action = json.data
+        if (!action) {
+          // No active action — check if resolved
+          if (nuclearAction) {
+            const { data: resolved } = await supabase.from('nuclear_actions')
+              .select('status, resolution').eq('id', (nuclearAction as Record<string,unknown>).id)
+              .limit(1)
+            if (resolved?.[0]?.status === 'resolved') {
+              setResult(resolved[0].resolution as Record<string,unknown>)
+              setPhase('resolved')
+            } else if (resolved?.[0]?.status === 'cancelled') {
+              setError('Launch cancelled — authorization rejected')
+              setPhase('select')
+            }
+          }
+          return
+        }
+        setNuclearAction(action)
+
+        // Update countdown timer
+        if (action.timer_started_at) {
+          const started = new Date(action.timer_started_at as string).getTime()
+          const duration = (action.timer_duration_sec as number) || (action.nuclear_auth_timer_sec as number) || 600
+          const remaining = duration - (Date.now() - started) / 1000
+          setCountdown(Math.max(0, remaining))
+        }
+
+        // Phase transitions
+        if (action.status === 'awaiting_interception' && phase === 'authorizing') {
+          setPhase('flight')
+        }
+        if (action.status === 'resolved') {
+          setResult(action.resolution as Record<string,unknown>)
+          setPhase('resolved')
+        }
+        if (action.status === 'cancelled') {
+          setError('Launch cancelled — authorization rejected')
+          setPhase('select')
+        }
+      } catch { /* ignore polling errors */ }
+    }
+    poll()
+    pollRef.current = setInterval(poll, 2000)
+    return () => { if (pollRef.current) clearInterval(pollRef.current) }
+  }, [phase, simId, nuclearAction])
+
+  const maxMissiles = nuclearLevel >= 3 ? missiles.length : 1
+  const usedMissileIds = new Set(pairs.map(p => p.missileId))
+  const availableMissiles = missiles.filter(m => !usedMissileIds.has(m.unit_id))
+
+  const handleInitiate = async () => {
+    if (pairs.length === 0) return
+    setSubmitting(true); setError(null)
+    try {
+      const missilePayload = pairs.map(p => ({
+        missile_unit_code: p.missileId,
+        target_global_row: p.targetRow,
+        target_global_col: p.targetCol,
+      }))
+      const res = await submitAction(simId, 'nuclear_launch_initiate', roleId, countryId, {
+        warhead: 'nuclear',
+        missiles: missilePayload,
+      })
+      if (res.status === 'rejected') {
+        setError((res.errors as string[])?.join(', ') || 'Launch rejected')
+        setSubmitting(false)
+        return
+      }
+      setNuclearAction(res)
+      setPhase('authorizing')
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed')
+    } finally { setSubmitting(false) }
+  }
+
+  const removePair = (idx: number) => setPairs(prev => prev.filter((_, i) => i !== idx))
+
+  const fmtCountdown = (s: number) => {
+    const m = Math.floor(s / 60)
+    const ss = Math.floor(s % 60)
+    return `${String(m).padStart(2,'0')}:${String(ss).padStart(2,'0')}`
+  }
+
+  // Pre-check: can we launch?
+  if (loading) return <div style={{backgroundColor:'#0A0E1A',padding:'2rem',borderRadius:'0.5rem'}}>
+    <p style={{fontFamily:'JetBrains Mono, monospace',color:'#9CA3AF',fontSize:'0.8rem'}}>Loading nuclear status...</p>
+  </div>
+
+  if (!nuclearConfirmed) return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Nuclear Launch</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+      <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem'}}>
+        <p style={{fontFamily:'JetBrains Mono, monospace',color:'#FF6B35',fontSize:'0.9rem'}}>
+          Nuclear capability not confirmed. Conduct a successful nuclear test first.
+        </p>
+      </div>
+    </div>
+  )
+
+  if (missiles.length === 0) return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Nuclear Launch</h2>
+        <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">← Back</button>
+      </div>
+      <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem'}}>
+        <p style={{fontFamily:'JetBrains Mono, monospace',color:'#FF6B35',fontSize:'0.9rem'}}>
+          No deployed strategic missiles available. Deploy missiles to launch.
+        </p>
+      </div>
+    </div>
+  )
+
+  // RESOLVED phase — full-screen dark result
+  if (phase === 'resolved' && result) {
+    const hits = (result.hits as number) ?? 0
+    const intercepted = (result.missiles_intercepted as number) ?? 0
+    const launched = (result.missiles_launched as number) ?? 0
+    return (
+      <div style={{
+        position:'fixed',inset:0,zIndex:50,backgroundColor:'#0A0E1A',
+        display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'1.5rem',
+      }}>
+        <div style={{
+          fontFamily:'"JetBrains Mono","Courier New",monospace',
+          color: hits > 0 ? '#FF3C14' : '#00FF41',
+          fontSize:'2.5rem',fontWeight:700,letterSpacing:'0.1em',textAlign:'center',
+          textShadow: hits > 0
+            ? '0 0 40px rgba(255,60,20,0.5)'
+            : '0 0 40px rgba(0,255,65,0.5)',
+          animation:'nuclearReveal 1s ease-out forwards',maxWidth:'90vw',
+        }}>
+          {hits > 0 ? `NUCLEAR STRIKE — ${hits} IMPACT${hits>1?'S':''}` : 'ALL MISSILES NEUTRALIZED'}
+        </div>
+        <div style={{
+          fontFamily:'"JetBrains Mono",monospace',color:'rgba(255,255,255,0.6)',
+          fontSize:'0.875rem',textAlign:'center',lineHeight:1.8,maxWidth:'600px',
+        }}>
+          <div>Launched: {launched} | Intercepted: {intercepted} | Hits: {hits}</div>
+          {(result.damage_log as {military_destroyed:number;nuclear_site_destroyed:boolean}[])?.map((d,i) => (
+            <div key={i}>
+              Target ({(d as Record<string,unknown>).target_hex as string}): {d.military_destroyed} units destroyed
+              {d.nuclear_site_destroyed && ' | NUCLEAR SITE DESTROYED'}
+            </div>
+          ))}
+          {(result.salvo_effects as Record<string,unknown>)?.leader_killed && (
+            <div style={{color:'#FF3C14',marginTop:'0.5rem'}}>TARGET LEADER KILLED IN STRIKE</div>
+          )}
+        </div>
+        <button onClick={() => { setPhase('select'); onSubmitted() }} style={{
+          fontFamily:'"JetBrains Mono",monospace',color:'#00FF41',backgroundColor:'transparent',
+          border:'1px solid rgba(0,255,65,0.3)',padding:'0.75rem 2rem',fontSize:'0.875rem',
+          cursor:'pointer',letterSpacing:'0.1em',textTransform:'uppercase',marginTop:'1rem',
+        }}>Return to Actions</button>
+        <style>{`@keyframes nuclearReveal { 0% { opacity:0; transform:translateY(20px); } 100% { opacity:1; transform:translateY(0); } }`}</style>
+      </div>
+    )
+  }
+
+  // SELECT / AUTHORIZING / FLIGHT — sidebar + map layout
+  return (
+    <div className="flex gap-3" style={{height:'calc(100vh - 180px)'}}>
+      {/* LEFT SIDEBAR — controls (25%) */}
+      <div className="w-1/4 min-w-[240px] flex flex-col gap-2 overflow-y-auto pr-1">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h3 text-text-primary" style={{color:'#FF3C14'}}>Nuclear Launch</h2>
+          <button onClick={onClose} className="font-body text-caption text-text-secondary hover:text-text-primary px-2 py-0.5 rounded border border-border">← Back</button>
+        </div>
+
+        <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1rem',flex:1,display:'flex',flexDirection:'column',gap:'0.75rem'}}>
+          {/* Nuclear Status */}
+          <div style={{display:'flex',gap:'1rem',padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+            <div style={{textAlign:'center',flex:1}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.6rem',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'0.1em'}}>Level</div>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.5rem',color:'#F59E0B'}}>{nuclearLevel}</div>
+            </div>
+            <div style={{textAlign:'center',flex:1}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.6rem',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'0.1em'}}>Missiles</div>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.5rem',color:'#FF3C14'}}>{missiles.length}</div>
+            </div>
+            <div style={{textAlign:'center',flex:1}}>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.6rem',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'0.1em'}}>Max</div>
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.5rem',color:'#FF3C14'}}>{maxMissiles}</div>
+            </div>
+          </div>
+
+          {/* Phase: SELECT */}
+          {phase === 'select' && (<>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'0.1em'}}>
+              Select Missile{maxMissiles > 1 ? 's' : ''} + Assign Target{maxMissiles > 1 ? 's' : ''}
+            </div>
+
+            {/* Available missiles */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:'0.5rem'}}>
+              {availableMissiles.map(m => (
+                <button key={m.unit_id} onClick={() => setSelectedMissile(m.unit_id === selectedMissile ? null : m.unit_id)}
+                  style={{
+                    display:'inline-flex',alignItems:'center',justifyContent:'center',
+                    width:'2.5rem',height:'2.5rem',borderRadius:'0.25rem',cursor:'pointer',
+                    backgroundColor: m.unit_id === selectedMissile ? 'rgba(255,60,20,0.2)' : 'transparent',
+                    border: m.unit_id === selectedMissile ? '2px solid #FF3C14' : '2px solid rgba(255,255,255,0.15)',
+                    color: m.unit_id === selectedMissile ? '#FF3C14' : '#9CA3AF',
+                    fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',
+                  }} title={m.unit_id}>
+                  {'\u2622'}
+                </button>
+              ))}
+              {availableMissiles.length === 0 && pairs.length > 0 && (
+                <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#9CA3AF'}}>All missiles assigned</span>
+              )}
+            </div>
+
+            {selectedMissile && (
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#FF3C14',
+                padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.3)',backgroundColor:'rgba(255,60,20,0.05)'}}>
+                {'\u2622'} {selectedMissile} selected — click target hex on map
+              </div>
+            )}
+
+            {/* Queued pairs */}
+            {pairs.length > 0 && (
+              <div style={{display:'flex',flexDirection:'column',gap:'0.25rem'}}>
+                <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Launch Queue</div>
+                {pairs.map((p, i) => (
+                  <div key={i} style={{
+                    display:'flex',alignItems:'center',justifyContent:'space-between',
+                    padding:'0.35rem 0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.2)',
+                    backgroundColor:'rgba(255,60,20,0.05)',
+                  }}>
+                    <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#FF3C14'}}>
+                      {p.missileId} {'\u2192'} ({p.targetRow},{p.targetCol})
+                    </span>
+                    <button onClick={() => removePair(i)} style={{
+                      color:'#9CA3AF',cursor:'pointer',border:'none',background:'none',
+                      fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',
+                    }}>{'\u2716'}</button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* INITIATE button */}
+            {pairs.length > 0 && (
+              <button onClick={handleInitiate} disabled={submitting}
+                style={{
+                  width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+                  backgroundColor:'rgba(255,60,20,0.2)',border:'2px solid #FF3C14',
+                  color:'#FF3C14',fontFamily:'JetBrains Mono, monospace',
+                  fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+                  letterSpacing:'0.15em',opacity:submitting?0.5:1,
+                }}>
+                {submitting ? 'INITIATING...' : `INITIATE LAUNCH (${pairs.length} MISSILE${pairs.length>1?'S':''})`}
+              </button>
+            )}
+          </>)}
+
+          {/* Phase: AUTHORIZING */}
+          {phase === 'authorizing' && nuclearAction && (<>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#F59E0B',textTransform:'uppercase',letterSpacing:'0.1em'}}>
+              Awaiting Authorization
+            </div>
+            {countdown !== null && (
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'2rem',color:'#F59E0B',textAlign:'center'}}>
+                {fmtCountdown(countdown)}
+              </div>
+            )}
+            <div style={{display:'flex',flexDirection:'column',gap:'0.5rem'}}>
+              {nuclearAction.authorizer_1_role && (
+                <div style={{
+                  display:'flex',alignItems:'center',justifyContent:'space-between',
+                  padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',
+                }}>
+                  <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.75rem',color:'#D1D5DB'}}>
+                    {nuclearAction.authorizer_1_role as string}
+                  </span>
+                  <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',
+                    color: nuclearAction.authorizer_1_response === 'confirm' ? '#00FF41'
+                      : nuclearAction.authorizer_1_response === 'reject' ? '#FF3C14' : '#F59E0B'
+                  }}>
+                    {nuclearAction.authorizer_1_response === 'confirm' ? '\u2713'
+                      : nuclearAction.authorizer_1_response === 'reject' ? '\u2717' : '\u23F3'}
+                  </span>
+                </div>
+              )}
+              {nuclearAction.authorizer_2_role && (
+                <div style={{
+                  display:'flex',alignItems:'center',justifyContent:'space-between',
+                  padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',
+                }}>
+                  <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.75rem',color:'#D1D5DB'}}>
+                    {nuclearAction.authorizer_2_role as string}
+                  </span>
+                  <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',
+                    color: nuclearAction.authorizer_2_response === 'confirm' ? '#00FF41'
+                      : nuclearAction.authorizer_2_response === 'reject' ? '#FF3C14' : '#F59E0B'
+                  }}>
+                    {nuclearAction.authorizer_2_response === 'confirm' ? '\u2713'
+                      : nuclearAction.authorizer_2_response === 'reject' ? '\u2717' : '\u23F3'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </>)}
+
+          {/* Phase: FLIGHT */}
+          {phase === 'flight' && (<>
+            <div style={{
+              fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#FF3C14',
+              textTransform:'uppercase',letterSpacing:'0.15em',textAlign:'center',
+              animation:'nuclearPulse 1.5s ease-in-out infinite',
+            }}>
+              MISSILES IN FLIGHT
+            </div>
+            {countdown !== null && (
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'2.5rem',color:'#FF3C14',textAlign:'center',
+                textShadow:'0 0 30px rgba(255,60,20,0.4)'}}>
+                {fmtCountdown(countdown)}
+              </div>
+            )}
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#9CA3AF',textAlign:'center'}}>
+              Awaiting interception decisions from T3+ nuclear powers
+            </div>
+            <style>{`@keyframes nuclearPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.03)} }`}</style>
+          </>)}
+
+          {error && (
+            <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.8rem',color:'#FF3C14',
+              padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.3)'}}>
+              {error}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* RIGHT: Map (75%) */}
+      <div className="flex-1 relative rounded-lg overflow-hidden border border-border">
+        <iframe ref={mapRef}
+          src={`/map/deployments.html?display=clean&sim_run_id=${simId}&highlight_country=${countryId}`}
+          className="absolute inset-0 w-full h-full border-0"
+          title="Nuclear Target Map" />
+      </div>
     </div>
   )
 }

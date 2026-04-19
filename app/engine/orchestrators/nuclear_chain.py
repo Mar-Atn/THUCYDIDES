@@ -124,6 +124,15 @@ class NuclearChainOrchestrator:
         # Determine authorizers
         auth1, auth2 = self._get_authorizers(country_code)
 
+        # Load timer config from sim_runs.schedule
+        schedule = {}
+        try:
+            run = self.client.table("sim_runs").select("schedule").eq("id", sim_run_id).limit(1).execute()
+            schedule = (run.data[0].get("schedule") or {}) if run.data else {}
+        except Exception:
+            pass
+        auth_timer = schedule.get("nuclear_auth_timer_sec", 600)
+
         # Create nuclear_actions record
         row = {
             "sim_run_id": sim_run_id,
@@ -136,6 +145,7 @@ class NuclearChainOrchestrator:
             "authorizer_1_role": auth1,
             "authorizer_2_role": auth2,
             "timer_started_at": datetime.now(timezone.utc).isoformat(),
+            "timer_duration_sec": auth_timer,
         }
         res = self.client.table("nuclear_actions").insert(row).execute()
         action_id = res.data[0]["id"]
@@ -193,9 +203,41 @@ class NuclearChainOrchestrator:
         auth2_ok = action.get("authorizer_2_response") == "confirm" or action.get("authorizer_2_role") is None
 
         if auth1_ok and auth2_ok:
-            self.client.table("nuclear_actions").update({"status": "authorized"}).eq("id", action_id).execute()
-            logger.info("[nuclear] AUTHORIZED — all authorizers confirmed")
-            return {"status": "authorized"}
+            if action["action_type"] == "nuclear_launch":
+                # Nuclear launch: transition to interception phase with timer + auto-pause sim
+                sim_run_id = action["sim_run_id"]
+                schedule = {}
+                try:
+                    run = self.client.table("sim_runs").select("schedule").eq("id", sim_run_id).limit(1).execute()
+                    schedule = (run.data[0].get("schedule") or {}) if run.data else {}
+                except Exception:
+                    pass
+                flight_timer = schedule.get("nuclear_flight_timer_sec", 600)
+
+                self.client.table("nuclear_actions").update({
+                    "status": "awaiting_interception",
+                    "timer_started_at": datetime.now(timezone.utc).isoformat(),
+                    "timer_duration_sec": flight_timer,
+                }).eq("id", action_id).execute()
+
+                # Auto-pause the sim (Phase 3 = dramatic moment)
+                try:
+                    self.client.table("sim_runs").update({
+                        "status": "paused",
+                    }).eq("id", sim_run_id).execute()
+                    logger.info("[nuclear] SIM auto-paused for nuclear launch flight phase")
+                except Exception as e:
+                    logger.warning("[nuclear] auto-pause failed: %s", e)
+
+                # Generate classified artefacts for T3+ countries
+                self._generate_launch_artefacts(action)
+
+                logger.info("[nuclear] AUTHORIZED → awaiting_interception (flight timer=%ds)", flight_timer)
+                return {"status": "awaiting_interception"}
+            else:
+                self.client.table("nuclear_actions").update({"status": "authorized"}).eq("id", action_id).execute()
+                logger.info("[nuclear] AUTHORIZED — all authorizers confirmed")
+                return {"status": "authorized"}
 
         return {"status": "awaiting_authorization", "confirmed_so_far": [role_id]}
 
@@ -266,6 +308,16 @@ class NuclearChainOrchestrator:
         if result.get("outcome") not in ("rejected", "cancelled"):
             self._write_events(action, result)
 
+        # Auto-resume sim after nuclear launch resolution (was paused in Phase 3)
+        if atype == "nuclear_launch":
+            try:
+                self.client.table("sim_runs").update({
+                    "status": "active",
+                }).eq("id", sim_run_id).eq("status", "paused").execute()
+                logger.info("[nuclear] SIM auto-resumed after launch resolution")
+            except Exception as e:
+                logger.warning("[nuclear] auto-resume failed: %s", e)
+
         logger.info("[nuclear] RESOLVED %s for %s — %s", atype, cc, result.get("outcome"))
         return result
 
@@ -323,6 +375,74 @@ class NuclearChainOrchestrator:
 
         # Phase 4: Resolve
         return self.resolve(action_id, precomputed_rolls)
+
+    # ------------------------------------------------------------------
+    # Artefact generation
+    # ------------------------------------------------------------------
+
+    def _generate_launch_artefacts(self, action: dict) -> None:
+        """Insert classified artefacts for T3+ countries' HoS and military roles on launch authorization."""
+        import uuid
+
+        sim_run_id = action["sim_run_id"]
+        round_num = action["round_num"]
+        launcher = action["country_code"]
+        payload = action.get("payload") or {}
+        missiles = payload.get("changes", {}).get("missiles", [])
+        targets_desc = ", ".join(
+            f"({m.get('target_global_row')},{m.get('target_global_col')})" for m in missiles
+        )
+
+        try:
+            t3_countries = self._get_t3_countries(sim_run_id, round_num, exclude=launcher)
+            if not t3_countries:
+                return
+
+            roles_rows = self.client.table("roles").select(
+                "id, country_id, position_type"
+            ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
+                "country_id", t3_countries
+            ).execute().data or []
+
+            target_role_ids = [
+                r["id"] for r in roles_rows
+                if r.get("position_type") in ("head_of_state", "military_chief")
+            ]
+
+            if not target_role_ids:
+                return
+
+            artefacts = []
+            for rid in target_role_ids:
+                artefacts.append({
+                    "id": f"nuke_launch_{launcher}_{round_num}_{rid}_{uuid.uuid4().hex[:8]}",
+                    "sim_run_id": sim_run_id,
+                    "role_id": rid,
+                    "artefact_type": "classified_report",
+                    "title": "NUCLEAR LAUNCH ALERT",
+                    "subtitle": f"Ballistic missile launch detected from {launcher.upper()}",
+                    "classification": "TOP SECRET — FLASH",
+                    "from_entity": "Global Monitoring Systems",
+                    "date_label": f"Round {round_num}",
+                    "content_html": (
+                        f"<p>Global early warning systems have detected a <strong>nuclear ballistic missile launch</strong> "
+                        f"originating from <strong>{launcher.upper()}</strong>.</p>"
+                        f"<p><strong>Missiles launched:</strong> {len(missiles)}</p>"
+                        f"<p><strong>Target coordinates:</strong> {targets_desc}</p>"
+                        f"<p>Interception window is now open. Your air defense systems "
+                        f"can attempt interception (25% success per AD unit).</p>"
+                        f"<p class='text-red-500'><strong>IMMEDIATE ACTION REQUIRED</strong></p>"
+                    ),
+                    "round_delivered": round_num,
+                    "is_read": False,
+                })
+
+            if artefacts:
+                self.client.table("artefacts").insert(artefacts).execute()
+                logger.info("[nuclear] Generated %d launch artefacts for T3+ countries", len(artefacts))
+
+        except Exception as e:
+            logger.warning("Nuclear launch artefact generation failed: %s", e)
 
     # ------------------------------------------------------------------
     # Internal helpers

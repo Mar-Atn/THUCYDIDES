@@ -103,7 +103,7 @@ function trendColor(current: number, prev: number, dangerUp: boolean = true): st
 const PUBLIC_NEWS_EVENTS = new Set([
   // Military (always public — you can see armies fighting)
   'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade',
-  'launch_missile_conventional', 'nuclear_launch_initiate',
+  'launch_missile_conventional', 'nuclear_launch_initiate', 'nuclear_launch',
   // nuclear_test: only surface tests are public (underground = classified, filtered below)
   // Political (public events)
   'change_leader_initiated', 'change_leader_removal', 'change_leader_elected',
@@ -140,6 +140,12 @@ export function PublicScreen() {
   // Nuclear alert banner state
   const [nuclearAlert, setNuclearAlert] = useState<{country:string, testType:string}|null>(null)
   const nuclearAlertTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+  // Nuclear launch banner state (dramatic, 60s display)
+  const [nuclearLaunchAlert, setNuclearLaunchAlert] = useState<{country:string, missiles:number, targets:string}|null>(null)
+  const nuclearLaunchTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null)
+  // Nuclear flight banner (from nuclear_actions realtime)
+  const [nuclearFlightAction, setNuclearFlightAction] = useState<{country:string,missiles:number,timerStart:number,duration:number}|null>(null)
+  const [flightCountdown, setFlightCountdown] = useState<number|null>(null)
 
   /* Load data ------------------------------------------------------------- */
   const loadData = useCallback(async () => {
@@ -219,6 +225,41 @@ export function PublicScreen() {
             if (nuclearAlertTimerRef.current) clearTimeout(nuclearAlertTimerRef.current)
             nuclearAlertTimerRef.current = setTimeout(() => setNuclearAlert(null), 30000)
           }
+          // Nuclear launch resolution — dramatic banner for 60s
+          if (evt.event_type === 'nuclear_launch') {
+            const cc = evt.country_code ?? 'UNKNOWN'
+            const hits = (evt.payload?.hits as number) ?? 0
+            const launched = (evt.payload?.missiles_launched as number) ?? 0
+            const targetDesc = hits > 0 ? `${hits} IMPACT${hits > 1 ? 'S' : ''}` : 'ALL INTERCEPTED'
+            setNuclearLaunchAlert({ country: cc.toUpperCase(), missiles: launched, targets: targetDesc })
+            if (nuclearLaunchTimerRef.current) clearTimeout(nuclearLaunchTimerRef.current)
+            nuclearLaunchTimerRef.current = setTimeout(() => setNuclearLaunchAlert(null), 60000)
+            // Also refresh map to show impact markers
+            setMapKey((k) => k + 1)
+          }
+        }
+      })
+      .subscribe()
+
+    // Nuclear actions channel — watch for flight phase (awaiting_interception)
+    const nuclearChannel = supabase
+      .channel(`pub_nuclear:${simId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'nuclear_actions',
+        filter: `sim_run_id=eq.${simId}`,
+      }, (payload) => {
+        const row = payload.new as Record<string, unknown>
+        if (!row) return
+        if (row.status === 'awaiting_interception' && row.action_type === 'nuclear_launch') {
+          const cc = (row.country_code as string) ?? 'UNKNOWN'
+          const missiles = ((row.payload as Record<string,unknown>)?.changes as Record<string,unknown>)?.missiles as unknown[]
+          const missileCount = missiles?.length ?? 1
+          const timerStart = row.timer_started_at ? new Date(row.timer_started_at as string).getTime() : Date.now()
+          const duration = (row.timer_duration_sec as number) ?? 600
+          setNuclearFlightAction({ country: cc.toUpperCase(), missiles: missileCount, timerStart, duration })
+        } else if (row.status === 'resolved' || row.status === 'cancelled') {
+          setNuclearFlightAction(null)
+          setFlightCountdown(null)
         }
       })
       .subscribe()
@@ -228,6 +269,7 @@ export function PublicScreen() {
     return () => {
       supabase.removeChannel(simRunChannel)
       supabase.removeChannel(eventsChannel)
+      supabase.removeChannel(nuclearChannel)
       clearInterval(fallback)
     }
   }, [simId, loadData])
@@ -249,6 +291,19 @@ export function PublicScreen() {
     timerRef.current = setInterval(tick, 1000)
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [simState?.phase_started_at, simState?.phase_duration_seconds, simState?.status])
+
+  /* Nuclear flight countdown ----------------------------------------------- */
+  useEffect(() => {
+    if (!nuclearFlightAction) { setFlightCountdown(null); return }
+    const tick = () => {
+      const elapsed = (Date.now() - nuclearFlightAction.timerStart) / 1000
+      const remaining = Math.max(0, nuclearFlightAction.duration - elapsed)
+      setFlightCountdown(remaining)
+    }
+    tick()
+    const interval = setInterval(tick, 1000)
+    return () => clearInterval(interval)
+  }, [nuclearFlightAction])
 
   /* Derived --------------------------------------------------------------- */
   const currentRound = simState?.current_round ?? 0
@@ -371,6 +426,67 @@ export function PublicScreen() {
           </span>
         </div>
       )}
+      {/* ── Nuclear Flight Banner (Phase 3 — missiles in flight) ── */}
+      {nuclearFlightAction && (
+        <div style={{
+          width: '100%',
+          backgroundColor: '#7F1D1D',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1.5rem',
+          animation: 'nuclearBannerFlash 1.5s ease-in-out infinite',
+          zIndex: 40,
+        }}>
+          <span style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#FFFFFF',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}>
+            {'\u26A0'} BALLISTIC MISSILE LAUNCH DETECTED {'\u2014'} {nuclearFlightAction.country}
+          </span>
+          <span style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#FFFFFF',
+            letterSpacing: '0.1em',
+          }}>
+            {nuclearFlightAction.missiles} MISSILE{nuclearFlightAction.missiles > 1 ? 'S' : ''} INBOUND
+            {flightCountdown !== null && ` \u2014 Impact in ${formatTimer(flightCountdown)}`}
+          </span>
+        </div>
+      )}
+
+      {/* ── Nuclear Launch Resolution Banner (60s) ── */}
+      {nuclearLaunchAlert && !nuclearFlightAction && (
+        <div style={{
+          width: '100%',
+          backgroundColor: '#7F1D1D',
+          padding: '1rem 1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1.5rem',
+          zIndex: 40,
+        }}>
+          <span style={{
+            fontFamily: '"JetBrains Mono", monospace',
+            fontSize: '1.5rem',
+            fontWeight: 700,
+            color: '#FFFFFF',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+          }}>
+            {'\u2622'} NUCLEAR STRIKE {'\u2014'} {nuclearLaunchAlert.country} {'\u2014'} {nuclearLaunchAlert.targets}
+          </span>
+        </div>
+      )}
+
       <style>{`
         @keyframes nuclearBannerFlash {
           0%, 100% { background-color: #991B1B; }

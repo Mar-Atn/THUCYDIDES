@@ -260,7 +260,7 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
     from engine.services.supabase import get_client
     client = get_client()
 
-    COMBAT_TYPES = {'ground_attack', 'ground_move', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional', 'nuclear_test'}
+    COMBAT_TYPES = {'ground_attack', 'ground_move', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional', 'nuclear_test', 'nuclear_launch'}
 
     evts = client.table("observatory_events") \
         .select("event_type, payload, country_code") \
@@ -313,6 +313,26 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         if e["event_type"] == "nuclear_test":
             entry["combat_type"] = "nuclear_test"
             entry["test_type"] = p.get("test_type", "underground")
+        # Nuclear launch: add ☢ markers at each impact hex
+        if e["event_type"] == "nuclear_launch":
+            entry["combat_type"] = "nuclear_launch"
+            # Add entries for each hit target (first entry already added above)
+            hit_details = p.get("hit_details") or []
+            for hit in hit_details[1:]:  # skip first, already in entry
+                target = hit.get("target")
+                if target and len(target) >= 2:
+                    hit_hex = (target[0], target[1])
+                    if hit_hex not in seen_hexes:
+                        seen_hexes.add(hit_hex)
+                        combat.append({
+                            "event_type": "nuclear_launch",
+                            "combat_type": "nuclear_launch",
+                            "global_row": target[0],
+                            "global_col": target[1],
+                            "theater": theater,
+                            "theater_row": None,
+                            "theater_col": None,
+                        })
         combat.append(entry)
 
     return {"events": combat, "count": len(combat)}
@@ -1763,6 +1783,40 @@ async def get_nuclear_actions(sim_id: str, user: AuthUser = Depends(get_current_
         .execute()
     ).data or []
     return APIResponse(data=rows, meta={"count": len(rows)})
+
+
+@app.get("/api/sim/{sim_id}/nuclear/active", response_model=APIResponse)
+async def get_active_nuclear_action(sim_id: str, user: AuthUser = Depends(get_current_user)):
+    """Get active nuclear action (if any) for global banner + interception decisions.
+
+    Returns the nuclear_actions row where status is one of the active states,
+    plus timer configuration from sim_runs.schedule.
+    """
+    from engine.services.supabase import get_client
+    client = get_client()
+
+    rows = (
+        client.table("nuclear_actions")
+        .select("*")
+        .eq("sim_run_id", sim_id)
+        .in_("status", ["awaiting_authorization", "authorized", "awaiting_interception"])
+        .order("created_at", desc=True)
+        .limit(1)
+        .execute()
+    ).data or []
+
+    if not rows:
+        return APIResponse(data=None, meta={"active": False})
+
+    action = rows[0]
+
+    # Load timer config from sim_runs.schedule
+    run_rows = client.table("sim_runs").select("schedule").eq("id", sim_id).limit(1).execute().data or []
+    schedule = (run_rows[0].get("schedule") or {}) if run_rows else {}
+    action["nuclear_auth_timer_sec"] = schedule.get("nuclear_auth_timer_sec", 600)
+    action["nuclear_flight_timer_sec"] = schedule.get("nuclear_flight_timer_sec", 600)
+
+    return APIResponse(data=action, meta={"active": True})
 
 
 @app.post("/api/sim/{sim_id}/nuclear/{action_id}/resolve", response_model=APIResponse)
