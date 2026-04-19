@@ -68,8 +68,14 @@ interface ObservatoryEvent {
 interface KeyEvent {
   round: number
   type: string
-  description: string
+  name?: string
+  subtype?: string
+  description?: string
   country?: string
+  country_code?: string
+  organization?: string
+  nominations_round?: number
+  participants?: Record<string, unknown>[]
 }
 
 /* -------------------------------------------------------------------------- */
@@ -759,10 +765,12 @@ export function FacilitatorDashboard() {
                 {roundKeyEvents.map((ke, idx) => (
                   <span
                     key={idx}
-                    className="font-body text-caption bg-accent/10 text-accent border border-accent/20 rounded-full px-3 py-1"
+                    className={`font-body text-caption border rounded-full px-3 py-1 ${
+                      ke.type === 'election' ? 'bg-warning/10 text-warning border-warning/20' :
+                      'bg-accent/10 text-accent border-accent/20'
+                    }`}
                   >
-                    {ke.type}: {ke.description}
-                    {ke.country && ` (${ke.country})`}
+                    {ke.name || ke.description || `${ke.type}: ${ke.subtype || ''}`}
                   </span>
                 ))}
               </div>
@@ -836,7 +844,7 @@ export function FacilitatorDashboard() {
                   {simRun?.dice_mode ? 'Dice: REAL' : 'Dice: Auto'}
                 </button>
               </div>
-              {pendingActions.length === 0 ? (
+              {pendingActions.length === 0 && !activeNomEvent && !activeElecEvent && activeLeaderVotes.length === 0 ? (
                 <EmptyState message="No pending actions" />
               ) : (
                 <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
