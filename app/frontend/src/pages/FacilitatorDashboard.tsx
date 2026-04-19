@@ -1322,7 +1322,8 @@ function ParticipantPanel({
   const [users, setUsers] = useState<UserRecord[]>([])
   const [usersLoaded, setUsersLoaded] = useState(false)
 
-  const activeRoles = roles.filter((r) => r.status === 'active')
+  // Include arrested roles in the management view (they're still "in the game")
+  const activeRoles = roles.filter((r) => r.status === 'active' || r.status === 'arrested')
   const humanRoles = activeRoles.filter((r) => !r.is_ai_operated)
   const aiRoles = activeRoles.filter((r) => r.is_ai_operated)
   const assignedHuman = humanRoles.filter((r) => r.user_id)
