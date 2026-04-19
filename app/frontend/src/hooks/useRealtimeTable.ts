@@ -1,113 +1,16 @@
 /**
- * useRealtimeTable — subscribe to a Supabase table with automatic updates.
+ * useRealtimeTable / useRealtimeRow — React hooks for Supabase Realtime.
  *
- * Architecture: Global ChannelManager deduplicates Postgres Changes channels.
- * Multiple components subscribing to the same table+simId share ONE channel.
- * Reference-counted: channel is removed only when the last subscriber unmounts.
- *
- * This is critical for scalability — 30+ users × multiple tabs × 5 hooks each
- * would otherwise exhaust the browser connection pool and Supabase channel limit.
+ * Thin wrappers over the ChannelManager (lib/channelManager.ts).
+ * Handles: initial fetch, client-side filtering, state management.
+ * The ChannelManager handles: channel dedup, ref counting, fan-out.
  *
  * M2 Realtime Architecture (SPEC_M2_REALTIME.md)
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import type { RealtimeChannel } from '@supabase/supabase-js'
-
-// ---------------------------------------------------------------------------
-// ChannelManager — singleton, shared across all hooks, survives HMR
-// ---------------------------------------------------------------------------
-
-type Listener = (payload: { eventType: string; new: Record<string, unknown>; old: Record<string, unknown> }) => void
-
-interface ManagedChannel {
-  channel: RealtimeChannel
-  refCount: number
-  listeners: Set<Listener>
-}
-
-const GLOBAL_CM_KEY = '__ttt_channel_manager__'
-
-class ChannelManager {
-  private channels = new Map<string, ManagedChannel>()
-
-  /** Get or create a Postgres Changes channel for table+simId. */
-  subscribe(table: string, simId: string, listener: Listener): string {
-    const key = `rt:${table}:${simId}`
-    let managed = this.channels.get(key)
-
-    if (managed) {
-      // Reuse existing channel — just bump ref count
-      managed.refCount++
-      managed.listeners.add(listener)
-      return key
-    }
-
-    // Create new channel
-    const channel = supabase
-      .channel(key)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: table,
-          filter: `sim_run_id=eq.${simId}`,
-        },
-        (payload) => {
-          // Fan out to all listeners
-          const m = this.channels.get(key)
-          if (!m) return
-          for (const fn of m.listeners) {
-            try { fn(payload as unknown as Parameters<Listener>[0]) } catch { /* swallow */ }
-          }
-        },
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          // On error, listeners will re-fetch on their own via reconnect logic
-          console.warn(`[ChannelManager] ${key} error: ${status}`)
-        }
-      })
-
-    managed = { channel, refCount: 1, listeners: new Set([listener]) }
-    this.channels.set(key, managed)
-    return key
-  }
-
-  /** Remove a listener. When refCount drops to 0, remove the channel. */
-  unsubscribe(key: string, listener: Listener): void {
-    const managed = this.channels.get(key)
-    if (!managed) return
-
-    managed.listeners.delete(listener)
-    managed.refCount--
-
-    if (managed.refCount <= 0) {
-      supabase.removeChannel(managed.channel)
-      this.channels.delete(key)
-    }
-  }
-
-  /** Debug: how many active channels. */
-  get size(): number { return this.channels.size }
-}
-
-// Persist across HMR
-function getChannelManager(): ChannelManager {
-  const w = window as Record<string, unknown>
-  if (!w[GLOBAL_CM_KEY]) {
-    w[GLOBAL_CM_KEY] = new ChannelManager()
-  }
-  return w[GLOBAL_CM_KEY] as ChannelManager
-}
-
-const channelManager = getChannelManager()
-
-// ---------------------------------------------------------------------------
-// useRealtimeTable hook
-// ---------------------------------------------------------------------------
+import { channelManager, type RealtimeListener } from '@/lib/channelManager'
 
 interface UseRealtimeTableOptions {
   columns?: string
@@ -137,7 +40,7 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
   const [data, setData] = useState<T[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Stable references for filter/eq to avoid unnecessary re-subscriptions
+  // Stable references for filter/eq to avoid stale closures in listener
   const filterRef = useRef(filter)
   const eqRef = useRef(eq)
   filterRef.current = filter
@@ -183,13 +86,12 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
     fetchData()
 
     // Subscribe via ChannelManager (deduplicated per table+simId)
-    const listener: Listener = (payload) => {
+    const listener: RealtimeListener = (payload) => {
       const { eventType, new: newRow, old: oldRow } = payload
 
       setData((prev) => {
         if (eventType === 'INSERT') {
           const row = newRow as T
-          // Check additional filters match
           if (filterRef.current) {
             const parts = filterRef.current.split('=')
             if (parts.length === 2) {
@@ -203,7 +105,6 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
               if (String((row as Record<string, unknown>)[k]) !== v) return prev
             }
           }
-          // Avoid duplicates
           const exists = prev.some((r) => r[idField] === (row as Record<string, unknown>)[idField])
           if (exists) return prev.map((r) => r[idField] === (row as Record<string, unknown>)[idField] ? row : r)
           const next = [row, ...prev]
@@ -260,7 +161,7 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
 
 /**
  * useRealtimeRow — subscribe to a single row by ID.
- * Uses ChannelManager for deduplication (keyed by table+id).
+ * Uses stable channel name (no random suffix) for deduplication.
  */
 export function useRealtimeRow<T extends Record<string, unknown>>(
   table: string,
@@ -280,10 +181,8 @@ export function useRealtimeRow<T extends Record<string, unknown>>(
         setLoading(false)
       })
 
-    // Subscribe — use stable channel name (no random suffix)
+    // Subscribe with stable channel name
     const channelName = `rt:${table}:row:${id}`
-
-    // Check if channel already exists on the Supabase client
     const channel = supabase
       .channel(channelName)
       .on('postgres_changes', {
