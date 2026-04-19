@@ -12,7 +12,10 @@ from typing import Optional
 
 from supabase import Client
 
-from engine.config.position_actions import compute_actions
+from engine.config.position_actions import (
+    compute_actions, REACTIVE_ACTIONS, INTEL_LIMITS,
+    ORG_MEMBER_ACTIONS, ORG_CHAIRMAN_ACTIONS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -132,6 +135,164 @@ def recompute_country_actions(
         results[role["id"]] = recompute_role_actions(client, sim_run_id, role["id"])
 
     return results
+
+
+def recompute_all_role_actions(
+    client: Client,
+    sim_run_id: str,
+) -> dict:
+    """Recompute role_actions for ALL active roles in a sim.
+
+    - Computes actions from positions + country state via compute_actions()
+    - Adds org-based actions (call_org_meeting for members, publish_org_decision for chairmen)
+    - Preserves rows with notes='manual_override'
+    - Sets uses_total for intel/covert/assassination per INTEL_LIMITS
+    - Removes any reactive actions that shouldn't be in role_actions
+
+    Returns:
+        {
+            "total_roles": int,
+            "changes": [{role_id, added: [...], removed: [...]}],
+            "manual_preserved": int,
+        }
+    """
+    # Load all active roles
+    roles = (
+        client.table("roles")
+        .select("id, country_id, positions")
+        .eq("sim_run_id", sim_run_id)
+        .eq("status", "active")
+        .execute()
+    ).data or []
+
+    # Load all country states
+    countries = (
+        client.table("countries")
+        .select("id, nuclear_level, nuclear_confirmed")
+        .eq("sim_run_id", sim_run_id)
+        .execute()
+    ).data or []
+    cs_map = {c["id"]: c for c in countries}
+
+    # Load org memberships for org-based actions
+    org_members_raw = (
+        client.table("org_memberships")
+        .select("country_id, role_in_org")
+        .eq("sim_run_id", sim_run_id)
+        .execute()
+    ).data or []
+    # Build set of country_ids that are org members, and chairmen
+    org_member_countries: set[str] = set()
+    org_chairman_countries: set[str] = set()
+    for m in org_members_raw:
+        org_member_countries.add(m["country_id"])
+        if m.get("role_in_org") in ("chairman", "president", "secretary_general"):
+            org_chairman_countries.add(m["country_id"])
+
+    # Load ALL current role_actions (one query instead of N)
+    all_ra = (
+        client.table("role_actions")
+        .select("role_id, action_id, notes")
+        .eq("sim_run_id", sim_run_id)
+        .execute()
+    ).data or []
+
+    # Index: role_id -> {action_id: notes}
+    current_by_role: dict[str, dict[str, str]] = {}
+    for ra in all_ra:
+        rid = ra["role_id"]
+        if rid not in current_by_role:
+            current_by_role[rid] = {}
+        current_by_role[rid][ra["action_id"]] = ra.get("notes") or ""
+
+    changes = []
+    manual_preserved = 0
+    rows_to_insert = []
+    rows_to_delete = []
+
+    for role in roles:
+        rid = role["id"]
+        country = role["country_id"]
+        positions = role.get("positions") or []
+        cs = cs_map.get(country, {})
+
+        # Compute actions from rules engine
+        computed = compute_actions(positions, country, cs)
+
+        # Add org-based actions
+        if country in org_member_countries:
+            computed.update(ORG_MEMBER_ACTIONS)
+        if country in org_chairman_countries and positions:
+            # Only roles with positions (not citizens) get chairman actions
+            # In practice, HoS typically represents the country in orgs
+            if "head_of_state" in positions:
+                computed.update(ORG_CHAIRMAN_ACTIONS)
+
+        # Remove any reactive actions (should never be in role_actions)
+        computed -= REACTIVE_ACTIONS
+
+        current = current_by_role.get(rid, {})
+        current_actions = set(current.keys())
+
+        to_add = computed - current_actions
+        to_remove = current_actions - computed
+
+        # Preserve manual overrides
+        preserved_remove = set()
+        for aid in to_remove:
+            if current.get(aid) == "manual_override":
+                preserved_remove.add(aid)
+                manual_preserved += 1
+        to_remove -= preserved_remove
+
+        if to_add or to_remove:
+            changes.append({
+                "role_id": rid,
+                "added": sorted(to_add),
+                "removed": sorted(to_remove),
+            })
+
+        # Prepare batch operations
+        for aid in to_add:
+            row = {"sim_run_id": sim_run_id, "role_id": rid, "action_id": aid}
+            # Set intel limits (uses_total)
+            for pos in positions:
+                limits = INTEL_LIMITS.get(pos, {})
+                if aid in limits:
+                    row["uses_total"] = limits[aid]
+                    break
+            rows_to_insert.append(row)
+
+        for aid in to_remove:
+            rows_to_delete.append((rid, aid))
+
+    # Apply inserts in batches
+    if rows_to_insert:
+        batch_size = 500
+        for i in range(0, len(rows_to_insert), batch_size):
+            batch = rows_to_insert[i:i + batch_size]
+            client.table("role_actions").insert(batch).execute()
+
+    # Apply deletes
+    for rid, aid in rows_to_delete:
+        client.table("role_actions").delete().eq(
+            "sim_run_id", sim_run_id
+        ).eq("role_id", rid).eq("action_id", aid).execute()
+
+    total_added = sum(len(c["added"]) for c in changes)
+    total_removed = sum(len(c["removed"]) for c in changes)
+    logger.info(
+        "recompute_all: %d roles, +%d -%d actions, %d manual preserved",
+        len(roles), total_added, total_removed, manual_preserved,
+    )
+
+    return {
+        "total_roles": len(roles),
+        "changes": changes,
+        "manual_preserved": manual_preserved,
+        "total_added": total_added,
+        "total_removed": total_removed,
+    }
 
 
 def transfer_position(

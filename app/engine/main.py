@@ -1791,6 +1791,28 @@ async def resolve_leadership_vote(
 
 
 # ---------------------------------------------------------------------------
+# Positions & Actions — recompute role_actions from positions
+# ---------------------------------------------------------------------------
+
+@app.post("/api/sim/{sim_id}/recompute-actions", response_model=APIResponse)
+async def recompute_actions(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Recompute all role_actions from positions + country state.
+
+    Preserves manual_override rows. Used by Template Editor Actions tab.
+    """
+    from engine.services.position_helpers import recompute_all_role_actions
+    from engine.services.supabase import get_client
+    client = get_client()
+    result = recompute_all_role_actions(client, sim_id)
+    logger.info("Recomputed actions for %s by %s: +%d -%d",
+                sim_id, user.id, result["total_added"], result["total_removed"])
+    return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
 # M4: Nuclear Chain Management
 # ---------------------------------------------------------------------------
 

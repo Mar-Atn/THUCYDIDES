@@ -110,6 +110,14 @@ def create_sim_run(
     # ── 4. Copy role_actions (only for active roles) ──────────────────────
     _copy_role_actions(client, source_sim_id, new_id, custom_map)
 
+    # ── 4b. Recompute role_actions from positions + country state ────────
+    # Ensures dynamic conditions (nuclear, OPEC) are evaluated at creation
+    # time, and position-derived actions are fresh. Manual overrides preserved.
+    from engine.services.position_helpers import recompute_all_role_actions
+    recompute_result = recompute_all_role_actions(client, new_id)
+    logger.info("SimRun %s: recomputed role_actions +%d -%d",
+                new_id, recompute_result["total_added"], recompute_result["total_removed"])
+
     # ── 5. Copy relationships (uuid id → regenerate) ───────────────────
     _copy_table(client, "relationships", source_sim_id, new_id,
                 id_field="id", id_is_text=False,

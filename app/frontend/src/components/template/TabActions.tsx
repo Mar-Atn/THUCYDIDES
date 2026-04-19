@@ -9,6 +9,7 @@ import {
   getTemplateRoles,
   getTemplateRoleActions,
   getTemplateCountries,
+  simAction,
   type Role,
   type RoleAction,
   type Country,
@@ -336,6 +337,26 @@ export function TabActions({ templateId: _templateId }: TabActionsProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedAction, setSelectedAction] = useState<string | null>(null)
+  const [recomputing, setRecomputing] = useState(false)
+  const [recomputeResult, setRecomputeResult] = useState<string | null>(null)
+
+  const DEFAULT_SIM_ID = '00000000-0000-0000-0000-000000000001'
+
+  const handleRecompute = async () => {
+    if (!confirm('Recompute all action assignments from positions + country state?\n\nManual overrides will be preserved.')) return
+    setRecomputing(true)
+    setRecomputeResult(null)
+    try {
+      const res = await simAction(DEFAULT_SIM_ID, 'recompute-actions')
+      const added = (res as Record<string, unknown>).total_added ?? 0
+      const removed = (res as Record<string, unknown>).total_removed ?? 0
+      const preserved = (res as Record<string, unknown>).manual_preserved ?? 0
+      setRecomputeResult(`Done: +${added} added, -${removed} removed, ${preserved} manual preserved`)
+      loadData()
+    } catch (err) {
+      setRecomputeResult(`Error: ${err instanceof Error ? err.message : 'Failed'}`)
+    } finally { setRecomputing(false) }
+  }
 
   const loadData = useCallback(async () => {
     setLoading(true)
@@ -414,11 +435,27 @@ export function TabActions({ templateId: _templateId }: TabActionsProps) {
 
   return (
     <div>
-      <h2 className="font-heading text-h2 text-text-primary mb-1">Actions</h2>
-      <p className="font-body text-body-sm text-text-secondary mb-6">
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="font-heading text-h2 text-text-primary">Actions</h2>
+        <button
+          onClick={handleRecompute}
+          disabled={recomputing}
+          className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1.5 rounded hover:bg-action/20 disabled:opacity-50 transition-colors"
+        >
+          {recomputing ? 'Recomputing...' : 'Recompute from Positions'}
+        </button>
+      </div>
+      <p className="font-body text-body-sm text-text-secondary mb-2">
         Action permissions across all roles. {allActionIds.length} actions defined,{' '}
-        {roleActions.length} role-action assignments loaded. Read-only view.
+        {roleActions.length} role-action assignments.
       </p>
+      {recomputeResult && (
+        <div className={`font-body text-caption px-3 py-2 rounded mb-4 ${
+          recomputeResult.startsWith('Error') ? 'bg-danger/5 text-danger' : 'bg-success/5 text-success'
+        }`}>
+          {recomputeResult}
+        </div>
+      )}
 
       <div className="flex gap-6">
         {/* Left panel: action library */}
