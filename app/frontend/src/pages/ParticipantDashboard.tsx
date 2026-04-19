@@ -3853,11 +3853,10 @@ function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:{
       if (!res.success) { setError(res.narrative || 'Failed'); setSubmitting(false); return }
       setSuccess(res.narrative || 'Position reassigned')
       setSelectedPosition(''); setTargetRoleId(''); setVacate(false)
-      // Reload roles to show updated positions
+      // Reload roles to show updated positions — stay on same screen
       const { data } = await supabase.from('roles').select('id,character_name,positions,title')
         .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
       if (data) setRoles(data as typeof roles)
-      onSubmitted()
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
     finally { setSubmitting(false) }
   }
