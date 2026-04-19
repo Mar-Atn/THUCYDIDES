@@ -1350,6 +1350,7 @@ ACTION_CATEGORIES: dict[str, str] = {
     "intelligence": "covert",
     # Political
     "arrest": "political",
+    "release_arrest": "political",
     "assassination": "political",
     "change_leader": "political",
     "reassign_types": "political",
@@ -1389,6 +1390,7 @@ async def submit_action(
         "nuclear_authorize", "nuclear_intercept",
         "accept_transaction", "sign_agreement",
         "cast_vote", "cast_election_vote", "accept_meeting",
+        "release_arrest",
     }
     PAUSED_ALLOWED = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):

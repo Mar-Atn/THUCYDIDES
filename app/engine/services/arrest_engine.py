@@ -107,6 +107,52 @@ def request_arrest(
     }
 
 
+def release_role(
+    sim_run_id: str,
+    releaser_role_id: str,
+    target_role_id: str,
+    round_num: int,
+) -> dict:
+    """Manually release an arrested role (by HoS or Security). No limit."""
+    client = get_client()
+
+    target_data = client.table("roles") \
+        .select("id, character_name, status, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", target_role_id).limit(1).execute().data
+    if not target_data:
+        return {"success": False, "message": f"Role {target_role_id} not found"}
+    target = target_data[0]
+
+    if target["status"] != "arrested":
+        return {"success": False, "message": f"{target['character_name']} is not arrested"}
+
+    releaser_data = client.table("roles") \
+        .select("id, character_name, positions, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", releaser_role_id).limit(1).execute().data
+    if not releaser_data:
+        return {"success": False, "message": f"Releaser {releaser_role_id} not found"}
+    releaser = releaser_data[0]
+
+    if not (has_position(releaser, "head_of_state") or has_position(releaser, "security")):
+        return {"success": False, "message": "Only HoS or Security can release arrested roles"}
+
+    if releaser["country_id"] != target["country_id"]:
+        return {"success": False, "message": "Can only release roles in your own country"}
+
+    # Release
+    client.table("roles").update({"status": "active", "status_detail": None}) \
+        .eq("sim_run_id", sim_run_id).eq("id", target_role_id).execute()
+
+    logger.info("[arrest] %s released %s in round %d", releaser_role_id, target_role_id, round_num)
+
+    return {
+        "success": True,
+        "released_role": target_role_id,
+        "released_name": target["character_name"],
+        "message": f"{target['character_name']} released from arrest by {releaser['character_name']}",
+    }
+
+
 def release_arrested_roles(sim_run_id: str, round_num: int) -> list[str]:
     """Auto-release all arrested roles at round end.
 

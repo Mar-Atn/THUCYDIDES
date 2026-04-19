@@ -166,6 +166,18 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             action.get("target_country"))
 
     # ── Political ────��────────────────────────────────────────────────
+    if action_type == "release_arrest":
+        from engine.services.arrest_engine import release_role
+        target = (action.get("changes") or {}).get("target_role") or action.get("target_role", "")
+        result = release_role(sim_run_id, role_id, target, round_num)
+        if result.get("success"):
+            scenario_id = get_scenario_id(client, sim_run_id)
+            write_event(client, sim_run_id, scenario_id, round_num, country_code,
+                        "release_arrest", result.get("message", ""),
+                        {"released_role": target, "by": role_id},
+                        phase="A", category="political")
+        return result
+
     if action_type == "arrest":
         from engine.services.arrest_engine import request_arrest
         target = (action.get("changes") or {}).get("target_role") or action.get("target_role", "")

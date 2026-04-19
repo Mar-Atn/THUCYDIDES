@@ -3885,22 +3885,41 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [success, setSuccess] = useState<string|null>(null)
   const [remaining, setRemaining] = useState<number|null>(null)
 
-  useEffect(() => {
+  const loadRoles = useCallback(() => {
     Promise.all([
       supabase.from('roles').select('id,character_name,positions,status')
-        .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active'),
+        .eq('sim_run_id', simId).eq('country_id', countryId).in('status', ['active', 'arrested']),
       supabase.from('role_actions').select('uses_remaining')
         .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'arrest').limit(1),
     ]).then(([rolesRes, usageRes]) => {
       if (rolesRes.data) setRoles(rolesRes.data as typeof roles)
       setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
-    })
-      .finally(() => setLoading(false))
-  }, [simId, countryId])
+    }).finally(() => setLoading(false))
+  }, [simId, countryId, roleId])
 
-  // Eligible targets: same country, active, not self
-  // Cannot arrest self or HoS
-  const targets = roles.filter(r => r.id !== roleId && !(r.positions || []).includes('head_of_state'))
+  useEffect(() => { loadRoles() }, [loadRoles])
+
+  // Arrest targets: active, not self, not HoS
+  const targets = roles.filter(r => r.id !== roleId && r.status === 'active' && !(r.positions || []).includes('head_of_state'))
+  // Currently arrested in this country
+  const arrested = roles.filter(r => r.status === 'arrested')
+
+  const handleRelease = async (targetId: string, name: string) => {
+    if (!confirm(`Release ${name} from arrest?`)) return
+    setSubmitting(true); setError(null); setSuccess(null)
+    try {
+      const res = await submitAction(simId, 'release_arrest', roleId, countryId, {
+        changes: { target_role: targetId },
+      })
+      if (res.success) {
+        setSuccess(res.message || `${name} released`)
+        loadRoles()
+      } else {
+        setError(res.message || res.narrative || 'Failed')
+      }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
 
   const handleSubmit = async () => {
     if (!targetId || justification.trim().length < 30) return
@@ -3945,6 +3964,24 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           </p>
         )}
       </div>
+
+      {/* Currently arrested — release option */}
+      {arrested.length > 0 && (
+        <div>
+          <label className="font-body text-caption text-text-secondary block mb-2">Currently arrested</label>
+          <div className="bg-card border border-danger/20 rounded-lg divide-y divide-border">
+            {arrested.map(r => (
+              <div key={r.id} className="flex items-center justify-between px-4 py-2.5">
+                <span className="font-body text-body-sm text-danger font-medium">{r.character_name}</span>
+                <button onClick={() => handleRelease(r.id, r.character_name)} disabled={submitting}
+                  className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 disabled:opacity-50 transition-colors">
+                  Release
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {remaining === 0 && (
         <div className="bg-danger/5 border border-danger/20 rounded-lg p-4 text-center">
