@@ -168,9 +168,18 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     # ── Political ────��────────────────────────────────────────────────
     if action_type == "arrest":
         from engine.services.arrest_engine import request_arrest
-        return request_arrest(
-            sim_run_id, round_num, role_id, action.get("target_role"),
-            country_code)
+        target = (action.get("changes") or {}).get("target_role") or action.get("target_role", "")
+        justification = action.get("rationale", "")
+        result = request_arrest(sim_run_id, role_id, target, justification, round_num)
+        # Write public observatory event on success
+        if result.get("success"):
+            arrested_name = result.get("arrested_name", target)
+            scenario_id = get_scenario_id(client, sim_run_id)
+            write_event(client, sim_run_id, scenario_id, round_num, country_code,
+                        "arrest", f"{arrested_name} arrested in {country_code.upper()}",
+                        {"arrested_role": target, "by": role_id, "justification": justification},
+                        phase="A", category="political", role_name=action.get("arrester_name", role_id))
+        return result
 
     if action_type == "assassination":
         from engine.services.assassination_engine import execute_assassination

@@ -44,7 +44,7 @@ function hexCountryName(row: number, col: number): string {
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface RoleData {
-  id: string; character_name: string; country_id: string; position_type: string; positions?: string[]
+  id: string; character_name: string; country_id: string; position_type: string; positions?: string[]; status?: string
   title: string; public_bio: string; confidential_brief: string | null
   objectives: string[]; powers: string[]
 }
@@ -208,7 +208,7 @@ export function ParticipantDashboard() {
     try {
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
-        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers')
+        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status')
         .eq('sim_run_id',simId)
       const { data: roles } = proxyRoleId
         ? await roleQuery.eq('id', proxyRoleId).limit(1)
@@ -355,6 +355,17 @@ export function ParticipantDashboard() {
         <button onClick={()=>setBroadcast(null)} className="text-text-secondary hover:text-text-primary">{'\u2715'}</button>
       </div></div>}
 
+      {/* Arrested banner — blocks all actions */}
+      {myRole?.status === 'arrested' && (
+        <div className="bg-danger/10 border-b border-danger/30 px-6 py-3">
+          <div className="max-w-7xl mx-auto">
+            <p className="font-body text-body-sm text-danger font-medium">
+              You have been arrested. All actions are suspended until the end of this round.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Nuclear Flight Banner — shown to ALL participants during Phase 3 */}
       {(() => {
         const resolvedAction = !activeFlightAction && !nuclearBannerDismissed && (globalNuclearActions as unknown as {
@@ -449,7 +460,15 @@ export function ParticipantDashboard() {
 
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
-        {tab==='actions'&&myRole&&(
+        {tab==='actions'&&myRole&&myRole.status==='arrested'&&(
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-6 text-center">
+            <h3 className="font-heading text-h3 text-danger mb-2">Arrested</h3>
+            <p className="font-body text-body-sm text-text-secondary">
+              You cannot take any actions while under arrest. You will be released at the end of this round.
+            </p>
+          </div>
+        )}
+        {tab==='actions'&&myRole&&myRole.status!=='arrested'&&(
           activeAction
             ? <ActionForm
                 actionType={activeAction}
@@ -1470,6 +1489,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'nuclear_launch_initiate') return <NuclearLaunchForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'change_leader') return <ChangeLeaderForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'reassign_types') return <ReassignPowersForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'arrest') return <ArrestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -3802,6 +3822,118 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [roles, setRoles] = useState<{id:string;character_name:string;positions:string[];status:string}[]>([])
+  const [targetId, setTargetId] = useState('')
+  const [justification, setJustification] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [success, setSuccess] = useState<string|null>(null)
+
+  useEffect(() => {
+    supabase.from('roles').select('id,character_name,positions,status')
+      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      .then(({ data }) => { if (data) setRoles(data as typeof roles) })
+      .finally(() => setLoading(false))
+  }, [simId, countryId])
+
+  // Eligible targets: same country, active, not self
+  const targets = roles.filter(r => r.id !== roleId)
+
+  const handleSubmit = async () => {
+    if (!targetId || justification.trim().length < 30) return
+    if (!confirm(`Arrest ${targets.find(r=>r.id===targetId)?.character_name}?\n\nThis will be sent to the moderator for confirmation.`)) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'arrest', roleId, countryId, {
+        changes: { target_role: targetId },
+        rationale: justification.trim(),
+      })
+      if (res.status === 'pending') {
+        setSuccess('Arrest request submitted — awaiting moderator confirmation')
+      } else if (res.success) {
+        setSuccess(res.narrative || 'Arrest executed')
+      } else {
+        setError(res.narrative || 'Failed')
+      }
+      onSubmitted()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Arrest</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
+      </div>
+
+      <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+        <p className="font-body text-body-sm text-text-primary">
+          Arrest a citizen of your country. The arrested person will be <strong className="text-danger">unable to take any actions</strong> for the remainder of this round. Released automatically at round end.
+        </p>
+      </div>
+
+      {success ? (
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-success font-medium">{success}</p>
+        </div>
+      ) : (<>
+        <div>
+          <label className="font-body text-caption text-text-secondary block mb-2">Target</label>
+          <div className="bg-card border border-border rounded-lg divide-y divide-border">
+            {targets.map(r => (
+              <label key={r.id} className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${
+                targetId === r.id ? 'bg-danger/5' : 'hover:bg-base'
+              }`}>
+                <input type="radio" name="arrest_target" value={r.id} checked={targetId === r.id}
+                  onChange={() => setTargetId(r.id)} className="accent-danger"/>
+                <span className="font-body text-body-sm text-text-primary flex-1">{r.character_name}</span>
+                <span className="font-body text-caption text-text-secondary">
+                  {(r.positions || []).length > 0 ? (r.positions || []).map(p => POS[p] ?? p).join(' + ') : 'Citizen'}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <label className="font-body text-caption text-text-secondary block mb-2">
+            Justification <span className="text-text-secondary/50">(min 30 characters)</span>
+          </label>
+          <textarea value={justification} onChange={e => setJustification(e.target.value)}
+            placeholder="Reason for the arrest..."
+            rows={3}
+            className="w-full bg-base border border-border rounded-lg px-4 py-3 font-body text-body-sm text-text-primary resize-none focus:border-action/50 focus:outline-none transition-colors"
+          />
+          {justification.length > 0 && justification.length < 30 && (
+            <span className="font-body text-caption text-warning mt-1 block">{30 - justification.length} more characters needed</span>
+          )}
+        </div>
+
+        <button onClick={handleSubmit} disabled={!targetId || justification.trim().length < 30 || submitting}
+          className="w-full bg-danger text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          {submitting ? 'Submitting...' : targetId ? `Arrest ${targets.find(r=>r.id===targetId)?.character_name}` : 'Select a target'}
+        </button>
+      </>)}
+
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:{

@@ -59,7 +59,7 @@ def request_arrest(
         return {"success": False, "status": "rejected",
                 "message": f"Cannot arrest {target_role_id!r} — different country"}
 
-    # Execute arrest
+    # Execute arrest — update both run_roles and roles tables
     result = update_role_status(
         sim_run_id, target_role_id, "arrested",
         changed_by=arrester_role_id,
@@ -69,6 +69,11 @@ def request_arrest(
 
     if not result["success"]:
         return {"success": False, "status": "error", "message": result.get("message", "unknown error")}
+
+    # Also update roles table status (for frontend visibility)
+    client.table("roles").update({
+        "status": "arrested",
+    }).eq("sim_run_id", sim_run_id).eq("id", target_role_id).execute()
 
     logger.info("[arrest] %s arrested %s in round %d: %s",
                 arrester_role_id, target_role_id, round_num, justification)
@@ -110,6 +115,8 @@ def release_arrested_roles(sim_run_id: str, round_num: int) -> list[str]:
             reason=f"Auto-released at end of round {round_num}",
             round_num=round_num,
         )
+        # Also restore roles table status
+        client.table("roles").update({"status": "active"}).eq("sim_run_id", sim_run_id).eq("id", rid).execute()
         released.append(rid)
 
     if released:
