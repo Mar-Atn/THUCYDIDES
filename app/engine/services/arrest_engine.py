@@ -16,9 +16,7 @@ import logging
 from typing import Optional
 
 from engine.config.position_actions import has_position
-from engine.services.run_roles import (
-    get_run_role, update_role_status,
-)
+from engine.services.run_roles import update_role_status
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -35,27 +33,35 @@ def request_arrest(
 
     Returns ``{success, status, message}``.
     """
-    # Verify target exists and is active
-    target = get_run_role(sim_run_id, target_role_id)
-    if not target:
+    client = get_client()
+
+    # Verify target exists and is active (query roles table, not run_roles)
+    target_data = client.table("roles") \
+        .select("id, character_name, status, positions, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", target_role_id).limit(1).execute().data
+    if not target_data:
         return {"success": False, "status": "rejected",
-                "message": f"Target role {target_role_id!r} not found in this run"}
+                "message": f"Target role {target_role_id!r} not found"}
+    target = target_data[0]
 
     if target["status"] != "active":
         return {"success": False, "status": "rejected",
                 "message": f"Target {target_role_id!r} is already {target['status']}"}
 
-    # Verify arrester has authority (checked by validator, but double-check)
-    arrester = get_run_role(sim_run_id, arrester_role_id)
-    if not arrester:
+    # Verify arrester has authority
+    arrester_data = client.table("roles") \
+        .select("id, character_name, positions, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", arrester_role_id).limit(1).execute().data
+    if not arrester_data:
         return {"success": False, "status": "rejected",
                 "message": f"Arrester {arrester_role_id!r} not found"}
+    arrester = arrester_data[0]
 
     if not (has_position(arrester, "head_of_state") or has_position(arrester, "security")):
         return {"success": False, "status": "rejected",
                 "message": f"{arrester_role_id!r} is not HoS or Security — cannot arrest"}
 
-    if arrester["country_code"] != target["country_code"]:
+    if arrester["country_id"] != target["country_id"]:
         return {"success": False, "status": "rejected",
                 "message": f"Cannot arrest {target_role_id!r} — different country"}
 
