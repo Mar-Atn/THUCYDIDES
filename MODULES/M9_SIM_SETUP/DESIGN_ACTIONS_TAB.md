@@ -48,16 +48,16 @@ DIPLOMATIC
   └── Basing Rights          HoS, Diplomat       Phase A
 
 POLITICAL
-  ├── Arrest                 HoS only            Phase A
+  ├── Arrest                 HoS, Security       Phase A  [arrested = no actions]
   ├── Reassign Types         HoS only            Phase A
   ├── Martial Law            HoS only            Phase A  [eligible country, one-time]
   ├── Change Leader          All citizens         Phase A  [stability ≤ threshold]
   └── Cast Vote              All citizens         Reactive [vote active in country]
 
 COVERT & INTELLIGENCE
-  ├── Intelligence           Security, Military, Diplomat, Citizen   Phase A  [per-round limit]
-  ├── Covert Operation       Security, Military                     Phase A  [per-round limit]
-  └── Assassination          Security, Military                     Phase A  [per-round limit]
+  ├── Intelligence           Security, Military, Diplomat, Opposition  Phase A  [per-SIM limit]
+  ├── Covert Operation       Security, Military                       Phase A  [per-SIM limit]
+  └── Assassination          Security, Military                       Phase A  [per-SIM limit]
 
 COLUMBIA ELECTIONS
   ├── Self-Nominate          Columbia citizens    Phase A  [election round, moderator]
@@ -65,7 +65,8 @@ COLUMBIA ELECTIONS
 
 COMMUNICATION (Universal)
   ├── Public Statement       All                 Phase A
-  ├── Call Org Meeting       All                 Phase A
+  ├── Call Org Meeting       Org members          Phase A
+  ├── Publish Org Decision   Org chairmen         Phase A  [formal publication]
   └── Meet Freely            All                 Phase A
 ```
 
@@ -189,30 +190,34 @@ For Nuclear Authorize:
 | **propose_transaction** | HoS, diplomat | Static | — | unlimited |
 | **accept_transaction** | HoS, diplomat | Reactive | Transaction proposed to country | — |
 | **basing_rights** | HoS, diplomat | Static | — | unlimited |
-| **arrest** | HoS | Static | Target same country, active | unlimited |
+| **arrest** | HoS, security | Static | Target same country, active. Arrested participant has NO actions available until released. | unlimited |
 | **reassign_types** | HoS | Static | Cannot reassign own HoS | unlimited |
 | **martial_law** | HoS | Dynamic | Country in eligible list AND not yet declared | 1/sim |
 | **change_leader** | All citizens | Dynamic | Stability ≤ threshold (or HoS voluntary) | 1/round |
 | **cast_vote** | All citizens | Reactive | Leadership change vote active in country | 1 per vote |
-| **intelligence** | security, military, diplomat, citizen | Static | — | see limits |
+| **intelligence** | security, military, diplomat, opposition | Static | — | see limits |
 | **covert_operation** | security, military | Static | — | see limits |
 | **assassination** | security, military | Static | — | see limits |
 | **self_nominate** | Columbia citizens | Dynamic | Election round, moderator confirmed | 1/election |
 | **cast_election_vote** | Columbia citizens | Reactive | Nomination open | 1/election |
 | **public_statement** | All | Static | — | 3/round |
-| **call_org_meeting** | All | Static | Must be org member | unlimited |
+| **call_org_meeting** | All org members | Static | Must be member of the organization | unlimited |
+| **publish_org_decision** | Org chairmen | Static | Must be chairman of the organization. Formal publication of org decisions (appears on public screen). | unlimited |
 | **meet_freely** | All | Static | — | unlimited |
 
-### 3.3 Intelligence & Covert Ops Limits (per round)
+### 3.3 Intelligence & Covert Ops Limits (per SIM)
+
+Limits are **per entire SIM** (not per round). When a position is reassigned, the **remaining quota transfers** to the new holder.
 
 | Position | intelligence | covert_operation | assassination |
 |----------|-------------|-----------------|---------------|
 | security | 5 | 5 | 3 |
 | military | 5 | 5 | 2 |
 | diplomat | 1 | — | — |
-| citizen (no position) | 2 | — | — |
+| opposition | 2 | — | — |
+| citizen (no position) | 0 | — | — |
 
-On position reassignment: remaining quota transfers to new holder.
+On position reassignment: remaining uses transfer to the new position holder.
 
 ### 3.4 Nuclear Authorize — Country-Specific Assignment
 
@@ -259,12 +264,54 @@ Two modes for populating role_actions:
 
 ---
 
-## 5. Open Questions
+## 5. Position Types (canonical list)
 
-1. Should reactive actions (nuclear_authorize, accept_transaction, sign_agreement, cast_vote) be stored in role_actions at all? Or should they be computed at runtime only?
+| Position | Max per Country | Description |
+|----------|----------------|-------------|
+| `head_of_state` | 1 | Political leader, top authority |
+| `military` | 1 | Commands military forces |
+| `economy` | 1 | Budget, trade, sanctions |
+| `diplomat` | 1 | Agreements, treaties, transactions |
+| `security` | 1 | Intelligence, covert operations, arrests |
+| `opposition` | unlimited | Formal opposition with limited intelligence |
+| *(citizen)* | — | Default fallback: no position. Universal actions only. |
 
-2. Should the template store the nuclear_authorize assignments (which 2 roles per country) as a separate config, or derive from position priority at sim creation?
+A role can hold 0–N positions. A role with no positions is a *citizen*.
 
 ---
 
-*DRAFT — requires Marat review and approval.*
+## 6. Reactive Actions — Runtime Only
+
+**DECIDED:** Reactive actions are NOT stored in role_actions. They are computed at runtime when triggered. This prevents stale permissions after position changes or arrests.
+
+Reactive actions: `nuclear_authorize`, `nuclear_intercept`, `accept_transaction`, `sign_agreement`, `cast_vote`, `cast_election_vote`.
+
+These appear in **Actions Expected Now** when their trigger condition is met.
+
+---
+
+## 7. Nuclear Authorize — Derived from Position Priority
+
+**DECIDED:** Not stored as config. Derived at launch time from position priority:
+`military > security > diplomat > economy > opposition`
+
+Pick the top 2 available roles in the launching country. Single-role countries: 1 AI Officer auto-assigned.
+
+---
+
+## 8. Decisions Log
+
+| # | Question | Decision | Date |
+|---|----------|----------|------|
+| 1 | Reactive actions in role_actions? | No — computed at runtime only. Prevents stale permissions. | 2026-04-19 |
+| 2 | Nuclear authorize storage? | Derived from position priority at launch time, not stored. | 2026-04-19 |
+| 3 | Arrest available to? | HoS + security (was HoS only) | 2026-04-19 |
+| 4 | Intel/covert limits scope? | Per entire SIM (not per round). Remaining quota transfers on position change. | 2026-04-19 |
+| 5 | Position naming? | HoS, military, economy, diplomat, security, opposition. Citizen = no position (fallback). | 2026-04-19 |
+| 6 | Call org meeting? | Org members only | 2026-04-19 |
+| 7 | Publish org decision? | New action — org chairmen only. Formal publication on public screen. | 2026-04-19 |
+| 8 | Intelligence for opposition? | Yes, 2/sim. Citizens (no position) get 0. | 2026-04-19 |
+
+---
+
+*APPROVED by Marat 2026-04-19. Ready for implementation.*
