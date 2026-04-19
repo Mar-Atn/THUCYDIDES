@@ -1382,11 +1382,17 @@ async def submit_action(
     except ValueError:
         raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
 
-    # Nuclear chain actions (authorize, intercept) are allowed even when paused
-    # because the sim auto-pauses during the flight phase
-    NUCLEAR_CHAIN_ACTIONS = {"nuclear_authorize", "nuclear_intercept"}
+    # Reactive actions are NOT stored in role_actions — they are computed at runtime
+    # by their respective engines. They bypass the role_actions permission check.
+    # Some (nuclear chain) are also allowed when sim is paused (flight phase).
+    REACTIVE_ACTIONS = {
+        "nuclear_authorize", "nuclear_intercept",
+        "accept_transaction", "sign_agreement",
+        "cast_vote", "cast_election_vote", "accept_meeting",
+    }
+    PAUSED_ALLOWED = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):
-        if not (run["status"] == "paused" and body.action_type in NUCLEAR_CHAIN_ACTIONS):
+        if not (run["status"] == "paused" and body.action_type in PAUSED_ALLOWED):
             raise HTTPException(
                 status_code=400,
                 detail=f"Sim is '{run['status']}' — actions only allowed when active",
@@ -1409,9 +1415,9 @@ async def submit_action(
     role = role_check.data[0]
 
     # 3. Validate role has this action type (check role_actions table)
-    # Nuclear chain actions (authorize, intercept) bypass role_actions —
-    # authorization is determined by the nuclear chain orchestrator itself
-    if body.action_type not in NUCLEAR_CHAIN_ACTIONS:
+    # Reactive actions bypass role_actions — their authorization is handled
+    # at runtime by their respective engines (nuclear chain, transaction, etc.)
+    if body.action_type not in REACTIVE_ACTIONS:
         # ground_move is authorized by ground_attack permission (same capability)
         check_action = body.action_type
         if check_action == "ground_move":
