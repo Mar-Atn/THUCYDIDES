@@ -208,7 +208,7 @@ export function ParticipantDashboard() {
     try {
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
-        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status')
+        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status,status_detail')
         .eq('sim_run_id',simId)
       const { data: roles } = proxyRoleId
         ? await roleQuery.eq('id', proxyRoleId).limit(1)
@@ -283,6 +283,23 @@ export function ParticipantDashboard() {
     }
     prevRoundRef.current = newRound
   }, [simRun?.current_round, loadData])
+
+  /* Realtime: detect role status changes (arrest/release) --------------- */
+  useEffect(() => {
+    if (!myRole || !simId) return
+    const channel = supabase.channel(`role-status:${myRole.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'roles',
+        filter: `id=eq.${myRole.id}`,
+      }, (payload) => {
+        const newStatus = (payload.new as Record<string, unknown>)?.status as string
+        if (newStatus && newStatus !== myRole.status) {
+          setMyRole(prev => prev ? { ...prev, status: newStatus } : prev)
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(channel) }
+  }, [myRole?.id, myRole?.status, simId])
 
   /* Timer countdown ------------------------------------------------------- */
   useEffect(() => {
@@ -3093,22 +3110,18 @@ const UNIT_ICON_PATHS: Record<string,string> = {
 function ArrestedBanner({simId, roleId, round}:{simId:string; roleId:string; round:number}) {
   const [info, setInfo] = useState<{by:string;reason:string}|null>(null)
   useEffect(() => {
-    supabase.from('run_roles').select('status_changed_by,status_change_reason')
-      .eq('sim_run_id', simId).eq('role_id', roleId).eq('status', 'arrested').limit(1)
+    supabase.from('roles').select('status_detail')
+      .eq('sim_run_id', simId).eq('id', roleId).limit(1)
       .then(({ data }) => {
-        if (data?.[0]) {
-          const byId = data[0].status_changed_by || 'Unknown'
-          const reason = data[0].status_change_reason || ''
-          // Resolve the arrester's character name
-          supabase.from('roles').select('character_name').eq('sim_run_id', simId).eq('id', byId).limit(1)
-            .then(({ data: rd }) => {
-              setInfo({ by: rd?.[0]?.character_name || byId, reason })
-            })
+        const detail = data?.[0]?.status_detail as Record<string, unknown> | null
+        if (detail) {
+          setInfo({
+            by: (detail.arrested_by_name as string) || (detail.arrested_by as string) || 'Unknown',
+            reason: (detail.justification as string) || '',
+          })
         }
       })
   }, [simId, roleId])
-
-  const RD: Record<number,string> = {0:'Pre-Sim',1:'H2 2026',2:'H1 2027',3:'H2 2027',4:'H1 2028',5:'H2 2028',6:'H1 2029'}
 
   return (
     <div className="bg-danger/10 border-b-2 border-danger/40 px-6 py-4">

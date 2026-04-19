@@ -63,21 +63,29 @@ def request_arrest(
         return {"success": False, "status": "rejected",
                 "message": "Cannot arrest the Head of State"}
 
-    # Execute arrest — update both run_roles and roles tables
-    result = update_role_status(
-        sim_run_id, target_role_id, "arrested",
-        changed_by=arrester_role_id,
-        reason=justification,
-        round_num=round_num,
-    )
-
-    if not result["success"]:
-        return {"success": False, "status": "error", "message": result.get("message", "unknown error")}
-
-    # Also update roles table status (for frontend visibility)
+    # Execute arrest — update roles table (primary, frontend reads this)
+    # Store arrest metadata so the banner can display who/why
+    arrester_name = arrester.get("character_name", arrester_role_id)
     client.table("roles").update({
         "status": "arrested",
+        "status_detail": {
+            "arrested_by": arrester_role_id,
+            "arrested_by_name": arrester_name,
+            "justification": justification,
+            "round": round_num,
+        },
     }).eq("sim_run_id", sim_run_id).eq("id", target_role_id).execute()
+
+    # Also update run_roles if it exists (legacy system, may not be seeded)
+    try:
+        update_role_status(
+            sim_run_id, target_role_id, "arrested",
+            changed_by=arrester_role_id,
+            reason=justification,
+            round_num=round_num,
+        )
+    except Exception as e:
+        logger.debug("[arrest] run_roles update skipped: %s", e)
 
     logger.info("[arrest] %s arrested %s in round %d: %s",
                 arrester_role_id, target_role_id, round_num, justification)
@@ -113,15 +121,26 @@ def release_arrested_roles(sim_run_id: str, round_num: int) -> list[str]:
     released = []
     for row in (res.data or []):
         rid = row["role_id"]
-        update_role_status(
-            sim_run_id, rid, "active",
-            changed_by="system",
-            reason=f"Auto-released at end of round {round_num}",
-            round_num=round_num,
-        )
-        # Also restore roles table status
-        client.table("roles").update({"status": "active"}).eq("sim_run_id", sim_run_id).eq("id", rid).execute()
+        try:
+            update_role_status(
+                sim_run_id, rid, "active",
+                changed_by="system",
+                reason=f"Auto-released at end of round {round_num}",
+                round_num=round_num,
+            )
+        except Exception:
+            pass
+        # Restore roles table status + clear arrest metadata
+        client.table("roles").update({"status": "active", "status_detail": None}).eq("sim_run_id", sim_run_id).eq("id", rid).execute()
         released.append(rid)
+
+    # Also release from roles table directly (in case run_roles was not seeded)
+    arrested_roles = client.table("roles").select("id") \
+        .eq("sim_run_id", sim_run_id).eq("status", "arrested").execute().data or []
+    for r in arrested_roles:
+        if r["id"] not in released:
+            client.table("roles").update({"status": "active", "status_detail": None}).eq("sim_run_id", sim_run_id).eq("id", r["id"]).execute()
+            released.append(r["id"])
 
     if released:
         logger.info("[arrest] auto-released %d roles at end of R%d: %s",
