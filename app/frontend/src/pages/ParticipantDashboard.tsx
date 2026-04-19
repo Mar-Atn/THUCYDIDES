@@ -3809,6 +3809,7 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [loading, setLoading] = useState(true)
   const [stability, setStability] = useState(10)
   const [hosName, setHosName] = useState('')
+  const [isHosSelf, setIsHosSelf] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string|null>(null)
   const [success, setSuccess] = useState<string|null>(null)
@@ -3817,20 +3818,25 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   useEffect(() => {
     Promise.all([
       supabase.from('countries').select('stability').eq('sim_run_id',simId).eq('id',countryId).limit(1),
-      supabase.from('roles').select('character_name,positions').eq('sim_run_id',simId).eq('country_id',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
+      supabase.from('roles').select('id,character_name,positions').eq('sim_run_id',simId).eq('country_id',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
     ]).then(([cs, rs]) => {
       setStability(cs.data?.[0]?.stability ?? 10)
       setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
+      setIsHosSelf(rs.data?.[0]?.id === roleId)
     }).catch(() => {
       setError('Failed to load — please retry')
     }).finally(() => setLoading(false))
-  }, [simId, countryId])
+  }, [simId, countryId, roleId])
 
-  const canInitiate = stability <= threshold
+  // HoS can resign without stability check; citizens need stability ≤ threshold
+  const canInitiate = isHosSelf || stability <= threshold
 
   const handleInitiate = async () => {
     if (!canInitiate) return
-    if (!confirm(`Initiate removal of ${hosName} as Head of State?\n\nAll citizens will vote. This cannot be undone.`)) return
+    const msg = isHosSelf
+      ? 'Resign from Head of State and initiate election of a new leader?\n\nThis cannot be undone.'
+      : `Initiate removal of ${hosName} as Head of State?\n\nAll citizens will vote. This cannot be undone.`
+    if (!confirm(msg)) return
     setSubmitting(true); setError(null)
     try {
       const res = await submitAction(simId, 'change_leader', roleId, countryId, {})
@@ -3853,31 +3859,43 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
         </button>
       </div>
 
-      <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
-        <p className="font-body text-body-sm text-text-primary">
-          Initiate removal of <strong className="text-danger">{hosName}</strong> as Head of State.
-          All citizens will vote. Requires stability ≤ {threshold.toFixed(1)}.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 text-center">
-        <div className="bg-base rounded-lg p-3">
-          <div className={`font-data text-data-lg ${canInitiate ? 'text-danger' : 'text-text-primary'}`}>
-            {stability.toFixed(1)}
+      {isHosSelf ? (
+        /* HoS voluntary resignation — no stability check, no removal vote */
+        <div className="bg-action/5 border border-action/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-text-primary">
+            Resign from the position of Head of State and initiate election of a new leader.
+            All citizens will vote to elect your successor.
+          </p>
+        </div>
+      ) : (
+        /* Citizen-initiated removal — requires stability check */
+        <>
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+            <p className="font-body text-body-sm text-text-primary">
+              Initiate removal of <strong className="text-danger">{hosName}</strong> as Head of State.
+              All citizens will vote. Requires stability ≤ {threshold.toFixed(1)}.
+            </p>
           </div>
-          <div className="font-body text-caption text-text-secondary">Current stability</div>
-        </div>
-        <div className="bg-base rounded-lg p-3">
-          <div className="font-data text-data-lg text-text-secondary">{threshold.toFixed(1)}</div>
-          <div className="font-body text-caption text-text-secondary">Threshold</div>
-        </div>
-      </div>
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-base rounded-lg p-3">
+              <div className={`font-data text-data-lg ${canInitiate ? 'text-danger' : 'text-text-primary'}`}>
+                {stability.toFixed(1)}
+              </div>
+              <div className="font-body text-caption text-text-secondary">Current stability</div>
+            </div>
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-text-secondary">{threshold.toFixed(1)}</div>
+              <div className="font-body text-caption text-text-secondary">Threshold</div>
+            </div>
+          </div>
+        </>
+      )}
 
       {success ? (
         <div className="bg-success/5 border border-success/20 rounded-lg p-4">
           <p className="font-body text-body-sm text-success font-medium">{success}</p>
           <p className="font-body text-caption text-text-secondary mt-1">
-            Vote is now open in Actions Expected Now for all citizens.
+            Election is now open in Actions Expected Now for all citizens.
           </p>
         </div>
       ) : (
@@ -3887,7 +3905,10 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
               ? 'bg-action text-white hover:bg-action/90 cursor-pointer'
               : 'bg-base text-text-secondary/50 cursor-not-allowed'
           } disabled:opacity-50 disabled:cursor-not-allowed`}>
-          {submitting ? 'Initiating...' : canInitiate ? 'Initiate Leadership Change' : `Stability too high (${stability.toFixed(1)} > ${threshold})`}
+          {submitting ? 'Initiating...'
+            : isHosSelf ? 'Resign and Initiate Election'
+            : canInitiate ? 'Initiate Leadership Change'
+            : `Stability too high (${stability.toFixed(1)} > ${threshold})`}
         </button>
       )}
       {error && (

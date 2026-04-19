@@ -65,27 +65,27 @@ def initiate_change_leader(
         return {"success": False, "narrative": f"Country {country_code} has no Head of State"}
     hos_role = hos[0]
 
-    # Validate initiator is non-HoS
+    # Check initiator identity
     initiator = [r for r in roles if r["id"] == role_id]
     if not initiator:
         return {"success": False, "narrative": f"Role {role_id} not found in {country_code}"}
-    if _is_hos(initiator[0]):
-        return {"success": False, "narrative": "Head of State cannot initiate their own removal"}
+    is_voluntary = _is_hos(initiator[0])
 
-    # Check stability threshold
-    country = (
-        client.table("countries")
-        .select("stability")
-        .eq("sim_run_id", sim_run_id)
-        .eq("id", country_code)
-        .execute()
-    ).data
-    if not country:
-        return {"success": False, "narrative": f"Country {country_code} not found"}
+    if not is_voluntary:
+        # Citizen-initiated: check stability threshold
+        country = (
+            client.table("countries")
+            .select("stability")
+            .eq("sim_run_id", sim_run_id)
+            .eq("id", country_code)
+            .execute()
+        ).data
+        if not country:
+            return {"success": False, "narrative": f"Country {country_code} not found"}
 
-    stability = country[0].get("stability", 10)
-    if stability > DEFAULT_THRESHOLD:
-        return {"success": False, "narrative": f"Stability {stability:.1f} is above threshold {DEFAULT_THRESHOLD}. Leadership change requires stability ≤ {DEFAULT_THRESHOLD}"}
+        stability = country[0].get("stability", 10)
+        if stability > DEFAULT_THRESHOLD:
+            return {"success": False, "narrative": f"Stability {stability:.1f} is above threshold {DEFAULT_THRESHOLD}. Leadership change requires stability ≤ {DEFAULT_THRESHOLD}"}
 
     # Check no existing active vote this round
     existing = (
@@ -100,7 +100,60 @@ def initiate_change_leader(
     if existing:
         return {"success": False, "narrative": "A leadership change vote is already in progress this round"}
 
-    # Create the removal vote
+    # HoS voluntary resignation: skip removal vote, go straight to election
+    if is_voluntary:
+        # Remove HoS position immediately
+        old_positions = list(hos_role.get("positions") or [])
+        new_positions = [p for p in old_positions if p != "head_of_state"]
+        client.table("roles").update({
+            "positions": new_positions,
+            "is_head_of_state": False,
+        }).eq("sim_run_id", sim_run_id).eq("id", hos_role["id"]).execute()
+
+        recompute_role_actions(client, sim_run_id, hos_role["id"])
+
+        hos_name = hos_role["character_name"]
+        scenario_id = get_scenario_id(client, sim_run_id)
+
+        write_event(
+            client, sim_run_id, scenario_id, round_num,
+            country_code, "change_leader_removal",
+            f"{hos_name} RESIGNED as Head of State of {country_code}. Election for new leader begins.",
+            {"vote_id": None, "resigned": True, "removed": hos_role["id"]},
+            phase="A", category="political", role_name=hos_name,
+        )
+
+        # Create election phase directly
+        total_voters = len(roles)
+        election_required = total_voters // 2 + 1
+        expires_at = (datetime.now(timezone.utc) + timedelta(minutes=VOTE_TIMEOUT_MINUTES)).isoformat()
+
+        election_vote = client.table("leadership_votes").insert({
+            "sim_run_id": sim_run_id,
+            "round_num": round_num,
+            "country_code": country_code,
+            "phase": "election",
+            "status": "voting",
+            "initiated_by": role_id,
+            "target_role": hos_role["id"],
+            "votes": {},
+            "required_majority": election_required,
+            "expires_at": expires_at,
+        }).execute()
+
+        election_id = election_vote.data[0]["id"] if election_vote.data else None
+
+        logger.info("HoS %s resigned in %s, election started (vote %s)", hos_role["id"], country_code, election_id)
+
+        return {
+            "success": True,
+            "narrative": f"{hos_name} resigned. Election for new Head of State open. Need {election_required} votes.",
+            "vote_id": election_id,
+            "phase": "election",
+            "resigned": True,
+        }
+
+    # Citizen-initiated: create removal vote
     non_hos = [r for r in roles if not _is_hos(r)]
     required = math.ceil(len(non_hos) / 2) + (0 if len(non_hos) % 2 == 1 else 1)
     # Strict majority: more than half
