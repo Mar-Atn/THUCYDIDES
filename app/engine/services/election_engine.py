@@ -15,8 +15,9 @@ Voting mechanics (CONTRACT v2.0):
   - With bonus total: 11 votes
   - Simple majority wins (5/9 or 6/11). Ties = no winner.
 
-Economy score formula:
-  economy_score = (stability / 10) * 0.5 + max(0, 1 - inflation / 20) * 0.5
+Economy score formula (tuned 2026-04-19):
+  economy_score = max(0, (stability-2)/10) * 0.45 + max(0, 1 - inflation/12) * 0.55
+  Starting ~0.615 (stab=7, infl=3.5%). Threshold: < 0.5 triggers bonus.
 """
 
 from __future__ import annotations
@@ -38,12 +39,19 @@ COLUMBIA_VOTER_ROLES = ["dealer", "volt", "anchor", "shadow", "shield", "tribune
 # ── Economy Score ────────────────────────────────────────────────────────
 
 def compute_economy_score(stability: float, inflation: float) -> float:
-    """Compute economy score per CONTRACT_COLUMBIA_ELECTIONS v2.0.
+    """Compute economy score for Columbia elections.
+
+    Tuned formula (approved 2026-04-19):
+    - Stability floor at 2 (below = zero contribution)
+    - Inflation ceiling at 12% (above = zero contribution)
+    - Inflation weighted slightly more (55% vs 45%)
+    - Starting score ~0.615 (stab=7, infl=3.5%)
+    - Bonus triggers at: stab=7/infl=12+, stab=6/infl=6, stab=4/infl=4
 
     Returns a value [0, 1]. If < 0.5, opposition gets bonus votes.
     """
-    stability_component = (stability / 10.0) * 0.5
-    inflation_component = max(0.0, 1.0 - inflation / 20.0) * 0.5
+    stability_component = max(0.0, (stability - 2.0) / 10.0) * 0.45
+    inflation_component = max(0.0, 1.0 - inflation / 12.0) * 0.55
     return stability_component + inflation_component
 
 
