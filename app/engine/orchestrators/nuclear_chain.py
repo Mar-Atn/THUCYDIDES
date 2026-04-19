@@ -255,11 +255,10 @@ class NuclearChainOrchestrator:
         # Write audit JSONB
         audit_col = "nuclear_test_decision" if atype == "nuclear_test" else "nuclear_launch_decision"
         try:
-            self.client.table("country_states_per_round").update({
+            self.client.table("countries").update({
                 audit_col: {"payload": payload, "resolution": result},
             }).eq("sim_run_id", sim_run_id) \
-              .eq("round_num", round_num) \
-              .eq("country_code", cc).execute()
+              .eq("id", cc).execute()
         except Exception as e:
             logger.debug("nuclear audit write failed: %s", e)
 
@@ -344,22 +343,20 @@ class NuclearChainOrchestrator:
 
     def _load_validation_context(self, sim_run_id: str, round_num: int):
         """Load units, country_state, zones for validator calls."""
-        units_rows = self.client.table("unit_states_per_round").select("*") \
-            .eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-            .order("round_num", desc=True).execute().data or []
-        # Dedupe to latest per unit
+        units_rows = self.client.table("deployments").select("*") \
+            .eq("sim_run_id", sim_run_id).execute().data or []
+        # Live table — no dedup needed, one row per unit
         units: dict[str, dict] = {}
         for r in units_rows:
-            c = r.get("unit_code")
-            if c and c not in units:
-                units[c] = r
+            uid = r.get("unit_id")
+            if uid:
+                units[uid] = r
 
-        cs_rows = self.client.table("country_states_per_round").select("*") \
-            .eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-            .order("round_num", desc=True).execute().data or []
+        cs_rows = self.client.table("countries").select("*") \
+            .eq("sim_run_id", sim_run_id).execute().data or []
         cs: dict[str, dict] = {}
         for r in cs_rows:
-            cc = r.get("country_code")
+            cc = r.get("id")
             if cc and cc not in cs:
                 cs[cc] = r
 
@@ -368,25 +365,20 @@ class NuclearChainOrchestrator:
         for u in units.values():
             r, c = u.get("global_row"), u.get("global_col")
             if r is not None and c is not None:
-                zones.setdefault((r, c), {"type": "land", "owner": u.get("country_code")})
+                zones.setdefault((r, c), {"type": "land", "owner": u.get("country_id")})
 
         return units, cs, zones
 
     def _get_t3_countries(self, sim_run_id: str, round_num: int, exclude: str) -> list[str]:
         """Return country_codes with nuclear_level >= 3 and confirmed."""
-        cs_rows = self.client.table("country_states_per_round").select(
-            "country_code,nuclear_level,nuclear_confirmed"
-        ).eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute().data or []
-        # Fallback to R0
-        if not cs_rows:
-            cs_rows = self.client.table("country_states_per_round").select(
-                "country_code,nuclear_level,nuclear_confirmed"
-            ).eq("sim_run_id", sim_run_id).eq("round_num", 0).execute().data or []
+        cs_rows = self.client.table("countries").select(
+            "id,nuclear_level,nuclear_confirmed"
+        ).eq("sim_run_id", sim_run_id).execute().data or []
         return [
-            r["country_code"] for r in cs_rows
+            r["id"] for r in cs_rows
             if int(r.get("nuclear_level", 0) or 0) >= 3
             and r.get("nuclear_confirmed")
-            and r["country_code"] != exclude
+            and r["id"] != exclude
         ]
 
     # ------------------------------------------------------------------
@@ -483,9 +475,8 @@ class NuclearChainOrchestrator:
         test_type = payload["changes"]["test_type"]
 
         # Get nuclear level
-        cs = self.client.table("country_states_per_round").select("nuclear_level") \
-            .eq("sim_run_id", sim_run_id).eq("country_code", cc) \
-            .lte("round_num", round_num).order("round_num", desc=True) \
+        cs = self.client.table("countries").select("nuclear_level") \
+            .eq("sim_run_id", sim_run_id).eq("id", cc) \
             .limit(1).execute().data
         nuc_level = int((cs[0] if cs else {}).get("nuclear_level", 1) or 1)
 
@@ -520,11 +511,10 @@ class NuclearChainOrchestrator:
         # On success: confirm tier
         if success:
             try:
-                self.client.table("country_states_per_round").update({
+                self.client.table("countries").update({
                     "nuclear_confirmed": True,
                 }).eq("sim_run_id", sim_run_id) \
-                  .eq("round_num", round_num) \
-                  .eq("country_code", cc).execute()
+                  .eq("id", cc).execute()
                 result["tier_confirmed"] = True
             except Exception as e:
                 logger.warning("nuclear_confirmed update failed: %s", e)
@@ -544,13 +534,9 @@ class NuclearChainOrchestrator:
         pre = precomputed_rolls or {}
 
         # Load target country AD counts (for auto-interception)
-        units_rows = self.client.table("unit_states_per_round").select(
-            "unit_code,country_code,unit_type,status,global_row,global_col"
-        ).eq("sim_run_id", sim_run_id).eq("round_num", round_num).execute().data or []
-        if not units_rows:
-            units_rows = self.client.table("unit_states_per_round").select(
-                "unit_code,country_code,unit_type,status,global_row,global_col"
-            ).eq("sim_run_id", sim_run_id).eq("round_num", 0).execute().data or []
+        units_rows = self.client.table("deployments").select(
+            "unit_id,country_id,unit_type,unit_status,global_row,global_col"
+        ).eq("sim_run_id", sim_run_id).execute().data or []
 
         # Determine target countries
         target_hexes = [(m["target_global_row"], m["target_global_col"]) for m in missiles]
@@ -558,14 +544,14 @@ class NuclearChainOrchestrator:
         for u in units_rows:
             if u.get("global_row") is not None:
                 for tr, tc in target_hexes:
-                    if u["global_row"] == tr and u.get("global_col") == tc and u["country_code"] != cc:
-                        target_countries.add(u["country_code"])
+                    if u["global_row"] == tr and u.get("global_col") == tc and u["country_id"] != cc:
+                        target_countries.add(u["country_id"])
 
         # Count AD per intercepting entity
         ad_by_country: dict[str, int] = {}
         for u in units_rows:
-            if (u.get("unit_type") or "").lower() == "air_defense" and (u.get("status") or "").lower() == "active":
-                c = u["country_code"]
+            if (u.get("unit_type") or "").lower() == "air_defense" and (u.get("unit_status") or "").lower() == "active":
+                c = u["country_id"]
                 ad_by_country[c] = ad_by_country.get(c, 0) + 1
 
         # --- INTERCEPTION ---
@@ -631,11 +617,11 @@ class NuclearChainOrchestrator:
             # Military on target hex: 50% destroyed
             hex_units = [u for u in units_rows
                          if u.get("global_row") == tr and u.get("global_col") == tc
-                         and (u.get("status") or "").lower() == "active"]
+                         and (u.get("unit_status") or "").lower() == "active"]
             n_destroy = max(1, int(len(hex_units) * MILITARY_DESTROY_PCT))
             random.shuffle(hex_units)
             for u in hex_units[:n_destroy]:
-                destroyed_units.append(u["unit_code"])
+                destroyed_units.append(u["unit_id"])
             # Nuclear site check
             site_destroyed = False
             for site_cc, (sr, sc) in NUCLEAR_SITE_HEXES.items():
@@ -662,15 +648,12 @@ class NuclearChainOrchestrator:
             salvo_effects["leader_death_roll"] = leader_death_roll
             salvo_effects["leader_killed"] = ld_roll < LEADER_DEATH_PROB
 
-        # --- Apply unit losses to DB ---
+        # --- Apply unit losses to DB (delete from deployments) ---
         try:
-            for code in destroyed_units + consumed_missiles:
-                self.client.table("unit_states_per_round").update({
-                    "status": "destroyed",
-                    "global_row": None, "global_col": None,
-                }).eq("sim_run_id", sim_run_id) \
-                  .eq("round_num", round_num) \
-                  .eq("unit_code", code).execute()
+            for uid in destroyed_units + consumed_missiles:
+                self.client.table("deployments").delete() \
+                    .eq("sim_run_id", sim_run_id) \
+                    .eq("unit_id", uid).execute()
         except Exception as e:
             logger.warning("nuclear unit loss persistence failed: %s", e)
 
