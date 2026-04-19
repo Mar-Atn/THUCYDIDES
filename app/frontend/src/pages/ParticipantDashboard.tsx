@@ -203,63 +203,55 @@ export function ParticipantDashboard() {
         : await roleQuery.eq('user_id', user.id).limit(1)
       if (roles?.[0]) {
         const role = roles[0] as RoleData; setMyRole(role)
-        const { data: c } = await supabase.from('countries')
-          .select('id,sim_name,color_ui,gdp,stability,inflation,treasury,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,nuclear_level,nuclear_confirmed,ai_level,debt_burden')
-          .eq('sim_run_id',simId).eq('id',role.country_id).limit(1)
-        if (c?.[0]) setMyCountry(c[0] as CountryData)
-        const { data: arts } = await supabase.from('artefacts').select('*')
-          .eq('sim_run_id',simId).eq('role_id',role.id).order('round_delivered')
-        setArtefacts((arts??[]) as Artefact[])
-        const { data: ra } = await supabase.from('role_actions').select('action_id')
-          .eq('sim_run_id',simId).eq('role_id',role.id)
-        setRoleActions((ra??[]).map((r:{action_id:string})=>r.action_id))
-
-        // Objectives from role
         setObjectives(Array.isArray(role.objectives) ? role.objectives as string[] : [])
 
-        // Relationships for own country
-        const { data: rels } = await supabase.from('relationships')
-          .select('to_country_id,relationship,status')
-          .eq('sim_run_id',simId).eq('from_country_id',role.country_id)
-        setMyRelationships((rels??[]) as typeof myRelationships)
+        // Batch all independent queries into one Promise.all
+        // This reduces sequential wait from 13 round-trips to 1
+        const [countryRes, artsRes, raRes, relsRes, memsRes, prARes, prBRes, srRes, trRes, fcRes] = await Promise.all([
+          supabase.from('countries')
+            .select('id,sim_name,color_ui,gdp,stability,inflation,treasury,mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,nuclear_level,nuclear_confirmed,ai_level,debt_burden')
+            .eq('sim_run_id',simId).eq('id',role.country_id).limit(1),
+          supabase.from('artefacts').select('*')
+            .eq('sim_run_id',simId).eq('role_id',role.id).order('round_delivered'),
+          supabase.from('role_actions').select('action_id')
+            .eq('sim_run_id',simId).eq('role_id',role.id),
+          supabase.from('relationships')
+            .select('to_country_id,relationship,status')
+            .eq('sim_run_id',simId).eq('from_country_id',role.country_id),
+          supabase.from('org_memberships')
+            .select('org_id,role_in_org,has_veto')
+            .eq('sim_run_id',simId).eq('country_id',role.country_id),
+          supabase.from('role_relationships')
+            .select('role_a_id,role_b_id,relationship_type,notes')
+            .eq('sim_run_id',simId).eq('role_a_id',role.id),
+          supabase.from('role_relationships')
+            .select('role_a_id,role_b_id,relationship_type,notes')
+            .eq('sim_run_id',simId).eq('role_b_id',role.id),
+          supabase.from('sanctions')
+            .select('imposer_country_id,target_country_id,level')
+            .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`),
+          supabase.from('tariffs')
+            .select('imposer_country_id,target_country_id,level')
+            .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`),
+          supabase.from('countries').select('*')
+            .eq('sim_run_id',simId).eq('id',role.country_id).limit(1),
+        ])
 
-        // Org memberships
-        const { data: mems } = await supabase.from('org_memberships')
-          .select('org_id,role_in_org,has_veto')
-          .eq('sim_run_id',simId).eq('country_id',role.country_id)
-        setMyOrgMemberships((mems??[]) as typeof myOrgMemberships)
-
-        // Personal role relationships
-        const { data: prA } = await supabase.from('role_relationships')
-          .select('role_a_id,role_b_id,relationship_type,notes')
-          .eq('sim_run_id',simId).eq('role_a_id',role.id)
-        const { data: prB } = await supabase.from('role_relationships')
-          .select('role_a_id,role_b_id,relationship_type,notes')
-          .eq('sim_run_id',simId).eq('role_b_id',role.id)
+        if (countryRes.data?.[0]) setMyCountry(countryRes.data[0] as CountryData)
+        setArtefacts((artsRes.data??[]) as Artefact[])
+        setRoleActions((raRes.data??[]).map((r:{action_id:string})=>r.action_id))
+        setMyRelationships((relsRes.data??[]) as typeof myRelationships)
+        setMyOrgMemberships((memsRes.data??[]) as typeof myOrgMemberships)
         const pRels = [
-          ...((prA??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_b_id,type:r.relationship_type,notes:r.notes||''}))),
-          ...((prB??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_a_id,type:r.relationship_type,notes:r.notes||''}))),
+          ...((prARes.data??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_b_id,type:r.relationship_type,notes:r.notes||''}))),
+          ...((prBRes.data??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_a_id,type:r.relationship_type,notes:r.notes||''}))),
         ]
         setPersonalRels(pRels)
-
-        // Sanctions (received + imposed)
-        const { data: sr } = await supabase.from('sanctions')
-          .select('imposer_country_id,target_country_id,level')
-          .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`)
-        const sanctions = (sr??[]).map((s:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:s.imposer_country_id,target:s.target_country_id,level:s.level}))
+        const sanctions = (srRes.data??[]).map((s:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:s.imposer_country_id,target:s.target_country_id,level:s.level}))
         setMySanctions(sanctions)
-
-        // Tariffs (received + imposed)
-        const { data: tr } = await supabase.from('tariffs')
-          .select('imposer_country_id,target_country_id,level')
-          .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`)
-        const tariffs = (tr??[]).map((t:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:t.imposer_country_id,target:t.target_country_id,level:t.level}))
+        const tariffs = (trRes.data??[]).map((t:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:t.imposer_country_id,target:t.target_country_id,level:t.level}))
         setMyTariffs(tariffs)
-
-        // Full country data
-        const { data: fc } = await supabase.from('countries').select('*')
-          .eq('sim_run_id',simId).eq('id',role.country_id).limit(1)
-        if (fc?.[0]) setFullCountry(fc[0])
+        if (fcRes.data?.[0]) setFullCountry(fcRes.data[0])
 
       } else { setTab('world') }
       setError(null)
@@ -3755,8 +3747,9 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
     ]).then(([cs, rs]) => {
       setStability(cs.data?.[0]?.stability ?? 10)
       setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
-      setLoading(false)
-    })
+    }).catch(() => {
+      setError('Failed to load — please retry')
+    }).finally(() => setLoading(false))
   }, [simId, countryId])
 
   const canInitiate = stability <= threshold
