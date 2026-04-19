@@ -814,8 +814,43 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [electionSubmitting, setElectionSubmitting] = useState(false)
   const [selectedElectionCandidate, setSelectedElectionCandidate] = useState<string>('')
 
+  // Check if nominations are open (moderator started, or auto-mode)
+  const [nominationsOpen, setNominationsOpen] = useState(false)
+  useEffect(() => {
+    if (!simId || !activeNominationEvent) { setNominationsOpen(false); return }
+    supabase.from('sim_runs').select('schedule,auto_approve').eq('id', simId).limit(1)
+      .then(({ data }) => {
+        if (!data?.[0]) return
+        const sched = (data[0].schedule as Record<string, unknown>) || {}
+        setNominationsOpen(sched.nominations_open === true || data[0].auto_approve === true)
+      })
+  }, [simId, activeNominationEvent, dataVersion])
+
+  // Check if this role is a sitting parliament member (cannot nominate for midterms unless seat is for reelection)
+  const [isParliamentMember, setIsParliamentMember] = useState(false)
+  const [isSeatForReelection, setIsSeatForReelection] = useState(false)
+  useEffect(() => {
+    if (!simId || !isColumbia) return
+    supabase.from('org_memberships').select('role_in_org')
+      .eq('sim_run_id', simId).eq('org_id', 'columbia_parliament').eq('country_id', countryId)
+      .then(({ data }) => {
+        const myMembership = (data || []).find((m: Record<string,unknown>) => {
+          // Need to check by role — but org_memberships are by country, not role
+          // For now: check if role_in_org includes 'reelection'
+          return m.role_in_org === 'member_reelection'
+        })
+        // Simplified: any parliament member that's NOT up for reelection can't run for midterms
+        const members = data || []
+        setIsParliamentMember(members.length > 0)
+        setIsSeatForReelection(members.some((m: Record<string,unknown>) => m.role_in_org === 'member_reelection'))
+      })
+  }, [simId, isColumbia, countryId])
+
+  const canNominateForMidterm = !isParliamentMember || isSeatForReelection
+
   // Show election in expected actions
-  const showNomination = isColumbia && activeNominationEvent && !myNomination
+  const showNomination = isColumbia && activeNominationEvent && !myNomination && nominationsOpen
+    && (activeNominationEvent.subtype !== 'parliamentary_midterm' || canNominateForMidterm)
   const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0
 
   const handleSelfNominate = async () => {

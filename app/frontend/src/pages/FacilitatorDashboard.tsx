@@ -933,32 +933,59 @@ export function FacilitatorDashboard() {
                   })}
 
                   {/* Columbia Elections — Moderator Cards */}
-                  {activeNomEvent && (
+                  {activeNomEvent && (() => {
+                    const nomOpen = (simRun?.schedule as Record<string,unknown>)?.nominations_open === true
+                    const isAuto = simRun?.auto_approve
+                    return (
                     <div className="border rounded-lg p-3 bg-action/5 border-action/30">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-data text-caption font-bold text-action uppercase">
                           Columbia Nominations — {activeNomEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
                         </span>
                         <span className="font-data text-caption text-text-secondary">
-                          R{activeNomEvent.nominations_round}
+                          R{activeNomEvent.nominations_round} → Election R{activeNomEvent.round}
                         </span>
                       </div>
-                      <div className="font-body text-caption text-text-secondary mb-1">
-                        {elecNomCount} nominee{elecNomCount !== 1 ? 's' : ''} registered for Round {activeNomEvent.round} election
-                      </div>
-                      {elecNomCount > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1">
-                          {electionNominations
-                            .filter(n => n.election_type === activeNomEvent.subtype)
-                            .map(n => (
-                              <span key={n.id} className={`font-data text-caption px-2 py-0.5 rounded capitalize ${
-                                n.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
-                              }`}>{n.role_id}</span>
-                            ))}
-                        </div>
+
+                      {!nomOpen && !isAuto && (
+                        <button onClick={async () => {
+                          const sched = { ...((simRun?.schedule as Record<string,unknown>) || {}), nominations_open: true }
+                          await simAction(simId!, 'mode', { ...sched })
+                          // Simpler: directly update schedule
+                          const { supabase: sb } = await import('@/lib/supabase')
+                          await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
+                        }}
+                          className="w-full font-body text-body-sm font-medium bg-action text-white py-2 rounded-lg hover:bg-action/90 transition-colors mb-2">
+                          Start Nominations
+                        </button>
+                      )}
+
+                      {(nomOpen || isAuto) && (
+                        <>
+                          <div className="font-body text-caption text-text-secondary mb-1">
+                            {elecNomCount} nominee{elecNomCount !== 1 ? 's' : ''} registered
+                          </div>
+                          {elecNomCount > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {electionNominations
+                                .filter(n => n.election_type === activeNomEvent.subtype)
+                                .map(n => (
+                                  <span key={n.id} className={`font-data text-caption px-2 py-0.5 rounded capitalize ${
+                                    n.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
+                                  }`}>{n.role_id}</span>
+                                ))}
+                            </div>
+                          )}
+                          {elecNomCount === 0 && (
+                            <div className="font-body text-caption text-text-secondary/50">
+                              Waiting for Columbia citizens to nominate...
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
-                  )}
+                    )
+                  })()}
 
                   {activeElecEvent && !elecResolved && (
                     <div className="border rounded-lg p-3 bg-warning/10 border-warning/40">
