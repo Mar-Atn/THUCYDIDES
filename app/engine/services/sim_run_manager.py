@@ -282,7 +282,9 @@ def restart_simulation(sim_id: str) -> dict:
     _cleanup_runtime_data(client, sim_id, after_round=0)
 
     # 2. Delete tables that don't exist in template (runtime-created)
-    for table in ["agreements", "exchange_transactions", "hex_control", "blockades"]:
+    for table in ["agreements", "exchange_transactions", "hex_control", "blockades",
+                   "election_nominations", "election_votes", "election_results",
+                   "observatory_combat_results", "run_roles"]:
         try:
             client.table(table).delete().eq("sim_run_id", sim_id).execute()
         except Exception as e:
@@ -310,6 +312,23 @@ def restart_simulation(sim_id: str) -> dict:
                         exclude_cols=["created_at"])
         except Exception as e:
             logger.warning("Restart: reset %s failed: %s", table, e)
+
+    # 4. Reset roles: restore positions + status from template, recompute role_actions
+    try:
+        template_roles = client.table("roles").select("id, positions, status") \
+            .eq("sim_run_id", source_id).execute().data or []
+        for tr in template_roles:
+            client.table("roles").update({
+                "positions": tr.get("positions") or [],
+                "status": "active",
+                "status_detail": None,
+            }).eq("sim_run_id", sim_id).eq("id", tr["id"]).execute()
+        # Recompute role_actions from restored positions
+        from engine.services.position_helpers import recompute_all_role_actions
+        recompute_all_role_actions(client, sim_id)
+        logger.info("Restart: roles + role_actions restored from template")
+    except Exception as e:
+        logger.warning("Restart: roles reset failed: %s", e)
 
     logger.info("Simulation %s RESTARTED — all state re-copied from template", sim_id)
 
