@@ -311,7 +311,7 @@ def calc_stability(inp: StabilityInput) -> StabilityResult:
 
         delta -= inp.casualties * 0.2
         delta -= inp.territory_lost * 0.4
-        delta += inp.territory_gained * 0.15
+        delta += inp.territory_gained * 0.20
         delta -= min(inp.war_tiredness * 0.04, 0.4)
 
         # Wartime democratic resilience
