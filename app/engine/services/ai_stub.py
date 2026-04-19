@@ -40,7 +40,7 @@ def trigger_ai_agents(
     # 1. Load AI-operated roles with their allowed actions
     query = (
         client.table("roles")
-        .select("id, character_name, country_id, position_type, is_ai_operated")
+        .select("id, character_name, country_id, positions, position_type, is_ai_operated")
         .eq("sim_run_id", sim_run_id)
         .eq("is_ai_operated", True)
         .eq("status", "active")
@@ -78,7 +78,9 @@ def trigger_ai_agents(
         role_id = role["id"]
         cc = role["country_id"]
         name = role["character_name"]
-        position = role.get("position_type", "")
+        # Derive primary position from positions array or fallback to position_type
+        positions = role.get("positions") or []
+        position = positions[0] if positions else role.get("position_type", "")
         allowed = role_action_map.get(role_id, set())
 
         actions_taken = []

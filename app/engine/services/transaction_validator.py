@@ -102,9 +102,10 @@ def validate_proposal(
 
     # Role authorization (country scope)
     if scope == "country" and proposer_role and not errors:
+        from engine.config.position_actions import has_position
         role_info = (roles or {}).get(proposer_role) or {}
-        is_hos = bool(role_info.get("is_head_of_state"))
-        is_mil = bool(role_info.get("is_military_chief"))
+        is_hos = has_position(role_info, "head_of_state")
+        is_mil = has_position(role_info, "military")
         powers = role_info.get("powers") or ""
 
         if not is_hos:

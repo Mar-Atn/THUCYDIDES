@@ -398,15 +398,16 @@ class NuclearChainOrchestrator:
             if not t3_countries:
                 return
 
+            from engine.config.position_actions import has_position
             roles_rows = self.client.table("roles").select(
-                "id, country_id, position_type"
+                "id, country_id, positions, position_type"
             ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
                 "country_id", t3_countries
             ).execute().data or []
 
             target_role_ids = [
                 r["id"] for r in roles_rows
-                if r.get("position_type") in ("head_of_state", "military_chief")
+                if has_position(r, "head_of_state") or has_position(r, "military")
             ]
 
             if not target_role_ids:

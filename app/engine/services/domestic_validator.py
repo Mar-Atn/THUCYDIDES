@@ -46,8 +46,9 @@ def validate_fire_role(
         errors.append("MISSING_TARGET: changes.target_role required")
 
     # Firer must have authority over target (simplified: must be HoS)
+    from engine.config.position_actions import has_position
     firer_info = roles.get(firer_role) or {}
-    if not firer_info.get("is_head_of_state"):
+    if not has_position(firer_info, "head_of_state"):
         errors.append(f"UNAUTHORIZED: {firer_role!r} is not HoS — cannot fire roles")
 
     # Target must exist and be same country
@@ -104,7 +105,7 @@ def validate_arrest(
         errors.append("MISSING_TARGET")
 
     arrester_info = roles.get(arrester_role) or {}
-    if not arrester_info.get("is_head_of_state"):
+    if not has_position(arrester_info, "head_of_state"):
         errors.append(f"UNAUTHORIZED: {arrester_role!r} not HoS")
 
     target_info = roles.get(target_role) or {}

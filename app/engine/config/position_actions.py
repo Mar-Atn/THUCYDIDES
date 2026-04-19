@@ -207,3 +207,72 @@ def compute_actions(
         pass
 
     return actions
+
+
+# ---------------------------------------------------------------------------
+# Utility: check positions with legacy field fallback
+# ---------------------------------------------------------------------------
+
+# Map from legacy position_type values to positions array values
+_LEGACY_POSITION_MAP: dict[str, str] = {
+    "head_of_state": "head_of_state",
+    "military_chief": "military",
+    "economy_officer": "economy",
+    "diplomat": "diplomat",
+    "security": "security",
+    "opposition": "",  # no position
+}
+
+
+def has_position(role: dict, position: str) -> bool:
+    """Check if a role holds a given position.
+
+    Uses the positions array (primary) with fallback to legacy fields.
+    Works with both DB row dicts and Pydantic model dicts.
+
+    Args:
+        role: Dict with 'positions' (list) and/or legacy fields.
+        position: Position to check ('head_of_state', 'military', etc.)
+    """
+    positions = role.get("positions")
+    if positions is not None and isinstance(positions, list):
+        return position in positions
+
+    # Fallback to legacy boolean fields
+    if position == "head_of_state":
+        return bool(role.get("is_head_of_state"))
+    if position == "military":
+        return bool(role.get("is_military_chief"))
+    if position == "economy":
+        return bool(role.get("is_economy_officer"))
+    if position == "diplomat":
+        return bool(role.get("is_diplomat"))
+    if position == "security":
+        # No legacy boolean for security; check position_type
+        return role.get("position_type") == "security"
+
+    return False
+
+
+def get_positions(role: dict) -> list[str]:
+    """Get a role's positions list with legacy fallback.
+
+    Returns the positions array if set, otherwise derives from legacy fields.
+    """
+    positions = role.get("positions")
+    if positions is not None and isinstance(positions, list):
+        return list(positions)
+
+    # Derive from legacy fields
+    result = []
+    if role.get("is_head_of_state"):
+        result.append("head_of_state")
+    if role.get("is_military_chief"):
+        result.append("military")
+    if role.get("is_economy_officer"):
+        result.append("economy")
+    if role.get("is_diplomat"):
+        result.append("diplomat")
+    if role.get("position_type") == "security":
+        result.append("security")
+    return result

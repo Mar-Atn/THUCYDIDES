@@ -1254,16 +1254,17 @@ def _generate_nuclear_test_artefacts(
         if not t3_countries:
             return
 
-        # Find HoS + military chief roles for these countries
+        # Find HoS + military roles for these countries
+        from engine.config.position_actions import has_position
         roles_rows = client.table("roles").select(
-            "id, country_id, position_type"
+            "id, country_id, positions, position_type"
         ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
             "country_id", t3_countries
         ).execute().data or []
 
         target_role_ids: list[str] = []
         for r in roles_rows:
-            if r.get("position_type") in ("head_of_state", "military_chief"):
+            if has_position(r, "head_of_state") or has_position(r, "military"):
                 target_role_ids.append(r["id"])
 
         if not target_role_ids:

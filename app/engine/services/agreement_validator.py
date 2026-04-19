@@ -61,11 +61,12 @@ def validate_agreement_proposal(
         errors.append(f"PROPOSER_NOT_SIGNATORY: {proposer_cc!r} must be in signatories")
 
     # Role authorization: HoS, FM, or diplomat can sign
+    from engine.config.position_actions import has_position
     proposer_role = payload.get("proposer_role_id")
     if proposer_role and roles:
         role_info = roles.get(proposer_role) or {}
-        is_hos = bool(role_info.get("is_head_of_state"))
-        is_diplomat = bool(role_info.get("is_diplomat"))
+        is_hos = has_position(role_info, "head_of_state")
+        is_diplomat = has_position(role_info, "diplomat")
         powers = str(role_info.get("powers") or "")
         if not is_hos and not is_diplomat and "sign" not in powers.lower() and "agreement" not in powers.lower():
             errors.append(f"UNAUTHORIZED_ROLE: {proposer_role!r} not authorized to sign agreements")

@@ -177,10 +177,11 @@ def validate_early_elections(
     if not isinstance(rationale, str) or len(rationale.strip()) < RATIONALE_MIN:
         errors.append("RATIONALE_TOO_SHORT")
 
+    from engine.config.position_actions import has_position
     role_id = payload.get("role_id")
     if roles and role_id:
         role_info = roles.get(role_id) or {}
-        if not role_info.get("is_head_of_state"):
+        if not has_position(role_info, "head_of_state"):
             errors.append(f"UNAUTHORIZED: {role_id!r} is not HoS — only HoS can call elections")
 
     if errors:

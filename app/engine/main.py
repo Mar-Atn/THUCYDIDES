@@ -1398,7 +1398,7 @@ async def submit_action(
     client = get_client()
     role_check = (
         client.table("roles")
-        .select("id, character_name, country_id, position_type")
+        .select("id, character_name, country_id, positions, position_type")
         .eq("sim_run_id", sim_id)
         .eq("id", body.role_id)
         .execute()

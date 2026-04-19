@@ -302,8 +302,14 @@ def _build_role_context(ctx: ContextAssembler, *, scope: str | None = None, **_)
     lines = [f"# Role: {role.get('character_name', scope)}"]
     lines.append(f"**Country:** {role.get('country_id', '?')}")
     lines.append(f"**Title:** {role.get('title', '?')}")
-    if role.get("is_head_of_state"):
+    from engine.config.position_actions import has_position, get_positions
+    if has_position(role, "head_of_state"):
         lines.append("**Head of State** — has broadest decision powers")
+    role_positions = get_positions(role)
+    if role_positions and role_positions != ["head_of_state"]:
+        pos_labels = [p.replace("_", " ").title() for p in role_positions if p != "head_of_state"]
+        if pos_labels:
+            lines.append(f"**Positions:** {', '.join(pos_labels)}")
 
     powers = role.get("powers", [])
     if powers:
