@@ -300,6 +300,75 @@ export function FacilitatorDashboard() {
     return () => clearInterval(iv)
   }, [activeLeaderVotes.map(v => v.id).join(',')])
 
+  // ── Columbia Elections — moderator view ──────────────────────────────
+  const { data: electionNominationsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_nominations', simId,
+    { columns: '*' },
+  )
+  const electionNominations = electionNominationsRaw as unknown as {
+    id:string; election_type:string; election_round:number; role_id:string; camp:string
+  }[]
+
+  const { data: electionVotesRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_votes', simId,
+    { columns: 'id,election_type,voter_role_id,candidate_role_id' },
+  )
+  const electionVotes = electionVotesRaw as unknown as {
+    id:string; election_type:string; voter_role_id:string; candidate_role_id:string
+  }[]
+
+  const { data: electionResultsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'election_results', simId,
+    { columns: '*' },
+  )
+  const electionResults = electionResultsRaw as unknown as {
+    id:string; election_type:string; election_round:number; winner_role_id:string|null;
+    participant_votes:Record<string,number>; total_votes:Record<string,number>;
+    population_votes:Record<string,unknown>
+  }[]
+
+  const [electionResolving, setElectionResolving] = useState(false)
+
+  // Derive active election events from key_events + current round
+  const currentRound = simRunRT?.current_round ?? 0
+  const electionKeyEvents = keyEvents.filter(e => e.type === 'election') as unknown as {
+    type:string; subtype:string; round:number; nominations_round:number; name:string; country_code?:string
+  }[]
+  const activeNomEvent = electionKeyEvents.find(e => e.nominations_round === currentRound)
+  const activeElecEvent = electionKeyEvents.find(e => e.round === currentRound)
+
+  // Election stats for moderator
+  const elecNomCount = activeNomEvent
+    ? electionNominations.filter(n => n.election_type === activeNomEvent.subtype).length
+    : 0
+  const elecVoteCount = activeElecEvent
+    ? electionVotes.filter(v => v.election_type === activeElecEvent.subtype).length
+    : 0
+  const elecResolved = activeElecEvent
+    ? electionResults.find(r => r.election_type === activeElecEvent.subtype && r.election_round === activeElecEvent.round)
+    : undefined
+  // Moderator-visible vote tally (secret from participants, visible to moderator)
+  const elecTallies: Record<string,number> = {}
+  if (activeElecEvent) {
+    electionVotes
+      .filter(v => v.election_type === activeElecEvent.subtype)
+      .forEach(v => { elecTallies[v.candidate_role_id] = (elecTallies[v.candidate_role_id] || 0) + 1 })
+  }
+
+  const handleResolveElection = async () => {
+    if (!activeElecEvent || !simId) return
+    setElectionResolving(true)
+    try {
+      // Determine contested seat for midterms
+      const contestedSeat = activeElecEvent.subtype === 'parliamentary_midterm' ? 'shadow' : undefined
+      await submitAction(simId, 'resolve_election', 'moderator', 'columbia', {
+        election_type: activeElecEvent.subtype,
+        contested_seat_role: contestedSeat,
+      })
+    } catch (e) { alert(e instanceof Error ? e.message : 'Resolution failed') }
+    finally { setElectionResolving(false) }
+  }
+
   // Auto-resolve nuclear launch when flight countdown reaches 0
   const nuclearResolving = useRef(false)
   useEffect(() => {
@@ -854,6 +923,85 @@ export function FacilitatorDashboard() {
                       </div>
                     )
                   })}
+
+                  {/* Columbia Elections — Moderator Cards */}
+                  {activeNomEvent && (
+                    <div className="border rounded-lg p-3 bg-action/5 border-action/30">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-data text-caption font-bold text-action uppercase">
+                          Columbia Nominations — {activeNomEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                        </span>
+                        <span className="font-data text-caption text-text-secondary">
+                          R{activeNomEvent.nominations_round}
+                        </span>
+                      </div>
+                      <div className="font-body text-caption text-text-secondary mb-1">
+                        {elecNomCount} nominee{elecNomCount !== 1 ? 's' : ''} registered for Round {activeNomEvent.round} election
+                      </div>
+                      {elecNomCount > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {electionNominations
+                            .filter(n => n.election_type === activeNomEvent.subtype)
+                            .map(n => (
+                              <span key={n.id} className={`font-data text-caption px-2 py-0.5 rounded capitalize ${
+                                n.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
+                              }`}>{n.role_id}</span>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {activeElecEvent && !elecResolved && (
+                    <div className="border rounded-lg p-3 bg-warning/10 border-warning/40">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-data text-caption font-bold text-warning uppercase">
+                          Columbia Election — {activeElecEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                        </span>
+                        <span className="font-data text-caption text-text-secondary">
+                          R{activeElecEvent.round}
+                        </span>
+                      </div>
+                      <div className="font-body text-caption text-text-secondary mb-1">
+                        {elecVoteCount} of 7 Columbia citizens have voted
+                      </div>
+                      {Object.keys(elecTallies).length > 0 && (
+                        <div className="font-data text-caption text-text-primary mb-1">
+                          Tally (secret): {Object.entries(elecTallies).sort((a,b) => b[1]-a[1]).map(([c,n]) =>
+                            `${c}: ${n}`
+                          ).join(', ')}
+                        </div>
+                      )}
+                      <button onClick={handleResolveElection}
+                        disabled={electionResolving || elecVoteCount === 0}
+                        className="mt-2 font-body text-caption font-medium bg-action text-white px-3 py-1 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        {electionResolving ? 'Resolving...' : 'Resolve Election'}
+                      </button>
+                    </div>
+                  )}
+
+                  {elecResolved && activeElecEvent && (
+                    <div className="border rounded-lg p-3 bg-success/10 border-success/30">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="font-data text-caption font-bold text-success uppercase">
+                          Election Result — {activeElecEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                        </span>
+                      </div>
+                      <div className="font-body text-caption text-text-primary">
+                        {elecResolved.winner_role_id
+                          ? `Winner: ${elecResolved.winner_role_id}`
+                          : 'No winner (tie or no majority)'}
+                      </div>
+                      {elecResolved.total_votes && (
+                        <div className="font-data text-caption text-text-secondary mt-0.5">
+                          Votes: {Object.entries(elecResolved.total_votes as Record<string,number>)
+                            .sort((a,b) => b[1]-a[1])
+                            .map(([c,n]) => `${c}: ${n}`)
+                            .join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </DashboardSection>
