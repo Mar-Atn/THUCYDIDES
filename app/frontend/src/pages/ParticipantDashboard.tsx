@@ -83,7 +83,12 @@ const POS: Record<string, string> = {
 }
 function displayPositions(role: { positions?: string[]; position_type: string }): string {
   const pos = role.positions
-  if (pos && pos.length > 0) return pos.map(p => POS[p] ?? p).join(' + ')
+  // If positions array exists (even empty), it's the source of truth
+  if (Array.isArray(pos)) {
+    if (pos.length > 0) return pos.map(p => POS[p] ?? p).join(' + ')
+    return 'Citizen'
+  }
+  // Fallback to legacy position_type only if positions not set
   return POS[role.position_type] ?? role.position_type ?? 'Citizen'
 }
 
