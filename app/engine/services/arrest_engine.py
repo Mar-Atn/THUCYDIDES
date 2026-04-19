@@ -59,6 +59,10 @@ def request_arrest(
         return {"success": False, "status": "rejected",
                 "message": f"Cannot arrest {target_role_id!r} — different country"}
 
+    if has_position(target, "head_of_state"):
+        return {"success": False, "status": "rejected",
+                "message": "Cannot arrest the Head of State"}
+
     # Execute arrest — update both run_roles and roles tables
     result = update_role_status(
         sim_run_id, target_role_id, "arrested",

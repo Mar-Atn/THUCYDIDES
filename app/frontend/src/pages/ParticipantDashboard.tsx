@@ -3843,7 +3843,8 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   }, [simId, countryId])
 
   // Eligible targets: same country, active, not self
-  const targets = roles.filter(r => r.id !== roleId)
+  // Cannot arrest self or HoS
+  const targets = roles.filter(r => r.id !== roleId && !(r.positions || []).includes('head_of_state'))
 
   const handleSubmit = async () => {
     if (!targetId || justification.trim().length < 30) return
