@@ -1084,6 +1084,7 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
       }
       const res = await onConfirm(rolls)
       if (isCombat) setCombatResult(res)
+      if (!isCombat) setActionDone('approved')
     } catch(e) {
       alert(e instanceof Error ? e.message : 'Failed')
     } finally {
@@ -1091,7 +1092,43 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
     }
   }
 
-  // Non-combat or auto-dice: simple card
+  const [actionDone, setActionDone] = useState<'approved'|'rejected'|null>(null)
+
+  const handleQuickConfirm = async (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    if (resolving || actionDone) return
+    setResolving(true)
+    try {
+      await onConfirm()
+      setActionDone('approved')
+    } catch { /* ignore */ }
+    finally { setResolving(false) }
+  }
+
+  const handleQuickReject = (e?: React.MouseEvent) => {
+    e?.stopPropagation()
+    if (resolving || actionDone) return
+    setActionDone('rejected')
+    onReject()
+  }
+
+  // Already resolved — show brief result then fade
+  if (actionDone) {
+    return (
+      <div className={`flex items-center justify-between rounded-lg px-4 py-3 border transition-opacity ${
+        actionDone === 'approved' ? 'bg-success/10 border-success/30' : 'bg-danger/10 border-danger/30'
+      }`}>
+        <span className={`font-body text-body-sm font-medium ${actionDone === 'approved' ? 'text-success' : 'text-danger'}`}>
+          {actionDone === 'approved' ? 'Approved' : 'Rejected'} — {pa.action_type}
+        </span>
+        <span className="font-body text-caption text-text-secondary">
+          {pa.target_info || pa.country_code}
+        </span>
+      </div>
+    )
+  }
+
+  // Non-combat: simple card with loading state
   if (!isCombat) {
     return (
       <div className="flex items-center justify-between bg-base rounded-lg px-4 py-3 border border-border">
@@ -1102,8 +1139,14 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
           </span>
         </div>
         <div className="flex gap-2">
-          <button onClick={() => onConfirm()} className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors">Confirm</button>
-          <button onClick={onReject} className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors">Reject</button>
+          <button onClick={() => handleQuickConfirm()} disabled={resolving}
+            className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 disabled:opacity-50 transition-colors">
+            {resolving ? '...' : 'Confirm'}
+          </button>
+          <button onClick={() => handleQuickReject()} disabled={resolving}
+            className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 disabled:opacity-50 transition-colors">
+            Reject
+          </button>
         </div>
       </div>
     )
@@ -1126,8 +1169,14 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
         <div className="flex items-center gap-2">
           {!expanded && !needsDice && (
             <>
-              <button onClick={(e) => {e.stopPropagation(); onConfirm()}} className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20">Confirm</button>
-              <button onClick={(e) => {e.stopPropagation(); onReject()}} className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20">Reject</button>
+              <button onClick={(e) => handleQuickConfirm(e)} disabled={resolving}
+                className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 disabled:opacity-50 transition-colors">
+                {resolving ? '...' : 'Confirm'}
+              </button>
+              <button onClick={(e) => handleQuickReject(e)} disabled={resolving}
+                className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 disabled:opacity-50 transition-colors">
+                Reject
+              </button>
             </>
           )}
           <span className="font-body text-caption text-text-secondary">{expanded ? '▲' : '▼'}</span>
