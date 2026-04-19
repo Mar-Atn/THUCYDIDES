@@ -1200,6 +1200,13 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
   const tariffsOn = tariffs.filter(t=>t.target===cc)
   const tariffsBy = tariffs.filter(t=>t.imposer===cc)
 
+  const [countryRolesTab, setCountryRolesTab] = useState<{id:string;character_name:string;position_type:string;positions?:string[];title:string;status:string}[]>([])
+  useEffect(()=>{
+    supabase.from('roles').select('id,character_name,position_type,positions,title,status')
+      .eq('sim_run_id',simId).eq('country_id',cc).eq('status','active')
+      .then(({data})=>{ if(data) setCountryRolesTab(data) })
+  },[simId,cc])
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -1222,6 +1229,34 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
       {fc.country_brief&&<div className="bg-card border border-border rounded-lg p-4">
         <p className="font-body text-body-sm text-text-primary leading-relaxed">{String(fc.country_brief)}</p>
       </div>}
+
+      {/* Leadership & Roles */}
+      {countryRolesTab.length > 0 && (
+        <div className="bg-card border border-border rounded-lg divide-y divide-border">
+          {countryRolesTab.map(r => {
+            const pos = displayPositions(r as RoleData)
+            const isHos = r.positions?.includes('head_of_state') || r.position_type === 'head_of_state'
+            return (
+              <div key={r.id} className="flex items-center gap-3 px-4 py-2.5">
+                <span className={`font-body text-body-sm text-text-primary font-medium w-28 shrink-0 ${isHos ? 'text-warning' : ''}`}>
+                  {r.character_name}
+                </span>
+                <span className={`font-body text-caption px-1.5 py-0.5 rounded ${
+                  isHos ? 'bg-warning/10 text-warning' :
+                  (r.positions?.includes('military') || r.position_type === 'military_chief') ? 'bg-danger/10 text-danger' :
+                  (r.positions?.includes('economy') || r.position_type === 'economy_officer') ? 'bg-accent/10 text-accent' :
+                  (r.positions?.includes('diplomat') || r.position_type === 'diplomat') ? 'bg-action/10 text-action' :
+                  (r.positions?.includes('security') || r.position_type === 'security') ? 'bg-text-secondary/10 text-text-secondary' :
+                  'bg-text-secondary/5 text-text-secondary/60'
+                }`}>
+                  {pos || 'Citizen'}
+                </span>
+                {r.title && <span className="font-body text-caption text-text-secondary ml-auto">{r.title}</span>}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {section==='overview'&&<>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
