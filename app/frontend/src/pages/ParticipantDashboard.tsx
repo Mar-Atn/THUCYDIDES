@@ -84,8 +84,7 @@ const CATS: { key: string; label: string; actions: { id: string; label: string }
     {id:'attack',label:'Attack'},
     {id:'naval_blockade',label:'Blockade'},{id:'move_units',label:'Move Units (inter-round)'},
     {id:'martial_law',label:'Martial Law'},{id:'nuclear_test',label:'Nuclear Test'},
-    {id:'nuclear_launch_initiate',label:'Nuclear Launch'},{id:'nuclear_authorize',label:'Authorize Nuclear'},
-    {id:'nuclear_intercept',label:'Intercept Missiles'},
+    {id:'nuclear_launch_initiate',label:'Nuclear Launch'},
   ]},
   { key:'political', label:'Political', actions:[
     {id:'reassign_types',label:'Reassign Powers'},{id:'arrest',label:'Arrest'},{id:'change_leader',label:'Change Leader'},
