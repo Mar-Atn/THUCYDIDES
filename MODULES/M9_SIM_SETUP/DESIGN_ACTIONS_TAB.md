@@ -67,7 +67,8 @@ COMMUNICATION (Universal)
   ├── Public Statement       All                 Phase A
   ├── Call Org Meeting       Org members          Phase A
   ├── Publish Org Decision   Org chairmen         Phase A  [formal publication]
-  └── Meet Freely            All                 Phase A
+  ├── Invite to Meet         All                 Phase A  [select target role]
+  └── Accept/Reject Meeting  All                 Reactive [invitation received]
 ```
 
 ### Right Panel (70%): Action Detail
@@ -203,7 +204,8 @@ For Nuclear Authorize:
 | **public_statement** | All | Static | — | 3/round |
 | **call_org_meeting** | All org members | Static | Must be member of the organization | unlimited |
 | **publish_org_decision** | Org chairmen | Static | Must be chairman of the organization. Formal publication of org decisions (appears on public screen). | unlimited |
-| **meet_freely** | All | Static | — | unlimited |
+| **invite_to_meet** | All | Static | Select target role (any country). Target receives invitation in Actions Expected Now. | unlimited |
+| **accept_meeting** | All | Reactive | Meeting invitation received. Accept → human-human: notification to go talk; AI-human/AI-AI: structured dialogue in system. Reject → initiator notified. | — |
 
 ### 3.3 Intelligence & Covert Ops Limits (per SIM)
 
@@ -284,7 +286,7 @@ A role can hold 0–N positions. A role with no positions is a *citizen*.
 
 **DECIDED:** Reactive actions are NOT stored in role_actions. They are computed at runtime when triggered. This prevents stale permissions after position changes or arrests.
 
-Reactive actions: `nuclear_authorize`, `nuclear_intercept`, `accept_transaction`, `sign_agreement`, `cast_vote`, `cast_election_vote`.
+Reactive actions: `nuclear_authorize`, `nuclear_intercept`, `accept_transaction`, `sign_agreement`, `cast_vote`, `cast_election_vote`, `accept_meeting`.
 
 These appear in **Actions Expected Now** when their trigger condition is met.
 
