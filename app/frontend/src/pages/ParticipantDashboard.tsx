@@ -3913,7 +3913,8 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
       })
       if (res.success) {
         setSuccess(res.message || `${name} released`)
-        loadRoles()
+        // Optimistic update — move from arrested to active immediately
+        setRoles(prev => prev.map(r => r.id === targetId ? { ...r, status: 'active' } : r))
       } else {
         setError(res.message || res.narrative || 'Failed')
       }
