@@ -13,7 +13,7 @@ from typing import Optional
 from supabase import Client
 
 from engine.config.position_actions import (
-    compute_actions, REACTIVE_ACTIONS, INTEL_LIMITS,
+    compute_actions, REACTIVE_ACTIONS, ACTION_LIMITS, LIMITED_ACTIONS,
     ORG_MEMBER_ACTIONS, ORG_CHAIRMAN_ACTIONS,
 )
 
@@ -255,11 +255,12 @@ def recompute_all_role_actions(
         # Prepare batch operations
         for aid in to_add:
             row = {"sim_run_id": sim_run_id, "role_id": rid, "action_id": aid}
-            # Set intel limits (uses_total)
+            # Set action limits (uses_total + uses_remaining)
             for pos in positions:
-                limits = INTEL_LIMITS.get(pos, {})
+                limits = ACTION_LIMITS.get(pos, {})
                 if aid in limits:
                     row["uses_total"] = limits[aid]
+                    row["uses_remaining"] = limits[aid]
                     break
             rows_to_insert.append(row)
 
@@ -349,6 +350,11 @@ def transfer_position(
     _sync_legacy_fields(client, sim_run_id, from_role_id, from_positions)
     _sync_legacy_fields(client, sim_run_id, to_role_id, to_positions)
 
+    # Transfer remaining usage for limited actions before recomputing
+    # (recompute will set fresh uses_total, but we need to preserve uses_remaining)
+    for action_id in LIMITED_ACTIONS:
+        transfer_action_usage(client, sim_run_id, from_role_id, to_role_id, action_id)
+
     # Recompute actions for both
     recompute_role_actions(client, sim_run_id, from_role_id)
     recompute_role_actions(client, sim_run_id, to_role_id)
@@ -379,3 +385,145 @@ def _sync_legacy_fields(
     client.table("roles").update(update).eq(
         "sim_run_id", sim_run_id
     ).eq("id", role_id).execute()
+
+
+# ---------------------------------------------------------------------------
+# Action usage tracking — limited actions (arrest, intel, covert, assassination)
+# ---------------------------------------------------------------------------
+
+def check_and_decrement_usage(
+    client: Client,
+    sim_run_id: str,
+    role_id: str,
+    action_id: str,
+) -> dict:
+    """Check if a limited action has remaining uses and decrement.
+
+    Returns:
+        {"allowed": True, "remaining": N} if action can proceed
+        {"allowed": False, "remaining": 0, "message": "..."} if exhausted
+        {"allowed": True, "remaining": None} if action has no limit
+    """
+    if action_id not in LIMITED_ACTIONS:
+        return {"allowed": True, "remaining": None}
+
+    row = (
+        client.table("role_actions")
+        .select("uses_total, uses_remaining")
+        .eq("sim_run_id", sim_run_id)
+        .eq("role_id", role_id)
+        .eq("action_id", action_id)
+        .limit(1)
+        .execute()
+    ).data
+
+    if not row:
+        return {"allowed": False, "remaining": 0, "message": f"Action {action_id} not available"}
+
+    uses_total = row[0].get("uses_total")
+    uses_remaining = row[0].get("uses_remaining")
+
+    # No limit set
+    if uses_total is None:
+        return {"allowed": True, "remaining": None}
+
+    # Check remaining
+    if uses_remaining is None:
+        uses_remaining = uses_total  # not yet initialized
+
+    if uses_remaining <= 0:
+        return {"allowed": False, "remaining": 0,
+                "message": f"No {action_id} actions remaining (used all {uses_total})"}
+
+    # Decrement
+    new_remaining = uses_remaining - 1
+    client.table("role_actions").update({"uses_remaining": new_remaining}).eq(
+        "sim_run_id", sim_run_id
+    ).eq("role_id", role_id).eq("action_id", action_id).execute()
+
+    logger.info("[usage] %s:%s decremented: %d → %d", role_id, action_id, uses_remaining, new_remaining)
+    return {"allowed": True, "remaining": new_remaining}
+
+
+def get_action_usage(
+    client: Client,
+    sim_run_id: str,
+    role_id: str,
+    action_id: str,
+) -> dict:
+    """Get current usage info for a limited action (without decrementing).
+
+    Returns {"uses_total": N, "uses_remaining": M} or {"uses_total": None}
+    """
+    if action_id not in LIMITED_ACTIONS:
+        return {"uses_total": None, "uses_remaining": None}
+
+    row = (
+        client.table("role_actions")
+        .select("uses_total, uses_remaining")
+        .eq("sim_run_id", sim_run_id)
+        .eq("role_id", role_id)
+        .eq("action_id", action_id)
+        .limit(1)
+        .execute()
+    ).data
+
+    if not row:
+        return {"uses_total": None, "uses_remaining": None}
+
+    return {
+        "uses_total": row[0].get("uses_total"),
+        "uses_remaining": row[0].get("uses_remaining"),
+    }
+
+
+def transfer_action_usage(
+    client: Client,
+    sim_run_id: str,
+    from_role_id: str,
+    to_role_id: str,
+    action_id: str,
+) -> None:
+    """Transfer remaining usage of a limited action from one role to another.
+
+    Called during position reassignment. The new holder gets the remaining
+    count from the old holder (not a fresh allocation).
+    """
+    if action_id not in LIMITED_ACTIONS:
+        return
+
+    # Get old holder's remaining
+    old = (
+        client.table("role_actions")
+        .select("uses_remaining, uses_total")
+        .eq("sim_run_id", sim_run_id)
+        .eq("role_id", from_role_id)
+        .eq("action_id", action_id)
+        .limit(1)
+        .execute()
+    ).data
+
+    if not old:
+        return
+
+    remaining = old[0].get("uses_remaining")
+    if remaining is None:
+        remaining = old[0].get("uses_total")
+
+    # Set on new holder
+    new = (
+        client.table("role_actions")
+        .select("id")
+        .eq("sim_run_id", sim_run_id)
+        .eq("role_id", to_role_id)
+        .eq("action_id", action_id)
+        .limit(1)
+        .execute()
+    ).data
+
+    if new:
+        client.table("role_actions").update({"uses_remaining": remaining}).eq(
+            "sim_run_id", sim_run_id
+        ).eq("role_id", to_role_id).eq("action_id", action_id).execute()
+        logger.info("[usage] transferred %s %d remaining from %s to %s",
+                    action_id, remaining or 0, from_role_id, to_role_id)

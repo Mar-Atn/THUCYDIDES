@@ -121,16 +121,24 @@ OPEC_MEMBERS: set[str] = {"caribe", "mirage", "persia", "sarmatia", "solaria"}
 COLUMBIA_ELECTION_ACTIONS: set[str] = {"self_nominate"}
 
 # ---------------------------------------------------------------------------
-# Intelligence & Covert Ops limits per SIM (not per round)
+# Action limits per SIM (not per round)
 # When position is reassigned, remaining quota transfers to new holder.
+# Includes: intelligence, covert ops, assassination, arrest.
 # ---------------------------------------------------------------------------
-INTEL_LIMITS: dict[Optional[str], dict[str, int]] = {
-    "security": {"intelligence": 5, "covert_operation": 5, "assassination": 3},
+ACTION_LIMITS: dict[Optional[str], dict[str, int]] = {
+    "head_of_state": {"arrest": 4},
+    "security": {"intelligence": 5, "covert_operation": 5, "assassination": 3, "arrest": 4},
     "military": {"intelligence": 5, "covert_operation": 5, "assassination": 2},
     "diplomat": {"intelligence": 1},
     "opposition": {"intelligence": 2},
-    None: {},  # citizen with no position — 0 intelligence
+    None: {},  # citizen with no position — no limited actions
 }
+
+# Backward compatibility alias
+INTEL_LIMITS = ACTION_LIMITS
+
+# All actions that have per-SIM limits (used for usage tracking)
+LIMITED_ACTIONS: set[str] = {"intelligence", "covert_operation", "assassination", "arrest"}
 
 # ---------------------------------------------------------------------------
 # Org-based actions — applied by position_helpers.py, not compute_actions()

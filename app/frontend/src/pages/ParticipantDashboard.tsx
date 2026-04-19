@@ -3870,11 +3870,18 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string|null>(null)
   const [success, setSuccess] = useState<string|null>(null)
+  const [remaining, setRemaining] = useState<number|null>(null)
 
   useEffect(() => {
-    supabase.from('roles').select('id,character_name,positions,status')
-      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
-      .then(({ data }) => { if (data) setRoles(data as typeof roles) })
+    Promise.all([
+      supabase.from('roles').select('id,character_name,positions,status')
+        .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active'),
+      supabase.from('role_actions').select('uses_remaining')
+        .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'arrest').limit(1),
+    ]).then(([rolesRes, usageRes]) => {
+      if (rolesRes.data) setRoles(rolesRes.data as typeof roles)
+      setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
+    })
       .finally(() => setLoading(false))
   }, [simId, countryId])
 
@@ -3919,7 +3926,18 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
         <p className="font-body text-body-sm text-text-primary">
           Arrest a citizen of your country. The arrested person will be <strong className="text-danger">unable to take any actions</strong> for the remainder of this round. Released automatically at round end.
         </p>
+        {remaining !== null && (
+          <p className={`font-data text-caption mt-2 ${remaining > 0 ? 'text-text-secondary' : 'text-danger'}`}>
+            {remaining > 0 ? `${remaining} arrest${remaining !== 1 ? 's' : ''} remaining this simulation` : 'No arrests remaining'}
+          </p>
+        )}
       </div>
+
+      {remaining === 0 && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4 text-center">
+          <p className="font-body text-body-sm text-danger font-medium">All arrest actions have been used this simulation.</p>
+        </div>
+      )}
 
       {success ? (
         <div className="bg-success/5 border border-success/20 rounded-lg p-4">
@@ -3958,7 +3976,7 @@ function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           )}
         </div>
 
-        <button onClick={handleSubmit} disabled={!targetId || justification.trim().length < 30 || submitting}
+        <button onClick={handleSubmit} disabled={!targetId || justification.trim().length < 30 || submitting || remaining === 0}
           className="w-full bg-danger text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
           {submitting ? 'Submitting...' : targetId ? `Arrest ${targets.find(r=>r.id===targetId)?.character_name}` : 'Select a target'}
         </button>

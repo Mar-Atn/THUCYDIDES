@@ -1448,7 +1448,17 @@ async def submit_action(
     category = ACTION_CATEGORIES.get(body.action_type, "system")
     scenario_id = run.get("scenario_id")
 
-    # 4a. Compute combat modifiers (needed for both pending and immediate paths)
+    # 4a. Check limited action usage (arrest, intelligence, covert_operation, assassination)
+    from engine.config.position_actions import LIMITED_ACTIONS
+    if body.action_type in LIMITED_ACTIONS:
+        from engine.services.position_helpers import check_and_decrement_usage
+        usage = check_and_decrement_usage(client, sim_id, body.role_id, body.action_type)
+        if not usage["allowed"]:
+            raise HTTPException(status_code=400, detail=usage["message"])
+        # Include remaining count in response for UI
+        action_payload["_uses_remaining"] = usage["remaining"]
+
+    # 4b. Compute combat modifiers (needed for both pending and immediate paths)
     if body.action_type in ("ground_attack", "naval_combat"):
         tr = body.params.get("target_row")
         tc = body.params.get("target_col")
@@ -1787,6 +1797,22 @@ async def resolve_leadership_vote(
     from engine.services.change_leader import resolve_leader_vote
     result = resolve_leader_vote(sim_id, vote_id)
     logger.info("Leadership vote %s resolved by %s: %s", vote_id, user.id, result.get("outcome"))
+    return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# Action usage — check remaining uses for limited actions
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/action-usage/{role_id}/{action_id}")
+async def get_action_usage_endpoint(
+    sim_id: str, role_id: str, action_id: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Get remaining uses for a limited action."""
+    from engine.services.position_helpers import get_action_usage
+    from engine.services.supabase import get_client
+    result = get_action_usage(get_client(), sim_id, role_id, action_id)
     return APIResponse(data=result)
 
 
