@@ -849,19 +849,28 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const canNominateForMidterm = !isParliamentMember || isSeatForReelection
 
   // Show election in expected actions
-  const showNomination = isColumbia && activeNominationEvent && !myNomination && nominationsOpen
+  // Combine DB nomination with local optimistic state
+  const isNominated = localNominated === true || (localNominated === null && !!myNomination)
+  const showNomination = isColumbia && activeNominationEvent && !isNominated && nominationsOpen
     && (activeNominationEvent.subtype !== 'parliamentary_midterm' || canNominateForMidterm)
   const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0
+
+  // Local nomination state for optimistic updates (realtime may be slow)
+  const [localNominated, setLocalNominated] = useState<boolean|null>(null)
 
   const handleSelfNominate = async () => {
     if (!activeNominationEvent) return
     setElectionSubmitting(true)
     try {
-      await submitAction(simId, 'self_nominate', roleId, countryId, {
+      const res = await submitAction(simId, 'self_nominate', roleId, countryId, {
         election_type: activeNominationEvent.subtype,
         election_round: activeNominationEvent.round,
       })
-      setShowElectionPanel(null)
+      if (res.success) {
+        setLocalNominated(true)
+      } else {
+        alert(res.narrative || 'Nomination failed')
+      }
     } catch (e) { alert(e instanceof Error ? e.message : 'Nomination failed') }
     finally { setElectionSubmitting(false) }
   }
@@ -870,10 +879,14 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     if (!activeNominationEvent) return
     setElectionSubmitting(true)
     try {
-      await submitAction(simId, 'withdraw_nomination', roleId, countryId, {
+      const res = await submitAction(simId, 'withdraw_nomination', roleId, countryId, {
         election_type: activeNominationEvent.subtype,
       })
-      setShowElectionPanel(null)
+      if (res.success) {
+        setLocalNominated(false)
+      } else {
+        alert(res.narrative || 'Withdrawal failed')
+      }
     } catch (e) { alert(e instanceof Error ? e.message : 'Withdrawal failed') }
     finally { setElectionSubmitting(false) }
   }
@@ -1207,7 +1220,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           </div>
         )}
 
-        {!myNomination ? (
+        {!isNominated ? (
           <button onClick={handleSelfNominate} disabled={electionSubmitting}
             className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
             {electionSubmitting ? 'Submitting...' : 'Nominate Yourself'}
@@ -1279,7 +1292,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
   const showLeaderVote = activeVote && !hasVotedInActiveVote ? 1 : 0
-  const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (myNomination ? 1 : 0)
+  const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (isNominated ? 1 : 0)
   const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
     + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote + electionExpected
   const hasExpected = expectedCount > 0
@@ -1352,7 +1365,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 </span>
               </button>
             )}
-            {myNomination && activeNominationEvent && (
+            {isNominated && activeNominationEvent && (
               <button onClick={() => setShowElectionPanel('nominate')}
                 className="text-left bg-success/5 border border-success/30 rounded-lg px-4 py-3 transition-colors hover:bg-success/10">
                 <span className="font-body text-body-sm text-success font-medium block">
