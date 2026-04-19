@@ -160,9 +160,9 @@ function positionBadgeClass(position: string): string {
   switch (position) {
     case 'head_of_state':
       return 'bg-warning/15 text-warning'
-    case 'military_chief':
+    case 'military': case 'military_chief':
       return 'bg-danger/15 text-danger'
-    case 'economy_officer':
+    case 'economy': case 'economy_officer':
       return 'bg-accent/15 text-accent'
     case 'diplomat':
       return 'bg-action/15 text-action'
@@ -178,13 +178,36 @@ function positionBadgeClass(position: string): string {
 function positionLabel(position: string): string {
   switch (position) {
     case 'head_of_state': return 'HoS'
-    case 'military_chief': return 'Military'
-    case 'economy_officer': return 'Economy'
-    case 'diplomat': return 'Diplomat'
-    case 'security': return 'Security'
-    case 'opposition': return 'Opposition'
-    default: return position
+    case 'military': case 'military_chief': return 'Mil'
+    case 'economy': case 'economy_officer': return 'Econ'
+    case 'diplomat': return 'Dipl'
+    case 'security': return 'Sec'
+    case 'opposition': return 'Opp'
+    default: return position.slice(0, 4)
   }
+}
+
+/** Render position badges from positions[] array with legacy fallback */
+function PositionBadges({ role }: { role: { positions?: string[]; position_type: string } }) {
+  const pos = Array.isArray(role.positions) && role.positions.length > 0
+    ? role.positions
+    : Array.isArray(role.positions) && role.positions.length === 0
+      ? []  // citizen
+      : [role.position_type]  // legacy fallback
+
+  if (pos.length === 0) {
+    return <span className="font-body text-caption px-1 py-0.5 rounded bg-base text-text-secondary/50">—</span>
+  }
+
+  return (
+    <span className="flex gap-0.5">
+      {pos.map(p => (
+        <span key={p} className={`font-body text-caption font-medium px-1 py-0.5 rounded text-center ${positionBadgeClass(p)}`}>
+          {positionLabel(p)}
+        </span>
+      ))}
+    </span>
+  )
 }
 
 function formatTimer(seconds: number): string {
@@ -1345,8 +1368,8 @@ function ParticipantPanel({
                       <span className="font-body text-caption text-text-primary w-24 shrink-0">
                         {role.character_name}
                       </span>
-                      <span className={`font-body text-caption font-medium w-28 shrink-0 px-1.5 py-0.5 rounded text-center ${positionBadgeClass(role.position_type)}`}>
-                        {positionLabel(role.position_type)}
+                      <span className="w-24 shrink-0">
+                        <PositionBadges role={role} />
                       </span>
 
                       {/* AI/Human toggle */}

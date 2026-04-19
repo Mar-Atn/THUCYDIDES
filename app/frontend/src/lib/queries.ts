@@ -209,7 +209,7 @@ export async function duplicateSimRun(sourceId: string, newName: string): Promis
 export async function getSimRunRoles(simRunId: string): Promise<SimRunRole[]> {
   const { data, error } = await supabase
     .from('roles')
-    .select('id, sim_run_id, character_name, country_id, title, position_type, is_ai_operated, expansion_role, public_bio, status, user_id')
+    .select('id, sim_run_id, character_name, country_id, title, position_type, positions, is_ai_operated, expansion_role, public_bio, status, user_id')
     .eq('sim_run_id', simRunId)
     .order('country_id')
 
