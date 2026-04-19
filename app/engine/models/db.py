@@ -125,6 +125,7 @@ class Role(BaseModel):
     faction: str = ""
     title: str = ""
     position_type: Optional[str] = None  # head_of_state | military_chief | economy_officer | diplomat | security | opposition
+    positions: list[str] = Field(default_factory=list)  # NEW: ['head_of_state', 'security'] — source of truth for authorization
     age: int = 50
     gender: str = "M"
     public_bio: str = ""
