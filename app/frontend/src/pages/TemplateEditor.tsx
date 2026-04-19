@@ -17,11 +17,13 @@ import { TabMap } from '@/components/template/TabMap'
 import { TabDeployments } from '@/components/template/TabDeployments'
 import { TabSchedule } from '@/components/template/TabSchedule'
 import { TabFormulas } from '@/components/template/TabFormulas'
+import { TabActions } from '@/components/template/TabActions'
 
 const TABS = [
   { key: 'general', label: 'General' },
   { key: 'countries', label: 'Countries' },
   { key: 'roles', label: 'Roles' },
+  { key: 'actions', label: 'Actions' },
   { key: 'organizations', label: 'Organizations' },
   { key: 'relationships', label: 'Relationships' },
   { key: 'sanctions-tariffs', label: 'Sanctions & Tariffs' },
@@ -125,6 +127,9 @@ export function TemplateEditor() {
           )}
           {activeTab === 'roles' && (
             <TabRoles templateId={template.id} />
+          )}
+          {activeTab === 'actions' && (
+            <TabActions templateId={template.id} />
           )}
           {activeTab === 'organizations' && (
             <TabOrganizations templateId={template.id} />

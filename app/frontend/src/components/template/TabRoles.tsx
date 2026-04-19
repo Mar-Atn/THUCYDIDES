@@ -21,6 +21,7 @@ import {
   type RoleRelationship,
   type OrgMembership,
 } from '@/lib/queries'
+import { ACTION_LABELS, ACTION_CATEGORIES } from '@/lib/action_constants'
 
 /* -------------------------------------------------------------------------- */
 /*  Constants                                                                  */
@@ -37,40 +38,6 @@ const COUNTRY_ORDER: string[] = [
 const GENDER_OPTIONS = ['M', 'F'] as const
 const POSITION_OPTIONS = ['head_of_state', 'military_chief', 'economy_officer', 'diplomat', 'security', 'opposition', 'other'] as const
 const PARTY_OPTIONS = ['', 'rep', 'dem', 'independent'] as const
-
-const ACTION_LABELS: Record<string, string> = {
-  // HoS only
-  reassign_types: 'Re-Assign Role Types', martial_law: 'Martial Law', arrest: 'Arrest',
-  // Regular Economic
-  set_budget: 'Set Budget', set_tariffs: 'Set Tariffs', set_sanctions: 'Set Sanctions', set_opec: 'Set Cartel Production',
-  // Military
-  ground_attack: 'Ground Attack', air_strike: 'Air Strike', naval_combat: 'Naval Combat',
-  naval_bombardment: 'Naval Bombardment', launch_missile_conventional: 'Launch Missile (conventional)',
-  naval_blockade: 'Naval Blockade', move_units: 'Move Units',
-  // Nuclear
-  nuclear_test: 'Nuclear Test', nuclear_launch_initiate: 'Nuclear Launch (initiate)',
-  nuclear_authorize: 'Nuclear Authorization', nuclear_intercept: 'Nuclear Intercept',
-  // Transactions & Agreements
-  propose_transaction: 'Propose Transaction', accept_transaction: 'Accept/Decline/Counter Transaction',
-  propose_agreement: 'Propose Agreement', sign_agreement: 'Sign Agreement', basing_rights: 'Basing Rights',
-  // Covert & Intelligence
-  intelligence: 'Intelligence', covert_operation: 'Covert Operation', assassination: 'Assassination',
-  // Political
-  change_leader: 'Change Leader', self_nominate: 'Self-Nominate', cast_vote: 'Cast Vote',
-  // Communication
-  public_statement: 'Public Statement', call_org_meeting: 'Call Organization Meeting', meet_freely: 'Meet Freely',
-}
-
-const ACTION_CATEGORIES: Record<string, string[]> = {
-  'HoS Powers': ['reassign_types', 'martial_law', 'arrest'],
-  'Regular Economic': ['set_budget', 'set_tariffs', 'set_sanctions', 'set_opec'],
-  'Military': ['ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'launch_missile_conventional', 'naval_blockade', 'move_units'],
-  'Nuclear': ['nuclear_test', 'nuclear_launch_initiate', 'nuclear_authorize', 'nuclear_intercept'],
-  'Transactions & Agreements': ['propose_transaction', 'accept_transaction', 'propose_agreement', 'sign_agreement', 'basing_rights'],
-  'Covert & Intelligence': ['intelligence', 'covert_operation', 'assassination'],
-  'Political': ['change_leader', 'self_nominate', 'cast_vote'],
-  'Communication': ['public_statement', 'call_org_meeting', 'meet_freely'],
-}
 
 const POSITION_BADGE: Record<string, { label: string; cls: string }> = {
   head_of_state:  { label: 'HoS',        cls: 'bg-warning/10 text-warning' },
