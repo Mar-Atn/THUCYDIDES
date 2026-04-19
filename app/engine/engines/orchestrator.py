@@ -488,6 +488,21 @@ async def process_round(
     tf_results: dict[str, ThresholdFlagsResult] = {}
     wars = world_state["wars"]
 
+    # Count territory changes from hex_control for stability
+    territory_changes: dict[str, dict[str, int]] = {}
+    try:
+        hc_rows = client.table("hex_control").select("owner, controlled_by") \
+            .eq("sim_run_id", sim_run_id).execute().data or []
+        for hc in hc_rows:
+            owner = hc.get("owner", "")
+            occupier = hc.get("controlled_by")
+            if not occupier or occupier == owner:
+                continue
+            territory_changes.setdefault(owner, {"gained": 0, "lost": 0})["lost"] += 1
+            territory_changes.setdefault(occupier, {"gained": 0, "lost": 0})["gained"] += 1
+    except Exception:
+        pass
+
     for cid, c in countries.items():
         eco, pol = c["economic"], c["political"]
         at_war = _is_at_war(cid, wars)
@@ -505,6 +520,7 @@ async def process_round(
         if econ_result.market_indexes is not None:
             mkt_stress = get_market_stress_for_country(cid, econ_result.market_indexes)
 
+        tc = territory_changes.get(cid, {"gained": 0, "lost": 0})
         sr = calc_stability(StabilityInput(
             country_id=cid, stability=pol["stability"], regime_type=c["regime_type"],
             gdp_growth_rate=eco.get("gdp_growth_rate", 0.0),
@@ -514,6 +530,8 @@ async def process_round(
             market_stress=mkt_stress,
             social_spending_ratio=eco.get("_actual_social_ratio", eco.get("social_spending_baseline", 0.20)),
             social_spending_baseline=eco.get("social_spending_baseline", 0.20), gdp=eco["gdp"],
+            territory_lost=tc["lost"],
+            territory_gained=tc["gained"],
         ))
         pol["stability"] = sr.new_stability
         stability_results[cid] = sr

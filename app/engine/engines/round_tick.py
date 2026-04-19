@@ -132,6 +132,8 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
             PoliticalSupportInput, calc_political_support,
             WarTirednessInput, update_war_tiredness,
         )
+        # Load territory changes for stability calculation
+        territory_changes = _count_territory_changes(client, sim_run_id, round_num)
         for cc, c in countries.items():
             eco = c.get("economic", {})
             pol = c.get("political", {})
@@ -145,6 +147,7 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
                 pol["war_tiredness"] = wt.new_war_tiredness
 
                 # Stability
+                tc = territory_changes.get(cc, {"gained": 0, "lost": 0})
                 sr = calc_stability(StabilityInput(
                     country_id=cc,
                     stability=pol.get("stability", 5),
@@ -159,6 +162,8 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
                     social_spending_ratio=eco.get("_actual_social_ratio", eco.get("social_spending_baseline", 0.20)),
                     social_spending_baseline=eco.get("social_spending_baseline", 0.20),
                     gdp=eco.get("gdp", 10),
+                    territory_lost=tc["lost"],
+                    territory_gained=tc["gained"],
                 ))
                 pol["stability"] = sr.new_stability
 
@@ -432,6 +437,31 @@ def _count_combat_losses(client, sim_run_id: str, round_num: int) -> dict[str, i
     except Exception as e:
         logger.warning("combat losses count failed: %s", e)
     return losses
+
+
+def _count_territory_changes(client, sim_run_id: str, round_num: int) -> dict[str, dict[str, int]]:
+    """Count territory hexes gained/lost per country from hex_control table.
+
+    Returns {country_id: {"gained": N, "lost": N}}.
+    - gained: hexes where controlled_by = this country (captured by us)
+    - lost: hexes where owner = this country AND controlled_by != this country (occupied by enemy)
+    """
+    changes: dict[str, dict[str, int]] = {}
+    try:
+        rows = client.table("hex_control").select("owner, controlled_by, captured_round") \
+            .eq("sim_run_id", sim_run_id).execute().data or []
+        for r in rows:
+            owner = r.get("owner", "")
+            occupier = r.get("controlled_by")
+            if not occupier or occupier == owner:
+                continue
+            # Owner lost this hex
+            changes.setdefault(owner, {"gained": 0, "lost": 0})["lost"] += 1
+            # Occupier gained this hex
+            changes.setdefault(occupier, {"gained": 0, "lost": 0})["gained"] += 1
+    except Exception as e:
+        logger.warning("territory changes count failed: %s", e)
+    return changes
 
 
 def _build_world_state(
