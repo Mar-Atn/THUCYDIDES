@@ -631,41 +631,29 @@
       g.style.pointerEvents = 'none';
 
       if (isNuclearTest) {
-        // ☢ Radiation trefoil — larger, orange/yellow, pulsing glow
-        const glowSize = r * 1.2;
-
-        // Outer radiation glow
-        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        glow.setAttribute('r', String(glowSize));
-        glow.setAttribute('fill', 'rgba(255,165,0,0.2)');
-        glow.setAttribute('stroke', 'rgba(255,165,0,0.4)');
-        glow.setAttribute('stroke-width', '2');
-        g.appendChild(glow);
-
-        // Pulsing glow animation
-        const glowAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-        glowAnim.setAttribute('attributeName', 'r');
-        glowAnim.setAttribute('values', (glowSize * 0.9) + ';' + (glowSize * 1.1) + ';' + (glowSize * 0.9));
-        glowAnim.setAttribute('dur', '2s');
-        glowAnim.setAttribute('repeatCount', 'indefinite');
-        glow.appendChild(glowAnim);
-
-        var opacAnim = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
-        opacAnim.setAttribute('attributeName', 'opacity');
-        opacAnim.setAttribute('values', '0.8;0.4;0.8');
-        opacAnim.setAttribute('dur', '2s');
-        opacAnim.setAttribute('repeatCount', 'indefinite');
-        glow.appendChild(opacAnim);
-
-        // Trefoil symbol ☢
+        // ☢ Radiation trefoil — dark red, large, pulsing symbol
         const trefoil = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         trefoil.setAttribute('text-anchor', 'middle');
         trefoil.setAttribute('dominant-baseline', 'central');
-        trefoil.setAttribute('font-size', String(r * 1.4));
-        trefoil.setAttribute('fill', '#FFA500');
-        trefoil.setAttribute('opacity', '0.95');
+        trefoil.setAttribute('font-size', String(r * 1.8));
+        trefoil.setAttribute('fill', '#991B1B');
         trefoil.textContent = '\u2622';  // ☢ radiation trefoil
         g.appendChild(trefoil);
+
+        // Pulse the trefoil itself (opacity + size)
+        const pulseOpac = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        pulseOpac.setAttribute('attributeName', 'opacity');
+        pulseOpac.setAttribute('values', '1;0.4;1');
+        pulseOpac.setAttribute('dur', '1.5s');
+        pulseOpac.setAttribute('repeatCount', 'indefinite');
+        trefoil.appendChild(pulseOpac);
+
+        const pulseSize = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        pulseSize.setAttribute('attributeName', 'font-size');
+        pulseSize.setAttribute('values', (r * 1.6) + ';' + (r * 2.0) + ';' + (r * 1.6));
+        pulseSize.setAttribute('dur', '1.5s');
+        pulseSize.setAttribute('repeatCount', 'indefinite');
+        trefoil.appendChild(pulseSize);
       } else {
         // Standard explosion burst
         // Outer glow

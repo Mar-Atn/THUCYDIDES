@@ -1712,7 +1712,7 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
                   Selected: ({targetHex.row}, {targetHex.col})
                 </div>
               )}
-              <div style={{position:'relative', height:'300px', borderRadius:'0.5rem', overflow:'hidden', border:'1px solid rgba(255,255,255,0.15)'}}>
+              <div style={{position:'relative', height:'60vh', minHeight:'400px', borderRadius:'0.5rem', overflow:'hidden', border:'1px solid rgba(255,255,255,0.15)'}}>
                 <iframe
                   ref={mapRef}
                   src={`/map/deployments.html?display=clean&mode=attack&country=${countryId}&sim_run_id=${simId}`}
