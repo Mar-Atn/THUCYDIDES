@@ -146,7 +146,7 @@ def compute_actions(
 
     nuclear_level = country_state.get("nuclear_level", 0)
     nuclear_confirmed = country_state.get("nuclear_confirmed", False)
-    opec_member = country_state.get("opec_member", False)
+    opec_member = country_code in OPEC_MEMBERS
 
     if not positions:
         # Unpositioned citizen — opposition defaults
