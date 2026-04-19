@@ -6,6 +6,8 @@ actions that modify role state or unit counts.
 
 from __future__ import annotations
 
+from engine.config.position_actions import has_position
+
 CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "albion", "bharata", "caribe", "cathay", "choson", "columbia",
     "formosa", "freeland", "gallia", "hanguk", "levantia", "mirage",
@@ -46,7 +48,6 @@ def validate_fire_role(
         errors.append("MISSING_TARGET: changes.target_role required")
 
     # Firer must have authority over target (simplified: must be HoS)
-    from engine.config.position_actions import has_position
     firer_info = roles.get(firer_role) or {}
     if not has_position(firer_info, "head_of_state"):
         errors.append(f"UNAUTHORIZED: {firer_role!r} is not HoS — cannot fire roles")
