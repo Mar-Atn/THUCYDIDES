@@ -106,8 +106,8 @@ def validate_arrest(
         errors.append("MISSING_TARGET")
 
     arrester_info = roles.get(arrester_role) or {}
-    if not has_position(arrester_info, "head_of_state"):
-        errors.append(f"UNAUTHORIZED: {arrester_role!r} not HoS")
+    if not (has_position(arrester_info, "head_of_state") or has_position(arrester_info, "security")):
+        errors.append(f"UNAUTHORIZED: {arrester_role!r} — requires HoS or Security position")
 
     target_info = roles.get(target_role) or {}
     if not target_info:

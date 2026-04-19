@@ -38,19 +38,10 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Authorization role mapping (CONTRACT_NUCLEAR_CHAIN v1.0 §8)
+# Authorization: derived from position priority at launch time
+# (DESIGN_ACTIONS_TAB.md §7, decision #2)
 # ---------------------------------------------------------------------------
-
-#: Multi-role countries: HoS initiates, these 2 authorize.
-AUTHORIZATION_ROLES: dict[str, tuple[str, str]] = {
-    "columbia": ("shield", "shadow"),
-    "cathay": ("rampart", "abacus"),
-    "sarmatia": ("ironhand", "compass"),
-    "ruthenia": ("bulwark", "broker"),
-    "persia": ("anvil", "dawn"),
-}
-
-#: All other countries use 1 AI Officer (single-HoS = 2-way auth).
+from engine.config.position_actions import AUTHORIZE_PRIORITY, has_position
 
 # Nuclear test success probabilities (CARD_FORMULAS D.7)
 TEST_SUCCESS_BELOW_T2 = 0.70
@@ -122,7 +113,7 @@ class NuclearChainOrchestrator:
         normalized = report["normalized"]
 
         # Determine authorizers
-        auth1, auth2 = self._get_authorizers(country_code)
+        auth1, auth2 = self._get_authorizers(country_code, sim_run_id)
 
         # Load timer config from sim_runs.schedule
         schedule = {}
@@ -455,12 +446,40 @@ class NuclearChainOrchestrator:
             raise ValueError(f"nuclear_action {action_id} not found")
         return res.data[0]
 
-    def _get_authorizers(self, country_code: str) -> tuple[str, Optional[str]]:
-        """Return (auth1_role, auth2_role) for the country."""
-        if country_code in AUTHORIZATION_ROLES:
-            return AUTHORIZATION_ROLES[country_code]
-        # Single-HoS country: 1 AI Officer
-        return ("ai_officer", None)
+    def _get_authorizers(self, country_code: str, sim_run_id: str | None = None) -> tuple[str, Optional[str]]:
+        """Return (auth1_role, auth2_role) derived from position priority.
+
+        Priority: military > security > diplomat > economy > opposition.
+        Picks top 2 non-HoS roles. Single-role countries: 1 AI Officer.
+        """
+        if not sim_run_id:
+            # Fallback for legacy callers without sim_run_id
+            return ("ai_officer", None)
+
+        roles = self.client.table("roles") \
+            .select("id, positions, position_type") \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("country_id", country_code) \
+            .eq("status", "active") \
+            .execute().data or []
+
+        # Filter out HoS (initiator)
+        non_hos = [r for r in roles if not has_position(r, "head_of_state")]
+        if not non_hos:
+            return ("ai_officer", None)
+
+        # Sort by position priority
+        def priority_key(role: dict) -> int:
+            positions = role.get("positions") or []
+            for i, pos in enumerate(AUTHORIZE_PRIORITY):
+                if pos in positions:
+                    return i
+            return len(AUTHORIZE_PRIORITY)
+
+        non_hos.sort(key=priority_key)
+        auth1 = non_hos[0]["id"]
+        auth2 = non_hos[1]["id"] if len(non_hos) > 1 else None
+        return (auth1, auth2)
 
     def _load_validation_context(self, sim_run_id: str, round_num: int):
         """Load units, country_state, zones for validator calls."""
