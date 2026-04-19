@@ -24,7 +24,14 @@ from __future__ import annotations
 
 import logging
 
-from engine.services.run_roles import get_run_role
+from engine.services.supabase import get_client as _get_sb_client
+
+def _get_role(sim_run_id: str, role_id: str) -> dict | None:
+    """Get role from roles table (not run_roles which may be empty)."""
+    client = _get_sb_client()
+    rows = client.table("roles").select("id, character_name, status, country_id, positions") \
+        .eq("sim_run_id", sim_run_id).eq("id", role_id).limit(1).execute().data
+    return rows[0] if rows else None
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -85,7 +92,7 @@ def submit_nomination(
         )}
 
     # Validate role
-    role = get_run_role(sim_run_id, role_id)
+    role = _get_role(sim_run_id, role_id)
     if not role or role["status"] != "active":
         return {"success": False, "narrative": f"Role {role_id} not active"}
 
@@ -182,7 +189,7 @@ def cast_vote(
     client = get_client()
 
     # Validate voter
-    voter = get_run_role(sim_run_id, voter_role_id)
+    voter = _get_role(sim_run_id, voter_role_id)
     if not voter or voter["status"] != "active":
         return {"success": False, "narrative": f"Voter {voter_role_id} not active"}
 
