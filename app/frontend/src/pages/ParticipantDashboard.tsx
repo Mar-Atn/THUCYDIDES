@@ -356,15 +356,7 @@ export function ParticipantDashboard() {
       </div></div>}
 
       {/* Arrested banner — blocks all actions */}
-      {myRole?.status === 'arrested' && (
-        <div className="bg-danger/10 border-b border-danger/30 px-6 py-3">
-          <div className="max-w-7xl mx-auto">
-            <p className="font-body text-body-sm text-danger font-medium">
-              You have been arrested. All actions are suspended until the end of this round.
-            </p>
-          </div>
-        </div>
-      )}
+      {myRole?.status === 'arrested' && <ArrestedBanner simId={simId!} roleId={myRole.id} round={round} />}
 
       {/* Nuclear Flight Banner — shown to ALL participants during Phase 3 */}
       {(() => {
@@ -3096,6 +3088,50 @@ const UNIT_ICON_PATHS: Record<string,string> = {
   naval: 'M2 16 L4 12 L8 12 L8 10 L10 10 L10 8 L12 8 L12 6 L13 6 L13 8 L14 8 L14 10 L16 10 L16 12 L22 12 L22 14 L21 16 Z',
   strategic_missile: 'M12 1 L14.5 6 L14 6 L14 18 L16 18 L16 22 L8 22 L8 18 L10 18 L10 6 L9.5 6 Z',
   air_defense: 'M4 10 C4 5 8 2 12 2 C16 2 20 5 20 10 L18 10 C18 6 15.5 3.5 12 3.5 C8.5 3.5 6 6 6 10 Z M11 9 L13 9 L13 20 L11 20 Z M7 20 L17 20 L17 22 L7 22 Z',
+}
+
+function ArrestedBanner({simId, roleId, round}:{simId:string; roleId:string; round:number}) {
+  const [info, setInfo] = useState<{by:string;reason:string}|null>(null)
+  useEffect(() => {
+    supabase.from('run_roles').select('status_changed_by,status_change_reason')
+      .eq('sim_run_id', simId).eq('role_id', roleId).eq('status', 'arrested').limit(1)
+      .then(({ data }) => {
+        if (data?.[0]) {
+          const byId = data[0].status_changed_by || 'Unknown'
+          const reason = data[0].status_change_reason || ''
+          // Resolve the arrester's character name
+          supabase.from('roles').select('character_name').eq('sim_run_id', simId).eq('id', byId).limit(1)
+            .then(({ data: rd }) => {
+              setInfo({ by: rd?.[0]?.character_name || byId, reason })
+            })
+        }
+      })
+  }, [simId, roleId])
+
+  const RD: Record<number,string> = {0:'Pre-Sim',1:'H2 2026',2:'H1 2027',3:'H2 2027',4:'H1 2028',5:'H2 2028',6:'H1 2029'}
+
+  return (
+    <div className="bg-danger/10 border-b-2 border-danger/40 px-6 py-4">
+      <div className="max-w-7xl mx-auto space-y-1">
+        <p className="font-heading text-h3 text-danger">You Are Arrested</p>
+        <p className="font-body text-body-sm text-text-primary">
+          Detained until the end of <strong>{RD[round] || `Round ${round}`}</strong>. All actions are suspended.
+        </p>
+        {info && (
+          <>
+            <p className="font-body text-caption text-text-secondary">
+              By order of: <strong className="text-text-primary">{info.by}</strong>
+            </p>
+            {info.reason && (
+              <p className="font-body text-caption text-text-secondary">
+                Charges: <em className="text-text-primary">{info.reason}</em>
+              </p>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
 
 function UnitIcon({type, size=28, className=''}:{type:string;size?:number;className?:string}) {

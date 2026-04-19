@@ -1418,7 +1418,10 @@ function ParticipantPanel({
                         {role.character_name}
                       </span>
                       <span className="w-24 shrink-0">
-                        <PositionBadges role={role} />
+                        {role.status === 'arrested'
+                          ? <span className="font-body text-caption font-medium px-1.5 py-0.5 rounded bg-danger/15 text-danger">Arrested</span>
+                          : <PositionBadges role={role} />
+                        }
                       </span>
 
                       {/* AI/Human toggle */}
