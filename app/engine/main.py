@@ -1391,7 +1391,7 @@ async def submit_action(
         "accept_transaction", "sign_agreement",
         "cast_vote", "cast_election_vote", "accept_meeting",
         "release_arrest",
-        "withdraw_nomination", "resolve_election",
+        "self_nominate", "withdraw_nomination", "resolve_election",
     }
     PAUSED_ALLOWED = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):
