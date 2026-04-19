@@ -40,7 +40,7 @@ def initiate_change_leader(
     # Load country roles
     roles = (
         client.table("roles")
-        .select("id, character_name, position_type, country_id, status")
+        .select("id, character_name, position_type, is_head_of_state, country_id, status")
         .eq("sim_run_id", sim_run_id)
         .eq("country_id", country_code)
         .eq("status", "active")
@@ -50,8 +50,10 @@ def initiate_change_leader(
     if len(roles) < 3:
         return {"success": False, "narrative": f"Country {country_code} has only {len(roles)} active roles (need 3+)"}
 
-    # Find current HoS
-    hos = [r for r in roles if r["position_type"] == "head_of_state"]
+    # Find current HoS (check is_head_of_state flag first, fall back to position_type)
+    hos = [r for r in roles if r.get("is_head_of_state")]
+    if not hos:
+        hos = [r for r in roles if r["position_type"] == "head_of_state"]
     if not hos:
         return {"success": False, "narrative": f"Country {country_code} has no Head of State"}
     hos_role = hos[0]
@@ -60,7 +62,7 @@ def initiate_change_leader(
     initiator = [r for r in roles if r["id"] == role_id]
     if not initiator:
         return {"success": False, "narrative": f"Role {role_id} not found in {country_code}"}
-    if initiator[0]["position_type"] == "head_of_state":
+    if initiator[0].get("is_head_of_state") or initiator[0]["position_type"] == "head_of_state":
         return {"success": False, "narrative": "Head of State cannot initiate their own removal"}
 
     # Check stability threshold
@@ -271,9 +273,9 @@ def _resolve_removal(client, sim_run_id, scenario_id, record, votes, required, c
     passed = yes_count >= required
 
     if passed:
-        # Remove HoS — change position_type to 'other'
+        # Remove HoS — clear is_head_of_state flag (keep original position_type)
         client.table("roles").update({
-            "position_type": "other",
+            "is_head_of_state": False,
         }).eq("sim_run_id", sim_run_id).eq("id", target_role).execute()
 
         # Get target name for event
@@ -368,10 +370,15 @@ def _resolve_election(client, sim_run_id, scenario_id, record, votes, required, 
             break
 
     if winner:
-        # Set new HoS
+        old_hos = record.get("target_role", "")
+
+        # Set new HoS flag (keep original position_type)
         client.table("roles").update({
-            "position_type": "head_of_state",
+            "is_head_of_state": True,
         }).eq("sim_run_id", sim_run_id).eq("id", winner).execute()
+
+        # Migrate HoS-exclusive actions: copy from old HoS to new, remove from old
+        _migrate_hos_actions(client, sim_run_id, old_hos, winner)
 
         winner_data = client.table("roles").select("character_name").eq("id", winner).eq("sim_run_id", sim_run_id).execute()
         winner_name = winner_data.data[0]["character_name"] if winner_data.data else winner
@@ -416,3 +423,62 @@ def _resolve_election(client, sim_run_id, scenario_id, record, votes, required, 
             "outcome": "leaderless",
             "tallies": tallies,
         }
+
+
+def _migrate_hos_actions(client, sim_run_id: str, old_hos_id: str, new_hos_id: str) -> None:
+    """Migrate HoS-exclusive actions from old leader to new leader.
+
+    Compares old HoS's actions against all other country roles to find
+    HoS-exclusive ones. Copies those to new HoS, removes from old HoS.
+    The new HoS keeps their original actions too.
+    """
+    if not old_hos_id or not new_hos_id or old_hos_id == new_hos_id:
+        return
+
+    # Get old HoS's country
+    old_role = client.table("roles").select("country_id").eq("id", old_hos_id).eq("sim_run_id", sim_run_id).limit(1).execute().data
+    if not old_role:
+        return
+    country_id = old_role[0]["country_id"]
+
+    # Get all role_actions for this country
+    country_roles = client.table("roles").select("id").eq("sim_run_id", sim_run_id).eq("country_id", country_id).eq("status", "active").execute().data or []
+    non_hos_ids = [r["id"] for r in country_roles if r["id"] != old_hos_id]
+
+    old_actions = set(
+        a["action_id"] for a in
+        client.table("role_actions").select("action_id").eq("sim_run_id", sim_run_id).eq("role_id", old_hos_id).execute().data or []
+    )
+
+    # Find actions that NO other role in the country has → HoS-exclusive
+    other_actions = set()
+    for rid in non_hos_ids:
+        acts = client.table("role_actions").select("action_id").eq("sim_run_id", sim_run_id).eq("role_id", rid).execute().data or []
+        other_actions.update(a["action_id"] for a in acts)
+
+    hos_exclusive = old_actions - other_actions
+
+    if not hos_exclusive:
+        logger.info("[change_leader] No HoS-exclusive actions to migrate from %s to %s", old_hos_id, new_hos_id)
+        return
+
+    # Get new HoS's current actions to avoid duplicates
+    new_actions = set(
+        a["action_id"] for a in
+        client.table("role_actions").select("action_id").eq("sim_run_id", sim_run_id).eq("role_id", new_hos_id).execute().data or []
+    )
+
+    # Add HoS-exclusive actions to new HoS
+    to_add = hos_exclusive - new_actions
+    if to_add:
+        client.table("role_actions").insert([
+            {"sim_run_id": sim_run_id, "role_id": new_hos_id, "action_id": aid}
+            for aid in to_add
+        ]).execute()
+
+    # Remove HoS-exclusive actions from old HoS
+    for aid in hos_exclusive:
+        client.table("role_actions").delete().eq("sim_run_id", sim_run_id).eq("role_id", old_hos_id).eq("action_id", aid).execute()
+
+    logger.info("[change_leader] Migrated %d HoS-exclusive actions from %s to %s: %s",
+                len(hos_exclusive), old_hos_id, new_hos_id, sorted(hos_exclusive))
