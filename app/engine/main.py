@@ -1307,7 +1307,7 @@ async def trigger_ai(sim_id: str, user: AuthUser = Depends(require_moderator)):
 # Action type → category mapping (matches role_actions.action_id values in DB)
 # Actions requiring moderator confirmation before execution
 ACTIONS_REQUIRING_CONFIRMATION = {
-    "assassination", "arrest", "change_leader",
+    "assassination", "arrest",
 }
 
 # Combat actions that use dice (queue when dice_mode is on)
@@ -1751,14 +1751,24 @@ async def get_leadership_votes(sim_id: str, user: AuthUser = Depends(get_current
 @app.post("/api/sim/{sim_id}/leadership-votes/{vote_id}/cast", response_model=APIResponse)
 async def cast_leadership_vote(
     sim_id: str, vote_id: str,
-    role_id: str = "", vote: str = "",
+    request: Request,
     user: AuthUser = Depends(get_current_user),
 ):
     """Cast a vote in an active leadership change."""
     from engine.services.change_leader import cast_leader_vote
+    body = await request.json()
+    role_id = body.get("role_id", "")
+    vote = body.get("vote", "")
     if not role_id or not vote:
         raise HTTPException(status_code=400, detail="role_id and vote are required")
     result = cast_leader_vote(sim_id, vote_id, role_id, vote)
+    # Auto-resolve if majority achieved
+    if result.get("success"):
+        from engine.services.change_leader import _check_auto_resolve
+        auto = _check_auto_resolve(sim_id, vote_id)
+        if auto:
+            result["auto_resolved"] = True
+            result["resolution"] = auto
     return APIResponse(data=result)
 
 

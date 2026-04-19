@@ -248,6 +248,16 @@ export function FacilitatorDashboard() {
     return () => clearInterval(iv)
   }, [flightAction])
 
+  // Leadership votes — moderator sees live tally
+  const { data: leadershipVotes } = useRealtimeTable<Record<string, unknown>>(
+    'leadership_votes', simId ?? undefined,
+    { columns: '*' },
+  )
+  const activeLeaderVotes = leadershipVotes.filter(v => v.status === 'voting') as {
+    id:string; phase:string; country_code:string; votes:Record<string,string>;
+    required_majority:number; expires_at:string|null; target_role:string;
+  }[]
+
   // Auto-resolve nuclear launch when flight countdown reaches 0
   const nuclearResolving = useRef(false)
   useEffect(() => {
@@ -727,6 +737,51 @@ export function FacilitatorDashboard() {
                       }}
                       onReject={() => doAction(`pending/${pa.id}/reject`)} />
                   ))}
+                  {/* Leadership change votes — moderator sees live tally */}
+                  {activeLeaderVotes.map(lv => {
+                    const votes = lv.votes || {}
+                    const voteCount = Object.keys(votes).length
+                    const isRemoval = lv.phase === 'removal'
+                    // For removal: count yes/no
+                    const yesCount = isRemoval ? Object.values(votes).filter(v => v === 'yes').length : 0
+                    const noCount = isRemoval ? Object.values(votes).filter(v => v === 'no').length : 0
+                    // For election: tally per candidate
+                    const tallies: Record<string, number> = {}
+                    if (!isRemoval) {
+                      Object.values(votes).forEach(c => { tallies[c] = (tallies[c] || 0) + 1 })
+                    }
+                    return (
+                      <div key={lv.id} className="bg-warning/10 border border-warning/30 rounded-lg p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-data text-caption font-bold text-warning uppercase">
+                            {isRemoval ? '⚠ Leadership Removal Vote' : '🗳 Election Vote'} — {lv.country_code.toUpperCase()}
+                          </span>
+                          <span className="font-data text-caption text-text-secondary">
+                            Need {lv.required_majority}
+                          </span>
+                        </div>
+                        <div className="font-data text-caption text-text-primary mt-1">
+                          {isRemoval ? (
+                            <span>{voteCount} voted — <span className="text-warning font-bold">{yesCount} YES</span> / <span className="text-success">{noCount} NO</span></span>
+                          ) : (
+                            <div className="space-y-0.5">
+                              {Object.entries(tallies).sort((a,b) => b[1]-a[1]).map(([cand, cnt]) => (
+                                <div key={cand}><span className="text-action">{cand}</span>: {cnt} vote{cnt!==1?'s':''}</div>
+                              ))}
+                              {voteCount === 0 && <span className="text-text-secondary">No votes yet</span>}
+                            </div>
+                          )}
+                        </div>
+                        <button onClick={() => {
+                            if (!confirm(`Resolve this ${isRemoval ? 'removal' : 'election'} vote now?`)) return
+                            simAction(simId!, `leadership-votes/${lv.id}/resolve`)
+                          }}
+                          className="mt-2 font-body text-caption font-medium bg-warning/20 text-warning px-3 py-1 rounded hover:bg-warning/30 transition-colors">
+                          Resolve Now
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </DashboardSection>

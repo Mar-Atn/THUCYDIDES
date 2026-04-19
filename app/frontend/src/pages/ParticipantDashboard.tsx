@@ -587,6 +587,56 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
+  // Leadership votes — realtime subscription for change_leader voting
+  const { data: leadershipVotesRaw } = useRealtimeTable<Record<string, unknown>>(
+    'leadership_votes', simId,
+    { eq: { country_code: countryId }, columns: '*' },
+  )
+  const activeVote = leadershipVotesRaw.find(v => v.status === 'voting') as {
+    id:string; phase:string; status:string; country_code:string; initiated_by:string;
+    target_role:string; votes:Record<string,string>; required_majority:number;
+    expires_at:string|null;
+  } | undefined
+  const hasVotedInActiveVote = activeVote ? !!(activeVote.votes && activeVote.votes[roleId]) : false
+
+  // Leadership vote countdown
+  const [leaderVoteCountdown, setLeaderVoteCountdown] = useState<number|null>(null)
+  useEffect(() => {
+    if (!activeVote?.expires_at) { setLeaderVoteCountdown(null); return }
+    const tick = () => {
+      const rem = Math.max(0, (new Date(activeVote.expires_at!).getTime() - Date.now()) / 1000)
+      setLeaderVoteCountdown(rem)
+    }
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [activeVote?.id, activeVote?.expires_at])
+
+  // Leadership vote state
+  const [votingOnLeader, setVotingOnLeader] = useState<string|null>(null)
+  const [leaderVoteSubmitting, setLeaderVoteSubmitting] = useState(false)
+  const [selectedCandidate, setSelectedCandidate] = useState<string>('')
+  const [countryRoles, setCountryRoles] = useState<{id:string;character_name:string;position_type:string}[]>([])
+  useEffect(() => {
+    supabase.from('roles').select('id,character_name,position_type')
+      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      .then(({ data }) => { if (data) setCountryRoles(data) })
+  }, [simId, countryId, dataVersion])
+
+  const handleLeaderVote = async (voteId: string, vote: string) => {
+    setLeaderVoteSubmitting(true)
+    try {
+      const token = await getToken()
+      await fetch(`/api/sim/${simId}/leadership-votes/${voteId}/cast`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ role_id: roleId, vote }),
+      })
+      setVotingOnLeader(null)
+    } catch (e) { console.error(e) }
+    finally { setLeaderVoteSubmitting(false) }
+  }
+
   // Nuclear authorization/interception — passed from parent (no duplicate subscription)
   const nuclearActions = (nuclearActionsData ?? []) as unknown as {
     id:string; action_type:string; country_code:string; status:string;
@@ -664,6 +714,103 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       setInterceptingId(null)
     } catch (e) { alert(e instanceof Error ? e.message : 'Failed') }
     finally { setInterceptSubmitting(false) }
+  }
+
+  // Leadership vote detail panel
+  if (votingOnLeader && activeVote) {
+    const hosRole = countryRoles.find(r => r.id === activeVote.target_role)
+    const hosName = hosRole?.character_name ?? activeVote.target_role
+    const votesObj = activeVote.votes || {}
+    const votesCast = Object.keys(votesObj).length
+    const mm = leaderVoteCountdown !== null ? String(Math.floor(leaderVoteCountdown / 60)).padStart(2, '0') : '--'
+    const ss = leaderVoteCountdown !== null ? String(Math.floor(leaderVoteCountdown % 60)).padStart(2, '0') : '--'
+
+    if (activeVote.phase === 'removal') {
+      return (
+        <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'2px solid rgba(245,158,11,0.4)'}}>
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
+            <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#F59E0B',
+              textTransform:'uppercase',letterSpacing:'0.1em'}}>⚠ Remove Head of State</h2>
+            <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#F59E0B'}}>{mm}:{ss}</span>
+          </div>
+          <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',marginBottom:'1.5rem'}}>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Vote to remove</div>
+            <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#F59E0B'}}>{hosName}</div>
+            <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',marginTop:'0.5rem'}}>
+              {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} YES to remove
+            </div>
+          </div>
+          <div style={{display:'flex',gap:'1rem'}}>
+            <button onClick={() => handleLeaderVote(activeVote.id, 'yes')} disabled={leaderVoteSubmitting}
+              style={{flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+                backgroundColor:'rgba(245,158,11,0.2)',border:'2px solid #F59E0B',
+                color:'#F59E0B',fontFamily:'JetBrains Mono, monospace',
+                fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+                opacity:leaderVoteSubmitting?0.5:1}}>YES — REMOVE</button>
+            <button onClick={() => handleLeaderVote(activeVote.id, 'no')} disabled={leaderVoteSubmitting}
+              style={{flex:1,padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+                backgroundColor:'rgba(0,255,65,0.1)',border:'2px solid #00FF41',
+                color:'#00FF41',fontFamily:'JetBrains Mono, monospace',
+                fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+                opacity:leaderVoteSubmitting?0.5:1}}>NO — KEEP</button>
+          </div>
+          <button onClick={() => setVotingOnLeader(null)} style={{
+            marginTop:'1rem',fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
+            cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
+            padding:'0.25rem 0.5rem',backgroundColor:'transparent',
+          }}>{'\u2190'} Back</button>
+        </div>
+      )
+    }
+
+    // Election phase
+    return (
+      <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'2px solid rgba(59,130,246,0.4)'}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
+          <h2 style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#3B82F6',
+            textTransform:'uppercase',letterSpacing:'0.1em'}}>🗳 Elect New Head of State</h2>
+          <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1.1rem',color:'#3B82F6'}}>{mm}:{ss}</span>
+        </div>
+        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)',marginBottom:'1rem'}}>
+          <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF'}}>
+            {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} for majority
+          </div>
+        </div>
+        <div style={{display:'flex',flexDirection:'column',gap:'0.5rem',marginBottom:'1.5rem'}}>
+          {countryRoles.map(r => (
+            <label key={r.id} style={{
+              display:'flex',alignItems:'center',gap:'0.75rem',padding:'0.5rem 0.75rem',
+              borderRadius:'0.25rem',cursor:'pointer',
+              border: selectedCandidate === r.id ? '2px solid #3B82F6' : '1px solid rgba(255,255,255,0.1)',
+              backgroundColor: selectedCandidate === r.id ? 'rgba(59,130,246,0.1)' : 'transparent',
+            }}>
+              <input type="radio" name="candidate" value={r.id} checked={selectedCandidate === r.id}
+                onChange={() => setSelectedCandidate(r.id)} style={{accentColor:'#3B82F6'}}/>
+              <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#D1D5DB'}}>
+                {r.character_name}
+              </span>
+              <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.65rem',color:'#6B7280',marginLeft:'auto'}}>
+                {r.position_type?.replace('_',' ')}
+              </span>
+            </label>
+          ))}
+        </div>
+        <button onClick={() => { if (selectedCandidate) handleLeaderVote(activeVote.id, selectedCandidate) }}
+          disabled={!selectedCandidate || leaderVoteSubmitting}
+          style={{width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
+            backgroundColor: selectedCandidate ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.05)',
+            border:'2px solid #3B82F6', color:'#3B82F6',fontFamily:'JetBrains Mono, monospace',
+            fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+            opacity:(!selectedCandidate||leaderVoteSubmitting)?0.5:1}}>
+          CAST VOTE
+        </button>
+        <button onClick={() => setVotingOnLeader(null)} style={{
+          marginTop:'0.75rem',fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',
+          cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',
+          padding:'0.25rem 0.5rem',backgroundColor:'transparent',
+        }}>{'\u2190'} Back</button>
+      </div>
+    )
   }
 
   // Authorization detail panel
@@ -806,8 +953,9 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   }
 
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
+  const showLeaderVote = activeVote && !hasVotedInActiveVote ? 1 : 0
   const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
-    + pendingAuthorizations.length + visibleInterceptions.length
+    + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote
   const hasExpected = expectedCount > 0
 
   return (
@@ -855,6 +1003,19 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 </span>
               </button>
             ))}
+            {activeVote && !hasVotedInActiveVote && (
+              <button onClick={() => setVotingOnLeader(activeVote.id)}
+                className="text-left rounded-lg px-4 py-3 transition-colors"
+                style={{backgroundColor:'rgba(245,158,11,0.1)',border:'2px solid rgba(245,158,11,0.5)',cursor:'pointer'}}>
+                <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#F59E0B',fontWeight:700,display:'block'}}>
+                  {activeVote.phase === 'removal' ? '⚠ VOTE: Remove Head of State' : '🗳 VOTE: Elect New Leader'}
+                </span>
+                <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#D1D5DB',display:'block',marginTop:'0.25rem'}}>
+                  {leaderVoteCountdown !== null && `${Math.floor(leaderVoteCountdown/60)}:${String(Math.floor(leaderVoteCountdown%60)).padStart(2,'0')} remaining — `}
+                  click to vote
+                </span>
+              </button>
+            )}
             {pendingTxns.map(txn=>
               <button key={txn.id} onClick={()=>setReviewTxn(txn.id)}
                 className="text-left bg-card hover:bg-action/5 border border-warning/30 hover:border-action/30 rounded-lg px-4 py-3 transition-colors">
@@ -1256,6 +1417,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'martial_law') return <MartialLawForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'nuclear_test') return <NuclearTestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'nuclear_launch_initiate') return <NuclearLaunchForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'change_leader') return <ChangeLeaderForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -3588,6 +3750,91 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [stability, setStability] = useState(10)
+  const [hosName, setHosName] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [success, setSuccess] = useState<string|null>(null)
+  const threshold = 4.0
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('countries').select('stability').eq('sim_run_id',simId).eq('id',countryId).limit(1),
+      supabase.from('roles').select('character_name').eq('sim_run_id',simId).eq('country_id',countryId).eq('position_type','head_of_state').eq('status','active').limit(1),
+    ]).then(([cs, rs]) => {
+      setStability(cs.data?.[0]?.stability ?? 10)
+      setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
+      setLoading(false)
+    })
+  }, [simId, countryId])
+
+  const canInitiate = stability <= threshold
+
+  const handleInitiate = async () => {
+    if (!canInitiate) return
+    if (!confirm(`Initiate removal of ${hosName} as Head of State?\n\nAll citizens will vote. This cannot be undone.`)) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'change_leader', roleId, countryId, {})
+      if (!res.success) { setError(res.narrative || 'Failed'); setSubmitting(false); return }
+      setSuccess(res.narrative || 'Vote initiated')
+      onSubmitted()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
+
+  return (
+    <div style={{backgroundColor:'#0A0E1A',borderRadius:'0.5rem',padding:'1.5rem',border:'1px solid rgba(245,158,11,0.3)'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'1rem'}}>
+        <h2 style={{fontFamily:'Playfair Display, serif',fontSize:'1.2rem',color:'#F59E0B'}}>Change Leader</h2>
+        <button onClick={onClose} style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',cursor:'pointer',border:'1px solid rgba(255,255,255,0.15)',borderRadius:'0.25rem',padding:'0.25rem 0.5rem',backgroundColor:'transparent'}}>✕ Close</button>
+      </div>
+
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'1rem',marginBottom:'1.5rem'}}>
+        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:'1px solid rgba(255,255,255,0.1)'}}>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Current HoS</div>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color:'#F59E0B'}}>{hosName}</div>
+        </div>
+        <div style={{padding:'0.75rem',borderRadius:'0.25rem',border:`1px solid ${canInitiate ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.1)'}`}}>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Stability</div>
+          <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'1rem',color: canInitiate ? '#F59E0B' : '#9CA3AF'}}>
+            {stability.toFixed(1)} / {threshold.toFixed(1)}
+          </div>
+          <div style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.65rem',color: canInitiate ? '#F59E0B' : '#6B7280',marginTop:'0.25rem'}}>
+            {canInitiate ? 'Below threshold — change allowed' : `Must be ≤ ${threshold} to initiate`}
+          </div>
+        </div>
+      </div>
+
+      {success ? (
+        <div style={{padding:'1rem',borderRadius:'0.25rem',backgroundColor:'rgba(245,158,11,0.1)',border:'1px solid rgba(245,158,11,0.3)'}}>
+          <p style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#F59E0B'}}>{success}</p>
+          <p style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#9CA3AF',marginTop:'0.5rem'}}>
+            Vote is now open in Actions Expected Now for all citizens.
+          </p>
+        </div>
+      ) : (
+        <button onClick={handleInitiate} disabled={!canInitiate || submitting}
+          style={{width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor: canInitiate ? 'pointer' : 'not-allowed',
+            backgroundColor: canInitiate ? 'rgba(245,158,11,0.2)' : 'rgba(100,100,100,0.1)',
+            border: `2px solid ${canInitiate ? '#F59E0B' : '#4B5563'}`,
+            color: canInitiate ? '#F59E0B' : '#6B7280',fontFamily:'JetBrains Mono, monospace',
+            fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
+            opacity: submitting ? 0.5 : 1}}>
+          {canInitiate ? 'INITIATE LEADERSHIP CHANGE' : `STABILITY TOO HIGH (${stability.toFixed(1)} > ${threshold})`}
+        </button>
+      )}
+      {error && <p style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#FF3C14',marginTop:'0.5rem'}}>{error}</p>}
+    </div>
+  )
 }
 
 function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{

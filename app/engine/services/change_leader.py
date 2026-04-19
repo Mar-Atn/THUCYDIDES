@@ -192,6 +192,43 @@ def cast_leader_vote(
     }
 
 
+def _check_auto_resolve(sim_run_id: str, vote_id: str) -> dict | None:
+    """Check if a vote can be auto-resolved (majority already achieved).
+
+    Returns resolution result if auto-resolved, None otherwise.
+    """
+    client = get_client()
+    record = (
+        client.table("leadership_votes")
+        .select("*")
+        .eq("id", vote_id)
+        .eq("sim_run_id", sim_run_id)
+        .execute()
+    ).data
+    if not record or record[0]["status"] != "voting":
+        return None
+    record = record[0]
+
+    votes = record.get("votes", {})
+    required = record.get("required_majority", 2)
+    phase = record.get("phase", "removal")
+
+    if phase == "removal":
+        target_role = record.get("target_role", "")
+        yes_count = sum(1 for rid, v in votes.items() if v == "yes" and rid != target_role)
+        if yes_count >= required:
+            return resolve_leader_vote(sim_run_id, vote_id)
+    elif phase == "election":
+        tallies: dict[str, int] = {}
+        for rid, candidate in votes.items():
+            tallies[candidate] = tallies.get(candidate, 0) + 1
+        for candidate, count in tallies.items():
+            if count >= required:
+                return resolve_leader_vote(sim_run_id, vote_id)
+
+    return None
+
+
 def resolve_leader_vote(sim_run_id: str, vote_id: str) -> dict:
     """Resolve a leadership change vote (moderator triggers this).
 
