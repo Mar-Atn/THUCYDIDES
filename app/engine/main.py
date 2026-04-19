@@ -1391,6 +1391,7 @@ async def submit_action(
         "accept_transaction", "sign_agreement",
         "cast_vote", "cast_election_vote", "accept_meeting",
         "release_arrest",
+        "withdraw_nomination", "resolve_election",
     }
     PAUSED_ALLOWED = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):
@@ -1403,18 +1404,25 @@ async def submit_action(
     current_phase = run.get("current_phase", "")
 
     # 2. Validate role exists in this sim
+    # Moderator actions (resolve_election) use role_id='moderator' — skip role validation
+    MODERATOR_ACTIONS = {"resolve_election"}
     client = get_client()
-    role_check = (
-        client.table("roles")
-        .select("id, character_name, country_id, positions, position_type")
-        .eq("sim_run_id", sim_id)
-        .eq("id", body.role_id)
-        .execute()
-    )
-    if not role_check.data:
-        raise HTTPException(status_code=400, detail=f"Role '{body.role_id}' not found in sim")
 
-    role = role_check.data[0]
+    if body.role_id == "moderator" and body.action_type in MODERATOR_ACTIONS:
+        role = {"id": "moderator", "character_name": "Moderator", "country_id": body.country_code,
+                "positions": [], "position_type": "moderator"}
+    else:
+        role_check = (
+            client.table("roles")
+            .select("id, character_name, country_id, positions, position_type")
+            .eq("sim_run_id", sim_id)
+            .eq("id", body.role_id)
+            .execute()
+        )
+        if not role_check.data:
+            raise HTTPException(status_code=400, detail=f"Role '{body.role_id}' not found in sim")
+
+        role = role_check.data[0]
 
     # 3. Validate role has this action type (check role_actions table)
     # Reactive actions bypass role_actions — their authorization is handled

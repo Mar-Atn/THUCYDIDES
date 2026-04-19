@@ -433,10 +433,10 @@ def _apply_presidential_result(
 
     # Recompute role actions for both affected roles
     try:
-        from engine.services.power_assignments import recompute_role_actions
+        from engine.services.position_helpers import recompute_role_actions
         if old_hos_id:
-            recompute_role_actions(sim_run_id, old_hos_id)
-        recompute_role_actions(sim_run_id, winner)
+            recompute_role_actions(client, sim_run_id, old_hos_id)
+        recompute_role_actions(client, sim_run_id, winner)
     except Exception as e:
         logger.warning("[election] Failed to recompute role actions: %s", e)
 
