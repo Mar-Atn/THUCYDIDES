@@ -719,72 +719,100 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
     if (activeVote.phase === 'removal') {
       return (
-        <div className="bg-card border border-warning/30 rounded-lg p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-h3 text-warning uppercase tracking-wider">Remove Head of State</h2>
-            <span className="font-data text-data-lg text-warning">{mm}:{ss}</span>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-h2 text-text-primary">Remove Head of State</h2>
+            <button onClick={() => setVotingOnLeader(null)}
+              className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+              ← Back
+            </button>
           </div>
-          <div className="border border-border rounded p-3 mb-4">
-            <div className="font-data text-caption text-text-secondary uppercase">Vote to remove</div>
-            <div className="font-data text-data text-warning">{hosName}</div>
-            <div className="font-body text-caption text-text-secondary mt-1">
-              {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} YES to remove
+
+          <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+            <p className="font-body text-body-sm text-text-primary">
+              Vote to remove <strong className="text-danger">{hosName}</strong> as Head of State.
+              Need <strong>{activeVote.required_majority}</strong> YES votes from non-HoS citizens.
+            </p>
+            <p className="font-body text-caption text-text-secondary mt-1">
+              {votesCast} vote{votesCast !== 1 ? 's' : ''} cast
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-center">
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-text-primary">{mm}:{ss}</div>
+              <div className="font-body text-caption text-text-secondary">Time remaining</div>
+            </div>
+            <div className="bg-base rounded-lg p-3">
+              <div className="font-data text-data-lg text-danger">{activeVote.required_majority}</div>
+              <div className="font-body text-caption text-text-secondary">YES votes needed</div>
             </div>
           </div>
+
           <div className="flex gap-3">
             <button onClick={() => handleLeaderVote(activeVote.id, 'yes')} disabled={leaderVoteSubmitting}
-              className={`flex-1 py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-warning bg-warning/10 text-warning hover:bg-warning/20 transition-colors ${leaderVoteSubmitting?'opacity-50':''}`}>
-              YES — REMOVE
+              className="flex-1 bg-danger/10 text-danger font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-danger/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              Yes — Remove
             </button>
             <button onClick={() => handleLeaderVote(activeVote.id, 'no')} disabled={leaderVoteSubmitting}
-              className={`flex-1 py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-success bg-success/10 text-success hover:bg-success/20 transition-colors ${leaderVoteSubmitting?'opacity-50':''}`}>
-              NO — KEEP
+              className="flex-1 bg-success/10 text-success font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+              No — Keep
             </button>
           </div>
-          <button onClick={() => setVotingOnLeader(null)}
-            className="mt-3 font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">
-            ← Back
-          </button>
         </div>
       )
     }
 
     // Election phase
     return (
-      <div className="bg-card border border-action/30 rounded-lg p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-h3 text-action uppercase tracking-wider">Elect New Head of State</h2>
-          <span className="font-data text-data-lg text-action">{mm}:{ss}</span>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h2 text-text-primary">Elect New Head of State</h2>
+          <button onClick={() => setVotingOnLeader(null)}
+            className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+            ← Back
+          </button>
         </div>
-        <div className="border border-border rounded p-3 mb-3">
-          <div className="font-body text-caption text-text-secondary">
-            {votesCast} vote{votesCast !== 1 ? 's' : ''} cast — need {activeVote.required_majority} for majority
+
+        <div className="bg-action/5 border border-action/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-text-primary">
+            Select a candidate. Need <strong className="text-action">{activeVote.required_majority}</strong> votes for majority.
+          </p>
+          <p className="font-body text-caption text-text-secondary mt-1">
+            {votesCast} vote{votesCast !== 1 ? 's' : ''} cast
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 text-center">
+          <div className="bg-base rounded-lg p-3">
+            <div className="font-data text-data-lg text-text-primary">{mm}:{ss}</div>
+            <div className="font-body text-caption text-text-secondary">Time remaining</div>
+          </div>
+          <div className="bg-base rounded-lg p-3">
+            <div className="font-data text-data-lg text-action">{activeVote.required_majority}</div>
+            <div className="font-body text-caption text-text-secondary">Votes needed</div>
           </div>
         </div>
-        <div className="flex flex-col gap-2 mb-4">
+
+        <div className="bg-card border border-border rounded-lg divide-y divide-border">
           {countryRoles.map(r => (
-            <label key={r.id} className={`flex items-center gap-3 px-3 py-2 rounded cursor-pointer transition-colors ${
-              selectedCandidate === r.id ? 'border-2 border-action bg-action/10' : 'border border-border hover:bg-card'
+            <label key={r.id} className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+              selectedCandidate === r.id ? 'bg-action/5' : 'hover:bg-base'
             }`}>
               <input type="radio" name="candidate" value={r.id} checked={selectedCandidate === r.id}
                 onChange={() => setSelectedCandidate(r.id)} className="accent-action"/>
-              <span className="font-data text-body-sm text-text-primary">{r.character_name}</span>
-              <span className="font-body text-caption text-text-secondary ml-auto capitalize">
-                {r.position_type?.replace('_',' ')}
+              <span className="font-body text-body-sm text-text-primary flex-1">{r.character_name}</span>
+              <span className="font-body text-caption text-text-secondary capitalize">
+                {r.position_type?.replace(/_/g,' ')}
               </span>
             </label>
           ))}
         </div>
+
         <button onClick={() => { if (selectedCandidate) handleLeaderVote(activeVote.id, selectedCandidate) }}
           disabled={!selectedCandidate || leaderVoteSubmitting}
-          className={`w-full py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 border-action text-action transition-colors ${
-            selectedCandidate ? 'bg-action/10 hover:bg-action/20' : 'bg-action/5 opacity-50'
-          } ${leaderVoteSubmitting ? 'opacity-50' : ''}`}>
-          CAST VOTE
-        </button>
-        <button onClick={() => setVotingOnLeader(null)}
-          className="mt-3 font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">
-          ← Back
+          className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+          {leaderVoteSubmitting ? 'Submitting...' : 'Cast Vote'}
         </button>
       </div>
     )
@@ -982,14 +1010,13 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
             ))}
             {activeVote && !hasVotedInActiveVote && (
               <button onClick={() => setVotingOnLeader(activeVote.id)}
-                className="text-left rounded-lg px-4 py-3 transition-colors"
-                style={{backgroundColor:'rgba(245,158,11,0.1)',border:'2px solid rgba(245,158,11,0.5)',cursor:'pointer'}}>
-                <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#F59E0B',fontWeight:700,display:'block'}}>
-                  {activeVote.phase === 'removal' ? 'VOTE: Remove Head of State' : 'VOTE: Elect New Leader'}
+                className="text-left bg-card hover:bg-action/5 border border-warning/30 hover:border-action/30 rounded-lg px-4 py-3 transition-colors">
+                <span className="font-body text-body-sm text-text-primary font-medium block">
+                  {activeVote.phase === 'removal' ? 'Vote: Remove Head of State' : 'Vote: Elect New Leader'}
                 </span>
-                <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#D1D5DB',display:'block',marginTop:'0.25rem'}}>
+                <span className="font-body text-caption text-text-secondary">
                   {leaderVoteCountdown !== null && `${Math.floor(leaderVoteCountdown/60)}:${String(Math.floor(leaderVoteCountdown%60)).padStart(2,'0')} remaining — `}
-                  click to vote
+                  Click to vote
                 </span>
               </button>
             )}
@@ -3770,46 +3797,57 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
 
   return (
-    <div className="bg-card border border-warning/30 rounded-lg p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="font-heading text-h3 text-warning">Change Leader</h2>
-        <button onClick={onClose} className="font-body text-caption text-text-secondary border border-border rounded px-2 py-1 hover:text-text-primary transition-colors">✕ Close</button>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Change Leader</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="border border-border rounded p-3">
-          <div className="font-data text-caption text-text-secondary uppercase">Current HoS</div>
-          <div className="font-data text-data text-warning">{hosName}</div>
+      <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+        <p className="font-body text-body-sm text-text-primary">
+          Initiate removal of <strong className="text-danger">{hosName}</strong> as Head of State.
+          All citizens will vote. Requires stability ≤ {threshold.toFixed(1)}.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 text-center">
+        <div className="bg-base rounded-lg p-3">
+          <div className={`font-data text-data-lg ${canInitiate ? 'text-danger' : 'text-text-primary'}`}>
+            {stability.toFixed(1)}
+          </div>
+          <div className="font-body text-caption text-text-secondary">Current stability</div>
         </div>
-        <div className={`border rounded p-3 ${canInitiate ? 'border-warning/40' : 'border-border'}`}>
-          <div className="font-data text-caption text-text-secondary uppercase">Stability</div>
-          <div className={`font-data text-data ${canInitiate ? 'text-warning' : 'text-text-secondary'}`}>
-            {stability.toFixed(1)} / {threshold.toFixed(1)}
-          </div>
-          <div className={`font-body text-caption mt-1 ${canInitiate ? 'text-warning' : 'text-text-secondary/60'}`}>
-            {canInitiate ? 'Below threshold — change allowed' : `Must be ≤ ${threshold} to initiate`}
-          </div>
+        <div className="bg-base rounded-lg p-3">
+          <div className="font-data text-data-lg text-text-secondary">{threshold.toFixed(1)}</div>
+          <div className="font-body text-caption text-text-secondary">Threshold</div>
         </div>
       </div>
 
       {success ? (
-        <div className="bg-warning/10 border border-warning/30 rounded p-4">
-          <p className="font-data text-body-sm text-warning">{success}</p>
-          <p className="font-body text-caption text-text-secondary mt-2">
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-success font-medium">{success}</p>
+          <p className="font-body text-caption text-text-secondary mt-1">
             Vote is now open in Actions Expected Now for all citizens.
           </p>
         </div>
       ) : (
         <button onClick={handleInitiate} disabled={!canInitiate || submitting}
-          className={`w-full py-3 rounded-md font-data text-body-sm font-bold uppercase tracking-wider border-2 transition-colors ${
+          className={`w-full font-body text-body-sm font-medium py-2.5 rounded-lg transition-colors ${
             canInitiate
-              ? 'border-warning bg-warning/10 text-warning hover:bg-warning/20 cursor-pointer'
-              : 'border-border bg-card text-text-secondary/50 cursor-not-allowed'
-          } ${submitting ? 'opacity-50' : ''}`}>
-          {canInitiate ? 'INITIATE LEADERSHIP CHANGE' : `STABILITY TOO HIGH (${stability.toFixed(1)} > ${threshold})`}
+              ? 'bg-action text-white hover:bg-action/90 cursor-pointer'
+              : 'bg-base text-text-secondary/50 cursor-not-allowed'
+          } disabled:opacity-50 disabled:cursor-not-allowed`}>
+          {submitting ? 'Initiating...' : canInitiate ? 'Initiate Leadership Change' : `Stability too high (${stability.toFixed(1)} > ${threshold})`}
         </button>
       )}
-      {error && <p className="font-body text-caption text-danger mt-2">{error}</p>}
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
     </div>
   )
 }
