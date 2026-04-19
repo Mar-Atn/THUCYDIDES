@@ -3817,7 +3817,7 @@ function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   useEffect(() => {
     Promise.all([
       supabase.from('countries').select('stability').eq('sim_run_id',simId).eq('id',countryId).limit(1),
-      supabase.from('roles').select('character_name').eq('sim_run_id',simId).eq('country_id',countryId).eq('position_type','head_of_state').eq('status','active').limit(1),
+      supabase.from('roles').select('character_name,positions').eq('sim_run_id',simId).eq('country_id',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
     ]).then(([cs, rs]) => {
       setStability(cs.data?.[0]?.stability ?? 10)
       setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
