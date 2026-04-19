@@ -1469,6 +1469,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'nuclear_test') return <NuclearTestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'nuclear_launch_initiate') return <NuclearLaunchForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'change_leader') return <ChangeLeaderForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'reassign_types') return <ReassignPowersForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -3801,6 +3802,172 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [roles, setRoles] = useState<{id:string;character_name:string;positions:string[];title:string}[]>([])
+  const [selectedPosition, setSelectedPosition] = useState<string>('')
+  const [targetRoleId, setTargetRoleId] = useState<string>('')
+  const [vacate, setVacate] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [success, setSuccess] = useState<string|null>(null)
+
+  const POSITIONS = [
+    { id: 'military', label: 'Military' },
+    { id: 'economy', label: 'Economy' },
+    { id: 'diplomat', label: 'Diplomat' },
+    { id: 'security', label: 'Security' },
+  ]
+
+  useEffect(() => {
+    supabase.from('roles').select('id,character_name,positions,title')
+      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      .then(({ data }) => {
+        if (data) setRoles(data as typeof roles)
+      }).finally(() => setLoading(false))
+  }, [simId, countryId])
+
+  // Who currently holds the selected position?
+  const currentHolder = selectedPosition
+    ? roles.find(r => (r.positions || []).includes(selectedPosition))
+    : null
+
+  // Eligible targets: all roles except the current holder
+  const eligibleTargets = roles.filter(r => r.id !== currentHolder?.id)
+
+  const handleSubmit = async () => {
+    if (!selectedPosition) return
+    const target = vacate ? null : targetRoleId || null
+    if (!vacate && !target) return
+
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'reassign_types', roleId, countryId, {
+        position: selectedPosition,
+        target_role_id: target,
+      })
+      if (!res.success) { setError(res.narrative || 'Failed'); setSubmitting(false); return }
+      setSuccess(res.narrative || 'Position reassigned')
+      setSelectedPosition(''); setTargetRoleId(''); setVacate(false)
+      // Reload roles to show updated positions
+      const { data } = await supabase.from('roles').select('id,character_name,positions,title')
+        .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      if (data) setRoles(data as typeof roles)
+      onSubmitted()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Reassign Powers</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
+      </div>
+
+      {/* Current assignments overview */}
+      <div className="bg-card border border-border rounded-lg divide-y divide-border">
+        {POSITIONS.map(pos => {
+          const holder = roles.find(r => (r.positions || []).includes(pos.id))
+          return (
+            <div key={pos.id} className="flex items-center gap-3 px-4 py-2.5">
+              <span className="font-body text-body-sm text-text-secondary w-20 shrink-0">{pos.label}</span>
+              <span className={`font-body text-body-sm ${holder ? 'text-text-primary font-medium' : 'text-text-secondary/50'}`}>
+                {holder ? holder.character_name : 'Vacant'}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {success && (
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-success font-medium">{success}</p>
+        </div>
+      )}
+
+      {/* Select position to reassign */}
+      <div>
+        <label className="font-body text-caption text-text-secondary block mb-2">Position to reassign</label>
+        <div className="flex flex-wrap gap-2">
+          {POSITIONS.map(pos => (
+            <button key={pos.id} onClick={() => { setSelectedPosition(pos.id); setTargetRoleId(''); setVacate(false); setSuccess(null) }}
+              className={`font-body text-caption px-3 py-1.5 rounded border transition-colors ${
+                selectedPosition === pos.id
+                  ? 'border-action bg-action/10 text-action font-medium'
+                  : 'border-border text-text-secondary hover:border-action/30'
+              }`}>
+              {pos.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {selectedPosition && (
+        <>
+          {currentHolder && (
+            <div className="font-body text-caption text-text-secondary">
+              Currently held by <strong className="text-text-primary">{currentHolder.character_name}</strong>
+            </div>
+          )}
+
+          {/* Assign to or vacate */}
+          <div>
+            <label className="font-body text-caption text-text-secondary block mb-2">
+              {currentHolder ? 'Transfer to' : 'Assign to'}
+            </label>
+            <div className="bg-card border border-border rounded-lg divide-y divide-border">
+              {eligibleTargets.map(r => (
+                <label key={r.id} className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${
+                  !vacate && targetRoleId === r.id ? 'bg-action/5' : 'hover:bg-base'
+                }`}>
+                  <input type="radio" name="target" value={r.id} checked={!vacate && targetRoleId === r.id}
+                    onChange={() => { setTargetRoleId(r.id); setVacate(false) }} className="accent-action"/>
+                  <span className="font-body text-body-sm text-text-primary flex-1">{r.character_name}</span>
+                  <span className="font-body text-caption text-text-secondary">
+                    {(r.positions || []).length > 0 ? (r.positions || []).map(p => POS[p] ?? p).join(' + ') : 'Citizen'}
+                  </span>
+                </label>
+              ))}
+              {currentHolder && (
+                <label className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${
+                  vacate ? 'bg-warning/5' : 'hover:bg-base'
+                }`}>
+                  <input type="radio" name="target" value="" checked={vacate}
+                    onChange={() => { setVacate(true); setTargetRoleId('') }} className="accent-warning"/>
+                  <span className="font-body text-body-sm text-warning">Vacate position</span>
+                  <span className="font-body text-caption text-text-secondary">Remove without assigning</span>
+                </label>
+              )}
+            </div>
+          </div>
+
+          <button onClick={handleSubmit} disabled={(!targetRoleId && !vacate) || submitting}
+            className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            {submitting ? 'Reassigning...'
+              : vacate ? `Vacate ${POSITIONS.find(p=>p.id===selectedPosition)?.label}`
+              : targetRoleId ? `Assign ${POSITIONS.find(p=>p.id===selectedPosition)?.label} to ${roles.find(r=>r.id===targetRoleId)?.character_name}`
+              : 'Select a target'}
+          </button>
+        </>
+      )}
+
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{

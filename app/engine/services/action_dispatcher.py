@@ -184,10 +184,7 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return initiate_change_leader(sim_run_id, round_num, role_id, country_code)
 
     if action_type == "reassign_types":
-        from engine.services.power_assignments import reassign_power
-        return reassign_power(
-            sim_run_id, role_id, country_code,
-            action.get("power_type"), action.get("new_holder_role"))
+        return _reassign_position(sim_run_id, round_num, role_id, country_code, action)
 
     if action_type == "self_nominate":
         from engine.services.election_engine import submit_nomination
@@ -286,6 +283,112 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
 
     # ── Unknown ───────────────────────────────────────────────────────
     return {"success": False, "narrative": f"Unknown action_type: {action_type}"}
+
+
+# ── Reassign Position ───────────────────────────────────────────────────
+
+def _reassign_position(sim_run_id: str, round_num: int, role_id: str, country_code: str, action: dict) -> dict:
+    """HoS reassigns a position to another role in the country.
+
+    Can assign (move position to target role) or vacate (remove position
+    from current holder without assigning to anyone).
+
+    Payload:
+        position: str — e.g. 'military', 'economy', 'diplomat', 'security'
+        target_role_id: str | null — who gets it (null = vacate)
+    """
+    from engine.config.position_actions import has_position
+    from engine.services.position_helpers import transfer_position, recompute_role_actions
+    from engine.services.common import write_event, get_scenario_id
+
+    client = get_client()
+    position = action.get("position", "")
+    target_role_id = action.get("target_role_id")
+
+    # Validate position
+    valid_positions = {"military", "economy", "diplomat", "security", "opposition"}
+    if position not in valid_positions:
+        return {"success": False, "narrative": f"Invalid position: {position}. Must be one of: {sorted(valid_positions)}"}
+
+    # Cannot reassign head_of_state (use change_leader for that)
+    if position == "head_of_state":
+        return {"success": False, "narrative": "Cannot reassign Head of State — use Change Leader instead"}
+
+    # Validate initiator is HoS
+    initiator = client.table("roles").select("id,character_name,positions,country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", role_id).limit(1).execute().data
+    if not initiator or not has_position(initiator[0], "head_of_state"):
+        return {"success": False, "narrative": "Only Head of State can reassign positions"}
+    if initiator[0]["country_id"] != country_code:
+        return {"success": False, "narrative": "Can only reassign positions in your own country"}
+
+    initiator_name = initiator[0]["character_name"]
+
+    # Find who currently holds this position
+    country_roles = client.table("roles").select("id,character_name,positions") \
+        .eq("sim_run_id", sim_run_id).eq("country_id", country_code).eq("status", "active").execute().data or []
+
+    current_holder = None
+    for r in country_roles:
+        if position in (r.get("positions") or []):
+            current_holder = r
+            break
+
+    scenario_id = get_scenario_id(client, sim_run_id)
+
+    if target_role_id:
+        # Validate target exists in same country
+        target = next((r for r in country_roles if r["id"] == target_role_id), None)
+        if not target:
+            return {"success": False, "narrative": f"Role {target_role_id} not found in {country_code}"}
+
+        target_name = target["character_name"]
+
+        if current_holder and current_holder["id"] == target_role_id:
+            return {"success": False, "narrative": f"{target_name} already holds {position}"}
+
+        if current_holder:
+            # Transfer: remove from current, add to target
+            transfer_position(client, sim_run_id, current_holder["id"], target_role_id, position)
+            prev_name = current_holder["character_name"]
+            narrative = f"{position.capitalize()} position transferred from {prev_name} to {target_name}"
+        else:
+            # Assign to target (position was vacant)
+            target_positions = list(target.get("positions") or [])
+            if position not in target_positions:
+                target_positions.append(position)
+            client.table("roles").update({"positions": target_positions}).eq("sim_run_id", sim_run_id).eq("id", target_role_id).execute()
+            recompute_role_actions(client, sim_run_id, target_role_id)
+            narrative = f"{target_name} assigned {position.capitalize()} position"
+
+        write_event(client, sim_run_id, scenario_id, round_num, country_code,
+                    "reassign_types", narrative,
+                    {"position": position, "previous": current_holder["id"] if current_holder else None,
+                     "new": target_role_id, "by": role_id},
+                    phase="A", category="political", role_name=initiator_name)
+
+        logger.info("[reassign] %s: %s -> %s (by %s)", position, current_holder["id"] if current_holder else "vacant", target_role_id, role_id)
+        return {"success": True, "narrative": narrative}
+
+    else:
+        # Vacate: remove position from current holder
+        if not current_holder:
+            return {"success": False, "narrative": f"No one holds {position} — nothing to vacate"}
+
+        prev_name = current_holder["character_name"]
+        holder_positions = [p for p in (current_holder.get("positions") or []) if p != position]
+        client.table("roles").update({"positions": holder_positions}).eq("sim_run_id", sim_run_id).eq("id", current_holder["id"]).execute()
+        recompute_role_actions(client, sim_run_id, current_holder["id"])
+
+        narrative = f"{prev_name} removed from {position.capitalize()} position (vacant)"
+
+        write_event(client, sim_run_id, scenario_id, round_num, country_code,
+                    "reassign_types", narrative,
+                    {"position": position, "previous": current_holder["id"], "new": None, "by": role_id},
+                    phase="A", category="political", role_name=initiator_name)
+
+        logger.info("[reassign] %s vacated from %s (by %s)", position, current_holder["id"], role_id)
+        return {"success": True, "narrative": narrative}
 
 
 # ── Sub-dispatchers ──────────────────────────────────────────────────────
