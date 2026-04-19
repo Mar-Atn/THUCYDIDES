@@ -1472,6 +1472,25 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [countdownNum, setCountdownNum] = useState(5)
   const [result, setResult] = useState<Record<string,unknown>|null>(null)
   const [error, setError] = useState<string|null>(null)
+  const mapRef = useRef<HTMLIFrameElement>(null)
+
+  // Listen for hex clicks (surface test site selection)
+  useEffect(() => {
+    if (testType !== 'surface') return
+    const handler = (event: MessageEvent) => {
+      const msg = event.data
+      if (!msg || msg.type !== 'hex-click') return
+      const owner = msg.owner as string
+      if (owner === countryId) {
+        setTargetHex({row: msg.row as number, col: msg.col as number})
+        setError(null)
+      } else {
+        setError('Must select a hex on your own territory')
+      }
+    }
+    window.addEventListener('message', handler)
+    return () => window.removeEventListener('message', handler)
+  }, [testType, countryId])
 
   useEffect(() => {
     supabase.from('countries').select('nuclear_level, nuclear_confirmed, nuclear_rd_progress')
@@ -1682,28 +1701,23 @@ function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
           }}>
           </div>
 
-          {/* Surface hex selector */}
+          {/* Surface hex selector — map view */}
           {testType === 'surface' && (
             <div style={{marginBottom:'1rem'}}>
-              <label style={{fontFamily:'DM Sans, sans-serif', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)', display:'block', marginBottom:'0.5rem'}}>
-                Target Hex (row, col) — must be own territory
-              </label>
-              <div style={{display:'flex', gap:'0.5rem'}}>
-                <input type="number" min={1} max={10} placeholder="Row"
-                  style={{
-                    width:'80px', padding:'0.5rem', backgroundColor:'rgba(255,255,255,0.05)',
-                    border:'1px solid rgba(255,255,255,0.15)', borderRadius:'4px',
-                    color:'white', fontFamily:'JetBrains Mono, monospace',
-                  }}
-                  onChange={e => setTargetHex(prev => ({row: parseInt(e.target.value)||0, col: prev?.col||0}))}
-                />
-                <input type="number" min={1} max={20} placeholder="Col"
-                  style={{
-                    width:'80px', padding:'0.5rem', backgroundColor:'rgba(255,255,255,0.05)',
-                    border:'1px solid rgba(255,255,255,0.15)', borderRadius:'4px',
-                    color:'white', fontFamily:'JetBrains Mono, monospace',
-                  }}
-                  onChange={e => setTargetHex(prev => ({row: prev?.row||0, col: parseInt(e.target.value)||0}))}
+              <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'0.75rem', color:'rgba(255,255,255,0.5)', marginBottom:'0.5rem'}}>
+                Select test site on own territory
+              </div>
+              {targetHex && (
+                <div style={{fontFamily:'JetBrains Mono, monospace', fontSize:'0.85rem', color:'#F59E0B', marginBottom:'0.5rem'}}>
+                  Selected: ({targetHex.row}, {targetHex.col})
+                </div>
+              )}
+              <div style={{position:'relative', height:'300px', borderRadius:'0.5rem', overflow:'hidden', border:'1px solid rgba(255,255,255,0.15)'}}>
+                <iframe
+                  ref={mapRef}
+                  src={`/map/deployments.html?display=clean&mode=attack&country=${countryId}&sim_run_id=${simId}`}
+                  style={{position:'absolute', inset:0, width:'100%', height:'100%', border:'none'}}
+                  title="Select test site"
                 />
               </div>
             </div>

@@ -103,7 +103,8 @@ function trendColor(current: number, prev: number, dangerUp: boolean = true): st
 const PUBLIC_NEWS_EVENTS = new Set([
   // Military (always public — you can see armies fighting)
   'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade',
-  'launch_missile_conventional', 'nuclear_test', 'nuclear_launch_initiate',
+  'launch_missile_conventional', 'nuclear_launch_initiate',
+  // nuclear_test: only surface tests are public (underground = classified, filtered below)
   // Political (public events)
   'change_leader_initiated', 'change_leader_removal', 'change_leader_elected',
   'martial_law', 'arrest',
@@ -259,6 +260,8 @@ export function PublicScreen() {
   }
   const significantEvents = events
     .filter((e) => {
+      // Nuclear tests: only surface tests are public news
+      if (e.event_type === 'nuclear_test') return e.payload?.test_type === 'surface'
       if (!PUBLIC_NEWS_EVENTS.has(e.event_type)) return false
       // Agreements and transactions only if public (not secret)
       if (e.event_type === 'propose_agreement' || e.event_type === 'sign_agreement') {
