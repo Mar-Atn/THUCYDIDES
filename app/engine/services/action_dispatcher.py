@@ -1257,10 +1257,12 @@ def _generate_nuclear_test_artefacts(
         if not target_role_ids:
             return
 
+        import uuid
         outcome_word = "SUCCESSFUL" if test_success else "FAILED"
         artefacts = []
         for rid in target_role_ids:
             artefacts.append({
+                "id": f"nuke_alert_{testing_country}_{round_num}_{rid}_{uuid.uuid4().hex[:8]}",
                 "sim_run_id": sim_run_id,
                 "role_id": rid,
                 "artefact_type": "classified_report",
