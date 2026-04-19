@@ -1,20 +1,19 @@
 """Run Roles — per-run mutable role state.
 
-Follows the same pattern as country_states_per_round: template-level
-``roles`` table stays frozen; ``run_roles`` is cloned at run start and
-mutated during the run (arrest, kill, coin changes, etc.).
+ARCHITECTURE NOTE (2026-04-19):
+The ``roles`` table is the single source of truth for per-run role state.
+It stores: id, character_name, status, positions[], country_id, etc.
 
-Architecture (matching KING):
-  roles (template)          ← canonical character definitions (frozen)
-       ↓ seed_run_roles()
-  run_roles (per-run)       ← mutable copy per sim_run
+The old ``run_roles`` table was designed as a separate mutable copy but
+was never reliably seeded. All code now reads/writes ``roles`` directly.
+The ``run_roles`` table is kept in DB for backward compatibility but
+is not read by any active code path.
 
 Functions:
-  seed_run_roles(sim_run_id)         — clone template roles into run_roles
-  get_run_role(sim_run_id, role_id)  — get one role's current state
-  get_run_roles(sim_run_id, ...)     — query with filters
-  update_role_status(sim_run_id, role_id, new_status, by, reason, round)
-  update_personal_coins(sim_run_id, role_id, delta)
+  get_run_role(sim_run_id, role_id)    — get role from roles table
+  get_run_roles(sim_run_id, ...)       — query roles with filters
+  update_role_status(...)              — update status + status_detail on roles
+  seed_run_roles(sim_run_id)           — DEPRECATED (no-op)
 """
 
 from __future__ import annotations
@@ -28,78 +27,42 @@ logger = logging.getLogger(__name__)
 
 
 def seed_run_roles(sim_run_id: str) -> int:
-    """Clone template roles into run_roles for a new sim_run.
-
-    Reads from the template-level ``roles`` table and creates one
-    ``run_roles`` row per role with status='active' and starting
-    personal_coins from the template.
-
-    Returns the number of roles seeded.
-    """
-    client = get_client()
-
-    # Read template roles
-    res = client.table("roles").select(
-        "id,character_name,country_id,title,is_head_of_state,"
-        "is_military_chief,is_diplomat,personal_coins,powers,positions"
-    ).execute()
-    template_roles = res.data or []
-
-    if not template_roles:
-        logger.warning("[run_roles] no template roles found — nothing to seed")
-        return 0
-
-    rows = []
-    for r in template_roles:
-        role_id = r.get("id") or r.get("role_id", "")
-        if not role_id:
-            continue
-        # Derive positions from positions[] array, falling back to legacy booleans
-        positions = r.get("positions") or []
-        if not positions:
-            positions = []
-            if r.get("is_head_of_state"):
-                positions.append("head_of_state")
-            if r.get("is_military_chief"):
-                positions.append("military")
-            if r.get("is_diplomat"):
-                positions.append("diplomat")
-        rows.append({
-            "sim_run_id": sim_run_id,
-            "role_id": role_id,
-            "country_code": r.get("country_id", ""),
-            "character_name": r.get("character_name", ""),
-            "title": r.get("title", ""),
-            "is_head_of_state": bool(r.get("is_head_of_state")),
-            "is_military_chief": bool(r.get("is_military_chief")),
-            "is_diplomat": bool(r.get("is_diplomat")),
-            "positions": positions,
-            "status": "active",
-            "personal_coins": int(r.get("personal_coins") or 0),
-            "powers": r.get("powers", ""),
-        })
-
-    if rows:
-        try:
-            client.table("run_roles").upsert(
-                rows, on_conflict="sim_run_id,role_id"
-            ).execute()
-        except Exception as e:
-            logger.warning("[run_roles] seed failed: %s", e)
-            return 0
-
-    logger.info("[run_roles] seeded %d roles for run %s", len(rows), sim_run_id)
-    return len(rows)
+    """DEPRECATED — roles table is used directly. No-op."""
+    logger.debug("[run_roles] seed_run_roles is deprecated — roles table is primary")
+    return 0
 
 
 def get_run_role(sim_run_id: str, role_id: str) -> Optional[dict]:
-    """Get one role's current per-run state. Returns None if not found."""
+    """Get one role's current state from the roles table.
+
+    Returns dict with keys mapped for backward compatibility:
+    role_id, character_name, status, country_code, positions, is_head_of_state.
+    """
     client = get_client()
-    res = client.table("run_roles").select("*") \
+    res = client.table("roles") \
+        .select("id, character_name, status, country_id, positions, position_type, status_detail") \
         .eq("sim_run_id", sim_run_id) \
-        .eq("role_id", role_id) \
+        .eq("id", role_id) \
         .limit(1).execute()
-    return res.data[0] if res.data else None
+
+    if not res.data:
+        return None
+
+    r = res.data[0]
+    positions = r.get("positions") or []
+    return {
+        "role_id": r["id"],
+        "character_name": r["character_name"],
+        "status": r.get("status", "active"),
+        "country_code": r["country_id"],
+        "country_id": r["country_id"],
+        "positions": positions,
+        "position_type": r.get("position_type"),
+        "is_head_of_state": "head_of_state" in positions,
+        "is_military_chief": "military" in positions,
+        "is_diplomat": "diplomat" in positions,
+        "status_detail": r.get("status_detail"),
+    }
 
 
 def get_run_roles(
@@ -107,14 +70,27 @@ def get_run_roles(
     country_code: Optional[str] = None,
     status: Optional[str] = None,
 ) -> list[dict]:
-    """Query run_roles with optional filters."""
+    """Query roles with optional filters. Returns list of role dicts."""
     client = get_client()
-    q = client.table("run_roles").select("*").eq("sim_run_id", sim_run_id)
+    q = client.table("roles") \
+        .select("id, character_name, status, country_id, positions, position_type") \
+        .eq("sim_run_id", sim_run_id)
     if country_code:
-        q = q.eq("country_code", country_code)
+        q = q.eq("country_id", country_code)
     if status:
         q = q.eq("status", status)
-    return q.order("country_code").execute().data or []
+    rows = q.order("country_id").execute().data or []
+
+    return [{
+        "role_id": r["id"],
+        "character_name": r["character_name"],
+        "status": r.get("status", "active"),
+        "country_code": r["country_id"],
+        "country_id": r["country_id"],
+        "positions": r.get("positions") or [],
+        "position_type": r.get("position_type"),
+        "is_head_of_state": "head_of_state" in (r.get("positions") or []),
+    } for r in rows]
 
 
 def update_role_status(
@@ -127,47 +103,8 @@ def update_role_status(
 ) -> dict:
     """Update a role's status (arrest, kill, depose, reactivate).
 
+    Updates the roles table directly (single source of truth).
     Returns ``{success, previous_status, new_status}``.
-    """
-    client = get_client()
-
-    current = get_run_role(sim_run_id, role_id)
-    if not current:
-        return {"success": False, "message": f"role {role_id} not found in run"}
-
-    prev_status = current["status"]
-
-    try:
-        client.table("run_roles").update({
-            "status": new_status,
-            "status_changed_round": round_num,
-            "status_changed_by": changed_by,
-            "status_change_reason": reason,
-        }).eq("sim_run_id", sim_run_id) \
-          .eq("role_id", role_id).execute()
-    except Exception as e:
-        return {"success": False, "message": str(e)}
-
-    # Write event
-    _write_event(client, sim_run_id, round_num, current["country_code"],
-                 f"role_status_{new_status}",
-                 f"{role_id} ({current.get('character_name', '?')}): "
-                 f"{prev_status} → {new_status} by {changed_by} — {reason}",
-                 {"role_id": role_id, "previous": prev_status,
-                  "new": new_status, "by": changed_by})
-
-    logger.info("[run_roles] %s: %s → %s (by %s)", role_id, prev_status, new_status, changed_by)
-    return {"success": True, "previous_status": prev_status, "new_status": new_status}
-
-
-def update_personal_coins(
-    sim_run_id: str,
-    role_id: str,
-    delta: int,
-) -> dict:
-    """Adjust a role's personal coins by delta (positive or negative).
-
-    Returns ``{success, new_balance}``.
     """
     client = get_client()
 
@@ -175,24 +112,44 @@ def update_personal_coins(
     if not current:
         return {"success": False, "message": f"role {role_id} not found"}
 
-    old_balance = int(current.get("personal_coins", 0))
-    new_balance = max(0, old_balance + delta)
+    prev_status = current["status"]
 
+    # Update roles table (primary)
     try:
-        client.table("run_roles").update({
-            "personal_coins": new_balance,
-        }).eq("sim_run_id", sim_run_id) \
-          .eq("role_id", role_id).execute()
+        update_data: dict = {
+            "status": new_status,
+            "status_detail": {
+                "changed_by": changed_by,
+                "reason": reason,
+                "round": round_num,
+                "previous": prev_status,
+            },
+        }
+        if new_status == "active":
+            update_data["status_detail"] = None  # clear on release/reactivate
+
+        client.table("roles").update(update_data) \
+            .eq("sim_run_id", sim_run_id) \
+            .eq("id", role_id).execute()
     except Exception as e:
         return {"success": False, "message": str(e)}
 
-    return {"success": True, "previous_balance": old_balance, "new_balance": new_balance}
+    # Write observatory event
+    _write_event(client, sim_run_id, round_num, current["country_code"],
+                 f"role_status_{new_status}",
+                 f"{role_id} ({current.get('character_name', '?')}): "
+                 f"{prev_status} → {new_status} by {changed_by} — {reason}",
+                 {"role_id": role_id, "previous": prev_status,
+                  "new": new_status, "by": changed_by})
+
+    logger.info("[roles] %s: %s → %s (by %s)", role_id, prev_status, new_status, changed_by)
+
+    return {"success": True, "previous_status": prev_status, "new_status": new_status}
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
-
 
 def _write_event(client, sim_run_id, round_num, country_code, event_type, summary, payload):
     scenario_id = None
@@ -213,6 +170,7 @@ def _write_event(client, sim_run_id, round_num, country_code, event_type, summar
             "country_code": country_code,
             "summary": summary,
             "payload": payload,
+            "category": "political",
         }).execute()
     except Exception as e:
         logger.debug("event write failed: %s", e)
