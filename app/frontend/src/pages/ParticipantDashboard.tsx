@@ -2535,7 +2535,7 @@ function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
       {/* RIGHT: Map (75%) */}
       <div className="flex-1 relative rounded-lg overflow-hidden border border-border">
         <iframe ref={mapRef}
-          src={`/map/deployments.html?display=clean&sim_run_id=${simId}&highlight_country=${countryId}`}
+          src={`/map/deployments.html?display=clean&mode=attack&country=${countryId}&sim_run_id=${simId}`}
           className="absolute inset-0 w-full h-full border-0"
           title="Nuclear Target Map" />
       </div>
