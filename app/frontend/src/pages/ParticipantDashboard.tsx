@@ -848,15 +848,15 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
   const canNominateForMidterm = !isParliamentMember || isSeatForReelection
 
+  // Local nomination state for optimistic updates (realtime may be slow)
+  const [localNominated, setLocalNominated] = useState<boolean|null>(null)
+
   // Show election in expected actions
   // Combine DB nomination with local optimistic state
   const isNominated = localNominated === true || (localNominated === null && !!myNomination)
   const showNomination = isColumbia && activeNominationEvent && !isNominated && nominationsOpen
     && (activeNominationEvent.subtype !== 'parliamentary_midterm' || canNominateForMidterm)
   const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0
-
-  // Local nomination state for optimistic updates (realtime may be slow)
-  const [localNominated, setLocalNominated] = useState<boolean|null>(null)
 
   const handleSelfNominate = async () => {
     if (!activeNominationEvent) return
