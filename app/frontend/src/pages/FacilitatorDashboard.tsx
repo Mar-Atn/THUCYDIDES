@@ -330,12 +330,12 @@ export function FacilitatorDashboard() {
   const [electionResolving, setElectionResolving] = useState(false)
 
   // Derive active election events from key_events + current round
-  const currentRound = simRunRT?.current_round ?? 0
+  const elecRound = simRunRT?.current_round ?? 0
   const electionKeyEvents = keyEvents.filter(e => e.type === 'election') as unknown as {
     type:string; subtype:string; round:number; nominations_round:number; name:string; country_code?:string
   }[]
-  const activeNomEvent = electionKeyEvents.find(e => e.nominations_round === currentRound)
-  const activeElecEvent = electionKeyEvents.find(e => e.round === currentRound)
+  const activeNomEvent = electionKeyEvents.find(e => e.nominations_round === elecRound)
+  const activeElecEvent = electionKeyEvents.find(e => e.round === elecRound)
 
   // Election stats for moderator
   const elecNomCount = activeNomEvent
