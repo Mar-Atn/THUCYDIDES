@@ -213,11 +213,29 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             sim_run_id, round_num, role_id,
             action.get("election_type"), action.get("election_round"))
 
+    if action_type == "withdraw_nomination":
+        from engine.services.election_engine import withdraw_nomination
+        return withdraw_nomination(
+            sim_run_id, role_id, action.get("election_type"))
+
+    if action_type == "cast_election_vote":
+        from engine.services.election_engine import cast_vote
+        return cast_vote(
+            sim_run_id, round_num, role_id,
+            action.get("candidate_role_id"), action.get("election_type"))
+
     if action_type == "cast_vote":
         from engine.services.election_engine import cast_vote
         return cast_vote(
             sim_run_id, round_num, role_id,
             action.get("candidate_role_id"), action.get("election_type"))
+
+    if action_type == "resolve_election":
+        from engine.services.election_engine import resolve_election
+        return resolve_election(
+            sim_run_id, round_num,
+            action.get("election_type"),
+            contested_seat_role=action.get("contested_seat_role"))
 
     # ── Transactions / Agreements ──────────────────���──────────────────
     if action_type == "propose_transaction":
