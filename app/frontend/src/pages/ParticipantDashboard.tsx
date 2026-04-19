@@ -721,7 +721,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       return (
         <div className="bg-card border border-warning/30 rounded-lg p-5">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="font-heading text-h3 text-warning uppercase tracking-wider">⚠ Remove Head of State</h2>
+            <h2 className="font-heading text-h3 text-warning uppercase tracking-wider">Remove Head of State</h2>
             <span className="font-data text-data-lg text-warning">{mm}:{ss}</span>
           </div>
           <div className="border border-border rounded p-3 mb-4">
@@ -753,7 +753,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     return (
       <div className="bg-card border border-action/30 rounded-lg p-5">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-heading text-h3 text-action uppercase tracking-wider">🗳 Elect New Head of State</h2>
+          <h2 className="font-heading text-h3 text-action uppercase tracking-wider">Elect New Head of State</h2>
           <span className="font-data text-data-lg text-action">{mm}:{ss}</span>
         </div>
         <div className="border border-border rounded p-3 mb-3">
@@ -985,7 +985,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 className="text-left rounded-lg px-4 py-3 transition-colors"
                 style={{backgroundColor:'rgba(245,158,11,0.1)',border:'2px solid rgba(245,158,11,0.5)',cursor:'pointer'}}>
                 <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.85rem',color:'#F59E0B',fontWeight:700,display:'block'}}>
-                  {activeVote.phase === 'removal' ? '⚠ VOTE: Remove Head of State' : '🗳 VOTE: Elect New Leader'}
+                  {activeVote.phase === 'removal' ? 'VOTE: Remove Head of State' : 'VOTE: Elect New Leader'}
                 </span>
                 <span style={{fontFamily:'DM Sans, sans-serif',fontSize:'0.75rem',color:'#D1D5DB',display:'block',marginTop:'0.25rem'}}>
                   {leaderVoteCountdown !== null && `${Math.floor(leaderVoteCountdown/60)}:${String(Math.floor(leaderVoteCountdown%60)).padStart(2,'0')} remaining — `}

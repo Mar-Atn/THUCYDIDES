@@ -754,7 +754,7 @@ export function FacilitatorDashboard() {
                       <div key={lv.id} className="bg-warning/10 border border-warning/30 rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-data text-caption font-bold text-warning uppercase">
-                            {isRemoval ? '⚠ Leadership Removal Vote' : '🗳 Election Vote'} — {lv.country_code.toUpperCase()}
+                            {isRemoval ? 'Leadership Removal Vote' : 'Election Vote'} — {lv.country_code.toUpperCase()}
                           </span>
                           <span className="font-data text-caption text-text-secondary">
                             Need {lv.required_majority}
