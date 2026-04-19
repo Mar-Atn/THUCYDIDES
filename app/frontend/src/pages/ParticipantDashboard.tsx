@@ -2421,17 +2421,35 @@ function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
               </div>
             )}
 
-            {/* INITIATE button */}
+            {/* Assigned missiles (red, locked) */}
             {pairs.length > 0 && (
-              <button onClick={handleInitiate} disabled={submitting}
+              <div style={{display:'flex',flexWrap:'wrap',gap:'0.5rem',alignItems:'center',marginTop:'0.25rem'}}>
+                {pairs.map((p, i) => (
+                  <div key={i} title={`Target: (${p.targetRow},${p.targetCol})`}
+                    style={{display:'inline-flex',alignItems:'center',justifyContent:'center',
+                      width:'2.5rem',height:'2.5rem',borderRadius:'0.25rem',
+                      backgroundColor:'rgba(255,60,20,0.2)',border:'2px solid #FF3C14',color:'#FF3C14'}}>
+                    <UnitIcon type="strategic_missile" size={22}/>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* LAUNCH button — dramatic red */}
+            {pairs.length > 0 && (
+              <button onClick={() => {
+                if(!confirm(`CONFIRM NUCLEAR LAUNCH?\n\n${pairs.length} missile${pairs.length>1?'s':''} will be launched.\nThis action CANNOT be undone.\n\nProceed?`)) return
+                handleInitiate()
+              }} disabled={submitting}
                 style={{
-                  width:'100%',padding:'0.75rem',borderRadius:'0.375rem',cursor:'pointer',
-                  backgroundColor:'rgba(255,60,20,0.2)',border:'2px solid #FF3C14',
-                  color:'#FF3C14',fontFamily:'JetBrains Mono, monospace',
-                  fontSize:'0.85rem',fontWeight:700,textTransform:'uppercase',
-                  letterSpacing:'0.15em',opacity:submitting?0.5:1,
+                  width:'100%',padding:'1rem',borderRadius:'0.5rem',cursor:'pointer',
+                  backgroundColor:'#991B1B',border:'none',
+                  color:'white',fontFamily:'JetBrains Mono, monospace',
+                  fontSize:'1rem',fontWeight:700,textTransform:'uppercase',
+                  letterSpacing:'0.2em',opacity:submitting?0.5:1,
+                  boxShadow:'0 0 20px rgba(153,27,27,0.5)',
                 }}>
-                {submitting ? 'INITIATING...' : `INITIATE LAUNCH (${pairs.length} MISSILE${pairs.length>1?'S':''})`}
+                {submitting ? 'INITIATING...' : 'CONFIRM LAUNCH'}
               </button>
             )}
           </>)}
