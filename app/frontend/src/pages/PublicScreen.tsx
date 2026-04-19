@@ -103,7 +103,8 @@ function trendColor(current: number, prev: number, dangerUp: boolean = true): st
 const PUBLIC_NEWS_EVENTS = new Set([
   // Military (always public — you can see armies fighting)
   'ground_attack', 'air_strike', 'naval_combat', 'naval_bombardment', 'naval_blockade',
-  'launch_missile_conventional', 'nuclear_launch_initiate', 'nuclear_launch',
+  'launch_missile_conventional', 'nuclear_launch',
+  // nuclear_launch_initiate is SECRET — only visible after missiles are in flight
   // nuclear_test: only surface tests are public (underground = classified, filtered below)
   // Political (public events)
   'change_leader_initiated', 'change_leader_removal', 'change_leader_elected',
@@ -260,6 +261,8 @@ export function PublicScreen() {
         } else if (row.status === 'resolved' || row.status === 'cancelled') {
           setNuclearFlightAction(null)
           setFlightCountdown(null)
+          // Refresh map to show ☢ impact markers
+          setMapKey((k) => k + 1)
         }
       })
       .subscribe()

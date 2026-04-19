@@ -16,6 +16,31 @@ import { submitAction, getToken, type SimRun } from '@/lib/queries'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 
+/* ── Hex → Country lookup (canonical from map_config.py) ──────────────── */
+const HEX_OWNERS: Record<string, string> = {
+  '2,10':'freeland','2,11':'sarmatia','2,12':'sarmatia','2,16':'sarmatia',
+  '3,3':'columbia','3,6':'thule','3,8':'albion','3,10':'freeland',
+  '3,11':'ruthenia','3,12':'sarmatia','3,13':'sarmatia','3,14':'sarmatia',
+  '3,15':'sarmatia','3,16':'sarmatia','3,18':'choson',
+  '4,2':'columbia','4,3':'columbia','4,7':'albion','4,9':'teutonia',
+  '4,10':'teutonia','4,11':'ruthenia','4,12':'sarmatia','4,13':'sarmatia',
+  '4,14':'sarmatia','4,16':'sarmatia','4,17':'hanguk','4,19':'yamato',
+  '5,3':'columbia','5,4':'columbia','5,5':'columbia','5,9':'gallia',
+  '5,10':'gallia','5,11':'phrygia','5,14':'sogdiana','5,15':'cathay',
+  '5,16':'cathay','5,17':'cathay','5,19':'yamato',
+  '6,3':'columbia','6,4':'columbia','6,8':'ponte','6,10':'levantia',
+  '6,11':'phrygia','6,12':'persia','6,13':'sogdiana','6,14':'sogdiana',
+  '6,15':'cathay','6,16':'cathay',
+  '7,4':'columbia','7,9':'ponte','7,11':'solaria','7,13':'persia',
+  '7,14':'bharata','7,15':'bharata','7,16':'cathay','7,18':'formosa',
+  '8,10':'solaria','8,11':'mirage','8,13':'persia','8,14':'bharata',
+  '8,15':'bharata',
+  '9,5':'caribe','9,10':'horn','9,15':'bharata',
+}
+function hexCountryName(row: number, col: number): string {
+  return (HEX_OWNERS[`${row},${col}`] || 'sea').toUpperCase()
+}
+
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface RoleData {
@@ -136,6 +161,22 @@ export function ParticipantDashboard() {
   const { data: globalNuclearActions } = useRealtimeTable<Record<string, unknown>>(
     'nuclear_actions', simId,
   )
+
+  // Ticking countdown for nuclear flight banner
+  const activeFlightAction = (globalNuclearActions as unknown as {
+    id:string; status:string; country_code:string; payload:Record<string,unknown>;
+    timer_started_at:string|null; timer_duration_sec:number|null;
+  }[])?.find(a => a.status === 'awaiting_interception') ?? null
+  const [nuclearCountdown, setNuclearCountdown] = useState<number|null>(null)
+  useEffect(() => {
+    if (!activeFlightAction) { setNuclearCountdown(null); return }
+    const started = new Date(activeFlightAction.timer_started_at!).getTime()
+    const dur = activeFlightAction.timer_duration_sec ?? 600
+    const tick = () => setNuclearCountdown(Math.max(0, dur - (Date.now() - started) / 1000))
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [activeFlightAction?.id, activeFlightAction?.status])
 
   /* Derive simState from the realtime sim_runs row ----------------------- */
   const simState: SimState | null = simRun ? {
@@ -312,11 +353,7 @@ export function ParticipantDashboard() {
 
       {/* Nuclear Flight Banner — shown to ALL participants during Phase 3 */}
       {(() => {
-        const flightAction = (globalNuclearActions as unknown as {
-          id:string; status:string; country_code:string; payload:Record<string,unknown>;
-          timer_started_at:string|null; timer_duration_sec:number|null;
-        }[])?.find(a => a.status === 'awaiting_interception')
-        const resolvedAction = !flightAction && !nuclearBannerDismissed && (globalNuclearActions as unknown as {
+        const resolvedAction = !activeFlightAction && !nuclearBannerDismissed && (globalNuclearActions as unknown as {
           id:string; status:string; country_code:string; resolved_at:string|null;
         }[])?.find(a => {
           if (a.status !== 'resolved') return false
@@ -325,14 +362,10 @@ export function ParticipantDashboard() {
           return (Date.now() - resolvedAt) < 30000 // Show for 30s after resolution
         })
 
-        if (flightAction) {
-          const missiles = ((flightAction.payload?.changes as Record<string,unknown>)?.missiles as unknown[]) ?? []
-          const timerStart = flightAction.timer_started_at ? new Date(flightAction.timer_started_at).getTime() : 0
-          const timerDuration = flightAction.timer_duration_sec ?? 600
-          const now = Date.now()
-          const remaining = Math.max(0, timerDuration - (now - timerStart) / 1000)
-          const mm = String(Math.floor(remaining / 60)).padStart(2, '0')
-          const ss = String(Math.floor(remaining % 60)).padStart(2, '0')
+        if (activeFlightAction && nuclearCountdown !== null) {
+          const missiles = ((activeFlightAction.payload?.changes as Record<string,unknown>)?.missiles as unknown[]) ?? []
+          const mm = String(Math.floor(nuclearCountdown / 60)).padStart(2, '0')
+          const ss = String(Math.floor(nuclearCountdown % 60)).padStart(2, '0')
 
           return (
             <div style={{
@@ -344,7 +377,7 @@ export function ParticipantDashboard() {
                 fontFamily:'"JetBrains Mono",monospace',fontSize:'1.1rem',fontWeight:700,
                 color:'#FFFFFF',letterSpacing:'0.1em',textTransform:'uppercase',
               }}>
-                {'\u26A0'} BALLISTIC MISSILE LAUNCH DETECTED {'\u2014'} {flightAction.country_code.toUpperCase()}
+                {'\u26A0'} BALLISTIC MISSILE LAUNCH DETECTED {'\u2014'} {activeFlightAction.country_code.toUpperCase()}
               </span>
               <span style={{
                 fontFamily:'"JetBrains Mono",monospace',fontSize:'1.1rem',fontWeight:700,
@@ -424,7 +457,8 @@ export function ParticipantDashboard() {
                 onSubmitted={()=>{setActiveAction(null); loadData()}}
               />
             : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}
-                simId={simId!} countryId={myRole.country_id} roleId={myRole.id} dataVersion={dataVersion}/>
+                simId={simId!} countryId={myRole.country_id} roleId={myRole.id} dataVersion={dataVersion}
+                nuclearActionsData={globalNuclearActions}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
@@ -443,9 +477,10 @@ export function ParticipantDashboard() {
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion}:{
+function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion, nuclearActionsData}:{
   roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void
   simId:string; countryId:string; roleId:string; dataVersion?:number
+  nuclearActionsData?:Record<string, unknown>[]
 }) {
   const avail = new Set(roleActions)
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
@@ -552,11 +587,8 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
-  // Nuclear authorization/interception pending actions (realtime)
-  const { data: nuclearActionsRaw } = useRealtimeTable<Record<string, unknown>>(
-    'nuclear_actions', simId,
-  )
-  const nuclearActions = nuclearActionsRaw as unknown as {
+  // Nuclear authorization/interception — passed from parent (no duplicate subscription)
+  const nuclearActions = (nuclearActionsData ?? []) as unknown as {
     id:string; action_type:string; country_code:string; status:string;
     authorizer_1_role:string|null; authorizer_2_role:string|null;
     authorizer_1_response:string|null; authorizer_2_response:string|null;
@@ -604,13 +636,13 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     supabase.from('countries').select('nuclear_level, nuclear_confirmed')
       .eq('sim_run_id', simId).eq('id', countryId).limit(1)
       .then(({ data }) => {
-        if (data?.[0]?.nuclear_confirmed && (data[0].nuclear_level ?? 0) >= 3) {
+        if (data?.[0]?.nuclear_confirmed && (data[0].nuclear_level ?? 0) >= 2) {
           setMyNuclearLevel(data[0].nuclear_level)
         }
       })
   }, [simId, countryId, dataVersion])
 
-  const visibleInterceptions = myNuclearLevel >= 3 ? pendingInterceptions : []
+  const visibleInterceptions = myNuclearLevel >= 2 ? pendingInterceptions : []
 
   const handleAuthorize = async (actionId: string, confirm: boolean, rationale: string) => {
     setAuthSubmitting(true)
@@ -667,8 +699,8 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
         <div style={{marginBottom:'1.5rem'}}>
           <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase',marginBottom:'0.5rem'}}>Targets</div>
           {missiles.map((m, i) => (
-            <div key={i} style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.25rem'}}>
-              {m.missile_unit_code} {'\u2192'} ({m.target_global_row},{m.target_global_col})
+            <div key={i} style={{display:'flex',alignItems:'center',gap:'0.4rem',fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.35rem'}}>
+              <UnitIcon type="strategic_missile" size={16}/> {'\u2192'} ({m.target_global_row},{m.target_global_col}) — <span style={{color:'#FF3C14'}}>{hexCountryName(m.target_global_row, m.target_global_col)}</span>
             </div>
           ))}
         </div>
@@ -734,8 +766,8 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
         <div style={{marginBottom:'1rem'}}>
           <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase',marginBottom:'0.5rem'}}>Targets</div>
           {missiles.map((m, i) => (
-            <div key={i} style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.25rem'}}>
-              {m.missile_unit_code} {'\u2192'} ({m.target_global_row},{m.target_global_col})
+            <div key={i} style={{display:'flex',alignItems:'center',gap:'0.4rem',fontFamily:'JetBrains Mono, monospace',fontSize:'0.8rem',color:'#D1D5DB',marginBottom:'0.35rem'}}>
+              <UnitIcon type="strategic_missile" size={16}/> {'\u2192'} ({m.target_global_row},{m.target_global_col}) — <span style={{color:'#FF3C14'}}>{hexCountryName(m.target_global_row, m.target_global_col)}</span>
             </div>
           ))}
         </div>
@@ -2411,7 +2443,7 @@ function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
                     backgroundColor:'rgba(255,60,20,0.05)',
                   }}>
                     <span style={{display:'flex',alignItems:'center',gap:'0.4rem',color:'#FF3C14'}}>
-                      <UnitIcon type="strategic_missile" size={16}/> → ({p.targetRow},{p.targetCol}) ✓
+                      <UnitIcon type="strategic_missile" size={16}/> {'\u2192'} ({p.targetRow},{p.targetCol}) — {hexCountryName(p.targetRow, p.targetCol)} ✓
                     </span>
                     <button onClick={() => removePair(i)} style={{
                       color:'#9CA3AF',cursor:'pointer',border:'none',background:'none',fontSize:'0.8rem',

@@ -368,7 +368,7 @@ class NuclearChainOrchestrator:
             ).eq("id", action_id).execute()
 
             launcher_cc = action["country_code"]
-            t3_countries = self._get_t3_countries(sim_run_id, round_num, exclude=launcher_cc)
+            t3_countries = self._get_interceptor_countries(sim_run_id, round_num, exclude=launcher_cc)
             for t3_cc in t3_countries:
                 intercept, rationale = self._ai_intercept(action, t3_cc)
                 self.submit_interception(action_id, t3_cc, intercept, rationale)
@@ -394,7 +394,7 @@ class NuclearChainOrchestrator:
         )
 
         try:
-            t3_countries = self._get_t3_countries(sim_run_id, round_num, exclude=launcher)
+            t3_countries = self._get_interceptor_countries(sim_run_id, round_num, exclude=launcher)
             if not t3_countries:
                 return
 
@@ -489,14 +489,14 @@ class NuclearChainOrchestrator:
 
         return units, cs, zones
 
-    def _get_t3_countries(self, sim_run_id: str, round_num: int, exclude: str) -> list[str]:
-        """Return country_codes with nuclear_level >= 3 and confirmed."""
+    def _get_interceptor_countries(self, sim_run_id: str, round_num: int, exclude: str) -> list[str]:
+        """Return country_codes with nuclear_level >= 2 and confirmed (eligible to intercept)."""
         cs_rows = self.client.table("countries").select(
             "id,nuclear_level,nuclear_confirmed"
         ).eq("sim_run_id", sim_run_id).execute().data or []
         return [
             r["id"] for r in cs_rows
-            if int(r.get("nuclear_level", 0) or 0) >= 3
+            if int(r.get("nuclear_level", 0) or 0) >= 2
             and r.get("nuclear_confirmed")
             and r["id"] != exclude
         ]
@@ -829,19 +829,40 @@ class NuclearChainOrchestrator:
         events = []
 
         if atype == "nuclear_test":
+            test_label = "SURFACE" if result.get("test_type") == "surface" else "UNDERGROUND"
+            outcome = "SUCCESSFUL" if result.get("success") else "FAILED"
             events.append({
                 **base,
                 "event_type": "nuclear_test",
-                "summary": f"{cc} {result['test_type']} nuclear test: {'SUCCESS' if result['success'] else 'FAILURE'} "
-                           f"(prob={result['success_probability']}, roll={result['success_roll']:.2f})",
+                "category": "military",
+                "summary": f"☢ {cc.upper()} conducts {test_label} nuclear test — {outcome}",
                 "payload": result,
             })
         else:
+            launched = result.get("missiles_launched", 0)
+            intercepted = result.get("missiles_intercepted", 0)
+            hits = result.get("hits", 0)
+            parts = [f"☢ NUCLEAR STRIKE — {cc.upper()} launches {launched} missile{'s' if launched != 1 else ''}"]
+            if intercepted > 0:
+                parts.append(f"{intercepted} intercepted")
+            if hits > 0:
+                # Get target country names from hit_details
+                target_hexes = [h.get("target") for h in result.get("hit_details", []) if h.get("target")]
+                target_countries = set()
+                for th in target_hexes:
+                    from engine.config.map_config import hex_owner
+                    owner = hex_owner(th[0], th[1])
+                    if owner != "sea":
+                        target_countries.add(owner.upper())
+                targets_str = ", ".join(sorted(target_countries)) if target_countries else "unknown"
+                parts.append(f"{hits} hit{'s' if hits != 1 else ''} on {targets_str}")
+            else:
+                parts.append("ALL INTERCEPTED — no impacts")
             events.append({
                 **base,
                 "event_type": "nuclear_launch",
-                "summary": f"{cc} nuclear launch: {result['missiles_launched']} missiles, "
-                           f"{result['missiles_intercepted']} intercepted, {result['hits']} hits",
+                "category": "military",
+                "summary": " — ".join(parts),
                 "payload": result,
             })
 

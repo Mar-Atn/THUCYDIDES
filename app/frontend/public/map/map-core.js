@@ -620,8 +620,9 @@
       }
       if (row == null || col == null) return;
 
-      // Nuclear test surface events get a radiation trefoil instead of explosion
+      // Nuclear events get radiation trefoil ☢ — tests (surface) + launch impacts
       const isNuclearTest = evt.combat_type === 'nuclear_test' && evt.test_type === 'surface';
+      const isNuclearImpact = evt.combat_type === 'nuclear_launch';
 
       // Convert to 0-indexed for hexCenter
       const center = hexCenter(row - 1, col - 1, r);
@@ -630,8 +631,44 @@
       g.setAttribute('transform', `translate(${center.x},${center.y})`);
       g.style.pointerEvents = 'none';
 
-      if (isNuclearTest) {
-        // ☢ Radiation trefoil — dark red, large, pulsing symbol
+      if (isNuclearImpact) {
+        // Nuclear strike impact — large dark red ☢ with dramatic pulsing + red glow
+        const glow = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        glow.setAttribute('r', String(r * 1.2));
+        glow.setAttribute('fill', 'rgba(153,27,27,0.35)');
+        glow.setAttribute('stroke', '#991B1B');
+        glow.setAttribute('stroke-width', '2');
+        g.appendChild(glow);
+        const glowPulse = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        glowPulse.setAttribute('attributeName', 'r');
+        glowPulse.setAttribute('values', (r * 1.0) + ';' + (r * 1.4) + ';' + (r * 1.0));
+        glowPulse.setAttribute('dur', '2s');
+        glowPulse.setAttribute('repeatCount', 'indefinite');
+        glow.appendChild(glowPulse);
+
+        const trefoil = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        trefoil.setAttribute('text-anchor', 'middle');
+        trefoil.setAttribute('dominant-baseline', 'central');
+        trefoil.setAttribute('font-size', String(r * 2.2));
+        trefoil.setAttribute('fill', '#991B1B');
+        trefoil.textContent = '\u2622';  // ☢ radiation trefoil
+        g.appendChild(trefoil);
+
+        const pulseOpac = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        pulseOpac.setAttribute('attributeName', 'opacity');
+        pulseOpac.setAttribute('values', '1;0.3;1');
+        pulseOpac.setAttribute('dur', '1.5s');
+        pulseOpac.setAttribute('repeatCount', 'indefinite');
+        trefoil.appendChild(pulseOpac);
+
+        const pulseSize = document.createElementNS('http://www.w3.org/2000/svg', 'animate');
+        pulseSize.setAttribute('attributeName', 'font-size');
+        pulseSize.setAttribute('values', (r * 2.0) + ';' + (r * 2.6) + ';' + (r * 2.0));
+        pulseSize.setAttribute('dur', '1.5s');
+        pulseSize.setAttribute('repeatCount', 'indefinite');
+        trefoil.appendChild(pulseSize);
+      } else if (isNuclearTest) {
+        // ☢ Radiation trefoil — dark red, large, pulsing symbol (smaller than impact)
         const trefoil = document.createElementNS('http://www.w3.org/2000/svg', 'text');
         trefoil.setAttribute('text-anchor', 'middle');
         trefoil.setAttribute('dominant-baseline', 'central');

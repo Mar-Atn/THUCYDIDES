@@ -274,6 +274,27 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         if e["event_type"] not in COMBAT_TYPES:
             continue
         p = e.get("payload") or {}
+
+        # Nuclear launch: markers come from hit_details, not generic coords
+        if e["event_type"] == "nuclear_launch":
+            hit_details = p.get("hit_details") or []
+            for hit in hit_details:
+                target = hit.get("target")
+                if target and len(target) >= 2:
+                    hit_hex = (target[0], target[1])
+                    if hit_hex not in seen_hexes:
+                        seen_hexes.add(hit_hex)
+                        combat.append({
+                            "event_type": "nuclear_launch",
+                            "combat_type": "nuclear_launch",
+                            "global_row": target[0],
+                            "global_col": target[1],
+                            "theater": None,
+                            "theater_row": None,
+                            "theater_col": None,
+                        })
+            continue
+
         # Target coords can be at payload root, in action, or in result
         action = p.get("action", {})
         result = p.get("result", {})
@@ -313,26 +334,7 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         if e["event_type"] == "nuclear_test":
             entry["combat_type"] = "nuclear_test"
             entry["test_type"] = p.get("test_type", "underground")
-        # Nuclear launch: add ☢ markers at each impact hex
-        if e["event_type"] == "nuclear_launch":
-            entry["combat_type"] = "nuclear_launch"
-            # Add entries for each hit target (first entry already added above)
-            hit_details = p.get("hit_details") or []
-            for hit in hit_details[1:]:  # skip first, already in entry
-                target = hit.get("target")
-                if target and len(target) >= 2:
-                    hit_hex = (target[0], target[1])
-                    if hit_hex not in seen_hexes:
-                        seen_hexes.add(hit_hex)
-                        combat.append({
-                            "event_type": "nuclear_launch",
-                            "combat_type": "nuclear_launch",
-                            "global_row": target[0],
-                            "global_col": target[1],
-                            "theater": theater,
-                            "theater_row": None,
-                            "theater_col": None,
-                        })
+        # nuclear_launch is handled above (early continue), should not reach here
         combat.append(entry)
 
     return {"events": combat, "count": len(combat)}
@@ -1380,11 +1382,15 @@ async def submit_action(
     except ValueError:
         raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
 
+    # Nuclear chain actions (authorize, intercept) are allowed even when paused
+    # because the sim auto-pauses during the flight phase
+    NUCLEAR_CHAIN_ACTIONS = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):
-        raise HTTPException(
-            status_code=400,
-            detail=f"Sim is '{run['status']}' — actions only allowed when active",
-        )
+        if not (run["status"] == "paused" and body.action_type in NUCLEAR_CHAIN_ACTIONS):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Sim is '{run['status']}' — actions only allowed when active",
+            )
 
     current_phase = run.get("current_phase", "")
 
@@ -1403,23 +1409,26 @@ async def submit_action(
     role = role_check.data[0]
 
     # 3. Validate role has this action type (check role_actions table)
-    # ground_move is authorized by ground_attack permission (same capability)
-    check_action = body.action_type
-    if check_action == "ground_move":
-        check_action = "ground_attack"
-    action_check = (
-        client.table("role_actions")
-        .select("id")
-        .eq("sim_run_id", sim_id)
-        .eq("role_id", body.role_id)
-        .eq("action_id", check_action)
-        .execute()
-    )
-    if not action_check.data:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Role '{body.role_id}' is not authorized for action '{body.action_type}'",
+    # Nuclear chain actions (authorize, intercept) bypass role_actions —
+    # authorization is determined by the nuclear chain orchestrator itself
+    if body.action_type not in NUCLEAR_CHAIN_ACTIONS:
+        # ground_move is authorized by ground_attack permission (same capability)
+        check_action = body.action_type
+        if check_action == "ground_move":
+            check_action = "ground_attack"
+        action_check = (
+            client.table("role_actions")
+            .select("id")
+            .eq("sim_run_id", sim_id)
+            .eq("role_id", body.role_id)
+            .eq("action_id", check_action)
+            .execute()
         )
+        if not action_check.data:
+            raise HTTPException(
+                status_code=403,
+                detail=f"Role '{body.role_id}' is not authorized for action '{body.action_type}'",
+            )
 
     # 4. Build action payload
     action_payload = {

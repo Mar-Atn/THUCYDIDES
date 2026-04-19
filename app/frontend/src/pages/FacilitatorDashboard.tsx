@@ -228,6 +228,38 @@ export function FacilitatorDashboard() {
     { orderBy: 'created_at.desc', limit: 100 },
   )
 
+  // Nuclear flight banner — subscribe to active nuclear actions
+  const { data: nuclearActions } = useRealtimeTable<Record<string, unknown>>(
+    'nuclear_actions', simId,
+    { columns: 'id,status,country_code,timer_started_at,timer_duration_sec,payload' },
+  )
+  const flightAction = nuclearActions.find(a => a.status === 'awaiting_interception')
+  const [flightCountdown, setFlightCountdown] = useState<number|null>(null)
+  useEffect(() => {
+    if (!flightAction) { setFlightCountdown(null); return }
+    const started = new Date(flightAction.timer_started_at as string).getTime()
+    const dur = Number(flightAction.timer_duration_sec || 600)
+    const tick = () => {
+      const rem = Math.max(0, dur - (Date.now() - started) / 1000)
+      setFlightCountdown(rem)
+    }
+    tick()
+    const iv = setInterval(tick, 1000)
+    return () => clearInterval(iv)
+  }, [flightAction])
+
+  // Auto-resolve nuclear launch when flight countdown reaches 0
+  const nuclearResolving = useRef(false)
+  useEffect(() => {
+    if (!flightAction || flightCountdown === null || flightCountdown > 0) return
+    if (nuclearResolving.current) return
+    nuclearResolving.current = true
+    const actionId = flightAction.id as string
+    simAction(simId!, `nuclear/${actionId}/resolve`).catch(e =>
+      console.error('Nuclear auto-resolve failed:', e)
+    ).finally(() => { nuclearResolving.current = false })
+  }, [flightCountdown, flightAction, simId])
+
   const simRun = simRunRT
 
   /* Derive simState from the realtime sim_runs row ----------------------- */
@@ -372,6 +404,35 @@ export function FacilitatorDashboard() {
   return (
     <div className="min-h-screen bg-base flex flex-col">
       <Header subtitle="Live Simulation" />
+
+      {/* Nuclear flight banner */}
+      {flightAction && flightCountdown !== null && (
+        <div style={{
+          position:'sticky',top:0,zIndex:50,
+          backgroundColor:'rgba(220,38,38,0.95)',padding:'0.75rem 1.5rem',
+          display:'flex',alignItems:'center',justifyContent:'center',gap:'1rem',
+          fontFamily:'JetBrains Mono, monospace',color:'white',
+          animation:'pulse 2s ease-in-out infinite',
+        }}>
+          <span style={{fontSize:'1.1rem'}}>⚠ BALLISTIC MISSILE LAUNCH DETECTED — {(flightAction.country_code as string).toUpperCase()}</span>
+          <span style={{fontSize:'1.3rem',fontWeight:700}}>
+            {Math.floor(flightCountdown/60).toString().padStart(2,'0')}:{Math.floor(flightCountdown%60).toString().padStart(2,'0')}
+          </span>
+          <button
+            onClick={() => {
+              if (!confirm('RESOLVE NUCLEAR IMPACT NOW?\n\nThis will skip remaining interception time and resolve the strike immediately.')) return
+              simAction(simId!, `nuclear/${flightAction.id as string}/resolve`).catch(e =>
+                alert('Resolve failed: ' + e)
+              )
+            }}
+            style={{
+              marginLeft:'1rem',padding:'0.4rem 1rem',borderRadius:'0.25rem',
+              backgroundColor:'white',color:'#991B1B',fontWeight:700,fontSize:'0.85rem',
+              border:'none',cursor:'pointer',textTransform:'uppercase',letterSpacing:'0.05em',
+            }}
+          >RESOLVE NOW</button>
+        </div>
+      )}
 
       {/* ================================================================== */}
       {/*  TOP BAR — fixed control strip                                     */}

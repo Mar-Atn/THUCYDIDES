@@ -232,11 +232,14 @@ def validate_nuclear_launch(
         if not u:
             errors.append(f"UNKNOWN_UNIT: {code!r}")
             continue
-        if u.get("country_code") != cc:
+        # deployments table uses country_id and unit_status
+        unit_country = u.get("country_id") or u.get("country_code")
+        if unit_country != cc:
             errors.append(f"NOT_OWN_UNIT: {code!r}")
         if (u.get("unit_type") or "").lower() != "strategic_missile":
             errors.append(f"WRONG_UNIT_TYPE: {code!r} is {u.get('unit_type')!r}")
-        if (u.get("status") or "").lower() != "active":
+        unit_status = u.get("unit_status") or u.get("status") or ""
+        if unit_status.lower() != "active":
             errors.append(f"UNIT_NOT_ACTIVE: {code!r} must be deployed (active)")
 
         # Target coords

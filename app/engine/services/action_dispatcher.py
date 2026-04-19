@@ -244,7 +244,19 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     if action_type == "nuclear_launch_initiate":
         from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
         orch = NuclearChainOrchestrator()
-        return orch.initiate(action, sim_run_id, round_num, initiator_role_id=role_id)
+        # Build clean payload matching validator's expected format
+        launch_action = {
+            "action_type": "launch_missile",
+            "country_code": country_code,
+            "round_num": round_num,
+            "decision": "change",
+            "rationale": action.get("rationale") or "Nuclear launch initiated by Head of State",
+            "changes": {
+                "warhead": "nuclear",
+                "missiles": action.get("missiles", []),
+            },
+        }
+        return orch.initiate(launch_action, sim_run_id, round_num, initiator_role_id=role_id)
 
     if action_type == "nuclear_authorize":
         from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
