@@ -173,31 +173,54 @@ Some actions depend on country state, not just position:
 | Max 1 economy per country | Enforced at assignment time |
 | Max 1 diplomat per country | Enforced at assignment time |
 | Max 1 security per country | Enforced at assignment time |
-| Unlimited opposition | Default; any number of roles |
-| Role with 0 positions → opposition | Automatic fallback |
 | Position combos allowed | e.g., HoS + security (Furnace), economy + diplomat (Dawn) |
+| Role with 0 positions | Normal citizen — gets universal actions only (Layer 1) |
 
 ---
 
 ## 6. Position Changes
 
 ### 6.1 Change Leader (removes + assigns HoS)
+- **Citizen-initiated:** Non-HoS starts removal vote → election (current flow)
+- **HoS voluntary step-down:** HoS initiates → skips removal vote → goes straight to election
 - Removal: old HoS loses `head_of_state` from positions array
 - Election: winner gains `head_of_state` added to positions array
 - Actions recomputed for both roles
 
-### 6.2 Reassign Types (HoS transfers any non-HoS position)
-- *Design pending* — HoS can move military/economy/diplomat/security between roles
+### 6.2 Reassign Types (HoS reassigns any non-HoS position)
+- HoS can move `military`, `economy`, `diplomat`, `security` to any role in the country
+- HoS CANNOT reassign the `head_of_state` position (use change_leader for that)
+- Can leave a position vacant (remove from source without assigning to target)
+- Can assign to a role that already holds other positions (creates combo)
 - Source role loses the position; target role gains it
-- Actions recomputed for both roles
-
-### 6.3 Voluntary Step-Down (HoS initiates change_leader on self)
-- Same flow as change_leader but initiated by HoS
-- Triggers election phase directly (no removal vote needed)
+- Actions recomputed for affected roles
 
 ---
 
-## 7. Implementation Architecture
+## 7. Intelligence & Covert Ops — Limits per Round
+
+Operations are **limited per round** by position. When a position is reassigned mid-round, the **remaining quota transfers** to the new holder.
+
+| Position | Intelligence | Covert Ops | Assassination |
+|----------|-------------|------------|---------------|
+| `security` | 5/round | 5/round | 3/round |
+| `military` | 5/round | 5/round | 2/round |
+| `diplomat` | 1/round | — | — |
+| `opposition` / citizen (no position) | 2/round | — | — |
+
+*Note: These are per-round limits. Country-level modifiers may apply in future.*
+
+---
+
+## 8. Columbia Elections
+
+- `self_nominate` and `cast_vote` are **Columbia-only** mechanisms
+- Available in designated election rounds, confirmed by moderator
+- Not applicable to other countries
+
+---
+
+## 9. Implementation Architecture
 
 ```
 roles.positions: text[]              -- e.g. ['head_of_state', 'security']
@@ -214,20 +237,30 @@ role_actions table                   -- computed from positions + country state
 
 ---
 
-## 8. Open Questions for Marat
+## 10. Decisions Log
 
-1. **HoS voluntary step-down:** Should this skip the removal vote entirely and go straight to election? Or should HoS just be able to initiate the same change_leader flow?
-
-2. **Opposition intelligence:** Should opposition roles have any intelligence capability? The Excel gives Columbia opposition some intelligence points (3). Should all opposition get basic intelligence?
-
-3. **Reassign_types scope:** Can HoS reassign ANY position to ANY role? Or only vacant positions? Can HoS remove a position from someone without giving it to someone else (leave it vacant)?
-
-4. **Columbia elections:** Self-nominate and cast_vote are currently Columbia-only. Should the election mechanism be available to other democratic countries in the future?
-
-5. **Intelligence for diplomats:** The Excel gives diplomats intelligence. The contracts say "Intelligence Director or similar." Should diplomat intelligence be the same scope as security intelligence, or more limited (e.g., only about other countries' diplomatic activities)?
-
-6. **Covert ops cards:** Are intelligence/covert_operation/assassination card-limited (consume a card from a pool) or unlimited? The contracts mention card pools but the implementation varies.
+| # | Question | Decision | Date |
+|---|----------|----------|------|
+| 1 | HoS voluntary step-down | Yes — skip removal vote, straight to election | 2026-04-19 |
+| 2 | Unpositioned roles | Normal citizen (no forced "opposition" label), gets universal actions + 2 intelligence/round | 2026-04-19 |
+| 3 | Reassign_types scope | Any position to any role, except HoS's own position. Can leave vacant. | 2026-04-19 |
+| 4 | Columbia elections | Columbia only | 2026-04-19 |
+| 5 | Diplomat intelligence | Same scope as security, 1 request/round | 2026-04-19 |
+| 6 | Covert ops limits | Limited by position per round (see §7). On reassignment, remaining quota transfers. | 2026-04-19 |
 
 ---
 
-*DRAFT — requires Marat approval before implementation.*
+## 11. Actions Still Pending Final Design
+
+| Action | Status | Notes |
+|--------|--------|-------|
+| `intelligence` | Limits decided, mechanics TBD | LLM-generated report with noise |
+| `covert_operation` | Limits decided, mechanics TBD | Sabotage, propaganda, election meddling |
+| `assassination` | Limits decided, mechanics TBD | Target selection, success probability |
+| `reassign_types` | Rules decided, UX TBD | Position transfer UI |
+| `self_nominate` | Columbia-only, mechanics TBD | Election round trigger |
+| `cast_vote` | Columbia-only, mechanics TBD | Simple majority |
+
+---
+
+*APPROVED by Marat 2026-04-19. Implementation can proceed for the positions array + recompute engine. Pending actions (§11) designed separately.*
