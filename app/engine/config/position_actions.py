@@ -117,8 +117,8 @@ MARTIAL_LAW_ELIGIBLE: set[str] = {"sarmatia", "ruthenia", "persia", "cathay"}
 # OPEC+ member countries
 OPEC_MEMBERS: set[str] = {"caribe", "mirage", "persia", "sarmatia", "solaria"}
 
-# Columbia-specific election actions (added for Columbia opposition roles)
-COLUMBIA_ELECTION_ACTIONS: set[str] = {"self_nominate"}
+# Columbia-specific election actions (added for ALL Columbia citizens)
+COLUMBIA_ELECTION_ACTIONS: set[str] = {"self_nominate", "cast_election_vote"}
 
 # ---------------------------------------------------------------------------
 # Action limits per SIM (not per round)
@@ -219,8 +219,8 @@ def compute_actions(
     if "martial_law" in actions and country_code not in MARTIAL_LAW_ELIGIBLE:
         actions.discard("martial_law")
 
-    # Columbia: opposition gets election actions
-    if country_code == "columbia" and "opposition" in positions:
+    # Columbia: ALL citizens get election actions (nominate + vote)
+    if country_code == "columbia":
         actions.update(COLUMBIA_ELECTION_ACTIONS)
 
     return actions
