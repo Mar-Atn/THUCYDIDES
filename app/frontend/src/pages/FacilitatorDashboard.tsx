@@ -196,7 +196,7 @@ function PositionBadges({ role }: { role: { positions?: string[]; position_type:
       : [role.position_type]  // legacy fallback
 
   if (pos.length === 0) {
-    return <span className="font-body text-caption px-1 py-0.5 rounded bg-base text-text-secondary/50">—</span>
+    return <span className="font-body text-caption px-1 py-0.5 rounded bg-base text-text-secondary/50">Citizen</span>
   }
 
   return (
