@@ -44,7 +44,7 @@ function hexCountryName(row: number, col: number): string {
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface RoleData {
-  id: string; character_name: string; country_id: string; position_type: string
+  id: string; character_name: string; country_id: string; position_type: string; positions?: string[]
   title: string; public_bio: string; confidential_brief: string | null
   objectives: string[]; powers: string[]
 }
@@ -78,6 +78,13 @@ const POS: Record<string, string> = {
   head_of_state: 'Head of State', military_chief: 'Military Chief',
   economy_officer: 'Economy Officer', diplomat: 'Diplomat',
   security: 'Security', opposition: 'Opposition',
+  // New canonical position names (from positions[] array)
+  military: 'Military', economy: 'Economy',
+}
+function displayPositions(role: { positions?: string[]; position_type: string }): string {
+  const pos = role.positions
+  if (pos && pos.length > 0) return pos.map(p => POS[p] ?? p).join(' + ')
+  return POS[role.position_type] ?? role.position_type ?? 'Citizen'
 }
 
 const RD: Record<number, string> = {
@@ -196,7 +203,7 @@ export function ParticipantDashboard() {
     try {
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
-        .select('id,character_name,country_id,position_type,title,public_bio,confidential_brief,objectives,powers')
+        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers')
         .eq('sim_run_id',simId)
       const { data: roles } = proxyRoleId
         ? await roleQuery.eq('id', proxyRoleId).limit(1)
@@ -309,7 +316,7 @@ export function ParticipantDashboard() {
                 <div className="font-heading text-h3 text-text-primary">{myRole!.character_name}</div>
                 <div className="font-body text-caption text-text-secondary">{myRole!.title} · {myCountry?.sim_name??myRole!.country_id}</div>
               </div>
-              <span className="font-body text-caption font-medium px-2 py-0.5 rounded" style={{backgroundColor:`${color}15`,color}}>{POS[myRole!.position_type]??myRole!.position_type}</span>
+              <span className="font-body text-caption font-medium px-2 py-0.5 rounded" style={{backgroundColor:`${color}15`,color}}>{displayPositions(myRole!)}</span>
             </>) : (<div>
               <div className="font-heading text-h3 text-text-primary">{profile?.display_name??'Participant'}</div>
               <div className="font-body text-caption text-text-secondary">Awaiting role assignment</div>
@@ -5377,13 +5384,13 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
                       className="w-full text-left flex items-center gap-3 py-1 hover:bg-base/30 rounded px-2 -mx-2 transition-colors">
                       <span className="font-body text-body-sm text-text-primary font-medium w-28 shrink-0">{role.character_name}</span>
                       <span className={`font-body text-caption px-1.5 py-0.5 rounded ${
-                        role.position_type==='head_of_state'?'bg-warning/10 text-warning':
-                        role.position_type==='military_chief'?'bg-danger/10 text-danger':
-                        role.position_type==='economy_officer'?'bg-accent/10 text-accent':
-                        role.position_type==='diplomat'?'bg-action/10 text-action':
+                        (role.positions?.includes('head_of_state') || role.position_type==='head_of_state')?'bg-warning/10 text-warning':
+                        (role.positions?.includes('military') || role.position_type==='military_chief')?'bg-danger/10 text-danger':
+                        (role.positions?.includes('economy') || role.position_type==='economy_officer')?'bg-accent/10 text-accent':
+                        (role.positions?.includes('diplomat') || role.position_type==='diplomat')?'bg-action/10 text-action':
                         'bg-text-secondary/10 text-text-secondary'
                       }`}>
-                        {POS[role.position_type]??role.position_type}
+                        {displayPositions(role as RoleData)}
                       </span>
                       <span className="font-body text-caption text-text-secondary flex-1">{role.title}</span>
                       {role.is_ai_operated&&<span className="font-body text-caption text-accent/60">AI</span>}
