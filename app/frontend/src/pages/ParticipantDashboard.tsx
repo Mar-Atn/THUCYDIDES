@@ -2372,19 +2372,19 @@ function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
               Select Missile{maxMissiles > 1 ? 's' : ''} + Assign Target{maxMissiles > 1 ? 's' : ''}
             </div>
 
-            {/* Available missiles */}
-            <div style={{display:'flex',flexWrap:'wrap',gap:'0.5rem'}}>
+            {/* Available missiles — icons only */}
+            <div style={{display:'flex',flexWrap:'wrap',gap:'0.5rem',alignItems:'center'}}>
               {availableMissiles.map(m => (
                 <button key={m.unit_id} onClick={() => setSelectedMissile(m.unit_id === selectedMissile ? null : m.unit_id)}
+                  title={m.unit_id}
                   style={{
                     display:'inline-flex',alignItems:'center',justifyContent:'center',
                     width:'2.5rem',height:'2.5rem',borderRadius:'0.25rem',cursor:'pointer',
                     backgroundColor: m.unit_id === selectedMissile ? 'rgba(255,60,20,0.2)' : 'transparent',
                     border: m.unit_id === selectedMissile ? '2px solid #FF3C14' : '2px solid rgba(255,255,255,0.15)',
                     color: m.unit_id === selectedMissile ? '#FF3C14' : '#9CA3AF',
-                    fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',
-                  }} title={m.unit_id}>
-                  {'\u2622'}
+                  }}>
+                  <UnitIcon type="strategic_missile" size={22}/>
                 </button>
               ))}
               {availableMissiles.length === 0 && pairs.length > 0 && (
@@ -2393,29 +2393,29 @@ function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
             </div>
 
             {selectedMissile && (
-              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#FF3C14',
-                padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.3)',backgroundColor:'rgba(255,60,20,0.05)'}}>
-                {'\u2622'} {selectedMissile} selected — click target hex on map
+              <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.75rem',color:'#FF3C14',
+                padding:'0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.3)',backgroundColor:'rgba(255,60,20,0.05)',
+                display:'flex',alignItems:'center',gap:'0.5rem'}}>
+                <UnitIcon type="strategic_missile" size={18}/> Click target hex on map
               </div>
             )}
 
-            {/* Queued pairs */}
+            {/* Queued missile → target pairs */}
             {pairs.length > 0 && (
               <div style={{display:'flex',flexDirection:'column',gap:'0.25rem'}}>
-                <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Launch Queue</div>
+                <div style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.65rem',color:'#9CA3AF',textTransform:'uppercase'}}>Launch Queue ({pairs.length})</div>
                 {pairs.map((p, i) => (
                   <div key={i} style={{
                     display:'flex',alignItems:'center',justifyContent:'space-between',
                     padding:'0.35rem 0.5rem',borderRadius:'0.25rem',border:'1px solid rgba(255,60,20,0.2)',
                     backgroundColor:'rgba(255,60,20,0.05)',
                   }}>
-                    <span style={{fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',color:'#FF3C14'}}>
-                      {p.missileId} {'\u2192'} ({p.targetRow},{p.targetCol})
+                    <span style={{display:'flex',alignItems:'center',gap:'0.4rem',color:'#FF3C14'}}>
+                      <UnitIcon type="strategic_missile" size={16}/> → ({p.targetRow},{p.targetCol}) ✓
                     </span>
                     <button onClick={() => removePair(i)} style={{
-                      color:'#9CA3AF',cursor:'pointer',border:'none',background:'none',
-                      fontFamily:'JetBrains Mono, monospace',fontSize:'0.7rem',
-                    }}>{'\u2716'}</button>
+                      color:'#9CA3AF',cursor:'pointer',border:'none',background:'none',fontSize:'0.8rem',
+                    }}>✕</button>
                   </div>
                 ))}
               </div>
