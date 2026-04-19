@@ -85,6 +85,31 @@ def load_country_context(country_id: str) -> dict[str, Any]:
     raise ValueError(f"Country not found: {country_id}")
 
 
+def _derive_positions(row: dict) -> list[str]:
+    """Derive positions list from CSV legacy boolean fields.
+
+    Reads positions column if present; otherwise falls back to
+    is_head_of_state, is_military_chief, is_diplomat booleans.
+    """
+    # If the CSV already has a positions column, use it
+    raw = row.get("positions", "")
+    if raw and raw.lower() not in ("", "false", "none"):
+        return [p.strip() for p in raw.split(";") if p.strip()]
+    # Derive from legacy booleans
+    result: list[str] = []
+    if row.get("is_head_of_state", "false").lower() == "true":
+        result.append("head_of_state")
+    if row.get("is_military_chief", "false").lower() == "true":
+        result.append("military")
+    if row.get("is_diplomat", "false").lower() == "true":
+        result.append("diplomat")
+    # position_type field may carry security/opposition/economy
+    pt = row.get("position_type", "").strip().lower()
+    if pt in ("security", "opposition", "economy") and pt not in result:
+        result.append(pt)
+    return result
+
+
 def _parse_role(row: dict) -> dict[str, Any]:
     """Parse a CSV row into a role dict."""
     return {
@@ -99,6 +124,7 @@ def _parse_role(row: dict) -> dict[str, Any]:
         "gender": row.get("gender", "M"),
         "is_head_of_state": row.get("is_head_of_state", "false").lower() == "true",
         "is_military_chief": row.get("is_military_chief", "false").lower() == "true",
+        "positions": _derive_positions(row),
         "intelligence_pool": int(row.get("intelligence_pool", 0)),
         "personal_coins": float(row.get("personal_coins", 0)),
         "powers": [p.strip() for p in row.get("powers", "").split(";") if p.strip()],

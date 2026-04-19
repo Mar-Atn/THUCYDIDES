@@ -5,6 +5,8 @@ Group C/D from CARD_ACTIONS §6.2, §6.4, §6.5, §6.6, §6.7.
 
 from __future__ import annotations
 
+from engine.config.position_actions import has_position
+
 CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "albion", "bharata", "caribe", "cathay", "choson", "columbia",
     "formosa", "freeland", "gallia", "hanguk", "levantia", "mirage",
@@ -96,7 +98,7 @@ def validate_coup(
     # Role check: must be military chief or opposition with coup_potential
     if roles and role_id:
         role_info = roles.get(role_id) or {}
-        is_mil = role_info.get("is_military_chief")
+        is_mil = has_position(role_info, "military")
         powers = str(role_info.get("powers") or "")
         if not is_mil and "coup" not in powers.lower():
             errors.append(f"UNAUTHORIZED: {role_id!r} lacks coup capability")

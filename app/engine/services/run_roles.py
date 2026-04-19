@@ -41,7 +41,7 @@ def seed_run_roles(sim_run_id: str) -> int:
     # Read template roles
     res = client.table("roles").select(
         "id,character_name,country_id,title,is_head_of_state,"
-        "is_military_chief,is_diplomat,personal_coins,powers"
+        "is_military_chief,is_diplomat,personal_coins,powers,positions"
     ).execute()
     template_roles = res.data or []
 
@@ -54,6 +54,16 @@ def seed_run_roles(sim_run_id: str) -> int:
         role_id = r.get("id") or r.get("role_id", "")
         if not role_id:
             continue
+        # Derive positions from positions[] array, falling back to legacy booleans
+        positions = r.get("positions") or []
+        if not positions:
+            positions = []
+            if r.get("is_head_of_state"):
+                positions.append("head_of_state")
+            if r.get("is_military_chief"):
+                positions.append("military")
+            if r.get("is_diplomat"):
+                positions.append("diplomat")
         rows.append({
             "sim_run_id": sim_run_id,
             "role_id": role_id,
@@ -63,6 +73,7 @@ def seed_run_roles(sim_run_id: str) -> int:
             "is_head_of_state": bool(r.get("is_head_of_state")),
             "is_military_chief": bool(r.get("is_military_chief")),
             "is_diplomat": bool(r.get("is_diplomat")),
+            "positions": positions,
             "status": "active",
             "personal_coins": int(r.get("personal_coins") or 0),
             "powers": r.get("powers", ""),

@@ -51,6 +51,7 @@ export interface SimRunRole {
   character_name: string
   country_id: string
   title: string
+  positions: string[]
   position_type: string
   is_ai_operated: boolean
   expansion_role: boolean
@@ -535,6 +536,7 @@ export interface Role {
   brief_file: string
   public_bio: string
   confidential_brief: string
+  positions: string[]
   position_type: string
   party: string
   intelligence_pool: number

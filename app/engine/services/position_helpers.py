@@ -365,7 +365,10 @@ def _sync_legacy_fields(
 ) -> None:
     """Sync legacy boolean fields (is_head_of_state, etc.) from positions array.
 
-    Keeps backward compatibility while positions array is the source of truth.
+    DEPRECATED: This function will be removed when legacy boolean columns
+    (is_head_of_state, is_military_chief, is_economy_officer, is_diplomat)
+    are dropped from the DB schema via a Supabase migration. Until then,
+    it keeps backward compatibility while positions[] is the source of truth.
     """
     update = {
         "is_head_of_state": "head_of_state" in positions,

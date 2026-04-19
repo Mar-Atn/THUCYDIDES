@@ -147,8 +147,8 @@ def _decide_actions(
 
     Position-based defaults:
     - head_of_state: set_budget + public_statement
-    - economy_officer: set_budget + set_tariffs
-    - military_chief: public_statement (no combat in stub)
+    - economy: set_budget + set_tariffs
+    - military: public_statement (no combat in stub)
     - diplomat: public_statement + propose_agreement (if available)
     - security/opposition: public_statement
 
@@ -176,8 +176,8 @@ def _decide_actions(
             },
         })
 
-    # Economy officer: set budget + tariffs
-    if position == "economy_officer":
+    # Economy: set budget + tariffs
+    if position == "economy":
         if "set_budget" in allowed:
             decisions.append({
                 "action_type": "set_budget",

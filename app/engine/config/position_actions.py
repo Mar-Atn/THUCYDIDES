@@ -21,7 +21,11 @@ The role_actions table is a CACHE of computed permissions.
 Source of truth: positions[] + country state → available actions.
 """
 
+import logging
+import warnings
 from typing import Optional
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Layer 1: Universal actions (available to ALL roles regardless of position)
@@ -232,12 +236,18 @@ def has_position(role: dict, position: str) -> bool:
     """Check if a role holds a given position.
 
     Uses the positions array (primary) with fallback to legacy fields.
+    The legacy fallback is DEPRECATED and will be removed when legacy
+    columns are dropped from the DB.
     """
     positions = role.get("positions")
     if positions is not None and isinstance(positions, list):
         return position in positions
 
-    # Fallback to legacy boolean fields
+    # DEPRECATED: legacy boolean field fallback — all roles should have positions[] by now
+    logger.warning(
+        "has_position: role %s missing positions[], using legacy fallback (DEPRECATED)",
+        role.get("id") or role.get("role_id") or "?",
+    )
     if position == "head_of_state":
         return bool(role.get("is_head_of_state"))
     if position == "military":
@@ -255,12 +265,20 @@ def has_position(role: dict, position: str) -> bool:
 
 
 def get_positions(role: dict) -> list[str]:
-    """Get a role's positions list with legacy fallback."""
+    """Get a role's positions list with legacy fallback.
+
+    The legacy fallback is DEPRECATED and will be removed when legacy
+    columns are dropped from the DB.
+    """
     positions = role.get("positions")
     if positions is not None and isinstance(positions, list):
         return list(positions)
 
-    # Derive from legacy fields
+    # DEPRECATED: legacy field derivation — all roles should have positions[] by now
+    logger.warning(
+        "get_positions: role %s missing positions[], using legacy fallback (DEPRECATED)",
+        role.get("id") or role.get("role_id") or "?",
+    )
     result = []
     if role.get("is_head_of_state"):
         result.append("head_of_state")

@@ -15,6 +15,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
+from engine.config.position_actions import has_position
 from engine.services.run_roles import (
     get_run_role, update_role_status,
 )
@@ -50,9 +51,9 @@ def request_arrest(
         return {"success": False, "status": "rejected",
                 "message": f"Arrester {arrester_role_id!r} not found"}
 
-    if not arrester.get("is_head_of_state"):
+    if not (has_position(arrester, "head_of_state") or has_position(arrester, "security")):
         return {"success": False, "status": "rejected",
-                "message": f"{arrester_role_id!r} is not HoS — cannot arrest"}
+                "message": f"{arrester_role_id!r} is not HoS or Security — cannot arrest"}
 
     if arrester["country_code"] != target["country_code"]:
         return {"success": False, "status": "rejected",

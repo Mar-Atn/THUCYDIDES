@@ -36,13 +36,13 @@ const COUNTRY_ORDER: string[] = [
 ]
 
 const GENDER_OPTIONS = ['M', 'F'] as const
-const POSITION_OPTIONS = ['head_of_state', 'military_chief', 'economy_officer', 'diplomat', 'security', 'opposition', 'other'] as const
+const POSITION_OPTIONS = ['head_of_state', 'military', 'economy', 'diplomat', 'security', 'opposition', 'other'] as const
 const PARTY_OPTIONS = ['', 'rep', 'dem', 'independent'] as const
 
 const POSITION_BADGE: Record<string, { label: string; cls: string }> = {
   head_of_state:  { label: 'HoS',        cls: 'bg-warning/10 text-warning' },
-  military_chief: { label: 'Military',    cls: 'bg-danger/10 text-danger' },
-  economy_officer:{ label: 'Economy',     cls: 'bg-accent/10 text-accent' },
+  military:       { label: 'Military',    cls: 'bg-danger/10 text-danger' },
+  economy:        { label: 'Economy',     cls: 'bg-accent/10 text-accent' },
   diplomat:       { label: 'Diplomat',    cls: 'bg-action/10 text-action' },
   security:       { label: 'Security',    cls: 'bg-text-secondary/10 text-text-primary' },
   opposition:     { label: 'Opposition',  cls: 'bg-danger/20 text-danger' },
@@ -463,10 +463,14 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="font-body text-caption text-text-secondary">position_type</label>
+          <label className="font-body text-caption text-text-secondary">positions</label>
           <select
-            value={draft.position_type}
-            onChange={(e) => set('position_type', e.target.value)}
+            value={(draft.positions && draft.positions.length > 0) ? draft.positions[0] : (draft.position_type || 'other')}
+            onChange={(e) => {
+              const pos = e.target.value
+              set('positions', pos === 'other' ? [] : [pos])
+              set('position_type', pos) // keep legacy field in sync
+            }}
             className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
           >
             {POSITION_OPTIONS.map((opt) => (
@@ -629,7 +633,8 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
 /* -------------------------------------------------------------------------- */
 
 function CollapsedBadges({ role }: { role: Role }) {
-  const pos = POSITION_BADGE[role.position_type]
+  const primaryPosition = (role.positions && role.positions.length > 0) ? role.positions[0] : role.position_type
+  const pos = POSITION_BADGE[primaryPosition]
   const party = role.country_id === 'columbia' && role.party ? PARTY_BADGE[role.party] : null
 
   return (
