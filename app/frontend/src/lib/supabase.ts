@@ -1,14 +1,8 @@
 /**
- * Supabase client — singleton with connection management.
+ * Supabase client — singleton, persisted across HMR.
  *
- * Two critical features:
- * 1. Navigator lock disabled (prevents "lock stolen" errors on HMR)
- * 2. Throttled fetch: limits concurrent HTTP requests to Supabase REST API
- *    to prevent browser ERR_INSUFFICIENT_RESOURCES.
- *
- * The throttle is necessary because the app makes 50-70 REST calls per page
- * across mount effects and realtime hooks. With 4+ browser tabs, this
- * exceeds the browser's per-origin connection limit (~6 HTTP/1.1, ~100 HTTP/2).
+ * Navigator lock disabled to prevent "lock stolen" errors on page reload.
+ * Client is stored on window to survive Vite HMR module reloads.
  */
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
@@ -22,63 +16,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
-// ---------------------------------------------------------------------------
-// Throttled fetch — limits concurrent requests to Supabase REST API
-// ---------------------------------------------------------------------------
-
-const MAX_CONCURRENT = 4  // max simultaneous REST requests per tab
-const QUEUE_KEY = '__ttt_fetch_queue__'
-
-interface FetchQueue {
-  active: number
-  queue: Array<{ resolve: (v: unknown) => void; args: [RequestInfo | URL, RequestInit?] }>
-}
-
-function getFetchQueue(): FetchQueue {
-  const w = window as Record<string, unknown>
-  if (!w[QUEUE_KEY]) {
-    w[QUEUE_KEY] = { active: 0, queue: [] } as FetchQueue
-  }
-  return w[QUEUE_KEY] as FetchQueue
-}
-
-function processQueue(): void {
-  const q = getFetchQueue()
-  while (q.active < MAX_CONCURRENT && q.queue.length > 0) {
-    const item = q.queue.shift()!
-    q.active++
-    window.fetch.apply(window, item.args as [RequestInfo | URL, RequestInit?])
-      .then(
-        (res) => { q.active--; item.resolve(res); processQueue() },
-        (err) => { q.active--; item.resolve(Promise.reject(err)); processQueue() },
-      )
-  }
-}
-
-function throttledFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
-  const q = getFetchQueue()
-
-  // If under limit, execute immediately
-  if (q.active < MAX_CONCURRENT) {
-    q.active++
-    return window.fetch(input, init).finally(() => {
-      q.active--
-      processQueue()
-    })
-  }
-
-  // Otherwise queue it
-  return new Promise((resolve) => {
-    q.queue.push({ resolve, args: [input, init] })
-  }) as Promise<Response>
-}
-
-// ---------------------------------------------------------------------------
-// Client singleton — persists across HMR
-// ---------------------------------------------------------------------------
-
-// Version bump forces client re-creation when fetch strategy changes
-const GLOBAL_KEY = '__ttt_supabase_client_v2__'
+// Version key — bump when client config changes to force re-creation
+const GLOBAL_KEY = '__ttt_supabase_client_v3__'
 
 function getOrCreateClient(): SupabaseClient {
   const w = window as Record<string, unknown>
@@ -97,9 +36,6 @@ function getOrCreateClient(): SupabaseClient {
       params: {
         eventsPerSecond: 10,
       },
-    },
-    global: {
-      fetch: throttledFetch,
     },
   })
 

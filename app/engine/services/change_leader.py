@@ -91,10 +91,6 @@ def initiate_change_leader(
     if existing:
         return {"success": False, "narrative": "A leadership change vote is already in progress this round"}
 
-    # Round 1 restriction
-    if round_num <= 1:
-        return {"success": False, "narrative": "Cannot initiate leadership change in Round 1"}
-
     # Create the removal vote
     non_hos = [r for r in roles if r["position_type"] != "head_of_state"]
     required = math.ceil(len(non_hos) / 2) + (0 if len(non_hos) % 2 == 1 else 1)
