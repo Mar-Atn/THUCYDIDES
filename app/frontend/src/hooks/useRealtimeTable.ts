@@ -81,7 +81,7 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
     fetchData()
 
     // Subscribe to changes
-    const channelName = `rt:${table}:${simId}:${filter || 'all'}:${JSON.stringify(eq || {})}`
+    const channelName = `rt:${table}:${simId}:${filter || 'all'}:${JSON.stringify(eq || {})}:${Math.random().toString(36).slice(2, 8)}`
     const channel = supabase
       .channel(channelName)
       .on(
