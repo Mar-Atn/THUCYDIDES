@@ -334,6 +334,8 @@ export function FacilitatorDashboard() {
   }[]
 
   const [electionResolving, setElectionResolving] = useState(false)
+  const [electionStartedLocal, setElectionStartedLocal] = useState(false)
+  const [electionStartedAtLocal, setElectionStartedAtLocal] = useState<string|null>(null)
   const [electionStoppedLocal, setElectionStoppedLocal] = useState(false)
   const [nominationsClosedLocal, setNominationsClosedLocal] = useState(false)
   const [localVoteOverrides, setLocalVoteOverrides] = useState<Record<string, string | null>>({})
@@ -961,6 +963,8 @@ export function FacilitatorDashboard() {
                           const { supabase: sb } = await import('@/lib/supabase')
                           await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
                           setNominationsClosedLocal(false)
+                          setElectionStartedLocal(false)
+                          setElectionStartedAtLocal(null)
                           setElectionStoppedLocal(false)
                           setLocalVoteOverrides({})
                         }}
@@ -1064,8 +1068,8 @@ export function FacilitatorDashboard() {
 
                   {activeElecEvent && !elecResolved && (() => {
                     const sched = (simRun?.schedule as Record<string,unknown>) || {}
-                    const elecStarted = sched.election_open === true
-                    const elecStartedAt = sched.election_started_at as string | null
+                    const elecStarted = sched.election_open === true || electionStartedLocal
+                    const elecStartedAt = (sched.election_started_at as string | null) || electionStartedAtLocal
                     const elecDurationMin = (sched.election_duration_min as number) || 10
 
                     // Economy indicator for moderator
@@ -1117,9 +1121,13 @@ export function FacilitatorDashboard() {
                             const stab = cs?.[0]?.stability ?? 0
                             const infl = cs?.[0]?.inflation ?? 0
                             const eScore = Math.max(0, (stab - 2) / 10) * 0.45 + Math.max(0, 1 - infl / 12) * 0.55
-                            const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10,
+                            const startedAt = new Date().toISOString()
+                            const newSched = { ...sched, election_open: true, election_started_at: startedAt, election_duration_min: 10,
                               election_econ_score: eScore.toFixed(3), election_stability: stab.toFixed(1), election_inflation: infl.toFixed(1) }
                             await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                            setElectionStartedLocal(true)
+                            setElectionStartedAtLocal(startedAt)
+                            setElectionStoppedLocal(false)
                           }}
                             className="w-full font-body text-body-sm font-medium bg-warning text-white py-2 rounded-lg hover:bg-warning/90 transition-colors">
                             Start Election
