@@ -1084,11 +1084,11 @@ export function FacilitatorDashboard() {
                         electionVotes.filter(v => v.election_type === activeElecEvent.subtype).forEach(v => {
                           voterMap[v.voter_role_id] = v.candidate_role_id
                         })
-                        // Economy score (loaded from country data if available)
-                        const colCountry = roles.find(r => r.country_id === 'columbia')
-                        // We need stability/inflation — load async, use placeholder for now
+                        // Economy score — use cached from start, or treat as unknown
                         const econNote = (sched.election_econ_score as string) || null
-                        const hasBonus = econNote ? parseFloat(econNote) < 0.5 : false
+                        // If no cached score, we'll load it via ElectionEconIndicator
+                        // For weight calc, default to bonus=true if unknown (conservative)
+                        const hasBonus = econNote ? parseFloat(econNote) < 0.5 : true
 
                         return !elecStarted ? (
                         <>
@@ -1133,22 +1133,15 @@ export function FacilitatorDashboard() {
                             )
                           })()}
 
-                          {/* Economy indicator */}
-                          <div className="bg-base rounded p-2 mb-2 font-data text-caption">
-                            <div className="flex gap-3">
-                              <span className="text-text-secondary">Stability: <span className="text-text-primary">{sched.election_stability || '?'}</span></span>
-                              <span className="text-text-secondary">Inflation: <span className="text-text-primary">{sched.election_inflation || '?'}%</span></span>
-                              <span className="text-text-secondary">Score: <span className={`font-medium ${econNote && parseFloat(econNote) < 0.5 ? 'text-danger' : 'text-success'}`}>{econNote || '?'}</span></span>
-                              <span className="text-text-secondary/50">Threshold: 0.50</span>
-                            </div>
-                          </div>
+                          {/* Economy indicator — load live if not captured at start */}
+                          <ElectionEconIndicator simId={simId!} sched={sched} />
 
                           {/* Voter table: role → voted for → weight */}
                           <div className="bg-card border border-border rounded divide-y divide-border mb-2">
                             {ALL_VOTERS.map(rid => {
                               const voted = voterMap[rid]
                               const isOpp = OPPOSITION.has(rid)
-                              const weight = isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1
+                              const weight = isOpp ? (hasBonus ? 3 : 2) : 1
                               return (
                                 <div key={rid} className="flex items-center gap-2 px-3 py-1.5 text-caption">
                                   <span className="font-body text-text-primary w-20 capitalize">{rid}</span>
@@ -1172,12 +1165,12 @@ export function FacilitatorDashboard() {
                                   const total = ALL_VOTERS.reduce((sum, rid) => {
                                     if (voterMap[rid] !== c.role_id) return sum
                                     const isOpp = OPPOSITION.has(rid)
-                                    const w = isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1
+                                    const w = isOpp ? (hasBonus ? 3 : 2) : 1
                                     return sum + w
                                   }, 0)
                                   const maxVotes = ALL_VOTERS.reduce((sum, rid) => {
                                     const isOpp = OPPOSITION.has(rid)
-                                    return sum + (isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1)
+                                    return sum + (isOpp ? (hasBonus ? 3 : 2) : 1)
                                   }, 0)
                                   const majority = Math.floor(maxVotes / 2) + 1
                                   return (
@@ -1187,7 +1180,7 @@ export function FacilitatorDashboard() {
                                   )
                                 })}
                                 <span className="text-text-secondary/50 font-data text-caption ml-auto">
-                                  need {Math.floor(ALL_VOTERS.reduce((s, r) => s + (OPPOSITION.has(r) ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1), 0) / 2) + 1}
+                                  need {Math.floor(ALL_VOTERS.reduce((s, r) => s + (OPPOSITION.has(r) ? (hasBonus ? 3 : 2) : 1), 0) / 2) + 1}
                                 </span>
                               </div>
                             </div>
@@ -1430,6 +1423,40 @@ const COMBAT_ACTIONS = new Set([
 const COMBAT_LABELS: Record<string,string> = {
   ground_attack:'Ground Attack', air_strike:'Air Strike', naval_combat:'Naval Combat',
   naval_bombardment:'Naval Bombardment', launch_missile_conventional:'Missile Launch',
+}
+
+function ElectionEconIndicator({ simId, sched }: { simId: string; sched: Record<string, unknown> }) {
+  const [econ, setEcon] = useState<{ stab: string; infl: string; score: string } | null>(null)
+
+  useEffect(() => {
+    // Use cached values from schedule if available
+    if (sched.election_stability && sched.election_inflation && sched.election_econ_score) {
+      setEcon({ stab: String(sched.election_stability), infl: String(sched.election_inflation), score: String(sched.election_econ_score) })
+      return
+    }
+    // Otherwise load live
+    supabase.from('countries').select('stability,inflation').eq('sim_run_id', simId).eq('id', 'columbia').limit(1)
+      .then(({ data }) => {
+        if (!data?.[0]) return
+        const stab = data[0].stability ?? 0
+        const infl = data[0].inflation ?? 0
+        const sc = Math.max(0, (stab - 2) / 10) * 0.45 + Math.max(0, 1 - infl / 12) * 0.55
+        setEcon({ stab: Number(stab).toFixed(1), infl: Number(infl).toFixed(1), score: sc.toFixed(3) })
+      })
+  }, [simId, sched.election_stability, sched.election_inflation, sched.election_econ_score])
+
+  if (!econ) return null
+  const scoreNum = parseFloat(econ.score)
+  return (
+    <div className="bg-base rounded p-2 mb-2 font-data text-caption">
+      <div className="flex gap-3">
+        <span className="text-text-secondary">Stability: <span className="text-text-primary">{econ.stab}</span></span>
+        <span className="text-text-secondary">Inflation: <span className="text-text-primary">{econ.infl}%</span></span>
+        <span className="text-text-secondary">Score: <span className={`font-medium ${scoreNum < 0.5 ? 'text-danger' : 'text-success'}`}>{econ.score}</span></span>
+        <span className="text-text-secondary/50">Threshold: 0.50</span>
+      </div>
+    </div>
+  )
 }
 
 function PendingActionCard({pa, simRun, onConfirm, onReject}:{
