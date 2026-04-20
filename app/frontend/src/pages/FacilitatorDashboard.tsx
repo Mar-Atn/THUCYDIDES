@@ -1137,7 +1137,7 @@ export function FacilitatorDashboard() {
                           {/* Economy indicator — load live if not captured at start */}
                           <ElectionEconIndicator simId={simId!} sched={sched} />
 
-                          {/* Voter table: role → voted for → weight */}
+                          {/* Voter table: role → vote dropdown → weight */}
                           <div className="bg-card border border-border rounded divide-y divide-border mb-2">
                             {ALL_VOTERS.map(rid => {
                               const voted = voterMap[rid]
@@ -1146,10 +1146,29 @@ export function FacilitatorDashboard() {
                               return (
                                 <div key={rid} className="flex items-center gap-2 px-3 py-1.5 text-caption">
                                   <span className="font-body text-text-primary w-20 capitalize">{rid}</span>
-                                  <span className={`font-body flex-1 ${voted ? 'text-action' : 'text-text-secondary/40'}`}>
-                                    {voted ? <span className="capitalize">{voted}</span> : '—'}
-                                  </span>
-                                  <span className={`font-data ${isOpp ? 'text-warning font-medium' : 'text-text-secondary'}`}>
+                                  <select value={voted || ''} onChange={async (e) => {
+                                    const { supabase: sb } = await import('@/lib/supabase')
+                                    const newCandidate = e.target.value
+                                    // Delete existing vote for this voter
+                                    await sb.from('election_votes').delete()
+                                      .eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype).eq('voter_role_id', rid)
+                                    // Insert new vote if not clearing
+                                    if (newCandidate) {
+                                      await sb.from('election_votes').insert({
+                                        sim_run_id: simId, election_type: activeElecEvent.subtype,
+                                        election_round: activeElecEvent.round, voter_role_id: rid,
+                                        candidate_role_id: newCandidate, country_code: 'columbia',
+                                      })
+                                    }
+                                    setTimeout(() => refetchElectionVotes(), 300)
+                                  }}
+                                    className="flex-1 font-body text-caption bg-base border border-border rounded px-1 py-0.5">
+                                    <option value="">—</option>
+                                    {candidates.map(c => (
+                                      <option key={c.role_id} value={c.role_id}>{c.role_id}</option>
+                                    ))}
+                                  </select>
+                                  <span className={`font-data w-4 text-right ${isOpp ? 'text-warning font-medium' : 'text-text-secondary'}`}>
                                     {weight}
                                   </span>
                                 </div>
