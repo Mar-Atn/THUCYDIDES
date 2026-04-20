@@ -84,7 +84,12 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", description="development | staging | production")
     log_level: str = Field(default="INFO", description="Logging level")
     cors_origins: list[str] = Field(
-        default=["http://localhost:5173", "http://localhost:3000"],
+        default=[
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "https://thucydides-pi.vercel.app",
+            "https://thucydides.metagames.academy",
+        ],
         description="Allowed CORS origins",
     )
 
