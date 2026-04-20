@@ -960,29 +960,94 @@ export function FacilitatorDashboard() {
                         </button>
                       )}
 
-                      {(nomOpen || isAuto) && (
+                      {(nomOpen || isAuto) && (() => {
+                        const nomsClosed = (simRun?.schedule as Record<string,unknown>)?.nominations_closed === true
+                        const currentNoms = electionNominations.filter(n => n.election_type === activeNomEvent.subtype)
+                        const columbiaRoles = roles.filter(r => r.country_id === 'columbia' && r.status === 'active')
+                        const nominatedIds = new Set(currentNoms.map(n => n.role_id))
+                        const availableToAdd = columbiaRoles.filter(r => !nominatedIds.has(r.id))
+
+                        return nomsClosed ? (
+                          <div className="bg-success/5 border border-success/20 rounded p-2 mt-1">
+                            <span className="font-body text-caption text-success font-medium">
+                              Nominations closed — {currentNoms.length} candidate{currentNoms.length !== 1 ? 's' : ''} approved for R{activeNomEvent.round} election
+                            </span>
+                          </div>
+                        ) : (
                         <>
                           <div className="font-body text-caption text-text-secondary mb-1">
                             {elecNomCount} nominee{elecNomCount !== 1 ? 's' : ''} registered
                           </div>
-                          {elecNomCount > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {electionNominations
-                                .filter(n => n.election_type === activeNomEvent.subtype)
-                                .map(n => (
-                                  <span key={n.id} className={`font-data text-caption px-2 py-0.5 rounded capitalize ${
-                                    n.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
-                                  }`}>{n.role_id}</span>
-                                ))}
+
+                          {/* Nominee list with remove buttons */}
+                          {currentNoms.length > 0 && (
+                            <div className="bg-card border border-border rounded divide-y divide-border mt-1 mb-2">
+                              {currentNoms.map(n => (
+                                <div key={n.id} className="flex items-center justify-between px-3 py-1.5">
+                                  <span className={`font-data text-caption capitalize ${
+                                    n.camp === 'opposition' ? 'text-action' : 'text-text-primary'
+                                  }`}>{n.role_id} <span className="text-text-secondary/50">({n.camp})</span></span>
+                                  <button onClick={async () => {
+                                    const { supabase: sb } = await import('@/lib/supabase')
+                                    await sb.from('election_nominations').delete().eq('id', n.id)
+                                  }} className="font-body text-caption text-danger/60 hover:text-danger transition-colors">
+                                    remove
+                                  </button>
+                                </div>
+                              ))}
                             </div>
                           )}
+
+                          {/* Add nominee dropdown */}
+                          {availableToAdd.length > 0 && (
+                            <div className="flex gap-1 mb-2">
+                              <select id="add-nominee-select" className="flex-1 font-body text-caption bg-base border border-border rounded px-2 py-1">
+                                <option value="">Add nominee...</option>
+                                {availableToAdd.map(r => (
+                                  <option key={r.id} value={r.id}>{r.character_name} ({r.id})</option>
+                                ))}
+                              </select>
+                              <button onClick={async () => {
+                                const select = document.getElementById('add-nominee-select') as HTMLSelectElement
+                                const rid = select?.value
+                                if (!rid) return
+                                const camp = ['tribune','challenger'].includes(rid) ? 'opposition' : 'president_camp'
+                                const { supabase: sb } = await import('@/lib/supabase')
+                                await sb.from('election_nominations').insert({
+                                  sim_run_id: simId,
+                                  election_type: activeNomEvent.subtype,
+                                  election_round: activeNomEvent.round,
+                                  role_id: rid,
+                                  country_code: 'columbia',
+                                  camp,
+                                })
+                                select.value = ''
+                              }} className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors">
+                                Add
+                              </button>
+                            </div>
+                          )}
+
                           {elecNomCount === 0 && (
-                            <div className="font-body text-caption text-text-secondary/50">
+                            <div className="font-body text-caption text-text-secondary/50 mb-2">
                               Waiting for Columbia citizens to nominate...
                             </div>
                           )}
+
+                          {/* Close & Approve button */}
+                          <button onClick={async () => {
+                            if (!confirm(`Close nominations with ${currentNoms.length} candidate${currentNoms.length !== 1 ? 's' : ''}?\n\nThis will finalize the candidate list for the R${activeNomEvent.round} election.`)) return
+                            const sched = { ...((simRun?.schedule as Record<string,unknown>) || {}), nominations_closed: true }
+                            const { supabase: sb } = await import('@/lib/supabase')
+                            await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
+                          }}
+                            disabled={currentNoms.length === 0}
+                            className="w-full font-body text-caption font-medium bg-success/10 text-success py-1.5 rounded hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Close and Approve Nominations ({currentNoms.length})
+                          </button>
                         </>
-                      )}
+                        )
+                      })()}
                     </div>
                     )
                   })()}
