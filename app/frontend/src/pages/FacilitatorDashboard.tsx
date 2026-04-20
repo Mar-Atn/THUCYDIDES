@@ -951,7 +951,10 @@ export function FacilitatorDashboard() {
 
                       {!nomOpen && !isAuto && (
                         <button onClick={async () => {
-                          const sched = { ...((simRun?.schedule as Record<string,unknown>) || {}), nominations_open: true }
+                          const baseSched = { ...((simRun?.schedule as Record<string,unknown>) || {}) }
+                          // Clear stale election flags from previous elections
+                          for (const f of ['nominations_open','nominations_closed','election_open','election_stopped','election_started_at','election_duration_min','election_econ_score','election_stability','election_inflation']) delete baseSched[f]
+                          const sched = { ...baseSched, nominations_open: true }
                           await simAction(simId!, 'mode', { ...sched })
                           // Simpler: directly update schedule
                           const { supabase: sb } = await import('@/lib/supabase')
