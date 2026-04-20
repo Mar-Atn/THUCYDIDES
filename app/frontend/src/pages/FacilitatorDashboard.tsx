@@ -1052,7 +1052,19 @@ export function FacilitatorDashboard() {
                     )
                   })()}
 
-                  {activeElecEvent && !elecResolved && (
+                  {activeElecEvent && !elecResolved && (() => {
+                    const sched = (simRun?.schedule as Record<string,unknown>) || {}
+                    const elecStarted = sched.election_open === true
+                    const elecStartedAt = sched.election_started_at as string | null
+                    const elecDurationMin = (sched.election_duration_min as number) || 10
+
+                    // Economy indicator for moderator
+                    const colState = (() => {
+                      const c = roles.find(r => r.country_id === 'columbia')
+                      return c ? { stab: 0, infl: 0 } : { stab: 0, infl: 0 }
+                    })()
+
+                    return (
                     <div className="border rounded-lg p-3 bg-warning/10 border-warning/40">
                       <div className="flex items-center justify-between mb-1">
                         <span className="font-data text-caption font-bold text-warning uppercase">
@@ -1062,23 +1074,79 @@ export function FacilitatorDashboard() {
                           R{activeElecEvent.round}
                         </span>
                       </div>
-                      <div className="font-body text-caption text-text-secondary mb-1">
-                        {elecVoteCount} of 7 Columbia citizens have voted
-                      </div>
-                      {Object.keys(elecTallies).length > 0 && (
-                        <div className="font-data text-caption text-text-primary mb-1">
-                          Tally (secret): {Object.entries(elecTallies).sort((a,b) => b[1]-a[1]).map(([c,n]) =>
-                            `${c}: ${n}`
-                          ).join(', ')}
-                        </div>
+
+                      {!elecStarted ? (
+                        <>
+                          <div className="font-body text-caption text-text-secondary mb-2">
+                            {electionNominations.filter(n => n.election_type === activeElecEvent.subtype).length} candidates ready. Start voting (10 min timer).
+                          </div>
+                          <button onClick={async () => {
+                            const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
+                            const { supabase: sb } = await import('@/lib/supabase')
+                            await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                          }}
+                            className="w-full font-body text-body-sm font-medium bg-warning text-white py-2 rounded-lg hover:bg-warning/90 transition-colors">
+                            Start Election
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          {/* Timer */}
+                          {elecStartedAt && (() => {
+                            const elapsed = (Date.now() - new Date(elecStartedAt).getTime()) / 1000
+                            const total = elecDurationMin * 60
+                            const rem = Math.max(0, total - elapsed)
+                            const mm = String(Math.floor(rem / 60)).padStart(2, '0')
+                            const ss = String(Math.floor(rem % 60)).padStart(2, '0')
+                            return (
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="font-data text-caption text-warning">{mm}:{ss} remaining</span>
+                                <div className="flex gap-1">
+                                  <button onClick={async () => {
+                                    const newSched = { ...sched, election_duration_min: elecDurationMin + 5 }
+                                    const { supabase: sb } = await import('@/lib/supabase')
+                                    await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                  }} className="font-body text-caption text-text-secondary hover:text-action px-1">+5m</button>
+                                  <button onClick={async () => {
+                                    const newSched = { ...sched, election_duration_min: 0 }
+                                    const { supabase: sb } = await import('@/lib/supabase')
+                                    await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                  }} className="font-body text-caption text-text-secondary hover:text-danger px-1">Stop</button>
+                                </div>
+                              </div>
+                            )
+                          })()}
+
+                          {/* Vote progress */}
+                          <div className="font-body text-caption text-text-secondary mb-1">
+                            {elecVoteCount} of 7 Columbia citizens have voted
+                          </div>
+
+                          {/* Secret tally for moderator */}
+                          {Object.keys(elecTallies).length > 0 && (
+                            <div className="font-data text-caption text-text-primary mb-1">
+                              Tally: {Object.entries(elecTallies).sort((a,b) => b[1]-a[1]).map(([c,n]) =>
+                                `${c}: ${n}`
+                              ).join(', ')}
+                            </div>
+                          )}
+
+                          {/* Economy indicator */}
+                          <div className="font-body text-caption text-text-secondary/60 mb-2">
+                            Economy score determines vote weight. Opposition bonus: score &lt; 0.50
+                          </div>
+
+                          {/* Resolve button */}
+                          <button onClick={handleResolveElection}
+                            disabled={electionResolving || elecVoteCount === 0}
+                            className="w-full font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            {electionResolving ? 'Resolving...' : 'Resolve Election'}
+                          </button>
+                        </>
                       )}
-                      <button onClick={handleResolveElection}
-                        disabled={electionResolving || elecVoteCount === 0}
-                        className="mt-2 font-body text-caption font-medium bg-action text-white px-3 py-1 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        {electionResolving ? 'Resolving...' : 'Resolve Election'}
-                      </button>
                     </div>
-                  )}
+                    )
+                  })()}
 
                   {elecResolved && activeElecEvent && (
                     <div className="border rounded-lg p-3 bg-success/10 border-success/30">

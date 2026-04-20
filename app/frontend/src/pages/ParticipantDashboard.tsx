@@ -859,7 +859,19 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const isNominated = localNominated === true || (localNominated === null && !!myNomination)
   const showNomination = isColumbia && activeNominationEvent && !isNominated && nominationsOpen
     && (activeNominationEvent.subtype !== 'parliamentary_midterm' || canNominateForMidterm)
-  const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0
+  // Check if election voting is open (moderator started)
+  const [electionOpen, setElectionOpen] = useState(false)
+  useEffect(() => {
+    if (!simId || !activeElectionEvent) { setElectionOpen(false); return }
+    supabase.from('sim_runs').select('schedule,auto_approve').eq('id', simId).limit(1)
+      .then(({ data }) => {
+        if (!data?.[0]) return
+        const sched = (data[0].schedule as Record<string, unknown>) || {}
+        setElectionOpen(sched.election_open === true || data[0].auto_approve === true)
+      })
+  }, [simId, activeElectionEvent, dataVersion])
+
+  const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0 && electionOpen
 
   const handleSelfNominate = async () => {
     if (!activeNominationEvent) return
