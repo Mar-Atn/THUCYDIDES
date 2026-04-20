@@ -71,7 +71,7 @@ def generate_intelligence_report(
             "sim_run_id": sim_run_id,
             "role_id": requester_role,
             "artefact_type": "intelligence_report",
-            "classification": "classified",
+            "classification": "CONFIDENTIAL",
             "title": f"Intelligence Report — R{round_num}",
             "subtitle": question[:100],
             "from_entity": "Intelligence Directorate",
