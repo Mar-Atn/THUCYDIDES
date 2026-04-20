@@ -4304,6 +4304,7 @@ function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [error, setError] = useState<string|null>(null)
   const [result, setResult] = useState<{narrative:string;killed:boolean;attributed:boolean}|null>(null)
   const [remaining, setRemaining] = useState<number|null>(null)
+  const [pendingId, setPendingId] = useState<string|null>(null)
 
   useEffect(() => {
     Promise.all([
@@ -4337,6 +4338,7 @@ function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
         changes: { target_role: targetId },
       })
       if (res.status === 'pending') {
+        setPendingId(res.pending_action_id || null)
         setResult({ narrative: 'Assassination order submitted — awaiting moderator confirmation', killed: false, attributed: false })
       } else if (res.success !== false) {
         setResult({ narrative: res.narrative || 'Operation executed', killed: res.killed || false, attributed: res.attributed || false })
@@ -4344,7 +4346,6 @@ function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
       } else {
         setError(res.narrative || 'Failed')
       }
-      onSubmitted()
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
     finally { setSubmitting(false) }
   }
@@ -4377,8 +4378,20 @@ function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
           <p className="font-body text-body-sm text-danger font-medium">All assassination attempts have been used.</p>
         </div>
       ) : result ? (
-        <div className={`${result.killed ? 'bg-danger/5 border-danger/20' : 'bg-action/5 border-action/20'} border rounded-lg p-4`}>
-          <p className="font-body text-body-sm text-text-primary">{result.narrative}</p>
+        <div className="space-y-3">
+          <div className={`${result.killed ? 'bg-danger/5 border-danger/20' : 'bg-action/5 border-action/20'} border rounded-lg p-4`}>
+            <p className="font-body text-body-sm text-text-primary">{result.narrative}</p>
+          </div>
+          {pendingId && !result.killed && !result.attributed && (
+            <PendingResultPoller simId={simId} pendingActionId={pendingId} countryId={countryId} actionType="assassination"
+              onResolved={(res) => {
+                const r = res as Record<string, unknown>
+                const narrative = (r.narrative as string) || 'Operation complete'
+                setResult({ narrative, killed: r.killed === true, attributed: r.attributed === true })
+                setPendingId(null)
+                if (remaining !== null) setRemaining(Math.max(0, remaining - 1))
+              }} />
+          )}
         </div>
       ) : (
         <>
