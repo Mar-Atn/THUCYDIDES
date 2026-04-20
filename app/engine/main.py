@@ -58,6 +58,15 @@ app.add_middleware(
 # Health check
 # ---------------------------------------------------------------------------
 
+@app.get("/debug/env")
+async def debug_env():
+    """Temporary — check env var loading."""
+    return {
+        "supabase_url": settings.supabase_url[:25] if settings.supabase_url else "EMPTY",
+        "anon_key": settings.supabase_anon_key[:15] if settings.supabase_anon_key else "EMPTY",
+        "service_key": settings.supabase_service_role_key[:15] if settings.supabase_service_role_key else "EMPTY",
+    }
+
 @app.get("/health", response_model=APIResponse)
 async def health():
     """Infrastructure health check."""
