@@ -852,32 +852,25 @@ class TestHealthEvents:
 # ===========================================================================
 
 class TestRevolution:
-    """Revolution triggers at stability <= 2 AND support < 20%."""
+    """Revolution triggers at stability <= 2 (simplified 2026-04-15)."""
 
     def test_revolution_triggers(self):
-        """Low stability + low support -> mass protests."""
-        result = check_revolution("alpha", stability=2.0, political_support=15.0)
+        """Low stability -> mass protests flagged."""
+        result = check_revolution("alpha", stability=2.0)
         assert result is not None
         assert result.event == "mass_protests"
         assert result.severity == "major"
 
     def test_severe_at_stability_1(self):
-        """Stability <= 1 -> severe protests."""
-        result = check_revolution("alpha", stability=1.0, political_support=10.0)
+        """Stability <= 1 -> severe."""
+        result = check_revolution("alpha", stability=1.0)
         assert result is not None
         assert result.severity == "severe"
 
-    def test_no_revolution_above_thresholds(self):
-        """No revolution when stability > 2 or support >= 20%."""
-        assert check_revolution("alpha", stability=3.0, political_support=15.0) is None
-        assert check_revolution("alpha", stability=2.0, political_support=20.0) is None
-        assert check_revolution("alpha", stability=5.0, political_support=50.0) is None
-
-    def test_success_probability_formula(self):
-        """Base probability = 0.30 + (20 - support)/100 + (3 - stability) * 0.10."""
-        result = check_revolution("alpha", stability=1.0, political_support=10.0)
-        # 0.30 + (20-10)/100 + (3-1)*0.10 = 0.30 + 0.10 + 0.20 = 0.60
-        assert result.base_success_probability == pytest.approx(0.60, abs=0.01)
+    def test_no_revolution_above_threshold(self):
+        """No revolution when stability > 2."""
+        assert check_revolution("alpha", stability=3.0) is None
+        assert check_revolution("alpha", stability=5.0) is None
 
 
 # ===========================================================================

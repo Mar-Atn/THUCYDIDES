@@ -35,7 +35,7 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
         2. Load current ``country_states_per_round`` for this round
         3. Merge into engine-format dicts
         4. Call ``process_economy`` (11-step economic pipeline)
-        5. Call ``calc_stability`` + ``calc_political_support`` per country
+        5. Call ``calc_stability`` per country
         6. Write updated values back to ``country_states_per_round``
         7. Update ``global_state_per_round`` (oil price etc.)
 
@@ -126,10 +126,9 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
             econ_result = None
             new_oil = world_state["oil_price"]
 
-        # 6. Run stability + political support
+        # 6. Run stability + war tiredness
         from engine.engines.political import (
             StabilityInput, calc_stability,
-            PoliticalSupportInput, calc_political_support,
             WarTirednessInput, update_war_tiredness,
         )
         # Load territory changes for stability calculation
@@ -166,19 +165,6 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
                     territory_gained=tc["gained"],
                 ))
                 pol["stability"] = sr.new_stability
-
-                # Political support
-                ps = calc_political_support(PoliticalSupportInput(
-                    country_id=cc,
-                    political_support=pol.get("political_support", 50),
-                    stability=pol["stability"],
-                    at_war=at_war,
-                    war_tiredness=pol["war_tiredness"],
-                    regime_type=c.get("regime_type", "democratic"),
-                    gdp_growth_rate=eco.get("gdp_growth_rate", 0.0),
-                    economic_state=eco.get("economic_state", "normal"),
-                ))
-                pol["political_support"] = ps.new_support
             except Exception as e:
                 logger.warning("[tick R%d %s] political engine error: %s", round_num, cc, e)
 
@@ -198,7 +184,6 @@ def run_engine_tick(run_or_scenario: str, round_num: int) -> dict:
                 "treasury": round(eco.get("treasury", rs.get("treasury", 0)), 2),
                 "inflation": round(eco.get("inflation", rs.get("inflation", 0)), 4),
                 "stability": int(round(pol.get("stability", rs.get("stability", 5)))),
-                "political_support": int(round(pol.get("political_support", rs.get("political_support", 5)))),
                 "war_tiredness": int(round(pol.get("war_tiredness", rs.get("war_tiredness", 0)))),
                 # Persist computed coefficients so next round uses ratio (one-time shock, not repeated)
                 "sanctions_coefficient": round(eco.get("sanctions_coefficient", 1.0), 6),
@@ -556,7 +541,6 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
     inflation = _safe_float(rs.get("inflation") or base.get("inflation"), 0)
     treasury = _safe_float(rs.get("treasury") or base.get("treasury"), 0)
     stability = _safe_float(rs.get("stability") or base.get("stability"), 5)
-    pol_support = _safe_float(rs.get("political_support") or base.get("political_support"), 50)
     war_tired = _safe_float(rs.get("war_tiredness") or base.get("war_tiredness"), 0)
 
     return {
@@ -651,11 +635,6 @@ def _merge_to_engine_dict(base: dict, rs: dict) -> dict:
         },
         "political": {
             "stability": stability,
-            "political_support": pol_support,
-            "dem_rep_split": {
-                "dem": _safe_float(base.get("dem_rep_split_dem"), 50),
-                "rep": _safe_float(base.get("dem_rep_split_rep"), 50),
-            },
             "war_tiredness": war_tired,
             "regime_type": base.get("regime_type", "democratic"),
             "regime_status": "stable",

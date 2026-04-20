@@ -97,9 +97,6 @@ class Country(BaseModel):
 
     # Political
     stability: float = 5
-    political_support: float = 50  # DEPRECATED 2026-04-15: use stability only
-    dem_rep_split_dem: int = 0  # DEPRECATED 2026-04-15: parliament simplified to 3 seats
-    dem_rep_split_rep: int = 0  # DEPRECATED 2026-04-15: parliament simplified to 3 seats
     war_tiredness: float = 0
 
     # Technology
@@ -137,7 +134,6 @@ class Role(BaseModel):
     is_economy_officer: bool = False
     is_diplomat: bool = False
     parliament_seat: int = 0
-    personal_coins: float = 0  # DEPRECATED 2026-04-15: no personal transactions
     expansion_role: bool = False
     ai_candidate: bool = False
     is_ai_operated: bool = False

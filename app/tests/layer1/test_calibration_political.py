@@ -12,12 +12,10 @@ from engine.engines.political import (
     calc_political_support,
     update_war_tiredness,
     update_threshold_flags,
-    resolve_coup,
     check_revolution,
     StabilityInput,
     PoliticalSupportInput,
     WarTirednessInput,
-    CoupInput,
 )
 
 
@@ -519,111 +517,27 @@ class TestThresholdFlags:
 # ===========================================================================
 
 class TestRevolutionCheck:
-    """Revolution triggers when stability <= 2 AND support < 20%."""
+    """Revolution triggers when stability <= 2 (simplified 2026-04-15)."""
 
     def test_revolution_triggers(self):
-        """Stability 1.5, support 10% -> mass protests."""
-        result = check_revolution("sarmatia", 1.5, 10.0)
-        print(f"  Revolution check (1.5/10%): {result}")
+        """Stability 1.5 -> mass protests."""
+        result = check_revolution("sarmatia", 1.5)
         assert result is not None
         assert result.event == "mass_protests"
         assert result.severity == "major"
-        assert result.base_success_probability > 0.30
 
     def test_revolution_severe(self):
         """Stability 1.0 -> severe protests."""
-        result = check_revolution("sarmatia", 1.0, 5.0)
-        print(f"  Revolution severe (1.0/5%): {result}")
+        result = check_revolution("sarmatia", 1.0)
         assert result is not None
         assert result.severity == "severe"
 
-    def test_no_revolution_high_support(self):
-        """Stability 1.5 but support 25% -> no revolution."""
-        result = check_revolution("sarmatia", 1.5, 25.0)
-        assert result is None
-
     def test_no_revolution_high_stability(self):
-        """Stability 5.0, support 10% -> no revolution."""
-        result = check_revolution("sarmatia", 5.0, 10.0)
+        """Stability 5.0 -> no revolution."""
+        result = check_revolution("sarmatia", 5.0)
         assert result is None
 
 
-# ===========================================================================
-# COUP RESOLUTION (CARD_FORMULAS B.6 / political.py resolve_coup)
-# ===========================================================================
 
-class TestCoupResolution:
-    """Coup probability calculations (deterministic part)."""
-
-    def test_coup_base_probability(self):
-        """Base 15% with stable conditions."""
-        random.seed(999)  # deterministic
-        inp = CoupInput(
-            country_id="sarmatia",
-            plotters=["general", "spymaster"],
-            stability=7.0,
-            political_support=60.0,
-        )
-        result = resolve_coup(inp)
-        print(f"  Coup base: prob={result.probability}, success={result.success}")
-        assert result.probability == pytest.approx(0.15, abs=0.01), (
-            f"Base probability should be 15%, got {result.probability}"
-        )
-
-    def test_coup_high_probability(self):
-        """Low stability + low support + protests -> high probability."""
-        random.seed(999)
-        inp = CoupInput(
-            country_id="sarmatia",
-            plotters=["general", "spymaster"],
-            stability=2.5,
-            political_support=20.0,
-            protest_active=True,
-        )
-        result = resolve_coup(inp)
-        print(f"  Coup high prob: prob={result.probability}, success={result.success}")
-        # base 15% + protest 25% + stability<3: 15% + support<30: 10% = 65%
-        assert result.probability == pytest.approx(0.65, abs=0.01), (
-            f"Expected ~65%, got {result.probability}"
-        )
-
-    def test_coup_needs_two_plotters(self):
-        """Single plotter -> fails immediately."""
-        inp = CoupInput(
-            country_id="sarmatia",
-            plotters=["general"],
-            stability=2.0,
-            political_support=10.0,
-        )
-        result = resolve_coup(inp)
-        print(f"  Coup single plotter: prob={result.probability}, success={result.success}")
-        assert result.success is False
-        assert result.probability == 0.0
-
-    def test_coup_stability_change(self):
-        """Verify stability change: -2 on success, -1 on failure."""
-        # Force success
-        random.seed(0)
-        inp = CoupInput(
-            country_id="sarmatia",
-            plotters=["general", "spymaster"],
-            stability=2.0,
-            political_support=10.0,
-            protest_active=True,
-        )
-        # Run multiple times to get both outcomes
-        success_change = None
-        failure_change = None
-        for seed in range(100):
-            random.seed(seed)
-            result = resolve_coup(inp)
-            if result.success and success_change is None:
-                success_change = result.stability_change
-            elif not result.success and failure_change is None:
-                failure_change = result.stability_change
-            if success_change is not None and failure_change is not None:
-                break
-
-        print(f"  Coup stability changes: success={success_change}, failure={failure_change}")
-        assert success_change == -2.0, f"Success should cost -2 stability, got {success_change}"
-        assert failure_change == -1.0, f"Failure should cost -1 stability, got {failure_change}"
+# NOTE: TestCoupResolution removed — resolve_coup() deleted per simplification plan D.
+# Regime change now handled by change_leader player action.

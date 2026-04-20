@@ -8,7 +8,6 @@ Processing sequence:
   Steps 1-11: Economic engine (oil -> GDP -> revenue -> budget -> production
               -> tech -> inflation -> debt -> crisis -> momentum -> contagion)
   Step 12: Stability per country
-  Step 13: Political support per country
   Then: war tiredness, revolution checks, health events, elections, capitulation
 
 Source: 2 SEED/D_ENGINES/world_model_engine.py (deterministic_pass)
@@ -24,10 +23,10 @@ from fastapi import APIRouter, HTTPException
 
 from engine.engines.economic import EconomicResult, process_economy, get_market_stress_for_country
 from engine.engines.political import (
-    StabilityInput, StabilityResult, PoliticalSupportInput, PoliticalSupportResult,
+    StabilityInput, StabilityResult,
     ElectionInput, ElectionResult, RevolutionResult, HealthEventResult,
     WarTirednessInput, WarTirednessResult, ThresholdFlagsResult,
-    calc_stability, calc_political_support, process_election,
+    calc_stability, process_election,
     check_revolution, check_health_events, update_war_tiredness,
     update_threshold_flags, check_capitulation,
 )
@@ -52,7 +51,6 @@ class RoundResult(BaseModel):
     round_num: int
     economic: EconomicResult
     stability: dict[str, StabilityResult] = Field(default_factory=dict)
-    support: dict[str, PoliticalSupportResult] = Field(default_factory=dict)
     war_tiredness: dict[str, WarTirednessResult] = Field(default_factory=dict)
     threshold_flags: dict[str, ThresholdFlagsResult] = Field(default_factory=dict)
     elections: dict[str, ElectionResult] = Field(default_factory=dict)
@@ -115,10 +113,7 @@ def _country_to_dict(c: Country) -> dict[str, Any]:
             "mobilization_pool": c.mobilization_pool,
         },
         "political": {
-            "stability": c.stability, "political_support": c.political_support,
-            "dem_rep_split": {
-                "dem": c.dem_rep_split_dem, "rep": c.dem_rep_split_rep,
-            },
+            "stability": c.stability,
             "war_tiredness": c.war_tiredness,
             "regime_type": c.regime_type,
             "regime_status": "stable", "protest_risk": False, "coup_risk": False,
@@ -208,7 +203,6 @@ def _country_update_payload(c: dict[str, Any]) -> dict[str, Any]:
         "sanctions_coefficient": round(eco.get("sanctions_coefficient", 1.0), 4),
         "tariff_coefficient": round(eco.get("tariff_coefficient", 1.0), 4),
         "stability": round(pol["stability"], 2),
-        "political_support": round(pol["political_support"], 2),
         "war_tiredness": round(pol.get("war_tiredness", 0), 2),
         "nuclear_level": tech.get("nuclear_level", 0),
         "nuclear_rd_progress": round(tech.get("nuclear_rd_progress", 0), 4),
@@ -537,27 +531,11 @@ async def process_round(
         stability_results[cid] = sr
         tf_results[cid] = update_threshold_flags(pol["stability"])
 
-    # STEP 13: POLITICAL SUPPORT
-    support_results: dict[str, PoliticalSupportResult] = {}
-    for cid, c in countries.items():
-        eco, pol = c["economic"], c["political"]
-        sp = calc_political_support(PoliticalSupportInput(
-            country_id=cid, political_support=pol["political_support"],
-            stability=pol["stability"], regime_type=c["regime_type"],
-            gdp_growth_rate=eco.get("gdp_growth_rate", 0.0),
-            economic_state=eco.get("economic_state", "normal"),
-            oil_price=econ_result.oil_price.price,
-            oil_producer=eco.get("oil_producer", False),
-            round_num=round_num, war_tiredness=pol["war_tiredness"],
-        ))
-        pol["political_support"] = sp.new_support
-        support_results[cid] = sp
-
     # REVOLUTION CHECKS
     rev_results: dict[str, RevolutionResult] = {}
     for cid, c in countries.items():
         pol = c["political"]
-        rev = check_revolution(cid, pol["stability"], pol["political_support"])
+        rev = check_revolution(cid, pol["stability"], 50.0)  # political_support deprecated, pass neutral
         if rev is not None:
             rev_results[cid] = rev
             log.append(f"  REVOLUTION: {cid} — {rev.severity}")
@@ -620,7 +598,7 @@ async def process_round(
 
     return RoundResult(
         sim_id=sim_id, round_num=round_num, economic=econ_result,
-        stability=stability_results, support=support_results,
+        stability=stability_results,
         war_tiredness=wt_results, threshold_flags=tf_results,
         elections=election_results, revolutions=rev_results,
         health_events=health_results, capitulation_flags=cap_flags,

@@ -498,9 +498,6 @@ export interface Country {
   strategic_missile_growth: number
   mobilization_pool: number
   stability: number
-  political_support: number  // DEPRECATED — use stability only
-  dem_rep_split_dem: number
-  dem_rep_split_rep: number
   war_tiredness: number
   nuclear_level: number
   nuclear_rd_progress: number

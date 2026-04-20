@@ -564,29 +564,24 @@ def process_election(inp: ElectionInput) -> ElectionResult:
 
 
 def check_revolution(country_id: str, stability: float,
-                     political_support: float) -> Optional[RevolutionResult]:
-    """When stability <= 2 AND support < 20%, mass protests erupt.
+                     political_support: float = 50.0) -> Optional[RevolutionResult]:
+    """Flag severe instability for orchestrator logging.
 
-    An ELITE participant (non-HoS role) can choose to 'lead the protest'.
-    Probabilistic outcome (dice) with risk for BOTH sides:
-    - If protest succeeds: HoS removed, protest leader takes power
-    - If protest fails: protest leader imprisoned/exiled
-    - Base probability: 30% + (20 - support)% + (3 - stability) * 10%
+    Simplified 2026-04-15: political_support removed. Revolution is now
+    signaled when stability <= 2. Actual regime change is via the
+    change_leader player action, not automatic.
     """
-    if stability <= 2 and political_support < 20:
+    if stability <= 2:
         severity = "severe" if stability <= 1 else "major"
-        base_prob = 0.30 + (20 - political_support) / 100 + (3 - stability) * 0.10
         return RevolutionResult(
             event="mass_protests",
             country=country_id,
             severity=severity,
             stability=stability,
-            support=political_support,
+            support=0.0,
             elite_can_lead=True,
-            base_success_probability=round(base_prob, 4),
-            note=("An elite participant can choose to lead the protest. "
-                  "Success = regime change. Failure = imprisonment/exile for the leader. "
-                  "Risk for BOTH sides."),
+            base_success_probability=0.0,
+            note="Severe instability — change_leader action available to participants.",
         )
     return None
 
@@ -700,78 +695,6 @@ def check_capitulation(economic_state: str, crisis_rounds: int) -> bool:
     flagging for AI agent to consider capitulation.
     """
     return economic_state == "crisis" and crisis_rounds >= 3
-
-
-def resolve_coup(inp: CoupInput) -> CoupResult:
-    """Coup attempt resolution.
-
-    Two conspirators required: initiator + co-conspirator.
-    Base 15%
-    + active_protest: +25%
-    + stability < 3: +15%
-    + stability 3-4: +5%
-    + support < 30%: +10%
-    Success: initiator becomes HoS, old HoS arrested. Stability -2.
-    Failure: both exposed. Stability -1.
-    """
-    if len(inp.plotters) < 2:
-        return CoupResult(
-            success=False,
-            probability=0.0,
-            initiator=inp.plotters[0] if inp.plotters else "",
-            co_conspirator="",
-            stability_change=0.0,
-            note="Coup requires two conspirators (initiator + co-conspirator)",
-        )
-
-    stability = inp.stability
-    support = inp.political_support
-
-    # Base probability
-    prob = 0.15
-
-    # Active protest bonus
-    if inp.protest_risk or inp.protest_active:
-        prob += 0.25
-
-    # Stability bonuses
-    if stability < 3:
-        prob += 0.15
-    elif stability <= 4:
-        prob += 0.05
-
-    # Low support bonus
-    if support < 30:
-        prob += 0.10
-
-    prob = clamp(prob, 0.0, 0.90)
-
-    success = random.random() < prob
-
-    initiator_id = inp.plotters[0]
-    co_conspirator_id = inp.plotters[1]
-
-    if success:
-        stability_change = -2.0
-        note = (
-            f"Coup successful. {initiator_id} takes power. "
-            f"Former leader arrested."
-        )
-    else:
-        stability_change = -1.0
-        note = (
-            f"Coup failed. {initiator_id} and {co_conspirator_id} exposed. "
-            "Ruler and world learn of the attempt."
-        )
-
-    return CoupResult(
-        success=success,
-        probability=round(prob, 3),
-        initiator=initiator_id,
-        co_conspirator=co_conspirator_id,
-        stability_change=stability_change,
-        note=note,
-    )
 
 
 def resolve_assassination(inp: AssassinationInput) -> AssassinationResult:
