@@ -132,7 +132,7 @@ def _cleanup(client, scenario_id: str) -> None:
     try:
         client.table("tariffs").delete().eq(
             "sim_run_id", sim_run_id
-        ).eq("imposer_country_id", TEST_COUNTRY).like(
+        ).eq("imposer_country_code", TEST_COUNTRY).like(
             "notes", "set_tariffs by %"
         ).execute()
     except Exception:
@@ -185,8 +185,8 @@ def _get_tariff_level(client, sim_run_id: str, imposer: str, target: str) -> int
         client.table("tariffs")
         .select("level")
         .eq("sim_run_id", sim_run_id)
-        .eq("imposer_country_id", imposer)
-        .eq("target_country_id", target)
+        .eq("imposer_country_code", imposer)
+        .eq("target_country_code", target)
         .limit(1)
         .execute()
     )

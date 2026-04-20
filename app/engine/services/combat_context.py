@@ -194,13 +194,13 @@ def _at_war_with(client, country_code: str) -> list[str]:
     out: list[str] = []
     try:
         res = client.table("relationships") \
-            .select("from_country_id,to_country_id,status,relationship") \
-            .or_(f"from_country_id.eq.{country_code},to_country_id.eq.{country_code}") \
+            .select("from_country_code,to_country_code,status,relationship") \
+            .or_(f"from_country_code.eq.{country_code},to_country_code.eq.{country_code}") \
             .execute()
         for r in (res.data or []):
             rel = (r.get("status") or r.get("relationship") or "").lower()
             if "war" in rel or "military_conflict" in rel:
-                other = r["to_country_id"] if r.get("from_country_id") == country_code else r.get("from_country_id")
+                other = r["to_country_code"] if r.get("from_country_code") == country_code else r.get("from_country_code")
                 if other:
                     out.append(other)
     except Exception as e:

@@ -104,7 +104,7 @@ export function TabRelationships({ templateId: _templateId }: TabRelationshipsPr
   /** Build a lookup map for quick cell access. */
   const relMap = new Map<string, Relationship>()
   for (const r of relationships) {
-    relMap.set(`${r.from_country_id}:${r.to_country_id}`, r)
+    relMap.set(`${r.from_country_code}:${r.to_country_code}`, r)
   }
 
   /** Get a relationship for a cell. */
@@ -292,8 +292,8 @@ export function TabRelationships({ templateId: _templateId }: TabRelationshipsPr
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
           <div className="bg-card border border-border rounded-lg shadow-lg p-6 w-[420px] max-h-[90vh] overflow-y-auto">
             <h4 className="font-heading text-h3 text-text-primary mb-4">
-              {cap(editor.relationship.from_country_id)} &rarr;{' '}
-              {cap(editor.relationship.to_country_id)}
+              {cap(editor.relationship.from_country_code)} &rarr;{' '}
+              {cap(editor.relationship.to_country_code)}
             </h4>
 
             {/* Dynamic text (read-only context) */}
@@ -337,8 +337,8 @@ export function TabRelationships({ templateId: _templateId }: TabRelationshipsPr
                       updateEditorField('basing_rights_a_to_b', e.target.checked)
                     }
                   />
-                  Basing {cap(editor.relationship.from_country_id)} &rarr;{' '}
-                  {cap(editor.relationship.to_country_id)}
+                  Basing {cap(editor.relationship.from_country_code)} &rarr;{' '}
+                  {cap(editor.relationship.to_country_code)}
                 </label>
                 <label className="flex items-center gap-2 font-body text-body-sm text-text-primary">
                   <input
@@ -348,8 +348,8 @@ export function TabRelationships({ templateId: _templateId }: TabRelationshipsPr
                       updateEditorField('basing_rights_b_to_a', e.target.checked)
                     }
                   />
-                  Basing {cap(editor.relationship.to_country_id)} &rarr;{' '}
-                  {cap(editor.relationship.from_country_id)}
+                  Basing {cap(editor.relationship.to_country_code)} &rarr;{' '}
+                  {cap(editor.relationship.from_country_code)}
                 </label>
               </div>
             </div>

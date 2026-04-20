@@ -98,7 +98,7 @@ async def get_roles(sim_id: str, country_id: Optional[str] = None) -> list[Role]
     client = get_client()
     query = client.table("roles").select("*").eq("sim_run_id", sim_id)
     if country_id:
-        query = query.eq("country_id", country_id)
+        query = query.eq("country_code", country_id)
     result = query.order("id").execute()
     return [Role(**row) for row in result.data]
 
@@ -143,7 +143,7 @@ async def get_deployments(
     client = get_client()
     query = client.table("deployments").select("*").eq("sim_run_id", sim_id)
     if country_id:
-        query = query.eq("country_id", country_id)
+        query = query.eq("country_code", country_id)
     if global_row is not None:
         query = query.eq("global_row", global_row)
     if global_col is not None:
@@ -161,7 +161,7 @@ async def get_relationships(sim_id: str, country_id: Optional[str] = None) -> li
     client = get_client()
     query = client.table("relationships").select("*").eq("sim_run_id", sim_id)
     if country_id:
-        query = query.eq("from_country_id", country_id)
+        query = query.eq("from_country_code", country_id)
     result = query.execute()
     return [Relationship(**row) for row in result.data]
 

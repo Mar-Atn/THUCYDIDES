@@ -93,8 +93,8 @@ def _cleanup(client, scenario_id: str) -> None:
         try:
             client.table("sanctions").delete().eq(
                 "sim_run_id", sim_run_id
-            ).eq("imposer_country_id", TEST_COUNTRY).eq(
-                "target_country_id", target
+            ).eq("imposer_country_code", TEST_COUNTRY).eq(
+                "target_country_code", target
             ).execute()
         except Exception:
             pass
@@ -157,8 +157,8 @@ def _get_sanction_level(
         client.table("sanctions")
         .select("level")
         .eq("sim_run_id", sim_run_id)
-        .eq("imposer_country_id", imposer)
-        .eq("target_country_id", target)
+        .eq("imposer_country_code", imposer)
+        .eq("target_country_code", target)
         .limit(1)
         .execute()
     )
@@ -235,11 +235,11 @@ def test_no_change_writes_audit_does_not_touch_state(client, scenario_id):
     # Establish a baseline existing sanction to ensure carry-forward
     client.table("sanctions").upsert({
         "sim_run_id": sim_run_id,
-        "imposer_country_id": TEST_COUNTRY,
-        "target_country_id": "bharata",
+        "imposer_country_code": TEST_COUNTRY,
+        "target_country_code": "bharata",
         "level": 2,
         "notes": "",
-    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
 
     _insert_set_sanctions(
         client, scenario_id, 66, TEST_COUNTRY,

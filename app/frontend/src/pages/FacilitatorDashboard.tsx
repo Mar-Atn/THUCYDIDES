@@ -976,7 +976,7 @@ export function FacilitatorDashboard() {
                       {(nomOpen || isAuto) && (() => {
                         const nomsClosed = (simRun?.schedule as Record<string,unknown>)?.nominations_closed === true || nominationsClosedLocal
                         const currentNoms = electionNominations.filter(n => n.election_type === activeNomEvent.subtype)
-                        const columbiaRoles = roles.filter(r => r.country_id === 'columbia' && r.status === 'active')
+                        const columbiaRoles = roles.filter(r => r.country_code === 'columbia' && r.status === 'active')
                         const nominatedIds = new Set(currentNoms.map(n => n.role_id))
                         const availableToAdd = columbiaRoles.filter(r => !nominatedIds.has(r.id))
 
@@ -1074,7 +1074,7 @@ export function FacilitatorDashboard() {
 
                     // Economy indicator for moderator
                     const colState = (() => {
-                      const c = roles.find(r => r.country_id === 'columbia')
+                      const c = roles.find(r => r.country_code === 'columbia')
                       return c ? { stab: 0, infl: 0 } : { stab: 0, infl: 0 }
                     })()
 
@@ -1377,7 +1377,7 @@ export function FacilitatorDashboard() {
                       >
                         {role.character_name}{' '}
                         <span className="text-text-secondary">
-                          ({role.country_id})
+                          ({role.country_code})
                         </span>
                       </span>
                     ))}
@@ -1817,8 +1817,8 @@ function ParticipantPanel({
 
   // Group roles by country
   const byCountry = activeRoles.reduce((acc, r) => {
-    acc[r.country_id] = acc[r.country_id] || []
-    acc[r.country_id].push(r)
+    acc[r.country_code] = acc[r.country_code] || []
+    acc[r.country_code].push(r)
     return acc
   }, {} as Record<string, SimRunRole[]>)
 
@@ -2020,7 +2020,7 @@ function TestActionPanel({
       }
       const res = await submitAction(
         simId, actionType, selectedRole,
-        selectedRoleData?.country_id ?? '',
+        selectedRoleData?.country_code ?? '',
         params,
       )
       setResult(res.narrative as string ?? 'Action submitted')
@@ -2055,7 +2055,7 @@ function TestActionPanel({
                 <option value="">Select role...</option>
                 {activeRoles.map((r) => (
                   <option key={r.id} value={r.id}>
-                    {r.character_name} ({r.country_id}) — {r.position_type}
+                    {r.character_name} ({r.country_code}) — {r.position_type}
                   </option>
                 ))}
               </select>

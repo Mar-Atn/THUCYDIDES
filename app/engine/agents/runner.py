@@ -336,7 +336,7 @@ async def _start_round(
 
     for role_id, agent in agents.items():
         # Build visible world state for this agent
-        country_id = agent.role.get("country_id", "")
+        country_id = agent.role.get("country_code", "")
         country_data = countries.get(country_id, {})
 
         # Update agent's country data with current state
@@ -390,7 +390,7 @@ async def _active_loop(
     decision_tasks = {}
 
     for role_id, agent in agents.items():
-        country_id = agent.role.get("country_id", "")
+        country_id = agent.role.get("country_code", "")
         country_data = countries.get(country_id, {})
         round_context = _build_round_context(country_data, world_state, round_num)
         decision_tasks[role_id] = agent.decide_action(
@@ -429,7 +429,7 @@ async def _active_loop(
             elif target:
                 # Target might be a country_id — find the head of state
                 for rid, ag in agents.items():
-                    if ag.role.get("country_id") == target:
+                    if ag.role.get("country_code") == target:
                         conversation_requests.append((role_id, rid, result.get("detail", "")))
                         break
 
@@ -507,7 +507,7 @@ async def _mandatory_submission(
 
     tasks = {}
     for role_id, agent in agents.items():
-        country_id = agent.role.get("country_id", "")
+        country_id = agent.role.get("country_code", "")
         country_data = countries.get(country_id, {})
         round_context = _build_round_context(country_data, world_state, round_num)
         tasks[role_id] = agent.submit_mandatory_inputs(round_context)
@@ -521,7 +521,7 @@ async def _mandatory_submission(
         if isinstance(result, Exception):
             log.append(f"    {role_id}: mandatory submission error — {result}")
             mandatory_inputs[role_id] = _default_mandatory(countries.get(
-                agents[role_id].role.get("country_id", ""), {}
+                agents[role_id].role.get("country_code", ""), {}
             ))
         else:
             mandatory_inputs[role_id] = result
@@ -581,7 +581,7 @@ def _run_engines(
     for role_id, inputs in mandatory_inputs.items():
         if role_id not in agents:
             continue
-        country_id = agents[role_id].role.get("country_id", "")
+        country_id = agents[role_id].role.get("country_code", "")
         if not country_id:
             continue
 
@@ -811,7 +811,7 @@ async def _reflect(
 
     tasks = {}
     for role_id, agent in agents.items():
-        country_id = agent.role.get("country_id", "")
+        country_id = agent.role.get("country_code", "")
         eco_summary = engine_results.get("economic_summary", {}).get(country_id, {})
         stab = engine_results.get("stability", {}).get(country_id, {})
         supp = engine_results.get("support", {}).get(country_id, {})
@@ -854,7 +854,7 @@ async def _reflect(
     for i, result in enumerate(results):
         role_id = role_ids[i]
         agent = agents[role_id]
-        country_id = agent.role.get("country_id", "")
+        country_id = agent.role.get("country_code", "")
 
         if isinstance(result, Exception):
             reflection_text = f"Round {round_num} completed. Continuing current strategy."

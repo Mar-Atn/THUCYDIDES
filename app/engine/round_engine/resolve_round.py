@@ -453,11 +453,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 try:
                     client.table("sanctions").upsert({
                         "sim_run_id": _sim_run_id,
-                        "imposer_country_id": cc,
-                        "target_country_id": target,
+                        "imposer_country_code": cc,
+                        "target_country_code": target,
                         "level": level,
                         "notes": f"Set by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     logger.info("[resolve R%d] %s sanctions on %s -> level %d (state table updated)",
                                 round_num, cc, target, level)
                 except Exception as e:
@@ -470,11 +470,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 try:
                     client.table("sanctions").upsert({
                         "sim_run_id": _sim_run_id,
-                        "imposer_country_id": cc,
-                        "target_country_id": target,
+                        "imposer_country_code": cc,
+                        "target_country_code": target,
                         "level": 0,
                         "notes": f"Lifted by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     logger.info("[resolve R%d] %s lifts sanctions on %s (state table updated)",
                                 round_num, cc, target)
                 except Exception as e:
@@ -547,11 +547,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                     try:
                         client.table("sanctions").upsert({
                             "sim_run_id": _sim_run_id,
-                            "imposer_country_id": cc,
-                            "target_country_id": target,
+                            "imposer_country_code": cc,
+                            "target_country_code": target,
                             "level": int(level),
                             "notes": "",  # CONTRACT_SANCTIONS v1.0 §5: notes cleared
-                        }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                        }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     except Exception as e:
                         logger.warning(
                             "[resolve R%d] set_sanctions upsert failed %s->%s: %s",
@@ -575,11 +575,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 try:
                     client.table("tariffs").upsert({
                         "sim_run_id": _sim_run_id,
-                        "imposer_country_id": cc,
-                        "target_country_id": target,
+                        "imposer_country_code": cc,
+                        "target_country_code": target,
                         "level": level,
                         "notes": f"Set by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     logger.info("[resolve R%d] %s tariff on %s -> level %d (state table updated)",
                                 round_num, cc, target, level)
                 except Exception as e:
@@ -592,11 +592,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 try:
                     client.table("tariffs").upsert({
                         "sim_run_id": _sim_run_id,
-                        "imposer_country_id": cc,
-                        "target_country_id": target,
+                        "imposer_country_code": cc,
+                        "target_country_code": target,
                         "level": 0,
                         "notes": f"Lifted by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     logger.info("[resolve R%d] %s lifts tariff on %s (state table updated)",
                                 round_num, cc, target)
                 except Exception as e:
@@ -667,11 +667,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                     try:
                         client.table("tariffs").upsert({
                             "sim_run_id": _sim_run_id,
-                            "imposer_country_id": cc,
-                            "target_country_id": target,
+                            "imposer_country_code": cc,
+                            "target_country_code": target,
                             "level": int(level),
                             "notes": f"set_tariffs by {cc} in round {round_num}",
-                        }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+                        }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                     except Exception as e:
                         logger.warning(
                             "[resolve R%d] set_tariffs upsert failed %s->%s: %s",
@@ -878,13 +878,13 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                     client.table("blockades").upsert({
                         "sim_run_id": _sim_run_id,
                         "zone_id": zone_id,
-                        "imposer_country_id": cc,
+                        "imposer_country_code": cc,
                         "status": "lifted",
                         "level": level,
                         "established_round": round_num,
                         "lifted_round": round_num,
                         "notes": f"Lifted by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,zone_id,imposer_country_id").execute()
+                    }, on_conflict="sim_run_id,zone_id,imposer_country_code").execute()
                     logger.info("[resolve R%d] %s lifts blockade at %s (state table updated)",
                                 round_num, cc, zone_id)
                 except Exception as e:
@@ -896,12 +896,12 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                     client.table("blockades").upsert({
                         "sim_run_id": _sim_run_id,
                         "zone_id": zone_id,
-                        "imposer_country_id": cc,
+                        "imposer_country_code": cc,
                         "status": "active",
                         "level": level,
                         "established_round": round_num,
                         "notes": f"Established by {cc} in round {round_num}",
-                    }, on_conflict="sim_run_id,zone_id,imposer_country_id").execute()
+                    }, on_conflict="sim_run_id,zone_id,imposer_country_code").execute()
                     logger.info("[resolve R%d] %s establishes %s blockade at %s (state table updated)",
                                 round_num, cc, level, zone_id)
                 except Exception as e:
@@ -1192,11 +1192,11 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 if action == "grant":
                     client.table("relationships").update(
                         {"basing_rights_a_to_b": True}
-                    ).eq("from_country_id", cc).eq("to_country_id", counterpart).execute()
+                    ).eq("from_country_code", cc).eq("to_country_code", counterpart).execute()
                 elif action == "revoke":
                     client.table("relationships").update(
                         {"basing_rights_a_to_b": False}
-                    ).eq("from_country_id", cc).eq("to_country_id", counterpart).execute()
+                    ).eq("from_country_code", cc).eq("to_country_code", counterpart).execute()
             except Exception as e:
                 logger.warning("basing rights update failed: %s", e)
             events.append({"sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,

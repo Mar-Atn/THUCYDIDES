@@ -128,7 +128,7 @@ function AddRoleForm({ countryIds, onCreated, onCancel }: AddRoleFormProps) {
       await createRole({
         id: roleId.trim().toLowerCase(),
         character_name: characterName.trim(),
-        country_id: countryId,
+        country_code: countryId,
         title: title.trim(),
         status: 'active',
       })
@@ -425,7 +425,7 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
     }
   }
 
-  const isColumbia = draft.country_id === 'columbia'
+  const isColumbia = draft.country_code === 'columbia'
 
   return (
     <div className="px-4 py-4 space-y-2">
@@ -451,10 +451,10 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="font-body text-caption text-text-secondary">country_id</label>
+          <label className="font-body text-caption text-text-secondary">country_code</label>
           <select
-            value={draft.country_id}
-            onChange={(e) => set('country_id', e.target.value)}
+            value={draft.country_code}
+            onChange={(e) => set('country_code', e.target.value)}
             className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
           >
             {countryIds.map((cid) => (
@@ -635,7 +635,7 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
 function CollapsedBadges({ role }: { role: Role }) {
   const primaryPosition = (role.positions && role.positions.length > 0) ? role.positions[0] : role.position_type
   const pos = POSITION_BADGE[primaryPosition]
-  const party = role.country_id === 'columbia' && role.party ? PARTY_BADGE[role.party] : null
+  const party = role.country_code === 'columbia' && role.party ? PARTY_BADGE[role.party] : null
 
   return (
     <>
@@ -719,7 +719,7 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
   /** Role name lookup. */
   const roleNames = useMemo(() => {
     const m: Record<string, string> = {}
-    for (const r of roles) m[r.id] = `${r.character_name} (${cap(r.country_id)})`
+    for (const r of roles) m[r.id] = `${r.character_name} (${cap(r.country_code)})`
     return m
   }, [roles])
 
@@ -761,11 +761,11 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
     return m
   }, [allRelationships])
 
-  /** Group roles by country_id. */
+  /** Group roles by country_code. */
   const rolesByCountry = useMemo(() => {
     const map: Record<string, Role[]> = {}
     for (const role of roles) {
-      const key = role.country_id
+      const key = role.country_code
       if (!map[key]) map[key] = []
       map[key].push(role)
     }
@@ -886,7 +886,7 @@ export function TabRoles({ templateId: _templateId }: TabRolesProps) {
                             {role.title}
                           </span>
                           <span className="font-body text-caption text-text-secondary">
-                            {cap(role.country_id)}
+                            {cap(role.country_code)}
                           </span>
                           <CollapsedBadges role={role} />
                         </div>

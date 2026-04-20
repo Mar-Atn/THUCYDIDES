@@ -116,7 +116,7 @@ def _parse_role(row: dict) -> dict[str, Any]:
         "id": row["id"],
         "character_name": row["character_name"],
         "parallel": row.get("parallel", ""),
-        "country_id": row["country_id"],
+        "country_code": row["country_id"],
         "team": row.get("team", ""),
         "faction": row.get("faction", ""),
         "title": row.get("title", ""),

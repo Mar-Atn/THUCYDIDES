@@ -55,7 +55,7 @@ class TestModels:
         assert c.nuclear_level == 0
 
     def test_role_model(self):
-        r = Role(id="test", sim_run_id=SIM_ID, character_name="Test", country_id="test")
+        r = Role(id="test", sim_run_id=SIM_ID, character_name="Test", country_code="test")
         assert r.status == "active"
         assert r.powers == []
 
@@ -119,7 +119,7 @@ class TestRoleEndpoints:
         assert r.json()["meta"]["count"] == 40
 
     def test_filter_by_country(self):
-        r = client.get(f"/api/sim/{SIM_ID}/roles", params={"country_id": "persia"})
+        r = client.get(f"/api/sim/{SIM_ID}/roles", params={"country_code": "persia"})
         data = r.json()
         assert data["meta"]["count"] == 3
         names = {role["id"] for role in data["data"]}
@@ -158,7 +158,7 @@ class TestDeploymentEndpoints:
         assert r.json()["meta"]["count"] == 146
 
     def test_filter_by_country(self):
-        r = client.get(f"/api/sim/{SIM_ID}/deployments", params={"country_id": "columbia"})
+        r = client.get(f"/api/sim/{SIM_ID}/deployments", params={"country_code": "columbia"})
         data = r.json()
         assert data["meta"]["count"] > 20  # Columbia has many deployments
 

@@ -259,7 +259,7 @@ def _update_relationships_for_agreement(client, sim_run_id: str, agreement_type:
                 # Check current relationship
                 rel = client.table("relationships").select("relationship") \
                     .eq("sim_run_id", sim_run_id) \
-                    .eq("from_country_id", a).eq("to_country_id", b).execute()
+                    .eq("from_country_code", a).eq("to_country_code", b).execute()
 
                 current = rel.data[0]["relationship"] if rel.data else "neutral"
                 current_priority = RELATION_PRIORITY.get(current, 0)
@@ -268,11 +268,11 @@ def _update_relationships_for_agreement(client, sim_run_id: str, agreement_type:
                 if new_priority >= current_priority:
                     client.table("relationships").update({"relationship": new_relation}) \
                         .eq("sim_run_id", sim_run_id) \
-                        .eq("from_country_id", a).eq("to_country_id", b).execute()
+                        .eq("from_country_code", a).eq("to_country_code", b).execute()
                     # Also update reverse direction
                     client.table("relationships").update({"relationship": new_relation}) \
                         .eq("sim_run_id", sim_run_id) \
-                        .eq("from_country_id", b).eq("to_country_id", a).execute()
+                        .eq("from_country_code", b).eq("to_country_code", a).execute()
 
                     logger.info("[agreement] Relationship %s↔%s → %s (was %s)", a, b, new_relation, current)
             except Exception as e:

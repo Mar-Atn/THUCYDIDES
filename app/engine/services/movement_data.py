@@ -118,15 +118,15 @@ def load_basing_rights(client, sim_run_id: str | None = None) -> dict[str, set[s
     out: dict[str, set[str]] = {}
     try:
         query = client.table("relationships").select(
-            "from_country_id, to_country_id, "
+            "from_country_code, to_country_code, "
             "basing_rights_a_to_b, basing_rights_b_to_a"
         )
         if sim_run_id:
             query = query.eq("sim_run_id", sim_run_id)
         res = query.execute()
         for row in (res.data or []):
-            a = row.get("from_country_id")
-            b = row.get("to_country_id")
+            a = row.get("from_country_code")
+            b = row.get("to_country_code")
             if not a or not b:
                 continue
             # NOTE: schema reading per existing resolve_round basing_rights

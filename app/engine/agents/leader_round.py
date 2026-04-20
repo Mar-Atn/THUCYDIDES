@@ -270,7 +270,7 @@ def _resolve_role_id_by_country(country_code: str) -> Optional[str]:
     from engine.agents.profiles import load_heads_of_state
     hos = load_heads_of_state()
     for rid, role in hos.items():
-        if role.get("country_id") == country_code:
+        if role.get("country_code") == country_code:
             return rid
     return None
 
@@ -306,9 +306,9 @@ async def run_leader_round(
     leader = LeaderAgent(role_id=role_id)
     leader.initialize_sync(world_state=world_state)
 
-    country_code = leader.country.get("country_id") or leader.role.get("country_id")
+    country_code = leader.country.get("id") or leader.role.get("country_code")
     if not country_code:
-        return {"error": f"role {role_id} has no country_id", "committed": False}
+        return {"error": f"role {role_id} has no country_code", "committed": False}
 
     # 2. Build system prompt from cognitive blocks
     system = build_system_prompt_from_leader(leader, round_num)

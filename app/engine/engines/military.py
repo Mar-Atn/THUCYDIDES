@@ -317,7 +317,7 @@ class CovertOpInput(BaseModel):
     """Input for resolve_covert_op."""
     country_id: str
     op_type: CovertOpType
-    target_country_id: str
+    target_country_code: str
     role_id: Optional[str] = None
     role: Optional[RoleInfo] = None
     target_country: CountryMilitary
@@ -1745,7 +1745,7 @@ def resolve_covert_op(inp: CovertOpInput) -> CovertOpResult:
             return CovertOpResult(
                 op_type=op_type,
                 country=inp.country_id,
-                target=inp.target_country_id,
+                target=inp.target_country_code,
                 role_id=inp.role_id,
                 error=f"{inp.role_id} has no {op_type} cards remaining",
             )
@@ -1757,7 +1757,7 @@ def resolve_covert_op(inp: CovertOpInput) -> CovertOpResult:
             return CovertOpResult(
                 op_type=op_type,
                 country=inp.country_id,
-                target=inp.target_country_id,
+                target=inp.target_country_code,
                 error=f"{inp.country_id} has reached covert op limit this round",
             )
 
@@ -1787,7 +1787,7 @@ def resolve_covert_op(inp: CovertOpInput) -> CovertOpResult:
     result = CovertOpResult(
         op_type=op_type,
         country=inp.country_id,
-        target=inp.target_country_id,
+        target=inp.target_country_code,
         role_id=inp.role_id,
         success=success,
         detected=detected,

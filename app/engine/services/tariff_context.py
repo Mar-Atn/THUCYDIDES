@@ -214,18 +214,18 @@ def _load_all_relationships(client, country_code: str) -> dict[str, str]:
     try:
         res = (
             client.table("relationships")
-            .select("from_country_id, to_country_id, status")
+            .select("from_country_code, to_country_code, status")
             .or_(
-                f"from_country_id.eq.{country_code},"
-                f"to_country_id.eq.{country_code}"
+                f"from_country_code.eq.{country_code},"
+                f"to_country_code.eq.{country_code}"
             )
             .execute()
         )
         for row in (res.data or []):
             other = (
-                row["to_country_id"]
-                if row.get("from_country_id") == country_code
-                else row.get("from_country_id")
+                row["to_country_code"]
+                if row.get("from_country_code") == country_code
+                else row.get("from_country_code")
             )
             if not other:
                 continue
@@ -244,13 +244,13 @@ def _load_my_tariffs(client, country_code: str) -> list[dict]:
     try:
         res = (
             client.table("tariffs")
-            .select("target_country_id, level, notes")
+            .select("target_country_code, level, notes")
             .eq("sim_run_id", sim_run_id)
-            .eq("imposer_country_id", country_code)
+            .eq("imposer_country_code", country_code)
             .execute()
         )
         for row in (res.data or []):
-            target = row.get("target_country_id", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if target and level > 0:
                 tariffs.append({
@@ -271,13 +271,13 @@ def _load_tariffs_on_me(client, country_code: str) -> list[dict]:
     try:
         res = (
             client.table("tariffs")
-            .select("imposer_country_id, level, notes")
+            .select("imposer_country_code, level, notes")
             .eq("sim_run_id", sim_run_id)
-            .eq("target_country_id", country_code)
+            .eq("target_country_code", country_code)
             .execute()
         )
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
+            imposer = row.get("imposer_country_code", "")
             level = row.get("level", 0)
             if imposer and level > 0:
                 tariffs.append({

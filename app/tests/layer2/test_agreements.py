@@ -36,7 +36,7 @@ def test_sim(client):
 
 
 def get_relationship(client, sim_id, from_cc, to_cc):
-    r = client.table("relationships").select("relationship").eq("sim_run_id", sim_id).eq("from_country_id", from_cc).eq("to_country_id", to_cc).execute()
+    r = client.table("relationships").select("relationship").eq("sim_run_id", sim_id).eq("from_country_code", from_cc).eq("to_country_code", to_cc).execute()
     return r.data[0]["relationship"] if r.data else None
 
 
@@ -170,8 +170,8 @@ class TestRelationshipUpdate:
 
     def test_ceasefire_sets_hostile(self, client, test_sim):
         # First set to at_war
-        client.table("relationships").update({"relationship": "at_war"}).eq("sim_run_id", test_sim).eq("from_country_id", "levantia").eq("to_country_id", "persia").execute()
-        client.table("relationships").update({"relationship": "at_war"}).eq("sim_run_id", test_sim).eq("from_country_id", "persia").eq("to_country_id", "levantia").execute()
+        client.table("relationships").update({"relationship": "at_war"}).eq("sim_run_id", test_sim).eq("from_country_code", "levantia").eq("to_country_code", "persia").execute()
+        client.table("relationships").update({"relationship": "at_war"}).eq("sim_run_id", test_sim).eq("from_country_code", "persia").eq("to_country_code", "levantia").execute()
 
         r = propose_agreement({
             "action_type": "propose_agreement", "proposer_country_code": "levantia", "proposer_role_id": "citadel",
@@ -199,8 +199,8 @@ class TestRelationshipUpdate:
     def test_higher_priority_not_downgraded(self, client, test_sim):
         """Alliance should not be downgraded by trade agreement."""
         # Set alliance first
-        client.table("relationships").update({"relationship": "alliance"}).eq("sim_run_id", test_sim).eq("from_country_id", "caribe").eq("to_country_id", "mirage").execute()
-        client.table("relationships").update({"relationship": "alliance"}).eq("sim_run_id", test_sim).eq("from_country_id", "mirage").eq("to_country_id", "caribe").execute()
+        client.table("relationships").update({"relationship": "alliance"}).eq("sim_run_id", test_sim).eq("from_country_code", "caribe").eq("to_country_code", "mirage").execute()
+        client.table("relationships").update({"relationship": "alliance"}).eq("sim_run_id", test_sim).eq("from_country_code", "mirage").eq("to_country_code", "caribe").execute()
 
         r = propose_agreement({
             "action_type": "propose_agreement", "proposer_country_code": "caribe", "proposer_role_id": "havana",

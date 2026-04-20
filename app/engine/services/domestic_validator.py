@@ -56,7 +56,7 @@ def validate_fire_role(
     target_info = roles.get(target_role) or {}
     if not target_info:
         errors.append(f"UNKNOWN_TARGET: {target_role!r} not found")
-    elif firer_info.get("country_id") != target_info.get("country_id"):
+    elif firer_info.get("country_code") != target_info.get("country_code"):
         errors.append(f"WRONG_COUNTRY: {target_role!r} belongs to {target_info.get('country_id')!r}")
 
     # Cannot fire yourself
@@ -69,7 +69,7 @@ def validate_fire_role(
     return {"valid": True, "errors": [], "warnings": [], "normalized": {
         "action_type": "fire_role",
         "role_id": firer_role,
-        "country_code": firer_info.get("country_id"),
+        "country_code": firer_info.get("country_code"),
         "round_num": payload.get("round_num"),
         "rationale": rationale.strip(),
         "changes": {"target_role": target_role},
@@ -112,7 +112,7 @@ def validate_arrest(
     target_info = roles.get(target_role) or {}
     if not target_info:
         errors.append(f"UNKNOWN_TARGET: {target_role!r}")
-    elif arrester_info.get("country_id") != target_info.get("country_id"):
+    elif arrester_info.get("country_code") != target_info.get("country_code"):
         errors.append(f"WRONG_COUNTRY: {target_role!r}")
 
     if arrester_role == target_role:
@@ -124,7 +124,7 @@ def validate_arrest(
     return {"valid": True, "errors": [], "warnings": [], "normalized": {
         "action_type": "arrest",
         "role_id": arrester_role,
-        "country_code": arrester_info.get("country_id"),
+        "country_code": arrester_info.get("country_code"),
         "round_num": payload.get("round_num"),
         "rationale": rationale.strip(),
         "changes": {"target_role": target_role},

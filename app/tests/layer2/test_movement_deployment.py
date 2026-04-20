@@ -75,7 +75,7 @@ SEA_HEX_2 = (1, 11)  # another sea hex
 ENEMY_HEX = (4, 17)  # hanguk territory
 
 
-def _insert_deployment(client, sim_id: str, unit_id: str, country_id: str,
+def _insert_deployment(client, sim_id: str, unit_id: str, country_code: str,
                         unit_type: str, unit_status: str,
                         global_row=None, global_col=None,
                         embarked_on=None) -> str:
@@ -84,7 +84,7 @@ def _insert_deployment(client, sim_id: str, unit_id: str, country_id: str,
         "id": str(uuid.uuid4()),
         "sim_run_id": sim_id,
         "unit_id": unit_id,
-        "country_id": country_id,
+        "country_code": country_code,
         "unit_type": unit_type,
         "unit_status": unit_status,
         "global_row": global_row,
@@ -234,8 +234,8 @@ class TestDeployFromReserve:
             client.table("relationships").update({
                 "basing_rights_a_to_b": True,
             }).eq("sim_run_id", test_sim).eq(
-                "from_country_id", "columbia"
-            ).eq("to_country_id", "hanguk").execute()
+                "from_country_code", "columbia"
+            ).eq("to_country_code", "hanguk").execute()
 
             result = _dispatch_move(test_sim, "columbia", [
                 {"unit_code": uid, "target": "hex",
@@ -252,8 +252,8 @@ class TestDeployFromReserve:
             client.table("relationships").update({
                 "basing_rights_a_to_b": False,
             }).eq("sim_run_id", test_sim).eq(
-                "from_country_id", "columbia"
-            ).eq("to_country_id", "hanguk").execute()
+                "from_country_code", "columbia"
+            ).eq("to_country_code", "hanguk").execute()
             _delete_test_deployments(client, test_sim, [uid])
             _delete_observatory_events(client, test_sim)
 
@@ -553,7 +553,7 @@ class TestBatchValidation:
             result = _dispatch_move(test_sim, "columbia", [
                 {"unit_code": uid, "target": "reserve"},
             ])
-            # The dispatcher loads units filtered by country_id=columbia,
+            # The dispatcher loads units filtered by country_code=columbia,
             # so this unit won't be found at all -> "No moves provided" or similar
             assert not result["success"]
         finally:

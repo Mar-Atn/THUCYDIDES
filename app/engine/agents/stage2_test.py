@@ -39,15 +39,15 @@ def load_hos_agents(country_codes: list[str]) -> list[dict]:
     client = get_client()
     result = (
         client.table("roles")
-        .select("country_id, character_name, title")
+        .select("country_code, character_name, title")
         .eq("is_head_of_state", True)
-        .in_("country_id", country_codes)
+        .in_("country_code", country_codes)
         .execute()
     )
-    # dedup by country_id (first match wins)
+    # dedup by country_code (first match wins)
     seen: dict[str, dict] = {}
     for r in result.data or []:
-        cid = r["country_id"]
+        cid = r["country_code"]
         if cid not in seen:
             seen[cid] = {
                 "country_code": cid,

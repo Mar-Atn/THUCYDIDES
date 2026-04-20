@@ -149,7 +149,7 @@ def check_authorization(
     from engine.config.position_actions import has_position
     if roles:
         role_info = roles.get(role_id) or {}
-        if has_position(role_info, "head_of_state") and role_info.get("country_id") == country_code:
+        if has_position(role_info, "head_of_state") and role_info.get("country_code") == country_code:
             return {"authorized": True, "reason": "HoS — inherent authority"}
 
     # Power assignment check
@@ -209,7 +209,7 @@ def reassign_power(
         role_info = roles.get(by_role_id) or {}
         if not has_position(role_info, "head_of_state"):
             return {"success": False, "message": f"{by_role_id} is not HoS — cannot reassign powers"}
-        if role_info.get("country_id") != country_code:
+        if role_info.get("country_code") != country_code:
             return {"success": False, "message": f"{by_role_id} is not HoS of {country_code}"}
 
     if power_type not in ("military", "economic", "foreign_affairs"):

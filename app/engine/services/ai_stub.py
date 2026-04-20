@@ -6,7 +6,7 @@ When M5 is built, replace the decision logic here — the contract stays the sam
 
 Contract:
     Input:  sim_run_id, round_num
-    Output: list of {role_id, character_name, country_id, actions: [{action_type, success, narrative}]}
+    Output: list of {role_id, character_name, country_code, actions: [{action_type, success, narrative}]}
     Uses:   action_dispatcher.dispatch_action (same pipeline as human submissions)
 """
 
@@ -40,13 +40,13 @@ def trigger_ai_agents(
     # 1. Load AI-operated roles with their allowed actions
     query = (
         client.table("roles")
-        .select("id, character_name, country_id, positions, position_type, is_ai_operated")
+        .select("id, character_name, country_code, positions, position_type, is_ai_operated")
         .eq("sim_run_id", sim_run_id)
         .eq("is_ai_operated", True)
         .eq("status", "active")
     )
     if country_codes:
-        query = query.in_("country_id", country_codes)
+        query = query.in_("country_code", country_codes)
 
     roles = query.execute().data or []
     logger.info("AI stub: %d AI roles found for sim %s R%d", len(roles), sim_run_id, round_num)
@@ -76,7 +76,7 @@ def trigger_ai_agents(
 
     for role in roles:
         role_id = role["id"]
-        cc = role["country_id"]
+        cc = role["country_code"]
         name = role["character_name"]
         # Derive primary position from positions array or fallback to position_type
         positions = role.get("positions") or []
@@ -117,7 +117,7 @@ def trigger_ai_agents(
         results.append({
             "role_id": role_id,
             "character_name": name,
-            "country_id": cc,
+            "country_code": cc,
             "position_type": position,
             "actions": actions_taken,
         })

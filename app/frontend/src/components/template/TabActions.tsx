@@ -177,9 +177,9 @@ function ActionDetail({ actionId, roles, roleActions, countries }: ActionDetailP
   const rolesByCountry = useMemo(() => {
     const map = new Map<string, Role[]>()
     for (const role of roles) {
-      const list = map.get(role.country_id) ?? []
+      const list = map.get(role.country_code) ?? []
       list.push(role)
-      map.set(role.country_id, list)
+      map.set(role.country_code, list)
     }
     return map
   }, [roles])

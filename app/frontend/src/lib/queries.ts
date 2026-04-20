@@ -49,7 +49,7 @@ export interface SimRunRole {
   id: string
   sim_run_id: string
   character_name: string
-  country_id: string
+  country_code: string
   title: string
   positions: string[]
   position_type: string
@@ -209,9 +209,9 @@ export async function duplicateSimRun(sourceId: string, newName: string): Promis
 export async function getSimRunRoles(simRunId: string): Promise<SimRunRole[]> {
   const { data, error } = await supabase
     .from('roles')
-    .select('id, sim_run_id, character_name, country_id, title, position_type, positions, is_ai_operated, expansion_role, public_bio, status, user_id')
+    .select('id, sim_run_id, character_name, country_code, title, position_type, positions, is_ai_operated, expansion_role, public_bio, status, user_id')
     .eq('sim_run_id', simRunId)
-    .order('country_id')
+    .order('country_code')
 
   if (error) throw error
   return (data ?? []) as SimRunRole[]
@@ -518,7 +518,7 @@ export interface Role {
   sim_run_id: string
   character_name: string
   parallel: string
-  country_id: string
+  country_code: string
   team: string
   faction: string
   title: string
@@ -568,7 +568,7 @@ export interface Organization {
 export interface OrgMembership {
   id: string
   sim_run_id: string
-  country_id: string
+  country_code: string
   org_id: string
   role_id: string | null
   role_in_org: string
@@ -579,8 +579,8 @@ export interface OrgMembership {
 export interface Relationship {
   id: string
   sim_run_id: string
-  from_country_id: string
-  to_country_id: string
+  from_country_code: string
+  to_country_code: string
   relationship: string
   status: string
   dynamic: string
@@ -591,8 +591,8 @@ export interface Relationship {
 export interface Sanction {
   id: string
   sim_run_id: string
-  imposer_country_id: string
-  target_country_id: string
+  imposer_country_code: string
+  target_country_code: string
   level: number
   notes: string
 }
@@ -600,8 +600,8 @@ export interface Sanction {
 export interface Tariff {
   id: string
   sim_run_id: string
-  imposer_country_id: string
-  target_country_id: string
+  imposer_country_code: string
+  target_country_code: string
   level: number
   notes: string
 }
@@ -622,7 +622,7 @@ export interface Deployment {
   id: string
   sim_run_id: string
   unit_id: string | null
-  country_id: string
+  country_code: string
   unit_type: string
   global_row: number | null
   global_col: number | null
@@ -676,7 +676,7 @@ export async function getTemplateRoles(): Promise<Role[]> {
     .from('roles')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('country_id, character_name')
+    .order('country_code, character_name')
   if (error) throw error
   return (data ?? []) as Role[]
 }
@@ -691,7 +691,7 @@ export async function updateRole(id: string, updates: Partial<Role>): Promise<vo
   if (error) throw error
 }
 
-export async function createRole(role: Partial<Role> & { id: string; character_name: string; country_id: string }): Promise<void> {
+export async function createRole(role: Partial<Role> & { id: string; character_name: string; country_code: string }): Promise<void> {
   const { error } = await supabase
     .from('roles')
     .insert({ sim_run_id: DEFAULT_SIM_RUN_ID, ...role })
@@ -741,7 +741,7 @@ export async function getTemplateRelationships(): Promise<Relationship[]> {
     .from('relationships')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('from_country_id, to_country_id')
+    .order('from_country_code, to_country_code')
   if (error) throw error
   return (data ?? []) as Relationship[]
 }
@@ -761,7 +761,7 @@ export async function getTemplateSanctions(): Promise<Sanction[]> {
     .from('sanctions')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('imposer_country_id, target_country_id')
+    .order('imposer_country_code, target_country_code')
   if (error) throw error
   return (data ?? []) as Sanction[]
 }
@@ -771,7 +771,7 @@ export async function getTemplateTariffs(): Promise<Tariff[]> {
     .from('tariffs')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('imposer_country_id, target_country_id')
+    .order('imposer_country_code, target_country_code')
   if (error) throw error
   return (data ?? []) as Tariff[]
 }
@@ -830,7 +830,7 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
     .from('deployments')
     .select('*')
     .eq('sim_run_id', DEFAULT_SIM_RUN_ID)
-    .order('country_id, unit_type, global_row, global_col')
+    .order('country_code, unit_type, global_row, global_col')
   if (error) throw error
   return (data ?? []) as Deployment[]
 }

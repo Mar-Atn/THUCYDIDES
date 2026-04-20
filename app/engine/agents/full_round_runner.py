@@ -282,14 +282,14 @@ def _load_current_economic_state(
     try:
         sanctions_rows = (
             client.table("sanctions")
-            .select("target_country_id, level")
+            .select("target_country_code, level")
             .eq("sim_run_id", sim_run_id)
-            .eq("imposer_country_id", country_code)
+            .eq("imposer_country_code", country_code)
             .gt("level", 0)
             .execute()
         )
         sanction_list = [
-            {"target": s["target_country_id"], "level": s.get("level", 1)}
+            {"target": s["target_country_code"], "level": s.get("level", 1)}
             for s in (sanctions_rows.data or [])
         ]
         if sanction_list:
@@ -301,14 +301,14 @@ def _load_current_economic_state(
     try:
         tariffs_rows = (
             client.table("tariffs")
-            .select("target_country_id, level")
+            .select("target_country_code, level")
             .eq("sim_run_id", sim_run_id)
-            .eq("imposer_country_id", country_code)
+            .eq("imposer_country_code", country_code)
             .gt("level", 0)
             .execute()
         )
         tariff_list = [
-            {"target": t["target_country_id"], "level": t.get("level", 1)}
+            {"target": t["target_country_code"], "level": t.get("level", 1)}
             for t in (tariffs_rows.data or [])
         ]
         if tariff_list:
@@ -344,12 +344,12 @@ def _load_situation_context(scenario_code: str, country_code: str, round_num: in
                          f"War tiredness: {s.get('war_tiredness', 0)}")
 
         # Relationships — wars, alliances
-        rels = client.table("relationships").select("from_country_id, to_country_id, status, relationship") \
-            .or_(f"from_country_id.eq.{country_code},to_country_id.eq.{country_code}").execute()
+        rels = client.table("relationships").select("from_country_code, to_country_code, status, relationship") \
+            .or_(f"from_country_code.eq.{country_code},to_country_code.eq.{country_code}").execute()
         wars = []
         allies = []
         for r in (rels.data or []):
-            other = r["to_country_id"] if r["from_country_id"] == country_code else r["from_country_id"]
+            other = r["to_country_code"] if r["from_country_code"] == country_code else r["from_country_code"]
             status = r.get("status") or r.get("relationship") or ""
             if "conflict" in status.lower() or "war" in status.lower():
                 wars.append(other)
@@ -363,13 +363,13 @@ def _load_situation_context(scenario_code: str, country_code: str, round_num: in
         # Sanctions received — read from sanctions state table
         from engine.config.settings import Settings
         sim_run_id = Settings().default_sim_id
-        sanctions_on_me = client.table("sanctions").select("imposer_country_id, level") \
+        sanctions_on_me = client.table("sanctions").select("imposer_country_code, level") \
             .eq("sim_run_id", sim_run_id) \
-            .eq("target_country_id", country_code) \
+            .eq("target_country_code", country_code) \
             .gt("level", 0).execute()
         sanctions_against = []
         for s in (sanctions_on_me.data or []):
-            sanctions_against.append(f"{s['imposer_country_id']} L{s.get('level', '?')}")
+            sanctions_against.append(f"{s['imposer_country_code']} L{s.get('level', '?')}")
         if sanctions_against:
             lines.append(f"Sanctions against you: {', '.join(sanctions_against)}")
 
@@ -1034,7 +1034,7 @@ def _resolve_role_id(country_code: str) -> str:
     from engine.agents.profiles import load_heads_of_state
     hos = load_heads_of_state()
     for rid, role in hos.items():
-        if role.get("country_id") == country_code:
+        if role.get("country_code") == country_code:
             return rid
     return ""
 

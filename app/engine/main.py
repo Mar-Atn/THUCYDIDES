@@ -144,10 +144,10 @@ async def get_my_units(
     client = get_client()
 
     deps = client.table("deployments") \
-        .select("unit_id, country_id, unit_type, unit_status, global_row, global_col, "
+        .select("unit_id, country_code, unit_type, unit_status, global_row, global_col, "
                 "theater, theater_row, theater_col, embarked_on") \
         .eq("sim_run_id", sim_id) \
-        .eq("country_id", country) \
+        .eq("country_code", country) \
         .neq("unit_status", "destroyed") \
         .execute().data or []
 
@@ -192,13 +192,13 @@ async def get_map_units(sim_id: str):
     client = get_client()
 
     deps = client.table("deployments") \
-        .select("unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col, embarked_on, unit_status") \
+        .select("unit_id, country_code, unit_type, global_row, global_col, theater, theater_row, theater_col, embarked_on, unit_status") \
         .eq("sim_run_id", sim_id) \
         .execute().data or []
 
     units = [{
         "unit_id": d.get("unit_id", ""),
-        "country_id": d["country_id"],
+        "country_code": d["country_code"],
         "unit_type": d["unit_type"],
         "global_row": d.get("global_row"),
         "global_col": d.get("global_col"),
@@ -238,7 +238,7 @@ async def get_map_blockades(sim_id: str):
     from engine.services.supabase import get_client
     from engine.config.map_config import CHOKEPOINTS
     client = get_client()
-    blockades = client.table("blockades").select("zone_id, imposer_country_id, level") \
+    blockades = client.table("blockades").select("zone_id, imposer_country_code, level") \
         .eq("sim_run_id", sim_id).eq("status", "active").execute().data or []
     result = []
     for b in blockades:
@@ -248,7 +248,7 @@ async def get_map_blockades(sim_id: str):
                 "zone_id": b["zone_id"],
                 "name": cp["name"],
                 "hex": list(cp["hex"]),
-                "imposer": b["imposer_country_id"],
+                "imposer": b["imposer_country_code"],
                 "level": b["level"],
             })
     return {"blockades": result, "count": len(result)}
@@ -410,7 +410,7 @@ async def get_valid_attack_targets(
     unit = dep[0]
 
     utype = unit["unit_type"]
-    country = unit["country_id"]
+    country = unit["country_code"]
     src_row = unit.get("global_row")
     src_col = unit.get("global_col")
 
@@ -451,18 +451,18 @@ async def get_valid_attack_targets(
         reachable = hex_range(src_row, src_col, attack_range)
 
     # Load enemies — filter by theater or sim, then intersect with reachable set in Python
-    sel_cols = "unit_id, country_id, unit_type, global_row, global_col, theater, theater_row, theater_col"
+    sel_cols = "unit_id, country_code, unit_type, global_row, global_col, theater, theater_row, theater_col"
     reachable_set = set(reachable)
     if use_theater:
         all_in_theater = client.table("deployments").select(sel_cols) \
             .eq("sim_run_id", sim_id).eq("theater", theater) \
-            .neq("country_id", country).eq("unit_status", "active") \
+            .neq("country_code", country).eq("unit_status", "active") \
             .execute().data or []
         all_enemies = [e for e in all_in_theater if (e.get("theater_row"), e.get("theater_col")) in reachable_set]
     else:
         all_in_sim = client.table("deployments").select(sel_cols) \
             .eq("sim_run_id", sim_id) \
-            .neq("country_id", country).eq("unit_status", "active") \
+            .neq("country_code", country).eq("unit_status", "active") \
             .execute().data or []
         all_enemies = [e for e in all_in_sim if (e.get("global_row"), e.get("global_col")) in reachable_set]
 
@@ -472,11 +472,11 @@ async def get_valid_attack_targets(
         if use_theater:
             own_in_theater = client.table("deployments").select("theater_row, theater_col") \
                 .eq("sim_run_id", sim_id).eq("theater", theater) \
-                .eq("country_id", country).eq("unit_status", "active").execute().data or []
+                .eq("country_code", country).eq("unit_status", "active").execute().data or []
             own_hexes = {(u["theater_row"], u["theater_col"]) for u in own_in_theater if u.get("theater_row")}
         else:
             own_in_sim = client.table("deployments").select("global_row, global_col") \
-                .eq("sim_run_id", sim_id).eq("country_id", country).eq("unit_status", "active").execute().data or []
+                .eq("sim_run_id", sim_id).eq("country_code", country).eq("unit_status", "active").execute().data or []
             own_hexes = {(u["global_row"], u["global_col"]) for u in own_in_sim if u.get("global_row")}
 
     # Group enemies by hex
@@ -527,14 +527,14 @@ async def get_valid_attack_targets(
     if use_theater:
         friendlies_at_source = client.table("deployments") \
             .select("unit_id, unit_type") \
-            .eq("sim_run_id", sim_id).eq("country_id", country) \
+            .eq("sim_run_id", sim_id).eq("country_code", country) \
             .eq("theater", theater).eq("theater_row", t_row).eq("theater_col", t_col) \
             .in_("unit_status", ["active", "embarked"]) \
             .execute().data or []
     else:
         friendlies_at_source = client.table("deployments") \
             .select("unit_id, unit_type") \
-            .eq("sim_run_id", sim_id).eq("country_id", country) \
+            .eq("sim_run_id", sim_id).eq("country_code", country) \
             .eq("global_row", src_row).eq("global_col", src_col) \
             .in_("unit_status", ["active", "embarked"]) \
             .execute().data or []
@@ -562,7 +562,7 @@ async def get_valid_attack_targets(
     return {
         "source": {"row": src_row, "col": src_col,
                    "theater": unit.get("theater"), "theater_row": unit.get("theater_row"), "theater_col": unit.get("theater_col")},
-        "unit": {"unit_id": unit["unit_id"], "unit_type": utype, "country_id": country},
+        "unit": {"unit_id": unit["unit_id"], "unit_type": utype, "country_code": country},
         "friendlies_at_source": friendlies_at_source,
         "units_attacked_this_round": units_attacked_this_round,
         "targets": targets,
@@ -591,18 +591,18 @@ async def get_attack_preview(
     unit_ids = [u.strip() for u in attacker_unit_ids.split(",") if u.strip()]
 
     # Load attacker units (active or embarked)
-    atk_deps = client.table("deployments").select("unit_id,country_id,unit_type,global_row,global_col") \
+    atk_deps = client.table("deployments").select("unit_id,country_code,unit_type,global_row,global_col") \
         .eq("sim_run_id", sim_id).in_("unit_status", ["active", "embarked"]).in_("unit_id", unit_ids).execute().data or []
     if not atk_deps:
         raise HTTPException(status_code=404, detail="Attacker units not found")
 
-    attacker_country = atk_deps[0]["country_id"]
+    attacker_country = atk_deps[0]["country_code"]
     atk_count = len(atk_deps)
 
     # Load defender units at target hex
-    def_deps = client.table("deployments").select("unit_id,country_id,unit_type,global_row,global_col") \
+    def_deps = client.table("deployments").select("unit_id,country_code,unit_type,global_row,global_col") \
         .eq("sim_run_id", sim_id).eq("global_row", target_row).eq("global_col", target_col) \
-        .eq("unit_status", "active").neq("country_id", attacker_country).execute().data or []
+        .eq("unit_status", "active").neq("country_code", attacker_country).execute().data or []
 
     # Filter by attack type
     if attack_type == "ground_attack":
@@ -622,7 +622,7 @@ async def get_attack_preview(
     atk_stability = atk_country[0]["stability"] if atk_country else 5.0
     atk_ai = atk_country[0].get("ai_level", 0) if atk_country else 0
 
-    defender_countries = list(set(d["country_id"] for d in def_deps))
+    defender_countries = list(set(d["country_code"] for d in def_deps))
     def_stability = 5.0
     def_ai = 0
     if defender_countries:
@@ -910,10 +910,10 @@ async def get_blockades(sim_id: str, country: Optional[str] = None, user: AuthUs
     # Resolve user's country (from query param or user_id lookup)
     user_country = country
     if not user_country:
-        role = client.table("roles").select("country_id") \
+        role = client.table("roles").select("country_code") \
             .eq("sim_run_id", sim_id).eq("user_id", user.id) \
             .limit(1).execute().data
-        user_country = role[0]["country_id"] if role else None
+        user_country = role[0]["country_code"] if role else None
 
     active_blockades = get_blockade_status(sim_id)
 
@@ -932,7 +932,7 @@ async def get_blockades(sim_id: str, country: Optional[str] = None, user: AuthUs
         for b in active_blockades:
             if b["zone_id"] == cp_id:
                 entry["blockade"] = {
-                    "imposer": b["imposer_country_id"],
+                    "imposer": b["imposer_country_code"],
                     "level": b["level"],
                     "established_round": b["established_round"],
                 }
@@ -1429,12 +1429,12 @@ async def submit_action(
     client = get_client()
 
     if body.role_id == "moderator" and body.action_type in MODERATOR_ACTIONS:
-        role = {"id": "moderator", "character_name": "Moderator", "country_id": body.country_code,
+        role = {"id": "moderator", "character_name": "Moderator", "country_code": body.country_code,
                 "positions": [], "position_type": "moderator"}
     else:
         role_check = (
             client.table("roles")
-            .select("id, character_name, country_id, positions, position_type")
+            .select("id, character_name, country_code, positions, position_type")
             .eq("sim_run_id", sim_id)
             .eq("id", body.role_id)
             .execute()
@@ -1493,14 +1493,14 @@ async def submit_action(
         tr = body.params.get("target_row")
         tc = body.params.get("target_col")
         if tr is not None and tc is not None:
-            def_deps = client.table("deployments").select("id,country_id,unit_type") \
+            def_deps = client.table("deployments").select("id,country_code,unit_type") \
                 .eq("sim_run_id", sim_id).eq("global_row", int(tr)).eq("global_col", int(tc)) \
                 .eq("unit_status", "active") \
-                .neq("country_id", body.country_code).execute().data or []
+                .neq("country_code", body.country_code).execute().data or []
             def_ground = [d for d in def_deps if d["unit_type"] == "ground"]
             action_payload["_defender_ground_count"] = len(def_ground)
             # Compute modifiers
-            def_countries = list(set(d["country_id"] for d in def_deps))
+            def_countries = list(set(d["country_code"] for d in def_deps))
             atk_c = client.table("countries").select("stability,ai_level") \
                 .eq("sim_run_id", sim_id).eq("id", body.country_code).limit(1).execute().data
             def_c = client.table("countries").select("stability,ai_level") \

@@ -72,14 +72,14 @@ def get_ai_level(client, sim_id, country):
 
 
 def count_reserve_units(client, sim_id, country, unit_type=None):
-    q = client.table("deployments").select("id", count="exact").eq("sim_run_id", sim_id).eq("country_id", country).eq("unit_status", "reserve")
+    q = client.table("deployments").select("id", count="exact").eq("sim_run_id", sim_id).eq("country_code", country).eq("unit_status", "reserve")
     if unit_type:
         q = q.eq("unit_type", unit_type)
     return q.execute().count or 0
 
 
 def get_reserve_unit_ids(client, sim_id, country, unit_type, limit=5):
-    r = client.table("deployments").select("unit_id").eq("sim_run_id", sim_id).eq("country_id", country).eq("unit_status", "reserve").eq("unit_type", unit_type).limit(limit).execute()
+    r = client.table("deployments").select("unit_id").eq("sim_run_id", sim_id).eq("country_code", country).eq("unit_status", "reserve").eq("unit_type", unit_type).limit(limit).execute()
     return [u["unit_id"] for u in r.data]
 
 
@@ -349,7 +349,7 @@ class TestBasingRights:
         if resp["status"] == "executed":
             rel = client.table("relationships").select("basing_rights_a_to_b, basing_rights_b_to_a") \
                 .eq("sim_run_id", test_sim) \
-                .eq("from_country_id", "columbia").eq("to_country_id", "cathay").execute()
+                .eq("from_country_code", "columbia").eq("to_country_code", "cathay").execute()
             if rel.data:
                 # At least one direction should be true
                 assert rel.data[0].get("basing_rights_a_to_b") or rel.data[0].get("basing_rights_b_to_a")

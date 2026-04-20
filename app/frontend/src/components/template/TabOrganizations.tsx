@@ -255,7 +255,7 @@ export function TabOrganizations({ templateId: _templateId }: TabOrganizationsPr
                                   className="border-b border-border/50 hover:bg-card/50"
                                 >
                                   <td className="font-body text-body-sm text-text-primary px-3 py-2">
-                                    {cap(m.country_id)}
+                                    {cap(m.country_code)}
                                   </td>
                                   <td className="font-body text-body-sm text-text-primary px-3 py-2">
                                     {m.role_id ? cap(m.role_id) : '—'}

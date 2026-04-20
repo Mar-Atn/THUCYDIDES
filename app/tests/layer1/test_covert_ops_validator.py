@@ -6,9 +6,9 @@ from engine.services.covert_ops_validator import validate_covert_op
 
 ROLES = {
     "shadow": {"intelligence_pool": 8, "sabotage_cards": 3, "disinfo_cards": 3,
-               "election_meddling_cards": 1, "country_id": "columbia"},
+               "election_meddling_cards": 1, "country_code": "columbia"},
     "dealer": {"intelligence_pool": 0, "sabotage_cards": 0, "disinfo_cards": 0,
-               "election_meddling_cards": 0, "country_id": "columbia"},
+               "election_meddling_cards": 0, "country_code": "columbia"},
 }
 
 

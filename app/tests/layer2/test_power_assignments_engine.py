@@ -12,12 +12,12 @@ from tests._sim_run_helper import create_isolated_run
 SCENARIO = "start_one"
 
 ROLES = {
-    "dealer": {"is_head_of_state": True, "country_id": "columbia"},
-    "shield": {"is_head_of_state": False, "is_military_chief": True, "country_id": "columbia"},
-    "volt": {"is_head_of_state": False, "country_id": "columbia"},
-    "anchor": {"is_head_of_state": False, "country_id": "columbia"},
-    "shadow": {"is_head_of_state": False, "country_id": "columbia"},
-    "pathfinder": {"is_head_of_state": True, "country_id": "sarmatia"},
+    "dealer": {"is_head_of_state": True, "country_code": "columbia"},
+    "shield": {"is_head_of_state": False, "is_military_chief": True, "country_code": "columbia"},
+    "volt": {"is_head_of_state": False, "country_code": "columbia"},
+    "anchor": {"is_head_of_state": False, "country_code": "columbia"},
+    "shadow": {"is_head_of_state": False, "country_code": "columbia"},
+    "pathfinder": {"is_head_of_state": True, "country_code": "sarmatia"},
 }
 
 

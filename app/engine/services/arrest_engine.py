@@ -37,7 +37,7 @@ def request_arrest(
 
     # Verify target exists and is active (query roles table, not run_roles)
     target_data = client.table("roles") \
-        .select("id, character_name, status, positions, country_id") \
+        .select("id, character_name, status, positions, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", target_role_id).limit(1).execute().data
     if not target_data:
         return {"success": False, "status": "rejected",
@@ -50,7 +50,7 @@ def request_arrest(
 
     # Verify arrester has authority
     arrester_data = client.table("roles") \
-        .select("id, character_name, positions, country_id") \
+        .select("id, character_name, positions, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", arrester_role_id).limit(1).execute().data
     if not arrester_data:
         return {"success": False, "status": "rejected",
@@ -61,7 +61,7 @@ def request_arrest(
         return {"success": False, "status": "rejected",
                 "message": f"{arrester_role_id!r} is not HoS or Security — cannot arrest"}
 
-    if arrester["country_id"] != target["country_id"]:
+    if arrester["country_code"] != target["country_code"]:
         return {"success": False, "status": "rejected",
                 "message": f"Cannot arrest {target_role_id!r} — different country"}
 
@@ -117,7 +117,7 @@ def release_role(
     client = get_client()
 
     target_data = client.table("roles") \
-        .select("id, character_name, status, country_id") \
+        .select("id, character_name, status, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", target_role_id).limit(1).execute().data
     if not target_data:
         return {"success": False, "message": f"Role {target_role_id} not found"}
@@ -127,7 +127,7 @@ def release_role(
         return {"success": False, "message": f"{target['character_name']} is not arrested"}
 
     releaser_data = client.table("roles") \
-        .select("id, character_name, positions, country_id") \
+        .select("id, character_name, positions, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", releaser_role_id).limit(1).execute().data
     if not releaser_data:
         return {"success": False, "message": f"Releaser {releaser_role_id} not found"}
@@ -136,7 +136,7 @@ def release_role(
     if not (has_position(releaser, "head_of_state") or has_position(releaser, "security")):
         return {"success": False, "message": "Only HoS or Security can release arrested roles"}
 
-    if releaser["country_id"] != target["country_id"]:
+    if releaser["country_code"] != target["country_code"]:
         return {"success": False, "message": "Can only release roles in your own country"}
 
     # Release

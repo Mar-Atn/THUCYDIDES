@@ -48,7 +48,7 @@ function hexCountryName(row: number, col: number): string {
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
 interface RoleData {
-  id: string; character_name: string; country_id: string; position_type: string; positions?: string[]; status?: string
+  id: string; character_name: string; country_code: string; position_type: string; positions?: string[]; status?: string
   title: string; public_bio: string; confidential_brief: string | null
   objectives: string[]; powers: string[]
 }
@@ -158,7 +158,7 @@ export function ParticipantDashboard() {
   const [roleActions, setRoleActions] = useState<string[]>([])
   const [dataVersion, setDataVersion] = useState(0) // increments on every loadData — children use as refresh trigger
   const [objectives, setObjectives] = useState<string[]>([])
-  const [myRelationships, setMyRelationships] = useState<{to_country_id:string;relationship:string;status:string}[]>([])
+  const [myRelationships, setMyRelationships] = useState<{to_country_code:string;relationship:string;status:string}[]>([])
   const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
   const [personalRels, setPersonalRels] = useState<{other_role:string;type:string;notes:string}[]>([])
   const [activeAction, setActiveAction] = useState<string|null>(null)
@@ -212,7 +212,7 @@ export function ParticipantDashboard() {
     try {
       // Load role: proxy mode uses role_id, normal mode uses user_id
       const roleQuery = supabase.from('roles')
-        .select('id,character_name,country_id,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status,status_detail')
+        .select('id,character_name,country_code,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status,status_detail')
         .eq('sim_run_id',simId)
       const { data: roles } = proxyRoleId
         ? await roleQuery.eq('id', proxyRoleId).limit(1)
@@ -225,17 +225,17 @@ export function ParticipantDashboard() {
         // This reduces sequential wait from 13 round-trips to 1
         const [countryRes, artsRes, raRes, relsRes, memsRes, prARes, prBRes, srRes, trRes] = await Promise.all([
           supabase.from('countries').select('*')
-            .eq('sim_run_id',simId).eq('id',role.country_id).limit(1),
+            .eq('sim_run_id',simId).eq('id',role.country_code).limit(1),
           supabase.from('artefacts').select('*')
             .eq('sim_run_id',simId).eq('role_id',role.id).order('round_delivered'),
           supabase.from('role_actions').select('action_id')
             .eq('sim_run_id',simId).eq('role_id',role.id),
           supabase.from('relationships')
-            .select('to_country_id,relationship,status')
-            .eq('sim_run_id',simId).eq('from_country_id',role.country_id),
+            .select('to_country_code,relationship,status')
+            .eq('sim_run_id',simId).eq('from_country_code',role.country_code),
           supabase.from('org_memberships')
             .select('org_id,role_in_org,has_veto')
-            .eq('sim_run_id',simId).eq('country_id',role.country_id),
+            .eq('sim_run_id',simId).eq('country_code',role.country_code),
           supabase.from('role_relationships')
             .select('role_a_id,role_b_id,relationship_type,notes')
             .eq('sim_run_id',simId).eq('role_a_id',role.id),
@@ -243,11 +243,11 @@ export function ParticipantDashboard() {
             .select('role_a_id,role_b_id,relationship_type,notes')
             .eq('sim_run_id',simId).eq('role_b_id',role.id),
           supabase.from('sanctions')
-            .select('imposer_country_id,target_country_id,level')
-            .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`),
+            .select('imposer_country_code,target_country_code,level')
+            .eq('sim_run_id',simId).or(`target_country_code.eq.${role.country_code},imposer_country_code.eq.${role.country_code}`),
           supabase.from('tariffs')
-            .select('imposer_country_id,target_country_id,level')
-            .eq('sim_run_id',simId).or(`target_country_id.eq.${role.country_id},imposer_country_id.eq.${role.country_id}`),
+            .select('imposer_country_code,target_country_code,level')
+            .eq('sim_run_id',simId).or(`target_country_code.eq.${role.country_code},imposer_country_code.eq.${role.country_code}`),
         ])
 
         if (countryRes.data?.[0]) {
@@ -263,9 +263,9 @@ export function ParticipantDashboard() {
           ...((prBRes.data??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_a_id,type:r.relationship_type,notes:r.notes||''}))),
         ]
         setPersonalRels(pRels)
-        const sanctions = (srRes.data??[]).map((s:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:s.imposer_country_id,target:s.target_country_id,level:s.level}))
+        const sanctions = (srRes.data??[]).map((s:{imposer_country_code:string;target_country_code:string;level:number})=>({imposer:s.imposer_country_code,target:s.target_country_code,level:s.level}))
         setMySanctions(sanctions)
-        const tariffs = (trRes.data??[]).map((t:{imposer_country_id:string;target_country_id:string;level:number})=>({imposer:t.imposer_country_id,target:t.target_country_id,level:t.level}))
+        const tariffs = (trRes.data??[]).map((t:{imposer_country_code:string;target_country_code:string;level:number})=>({imposer:t.imposer_country_code,target:t.target_country_code,level:t.level}))
         setMyTariffs(tariffs)
 
       } else { setTab('world') }
@@ -335,7 +335,7 @@ export function ParticipantDashboard() {
               <div className="w-10 h-10 rounded-full flex items-center justify-center font-heading text-lg text-white" style={{backgroundColor:color}}>{myRole!.character_name[0]}</div>
               <div>
                 <div className="font-heading text-h3 text-text-primary">{myRole!.character_name}</div>
-                <div className="font-body text-caption text-text-secondary">{myRole!.title} · {myCountry?.sim_name??myRole!.country_id}</div>
+                <div className="font-body text-caption text-text-secondary">{myRole!.title} · {myCountry?.sim_name??myRole!.country_code}</div>
               </div>
               <span className="font-body text-caption font-medium px-2 py-0.5 rounded" style={{backgroundColor:`${color}15`,color}}>{displayPositions(myRole!)}</span>
             </>) : (<div>
@@ -496,13 +496,13 @@ export function ParticipantDashboard() {
                 actionType={activeAction}
                 roleId={myRole.id}
                 roleName={myRole.character_name}
-                countryId={myRole.country_id}
+                countryId={myRole.country_code}
                 simId={simId!}
                 onClose={()=>setActiveAction(null)}
                 onSubmitted={()=>{setActiveAction(null); loadData()}}
               />
             : <TabActions roleActions={roleActions} currentPhase={simState?.current_phase??'pre'} onSelectAction={setActiveAction}
-                simId={simId!} countryId={myRole.country_id} roleId={myRole.id} dataVersion={dataVersion}
+                simId={simId!} countryId={myRole.country_code} roleId={myRole.id} dataVersion={dataVersion}
                 nuclearActionsData={globalNuclearActions}
                 parentOrgIds={new Set(myOrgMemberships.map(m=>m.org_id))}
                 parentSimRun={simRun}/>
@@ -546,7 +546,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   )
   // Filter: 1:1 where I'm invitee, or org where I'm a member
   const myMeetingInvitations = (meetingInvitationsRaw as unknown as {
-    id:string; invitation_type:string; inviter_role_id:string; inviter_country_id:string;
+    id:string; invitation_type:string; inviter_role_id:string; inviter_country_code:string;
     invitee_role_id:string|null; org_id:string|null; org_name:string|null;
     message:string; theme:string|null; expires_at:string; responses:Record<string,unknown>;
   }[]).filter(inv => {
@@ -630,7 +630,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [countryRoles, setCountryRoles] = useState<{id:string;character_name:string;position_type:string}[]>([])
   useEffect(() => {
     supabase.from('roles').select('id,character_name,position_type')
-      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      .eq('sim_run_id', simId).eq('country_code', countryId).eq('status', 'active')
       .then(({ data }) => { if (data) setCountryRoles(data) })
   }, [simId, countryId, dataVersion])
 
@@ -789,7 +789,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   useEffect(() => {
     if (!simId || !isColumbia) return
     supabase.from('org_memberships').select('role_in_org')
-      .eq('sim_run_id', simId).eq('org_id', 'columbia_parliament').eq('country_id', countryId)
+      .eq('sim_run_id', simId).eq('org_id', 'columbia_parliament').eq('country_code', countryId)
       .then(({ data }) => {
         const myMembership = (data || []).find((m: Record<string,unknown>) => {
           // Need to check by role — but org_memberships are by country, not role
@@ -1671,7 +1671,7 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
   country:CountryData; fullCountry:Record<string,unknown>|null
   sanctions:{imposer:string;target:string;level:number}[]
   tariffs:{imposer:string;target:string;level:number}[]
-  relationships:{to_country_id:string;relationship:string;status:string}[]
+  relationships:{to_country_code:string;relationship:string;status:string}[]
   orgMemberships:{org_id:string;role_in_org:string;has_veto:boolean}[]
   simId:string
 }) {
@@ -1682,16 +1682,16 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
   const [basingWeReceive,setBasingWeReceive]=useState<string[]>([])
 
   useEffect(()=>{
-    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+    supabase.from('relationships').select('from_country_code,to_country_code,basing_rights_a_to_b,basing_rights_b_to_a')
       .eq('sim_run_id',simId)
-      .or(`from_country_id.eq.${cc},to_country_id.eq.${cc}`)
+      .or(`from_country_code.eq.${cc},to_country_code.eq.${cc}`)
       .then(({data})=>{
         const granted:string[]=[], received:string[]=[]
         ;(data??[]).forEach((r:Record<string,unknown>)=>{
-          if(r.from_country_id===cc && r.basing_rights_a_to_b) granted.push(r.to_country_id as string)
-          if(r.to_country_id===cc && r.basing_rights_b_to_a) granted.push(r.from_country_id as string)
-          if(r.from_country_id===cc && r.basing_rights_b_to_a) received.push(r.to_country_id as string)
-          if(r.to_country_id===cc && r.basing_rights_a_to_b) received.push(r.from_country_id as string)
+          if(r.from_country_code===cc && r.basing_rights_a_to_b) granted.push(r.to_country_code as string)
+          if(r.to_country_code===cc && r.basing_rights_b_to_a) granted.push(r.from_country_code as string)
+          if(r.from_country_code===cc && r.basing_rights_b_to_a) received.push(r.to_country_code as string)
+          if(r.to_country_code===cc && r.basing_rights_a_to_b) received.push(r.from_country_code as string)
         })
         setBasingWeGrant([...new Set(granted)])
         setBasingWeReceive([...new Set(received)])
@@ -1707,7 +1707,7 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
   const [countryRolesTab, setCountryRolesTab] = useState<{id:string;character_name:string;position_type:string;positions?:string[];title:string;status:string}[]>([])
   useEffect(()=>{
     supabase.from('roles').select('id,character_name,position_type,positions,title,status')
-      .eq('sim_run_id',simId).eq('country_id',cc).eq('status','active')
+      .eq('sim_run_id',simId).eq('country_code',cc).eq('status','active')
       .then(({data})=>{ if(data) setCountryRolesTab(data) })
   },[simId,cc])
 
@@ -1901,15 +1901,15 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
           <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Relationships</h3>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
             {relationships.filter(r=>r.relationship!=='neutral').map(r=>
-              <div key={r.to_country_id} className="flex items-center gap-2 bg-base rounded px-3 py-2">
-                <span className="font-body text-body-sm text-text-primary">{r.to_country_id}</span>
+              <div key={r.to_country_code} className="flex items-center gap-2 bg-base rounded px-3 py-2">
+                <span className="font-body text-body-sm text-text-primary">{r.to_country_code}</span>
                 <span className={`font-body text-caption font-medium ${relColor(r.relationship)}`}>{relLabel(r.relationship)}</span>
               </div>
             )}
           </div>
           {relationships.filter(r=>r.relationship==='neutral').length>0&&<div className="mt-2">
             <span className="font-body text-caption text-text-secondary">
-              Neutral: {relationships.filter(r=>r.relationship==='neutral').map(r=>r.to_country_id).join(', ')}
+              Neutral: {relationships.filter(r=>r.relationship==='neutral').map(r=>r.to_country_code).join(', ')}
             </span>
           </div>}
         </div>
@@ -1933,7 +1933,7 @@ function TabCountry({country,fullCountry,sanctions,tariffs,relationships,orgMemb
 /* ── Tab: World ────────────────────────────────────────────────────────── */
 
 interface WorldRole {
-  id: string; character_name: string; country_id: string; position_type: string
+  id: string; character_name: string; country_code: string; position_type: string
   title: string; public_bio: string; is_ai_operated: boolean
 }
 
@@ -1946,7 +1946,7 @@ interface CountryBrief {
 
 function TabWorld({simId,round}:{simId:string;round:number}) {
   const [countries,setCountries]=useState<CountryData[]>([])
-  const [relationships,setRelationships]=useState<{from_country_id:string;to_country_id:string;relationship:string}[]>([])
+  const [relationships,setRelationships]=useState<{from_country_code:string;to_country_code:string;relationship:string}[]>([])
   const [worldState,setWorldState]=useState<{oil_price:number;global_trade_volume_index:number;dollar_credibility:number}|null>(null)
   const [roles,setRoles]=useState<WorldRole[]>([])
   const [countryBriefs,setCountryBriefs]=useState<Record<string,string>>({})
@@ -1960,7 +1960,7 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       .eq('sim_run_id',simId).order('gdp',{ascending:false})
       .then(({data})=>setCountries((data??[]) as CountryData[]))
     supabase.from('relationships')
-      .select('from_country_id,to_country_id,relationship')
+      .select('from_country_code,to_country_code,relationship')
       .eq('sim_run_id',simId)
       .then(({data})=>setRelationships((data??[]) as typeof relationships))
     supabase.from('world_state')
@@ -1968,8 +1968,8 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       .eq('sim_run_id',simId).order('round_num',{ascending:false}).limit(1)
       .then(({data})=>{if(data?.[0]) setWorldState(data[0])})
     supabase.from('roles')
-      .select('id,character_name,country_id,position_type,title,public_bio,is_ai_operated')
-      .eq('sim_run_id',simId).eq('status','active').order('country_id,position_type')
+      .select('id,character_name,country_code,position_type,title,public_bio,is_ai_operated')
+      .eq('sim_run_id',simId).eq('status','active').order('country_code,position_type')
       .then(({data})=>setRoles((data??[]) as WorldRole[]))
     supabase.from('countries')
       .select('id,country_brief')
@@ -2075,16 +2075,16 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       {view==='relationships'&&<div className="bg-card border border-border rounded-lg p-4">
         <div className="space-y-1">
           {countries.slice(0,12).map(c=>{
-            const rels=relationships.filter(r=>r.from_country_id===c.id&&r.relationship!=='neutral')
+            const rels=relationships.filter(r=>r.from_country_code===c.id&&r.relationship!=='neutral')
             if(!rels.length) return null
             return <div key={c.id} className="flex items-center gap-2 py-1">
               <div className="w-3 h-3 rounded shrink-0" style={{backgroundColor:c.color_ui??'#666'}}/>
               <span className="font-body text-caption text-text-primary w-24 shrink-0">{c.sim_name}</span>
               <div className="flex flex-wrap gap-1">
                 {rels.map((r,i)=>{
-                  const target=countries.find(x=>x.id===r.to_country_id)
+                  const target=countries.find(x=>x.id===r.to_country_code)
                   return <span key={i} className={`font-body text-caption ${relColor(r.relationship)}`}>
-                    {target?.sim_name??r.to_country_id}({relLabel(r.relationship)})
+                    {target?.sim_name??r.to_country_code}({relLabel(r.relationship)})
                   </span>
                 })}
               </div>
@@ -2096,7 +2096,7 @@ function TabWorld({simId,round}:{simId:string;round:number}) {
       {/* Countries & People view */}
       {view==='countries'&&<div className="space-y-2">
         {countries.map(c=>{
-          const countryRoles=roles.filter(r=>r.country_id===c.id)
+          const countryRoles=roles.filter(r=>r.country_code===c.id)
           const isExpanded=expandedCountry===c.id
           return <div key={c.id} className="bg-card border border-border rounded-lg overflow-hidden">
             <button onClick={()=>setExpandedCountry(isExpanded?null:c.id)}

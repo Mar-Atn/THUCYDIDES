@@ -290,7 +290,7 @@ export function TransactionReview({txn,simId,countryId,roleId,onClose,onDone}:{
     supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
       .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
     // Count reserves by type
-    supabase.from('deployments').select('unit_type').eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','reserve')
+    supabase.from('deployments').select('unit_type').eq('sim_run_id',simId).eq('country_code',countryId).eq('unit_status','reserve')
       .then(({data})=>{
         const counts: Record<string,number> = {}
         ;(data??[]).forEach((d:{unit_type:string})=>{counts[d.unit_type]=(counts[d.unit_type]||0)+1})
@@ -484,16 +484,16 @@ export function BasingRightsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
 
     // Load current basing rights from relationships
-    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+    supabase.from('relationships').select('from_country_code,to_country_code,basing_rights_a_to_b,basing_rights_b_to_a')
       .eq('sim_run_id',simId)
-      .or(`from_country_id.eq.${countryId},to_country_id.eq.${countryId}`)
+      .or(`from_country_code.eq.${countryId},to_country_code.eq.${countryId}`)
       .then(({data})=>{
         const granted:string[]=[], received:string[]=[]
         ;(data??[]).forEach((r:Record<string,unknown>)=>{
-          if(r.from_country_id===countryId && r.basing_rights_a_to_b) granted.push(r.to_country_id as string)
-          if(r.to_country_id===countryId && r.basing_rights_b_to_a) granted.push(r.from_country_id as string)
-          if(r.from_country_id===countryId && r.basing_rights_b_to_a) received.push(r.to_country_id as string)
-          if(r.to_country_id===countryId && r.basing_rights_a_to_b) received.push(r.from_country_id as string)
+          if(r.from_country_code===countryId && r.basing_rights_a_to_b) granted.push(r.to_country_code as string)
+          if(r.to_country_code===countryId && r.basing_rights_b_to_a) granted.push(r.from_country_code as string)
+          if(r.from_country_code===countryId && r.basing_rights_b_to_a) received.push(r.to_country_code as string)
+          if(r.to_country_code===countryId && r.basing_rights_a_to_b) received.push(r.from_country_code as string)
         })
         setWeGrant([...new Set(granted)])
         setTheyGrant([...new Set(received)])
@@ -502,17 +502,17 @@ export function BasingRightsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     // Count foreign units on our territory
     // Get our country's hex positions first, then count foreign units at those hexes
     supabase.from('deployments').select('global_row,global_col')
-      .eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','active')
+      .eq('sim_run_id',simId).eq('country_code',countryId).eq('unit_status','active')
       .then(({data:ourUnits})=>{
         const ourHexes = new Set((ourUnits??[]).filter((u:{global_row:number|null})=>u.global_row!=null).map((u:{global_row:number;global_col:number})=>`${u.global_row},${u.global_col}`))
         // Now get all foreign active units and check if they're at our hexes
-        supabase.from('deployments').select('country_id,global_row,global_col')
-          .eq('sim_run_id',simId).neq('country_id',countryId).eq('unit_status','active')
+        supabase.from('deployments').select('country_code,global_row,global_col')
+          .eq('sim_run_id',simId).neq('country_code',countryId).eq('unit_status','active')
           .then(({data:foreignData})=>{
             const counts:Record<string,number>={}
-            ;(foreignData??[]).forEach((d:{country_id:string;global_row:number|null;global_col:number|null})=>{
+            ;(foreignData??[]).forEach((d:{country_code:string;global_row:number|null;global_col:number|null})=>{
               if(d.global_row!=null && d.global_col!=null && ourHexes.has(`${d.global_row},${d.global_col}`)){
-                counts[d.country_id]=(counts[d.country_id]||0)+1
+                counts[d.country_code]=(counts[d.country_code]||0)+1
               }
             })
             setForeignUnits(counts)
@@ -1072,7 +1072,7 @@ export function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
       // Load deployed strategic_missile units
       const { data: deps } = await supabase.from('deployments')
         .select('unit_id, unit_type, unit_status, global_row, global_col')
-        .eq('sim_run_id', simId).eq('country_id', countryId)
+        .eq('sim_run_id', simId).eq('country_code', countryId)
         .eq('unit_type', 'strategic_missile').eq('unit_status', 'active')
       setMissiles((deps ?? []) as typeof missiles)
       setLoading(false)
@@ -1652,11 +1652,11 @@ export function DeclareWarForm({roleId,countryId,simId,onClose,onSubmitted}:{
     supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
       .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
 
-    supabase.from('relationships').select('to_country_id,relationship')
-      .eq('sim_run_id',simId).eq('from_country_id',countryId)
+    supabase.from('relationships').select('to_country_code,relationship')
+      .eq('sim_run_id',simId).eq('from_country_code',countryId)
       .then(({data})=>{
         const map:Record<string,string>={}
-        ;(data??[]).forEach((r:{to_country_id:string;relationship:string})=>{map[r.to_country_id]=r.relationship})
+        ;(data??[]).forEach((r:{to_country_code:string;relationship:string})=>{map[r.to_country_code]=r.relationship})
         setRelationships(map)
       })
   },[simId,countryId])
@@ -1740,7 +1740,7 @@ type AttackStep = 'select_source' | 'select_units' | 'select_target' | 'confirm'
 
 interface AttackTarget {
   row: number; col: number; attack_type: string
-  enemies: { unit_id: string; country_id: string; unit_type: string }[]
+  enemies: { unit_id: string; country_code: string; unit_type: string }[]
 }
 
 const ATTACK_TYPE_LABELS: Record<string,string> = {
@@ -1933,7 +1933,7 @@ export function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
       // Helper: try to select a new source hex from any step
       const trySelectSource = () => {
-        const myUnits = (msg.units || []).filter((u:{country_id:string})=>u.country_id===countryId)
+        const myUnits = (msg.units || []).filter((u:{country_code:string})=>u.country_code===countryId)
         if (myUnits.length === 0) return false
         const combatUnits = myUnits.filter((u:{unit_type:string;status?:string})=>
           ['ground','tactical_air','naval','strategic_missile'].includes(u.unit_type)
@@ -1963,7 +1963,7 @@ export function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
       if (step === 'select_units' || step === 'select_target' || step === 'confirm') {
         // If clicking a hex with own combat units → re-select source
-        const myUnits = (msg.units || []).filter((u:{country_id:string})=>u.country_id===countryId)
+        const myUnits = (msg.units || []).filter((u:{country_code:string})=>u.country_code===countryId)
         const hasCombat = myUnits.some((u:{unit_type:string})=>
           ['ground','tactical_air','naval','strategic_missile'].includes(u.unit_type)
         )
@@ -2296,7 +2296,7 @@ export function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 <span className="font-body text-caption text-text-secondary block">Enemy Units</span>
                 <div className="flex gap-1 flex-wrap mt-0.5">
                   {selectedTarget.enemies.map(e=>
-                    <span key={e.unit_id} title={`${e.unit_id} (${e.country_id})`} className="text-danger"><UnitIcon type={e.unit_type} size={20}/></span>
+                    <span key={e.unit_id} title={`${e.unit_id} (${e.country_code})`} className="text-danger"><UnitIcon type={e.unit_type} size={20}/></span>
                   )}
                 </div>
               </div>
@@ -2356,7 +2356,7 @@ export function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
                 <div className="flex gap-2">
                   {selectedTarget.enemies.map(e=>(
                     <button key={e.unit_id} onClick={()=>setSelectedEnemyUnit(e.unit_id)}
-                      title={`${e.unit_id} (${e.country_id})`}
+                      title={`${e.unit_id} (${e.country_code})`}
                       className={`inline-flex items-center justify-center w-10 h-10 rounded border-2 transition-colors ${
                         selectedEnemyUnit===e.unit_id?'bg-danger/10 border-danger text-danger':'border-border text-text-secondary hover:border-danger/30'
                       }`}>
@@ -2535,7 +2535,7 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
 }) {
   const [loading, setLoading] = useState(true)
   const [meetingType, setMeetingType] = useState<'one_on_one'|'organization'>('one_on_one')
-  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_id:string}[]>([])
+  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_code:string}[]>([])
   const [myOrgs, setMyOrgs] = useState<{id:string;name:string}[]>([])
   const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string}[]>([])
   const [targetRole, setTargetRole] = useState('')
@@ -2558,10 +2558,10 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
   useEffect(() => {
     Promise.all([
-      supabase.from('roles').select('id,character_name,country_id')
+      supabase.from('roles').select('id,character_name,country_code')
         .eq('sim_run_id', simId).eq('status', 'active'),
       supabase.from('org_memberships').select('org_id')
-        .eq('sim_run_id', simId).eq('country_id', countryId),
+        .eq('sim_run_id', simId).eq('country_code', countryId),
       supabase.from('organizations').select('id,sim_name')
         .eq('sim_run_id', simId),
       supabase.from('countries').select('id,sim_name,color_ui')
@@ -2608,7 +2608,7 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   // Group roles by country
   const byCountry = countries.map(c => ({
     ...c,
-    roles: allRoles.filter(r => r.country_id === c.id),
+    roles: allRoles.filter(r => r.country_code === c.id),
   })).filter(c => c.roles.length > 0)
 
   return (
@@ -3066,7 +3066,7 @@ export function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
   roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
 }) {
   const [loading, setLoading] = useState(true)
-  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_id:string;positions:string[];status:string}[]>([])
+  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_code:string;positions:string[];status:string}[]>([])
   const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string}[]>([])
   const [targetId, setTargetId] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -3077,7 +3077,7 @@ export function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
   useEffect(() => {
     Promise.all([
-      supabase.from('roles').select('id,character_name,country_id,positions,status')
+      supabase.from('roles').select('id,character_name,country_code,positions,status')
         .eq('sim_run_id', simId).eq('status', 'active'),
       supabase.from('countries').select('id,sim_name,color_ui')
         .eq('sim_run_id', simId).order('sim_name'),
@@ -3094,7 +3094,7 @@ export function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const targets = allRoles.filter(r => r.id !== roleId)
   const byCountry = countries.map(c => ({
     ...c,
-    roles: targets.filter(r => r.country_id === c.id),
+    roles: targets.filter(r => r.country_code === c.id),
   })).filter(c => c.roles.length > 0)
 
   const handleSubmit = async () => {
@@ -3221,7 +3221,7 @@ export function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const loadRoles = useCallback(() => {
     Promise.all([
       supabase.from('roles').select('id,character_name,positions,status')
-        .eq('sim_run_id', simId).eq('country_id', countryId).in('status', ['active', 'arrested']),
+        .eq('sim_run_id', simId).eq('country_code', countryId).in('status', ['active', 'arrested']),
       supabase.from('role_actions').select('uses_remaining')
         .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'arrest').limit(1),
     ]).then(([rolesRes, usageRes]) => {
@@ -3396,7 +3396,7 @@ export function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:
 
   useEffect(() => {
     supabase.from('roles').select('id,character_name,positions,title')
-      .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+      .eq('sim_run_id', simId).eq('country_code', countryId).eq('status', 'active')
       .then(({ data }) => {
         if (data) setRoles(data as typeof roles)
       }).finally(() => setLoading(false))
@@ -3426,7 +3426,7 @@ export function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:
       setSelectedPosition(''); setTargetRoleId(''); setVacate(false)
       // Reload roles to show updated positions — stay on same screen
       const { data } = await supabase.from('roles').select('id,character_name,positions,title')
-        .eq('sim_run_id', simId).eq('country_id', countryId).eq('status', 'active')
+        .eq('sim_run_id', simId).eq('country_code', countryId).eq('status', 'active')
       if (data) setRoles(data as typeof roles)
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
     finally { setSubmitting(false) }
@@ -3555,7 +3555,7 @@ export function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   useEffect(() => {
     Promise.all([
       supabase.from('countries').select('stability').eq('sim_run_id',simId).eq('id',countryId).limit(1),
-      supabase.from('roles').select('id,character_name,positions').eq('sim_run_id',simId).eq('country_id',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
+      supabase.from('roles').select('id,character_name,positions').eq('sim_run_id',simId).eq('country_code',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
     ]).then(([cs, rs]) => {
       setStability(cs.data?.[0]?.stability ?? 10)
       setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
@@ -3677,15 +3677,15 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
   // Load basing rights
   useEffect(()=>{
-    supabase.from('relationships').select('from_country_id,to_country_id,basing_rights_a_to_b,basing_rights_b_to_a')
+    supabase.from('relationships').select('from_country_code,to_country_code,basing_rights_a_to_b,basing_rights_b_to_a')
       .eq('sim_run_id',simId)
-      .or(`from_country_id.eq.${countryId},to_country_id.eq.${countryId}`)
+      .or(`from_country_code.eq.${countryId},to_country_code.eq.${countryId}`)
       .then(({data})=>{
         const countries = new Set<string>()
         ;(data??[]).forEach((r:Record<string,unknown>)=>{
           // We receive basing FROM them
-          if(r.from_country_id===countryId && r.basing_rights_b_to_a) countries.add(r.to_country_id as string)
-          if(r.to_country_id===countryId && r.basing_rights_a_to_b) countries.add(r.from_country_id as string)
+          if(r.from_country_code===countryId && r.basing_rights_b_to_a) countries.add(r.to_country_code as string)
+          if(r.to_country_code===countryId && r.basing_rights_a_to_b) countries.add(r.from_country_code as string)
         })
         setBasingCountries(countries)
       })
@@ -3743,7 +3743,7 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         theater: m.theater,
         theater_row: m.theater_row,
         theater_col: m.theater_col,
-        country_id: countryId,
+        country_code: countryId,
       })),
     }, '*')
   }, [countryId])
@@ -3770,7 +3770,7 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         // Validate territory: own territory, or hex with own units
         const isOwnTerritory = hexOwner === countryId
         const isSea = hexOwner === 'sea'
-        const ownUnitsHere = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+        const ownUnitsHere = (msg.units || []).filter((u:{country_code:string}) => u.country_code === countryId)
         const hasOwnUnits = ownUnitsHere.length > 0
         const isNaval = selectedUnit.unit_type === 'naval'
         const isLand = !isNaval
@@ -3799,7 +3799,7 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         tryDeploy()
       } else {
         // Show own units at this hex for withdrawal
-        const mapUnits = (msg.units || []).filter((u:{country_id:string}) => u.country_id === countryId)
+        const mapUnits = (msg.units || []).filter((u:{country_code:string}) => u.country_code === countryId)
         const afterWithdraw = mapUnits.filter((u:{unit_id:string}) => !moves.some(m => m.unit_id === u.unit_id && m.action === 'withdraw'))
         const deployedHere = moves.filter(m => m.action === 'deploy' && m.target_row === row && m.target_col === col)
           .map(m => ({unit_id: m.unit_id, unit_type: m.unit_type}))
@@ -4224,7 +4224,7 @@ export function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitt
   useEffect(()=>{
     supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
       .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
-    supabase.from('deployments').select('unit_id,unit_type').eq('sim_run_id',simId).eq('country_id',countryId).eq('unit_status','reserve')
+    supabase.from('deployments').select('unit_id,unit_type').eq('sim_run_id',simId).eq('country_code',countryId).eq('unit_status','reserve')
       .then(({data})=>setMyReserves((data??[]) as typeof myReserves))
     supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
       .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
@@ -4659,17 +4659,17 @@ export function TariffSanctionForm({type,roleId,countryId,simId,onClose,onSubmit
     supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
       .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
     // Load existing imposed by us
-    supabase.from(table).select('target_country_id,level').eq('sim_run_id',simId).eq('imposer_country_id',countryId)
+    supabase.from(table).select('target_country_code,level').eq('sim_run_id',simId).eq('imposer_country_code',countryId)
       .then(({data})=>{
-        const items = (data??[]).map((r:{target_country_id:string;level:number})=>({target:r.target_country_id,level:r.level}))
+        const items = (data??[]).map((r:{target_country_code:string;level:number})=>({target:r.target_country_code,level:r.level}))
         setExisting(items)
         const ch: Record<string,number> = {}
         items.forEach(i=>{ch[i.target]=i.level})
         setChanges(ch)
       })
     // Load received against us
-    supabase.from(table).select('imposer_country_id,level').eq('sim_run_id',simId).eq('target_country_id',countryId)
-      .then(({data})=>setReceived((data??[]).map((r:{imposer_country_id:string;level:number})=>({imposer:r.imposer_country_id,level:r.level}))))
+    supabase.from(table).select('imposer_country_code,level').eq('sim_run_id',simId).eq('target_country_code',countryId)
+      .then(({data})=>setReceived((data??[]).map((r:{imposer_country_code:string;level:number})=>({imposer:r.imposer_country_code,level:r.level}))))
   },[simId,countryId,table])
 
   const setLevel = (target:string, level:number) => setChanges(p=>({...p,[target]:level}))

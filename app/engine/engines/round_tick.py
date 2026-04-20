@@ -271,11 +271,11 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     # --- Sanctions: read from `sanctions` state table ---
     sanction_changes: dict = {}
     try:
-        res = client.table("sanctions").select("imposer_country_id, target_country_id, level") \
+        res = client.table("sanctions").select("imposer_country_code, target_country_code, level") \
             .eq("sim_run_id", sim_run_id).execute()
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
-            target = row.get("target_country_id", "")
+            imposer = row.get("imposer_country_code", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if imposer and target and level != 0:
                 sanction_changes.setdefault(imposer, {})[target] = level
@@ -287,11 +287,11 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
     # --- Tariffs: read from `tariffs` state table ---
     tariff_changes: dict = {}
     try:
-        res = client.table("tariffs").select("imposer_country_id, target_country_id, level") \
+        res = client.table("tariffs").select("imposer_country_code, target_country_code, level") \
             .eq("sim_run_id", sim_run_id).execute()
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
-            target = row.get("target_country_id", "")
+            imposer = row.get("imposer_country_code", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if imposer and target and level != 0:
                 tariff_changes.setdefault(imposer, {})[target] = level
@@ -311,7 +311,7 @@ def _load_state_from_tables(client, sim_run_id: str, scenario_id: str, round_num
             if zone:
                 blockade_changes[zone] = {
                     "status": "active",
-                    "imposer": row.get("imposer_country_id", ""),
+                    "imposer": row.get("imposer_country_code", ""),
                     "level": row.get("level", "full"),
                     "zone_id": zone,
                 }
@@ -397,11 +397,11 @@ def _extract_war_state(client, sim_run_id: str) -> set[str]:
     try:
         # Check relationships state table — status='military_conflict' means at war
         res = client.table("relationships") \
-            .select("from_country_id, to_country_id, status") \
+            .select("from_country_code, to_country_code, status") \
             .eq("status", "military_conflict").execute()
         for r in (res.data or []):
-            at_war.add(r.get("from_country_id", ""))
-            at_war.add(r.get("to_country_id", ""))
+            at_war.add(r.get("from_country_code", ""))
+            at_war.add(r.get("to_country_code", ""))
     except Exception:
         pass
     # Also check for countries involved in combat this run

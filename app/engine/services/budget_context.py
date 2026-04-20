@@ -560,18 +560,18 @@ def _load_relationships(client, country_code: str) -> dict:
     try:
         res = (
             client.table("relationships")
-            .select("from_country_id, to_country_id, status")
+            .select("from_country_code, to_country_code, status")
             .or_(
-                f"from_country_id.eq.{country_code},"
-                f"to_country_id.eq.{country_code}"
+                f"from_country_code.eq.{country_code},"
+                f"to_country_code.eq.{country_code}"
             )
             .execute()
         )
         for row in (res.data or []):
             other = (
-                row["to_country_id"]
-                if row.get("from_country_id") == country_code
-                else row.get("from_country_id")
+                row["to_country_code"]
+                if row.get("from_country_code") == country_code
+                else row.get("from_country_code")
             )
             if not other:
                 continue

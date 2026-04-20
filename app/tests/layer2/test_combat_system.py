@@ -90,7 +90,7 @@ def _insert_unit(client, sim_id, country, unit_type, row, col, unit_id=None,
     uid = unit_id or f"test_{unit_type}_{country}_{uuid.uuid4().hex[:8]}"
     payload = {
         "sim_run_id": sim_id,
-        "country_id": country,
+        "country_code": country,
         "unit_type": unit_type,
         "unit_id": uid,
         "unit_status": status,

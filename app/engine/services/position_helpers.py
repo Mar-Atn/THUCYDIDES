@@ -40,7 +40,7 @@ def recompute_role_actions(
     # Load role
     role_data = (
         client.table("roles")
-        .select("id, country_id, positions")
+        .select("id, country_code, positions")
         .eq("sim_run_id", sim_run_id)
         .eq("id", role_id)
         .execute()
@@ -50,7 +50,7 @@ def recompute_role_actions(
         return {"added": [], "removed": [], "unchanged": []}
 
     role = role_data[0]
-    country_code = role["country_id"]
+    country_code = role["country_code"]
     positions = role.get("positions") or []
 
     # Load country state for dynamic conditions
@@ -125,7 +125,7 @@ def recompute_country_actions(
         client.table("roles")
         .select("id")
         .eq("sim_run_id", sim_run_id)
-        .eq("country_id", country_code)
+        .eq("country_code", country_code)
         .eq("status", "active")
         .execute()
     ).data or []
@@ -159,7 +159,7 @@ def recompute_all_role_actions(
     # Load all active roles
     roles = (
         client.table("roles")
-        .select("id, country_id, positions")
+        .select("id, country_code, positions")
         .eq("sim_run_id", sim_run_id)
         .eq("status", "active")
         .execute()
@@ -177,17 +177,17 @@ def recompute_all_role_actions(
     # Load org memberships for org-based actions
     org_members_raw = (
         client.table("org_memberships")
-        .select("country_id, role_in_org")
+        .select("country_code, role_in_org")
         .eq("sim_run_id", sim_run_id)
         .execute()
     ).data or []
-    # Build set of country_ids that are org members, and chairmen
+    # Build set of country_codes that are org members, and chairmen
     org_member_countries: set[str] = set()
     org_chairman_countries: set[str] = set()
     for m in org_members_raw:
-        org_member_countries.add(m["country_id"])
+        org_member_countries.add(m["country_code"])
         if m.get("role_in_org") in ("chairman", "president", "secretary_general"):
-            org_chairman_countries.add(m["country_id"])
+            org_chairman_countries.add(m["country_code"])
 
     # Load ALL current role_actions (one query instead of N)
     all_ra = (
@@ -212,7 +212,7 @@ def recompute_all_role_actions(
 
     for role in roles:
         rid = role["id"]
-        country = role["country_id"]
+        country = role["country_code"]
         positions = role.get("positions") or []
         cs = cs_map.get(country, {})
 

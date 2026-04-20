@@ -501,7 +501,7 @@ function AddEventForm({
         const role = roles.find((r) => r.id === roleId)
         return {
           role_id: roleId,
-          country_code: role?.country_id ?? '',
+          country_code: role?.country_code ?? '',
           character_name: role?.character_name ?? roleId,
         }
       })
@@ -524,8 +524,8 @@ function AddEventForm({
     'hanguk', 'levantia', 'mirage', 'phrygia', 'solaria', 'yamato',
   ]
   const sortedRoles = [...roles].sort((a, b) => {
-    const ia = COUNTRY_ORDER.indexOf(a.country_id)
-    const ib = COUNTRY_ORDER.indexOf(b.country_id)
+    const ia = COUNTRY_ORDER.indexOf(a.country_code)
+    const ib = COUNTRY_ORDER.indexOf(b.country_code)
     if (ia !== ib) return ia - ib
     return a.character_name.localeCompare(b.character_name)
   })
@@ -665,7 +665,7 @@ function AddEventForm({
                       {role.character_name}
                     </span>
                     <span className="font-body text-caption text-text-secondary">
-                      — {cap(role.country_id)}, {role.title}
+                      — {cap(role.country_code)}, {role.title}
                     </span>
                   </label>
                 ))}

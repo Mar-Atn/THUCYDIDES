@@ -41,9 +41,9 @@ def initiate_change_leader(
     # Load country roles
     roles = (
         client.table("roles")
-        .select("id, character_name, positions, position_type, is_head_of_state, country_id, status")
+        .select("id, character_name, positions, position_type, is_head_of_state, country_code, status")
         .eq("sim_run_id", sim_run_id)
-        .eq("country_id", country_code)
+        .eq("country_code", country_code)
         .eq("status", "active")
         .execute()
     ).data or []
@@ -367,7 +367,7 @@ def _resolve_removal(client, sim_run_id, scenario_id, record, votes, required, c
             client.table("roles")
             .select("id")
             .eq("sim_run_id", sim_run_id)
-            .eq("country_id", country_code)
+            .eq("country_code", country_code)
             .eq("status", "active")
             .execute()
         ).data or []

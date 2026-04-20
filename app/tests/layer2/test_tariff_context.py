@@ -108,11 +108,11 @@ def _seed_tariff(client, imposer: str, target: str, level: int, notes: str = "")
     sim_run_id = _get_sim_run_id()
     client.table("tariffs").upsert({
         "sim_run_id": sim_run_id,
-        "imposer_country_id": imposer,
-        "target_country_id": target,
+        "imposer_country_code": imposer,
+        "target_country_code": target,
         "level": level,
         "notes": notes or f"test seed {imposer}->{target} L{level}",
-    }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+    }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
 
 
 def _clean_test_tariffs(client) -> None:

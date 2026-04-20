@@ -22,7 +22,7 @@ def _has_naval_at_hex(client, sim_run_id: str, country_code: str, row: int, col:
     """Return naval deployments for country at the given hex."""
     return client.table("deployments").select("id, unit_id, unit_type") \
         .eq("sim_run_id", sim_run_id) \
-        .eq("country_id", country_code) \
+        .eq("country_code", country_code) \
         .eq("global_row", row).eq("global_col", col) \
         .eq("unit_type", "naval").eq("unit_status", "active") \
         .execute().data or []
@@ -39,7 +39,7 @@ def _has_ground_adjacent(client, sim_run_id: str, country_code: str, row: int, c
     for nr, nc in land_neighbors:
         units = client.table("deployments").select("id, unit_id, unit_type") \
             .eq("sim_run_id", sim_run_id) \
-            .eq("country_id", country_code) \
+            .eq("country_code", country_code) \
             .eq("global_row", nr).eq("global_col", nc) \
             .eq("unit_type", "ground").eq("unit_status", "active") \
             .execute().data or []
@@ -88,13 +88,13 @@ def establish_blockade(
     client = get_client()
 
     # Check for existing active blockade at this chokepoint
-    existing = client.table("blockades").select("id, imposer_country_id, level") \
+    existing = client.table("blockades").select("id, imposer_country_code, level") \
         .eq("sim_run_id", sim_run_id) \
         .eq("zone_id", zone_id) \
         .eq("status", "active") \
         .execute().data or []
     if existing:
-        imposer = existing[0]["imposer_country_id"]
+        imposer = existing[0]["imposer_country_code"]
         if imposer == country_code:
             return {"success": False, "narrative": f"You already have an active blockade at {cp['name']}."}
         return {"success": False, "narrative": f"{cp['name']} is already blockaded by {imposer}. Use attack to break it."}
@@ -110,7 +110,7 @@ def establish_blockade(
         client.table("blockades").insert({
             "sim_run_id": sim_run_id,
             "zone_id": zone_id,
-            "imposer_country_id": country_code,
+            "imposer_country_code": country_code,
             "status": "active",
             "level": level,
             "established_round": round_num,
@@ -151,7 +151,7 @@ def lift_blockade(
     cp = CHOKEPOINTS[zone_id]
     client = get_client()
 
-    existing = client.table("blockades").select("id, imposer_country_id") \
+    existing = client.table("blockades").select("id, imposer_country_code") \
         .eq("sim_run_id", sim_run_id) \
         .eq("zone_id", zone_id) \
         .eq("status", "active") \
@@ -161,8 +161,8 @@ def lift_blockade(
         return {"success": False, "narrative": f"No active blockade at {cp['name']}."}
 
     blockade = existing[0]
-    if blockade["imposer_country_id"] != country_code:
-        return {"success": False, "narrative": f"Only {blockade['imposer_country_id']} can lift the blockade at {cp['name']}."}
+    if blockade["imposer_country_code"] != country_code:
+        return {"success": False, "narrative": f"Only {blockade['imposer_country_code']} can lift the blockade at {cp['name']}."}
 
     try:
         client.table("blockades").update({
@@ -203,7 +203,7 @@ def reduce_blockade(
     cp = CHOKEPOINTS[zone_id]
     client = get_client()
 
-    existing = client.table("blockades").select("id, imposer_country_id, level") \
+    existing = client.table("blockades").select("id, imposer_country_code, level") \
         .eq("sim_run_id", sim_run_id) \
         .eq("zone_id", zone_id) \
         .eq("status", "active") \
@@ -213,8 +213,8 @@ def reduce_blockade(
         return {"success": False, "narrative": f"No active blockade at {cp['name']}."}
 
     blockade = existing[0]
-    if blockade["imposer_country_id"] != country_code:
-        return {"success": False, "narrative": f"Only {blockade['imposer_country_id']} can modify the blockade at {cp['name']}."}
+    if blockade["imposer_country_code"] != country_code:
+        return {"success": False, "narrative": f"Only {blockade['imposer_country_code']} can modify the blockade at {cp['name']}."}
 
     if blockade["level"] == "partial":
         return {"success": False, "narrative": f"Blockade at {cp['name']} is already partial."}
@@ -274,7 +274,7 @@ def check_blockade_integrity(sim_run_id: str) -> list[dict]:
 
     for blockade in active:
         zone_id = blockade["zone_id"]
-        imposer = blockade["imposer_country_id"]
+        imposer = blockade["imposer_country_code"]
         cp = CHOKEPOINTS.get(zone_id)
         if not cp:
             continue

@@ -390,13 +390,13 @@ def _load_sanctions_state(
     try:
         res = (
             client.table("sanctions")
-            .select("imposer_country_id, target_country_id, level")
+            .select("imposer_country_code, target_country_code, level")
             .eq("sim_run_id", sim_run_id)
             .execute()
         )
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
-            target = row.get("target_country_id", "")
+            imposer = row.get("imposer_country_code", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if imposer and target and level:
                 out.setdefault(imposer, {})[target] = int(level)
@@ -452,13 +452,13 @@ def _build_tariffs_on_producers(
     try:
         res = (
             client.table("tariffs")
-            .select("imposer_country_id, target_country_id, level")
+            .select("imposer_country_code, target_country_code, level")
             .eq("sim_run_id", sim_run_id)
             .execute()
         )
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
-            target = row.get("target_country_id", "")
+            imposer = row.get("imposer_country_code", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if not imposer or not target:
                 continue

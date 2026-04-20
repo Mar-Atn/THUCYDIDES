@@ -86,7 +86,7 @@ class LeaderAgent:
         """
         # Load role data
         self.role = load_role(self.role_id)
-        self.country = load_country_context(self.role["country_id"])
+        self.country = load_country_context(self.role["country_code"])
 
         # Block 1: Rich SIM world context (roster, structure, geography, situation)
         metacog_override = (sim_config or {}).get("metacognitive_architecture") if sim_config else None
@@ -118,7 +118,7 @@ class LeaderAgent:
     def initialize_sync(self, identity_text: str = "", world_state: dict | None = None):
         """Synchronous initialization (no LLM call — identity provided)."""
         self.role = load_role(self.role_id)
-        self.country = load_country_context(self.role["country_id"])
+        self.country = load_country_context(self.role["country_code"])
 
         rules = build_rich_block1(
             self.role_id,
@@ -552,7 +552,7 @@ class LeaderAgent:
         from engine.services.llm import call_llm
         from engine.config.settings import LLMUseCase
 
-        country_id = self.role.get("country_id", "")
+        country_id = self.role.get("country_code", "")
         eco = round_results.get("economic_summary", {}).get(country_id, {})
         stab = round_results.get("stability", {}).get(country_id, {})
         supp = round_results.get("support", {}).get(country_id, {})
@@ -675,7 +675,7 @@ class LeaderAgent:
         }
         relationships = {}
         if world_state and "relationships" in world_state:
-            my_country = self.role["country_id"]
+            my_country = self.role["country_code"]
             for country_id, rel in world_state.get("relationships", {}).get(my_country, {}).items():
                 rel_str = rel if isinstance(rel, str) else rel.get("relationship", "neutral")
                 relationships[country_id] = rel_map.get(rel_str, 0.0)

@@ -232,8 +232,8 @@ def validate_nuclear_launch(
         if not u:
             errors.append(f"UNKNOWN_UNIT: {code!r}")
             continue
-        # deployments table uses country_id and unit_status
-        unit_country = u.get("country_id") or u.get("country_code")
+        # deployments table uses country_code and unit_status
+        unit_country = u.get("country_code")
         if unit_country != cc:
             errors.append(f"NOT_OWN_UNIT: {code!r}")
         if (u.get("unit_type") or "").lower() != "strategic_missile":

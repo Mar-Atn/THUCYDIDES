@@ -2,7 +2,7 @@
 
 ARCHITECTURE NOTE (2026-04-19):
 The ``roles`` table is the single source of truth for per-run role state.
-It stores: id, character_name, status, positions[], country_id, etc.
+It stores: id, character_name, status, positions[], country_code, etc.
 
 The old ``run_roles`` table was designed as a separate mutable copy but
 was never reliably seeded. All code now reads/writes ``roles`` directly.
@@ -42,7 +42,7 @@ def get_run_role(sim_run_id: str, role_id: str) -> Optional[dict]:
     """
     client = get_client()
     res = client.table("roles") \
-        .select("id, character_name, status, country_id, positions, position_type, status_detail") \
+        .select("id, character_name, status, country_code, positions, position_type, status_detail") \
         .eq("sim_run_id", sim_run_id) \
         .eq("id", role_id) \
         .limit(1).execute()
@@ -56,8 +56,7 @@ def get_run_role(sim_run_id: str, role_id: str) -> Optional[dict]:
         "role_id": r["id"],
         "character_name": r["character_name"],
         "status": r.get("status", "active"),
-        "country_code": r["country_id"],
-        "country_id": r["country_id"],
+        "country_code": r["country_code"],
         "positions": positions,
         "position_type": r.get("position_type"),
         "is_head_of_state": "head_of_state" in positions,
@@ -75,20 +74,19 @@ def get_run_roles(
     """Query roles with optional filters. Returns list of role dicts."""
     client = get_client()
     q = client.table("roles") \
-        .select("id, character_name, status, country_id, positions, position_type") \
+        .select("id, character_name, status, country_code, positions, position_type") \
         .eq("sim_run_id", sim_run_id)
     if country_code:
-        q = q.eq("country_id", country_code)
+        q = q.eq("country_code", country_code)
     if status:
         q = q.eq("status", status)
-    rows = q.order("country_id").execute().data or []
+    rows = q.order("country_code").execute().data or []
 
     return [{
         "role_id": r["id"],
         "character_name": r["character_name"],
         "status": r.get("status", "active"),
-        "country_code": r["country_id"],
-        "country_id": r["country_id"],
+        "country_code": r["country_code"],
         "positions": r.get("positions") or [],
         "position_type": r.get("position_type"),
         "is_head_of_state": "head_of_state" in (r.get("positions") or []),

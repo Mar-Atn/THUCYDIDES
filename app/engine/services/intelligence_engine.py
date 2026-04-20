@@ -231,12 +231,12 @@ def _section_military(client, sim_run_id, round_num) -> str:
     """Military unit counts per country per branch."""
     # Use deployments table (live state)
     res = client.table("deployments").select(
-        "country_id,unit_type,unit_status"
+        "country_code,unit_type,unit_status"
     ).eq("sim_run_id", sim_run_id).execute().data or []
 
     counts: dict[str, dict[str, dict[str, int]]] = {}
     for r in res:
-        cc = r.get("country_id", "")
+        cc = r.get("country_code", "")
         ut = r.get("unit_type", "")
         st = r.get("unit_status", "")
         counts.setdefault(cc, {}).setdefault(ut, {}).setdefault(st, 0)
@@ -263,7 +263,7 @@ def _section_relationships(client, sim_run_id) -> str:
     """Wars, alliances, tensions."""
     try:
         res = client.table("relationships").select(
-            "from_country_id,to_country_id,status,relationship"
+            "from_country_code,to_country_code,status,relationship"
         ).eq("sim_run_id", sim_run_id).execute().data or []
     except Exception:
         res = []
@@ -272,7 +272,7 @@ def _section_relationships(client, sim_run_id) -> str:
         # Try without sim_run_id filter (legacy data)
         try:
             res = client.table("relationships").select(
-                "from_country_id,to_country_id,status,relationship"
+                "from_country_code,to_country_code,status,relationship"
             ).execute().data or []
         except Exception:
             res = []
@@ -280,7 +280,7 @@ def _section_relationships(client, sim_run_id) -> str:
     lines = ["[RELATIONSHIPS]"]
     for r in res:
         status = r.get("status") or r.get("relationship") or "neutral"
-        lines.append(f"  {r.get('from_country_id', '?'):12} → {r.get('to_country_id', '?'):12} : {status}")
+        lines.append(f"  {r.get('from_country_code', '?'):12} → {r.get('to_country_code', '?'):12} : {status}")
     if len(lines) == 1:
         lines.append("  (no explicit relationships recorded)")
     return "\n".join(lines)
@@ -391,14 +391,14 @@ def _section_blockades(client, sim_run_id) -> str:
     """Active blockades."""
     try:
         res = client.table("blockades").select(
-            "zone_id,imposer_country_id,level,status"
+            "zone_id,imposer_country_code,level,status"
         ).eq("sim_run_id", sim_run_id).eq("status", "active").execute().data or []
     except Exception:
         res = []
 
     lines = ["[ACTIVE BLOCKADES]"]
     for b in res:
-        lines.append(f"  {b.get('zone_id', '?')} by {b.get('imposer_country_id', '?')} [{b.get('level', '?')}]")
+        lines.append(f"  {b.get('zone_id', '?')} by {b.get('imposer_country_code', '?')} [{b.get('level', '?')}]")
     if len(lines) == 1:
         lines.append("  (no active blockades)")
     return "\n".join(lines)

@@ -60,7 +60,7 @@ def execute_martial_law(
         new_units.append({
             "sim_run_id": sim_run_id,
             "unit_id": unit_id,
-            "country_id": country_code,
+            "country_code": country_code,
             "unit_type": "ground",
             "unit_status": "reserve",
             "global_row": None,

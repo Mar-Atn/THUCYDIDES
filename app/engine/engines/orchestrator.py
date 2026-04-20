@@ -139,13 +139,13 @@ def _build_world_dict(
     """Convert DB world state + relations into engine dict format."""
     sanc: dict[str, dict[str, int]] = {}
     for s in sanctions:
-        sanc.setdefault(s.imposer_country_id, {})[s.target_country_id] = s.level
+        sanc.setdefault(s.imposer_country_code, {})[s.target_country_code] = s.level
     tar: dict[str, dict[str, int]] = {}
     for t in tariffs:
-        tar.setdefault(t.imposer_country_id, {})[t.target_country_id] = t.level
+        tar.setdefault(t.imposer_country_code, {})[t.target_country_code] = t.level
     rel: dict[str, dict[str, str]] = {}
     for r in relationships:
-        rel.setdefault(r.from_country_id, {})[r.to_country_id] = r.relationship
+        rel.setdefault(r.from_country_code, {})[r.to_country_code] = r.relationship
     return {
         "oil_price": ws.oil_price, "oil_price_index": ws.oil_price_index,
         "global_trade_volume_index": ws.global_trade_volume_index,

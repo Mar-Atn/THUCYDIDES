@@ -204,10 +204,10 @@ def _load_wars(client, country_code: str) -> list[str]:
     try:
         res = (
             client.table("relationships")
-            .select("from_country_id, to_country_id, relationship, status")
+            .select("from_country_code, to_country_code, relationship, status")
             .or_(
-                f"from_country_id.eq.{country_code},"
-                f"to_country_id.eq.{country_code}"
+                f"from_country_code.eq.{country_code},"
+                f"to_country_code.eq.{country_code}"
             )
             .execute()
         )
@@ -216,9 +216,9 @@ def _load_wars(client, country_code: str) -> list[str]:
             if rel != "war":
                 continue
             other = (
-                row["to_country_id"]
-                if row.get("from_country_id") == country_code
-                else row.get("from_country_id")
+                row["to_country_code"]
+                if row.get("from_country_code") == country_code
+                else row.get("from_country_code")
             )
             if other:
                 out.append(other)

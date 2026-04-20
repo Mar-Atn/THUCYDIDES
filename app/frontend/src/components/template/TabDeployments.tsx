@@ -65,8 +65,8 @@ export function TabDeployments({ templateId: _templateId }: TabDeploymentsProps)
   const byCountry = useMemo(() => {
     const grouped: Record<string, Deployment[]> = {}
     for (const d of deployments) {
-      if (!grouped[d.country_id]) grouped[d.country_id] = []
-      grouped[d.country_id].push(d)
+      if (!grouped[d.country_code]) grouped[d.country_code] = []
+      grouped[d.country_code].push(d)
     }
     return grouped
   }, [deployments])

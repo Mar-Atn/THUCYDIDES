@@ -7,13 +7,13 @@ from engine.services.political_validator import (
 )
 
 ROLES = {
-    "dealer": {"is_head_of_state": True, "country_id": "columbia",
+    "dealer": {"is_head_of_state": True, "country_code": "columbia",
                "assassination_cards": 0, "protest_stim_cards": 0},
-    "shadow": {"is_head_of_state": False, "country_id": "columbia",
+    "shadow": {"is_head_of_state": False, "country_code": "columbia",
                "assassination_cards": 1, "protest_stim_cards": 0, "powers": "intelligence"},
     "ironhand": {"is_head_of_state": False, "is_military_chief": True,
-                 "country_id": "sarmatia", "powers": "coup_potential"},
-    "compass": {"is_head_of_state": False, "country_id": "sarmatia",
+                 "country_code": "sarmatia", "powers": "coup_potential"},
+    "compass": {"is_head_of_state": False, "country_code": "sarmatia",
                 "protest_stim_cards": 1, "powers": ""},
 }
 

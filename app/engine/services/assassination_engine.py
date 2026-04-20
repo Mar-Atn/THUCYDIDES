@@ -47,7 +47,7 @@ def execute_assassination(
 
     # Validate attacker has security position
     attacker_data = client.table("roles") \
-        .select("id, character_name, positions, country_id") \
+        .select("id, character_name, positions, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", attacker_role).limit(1).execute().data
     if not attacker_data:
         return {"success": False, "narrative": f"Attacker {attacker_role} not found"}
@@ -56,11 +56,11 @@ def execute_assassination(
         return {"success": False, "narrative": f"{attacker_role} does not have security position — cannot assassinate"}
 
     attacker_name = attacker["character_name"]
-    attacker_cc = attacker["country_id"]
+    attacker_cc = attacker["country_code"]
 
     # Get target info
     target_data = client.table("roles") \
-        .select("id, character_name, status, country_id") \
+        .select("id, character_name, status, country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", target_role).limit(1).execute().data
     if not target_data:
         return {"success": False, "narrative": f"Target {target_role} not found"}
@@ -70,7 +70,7 @@ def execute_assassination(
         return {"success": False, "narrative": f"Target {target_role} is already {target['status']}"}
 
     target_name = target["character_name"]
-    target_cc = target["country_id"]
+    target_cc = target["country_code"]
 
     # Determine success probability
     if attacker_cc == "levantia" or target_cc == "levantia":

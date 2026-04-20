@@ -350,7 +350,7 @@ def _create_meeting_invitation(sim_run_id: str, round_num: int, action: dict) ->
         "sim_run_id": sim_run_id,
         "invitation_type": inv_type,
         "inviter_role_id": role_id,
-        "inviter_country_id": country_code,
+        "inviter_country_code": country_code,
         "message": message,
         "expires_at": expires_at,
         "status": "pending",
@@ -433,18 +433,18 @@ def _reassign_position(sim_run_id: str, round_num: int, role_id: str, country_co
         return {"success": False, "narrative": "Cannot reassign Head of State — use Change Leader instead"}
 
     # Validate initiator is HoS
-    initiator = client.table("roles").select("id,character_name,positions,country_id") \
+    initiator = client.table("roles").select("id,character_name,positions,country_code") \
         .eq("sim_run_id", sim_run_id).eq("id", role_id).limit(1).execute().data
     if not initiator or not has_position(initiator[0], "head_of_state"):
         return {"success": False, "narrative": "Only Head of State can reassign positions"}
-    if initiator[0]["country_id"] != country_code:
+    if initiator[0]["country_code"] != country_code:
         return {"success": False, "narrative": "Can only reassign positions in your own country"}
 
     initiator_name = initiator[0]["character_name"]
 
     # Find who currently holds this position
     country_roles = client.table("roles").select("id,character_name,positions") \
-        .eq("sim_run_id", sim_run_id).eq("country_id", country_code).eq("status", "active").execute().data or []
+        .eq("sim_run_id", sim_run_id).eq("country_code", country_code).eq("status", "active").execute().data or []
 
     current_holder = None
     for r in country_roles:
@@ -555,7 +555,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
         atk_units = client.table("deployments") \
             .select("*") \
             .eq("sim_run_id", sim_run_id) \
-            .eq("country_id", attacker) \
+            .eq("country_code", attacker) \
             .in_("unit_status", ["active", "embarked"]) \
             .in_("unit_id", attacker_unit_codes) \
             .execute().data or []
@@ -564,7 +564,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
         atk_units = client.table("deployments") \
             .select("*") \
             .eq("sim_run_id", sim_run_id) \
-            .eq("country_id", attacker) \
+            .eq("country_code", attacker) \
             .eq("global_row", src_row) \
             .eq("global_col", src_col) \
             .eq("unit_status", "active") \
@@ -593,7 +593,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
             .eq("global_col", target_col) \
             .eq("unit_status", "active") \
             .execute().data or []
-    def_units = [u for u in all_units_at_target if u["country_id"] != attacker]
+    def_units = [u for u in all_units_at_target if u["country_code"] != attacker]
 
     if not atk_units:
         return {"success": False, "narrative": f"No {attacker} units found for attack at {hex_label}"}
@@ -603,7 +603,7 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
         return [{
             "unit_code": u.get("unit_id") or u["id"],
             "type": u["unit_type"],
-            "country": u["country_id"],
+            "country": u["country_code"],
             "deployment_id": u["id"],
         } for u in units]
 
@@ -665,14 +665,14 @@ def _resolve_combat(sim_run_id: str, round_num: int, combat_type: str, action: d
                 captured = []
                 for dep in non_ground_def:
                     client.table("deployments").update({
-                        "country_id": attacker,
+                        "country_code": attacker,
                         "unit_status": "reserve",
                         "global_row": None, "global_col": None,
                         "theater": None, "theater_row": None, "theater_col": None,
                         "embarked_on": None,
                     }).eq("id", dep["id"]).execute()
                     captured.append({"unit_id": dep.get("unit_id") or dep["id"], "type": dep["unit_type"],
-                                     "from": dep["country_id"]})
+                                     "from": dep["country_code"]})
                 if captured:
                     cap_desc = ", ".join(f"{c['type']} from {c['from']}" for c in captured)
                     combat_result["captured"] = captured
@@ -985,7 +985,7 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
 
     # Load attacker units (active or embarked — landing from carrier)
     units = client.table("deployments").select("id, unit_id, global_row, global_col, theater, theater_row, theater_col, unit_status, embarked_on") \
-        .eq("sim_run_id", sim_run_id).eq("country_id", country) \
+        .eq("sim_run_id", sim_run_id).eq("country_code", country) \
         .in_("unit_status", ["active", "embarked"]).in_("unit_id", unit_codes).execute().data or []
 
     if not units:
@@ -998,10 +998,10 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
 
     # Check for non-ground enemy units at target hex (trophies to capture)
     enemy_at_target = client.table("deployments") \
-        .select("id, unit_id, unit_type, country_id") \
+        .select("id, unit_id, unit_type, country_code") \
         .eq("sim_run_id", sim_run_id) \
         .eq("global_row", target_row).eq("global_col", target_col) \
-        .neq("country_id", country).eq("unit_status", "active") \
+        .neq("country_code", country).eq("unit_status", "active") \
         .execute().data or []
 
     # Capture non-ground enemies: change owner to attacker, set to reserve
@@ -1009,13 +1009,13 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
     for enemy in enemy_at_target:
         if enemy["unit_type"] != "ground":
             client.table("deployments").update({
-                "country_id": country,
+                "country_code": country,
                 "unit_status": "reserve",
                 "global_row": None, "global_col": None,
                 "theater": None, "theater_row": None, "theater_col": None,
                 "embarked_on": None,
             }).eq("id", enemy["id"]).execute()
-            captured.append({"unit_id": enemy["unit_id"], "type": enemy["unit_type"], "from": enemy["country_id"]})
+            captured.append({"unit_id": enemy["unit_id"], "type": enemy["unit_type"], "from": enemy["country_code"]})
 
     # Move attacker units to target hex (disembark if embarked)
     for u in units:
@@ -1053,7 +1053,7 @@ def _ground_advance(sim_run_id: str, round_num: int, action: dict) -> dict:
         has_basing = client.table("relationships") \
             .select("basing_rights_a_to_b,basing_rights_b_to_a") \
             .eq("sim_run_id", sim_run_id) \
-            .or_(f"and(from_country_id.eq.{owner},to_country_id.eq.{country}),and(from_country_id.eq.{country},to_country_id.eq.{owner})") \
+            .or_(f"and(from_country_code.eq.{owner},to_country_code.eq.{country}),and(from_country_code.eq.{country},to_country_code.eq.{owner})") \
             .limit(1).execute().data
         is_guest = False
         if has_basing:
@@ -1086,7 +1086,7 @@ def _declare_war(sim_run_id: str, round_num: int, country_code: str, role_id: st
     # Check current relationship
     rel = client.table("relationships").select("relationship") \
         .eq("sim_run_id", sim_run_id) \
-        .eq("from_country_id", country_code).eq("to_country_id", target_country) \
+        .eq("from_country_code", country_code).eq("to_country_code", target_country) \
         .execute()
     current = rel.data[0]["relationship"] if rel.data else "neutral"
 
@@ -1096,10 +1096,10 @@ def _declare_war(sim_run_id: str, round_num: int, country_code: str, role_id: st
     # Set both directions to at_war
     client.table("relationships").update({"relationship": "at_war"}) \
         .eq("sim_run_id", sim_run_id) \
-        .eq("from_country_id", country_code).eq("to_country_id", target_country).execute()
+        .eq("from_country_code", country_code).eq("to_country_code", target_country).execute()
     client.table("relationships").update({"relationship": "at_war"}) \
         .eq("sim_run_id", sim_run_id) \
-        .eq("from_country_id", target_country).eq("to_country_id", country_code).execute()
+        .eq("from_country_code", target_country).eq("to_country_code", country_code).execute()
 
     # Write observatory event
     scenario_id = get_scenario_id(client, sim_run_id)
@@ -1182,7 +1182,7 @@ def _dep_to_unit(dep: dict) -> dict:
     return {
         **dep,
         "unit_code": dep["unit_id"],
-        "country_code": dep["country_id"],
+        "country_code": dep["country_code"],
         "status": dep["unit_status"],
     }
 
@@ -1207,10 +1207,10 @@ def _process_movement(sim_run_id: str, round_num: int, action: dict) -> dict:
 
     # 1. Load all country's units from deployments
     deps = client.table("deployments") \
-        .select("unit_id, country_id, unit_type, unit_status, global_row, global_col, "
+        .select("unit_id, country_code, unit_type, unit_status, global_row, global_col, "
                 "theater, theater_row, theater_col, embarked_on") \
         .eq("sim_run_id", sim_run_id) \
-        .eq("country_id", country_code) \
+        .eq("country_code", country_code) \
         .execute().data or []
 
     if not deps:
@@ -1488,9 +1488,9 @@ def _generate_nuclear_test_artefacts(
         # Find HoS + military roles for these countries
         from engine.config.position_actions import has_position
         roles_rows = client.table("roles").select(
-            "id, country_id, positions, position_type"
+            "id, country_code, positions, position_type"
         ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
-            "country_id", t3_countries
+            "country_code", t3_countries
         ).execute().data or []
 
         target_role_ids: list[str] = []

@@ -550,8 +550,8 @@ def get_relationships(
         # Try live relationships table first
         rels = (
             client.table("relationships")
-            .select("from_country_id, to_country_id, status, relationship")
-            .or_(f"from_country_id.eq.{country_code},to_country_id.eq.{country_code}")
+            .select("from_country_code, to_country_code, status, relationship")
+            .or_(f"from_country_code.eq.{country_code},to_country_code.eq.{country_code}")
             .execute()
         )
         if rels.data:
@@ -560,8 +560,8 @@ def get_relationships(
             allies: list[str] = []
             for r in rels.data:
                 status = r.get("status", "")
-                frm = r.get("from_country_id", "")
-                to = r.get("to_country_id", "")
+                frm = r.get("from_country_code", "")
+                to = r.get("to_country_code", "")
                 other = to if frm == country_code else frm
                 if status == "military_conflict":
                     if frm == country_code:
@@ -1027,10 +1027,10 @@ def get_my_identity(country_code: str) -> dict:
         result = (
             client.table("roles")
             .select(
-                "character_name,title,parallel,objectives,powers,country_id"
+                "character_name,title,parallel,objectives,powers,country_code"
             )
             .eq("is_head_of_state", True)
-            .eq("country_id", country_code)
+            .eq("country_code", country_code)
             .limit(1)
             .execute()
         )

@@ -329,7 +329,7 @@ def _transfer_unit(client, sim_run_id, round_num, unit_code, from_cc, to_cc, cha
     """Transfer a specific unit to new owner's reserve (live deployments table)."""
     try:
         client.table("deployments").update({
-            "country_id": to_cc,
+            "country_code": to_cc,
             "unit_status": "reserve",
             "global_row": None,
             "global_col": None,
@@ -348,14 +348,14 @@ def _transfer_unit_by_type(client, sim_run_id, round_num, unit_type, count, from
     try:
         # Find reserve units of the requested type
         available = client.table("deployments").select("id, unit_id") \
-            .eq("sim_run_id", sim_run_id).eq("country_id", from_cc) \
+            .eq("sim_run_id", sim_run_id).eq("country_code", from_cc) \
             .eq("unit_type", unit_type).eq("unit_status", "reserve") \
             .limit(count).execute().data or []
 
         transferred = 0
         for u in available[:count]:
             client.table("deployments").update({
-                "country_id": to_cc,
+                "country_code": to_cc,
                 "unit_status": "reserve",
             }).eq("id", u["id"]).execute()
             transferred += 1
@@ -398,7 +398,7 @@ def _grant_basing(client, sim_run_id, host_cc, guest_cc, changes):
         client.table("relationships").update({
             "basing_rights_a_to_b": True,
         }).eq("sim_run_id", sim_run_id) \
-          .eq("from_country_id", host_cc).eq("to_country_id", guest_cc).execute()
+          .eq("from_country_code", host_cc).eq("to_country_code", guest_cc).execute()
         changes.append(f"{host_cc} grants basing rights to {guest_cc}")
     except Exception as e:
         logger.warning("basing rights grant failed %s→%s: %s", host_cc, guest_cc, e)
@@ -416,7 +416,7 @@ def _load_world_state(client, sim_run_id, round_num):
     treasury, tech levels, etc. Uses `deployments` for unit data.
     """
     # Units from deployments (individual unit model)
-    deps = client.table("deployments").select("unit_id, country_id, unit_type, unit_status") \
+    deps = client.table("deployments").select("unit_id, country_code, unit_type, unit_status") \
         .eq("sim_run_id", sim_run_id).execute().data or []
     units = {}
     for d in deps:
@@ -424,7 +424,7 @@ def _load_world_state(client, sim_run_id, round_num):
         if uid:
             units[uid] = {
                 "unit_code": uid,
-                "country_code": d["country_id"],
+                "country_code": d["country_code"],
                 "unit_type": d["unit_type"],
                 "status": d.get("unit_status", "active"),
             }

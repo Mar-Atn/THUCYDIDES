@@ -551,7 +551,7 @@ class TestCovertOps:
         )
         inp = CovertOpInput(
             country_id="att_co", op_type=CovertOpType.ESPIONAGE,
-            target_country_id="target_co", role_id="spy1", role=role,
+            target_country_code="target_co", role_id="spy1", role=role,
             target_country=target, ai_level=2, prev_ops_against_target=0,
         )
         result = resolve_covert_op(inp)
@@ -569,7 +569,7 @@ class TestCovertOps:
             random.seed(i)
             inp = CovertOpInput(
                 country_id="att_co", op_type=CovertOpType.ESPIONAGE,
-                target_country_id="target_co", role_id="spy1", role=role,
+                target_country_code="target_co", role_id="spy1", role=role,
                 target_country=target, ai_level=0, prev_ops_against_target=0,
             )
             r = resolve_covert_op(inp)
@@ -586,12 +586,12 @@ class TestCovertOps:
         role = RoleInfo(role_id="spy1", country_id="att_co", sabotage_cards=5)
         inp0 = CovertOpInput(
             country_id="att_co", op_type=CovertOpType.SABOTAGE,
-            target_country_id="target_co", role_id="spy1", role=role,
+            target_country_code="target_co", role_id="spy1", role=role,
             target_country=target, ai_level=0, prev_ops_against_target=0,
         )
         inp3 = CovertOpInput(
             country_id="att_co", op_type=CovertOpType.SABOTAGE,
-            target_country_id="target_co", role_id="spy1", role=role,
+            target_country_code="target_co", role_id="spy1", role=role,
             target_country=target, ai_level=0, prev_ops_against_target=3,
         )
         random.seed(99)

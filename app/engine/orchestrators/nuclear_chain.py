@@ -391,9 +391,9 @@ class NuclearChainOrchestrator:
 
             from engine.config.position_actions import has_position
             roles_rows = self.client.table("roles").select(
-                "id, country_id, positions, position_type"
+                "id, country_code, positions, position_type"
             ).eq("sim_run_id", sim_run_id).eq("status", "active").in_(
-                "country_id", t3_countries
+                "country_code", t3_countries
             ).execute().data or []
 
             target_role_ids = [
@@ -459,7 +459,7 @@ class NuclearChainOrchestrator:
         roles = self.client.table("roles") \
             .select("id, positions, position_type") \
             .eq("sim_run_id", sim_run_id) \
-            .eq("country_id", country_code) \
+            .eq("country_code", country_code) \
             .eq("status", "active") \
             .execute().data or []
 
@@ -505,7 +505,7 @@ class NuclearChainOrchestrator:
         for u in units.values():
             r, c = u.get("global_row"), u.get("global_col")
             if r is not None and c is not None:
-                zones.setdefault((r, c), {"type": "land", "owner": u.get("country_id")})
+                zones.setdefault((r, c), {"type": "land", "owner": u.get("country_code")})
 
         return units, cs, zones
 
@@ -675,7 +675,7 @@ class NuclearChainOrchestrator:
 
         # Load target country AD counts (for auto-interception)
         units_rows = self.client.table("deployments").select(
-            "unit_id,country_id,unit_type,unit_status,global_row,global_col"
+            "unit_id,country_code,unit_type,unit_status,global_row,global_col"
         ).eq("sim_run_id", sim_run_id).execute().data or []
 
         # Determine target countries
@@ -684,14 +684,14 @@ class NuclearChainOrchestrator:
         for u in units_rows:
             if u.get("global_row") is not None:
                 for tr, tc in target_hexes:
-                    if u["global_row"] == tr and u.get("global_col") == tc and u["country_id"] != cc:
-                        target_countries.add(u["country_id"])
+                    if u["global_row"] == tr and u.get("global_col") == tc and u["country_code"] != cc:
+                        target_countries.add(u["country_code"])
 
         # Count AD per intercepting entity
         ad_by_country: dict[str, int] = {}
         for u in units_rows:
             if (u.get("unit_type") or "").lower() == "air_defense" and (u.get("unit_status") or "").lower() == "active":
-                c = u["country_id"]
+                c = u["country_code"]
                 ad_by_country[c] = ad_by_country.get(c, 0) + 1
 
         # --- INTERCEPTION ---

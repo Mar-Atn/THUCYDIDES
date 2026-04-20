@@ -118,12 +118,12 @@ def _snapshot_sanctions_rows(client, sim_run_id: str, imposer: str) -> dict:
     """Snapshot current sanctions rows imposed BY this country → {target: level}."""
     res = (
         client.table("sanctions")
-        .select("target_country_id, level")
+        .select("target_country_code, level")
         .eq("sim_run_id", sim_run_id)
-        .eq("imposer_country_id", imposer)
+        .eq("imposer_country_code", imposer)
         .execute()
     )
-    return {row["target_country_id"]: row["level"] for row in (res.data or [])}
+    return {row["target_country_code"]: row["level"] for row in (res.data or [])}
 
 
 def _restore_sanctions_snapshot(
@@ -140,18 +140,18 @@ def _restore_sanctions_snapshot(
         if target not in snapshot:
             client.table("sanctions").delete().eq(
                 "sim_run_id", sim_run_id
-            ).eq("imposer_country_id", imposer).eq(
-                "target_country_id", target
+            ).eq("imposer_country_code", imposer).eq(
+                "target_country_code", target
             ).execute()
     # Upsert back original values
     for target, level in snapshot.items():
         client.table("sanctions").upsert({
             "sim_run_id": sim_run_id,
-            "imposer_country_id": imposer,
-            "target_country_id": target,
+            "imposer_country_code": imposer,
+            "target_country_code": target,
             "level": int(level),
             "notes": "",
-        }, on_conflict="sim_run_id,imposer_country_id,target_country_id").execute()
+        }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
 
 
 def _cleanup(client, scenario_id: str, pre_sanctions_snapshot: dict | None = None) -> None:
@@ -220,8 +220,8 @@ def _get_sanction_level(client, sim_run_id: str, imposer: str, target: str) -> i
         client.table("sanctions")
         .select("level")
         .eq("sim_run_id", sim_run_id)
-        .eq("imposer_country_id", imposer)
-        .eq("target_country_id", target)
+        .eq("imposer_country_code", imposer)
+        .eq("target_country_code", target)
         .limit(1)
         .execute()
     )

@@ -59,7 +59,7 @@ const DEFAULT_SIM_RUN_ID = '00000000-0000-0000-0000-000000000001'
 interface WizardRole {
   id: string
   character_name: string
-  country_id: string
+  country_code: string
   title: string
   position_type: string
   is_ai_operated: boolean
@@ -188,7 +188,7 @@ export function SimRunWizard() {
             existingRoles.map((r) => ({
               id: r.id,
               character_name: r.character_name,
-              country_id: r.country_id,
+              country_code: r.country_code,
               title: r.title,
               position_type: r.position_type ?? 'other',
               is_ai_operated: r.is_ai_operated,
@@ -247,7 +247,7 @@ export function SimRunWizard() {
           sourceRoles.map((r) => ({
             id: r.id,
             character_name: r.character_name,
-            country_id: r.country_id,
+            country_code: r.country_code,
             title: r.title,
             position_type: r.position_type ?? 'other',
             is_ai_operated: r.is_ai_operated,
@@ -270,8 +270,8 @@ export function SimRunWizard() {
   const rolesByCountry = useMemo(() => {
     const grouped: Record<string, WizardRole[]> = {}
     for (const role of roles) {
-      if (!grouped[role.country_id]) grouped[role.country_id] = []
-      grouped[role.country_id].push(role)
+      if (!grouped[role.country_code]) grouped[role.country_code] = []
+      grouped[role.country_code].push(role)
     }
     return grouped
   }, [roles])
@@ -280,7 +280,7 @@ export function SimRunWizard() {
     const active = roles.filter((r) => r.active)
     const human = active.filter((r) => !r.is_ai_operated).length
     const ai = active.filter((r) => r.is_ai_operated).length
-    const countries = new Set(active.map((r) => r.country_id)).size
+    const countries = new Set(active.map((r) => r.country_code)).size
     return { countries, total: active.length, human, ai }
   }, [roles])
 
@@ -417,7 +417,7 @@ export function SimRunWizard() {
   const toggleCountryAll = (countryId: string, active: boolean) => {
     setRoles((prev) =>
       prev.map((r) =>
-        r.country_id === countryId ? { ...r, active } : r
+        r.country_code === countryId ? { ...r, active } : r
       )
     )
   }
@@ -425,7 +425,7 @@ export function SimRunWizard() {
   const setCountryAllAi = (countryId: string, isAi: boolean) => {
     setRoles((prev) =>
       prev.map((r) =>
-        r.country_id === countryId ? { ...r, is_ai_operated: isAi } : r
+        r.country_code === countryId ? { ...r, is_ai_operated: isAi } : r
       )
     )
   }
@@ -665,7 +665,7 @@ export function SimRunWizard() {
                       {/* Country */}
                       <div className="text-body-sm text-text-secondary">
                         <span className="font-medium text-text-primary">Country: </span>
-                        {role.country_id.charAt(0).toUpperCase() + role.country_id.slice(1)}
+                        {role.country_code.charAt(0).toUpperCase() + role.country_code.slice(1)}
                       </div>
                     </>
                   )

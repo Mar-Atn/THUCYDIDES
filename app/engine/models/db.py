@@ -120,7 +120,7 @@ class Role(BaseModel):
     user_id: Optional[str] = None
     character_name: str
     parallel: str = ""
-    country_id: str
+    country_code: str
     team: str = ""
     faction: str = ""
     title: str = ""
@@ -187,7 +187,7 @@ class Deployment(BaseModel):
     id: str
     sim_run_id: str
     unit_id: Optional[str] = None  # e.g. "sar_gnd_001"
-    country_id: str
+    country_code: str
     unit_type: str  # ground | naval | tactical_air | strategic_missile | air_defense
     global_row: Optional[int] = None  # 1-indexed hex row on global grid
     global_col: Optional[int] = None  # 1-indexed hex col on global grid
@@ -218,7 +218,7 @@ class Organization(BaseModel):
 class OrgMembership(BaseModel):
     """org_memberships table."""
     sim_run_id: str
-    country_id: str
+    country_code: str
     org_id: str
     role_in_org: str = "member"
     has_veto: bool = False
@@ -233,8 +233,8 @@ class Relationship(BaseModel):
     Engine reads `status` for all war/peace checks.
     """
     sim_run_id: str
-    from_country_id: str
-    to_country_id: str
+    from_country_code: str
+    to_country_code: str
     relationship: str  # alliance | economic_partnership | neutral | hostile | at_war
     status: str = "neutral"  # allied | friendly | neutral | tense | hostile | military_conflict | armistice | peace
     basing_rights_a_to_b: bool = False
@@ -245,8 +245,8 @@ class Relationship(BaseModel):
 class Sanction(BaseModel):
     """sanctions table."""
     sim_run_id: str
-    imposer_country_id: str
-    target_country_id: str
+    imposer_country_code: str
+    target_country_code: str
     level: int = 0  # -1 to 3 (-1 = evasion support)
     notes: str = ""
 
@@ -254,8 +254,8 @@ class Sanction(BaseModel):
 class Tariff(BaseModel):
     """tariffs table."""
     sim_run_id: str
-    imposer_country_id: str
-    target_country_id: str
+    imposer_country_code: str
+    target_country_code: str
     level: int = 0  # 0-3
     notes: str = ""
 

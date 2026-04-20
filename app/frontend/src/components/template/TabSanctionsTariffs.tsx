@@ -171,10 +171,10 @@ function SanctionsTable({ sanctions }: { sanctions: Sanction[] }) {
           {sanctions.map((s) => (
             <tr key={s.id} className="hover:bg-base/50">
               <td className="font-body text-body-sm text-text-primary px-3 py-2 border border-border whitespace-nowrap">
-                {cap(s.imposer_country_id)}
+                {cap(s.imposer_country_code)}
               </td>
               <td className="font-body text-body-sm text-text-primary px-3 py-2 border border-border whitespace-nowrap">
-                {cap(s.target_country_id)}
+                {cap(s.target_country_code)}
               </td>
               <td className={`font-data text-data text-center px-3 py-2 border border-border ${sanctionLevelColor(s.level)}`}>
                 {s.level > 0 ? `+${s.level}` : s.level}
@@ -226,10 +226,10 @@ function TariffsTable({ tariffs }: { tariffs: Tariff[] }) {
           {tariffs.map((t) => (
             <tr key={t.id} className="hover:bg-base/50">
               <td className="font-body text-body-sm text-text-primary px-3 py-2 border border-border whitespace-nowrap">
-                {cap(t.imposer_country_id)}
+                {cap(t.imposer_country_code)}
               </td>
               <td className="font-body text-body-sm text-text-primary px-3 py-2 border border-border whitespace-nowrap">
-                {cap(t.target_country_id)}
+                {cap(t.target_country_code)}
               </td>
               <td className={`font-data text-data text-center px-3 py-2 border border-border ${tariffLevelColor(t.level)}`}>
                 {t.level}

@@ -215,18 +215,18 @@ def _load_all_relationships(client, country_code: str) -> dict[str, str]:
     try:
         res = (
             client.table("relationships")
-            .select("from_country_id, to_country_id, status")
+            .select("from_country_code, to_country_code, status")
             .or_(
-                f"from_country_id.eq.{country_code},"
-                f"to_country_id.eq.{country_code}"
+                f"from_country_code.eq.{country_code},"
+                f"to_country_code.eq.{country_code}"
             )
             .execute()
         )
         for row in (res.data or []):
             other = (
-                row["to_country_id"]
-                if row.get("from_country_id") == country_code
-                else row.get("from_country_id")
+                row["to_country_code"]
+                if row.get("from_country_code") == country_code
+                else row.get("from_country_code")
             )
             if not other:
                 continue
@@ -248,13 +248,13 @@ def _load_sanctions_state(client) -> dict[str, dict[str, int]]:
     try:
         res = (
             client.table("sanctions")
-            .select("imposer_country_id, target_country_id, level")
+            .select("imposer_country_code, target_country_code, level")
             .eq("sim_run_id", sim_run_id)
             .execute()
         )
         for row in (res.data or []):
-            imposer = row.get("imposer_country_id", "")
-            target = row.get("target_country_id", "")
+            imposer = row.get("imposer_country_code", "")
+            target = row.get("target_country_code", "")
             level = row.get("level", 0)
             if imposer and target and level != 0:
                 out.setdefault(imposer, {})[target] = int(level)

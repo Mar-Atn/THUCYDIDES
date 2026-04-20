@@ -31,7 +31,7 @@ from engine.services.supabase import get_client as _get_sb_client
 def _get_role(sim_run_id: str, role_id: str) -> dict | None:
     """Get role from roles table (not run_roles which may be empty)."""
     client = _get_sb_client()
-    rows = client.table("roles").select("id, character_name, status, country_id, positions") \
+    rows = client.table("roles").select("id, character_name, status, country_code, positions") \
         .eq("sim_run_id", sim_run_id).eq("id", role_id).limit(1).execute().data
     return rows[0] if rows else None
 from engine.services.supabase import get_client
@@ -98,7 +98,7 @@ def submit_nomination(
     if not role or role["status"] != "active":
         return {"success": False, "narrative": f"Role {role_id} not active"}
 
-    country = role.get("country_code", "") or role.get("country_id", "")
+    country = role.get("country_code", "")
     if country != "columbia":
         return {"success": False, "narrative": f"{role_id} is not a Columbia role — only Columbia citizens can nominate"}
 
@@ -195,7 +195,7 @@ def cast_vote(
     if not voter or voter["status"] != "active":
         return {"success": False, "narrative": f"Voter {voter_role_id} not active"}
 
-    voter_country = voter.get("country_code", "") or voter.get("country_id", "")
+    voter_country = voter.get("country_code", "")
     if voter_country != "columbia":
         return {"success": False, "narrative": f"{voter_role_id} is not a Columbia role — cannot vote"}
 
@@ -402,7 +402,7 @@ def _apply_midterm_result(
     # Add winner to parliament
     client.table("org_memberships").insert({
         "sim_run_id": sim_run_id,
-        "country_id": "columbia",
+        "country_code": "columbia",
         "org_id": "columbia_parliament",
         "role_id": winner,
         "role_in_org": "member",
@@ -420,7 +420,7 @@ def _apply_presidential_result(
     """Apply presidential election: transfer head_of_state position."""
     # Find current HoS (Dealer)
     hos_roles = client.table("roles").select("id,positions") \
-        .eq("sim_run_id", sim_run_id).eq("country_id", "columbia").execute().data or []
+        .eq("sim_run_id", sim_run_id).eq("country_code", "columbia").execute().data or []
 
     old_hos_id = None
     for r in hos_roles:
