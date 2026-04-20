@@ -112,6 +112,9 @@ def _build_full_world_context(client, sim_run_id: str, round_num: int) -> str:
     """
     sections = []
 
+    # 0. GAME MECHANICS & RULES (for analysis, never disclose formulas)
+    sections.append(_section_rules())
+
     # 1. ALL COUNTRIES — economic + political + tech snapshot
     sections.append(_section_countries(client, sim_run_id, round_num))
 
@@ -140,6 +143,64 @@ def _build_full_world_context(client, sim_run_id: str, round_num: int) -> str:
     sections.append(_section_basing_rights(client, sim_run_id))
 
     return "\n\n".join(s for s in sections if s)
+
+
+def _section_rules() -> str:
+    """Game mechanics and rules — for LLM analysis, never disclosed to players."""
+    return """[GAME MECHANICS — USE FOR ANALYSIS, NEVER DISCLOSE EXACT FORMULAS]
+
+STABILITY (0-10 scale):
+- Core indicator of country health. Below 4.0 allows leadership change.
+- Driven by: GDP growth, social spending, war involvement, sanctions, inflation.
+- War and military losses reduce stability. High inflation erodes stability.
+- Protests and regime instability trigger below 3.0.
+
+ECONOMY:
+- GDP grows based on budget allocation (social, military, tech spending).
+- Inflation rises from excessive spending, sanctions, oil price shocks.
+- Sanctions reduce trade revenue. Tariffs affect bilateral trade.
+- Treasury = liquid funds. Debt burden affects long-term growth.
+- OPEC members (Caribe, Mirage, Persia, Sarmatia, Solaria) can set oil production.
+
+MILITARY:
+- 5 unit types: ground, naval, tactical_air, strategic_missile, air_defense.
+- Units are active (deployed) or reserve. Reserve units can be deployed between rounds.
+- Combat is probabilistic with dice mechanics. Larger forces have advantage.
+- Air defense intercepts missiles and air strikes.
+- Naval blockades at chokepoints restrict trade.
+
+NUCLEAR:
+- 3 levels: L1 (basic), L2 (intermediate), L3 (advanced arsenal).
+- Must be confirmed via nuclear test before launch capability.
+- Nuclear launch requires 3-way authorization (HoS + 2 officers).
+- Missile range: L1=2 hexes, L2=4 hexes, L3=global.
+- Nuclear strike causes: unit destruction, GDP damage, stability drop.
+- Countries with L2+ and confirmed can attempt interception.
+
+POLITICAL:
+- Leadership can change if stability drops below threshold.
+- Assassination is possible but probabilistic and risky.
+- Arrested leaders lose all actions temporarily.
+- Columbia has democratic elections (mid-term R2, presidential R6).
+- Opposition strength in elections grows during economic hardship.
+
+RELATIONSHIPS:
+- Types: Alliance, Economic Partnership, Neutral, Hostile, At War.
+- Military alliances provide mutual defense obligations.
+- War = open military conflict. Any attack auto-sets relationship to At War.
+- Agreements: Military Alliance, Trade Agreement, Peace Treaty, Ceasefire.
+
+COVERT OPERATIONS:
+- Sabotage: can target infrastructure, nuclear sites, or military assets.
+- Propaganda: can boost or undermine stability in any country.
+- Intelligence: can gather information on any aspect of the world.
+- All covert ops have detection risk. Attribution is not guaranteed.
+
+GEOGRAPHY:
+- 20 countries on a hex-based global map.
+- 2 theater maps (Eastern Ereb, Mashriq) for detailed regional conflicts.
+- 3 naval chokepoints that can be blockaded.
+- Territory can be occupied by ground forces."""
 
 
 def _section_countries(client, sim_run_id, round_num) -> str:
