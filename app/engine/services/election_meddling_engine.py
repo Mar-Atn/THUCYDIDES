@@ -15,11 +15,13 @@ from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_PROB = 0.40
-DETECTION_PROB = 0.45
-ATTRIBUTION_PROB = 0.50
-SUPPORT_SHIFT_MIN = 2
-SUPPORT_SHIFT_MAX = 5
+from engine.config.probabilities import (
+    MEDDLING_SUCCESS as SUCCESS_PROB,
+    MEDDLING_DETECTION as DETECTION_PROB,
+    MEDDLING_ATTRIBUTION as ATTRIBUTION_PROB,
+    MEDDLING_SUPPORT_SHIFT_MIN as SUPPORT_SHIFT_MIN,
+    MEDDLING_SUPPORT_SHIFT_MAX as SUPPORT_SHIFT_MAX,
+)
 
 
 def execute_election_meddling(

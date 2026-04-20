@@ -15,10 +15,12 @@ from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_PROB = 0.55
-DETECTION_PROB = 1.0   # always detected (2026-04-20)
-ATTRIBUTION_PROB = 0.20
-BASE_EFFECT = 0.3  # stability change
+from engine.config.probabilities import (
+    PROPAGANDA_SUCCESS as SUCCESS_PROB,
+    PROPAGANDA_DETECTION as DETECTION_PROB,
+    PROPAGANDA_ATTRIBUTION as ATTRIBUTION_PROB,
+    PROPAGANDA_STABILITY_EFFECT as BASE_EFFECT,
+)
 DIMINISHING_FACTOR = 0.5  # each repeat halves the effect
 
 

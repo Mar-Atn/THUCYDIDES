@@ -24,10 +24,12 @@ from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_PROB = 0.20          # flat 20% for all targets
-SUCCESS_PROB_LEVANTIA = 0.50 # Levantia bonus (either attacker or target)
-ATTRIBUTION_PROB = 0.50      # 50% chance attacker is identified
-MARTYR_STABILITY_BOOST = 1.5 # killed → target country stability +1.5
+from engine.config.probabilities import (
+    ASSASSINATION_SUCCESS as SUCCESS_PROB,
+    ASSASSINATION_SUCCESS_LEVANTIA as SUCCESS_PROB_LEVANTIA,
+    ASSASSINATION_ATTRIBUTION as ATTRIBUTION_PROB,
+    ASSASSINATION_MARTYR_STABILITY as MARTYR_STABILITY_BOOST,
+)
 
 
 def execute_assassination(

@@ -21,9 +21,10 @@ from engine.services.common import get_scenario_id, write_event
 logger = logging.getLogger(__name__)
 
 from engine.config.position_actions import MARTIAL_LAW_POOLS
-
-STABILITY_COST = -1.0
-WAR_TIREDNESS_COST = 1.0
+from engine.config.probabilities import (
+    MARTIAL_LAW_STABILITY_COST as STABILITY_COST,
+    MARTIAL_LAW_WAR_TIREDNESS_COST as WAR_TIREDNESS_COST,
+)
 
 
 def execute_martial_law(

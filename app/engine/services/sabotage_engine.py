@@ -19,14 +19,14 @@ from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_PROB = 0.50
-DETECTION_PROB = 1.0   # always detected (2026-04-20)
-ATTRIBUTION_PROB = 0.50
-
-# Damage constants per target_type
-INFRASTRUCTURE_COIN_DAMAGE = 1
-NUCLEAR_PROGRESS_DAMAGE = 0.30  # -30% of current progress
-MILITARY_DESTROY_PROB = 0.50    # 50% chance to destroy 1 unit
+from engine.config.probabilities import (
+    SABOTAGE_SUCCESS as SUCCESS_PROB,
+    SABOTAGE_DETECTION as DETECTION_PROB,
+    SABOTAGE_ATTRIBUTION as ATTRIBUTION_PROB,
+    SABOTAGE_TREASURY_DAMAGE as INFRASTRUCTURE_COIN_DAMAGE,
+    SABOTAGE_NUCLEAR_RD_DAMAGE as NUCLEAR_PROGRESS_DAMAGE,
+    SABOTAGE_MILITARY_DESTROY as MILITARY_DESTROY_PROB,
+)
 
 
 def execute_sabotage(
