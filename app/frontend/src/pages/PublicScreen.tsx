@@ -108,7 +108,8 @@ const PUBLIC_NEWS_EVENTS = new Set([
   // nuclear_test: only surface tests are public (underground = classified, filtered below)
   // Political (public events)
   'change_leader_initiated', 'change_leader_removal', 'change_leader_elected',
-  'martial_law', 'arrest',
+  'martial_law', 'arrest', 'release_arrest',
+  'election_result',
   // Diplomatic (public by nature)
   'public_statement', 'propose_agreement', 'sign_agreement',
   // Economic (public policy)
