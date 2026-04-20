@@ -290,11 +290,21 @@ def restart_simulation(sim_id: str) -> dict:
         except Exception as e:
             logger.warning("Restart: delete %s failed: %s", table, e)
 
-    # 3. Delete and re-copy state tables from template source
+    # 3. Restore state tables from template source
     from engine.services.sim_create import _copy_table
 
-    STATE_TABLES = [
-        ("countries", True),
+    # Countries: UPDATE in-place (can't delete due to foreign key constraints)
+    try:
+        template_countries = client.table("countries").select("*").eq("sim_run_id", source_id).execute().data or []
+        for tc in template_countries:
+            update = {k: v for k, v in tc.items() if k not in ("sim_run_id", "created_at")}
+            client.table("countries").update(update).eq("sim_run_id", sim_id).eq("id", tc["id"]).execute()
+        logger.info("Restart: restored %d countries from template", len(template_countries))
+    except Exception as e:
+        logger.warning("Restart: countries restore failed: %s", e)
+
+    # Other tables: delete + re-copy
+    COPY_TABLES = [
         ("deployments", False),
         ("relationships", False),
         ("sanctions", False),
@@ -304,7 +314,7 @@ def restart_simulation(sim_id: str) -> dict:
         ("org_memberships", False),
         ("artefacts", True),
     ]
-    for table, id_is_text in STATE_TABLES:
+    for table, id_is_text in COPY_TABLES:
         try:
             client.table(table).delete().eq("sim_run_id", sim_id).execute()
             _copy_table(client, table, source_id, sim_id,

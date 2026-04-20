@@ -1248,6 +1248,7 @@ export function FacilitatorDashboard() {
                               Restart
                             </button>
                           </div>
+                          )}
                         </>
                       )
                       })()}
