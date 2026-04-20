@@ -5,6 +5,9 @@
 
 import { supabase } from '@/lib/supabase'
 
+/** Engine API base URL. Empty in dev (Vite proxy), set via VITE_API_URL in production. */
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
+
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
 /* -------------------------------------------------------------------------- */
@@ -847,7 +850,7 @@ export async function getTemplateDeployments(): Promise<Deployment[]> {
 /** Fetch live sim state from the Sim Runner API. */
 export async function getSimState(simId: string): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`/api/sim/${simId}/state`, {
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/state`, {
     headers: token ? { 'Authorization': `Bearer ${token}` } : {},
   })
   if (!resp.ok) throw new Error('Failed to get sim state')
@@ -864,7 +867,7 @@ export async function submitAction(
   params?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`/api/sim/${simId}/action`, {
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/action`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -908,7 +911,7 @@ export async function simAction(
   params?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`/api/sim/${simId}/${action}`, {
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/${action}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

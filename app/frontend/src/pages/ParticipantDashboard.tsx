@@ -638,7 +638,8 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     setLeaderVoteSubmitting(true)
     try {
       const token = await getToken()
-      await fetch(`/api/sim/${simId}/leadership-votes/${voteId}/cast`, {
+      const API_BASE = import.meta.env.VITE_API_URL ?? ''
+      await fetch(`${API_BASE}/api/sim/${simId}/leadership-votes/${voteId}/cast`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ role_id: roleId, vote }),

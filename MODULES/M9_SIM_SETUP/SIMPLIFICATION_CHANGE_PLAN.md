@@ -1,14 +1,15 @@
 # Simplification Change Plan
 
-**Date:** 2026-04-15 | **Status:** A+B+C+D+E ALL DONE
+**Date:** 2026-04-15 | **Status:** FULLY EXECUTED (code + DB + tests cleaned 2026-04-21)
 **Approach:** Make all changes, then test and clean
 
 ## Completion Log
-- **A. political_support deprecated** ✅ — engines, context, frontend updated
-- **B. personal_coins deprecated** ✅ — model marked, frontend removed
+- **A. political_support REMOVED** ✅ — DB column dropped, calc_political_support() removed from pipeline, check_revolution() simplified to stability-only
+- **B. personal_coins REMOVED** ✅ — DB column dropped, model cleaned
 - **C. Relations simplified (5 types)** ✅ — DB migrated, frontend updated, agreement types defined
-- **D. change_leader replaces coup/protest** ✅ — contract written, schema updated, old contracts archived to DEPRECATED/
-- **E. Columbia elections simplified** ✅ — 9 base votes + economy bonus, simple majority, R2 midterm + R6 presidential, old camp system archived
+- **D. change_leader replaces coup/protest** ✅ — coup_engine.py + protest_engine.py DELETED, resolve_coup() removed from political.py
+- **E. Columbia elections simplified** ✅ — 9 base votes + economy bonus, simple majority, election state migrated from JSONB to proper columns
+- **F. DB columns dropped** ✅ — countries.political_support, dem_rep_split_dem/rep, roles.personal_coins, roles.ticking_clock, roles.fatherland_appeal, deployments.zone_id
 
 ---
 

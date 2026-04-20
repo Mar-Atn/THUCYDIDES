@@ -9,6 +9,8 @@ import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { submitAction, getToken } from '@/lib/queries'
 import { useRealtimeTable } from '@/hooks/useRealtimeTable'
+
+const API_BASE = import.meta.env.VITE_API_URL ?? ''
 import { useCountryList } from '@/hooks/useCountryList'
 
 /* ── Hex → Country lookup (canonical from map_config.py) ──────────────── */
@@ -1104,7 +1106,7 @@ export function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
     const poll = async () => {
       try {
         const token = await getToken()
-        const resp = await fetch(`/api/sim/${simId}/nuclear/active`, {
+        const resp = await fetch(`${API_BASE}/api/sim/${simId}/nuclear/active`, {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         })
         if (!resp.ok) return
@@ -1489,7 +1491,7 @@ export function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
     setLoading(true)
     try {
       const token = await getToken()
-      const resp = await fetch(`/api/sim/${simId}/blockades?country=${countryId}`, {
+      const resp = await fetch(`${API_BASE}/api/sim/${simId}/blockades?country=${countryId}`, {
         headers: { 'Authorization': `Bearer ${token}` },
       })
       if (!resp.ok) throw new Error('Failed to load blockade data')
@@ -2011,7 +2013,7 @@ export function AttackForm({roleId,countryId,simId,onClose,onSubmitted}:{
     try {
       const token = await getToken()
       const theaterParam = sourceHex?.theater ? `&theater=${encodeURIComponent(sourceHex.theater)}` : ''
-      const resp = await fetch(`/api/sim/${simId}/attack/valid-targets?unit_id=${encodeURIComponent(primaryUnit)}${theaterParam}`,{
+      const resp = await fetch(`${API_BASE}/api/sim/${simId}/attack/valid-targets?unit_id=${encodeURIComponent(primaryUnit)}${theaterParam}`,{
         headers: token ? {'Authorization':`Bearer ${token}`} : {},
       })
       if (!resp.ok) {
@@ -3695,7 +3697,7 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     setLoading(true)
     try {
       const token = await getToken()
-      const resp = await fetch(`/api/sim/${simId}/units/my?country=${encodeURIComponent(countryId)}`, {
+      const resp = await fetch(`${API_BASE}/api/sim/${simId}/units/my?country=${encodeURIComponent(countryId)}`, {
         headers: token ? {'Authorization':`Bearer ${token}`} : {},
       })
       if (!resp.ok) throw new Error('Failed to load units')
