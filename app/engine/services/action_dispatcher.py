@@ -316,14 +316,94 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return _process_movement(sim_run_id, round_num, action)
 
     # ── Not Yet Implemented ───────────────────────────────────────────
-    if action_type in ("call_org_meeting", "meet_freely"):
-        return {"success": True, "narrative": f"{action_type} acknowledged — implementation pending"}
+    if action_type in ("call_org_meeting", "meet_freely", "invite_to_meet", "set_meetings"):
+        return _create_meeting_invitation(sim_run_id, round_num, action)
+
+    if action_type == "respond_meeting":
+        return _respond_to_meeting(sim_run_id, action)
 
     # ── Unknown ───────────────────────────────────────────────────────
     return {"success": False, "narrative": f"Unknown action_type: {action_type}"}
 
 
 # ── Reassign Position ───────────────────────────────────────────────────
+
+def _create_meeting_invitation(sim_run_id: str, round_num: int, action: dict) -> dict:
+    """Create a meeting invitation (1:1 or org meeting). Expires in 10 minutes."""
+    from datetime import datetime, timezone, timedelta
+    client = get_client()
+    role_id = action.get("role_id", "")
+    country_code = action.get("country_code", "")
+    inv_type = action.get("invitation_type", "one_on_one")
+    message = action.get("message", "")[:300]
+
+    # Check limit: max 2 active invitations per role
+    active = client.table("meeting_invitations").select("id") \
+        .eq("sim_run_id", sim_run_id).eq("inviter_role_id", role_id) \
+        .eq("status", "pending").execute().data or []
+    if len(active) >= 2:
+        return {"success": False, "narrative": "You already have 2 active invitations. Wait for them to expire or be answered."}
+
+    expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
+
+    row = {
+        "sim_run_id": sim_run_id,
+        "invitation_type": inv_type,
+        "inviter_role_id": role_id,
+        "inviter_country_id": country_code,
+        "message": message,
+        "expires_at": expires_at,
+        "status": "pending",
+        "responses": {},
+    }
+
+    if inv_type == "one_on_one":
+        row["invitee_role_id"] = action.get("invitee_role_id", "")
+    elif inv_type == "organization":
+        row["org_id"] = action.get("org_id", "")
+        row["org_name"] = action.get("org_name", "")
+        row["theme"] = action.get("theme", "")
+
+    result = client.table("meeting_invitations").insert(row).execute()
+    inv_id = result.data[0]["id"] if result.data else None
+
+    if inv_type == "one_on_one":
+        target = action.get("invitee_role_id", "?")
+        narrative = f"Meeting invitation sent to {target}"
+    else:
+        org_name = action.get("org_name", action.get("org_id", "?"))
+        narrative = f"Meeting invitation sent to all members of {org_name}"
+
+    logger.info("[meeting] %s invited %s (type=%s, id=%s)", role_id,
+                action.get("invitee_role_id") or action.get("org_id"), inv_type, inv_id)
+
+    return {"success": True, "narrative": narrative, "invitation_id": inv_id}
+
+
+def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
+    """Respond to a meeting invitation."""
+    client = get_client()
+    inv_id = action.get("invitation_id", "")
+    role_id = action.get("role_id", "")
+    response = action.get("response", "reject")  # accept, reject, later
+    message = action.get("message", "")[:300]
+
+    inv = client.table("meeting_invitations").select("*") \
+        .eq("id", inv_id).limit(1).execute().data
+    if not inv:
+        return {"success": False, "narrative": "Invitation not found"}
+    inv = inv[0]
+
+    if inv["status"] != "pending":
+        return {"success": False, "narrative": "Invitation has expired"}
+
+    responses = inv.get("responses") or {}
+    responses[role_id] = {"response": response, "message": message}
+    client.table("meeting_invitations").update({"responses": responses}).eq("id", inv_id).execute()
+
+    label = {"accept": "accepted", "reject": "declined", "later": "asked to meet later"}.get(response, response)
+    return {"success": True, "narrative": f"You {label} the meeting invitation."}
+
 
 def _reassign_position(sim_run_id: str, round_num: int, role_id: str, country_code: str, action: dict) -> dict:
     """HoS reassigns a position to another role in the country.

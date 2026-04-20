@@ -1345,6 +1345,9 @@ ACTION_CATEGORIES: dict[str, str] = {
     "public_statement": "diplomatic",
     "call_org_meeting": "diplomatic",
     "meet_freely": "diplomatic",
+    "set_meetings": "diplomatic",
+    "invite_to_meet": "diplomatic",
+    "respond_meeting": "diplomatic",
     # Covert
     "covert_operation": "covert",
     "intelligence": "covert",
@@ -1392,6 +1395,7 @@ async def submit_action(
         "cast_vote", "cast_election_vote", "accept_meeting",
         "release_arrest",
         "withdraw_nomination", "resolve_election",
+        "respond_meeting",
     }
     PAUSED_ALLOWED = {"nuclear_authorize", "nuclear_intercept"}
     if run["status"] not in ("active", "processing", "inter_round"):

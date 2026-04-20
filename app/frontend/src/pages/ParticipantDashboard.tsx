@@ -105,7 +105,7 @@ const PHASE_RESTRICTED: Record<string, string> = { move_units: 'inter_round' }
 
 const CATS: { key: string; label: string; actions: { id: string; label: string }[] }[] = [
   { key:'general', label:'General', actions:[
-    {id:'public_statement',label:'Public Statement'},{id:'meet_freely',label:'Meet Anyone'},{id:'call_org_meeting',label:'Call Org Meeting'},
+    {id:'public_statement',label:'Public Statement'},{id:'set_meetings',label:'Set Meetings'},
   ]},
   { key:'economic', label:'Economic', actions:[
     {id:'set_budget',label:'Set Budget'},{id:'set_tariffs',label:'Set Tariffs'},
@@ -532,6 +532,45 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
   const [reviewAgr, setReviewAgr] = useState<string|null>(null)
   const [signingAgr, setSigningAgr] = useState<string|null>(null)
+
+  /* Realtime: meeting invitations for this role */
+  const { data: meetingInvitationsRaw } = useRealtimeTable<Record<string, unknown>>(
+    'meeting_invitations', simId,
+    { filter: 'status=eq.pending' },
+  )
+  // Filter: 1:1 invitations where I'm the invitee, or org invitations for my orgs
+  const myMeetingInvitations = (meetingInvitationsRaw as unknown as {
+    id:string; invitation_type:string; inviter_role_id:string; inviter_country_id:string;
+    invitee_role_id:string|null; org_id:string|null; org_name:string|null;
+    message:string; theme:string|null; expires_at:string; responses:Record<string,unknown>;
+  }[]).filter(inv => {
+    if (inv.inviter_role_id === roleId) return false // don't show own invitations
+    if (inv.invitation_type === 'one_on_one') return inv.invitee_role_id === roleId
+    return true // org invitations shown to all (filtered by sim_run_id)
+  }).filter(inv => {
+    // Check not expired
+    return new Date(inv.expires_at).getTime() > Date.now()
+  }).filter(inv => {
+    // Check not already responded
+    return !(inv.responses && (inv.responses as Record<string,unknown>)[roleId])
+  })
+
+  const [respondingTo, setRespondingTo] = useState<string|null>(null)
+  const [meetingResponse, setMeetingResponse] = useState<string>('')
+  const [meetingMessage, setMeetingMessage] = useState('')
+  const [meetingSubmitting, setMeetingSubmitting] = useState(false)
+
+  const handleMeetingResponse = async (invId: string, response: string, msg: string) => {
+    setMeetingSubmitting(true)
+    try {
+      await submitAction(simId, 'respond_meeting', roleId, countryId, {
+        invitation_id: invId, response, message: msg,
+      })
+      setRespondingTo(null)
+      setMeetingMessage('')
+    } catch { /* ignore */ }
+    finally { setMeetingSubmitting(false) }
+  }
 
   /* Realtime hooks replace 5s polling for pending transactions + agreements */
   const { data: pendingTxnsRaw } = useRealtimeTable<Record<string, unknown>>(
@@ -1379,7 +1418,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
   const showLeaderVote = activeVote && !hasVotedInActiveVote ? 1 : 0
   const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (isNominated ? 1 : 0) + (electionResolved ? 1 : 0)
-  const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
+  const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0) + myMeetingInvitations.length
     + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote + electionExpected
   const hasExpected = expectedCount > 0
 
@@ -1508,6 +1547,32 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 <span className="font-body text-caption text-action mt-1 block">Click to review</span>
               </button>
             )}
+            {/* Meeting invitations */}
+            {myMeetingInvitations.map(inv => (
+              <div key={inv.id} className="bg-card border border-action/30 rounded-lg px-4 py-3">
+                <div className="font-body text-body-sm text-text-primary font-medium">
+                  {inv.invitation_type === 'one_on_one'
+                    ? `Meeting request from ${inv.inviter_role_id}`
+                    : `${inv.org_name || inv.org_id} meeting`}
+                </div>
+                {inv.message && <p className="font-body text-caption text-text-secondary mt-0.5">{inv.message}</p>}
+                {inv.theme && <p className="font-body text-caption text-text-secondary mt-0.5">Theme: {inv.theme}</p>}
+                <div className="flex gap-2 mt-2">
+                  <button onClick={() => handleMeetingResponse(inv.id, 'accept', '')} disabled={meetingSubmitting}
+                    className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 disabled:opacity-50 transition-colors">
+                    Accept
+                  </button>
+                  <button onClick={() => handleMeetingResponse(inv.id, 'reject', '')} disabled={meetingSubmitting}
+                    className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 disabled:opacity-50 transition-colors">
+                    Decline
+                  </button>
+                  <button onClick={() => handleMeetingResponse(inv.id, 'later', '')} disabled={meetingSubmitting}
+                    className="font-body text-caption font-medium bg-warning/10 text-warning px-3 py-1 rounded hover:bg-warning/20 disabled:opacity-50 transition-colors">
+                    Not now
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         }
       </div>
@@ -1935,6 +2000,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'assassination') return <AssassinationForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'covert_operation') return <CovertOpsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'intelligence') return <IntelligenceForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_meetings') return <SetMeetingsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -4351,6 +4417,199 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [meetingType, setMeetingType] = useState<'one_on_one'|'organization'>('one_on_one')
+  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_id:string}[]>([])
+  const [myOrgs, setMyOrgs] = useState<{id:string;name:string}[]>([])
+  const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string}[]>([])
+  const [targetRole, setTargetRole] = useState('')
+  const [targetOrg, setTargetOrg] = useState('')
+  const [message, setMessage] = useState('')
+  const [theme, setTheme] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [result, setResult] = useState<string|null>(null)
+  const [error, setError] = useState<string|null>(null)
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('roles').select('id,character_name,country_id')
+        .eq('sim_run_id', simId).eq('status', 'active'),
+      supabase.from('org_memberships').select('org_id')
+        .eq('sim_run_id', simId).eq('country_id', countryId),
+      supabase.from('organizations').select('id,sim_name')
+        .eq('sim_run_id', simId),
+      supabase.from('countries').select('id,sim_name,color_ui')
+        .eq('sim_run_id', simId).order('sim_name'),
+    ]).then(([rolesRes, memsRes, orgsRes, countriesRes]) => {
+      if (rolesRes.data) setAllRoles(rolesRes.data.filter((r: Record<string,unknown>) => r.id !== roleId) as typeof allRoles)
+      if (countriesRes.data) setCountries(countriesRes.data as typeof countries)
+      // Match my org memberships to org names
+      const myOrgIds = new Set((memsRes.data || []).map((m: Record<string,unknown>) => m.org_id as string))
+      const orgMap = (orgsRes.data || []) as {id:string;sim_name:string}[]
+      setMyOrgs(orgMap.filter(o => myOrgIds.has(o.id)).map(o => ({ id: o.id, name: o.sim_name || o.id })))
+    }).finally(() => setLoading(false))
+  }, [simId, countryId, roleId])
+
+  const handleSubmit = async () => {
+    if (meetingType === 'one_on_one' && !targetRole) return
+    if (meetingType === 'organization' && !targetOrg) return
+    setSubmitting(true); setError(null); setResult(null)
+    try {
+      const params: Record<string, string> = {
+        invitation_type: meetingType,
+        message: message.trim(),
+      }
+      if (meetingType === 'one_on_one') {
+        params.invitee_role_id = targetRole
+      } else {
+        params.org_id = targetOrg
+        params.org_name = myOrgs.find(o => o.id === targetOrg)?.name || targetOrg
+        params.theme = theme.trim()
+      }
+      const res = await submitAction(simId, 'set_meetings', roleId, countryId, params)
+      if (res.success) {
+        setResult(res.narrative || 'Invitation sent')
+        setMessage(''); setTheme(''); setTargetRole(''); setTargetOrg('')
+      } else {
+        setError(res.narrative || 'Failed')
+      }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
+
+  // Group roles by country
+  const byCountry = countries.map(c => ({
+    ...c,
+    roles: allRoles.filter(r => r.country_id === c.id),
+  })).filter(c => c.roles.length > 0)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Set Meetings</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
+      </div>
+
+      {/* Type toggle */}
+      <div className="flex gap-2">
+        <button onClick={() => setMeetingType('one_on_one')}
+          className={`flex-1 font-body text-body-sm py-2 rounded-lg border transition-colors ${
+            meetingType === 'one_on_one' ? 'border-action bg-action/10 text-action font-medium' : 'border-border text-text-secondary'
+          }`}>1:1 Meeting</button>
+        {myOrgs.length > 0 && (
+          <button onClick={() => setMeetingType('organization')}
+            className={`flex-1 font-body text-body-sm py-2 rounded-lg border transition-colors ${
+              meetingType === 'organization' ? 'border-action bg-action/10 text-action font-medium' : 'border-border text-text-secondary'
+            }`}>Organization Meeting</button>
+        )}
+      </div>
+
+      {result ? (
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-success font-medium">{result}</p>
+          <button onClick={() => setResult(null)}
+            className="font-body text-caption text-action hover:underline mt-2">
+            Send another invitation
+          </button>
+        </div>
+      ) : (
+        <>
+          {meetingType === 'one_on_one' ? (
+            <>
+              <div>
+                <label className="font-body text-caption text-text-secondary block mb-2">Invite</label>
+                <div className="bg-card border border-border rounded-lg divide-y divide-border max-h-[300px] overflow-y-auto">
+                  {byCountry.map(c => (
+                    <div key={c.id}>
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-base">
+                        <div className="w-2.5 h-2.5 rounded" style={{backgroundColor: c.color_ui || '#666'}} />
+                        <span className="font-body text-caption text-text-secondary font-medium uppercase tracking-wider">{c.sim_name}</span>
+                      </div>
+                      {c.roles.map(r => (
+                        <label key={r.id} className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors ${
+                          targetRole === r.id ? 'bg-action/5' : 'hover:bg-base'
+                        }`}>
+                          <input type="radio" name="invite_role" value={r.id} checked={targetRole === r.id}
+                            onChange={() => setTargetRole(r.id)} className="accent-action"/>
+                          <span className="font-body text-body-sm text-text-primary">{r.character_name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="font-body text-caption text-text-secondary block mb-2">
+                  Message <span className="text-text-secondary/50">(optional, max 300 chars)</span>
+                </label>
+                <textarea value={message} onChange={e => setMessage(e.target.value.slice(0, 300))}
+                  placeholder="I'd like to discuss..."
+                  rows={2}
+                  className="w-full bg-base border border-border rounded-lg px-4 py-2 font-body text-body-sm text-text-primary resize-none focus:border-action/50 focus:outline-none transition-colors"
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="font-body text-caption text-text-secondary block mb-2">Organization</label>
+                <div className="bg-card border border-border rounded-lg divide-y divide-border">
+                  {myOrgs.map(org => (
+                    <label key={org.id} className={`flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors ${
+                      targetOrg === org.id ? 'bg-action/5' : 'hover:bg-base'
+                    }`}>
+                      <input type="radio" name="invite_org" value={org.id} checked={targetOrg === org.id}
+                        onChange={() => setTargetOrg(org.id)} className="accent-action"/>
+                      <span className="font-body text-body-sm text-text-primary">{org.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="font-body text-caption text-text-secondary block mb-2">Theme</label>
+                <input value={theme} onChange={e => setTheme(e.target.value)}
+                  placeholder="Agenda topic..."
+                  className="w-full bg-base border border-border rounded-lg px-4 py-2 font-body text-body-sm text-text-primary focus:border-action/50 focus:outline-none transition-colors"
+                />
+              </div>
+              <div>
+                <label className="font-body text-caption text-text-secondary block mb-2">
+                  Message <span className="text-text-secondary/50">(optional)</span>
+                </label>
+                <textarea value={message} onChange={e => setMessage(e.target.value.slice(0, 300))}
+                  placeholder="Additional details..."
+                  rows={2}
+                  className="w-full bg-base border border-border rounded-lg px-4 py-2 font-body text-body-sm text-text-primary resize-none focus:border-action/50 focus:outline-none transition-colors"
+                />
+              </div>
+            </>
+          )}
+
+          <button onClick={handleSubmit}
+            disabled={submitting || (meetingType === 'one_on_one' ? !targetRole : !targetOrg)}
+            className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            {submitting ? 'Sending...' : meetingType === 'one_on_one' ? 'Send Invitation' : 'Send to All Members'}
+          </button>
+        </>
+      )}
+
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function IntelligenceForm({roleId,countryId,simId,onClose,onSubmitted}:{
