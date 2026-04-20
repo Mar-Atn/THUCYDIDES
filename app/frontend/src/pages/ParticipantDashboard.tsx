@@ -814,15 +814,18 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [electionSubmitting, setElectionSubmitting] = useState(false)
   const [selectedElectionCandidate, setSelectedElectionCandidate] = useState<string>('')
 
-  // Check if nominations are open (moderator started, or auto-mode)
+  // Check if nominations are open/closed (moderator controls)
   const [nominationsOpen, setNominationsOpen] = useState(false)
+  const [nominationsClosed, setNominationsClosed] = useState(false)
   useEffect(() => {
-    if (!simId || !activeNominationEvent) { setNominationsOpen(false); return }
+    if (!simId || !activeNominationEvent) { setNominationsOpen(false); setNominationsClosed(false); return }
     supabase.from('sim_runs').select('schedule,auto_approve').eq('id', simId).limit(1)
       .then(({ data }) => {
         if (!data?.[0]) return
         const sched = (data[0].schedule as Record<string, unknown>) || {}
-        setNominationsOpen(sched.nominations_open === true || data[0].auto_approve === true)
+        const closed = sched.nominations_closed === true
+        setNominationsClosed(closed)
+        setNominationsOpen(!closed && (sched.nominations_open === true || data[0].auto_approve === true))
       })
   }, [simId, activeNominationEvent, dataVersion])
 
@@ -1192,12 +1195,15 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           </button>
         </div>
 
-        <div className="bg-action/5 border border-action/20 rounded-lg p-4 space-y-2">
+        <div className={`${nominationsClosed ? 'bg-base' : 'bg-action/5'} border ${nominationsClosed ? 'border-border' : 'border-action/20'} rounded-lg p-4 space-y-2`}>
           <p className="font-body text-body-sm text-text-primary">
             <strong className="text-action">{elType}</strong> — Election Round {activeNominationEvent.round}
           </p>
           <p className="font-body text-caption text-text-secondary">
-            Nominations are open this round. The election will take place in Round {activeNominationEvent.round}.
+            {nominationsClosed
+              ? `Nominations are closed. The election will take place in Round ${activeNominationEvent.round}.`
+              : `Nominations are open this round. The election will take place in Round ${activeNominationEvent.round}.`
+            }
           </p>
           <p className="font-body text-caption text-text-secondary">
             Opposition candidates represent 2 votes each. Under certain political and economic circumstances, their popular support may grow to 3 votes each.
@@ -1206,7 +1212,9 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
         {currentNominees.length > 0 && (
           <div className="bg-card border border-border rounded-lg p-4">
-            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Current Nominees</h3>
+            <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">
+              {nominationsClosed ? 'Candidates' : 'Current Nominees'}
+            </h3>
             <div className="space-y-2">
               {currentNominees.map(n => (
                 <div key={n.id} className="flex items-center gap-3 bg-base rounded px-3 py-2">
@@ -1220,7 +1228,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           </div>
         )}
 
-        {!isNominated ? (
+        {nominationsClosed ? null : !isNominated ? (
           <button onClick={handleSelfNominate} disabled={electionSubmitting}
             className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
             {electionSubmitting ? 'Submitting...' : 'Nominate Yourself'}
@@ -1354,7 +1362,18 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 </span>
               </button>
             )}
-            {showNomination && activeNominationEvent && (
+            {nominationsClosed && activeNominationEvent && (
+              <button onClick={() => setShowElectionPanel('nominate')}
+                className="text-left bg-card border border-border rounded-lg px-4 py-3 transition-colors hover:bg-base">
+                <span className="font-body text-body-sm text-text-primary font-medium block">
+                  Nominations Closed — {activeNominationEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                </span>
+                <span className="font-body text-caption text-text-secondary">
+                  {electionNominations.filter(n => n.election_type === activeNominationEvent.subtype).length} candidates — Election R{activeNominationEvent.round}
+                </span>
+              </button>
+            )}
+            {!nominationsClosed && showNomination && activeNominationEvent && (
               <button onClick={() => setShowElectionPanel('nominate')}
                 className="text-left bg-card hover:bg-action/5 border-2 border-action/40 hover:border-action/60 rounded-lg px-4 py-3 transition-colors">
                 <span className="font-body text-body-sm text-action font-bold block">
@@ -1365,7 +1384,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 </span>
               </button>
             )}
-            {isNominated && activeNominationEvent && (
+            {!nominationsClosed && isNominated && activeNominationEvent && (
               <button onClick={() => setShowElectionPanel('nominate')}
                 className="text-left bg-success/5 border border-success/30 rounded-lg px-4 py-3 transition-colors hover:bg-success/10">
                 <span className="font-body text-body-sm text-success font-medium block">
