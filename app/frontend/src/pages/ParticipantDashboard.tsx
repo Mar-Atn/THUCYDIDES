@@ -533,20 +533,31 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [reviewAgr, setReviewAgr] = useState<string|null>(null)
   const [signingAgr, setSigningAgr] = useState<string|null>(null)
 
+  /* Load my org memberships for meeting invitation filtering */
+  const [myOrgIds, setMyOrgIds] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    supabase.from('org_memberships').select('org_id')
+      .eq('sim_run_id', simId).eq('country_id', countryId)
+      .then(({ data }) => {
+        if (data) setMyOrgIds(new Set(data.map((m: Record<string,unknown>) => m.org_id as string)))
+      })
+  }, [simId, countryId])
+
   /* Realtime: meeting invitations for this role */
   const { data: meetingInvitationsRaw } = useRealtimeTable<Record<string, unknown>>(
     'meeting_invitations', simId,
     { filter: 'status=eq.pending' },
   )
-  // Filter: 1:1 invitations where I'm the invitee, or org invitations for my orgs
+  // Filter: 1:1 where I'm invitee, or org where I'm a member
   const myMeetingInvitations = (meetingInvitationsRaw as unknown as {
     id:string; invitation_type:string; inviter_role_id:string; inviter_country_id:string;
     invitee_role_id:string|null; org_id:string|null; org_name:string|null;
     message:string; theme:string|null; expires_at:string; responses:Record<string,unknown>;
   }[]).filter(inv => {
-    if (inv.inviter_role_id === roleId) return false // don't show own invitations
+    if (inv.inviter_role_id === roleId) return false
     if (inv.invitation_type === 'one_on_one') return inv.invitee_role_id === roleId
-    return true // org invitations shown to all (filtered by sim_run_id)
+    // Org invitations: only if I'm a member of that org
+    return inv.org_id ? myOrgIds.has(inv.org_id) : false
   }).filter(inv => {
     // Check not expired
     return new Date(inv.expires_at).getTime() > Date.now()
