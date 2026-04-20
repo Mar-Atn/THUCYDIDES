@@ -344,7 +344,7 @@ def resolve_election(
     if winner is None:
         narrative = (f"ELECTION RESULT ({election_type}): No winner — tied or no majority.{bonus_note} "
                      f"Economy score: {economy_score:.2f}. Votes: {votes_summary}. "
-                     f"Majority needed: {majority_threshold}/{total_possible}.")
+                     f"Total votes: {total_possible}.")
     elif election_type == "presidential":
         narrative = (f"ELECTION RESULT ({election_type}): {winner} elected President of Columbia!{bonus_note} "
                      f"Economy score: {economy_score:.2f}. Votes: {votes_summary}.")
@@ -364,7 +364,6 @@ def resolve_election(
                   "has_bonus": has_bonus,
                   "weighted_votes": weighted_votes,
                   "total_possible": total_possible,
-                  "majority_threshold": majority_threshold,
                   "seat_changed": seat_changed})
 
     logger.info("[election] %s resolved: winner=%s economy=%.2f bonus=%s",
@@ -377,7 +376,6 @@ def resolve_election(
         "has_bonus": has_bonus,
         "weighted_votes": weighted_votes,
         "total_possible": total_possible,
-        "majority_threshold": majority_threshold,
         "seat_changed": seat_changed,
         "narrative": narrative,
     }
