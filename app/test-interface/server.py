@@ -872,8 +872,10 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
 
             # 2. Save to Supabase template map_config
             from supabase import create_client
-            url = os.environ.get("SUPABASE_URL", "https://lukcymegoldprbovglmn.supabase.co")
-            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "sb_secret_96Y8Pi8EYlZMrKaTn0AqkA_eORKFnCb")
+            url = os.environ.get("SUPABASE_URL", "")
+            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+            if not url or not key:
+                return jsonify({"error": "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars required"}), 500
             client = create_client(url, key)
 
             # Get current map_config
@@ -1022,8 +1024,10 @@ class TestInterfaceHandler(SimpleHTTPRequestHandler):
         # Try loading colors from Supabase template (canonical source)
         try:
             from supabase import create_client
-            url = os.environ.get("SUPABASE_URL", "https://lukcymegoldprbovglmn.supabase.co")
-            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "sb_secret_96Y8Pi8EYlZMrKaTn0AqkA_eORKFnCb")
+            url = os.environ.get("SUPABASE_URL", "")
+            key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "")
+            if not url or not key:
+                raise ValueError("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY env vars required")
             client = create_client(url, key)
             rows = client.table("countries").select("id, color_ui, color_map, color_light").eq(
                 "sim_run_id", "00000000-0000-0000-0000-000000000001").execute().data
