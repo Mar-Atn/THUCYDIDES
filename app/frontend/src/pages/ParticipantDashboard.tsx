@@ -4358,15 +4358,15 @@ function CovertOpsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
 
   const SABOTAGE_TARGETS = [
-    { id: 'infrastructure' as const, label: 'Infrastructure', desc: 'Damage economy (-1 treasury)' },
-    { id: 'nuclear_tech' as const, label: 'Nuclear Site', desc: 'Set back nuclear R&D (-30%)' },
-    { id: 'military' as const, label: 'Military', desc: 'Chance to destroy a random unit' },
+    { id: 'infrastructure' as const, label: 'Infrastructure' },
+    { id: 'nuclear_tech' as const, label: 'Nuclear Site' },
+    { id: 'military' as const, label: 'Military' },
   ]
 
-  // For sabotage: exclude own country. For propaganda: include own.
+  // For sabotage: exclude own country. For propaganda: include own (own first).
   const targetOptions = opType === 'sabotage'
     ? countries.filter(c => c.id !== countryId)
-    : countries
+    : [...countries.filter(c => c.id === countryId), ...countries.filter(c => c.id !== countryId)]
 
   return (
     <div className="space-y-4">
@@ -4438,8 +4438,7 @@ function CovertOpsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                     <input type="radio" name="sabotage_target" value={t.id} checked={sabotageTarget === t.id}
                       onChange={() => setSabotageTarget(t.id)} className="accent-action"/>
                     <div>
-                      <span className="font-body text-body-sm text-text-primary block">{t.label}</span>
-                      <span className="font-body text-caption text-text-secondary">{t.desc}</span>
+                      <span className="font-body text-body-sm text-text-primary">{t.label}</span>
                     </div>
                   </label>
                 ))}
