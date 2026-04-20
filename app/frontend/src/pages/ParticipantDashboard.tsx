@@ -810,7 +810,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     : []
 
   // Election UI state
-  const [showElectionPanel, setShowElectionPanel] = useState<'nominate'|'vote'|null>(null)
+  const [showElectionPanel, setShowElectionPanel] = useState<'nominate'|'vote'|'results'|null>(null)
   const [electionSubmitting, setElectionSubmitting] = useState(false)
   const [selectedElectionCandidate, setSelectedElectionCandidate] = useState<string>('')
 
@@ -1304,9 +1304,67 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     )
   }
 
+  // Election results panel
+  if (showElectionPanel === 'results' && electionResolved && activeElectionEvent) {
+    const elType = activeElectionEvent.subtype === 'presidential' ? 'Presidential Election' : 'Mid-Term Parliamentary Election'
+    const totalVotes = electionResolved.total_votes as Record<string, number> || {}
+    const totalSum = Object.values(totalVotes).reduce((s, v) => s + v, 0)
+    const sortedCandidates = Object.entries(totalVotes).sort((a, b) => b[1] - a[1])
+    const winner = electionResolved.winner_role_id
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-h2 text-text-primary">Election Results</h2>
+          <button onClick={() => setShowElectionPanel(null)}
+            className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+            ← Back
+          </button>
+        </div>
+
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-text-primary">
+            <strong className="text-success">{elType}</strong> — Results
+          </p>
+          {winner && (
+            <p className="font-body text-body-sm text-success font-medium mt-1 capitalize">
+              Winner: {winner}
+            </p>
+          )}
+          {!winner && (
+            <p className="font-body text-body-sm text-warning font-medium mt-1">
+              No candidate achieved majority
+            </p>
+          )}
+        </div>
+
+        <div className="bg-card border border-border rounded-lg divide-y divide-border">
+          {sortedCandidates.map(([candidate, votes]) => {
+            const pct = totalSum > 0 ? (votes / totalSum * 100) : 0
+            const isWinner = candidate === winner
+            return (
+              <div key={candidate} className="px-4 py-3">
+                <div className="flex items-center justify-between mb-1">
+                  <span className={`font-body text-body-sm font-medium capitalize ${isWinner ? 'text-success' : 'text-text-primary'}`}>
+                    {candidate} {isWinner && '— Elected'}
+                  </span>
+                  <span className="font-data text-caption text-text-secondary">{pct.toFixed(1)}%</span>
+                </div>
+                <div className="w-full bg-border rounded-full h-2">
+                  <div className={`h-2 rounded-full ${isWinner ? 'bg-success' : 'bg-action/40'}`}
+                    style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
   const showMoveUnits = currentPhase === 'inter_round' && avail.has('move_units')
   const showLeaderVote = activeVote && !hasVotedInActiveVote ? 1 : 0
-  const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (isNominated ? 1 : 0)
+  const electionExpected = (showNomination ? 1 : 0) + (showElectionVote ? 1 : 0) + (isNominated ? 1 : 0) + (electionResolved ? 1 : 0)
   const expectedCount = pendingTxns.length + pendingAgreements.length + (showMoveUnits ? 1 : 0)
     + pendingAuthorizations.length + visibleInterceptions.length + showLeaderVote + electionExpected
   const hasExpected = expectedCount > 0
@@ -1407,6 +1465,17 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 </span>
                 <span className="font-body text-caption text-text-secondary">
                   {activeElectionEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'} — {electionCandidates.length} candidate{electionCandidates.length !== 1 ? 's' : ''}
+                </span>
+              </button>
+            )}
+            {electionResolved && activeElectionEvent && (
+              <button onClick={() => setShowElectionPanel('results')}
+                className="text-left bg-success/5 border border-success/30 rounded-lg px-4 py-3 transition-colors hover:bg-success/10">
+                <span className="font-body text-body-sm text-success font-medium block">
+                  Election Results — {activeElectionEvent.subtype === 'presidential' ? 'Presidential' : 'Mid-Term'}
+                </span>
+                <span className="font-body text-caption text-text-secondary">
+                  {electionResolved.winner_role_id ? `Winner: ${electionResolved.winner_role_id}` : 'No majority'} — Click to view
                 </span>
               </button>
             )}

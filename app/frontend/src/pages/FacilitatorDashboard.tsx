@@ -1186,26 +1186,61 @@ export function FacilitatorDashboard() {
                             </div>
                           )}
 
-                          {/* Stop + Approve / Restart */}
+                          {/* Auto-stop when timer expires */}
+                          {elecStartedAt && (() => {
+                            const elapsed = (Date.now() - new Date(elecStartedAt).getTime()) / 1000
+                            const total = elecDurationMin * 60
+                            const timerDone = elecDurationMin > 0 && elapsed >= total
+                            const elecStopped = sched.election_stopped === true || (elecDurationMin === 0)
+
+                            if (elecStopped || timerDone) {
+                              return (
+                                <div className="space-y-2">
+                                  <div className="bg-warning/10 border border-warning/30 rounded p-2">
+                                    <span className="font-body text-caption text-warning font-medium">
+                                      Voting closed — {elecVoteCount} votes cast
+                                    </span>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <button onClick={handleResolveElection}
+                                      disabled={electionResolving || elecVoteCount === 0}
+                                      className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                                      {electionResolving ? 'Approving...' : 'Approve and Publish Results'}
+                                    </button>
+                                    <button onClick={async () => {
+                                      if (!confirm('Restart election? All votes will be deleted.')) return
+                                      const { supabase: sb } = await import('@/lib/supabase')
+                                      await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
+                                      const newSched = { ...sched, election_open: true, election_stopped: false, election_started_at: new Date().toISOString(), election_duration_min: 10 }
+                                      await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                      setTimeout(() => refetchElectionVotes(), 500)
+                                    }}
+                                      className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">
+                                      Restart
+                                    </button>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return null
+                          })()}
+
+                          {/* Stop + Restart (while timer running) */}
+                          {!(sched.election_stopped === true) && elecDurationMin > 0 && (
                           <div className="flex gap-2">
                             <button onClick={async () => {
-                                if (!confirm('Stop election and approve results?')) return
-                                // Stop timer
-                                const newSched = { ...sched, election_duration_min: 0 }
+                                const newSched = { ...sched, election_stopped: true }
                                 const { supabase: sb } = await import('@/lib/supabase')
                                 await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                                // Resolve
-                                handleResolveElection()
                               }}
-                              disabled={electionResolving || elecVoteCount === 0}
-                              className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                              {electionResolving ? 'Resolving...' : 'Stop and Approve Results'}
+                              className="flex-1 font-body text-caption font-medium bg-warning/10 text-warning px-3 py-1.5 rounded hover:bg-warning/20 transition-colors">
+                              Stop Voting
                             </button>
                             <button onClick={async () => {
                               if (!confirm('Restart election? All votes will be deleted.')) return
                               const { supabase: sb } = await import('@/lib/supabase')
                               await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
-                              const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
+                              const newSched = { ...sched, election_open: true, election_stopped: false, election_started_at: new Date().toISOString(), election_duration_min: 10 }
                               await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
                               setTimeout(() => refetchElectionVotes(), 500)
                             }}
