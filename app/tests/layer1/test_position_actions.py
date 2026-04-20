@@ -49,6 +49,9 @@ class TestReactiveExclusion:
 
     @pytest.mark.parametrize("reactive", sorted(REACTIVE_ACTIONS))
     def test_reactive_not_in_hos(self, reactive):
+        # cast_election_vote is in COLUMBIA_ELECTION_ACTIONS (proactive for Columbia)
+        if reactive == "cast_election_vote":
+            return  # Columbia HoS gets this as proactive
         actions = compute_actions(["head_of_state"], "columbia",
                                   {"nuclear_level": 3, "nuclear_confirmed": True})
         assert reactive not in actions, f"Reactive action {reactive} found in HoS actions"
@@ -110,8 +113,10 @@ class TestMilitary:
 
     def test_military_gets_covert(self):
         actions = compute_actions(["military"], "sarmatia", {})
-        for a in ["intelligence", "covert_operation", "assassination"]:
-            assert a in actions
+        # Military gets intelligence + assassination but NOT covert_operation (security only)
+        assert "intelligence" in actions
+        assert "assassination" in actions
+        assert "covert_operation" not in actions
 
     def test_military_no_economic(self):
         actions = compute_actions(["military"], "sarmatia", {})
@@ -305,7 +310,7 @@ class TestPositionCombos:
 class TestIntelLimits:
     def test_security_limits(self):
         assert INTEL_LIMITS["security"]["intelligence"] == 5
-        assert INTEL_LIMITS["security"]["covert_operation"] == 5
+        assert INTEL_LIMITS["security"]["covert_operation"] == 7  # 7 shared uses per SIM
         assert INTEL_LIMITS["security"]["assassination"] == 3
 
     def test_military_limits(self):
