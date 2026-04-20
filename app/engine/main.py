@@ -1403,6 +1403,13 @@ async def submit_action(
 
     current_phase = run.get("current_phase", "")
 
+    # Phase B (inter_round): only move_units allowed
+    if run["status"] == "inter_round" and body.action_type != "move_units":
+        raise HTTPException(
+            status_code=400,
+            detail="Only unit movements are allowed during the inter-round phase",
+        )
+
     # 2. Validate role exists in this sim
     # Moderator actions (resolve_election) use role_id='moderator' — skip role validation
     MODERATOR_ACTIONS = {"resolve_election"}
