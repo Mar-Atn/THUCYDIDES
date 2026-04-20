@@ -144,50 +144,39 @@ def _build_full_world_context(client, sim_run_id: str, round_num: int) -> str:
 
 def _section_countries(client, sim_run_id, round_num) -> str:
     """All 20 countries: economic + political + tech state."""
-    res = client.table("country_states_per_round").select(
-        "country_code,gdp,treasury,inflation,stability,political_support,"
-        "war_tiredness,nuclear_level,nuclear_confirmed,ai_level,"
-        "opec_production,sanctions_coefficient,tariff_coefficient,"
-        "martial_law_declared"
-    ).eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-     .order("round_num", desc=True).execute().data or []
-
-    # Dedupe to latest per country
-    by_cc: dict[str, dict] = {}
-    for r in res:
-        cc = r.get("country_code")
-        if cc and cc not in by_cc:
-            by_cc[cc] = r
+    # Use the countries table (live state, not country_states_per_round)
+    res = client.table("countries").select(
+        "id,sim_name,gdp,treasury,inflation,stability,"
+        "nuclear_level,nuclear_confirmed,ai_level,debt_burden,"
+        "mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense"
+    ).eq("sim_run_id", sim_run_id).order("id").execute().data or []
 
     lines = ["[ALL COUNTRIES — Round " + str(round_num) + "]"]
-    lines.append(f"{'Country':12} {'GDP':>6} {'Tres':>5} {'Stab':>4} {'Supp':>4} {'WT':>3} {'Nuc':>3} {'AI':>3} {'Inf':>6}")
-    for cc in sorted(by_cc.keys()):
-        c = by_cc[cc]
-        nuc = f"T{c.get('nuclear_level', 0)}" + ("✓" if c.get("nuclear_confirmed") else "")
+    lines.append(f"{'Country':12} {'Name':15} {'GDP':>6} {'Tres':>5} {'Stab':>4} {'Infl':>5} {'Nuc':>5} {'AI':>3} {'Debt':>5}")
+    for c in res:
+        cc = c.get("id", "?")
+        nuc_lvl = int(c.get('nuclear_level') or 0)
+        nuc = f"L{nuc_lvl}" + ("ok" if c.get("nuclear_confirmed") else "") if nuc_lvl > 0 else "-"
         lines.append(
-            f"{cc:12} {float(c.get('gdp') or 0):6.0f} {float(c.get('treasury') or 0):5.0f} "
-            f"{int(c.get('stability') or 0):4d} {int(c.get('political_support') or 0):4d} "
-            f"{int(c.get('war_tiredness') or 0):3d} {nuc:>3} {int(c.get('ai_level') or 0):3d} "
-            f"{float(c.get('inflation') or 0):6.3f}"
+            f"{cc:12} {str(c.get('sim_name',''))[:15]:15} {float(c.get('gdp') or 0):6.0f} {float(c.get('treasury') or 0):5.0f} "
+            f"{float(c.get('stability') or 0):4.1f} {float(c.get('inflation') or 0):5.1f} "
+            f"{nuc:>5} {int(c.get('ai_level') or 0):3d} {float(c.get('debt_burden') or 0)*100:5.1f}%"
         )
     return "\n".join(lines)
 
 
 def _section_military(client, sim_run_id, round_num) -> str:
     """Military unit counts per country per branch."""
-    res = client.table("unit_states_per_round").select(
-        "country_code,unit_type,status"
-    ).eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-     .order("round_num", desc=True).execute().data or []
+    # Use deployments table (live state)
+    res = client.table("deployments").select(
+        "country_id,unit_type,unit_status"
+    ).eq("sim_run_id", sim_run_id).execute().data or []
 
-    # Dedupe by unit (latest round snapshot)
-    # Since we can't dedupe by unit_code here (no column), count from all rows
-    # This gives approximate counts (good enough for intelligence)
-    counts: dict[str, dict[str, dict[str, int]]] = {}  # cc → branch → status → count
+    counts: dict[str, dict[str, dict[str, int]]] = {}
     for r in res:
-        cc = r.get("country_code", "")
+        cc = r.get("country_id", "")
         ut = r.get("unit_type", "")
-        st = r.get("status", "")
+        st = r.get("unit_status", "")
         counts.setdefault(cc, {}).setdefault(ut, {}).setdefault(st, 0)
         counts[cc][ut][st] += 1
 
@@ -203,6 +192,8 @@ def _section_military(client, sim_run_id, round_num) -> str:
                 parts.append(f"{branch}:{active}a+{reserve}r")
         if parts:
             lines.append(f"  {cc:12} {', '.join(parts)}")
+    if len(lines) == 1:
+        lines.append("  (no military data)")
     return "\n".join(lines)
 
 
@@ -305,25 +296,19 @@ def _section_transactions(client, sim_run_id) -> str:
 
 
 def _section_nuclear(client, sim_run_id, round_num) -> str:
-    """Nuclear program status + tests/launches."""
-    # Country nuclear levels from country_states
-    res = client.table("country_states_per_round").select(
-        "country_code,nuclear_level,nuclear_confirmed,nuclear_rd_progress"
-    ).eq("sim_run_id", sim_run_id).lte("round_num", round_num) \
-     .order("round_num", desc=True).execute().data or []
-
-    by_cc: dict[str, dict] = {}
-    for r in res:
-        cc = r.get("country_code")
-        if cc and cc not in by_cc and int(r.get("nuclear_level", 0) or 0) > 0:
-            by_cc[cc] = r
+    """Nuclear program status."""
+    # Use countries table (live state)
+    res = client.table("countries").select(
+        "id,nuclear_level,nuclear_confirmed,nuclear_rd_progress"
+    ).eq("sim_run_id", sim_run_id).execute().data or []
 
     lines = ["[NUCLEAR STATUS]"]
-    for cc in sorted(by_cc.keys()):
-        c = by_cc[cc]
-        confirmed = "confirmed" if c.get("nuclear_confirmed") else "UNCONFIRMED"
-        progress = float(c.get("nuclear_rd_progress") or 0)
-        lines.append(f"  {cc:12} T{c.get('nuclear_level', 0)} {confirmed} (progress: {progress:.2f})")
+    for c in res:
+        nuc_level = int(c.get("nuclear_level") or 0)
+        if nuc_level > 0:
+            confirmed = "confirmed" if c.get("nuclear_confirmed") else "UNCONFIRMED"
+            progress = float(c.get("nuclear_rd_progress") or 0)
+            lines.append(f"  {c['id']:12} Level {nuc_level} {confirmed} (R&D progress: {progress:.0%})")
 
     # Nuclear actions in this run
     try:
