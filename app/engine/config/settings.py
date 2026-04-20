@@ -69,9 +69,9 @@ class Settings(BaseSettings):
     """Environment-based settings with validation."""
 
     # --- Supabase ---
-    supabase_url: str = Field(..., description="Supabase project URL")
-    supabase_anon_key: str = Field(..., description="Supabase publishable anon key")
-    supabase_service_role_key: str = Field(..., description="Supabase service role key (server-side only)")
+    supabase_url: str = Field(default="", description="Supabase project URL")
+    supabase_anon_key: str = Field(default="", description="Supabase publishable anon key")
+    supabase_service_role_key: str = Field(default="", description="Supabase service role key (server-side only)")
 
     # --- LLM Providers ---
     anthropic_api_key: str = Field(default="", description="Anthropic Claude API key")
