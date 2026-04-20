@@ -4334,10 +4334,10 @@ function IntelligenceForm({roleId,countryId,simId,onClose,onSubmitted}:{
       if (res.success === false) {
         setError(res.narrative || res.message || 'Failed')
       } else {
-        setSuccess('Intelligence report delivered to your Confidential tab.')
+        setSuccess('Intelligence report delivered. Switch to the Confidential tab to read it.')
         setQuestion('')
         if (remaining !== null && remaining > 0) setRemaining(remaining - 1)
-        onSubmitted()
+        onSubmitted()  // triggers loadData which refreshes artefacts
       }
     } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
     finally { setSubmitting(false) }
