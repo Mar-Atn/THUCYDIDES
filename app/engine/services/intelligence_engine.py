@@ -63,14 +63,39 @@ def generate_intelligence_report(
                  {"question": question, "requester_role": requester_role,
                   "report_length": len(report_text)})
 
-    logger.info("[intelligence] report generated for %s: '%s' (%d chars)",
-                requester_country, question[:60], len(report_text))
+    # Create artefact — classified report delivered to requester's Confidential tab
+    try:
+        import uuid
+        client.table("artefacts").insert({
+            "id": f"intel_{uuid.uuid4().hex[:12]}",
+            "sim_run_id": sim_run_id,
+            "role_id": requester_role,
+            "artefact_type": "intelligence_report",
+            "classification": "classified",
+            "title": f"Intelligence Report — R{round_num}",
+            "subtitle": question[:100],
+            "from_entity": "Intelligence Directorate",
+            "content_html": (
+                f"<p><strong>CLASSIFIED — INTELLIGENCE BRIEFING</strong></p>"
+                f"<p><em>RE: {question}</em></p>"
+                f"<hr/>"
+                f"{''.join(f'<p>{para.strip()}</p>' for para in report_text.split(chr(10)) if para.strip())}"
+            ),
+            "round_delivered": round_num,
+            "is_read": False,
+        }).execute()
+    except Exception as e:
+        logger.warning("[intelligence] artefact creation failed: %s", e)
+
+    logger.info("[intelligence] report generated for %s (%s): '%s' (%d chars)",
+                requester_country, requester_role, question[:60], len(report_text))
 
     return {
         "success": True,
         "report": report_text,
         "question": question,
         "round_num": round_num,
+        "narrative": f"Intelligence report delivered to your Confidential tab.",
     }
 
 
@@ -361,26 +386,24 @@ def _call_intelligence_llm(question: str, context: str, requester_country: str) 
         from engine.config.settings import LLMUseCase
 
         prompt = (
-            f"You are a senior intelligence analyst preparing a CLASSIFIED report.\n\n"
+            f"You are a senior intelligence analyst preparing a CLASSIFIED briefing.\n\n"
             f"REQUESTING COUNTRY: {requester_country.upper()}\n\n"
             f"QUESTION FROM LEADERSHIP:\n{question}\n\n"
             f"COMPLETE WORLD STATE (your intelligence database):\n{context}\n\n"
             f"INSTRUCTIONS:\n"
             f"- Write a 1-3 paragraph intelligence report answering the question.\n"
             f"- Use the real data as your base.\n"
-            f"- INJECT 10-30% misleading information (mandatory noise):\n"
-            f"  * Simple factual questions: ~10% noise (slightly wrong numbers)\n"
-            f"  * Moderate analysis: ~20% noise (plausible but false assessments)\n"
-            f"  * Broad strategic questions: ~30% noise (significant omissions + false conclusions)\n"
-            f"- Noise means: slightly wrong numbers, plausible but false assessments, omissions.\n"
+            f"- INJECT approximately 20-25% misleading or imprecise information:\n"
+            f"  * Slightly wrong numbers, plausible but false assessments, omissions.\n"
             f"- The requester does NOT know the noise level.\n"
             f"- Use SIM country names only (no real-world names).\n"
-            f"- Be professional, concise, and analytical.\n"
-            f"- Mark confidence level: HIGH / MODERATE / LOW for key assessments."
+            f"- Style: professional intelligence briefing. Concise, analytical.\n"
+            f"- Mark confidence level: HIGH / MODERATE / LOW for key assessments.\n"
+            f"- Do NOT reveal that you are injecting noise or that you are an AI."
         )
 
         response = asyncio.run(call_llm(
-            use_case=LLMUseCase.AGENT_REFLECTION,
+            use_case=LLMUseCase.QUICK_SCAN,  # Gemini Flash for cost efficiency
             messages=[{"role": "user", "content": prompt}],
             system="You are a senior intelligence analyst. Write a classified briefing. Be concise and professional.",
             max_tokens=600,

@@ -161,9 +161,9 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
 
     if action_type == "intelligence":
         from engine.services.intelligence_engine import generate_intelligence_report
+        question = action.get("question", "General situation assessment")
         return generate_intelligence_report(
-            sim_run_id, round_num, role_id, country_code,
-            action.get("target_country"))
+            sim_run_id, round_num, question, country_code, role_id)
 
     # ── Political ────��────────────────────────────────────────────────
     if action_type == "release_arrest":

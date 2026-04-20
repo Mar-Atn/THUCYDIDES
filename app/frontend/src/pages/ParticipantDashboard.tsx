@@ -1934,6 +1934,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'arrest') return <ArrestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'assassination') return <AssassinationForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'covert_operation') return <CovertOpsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'intelligence') return <IntelligenceForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -4306,6 +4307,106 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function IntelligenceForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [question, setQuestion] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [success, setSuccess] = useState<string|null>(null)
+  const [remaining, setRemaining] = useState<number|null>(null)
+
+  useEffect(() => {
+    supabase.from('role_actions').select('uses_remaining')
+      .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'intelligence').limit(1)
+      .then(({ data }) => setRemaining(data?.[0]?.uses_remaining ?? null))
+  }, [simId, roleId])
+
+  const handleSubmit = async () => {
+    if (question.trim().length < 10) return
+    setSubmitting(true); setError(null); setSuccess(null)
+    try {
+      const res = await submitAction(simId, 'intelligence', roleId, countryId, {
+        question: question.trim(),
+      })
+      if (res.success === false) {
+        setError(res.narrative || res.message || 'Failed')
+      } else {
+        setSuccess('Intelligence report delivered to your Confidential tab.')
+        setQuestion('')
+        if (remaining !== null && remaining > 0) setRemaining(remaining - 1)
+        onSubmitted()
+      }
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Intelligence</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
+      </div>
+
+      <div className="bg-action/5 border border-action/20 rounded-lg p-4">
+        <p className="font-body text-body-sm text-text-primary">
+          Submit a question to your intelligence services. You will receive a classified briefing in your Confidential tab.
+        </p>
+        <p className="font-body text-caption text-text-secondary mt-1">
+          Intelligence reports are based on available information and may contain inaccuracies.
+        </p>
+        {remaining !== null && (
+          <p className={`font-data text-caption mt-2 ${remaining > 0 ? 'text-text-secondary' : 'text-danger'}`}>
+            {remaining > 0 ? `${remaining} request${remaining !== 1 ? 's' : ''} remaining this simulation` : 'No requests remaining'}
+          </p>
+        )}
+      </div>
+
+      {remaining === 0 ? (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4 text-center">
+          <p className="font-body text-body-sm text-danger font-medium">All intelligence requests have been used.</p>
+        </div>
+      ) : success ? (
+        <div className="bg-success/5 border border-success/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-success font-medium">{success}</p>
+          <button onClick={() => setSuccess(null)}
+            className="font-body text-caption text-action hover:underline mt-2">
+            Submit another request
+          </button>
+        </div>
+      ) : (
+        <>
+          <div>
+            <label className="font-body text-caption text-text-secondary block mb-2">
+              Your question <span className="text-text-secondary/50">(min 10 characters)</span>
+            </label>
+            <textarea value={question} onChange={e => setQuestion(e.target.value)}
+              placeholder="What is the current state of Persia's nuclear program? How close are they to a weapon?"
+              rows={4}
+              className="w-full bg-base border border-border rounded-lg px-4 py-3 font-body text-body-sm text-text-primary resize-none focus:border-action/50 focus:outline-none transition-colors"
+              disabled={submitting}
+            />
+          </div>
+
+          <button onClick={handleSubmit} disabled={question.trim().length < 10 || submitting || remaining === 0}
+            className="w-full bg-action text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            {submitting ? 'Generating report...' : 'Request Intelligence Report'}
+          </button>
+        </>
+      )}
+
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function CovertOpsForm({roleId,countryId,simId,onClose,onSubmitted}:{
