@@ -315,7 +315,7 @@ export function FacilitatorDashboard() {
     id:string; election_type:string; election_round:number; role_id:string; camp:string
   }[]
 
-  const { data: electionVotesRaw } = useRealtimeTable<Record<string, unknown>>(
+  const { data: electionVotesRaw, refetch: refetchElectionVotes } = useRealtimeTable<Record<string, unknown>>(
     'election_votes', simId,
     { columns: 'id,election_type,voter_role_id,candidate_role_id' },
   )
@@ -1149,6 +1149,8 @@ export function FacilitatorDashboard() {
                               await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
                               const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
                               await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                              // Force refetch to clear stale vote data
+                              setTimeout(() => refetchElectionVotes(), 500)
                             }}
                               className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">
                               Restart
