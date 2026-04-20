@@ -14,6 +14,8 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
+from engine.services.common import get_scenario_id, write_event
+
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -52,14 +54,15 @@ def grant_basing_rights(
         return {"success": False, "status": "error", "message": str(e)}
 
     # Notify both countries
-    _write_event(client, sim_run_id, round_num, host_country,
-                 "basing_rights_granted",
-                 f"{host_country} grants basing rights to {guest_country}",
-                 {"host": host_country, "guest": guest_country, "source": source})
-    _write_event(client, sim_run_id, round_num, guest_country,
-                 "basing_rights_received",
-                 f"{guest_country} receives basing rights from {host_country}",
-                 {"host": host_country, "guest": guest_country, "source": source})
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(client, sim_run_id, scenario_id, round_num, host_country,
+                "basing_rights_granted",
+                f"{host_country} grants basing rights to {guest_country}",
+                {"host": host_country, "guest": guest_country, "source": source})
+    write_event(client, sim_run_id, scenario_id, round_num, guest_country,
+                "basing_rights_received",
+                f"{guest_country} receives basing rights from {host_country}",
+                {"host": host_country, "guest": guest_country, "source": source})
 
     logger.info("[basing] GRANTED: %s → %s (source=%s)", host_country, guest_country, source)
     return {"success": True, "status": "active", "message": f"{host_country} grants basing to {guest_country}"}
@@ -92,14 +95,15 @@ def revoke_basing_rights(
         return {"success": False, "status": "error", "message": str(e)}
 
     # Notify both countries
-    _write_event(client, sim_run_id, round_num, host_country,
-                 "basing_rights_revoked",
-                 f"{host_country} revokes basing rights from {guest_country}",
-                 {"host": host_country, "guest": guest_country})
-    _write_event(client, sim_run_id, round_num, guest_country,
-                 "basing_rights_lost",
-                 f"{guest_country} loses basing rights from {host_country} — must withdraw forces",
-                 {"host": host_country, "guest": guest_country})
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(client, sim_run_id, scenario_id, round_num, host_country,
+                "basing_rights_revoked",
+                f"{host_country} revokes basing rights from {guest_country}",
+                {"host": host_country, "guest": guest_country})
+    write_event(client, sim_run_id, scenario_id, round_num, guest_country,
+                "basing_rights_lost",
+                f"{guest_country} loses basing rights from {host_country} — must withdraw forces",
+                {"host": host_country, "guest": guest_country})
 
     logger.info("[basing] REVOKED: %s → %s", host_country, guest_country)
     return {"success": True, "status": "revoked", "message": f"{host_country} revokes basing from {guest_country}"}
@@ -125,25 +129,3 @@ def get_active_basing_rights(
 # ---------------------------------------------------------------------------
 
 
-def _write_event(client, sim_run_id, round_num, country_code, event_type, summary, payload):
-    scenario_id = None
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        if r.data:
-            scenario_id = r.data[0].get("scenario_id")
-    except Exception:
-        pass
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

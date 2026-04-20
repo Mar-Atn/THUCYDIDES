@@ -113,6 +113,14 @@ POSITION_ACTIONS: dict[str, set[str]] = {
 # Countries eligible for martial_law
 MARTIAL_LAW_ELIGIBLE: set[str] = {"sarmatia", "ruthenia", "persia", "cathay"}
 
+# Martial law conscription pool sizes per eligible country
+MARTIAL_LAW_POOLS: dict[str, int] = {
+    "sarmatia": 10,
+    "ruthenia": 6,
+    "persia": 8,
+    "cathay": 10,
+}
+
 # OPEC+ member countries
 OPEC_MEMBERS: set[str] = {"caribe", "mirage", "persia", "sarmatia", "solaria"}
 

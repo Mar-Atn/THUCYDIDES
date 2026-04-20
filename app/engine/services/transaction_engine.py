@@ -14,6 +14,8 @@ response is "accept" and both sides' assets validate.
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 from datetime import datetime, timezone
 from typing import Optional
@@ -59,7 +61,7 @@ def propose_exchange(
     normalized = report["normalized"]
 
     # Look up scenario_id for denorm
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
 
     # Create PENDING record
     row = {
@@ -77,14 +79,15 @@ def propose_exchange(
     txn_id = res.data[0]["id"]
 
     # Write event
-    _write_event(client, sim_run_id, scenario_id, round_num,
-                 "transaction_proposed", normalized["proposer_country_code"],
+    write_event(client, sim_run_id, scenario_id, round_num,
+                normalized["proposer_country_code"], "transaction_proposed",
                  f"{normalized['proposer_country_code']} proposes exchange to "
                  f"{normalized['counterpart_country_code']}: "
                  f"offer={_summarize_assets(normalized['offer'])}, "
                  f"request={_summarize_assets(normalized['request'])}",
                  {"transaction_id": txn_id, "offer": normalized["offer"],
-                  "request": normalized["request"]})
+                  "request": normalized["request"]},
+                 category="diplomatic")
 
     logger.info("[txn] proposed %s: %s → %s", txn_id,
                 normalized["proposer_country_code"], normalized["counterpart_country_code"])
@@ -128,10 +131,11 @@ def respond_to_exchange(
             "status": "declined",
         }).eq("id", transaction_id).execute()
 
-        _write_event(client, sim_run_id, scenario_id, round_num,
-                     "transaction_declined", txn["counterpart"],
+        write_event(client, sim_run_id, scenario_id, round_num,
+                    txn["counterpart"], "transaction_declined",
                      f"{txn['counterpart']} declined exchange from {txn['proposer']}",
-                     {"transaction_id": transaction_id})
+                     {"transaction_id": transaction_id},
+                     category="diplomatic")
 
         return {"status": "declined"}
 
@@ -146,11 +150,12 @@ def respond_to_exchange(
             "terms": txn.get("terms", "") + f"\n[COUNTER] {rationale}",
         }).eq("id", transaction_id).execute()
 
-        _write_event(client, sim_run_id, scenario_id, round_num,
-                     "transaction_countered", txn["counterpart"],
+        write_event(client, sim_run_id, scenario_id, round_num,
+                    txn["counterpart"], "transaction_countered",
                      f"{txn['counterpart']} counter-offered to {txn['proposer']}",
                      {"transaction_id": transaction_id,
-                      "counter_offer": counter_offer, "counter_request": counter_request})
+                      "counter_offer": counter_offer, "counter_request": counter_request},
+                     category="diplomatic")
 
         return {"status": "countered"}
 
@@ -176,11 +181,12 @@ def respond_to_exchange(
                 "status": "failed_validation",
             }).eq("id", transaction_id).execute()
 
-            _write_event(client, sim_run_id, scenario_id, round_num,
-                         "transaction_failed", txn["proposer"],
+            write_event(client, sim_run_id, scenario_id, round_num,
+                        txn["proposer"], "transaction_failed",
                          f"Exchange {txn['proposer']}↔{txn['counterpart']} failed validation: "
                          f"{exec_report['errors'][:2]}",
-                         {"transaction_id": transaction_id, "errors": exec_report["errors"]})
+                         {"transaction_id": transaction_id, "errors": exec_report["errors"]},
+                         category="diplomatic")
 
             return {"status": "failed_validation", "errors": exec_report["errors"]}
 
@@ -207,10 +213,11 @@ def respond_to_exchange(
             "executed_at": datetime.now(timezone.utc).isoformat(),
         }).eq("id", transaction_id).execute()
 
-        _write_event(client, sim_run_id, scenario_id, round_num,
-                     "transaction_executed", txn["proposer"],
+        write_event(client, sim_run_id, scenario_id, round_num,
+                    txn["proposer"], "transaction_executed",
                      f"Exchange executed: {txn['proposer']}↔{txn['counterpart']} — {', '.join(changes[:3])}",
-                     {"transaction_id": transaction_id, "changes": changes})
+                     {"transaction_id": transaction_id, "changes": changes},
+                     category="diplomatic")
 
         logger.info("[txn] EXECUTED %s: %s ↔ %s — %d changes",
                     transaction_id, txn["proposer"], txn["counterpart"], len(changes))
@@ -447,30 +454,6 @@ def _load_roles(client):
         return {}
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, event_type, country_code, summary, payload):
-    try:
-        row = {
-            "sim_run_id": sim_run_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-            "category": "diplomatic",
-        }
-        if scenario_id:
-            row["scenario_id"] = scenario_id
-        client.table("observatory_events").insert(row).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)
 
 
 def _summarize_assets(assets: dict) -> str:

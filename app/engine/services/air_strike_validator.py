@@ -14,6 +14,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from engine.config.map_config import hex_distance
+
 
 CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "albion", "bharata", "caribe", "cathay", "choson", "columbia",
@@ -36,16 +38,12 @@ RATIONALE_MIN_CHARS = 30
 GLOBAL_ROW_MIN, GLOBAL_ROW_MAX = 1, 10
 GLOBAL_COL_MIN, GLOBAL_COL_MAX = 1, 20
 
-#: Range = 2 cardinal hexes (Manhattan distance)
+#: Range = 2 hexes (proper hex distance on odd-r offset grid)
 MAX_RANGE = 2
 
 
 def _is_real_int(v: Any) -> bool:
     return isinstance(v, int) and not isinstance(v, bool)
-
-
-def _hex_distance(r1: int, c1: int, r2: int, c2: int) -> int:
-    return abs(r1 - r2) + abs(c1 - c2)
 
 
 def validate_air_strike(
@@ -158,7 +156,7 @@ def validate_air_strike(
         if (src_r, src_c) == (tgt_r, tgt_c):
             errors.append(f"SAME_HEX: source ({src_r},{src_c}) cannot equal target")
         else:
-            dist = _hex_distance(src_r, src_c, tgt_r, tgt_c)
+            dist = hex_distance(src_r, src_c, tgt_r, tgt_c)
             if dist > MAX_RANGE:
                 errors.append(
                     f"OUT_OF_RANGE: distance {dist} > {MAX_RANGE} hexes from "

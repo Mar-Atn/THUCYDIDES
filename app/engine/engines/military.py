@@ -2492,17 +2492,6 @@ class UnitNavalBombardmentResult(BaseModel):
 # HELPERS (hex geometry + AD zone + naval-adjacent)
 # ---------------------------------------------------------------------------
 
-def _hex_distance_v2(r1: int, c1: int, r2: int, c2: int) -> int:
-    """Hex distance on pointy-top odd-r offset grid (1-indexed)."""
-    def _to_cube(row: int, col: int) -> tuple[int, int, int]:
-        is_odd_row_0idx = ((row - 1) % 2) == 1
-        x = (col - 1) - ((row - 1) - (1 if is_odd_row_0idx else 0)) // 2
-        z = row - 1
-        y = -x - z
-        return (x, y, z)
-    a = _to_cube(r1, c1)
-    b = _to_cube(r2, c2)
-    return (abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])) // 2
 
 
 def _hex_neighbors_v2(row: int, col: int) -> list[tuple[int, int]]:
@@ -2527,7 +2516,7 @@ def collect_ad_units_in_zone(
     (per canonical theater↔global linkage table in map_config).
     """
     from engine.config.map_config import (
-        global_hex_for_theater_cell, theater_for_global_hex,
+        global_hex_for_theater_cell, hex_distance, theater_for_global_hex,
     )
     zone_key = (tgt_global_row, tgt_global_col)
     linked_theater = theater_for_global_hex(tgt_global_row, tgt_global_col)
@@ -2696,7 +2685,7 @@ def resolve_air_strike_units(inp: UnitAirStrikeInput) -> UnitAirStrikeResult:
     # Range check
     distance = None
     if au.global_row is not None and au.global_col is not None:
-        distance = _hex_distance_v2(
+        distance = hex_distance(
             au.global_row, au.global_col, inp.target_global_row, inp.target_global_col,
         )
         if distance > AIR_STRIKE_MAX_RANGE:

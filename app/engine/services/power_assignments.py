@@ -18,6 +18,8 @@ Functions:
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 from typing import Optional
 
@@ -235,13 +237,14 @@ def reassign_power(
     }, on_conflict="sim_run_id,country_code,power_type").execute()
 
     # Write events
+    scenario_id = get_scenario_id(client, sim_run_id)
     new_label = new_role_id or "(vacant — HoS holds)"
     prev_label = previous_role or "(vacant)"
-    _write_event(client, sim_run_id, round_num, country_code,
-                 "power_reassigned",
-                 f"{country_code} {power_type} power: {prev_label} → {new_label} (by {by_role_id})",
-                 {"power_type": power_type, "previous": previous_role,
-                  "new": new_role_id, "by": by_role_id})
+    write_event(client, sim_run_id, scenario_id, round_num, country_code,
+                "power_reassigned",
+                f"{country_code} {power_type} power: {prev_label} → {new_label} (by {by_role_id})",
+                {"power_type": power_type, "previous": previous_role,
+                 "new": new_role_id, "by": by_role_id})
 
     logger.info("[powers] %s %s: %s → %s (by %s)",
                 country_code, power_type, previous_role, new_role_id, by_role_id)
@@ -267,25 +270,3 @@ def get_assignments(
 # ---------------------------------------------------------------------------
 
 
-def _write_event(client, sim_run_id, round_num, country_code, event_type, summary, payload):
-    scenario_id = None
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        if r.data:
-            scenario_id = r.data[0].get("scenario_id")
-    except Exception:
-        pass
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

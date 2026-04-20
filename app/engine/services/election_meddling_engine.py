@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import random
 
+from engine.services.common import get_scenario_id, write_event
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -53,11 +54,11 @@ def execute_election_meddling(
         support_change = shift_roll if direction == "boost" else -shift_roll
         _apply_stability_change(client, sim_run_id, round_num, target_country, support_change)
 
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
     candidate_label = f" (candidate: {candidate})" if candidate else ""
 
     # Attacker sees full result
-    _write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
+    write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
                  "election_meddling_result",
                  f"[CLASSIFIED] Election meddling {direction} on {target_country}{candidate_label}: "
                  f"{'SUCCESS' if success else 'FAILED'}"
@@ -68,14 +69,14 @@ def execute_election_meddling(
 
     if detected:
         if attributed:
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "election_meddling_detected_attributed",
                          f"ELECTION MEDDLING: {attacker_country} interfered in {target_country}'s elections"
                          + (f" — support shifted {support_change:+d}%" if success else " — attempt failed"),
                          {"attacker": attacker_country, "target": target_country,
                           "direction": direction, "success": success, "attributed": True})
         else:
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "election_meddling_detected_anonymous",
                          f"ELECTION MEDDLING: unknown actor interfered in {target_country}'s elections"
                          + (f" — support shifted {support_change:+d}%" if success else " — attempt failed"),
@@ -117,22 +118,3 @@ def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
         logger.warning("stability change failed: %s", e)
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id, "scenario_id": scenario_id,
-            "round_num": round_num, "event_type": event_type,
-            "country_code": country_code, "summary": summary, "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

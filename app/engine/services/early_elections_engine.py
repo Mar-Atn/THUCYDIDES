@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 
+from engine.services.common import get_scenario_id
 from engine.services.run_roles import get_run_role
 from engine.services.supabase import get_client
 
@@ -46,7 +47,7 @@ def execute_early_elections(
         logger.warning("early_election flag update failed: %s", e)
 
     # Write observatory event
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
     narrative = (f"EARLY ELECTIONS CALLED: {role_id} calls early elections in {country_code}. "
                  f"Elections scheduled for round {election_round}.")
 
@@ -71,9 +72,3 @@ def execute_early_elections(
     }
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None

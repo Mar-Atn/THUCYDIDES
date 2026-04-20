@@ -546,7 +546,6 @@ export interface Role {
   election_meddling_cards: number
   assassination_cards: number
   protest_stim_cards: number
-  fatherland_appeal: number
   powers: string[]
   objectives: string[]
   ticking_clock: string

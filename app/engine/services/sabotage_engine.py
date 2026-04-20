@@ -13,6 +13,8 @@ from __future__ import annotations
 import logging
 import random
 
+from engine.services.common import get_scenario_id, write_event
+
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -81,10 +83,10 @@ def execute_sabotage(
         narrative = f"Covert operation against {tc_upper} failed. Operatives were unable to complete the mission."
 
     # --- EVENTS ---
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
 
     # Always log for attacker (private)
-    _write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
+    write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
                  "sabotage_result",
                  f"[CLASSIFIED] {narrative} (detected={detected}, attributed={attributed})",
                  {"success": success, "target_country": target_country,
@@ -95,7 +97,7 @@ def execute_sabotage(
     if detected:
         if attributed:
             # Public news: everyone knows who did it
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "sabotage_detected_attributed",
                          f"SABOTAGE {'succeeded' if success else 'attempt failed'}: "
                          f"{attacker_country} targeted {target_country}'s {target_type}"
@@ -105,7 +107,7 @@ def execute_sabotage(
                           "attributed": True})
         else:
             # Target knows but not who
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "sabotage_detected_anonymous",
                          f"SABOTAGE {'succeeded' if success else 'attempt failed'}: "
                          f"unknown actor targeted {target_country}'s {target_type}"
@@ -198,28 +200,3 @@ def _damage_military(client, sim_run_id, round_num, target_cc, roll) -> str | No
     except Exception as e:
         logger.warning("military sabotage failed: %s", e)
     return None
-
-
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

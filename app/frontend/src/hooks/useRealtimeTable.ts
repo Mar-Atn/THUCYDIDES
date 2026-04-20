@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { channelManager, type RealtimeListener } from '@/lib/channelManager'
+import { requestQueue } from '@/lib/requestQueue'
 
 interface UseRealtimeTableOptions {
   columns?: string
@@ -48,32 +49,34 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
 
   const fetchData = useCallback(async () => {
     if (!simId || !enabled) return
-    let query = supabase.from(table).select(columns).eq('sim_run_id', simId)
-    if (eq) {
-      for (const [k, v] of Object.entries(eq)) {
-        query = query.eq(k, v)
+    await requestQueue.enqueue(async () => {
+      let query = supabase.from(table).select(columns).eq('sim_run_id', simId)
+      if (eq) {
+        for (const [k, v] of Object.entries(eq)) {
+          query = query.eq(k, v)
+        }
       }
-    }
-    if (filter) {
-      const parts = filter.split('=')
-      if (parts.length === 2) {
-        const [col, rest] = parts
-        const [op, val] = rest.split('.')
-        if (op === 'eq') query = query.eq(col, val)
-        else if (op === 'neq') query = query.neq(col, val)
+      if (filter) {
+        const parts = filter.split('=')
+        if (parts.length === 2) {
+          const [col, rest] = parts
+          const [op, val] = rest.split('.')
+          if (op === 'eq') query = query.eq(col, val)
+          else if (op === 'neq') query = query.neq(col, val)
+        }
       }
-    }
-    if (orderBy) {
-      const [col, dir] = orderBy.split('.')
-      query = query.order(col, { ascending: dir !== 'desc' })
-    }
-    if (limit) query = query.limit(limit)
+      if (orderBy) {
+        const [col, dir] = orderBy.split('.')
+        query = query.order(col, { ascending: dir !== 'desc' })
+      }
+      if (limit) query = query.limit(limit)
 
-    const { data: rows, error } = await query
-    if (!error && rows) {
-      setData(rows as T[])
-    }
-    setLoading(false)
+      const { data: rows, error } = await query
+      if (!error && rows) {
+        setData(rows as T[])
+      }
+      setLoading(false)
+    })
   }, [table, simId, columns, filter, eq, orderBy, limit, enabled])
 
   useEffect(() => {
@@ -174,28 +177,21 @@ export function useRealtimeRow<T extends Record<string, unknown>>(
   useEffect(() => {
     if (!id) { setLoading(false); return }
 
-    // Initial fetch
-    supabase.from(table).select(columns).eq('id', id).limit(1)
-      .then(({ data: rows }) => {
+    // Initial fetch (queued to prevent ERR_INSUFFICIENT_RESOURCES)
+    requestQueue.enqueue(() =>
+      supabase.from(table).select(columns).eq('id', id).limit(1).then(({ data: rows }) => {
         if (rows?.[0]) setData(rows[0] as T)
         setLoading(false)
       })
+    )
 
-    // Subscribe with stable channel name
-    const channelName = `rt:${table}:row:${id}`
-    const channel = supabase
-      .channel(channelName)
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: table,
-        filter: `id=eq.${id}`,
-      }, (payload) => {
-        setData(payload.new as T)
-      })
-      .subscribe()
+    // Subscribe via ChannelManager (deduplicates across HMR and multiple callers)
+    const listener: RealtimeListener = (payload) => {
+      setData(payload.new as T)
+    }
+    const key = channelManager.subscribeRow(table, id, listener)
 
-    return () => { supabase.removeChannel(channel) }
+    return () => { channelManager.unsubscribe(key, listener) }
   }, [id, table, columns])
 
   return { data, loading }

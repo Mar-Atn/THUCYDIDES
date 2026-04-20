@@ -18,6 +18,8 @@ Functions:
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 from typing import Optional
 
@@ -135,42 +137,17 @@ def update_role_status(
         return {"success": False, "message": str(e)}
 
     # Write observatory event
-    _write_event(client, sim_run_id, round_num, current["country_code"],
-                 f"role_status_{new_status}",
-                 f"{role_id} ({current.get('character_name', '?')}): "
-                 f"{prev_status} → {new_status} by {changed_by} — {reason}",
-                 {"role_id": role_id, "previous": prev_status,
-                  "new": new_status, "by": changed_by})
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(client, sim_run_id, scenario_id, round_num, current["country_code"],
+                f"role_status_{new_status}",
+                f"{role_id} ({current.get('character_name', '?')}): "
+                f"{prev_status} → {new_status} by {changed_by} — {reason}",
+                {"role_id": role_id, "previous": prev_status,
+                 "new": new_status, "by": changed_by},
+                category="political")
 
     logger.info("[roles] %s: %s → %s (by %s)", role_id, prev_status, new_status, changed_by)
 
     return {"success": True, "previous_status": prev_status, "new_status": new_status}
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-def _write_event(client, sim_run_id, round_num, country_code, event_type, summary, payload):
-    scenario_id = None
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        if r.data:
-            scenario_id = r.data[0].get("scenario_id")
-    except Exception:
-        pass
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-            "category": "political",
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

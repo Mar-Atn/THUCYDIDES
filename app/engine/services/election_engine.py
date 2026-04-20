@@ -22,6 +22,8 @@ Economy score formula (tuned 2026-04-19):
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 
 from engine.services.supabase import get_client as _get_sb_client
@@ -132,10 +134,10 @@ def submit_nomination(
     }).execute()
 
     # Observatory event
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
     narrative = (f"NOMINATION: {role_id} nominates for {election_type} "
                  f"(election round {election_round}).")
-    _write_event(client, sim_run_id, scenario_id, round_num, "columbia",
+    write_event(client, sim_run_id, scenario_id, round_num, "columbia",
                  "election_nomination", narrative,
                  {"role_id": role_id, "election_type": election_type,
                   "election_round": election_round, "camp": camp})
@@ -229,9 +231,9 @@ def cast_vote(
     }).execute()
 
     # Observatory event (logged but candidate NOT revealed — secret ballot)
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
     narrative = f"VOTE CAST: {voter_role_id} voted in {election_type} (secret ballot)."
-    _write_event(client, sim_run_id, scenario_id, round_num, "columbia",
+    write_event(client, sim_run_id, scenario_id, round_num, "columbia",
                  "election_vote_cast", narrative,
                  {"voter": voter_role_id, "election_type": election_type})
 
@@ -357,8 +359,8 @@ def resolve_election(
                      f"Economy score: {economy_score:.2f}. Votes: {votes_summary}.")
 
     # Observatory event
-    scenario_id = _get_scenario_id(client, sim_run_id)
-    _write_event(client, sim_run_id, scenario_id, round_num, "columbia",
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(client, sim_run_id, scenario_id, round_num, "columbia",
                  "election_result", narrative,
                  {"winner": winner, "economy_score": round(economy_score, 4),
                   "has_bonus": has_bonus,
@@ -519,24 +521,3 @@ def _get_parliament_membership(client, sim_run_id: str, role_id: str) -> dict | 
     return result[0] if result else None
 
 
-def _get_scenario_id(client, sim_run_id):
-    """Get scenario_id for a sim run (used for observatory events)."""
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    """Write an observatory event."""
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id, "scenario_id": scenario_id,
-            "round_num": round_num, "event_type": event_type,
-            "country_code": country_code, "summary": summary, "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

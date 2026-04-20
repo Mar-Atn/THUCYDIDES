@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 import random
 
+from engine.services.common import get_scenario_id, write_event
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
@@ -62,10 +63,10 @@ def execute_propaganda(
         _apply_stability_change(client, sim_run_id, round_num, target_country, stability_change)
 
     # Events
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
 
     # Attacker always sees result
-    _write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
+    write_event(client, sim_run_id, scenario_id, round_num, attacker_country,
                  "propaganda_result",
                  f"[CLASSIFIED] Propaganda {intent} on {target_country}: "
                  f"{'SUCCESS' if success else 'FAILED'}"
@@ -76,14 +77,14 @@ def execute_propaganda(
 
     if detected:
         if attributed:
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "propaganda_detected_attributed",
                          f"PROPAGANDA: {attacker_country} ran {intent} campaign against {target_country}"
                          + (f" — stability {stability_change:+.2f}" if success else " — failed"),
                          {"attacker": attacker_country, "target": target_country,
                           "intent": intent, "success": success, "attributed": True})
         else:
-            _write_event(client, sim_run_id, scenario_id, round_num, target_country,
+            write_event(client, sim_run_id, scenario_id, round_num, target_country,
                          "propaganda_detected_anonymous",
                          f"PROPAGANDA: unknown actor ran {intent} campaign against {target_country}"
                          + (f" — stability {stability_change:+.2f}" if success else " — failed"),
@@ -143,28 +144,9 @@ def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
 
 def _log_use(client, sim_run_id, scenario_id, round_num, attacker_cc, target_cc, intent):
     """Log successful use for diminishing returns tracking."""
-    _write_event(client, sim_run_id, scenario_id, round_num, attacker_cc,
+    write_event(client, sim_run_id, scenario_id, round_num, attacker_cc,
                  "propaganda_use_logged",
                  f"Propaganda {intent} use logged: {attacker_cc}→{target_cc}",
                  {"target": target_cc, "intent": intent})
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id, "scenario_id": scenario_id,
-            "round_num": round_num, "event_type": event_type,
-            "country_code": country_code, "summary": summary, "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

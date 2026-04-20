@@ -135,9 +135,7 @@ def validate_arrest(
 # 1.2 Martial Law (Conscription)
 # ---------------------------------------------------------------------------
 
-MARTIAL_LAW_POOLS: dict[str, int] = {
-    "sarmatia": 10, "ruthenia": 6, "persia": 8, "cathay": 10,
-}
+from engine.config.position_actions import MARTIAL_LAW_POOLS
 
 
 def validate_martial_law(

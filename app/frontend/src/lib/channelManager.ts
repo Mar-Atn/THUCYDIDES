@@ -112,6 +112,51 @@ class ChannelManager {
     }
   }
 
+  /**
+   * Subscribe to a single row by primary key (id column).
+   * Same deduplication / ref-counting as subscribe(), but filters on id=eq.{rowId}.
+   */
+  subscribeRow(table: string, rowId: string, listener: RealtimeListener): string {
+    const key = `rt:${table}:row:${rowId}`
+    let managed = this.channels.get(key)
+
+    if (managed) {
+      managed.refCount++
+      managed.listeners.add(listener)
+      return key
+    }
+
+    const channel = supabase
+      .channel(key)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: table,
+          filter: `id=eq.${rowId}`,
+        },
+        (payload) => {
+          const m = this.channels.get(key)
+          if (!m) return
+          for (const fn of m.listeners) {
+            try {
+              fn(payload as unknown as Parameters<RealtimeListener>[0])
+            } catch { /* individual listener errors must not break others */ }
+          }
+        },
+      )
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`[ChannelManager] ${key}: ${status}`)
+        }
+      })
+
+    managed = { channel, refCount: 1, listeners: new Set([listener]) }
+    this.channels.set(key, managed)
+    return key
+  }
+
   /** Number of active channels (for debugging). */
   get activeChannels(): number {
     return this.channels.size

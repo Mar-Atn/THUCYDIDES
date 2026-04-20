@@ -181,17 +181,6 @@ def build_opec_context(
 # ---------------------------------------------------------------------------
 
 
-def _get_scenario_id(client, scenario_code: str) -> str:
-    res = (
-        client.table("sim_scenarios")
-        .select("id")
-        .eq("code", scenario_code)
-        .limit(1)
-        .execute()
-    )
-    if not res.data:
-        raise ValueError(f"Scenario '{scenario_code}' not found")
-    return res.data[0]["id"]
 
 
 def _get_sim_run_id() -> str:

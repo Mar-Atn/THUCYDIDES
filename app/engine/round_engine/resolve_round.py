@@ -1,5 +1,6 @@
-# DEPRECATED (2026-04-06) — being replaced by engines/military.py (unit-level v2) + engines/round_tick.py
-# See 3 DETAILED DESIGN/REUNIFICATION_AUDIT_2026-04-06.md. Do not add new logic here.
+# NOTE: Originally marked DEPRECATED 2026-04-06 for migration to engines/military.py v2.
+# In practice this module remains the core decision processor for AI agent rounds
+# (imported by full_round_runner.py + 29 test files). Treat as active code.
 """Round resolver — main orchestrator.
 
 Pulls committed ``agent_decisions`` for a scenario+round, applies them
@@ -27,6 +28,7 @@ from typing import Optional
 
 from engine.config.map_config import (
     global_hex_for_theater_cell,
+    hex_distance,
     is_theater_link_hex,
     theater_for_global_hex,
 )
@@ -1146,7 +1148,7 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                             "winner": cr.winner, "destroyed": cr.destroyed_unit}})
 
     # --- 13. Martial law (CARD_ACTIONS 1.2) --------------------------------
-    MARTIAL_LAW_POOLS = {"sarmatia": 10, "ruthenia": 6, "persia": 8, "cathay": 10}
+    from engine.config.position_actions import MARTIAL_LAW_POOLS
     for d in decisions:
         if d["action_type"] in MARTIAL_LAW_ACTIONS:
             cc = d["country_code"]
@@ -1537,7 +1539,7 @@ def _resolve_ranged_strikes(
     for au in air_units:
         au_r, au_c = au.get("global_row"), au.get("global_col")
         if au_r is not None and au_c is not None:
-            dist = _hex_distance(au_r, au_c, tgt_row, tgt_col)
+            dist = hex_distance(au_r, au_c, tgt_row, tgt_col)
             if dist > AIR_STRIKE_MAX_RANGE:
                 events.append({
                     "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
@@ -1787,22 +1789,6 @@ def _apply_losses(
             unit_state[code]["status"] = "destroyed"
 
 
-def _hex_distance(r1: int, c1: int, r2: int, c2: int) -> int:
-    """Hex distance on pointy-top odd-r offset grid (1-indexed).
-
-    Converts to cube coords then uses standard hex distance.
-    """
-    def _to_cube(row: int, col: int) -> tuple[int, int, int]:
-        # 1-indexed odd-r offset -> cube
-        # Flip parity because 1-indexed even == 0-indexed odd
-        is_odd_row_0idx = ((row - 1) % 2) == 1
-        x = (col - 1) - ((row - 1) - (1 if is_odd_row_0idx else 0)) // 2
-        z = row - 1
-        y = -x - z
-        return (x, y, z)
-    a = _to_cube(r1, c1)
-    b = _to_cube(r2, c2)
-    return (abs(a[0] - b[0]) + abs(a[1] - b[1]) + abs(a[2] - b[2])) // 2
 
 
 def _hex_neighbors(row: int, col: int) -> list[tuple[int, int]]:

@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import random
 
+from engine.services.common import get_scenario_id, write_event
 from engine.services.run_roles import get_run_role, update_role_status
 from engine.services.supabase import get_client
 
@@ -56,7 +57,7 @@ def execute_mass_protest(
     success_roll = pre.get("success_roll", random.random())
     success = success_roll < prob
 
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
 
     if success:
         # Find current HoS
@@ -82,7 +83,7 @@ def execute_mass_protest(
         narrative = (f"REVOLUTION SUCCESS: {leader_role} leads mass protest in {country_code}. "
                      f"Regime toppled. Stability +1, support +20.")
 
-        _write_event(client, sim_run_id, scenario_id, round_num, country_code,
+        write_event(client, sim_run_id, scenario_id, round_num, country_code,
                      "mass_protest_success", narrative,
                      {"leader": leader_role, "probability": round(prob, 3),
                       "deposed": hos_roles[0]["role_id"] if hos_roles else None})
@@ -99,7 +100,7 @@ def execute_mass_protest(
         narrative = (f"PROTEST CRUSHED: {leader_role}'s mass protest in {country_code} fails. "
                      f"Leader imprisoned. Stability -1, support -5.")
 
-        _write_event(client, sim_run_id, scenario_id, round_num, country_code,
+        write_event(client, sim_run_id, scenario_id, round_num, country_code,
                      "mass_protest_failed", narrative,
                      {"leader": leader_role, "probability": round(prob, 3)})
 
@@ -129,22 +130,3 @@ def _update_country(client, sim_run_id, round_num, cc, stability_delta, support_
         logger.warning("country update failed: %s", e)
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id, "scenario_id": scenario_id,
-            "round_num": round_num, "event_type": event_type,
-            "country_code": country_code, "summary": summary, "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

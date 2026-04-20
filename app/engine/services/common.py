@@ -25,6 +25,24 @@ def safe_float(val, default: float = 0.0) -> float:
 
 # ── Observatory helpers ────────────────────────────────────────────────────
 
+def get_scenario_id_by_code(client, scenario_code: str) -> str:
+    """Look up scenario id from sim_scenarios by code.
+
+    Used by context modules (budget, tariff, sanction, movement, opec)
+    that resolve scenarios by code rather than sim_run_id.
+    """
+    res = (
+        client.table("sim_scenarios")
+        .select("id")
+        .eq("code", scenario_code)
+        .limit(1)
+        .execute()
+    )
+    if not res.data:
+        raise ValueError(f"Scenario '{scenario_code}' not found")
+    return res.data[0]["id"]
+
+
 def get_scenario_id(client, sim_run_id: str) -> str | None:
     """Look up scenario_id for a sim_run."""
     try:

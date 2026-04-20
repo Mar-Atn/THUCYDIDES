@@ -13,6 +13,8 @@ No enforcement — all agreements are just saved.
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 from datetime import datetime, timezone
 
@@ -41,7 +43,7 @@ def propose_agreement(
         return {"agreement_id": None, "status": "rejected", "errors": report["errors"]}
 
     norm = report["normalized"]
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
 
     # Proposer auto-signs
     signatures = {
@@ -74,8 +76,8 @@ def propose_agreement(
     # Check if only 2 signatories and proposer already signed → need 1 more
     # If proposer is the only signatory needed... (shouldn't happen, min 2)
 
-    _write_event(client, sim_run_id, scenario_id, norm["round_num"],
-                 "agreement_proposed", norm["proposer_country_code"],
+    write_event(client, sim_run_id, scenario_id, norm["round_num"],
+                norm["proposer_country_code"], "agreement_proposed",
                  f"{norm['proposer_country_code']} proposes {norm['agreement_type']}: "
                  f"'{norm['agreement_name']}' with {', '.join(norm['signatories'])}",
                  {"agreement_id": agreement_id, "type": norm["agreement_type"],
@@ -128,8 +130,8 @@ def sign_agreement(
             "status": "declined",
         }).eq("id", agreement_id).execute()
 
-        _write_event(client, sim_run_id, scenario_id, agr["round_num"],
-                     "agreement_declined", country_code,
+        write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                    country_code, "agreement_declined",
                      f"{country_code} declined '{agr['agreement_name']}'",
                      {"agreement_id": agreement_id, "comments": comments})
 
@@ -153,8 +155,8 @@ def sign_agreement(
         # Auto-update bilateral relationships based on agreement type
         _update_relationships_for_agreement(client, sim_run_id, agr["agreement_type"], agr["signatories"] or [])
 
-        _write_event(client, sim_run_id, scenario_id, agr["round_num"],
-                     "agreement_activated", agr.get("proposer_country_code", ""),
+        write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                    agr.get("proposer_country_code", ""), "agreement_activated",
                      f"Agreement ACTIVE: '{agr['agreement_name']}' ({agr['agreement_type']}) — "
                      f"signed by {', '.join(agr['signatories'] or [])}",
                      {"agreement_id": agreement_id, "type": agr["agreement_type"],
@@ -163,8 +165,8 @@ def sign_agreement(
         logger.info("[agreement] ACTIVATED %s: '%s'", agreement_id, agr["agreement_name"])
         return {"status": "active", "activated": True}
 
-    _write_event(client, sim_run_id, scenario_id, agr["round_num"],
-                 "agreement_signed", country_code,
+    write_event(client, sim_run_id, scenario_id, agr["round_num"],
+                country_code, "agreement_signed",
                  f"{country_code} signed '{agr['agreement_name']}'",
                  {"agreement_id": agreement_id})
 
@@ -214,12 +216,6 @@ def _load_roles(client):
         return {}
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
 
 
 # Agreement type → relationship status mapping (SIMPLIFICATION_CHANGE_PLAN §C)
@@ -283,18 +279,3 @@ def _update_relationships_for_agreement(client, sim_run_id: str, agreement_type:
                 logger.warning("Failed to update relationship %s↔%s: %s", a, b, e)
 
 
-def _write_event(client, sim_run_id, scenario_id, round_num, event_type, country_code, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

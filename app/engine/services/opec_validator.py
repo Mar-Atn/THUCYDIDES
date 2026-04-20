@@ -23,12 +23,7 @@ from typing import Any
 # SCHEMA CONSTANTS — keep in lock-step with CONTRACT_OPEC v1.0
 # ---------------------------------------------------------------------------
 
-#: Canonical OPEC+ roster. Sourced from countries.opec_member = true
-#: as of 2026-04-10 (after Caribe/Venezuela was corrected to TRUE).
-#: Must be kept in sync with engine/agents/full_round_runner.py:OPEC_MEMBERS.
-CANONICAL_OPEC_MEMBERS: frozenset[str] = frozenset({
-    "caribe", "mirage", "persia", "sarmatia", "solaria",
-})
+from engine.config.position_actions import OPEC_MEMBERS as CANONICAL_OPEC_MEMBERS
 
 VALID_PRODUCTION_LEVELS: frozenset[str] = frozenset({
     "min", "low", "normal", "high", "max",

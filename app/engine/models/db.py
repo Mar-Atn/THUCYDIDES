@@ -154,7 +154,6 @@ class Role(BaseModel):
     election_meddling_cards: int = 0
     assassination_cards: int = 0
     protest_stim_cards: int = 0
-    fatherland_appeal: int = 0  # DEPRECATED 2026-04-17: scrapped mechanic
 
 
 class Zone(BaseModel):

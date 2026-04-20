@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from engine.config.map_config import hex_distance
+
 CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "albion", "bharata", "caribe", "cathay", "choson", "columbia",
     "formosa", "freeland", "gallia", "hanguk", "levantia", "mirage",
@@ -24,9 +26,6 @@ ALLOWED_CHANGE_FIELDS: frozenset[str] = frozenset({
 
 RATIONALE_MIN_CHARS = 30
 
-
-def _hex_distance(r1: int, c1: int, r2: int, c2: int) -> int:
-    return abs(r1 - r2) + abs(c1 - c2)
 
 
 def validate_naval_attack(
@@ -122,7 +121,7 @@ def validate_naval_attack(
         ar, ac = atk_unit.get("global_row"), atk_unit.get("global_col")
         tr, tc = tgt_unit.get("global_row"), tgt_unit.get("global_col")
         if ar is not None and tr is not None:
-            dist = _hex_distance(ar, ac, tr, tc)
+            dist = hex_distance(ar, ac, tr, tc)
             if dist > 1:
                 errors.append(
                     f"NOT_ADJACENT_OR_SAME: attacker at ({ar},{ac}), target at ({tr},{tc}), distance {dist} > 1"

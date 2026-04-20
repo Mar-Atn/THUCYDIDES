@@ -24,6 +24,8 @@ Data domains accessed:
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 from typing import Optional
 
@@ -55,8 +57,8 @@ def generate_intelligence_report(
     report_text = _call_intelligence_llm(question, context, requester_country)
 
     # Write event (report delivered to requester)
-    scenario_id = _get_scenario_id(client, sim_run_id)
-    _write_event(client, sim_run_id, scenario_id, round_num, requester_country,
+    scenario_id = get_scenario_id(client, sim_run_id)
+    write_event(client, sim_run_id, scenario_id, round_num, requester_country,
                  "intelligence_report_received",
                  f"{requester_country} receives intelligence report: '{question[:80]}'",
                  {"question": question, "requester_role": requester_role,
@@ -473,26 +475,3 @@ def _call_intelligence_llm(question: str, context: str, requester_country: str) 
 # ---------------------------------------------------------------------------
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id,
-            "scenario_id": scenario_id,
-            "round_num": round_num,
-            "event_type": event_type,
-            "country_code": country_code,
-            "summary": summary,
-            "payload": payload,
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

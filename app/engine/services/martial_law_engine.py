@@ -20,12 +20,7 @@ from engine.services.common import get_scenario_id, write_event
 
 logger = logging.getLogger(__name__)
 
-MARTIAL_LAW_POOLS: dict[str, int] = {
-    "sarmatia": 10,
-    "ruthenia": 6,
-    "persia": 8,
-    "cathay": 10,
-}
+from engine.config.position_actions import MARTIAL_LAW_POOLS
 
 STABILITY_COST = -1.0
 WAR_TIREDNESS_COST = 1.0

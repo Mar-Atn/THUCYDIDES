@@ -14,6 +14,8 @@ Approved design (2026-04-20):
 
 from __future__ import annotations
 
+from engine.services.common import get_scenario_id, write_event
+
 import logging
 import random
 
@@ -115,7 +117,7 @@ def execute_assassination(
                          f"Perpetrators unknown.")
 
     # Events — ALWAYS public (detection = 100%)
-    scenario_id = _get_scenario_id(client, sim_run_id)
+    scenario_id = get_scenario_id(client, sim_run_id)
     event_type = "assassination_attributed" if attributed else "assassination_anonymous"
     payload = {
         "target_role": target_role,
@@ -130,8 +132,8 @@ def execute_assassination(
         payload["attacker_name"] = attacker_name
         payload["attacker_country"] = attacker_cc
 
-    _write_event(client, sim_run_id, scenario_id, round_num, target_cc,
-                 event_type, narrative, payload)
+    write_event(client, sim_run_id, scenario_id, round_num, target_cc,
+                 event_type, narrative, payload, category="political")
 
     logger.info("[assassination] %s(%s)→%s(%s): success=%s attributed=%s",
                 attacker_role, attacker_cc, target_role, target_cc, success, attributed)
@@ -164,23 +166,3 @@ def _apply_stability_change(client, sim_run_id, country_code, change):
         logger.warning("stability change failed: %s", e)
 
 
-def _get_scenario_id(client, sim_run_id):
-    try:
-        r = client.table("sim_runs").select("scenario_id").eq("id", sim_run_id).limit(1).execute()
-        return r.data[0]["scenario_id"] if r.data else None
-    except Exception:
-        return None
-
-
-def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event_type, summary, payload):
-    if not scenario_id:
-        return
-    try:
-        client.table("observatory_events").insert({
-            "sim_run_id": sim_run_id, "scenario_id": scenario_id,
-            "round_num": round_num, "event_type": event_type,
-            "country_code": country_code, "summary": summary, "payload": payload,
-            "category": "political",
-        }).execute()
-    except Exception as e:
-        logger.debug("event write failed: %s", e)

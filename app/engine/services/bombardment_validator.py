@@ -3,6 +3,8 @@
 from __future__ import annotations
 from typing import Any
 
+from engine.config.map_config import hex_distance
+
 CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "albion", "bharata", "caribe", "cathay", "choson", "columbia",
     "formosa", "freeland", "gallia", "hanguk", "levantia", "mirage",
@@ -18,9 +20,6 @@ RATIONALE_MIN = 30
 def _is_int(v: Any) -> bool:
     return isinstance(v, int) and not isinstance(v, bool)
 
-
-def _hex_distance(r1, c1, r2, c2):
-    return abs(r1 - r2) + abs(c1 - c2)
 
 
 def validate_bombardment(
@@ -112,7 +111,7 @@ def validate_bombardment(
         # Must be on adjacent sea hex
         ur, uc = u.get("global_row"), u.get("global_col")
         if ur is not None and tgt_r is not None:
-            if _hex_distance(ur, uc, tgt_r, tgt_c) > 1:
+            if hex_distance(ur, uc, tgt_r, tgt_c) > 1:
                 errors.append(f"NOT_ADJACENT: {code!r} at ({ur},{uc}) not adjacent to ({tgt_r},{tgt_c})")
 
     # Must have enemy ground on target

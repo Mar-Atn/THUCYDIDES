@@ -26,10 +26,12 @@ from typing import Any, Callable, Optional
 
 from engine.agents import tools as agent_tools
 from engine.agents.leader import LeaderAgent
-from engine.agents.stage3_test import TOOL_SCHEMAS as STAGE3_TOOL_SCHEMAS
-from engine.agents.stage4_test import COMMIT_ACTION_SCHEMA
-from engine.agents.stage5_test import (
-    READ_MEMORY_SCHEMA, LIST_MY_MEMORIES_SCHEMA, WRITE_MEMORY_SCHEMA,
+from engine.agents.tool_schemas import (
+    LOOKUP_TOOL_SCHEMAS,
+    COMMIT_ACTION_SCHEMA,
+    READ_MEMORY_SCHEMA,
+    LIST_MY_MEMORIES_SCHEMA,
+    WRITE_MEMORY_SCHEMA,
 )
 from engine.config.settings import LLMProvider, LLMUseCase, settings
 from engine.services.llm_tools import call_tool_llm, serialize_assistant_content
@@ -40,7 +42,7 @@ MAX_TOOL_CALLS = 30   # Sprint B: more calls for multi-action rounds
 MAX_TOKENS = 4000
 
 TOOL_SCHEMAS = (
-    STAGE3_TOOL_SCHEMAS
+    LOOKUP_TOOL_SCHEMAS
     + [COMMIT_ACTION_SCHEMA]
     + [READ_MEMORY_SCHEMA, LIST_MY_MEMORIES_SCHEMA, WRITE_MEMORY_SCHEMA]
 )

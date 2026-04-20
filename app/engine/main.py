@@ -268,6 +268,18 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         .eq("round_num", round_num) \
         .execute().data or []
 
+    # Batch-load theater coords for all deployments in this sim (avoids N+1 per event)
+    deps = client.table("deployments") \
+        .select("global_row, global_col, theater, theater_row, theater_col") \
+        .eq("sim_run_id", sim_id) \
+        .execute().data or []
+    # Index: (global_row, global_col, theater) → (theater_row, theater_col)
+    theater_coord_map: dict[tuple, tuple] = {}
+    for d in deps:
+        key = (d.get("global_row"), d.get("global_col"), d.get("theater"))
+        if d.get("theater_row") is not None and d.get("theater_col") is not None:
+            theater_coord_map[key] = (d["theater_row"], d["theater_col"])
+
     combat = []
     seen_hexes = set()
     for e in evts:
@@ -312,15 +324,9 @@ async def get_map_combat_events(sim_id: str, round_num: int = 1):
         theater_row = action.get("target_theater_row")
         theater_col = action.get("target_theater_col")
         if theater and not theater_row:
-            dep = client.table("deployments") \
-                .select("theater_row, theater_col") \
-                .eq("sim_run_id", sim_id) \
-                .eq("global_row", tr).eq("global_col", tc) \
-                .eq("theater", theater) \
-                .limit(1).execute().data
-            if dep:
-                theater_row = dep[0].get("theater_row")
-                theater_col = dep[0].get("theater_col")
+            cached = theater_coord_map.get((tr, tc, theater))
+            if cached:
+                theater_row, theater_col = cached
 
         entry = {
             "event_type": e["event_type"],
@@ -1937,3 +1943,25 @@ async def resolve_nuclear_action(
     result = orch.resolve(action_id)
     logger.info("Nuclear action %s resolved by %s", action_id, user.id)
     return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# Standalone runner
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+    import os
+    import uvicorn
+
+    port = int(os.environ.get("PORT", 8000))
+    workers = int(os.environ.get("WEB_CONCURRENCY", 4))
+    reload = os.environ.get("ENGINE_RELOAD", "").lower() in ("1", "true")
+
+    uvicorn.run(
+        "engine.main:app",
+        host="0.0.0.0",
+        port=port,
+        workers=1 if reload else workers,  # reload requires single process
+        reload=reload,
+        log_level="info",
+    )
