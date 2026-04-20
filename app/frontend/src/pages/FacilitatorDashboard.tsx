@@ -335,6 +335,7 @@ export function FacilitatorDashboard() {
 
   const [electionResolving, setElectionResolving] = useState(false)
   const [electionStoppedLocal, setElectionStoppedLocal] = useState(false)
+  const [nominationsClosedLocal, setNominationsClosedLocal] = useState(false)
   const [localVoteOverrides, setLocalVoteOverrides] = useState<Record<string, string | null>>({})
 
   // Derive active election events from key_events + current round
@@ -959,6 +960,9 @@ export function FacilitatorDashboard() {
                           // Simpler: directly update schedule
                           const { supabase: sb } = await import('@/lib/supabase')
                           await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
+                          setNominationsClosedLocal(false)
+                          setElectionStoppedLocal(false)
+                          setLocalVoteOverrides({})
                         }}
                           className="w-full font-body text-body-sm font-medium bg-action text-white py-2 rounded-lg hover:bg-action/90 transition-colors mb-2">
                           Start Nominations
@@ -966,7 +970,7 @@ export function FacilitatorDashboard() {
                       )}
 
                       {(nomOpen || isAuto) && (() => {
-                        const nomsClosed = (simRun?.schedule as Record<string,unknown>)?.nominations_closed === true
+                        const nomsClosed = (simRun?.schedule as Record<string,unknown>)?.nominations_closed === true || nominationsClosedLocal
                         const currentNoms = electionNominations.filter(n => n.election_type === activeNomEvent.subtype)
                         const columbiaRoles = roles.filter(r => r.country_id === 'columbia' && r.status === 'active')
                         const nominatedIds = new Set(currentNoms.map(n => n.role_id))
@@ -1045,6 +1049,7 @@ export function FacilitatorDashboard() {
                             const sched = { ...((simRun?.schedule as Record<string,unknown>) || {}), nominations_closed: true }
                             const { supabase: sb } = await import('@/lib/supabase')
                             await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
+                            setNominationsClosedLocal(true)
                           }}
                             disabled={currentNoms.length === 0}
                             className="w-full font-body text-caption font-medium bg-success/10 text-success py-1.5 rounded hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
