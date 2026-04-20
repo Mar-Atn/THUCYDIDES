@@ -334,6 +334,7 @@ export function FacilitatorDashboard() {
   }[]
 
   const [electionResolving, setElectionResolving] = useState(false)
+  const [electionStoppedLocal, setElectionStoppedLocal] = useState(false)
 
   // Derive active election events from key_events + current round
   const elecRound = simRunRT?.current_round ?? 0
@@ -1180,7 +1181,7 @@ export function FacilitatorDashboard() {
                                   )
                                 })}
                                 <span className="text-text-secondary/50 font-data text-caption ml-auto">
-                                  need {Math.floor(ALL_VOTERS.reduce((s, r) => s + (OPPOSITION.has(r) ? (hasBonus ? 3 : 2) : 1), 0) / 2) + 1}
+                                  simple majority
                                 </span>
                               </div>
                             </div>
@@ -1191,7 +1192,7 @@ export function FacilitatorDashboard() {
                             const elapsed = elecStartedAt ? (Date.now() - new Date(elecStartedAt).getTime()) / 1000 : 0
                             const total = elecDurationMin * 60
                             const timerDone = elecDurationMin > 0 && elapsed >= total
-                            const isStopped = sched.election_stopped === true || elecDurationMin === 0 || timerDone
+                            const isStopped = sched.election_stopped === true || electionStoppedLocal || elecDurationMin === 0 || timerDone
 
                             return (
                               <div className="flex gap-2">
@@ -1200,6 +1201,7 @@ export function FacilitatorDashboard() {
                                       const newSched = { ...sched, election_stopped: true }
                                       const { supabase: sb } = await import('@/lib/supabase')
                                       await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                      setElectionStoppedLocal(true)
                                     }}
                                     className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 transition-colors">
                                     Stop Voting
@@ -1217,6 +1219,7 @@ export function FacilitatorDashboard() {
                                   await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
                                   const newSched = { ...sched, election_open: true, election_stopped: false, election_started_at: new Date().toISOString(), election_duration_min: 10 }
                                   await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                  setElectionStoppedLocal(false)
                                   setTimeout(() => refetchElectionVotes(), 500)
                                 }}
                                   className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">

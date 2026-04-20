@@ -296,16 +296,13 @@ def resolve_election(
         if cid in weighted_votes:
             weighted_votes[cid] += weight
 
-    # Determine total possible votes and majority threshold
+    # Simple majority: whoever gets the most weighted votes wins. Ties = no winner.
     total_possible = sum(get_vote_weight(r, economy_score) for r in COLUMBIA_VOTER_ROLES)
-    majority_threshold = total_possible // 2 + 1  # strict majority
-
-    # Find winner — must exceed majority threshold; ties = no winner
     sorted_candidates = sorted(weighted_votes.items(), key=lambda x: x[1], reverse=True)
     winner = None
     if sorted_candidates:
         top_votes = sorted_candidates[0][1]
-        if top_votes >= majority_threshold:
+        if top_votes > 0:
             # Check for tie at the top
             tied = [c for c, v in sorted_candidates if v == top_votes]
             if len(tied) == 1:
