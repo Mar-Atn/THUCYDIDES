@@ -347,18 +347,21 @@ def restart_simulation(sim_id: str) -> dict:
     except Exception as e:
         logger.warning("Restart: roles reset failed: %s", e)
 
-    # 5. Clean election/runtime flags from schedule (keep static config)
+    # 5. Reset election state columns (proper columns, not JSONB)
     try:
-        run = client.table("sim_runs").select("schedule").eq("id", sim_id).limit(1).execute().data
-        if run:
-            sched = dict(run[0].get("schedule") or {})
-            for flag in ["nominations_open", "nominations_closed", "election_open",
-                         "election_stopped", "election_started_at", "election_duration_min",
-                         "election_econ_score", "election_stability", "election_inflation"]:
-                sched.pop(flag, None)
-            client.table("sim_runs").update({"schedule": sched}).eq("id", sim_id).execute()
+        client.table("sim_runs").update({
+            "nominations_open": False,
+            "nominations_closed": False,
+            "election_open": False,
+            "election_stopped": False,
+            "election_started_at": None,
+            "election_duration_min": 10,
+            "election_econ_score": None,
+            "election_stability": None,
+            "election_inflation": None,
+        }).eq("id", sim_id).execute()
     except Exception as e:
-        logger.warning("Restart: schedule cleanup failed: %s", e)
+        logger.warning("Restart: election state reset failed: %s", e)
 
     logger.info("Simulation %s RESTARTED — all state re-copied from template", sim_id)
 

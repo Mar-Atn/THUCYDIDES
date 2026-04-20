@@ -334,10 +334,6 @@ export function FacilitatorDashboard() {
   }[]
 
   const [electionResolving, setElectionResolving] = useState(false)
-  const [electionStartedLocal, setElectionStartedLocal] = useState(false)
-  const [electionStartedAtLocal, setElectionStartedAtLocal] = useState<string|null>(null)
-  const [electionStoppedLocal, setElectionStoppedLocal] = useState(false)
-  const [nominationsClosedLocal, setNominationsClosedLocal] = useState(false)
   const [localVoteOverrides, setLocalVoteOverrides] = useState<Record<string, string | null>>({})
 
   // Derive active election events from key_events + current round
@@ -939,7 +935,7 @@ export function FacilitatorDashboard() {
 
                   {/* Columbia Elections — Moderator Cards */}
                   {activeNomEvent && (() => {
-                    const nomOpen = (simRun?.schedule as Record<string,unknown>)?.nominations_open === true
+                    const nomOpen = simRun?.nominations_open === true
                     const isAuto = simRun?.auto_approve
                     return (
                     <div className="border rounded-lg p-3 bg-action/5 border-action/30">
@@ -954,18 +950,18 @@ export function FacilitatorDashboard() {
 
                       {!nomOpen && !isAuto && (
                         <button onClick={async () => {
-                          const baseSched = { ...((simRun?.schedule as Record<string,unknown>) || {}) }
-                          // Clear stale election flags from previous elections
-                          for (const f of ['nominations_open','nominations_closed','election_open','election_stopped','election_started_at','election_duration_min','election_econ_score','election_stability','election_inflation']) delete baseSched[f]
-                          const sched = { ...baseSched, nominations_open: true }
-                          await simAction(simId!, 'mode', { ...sched })
-                          // Simpler: directly update schedule
                           const { supabase: sb } = await import('@/lib/supabase')
-                          await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
-                          setNominationsClosedLocal(false)
-                          setElectionStartedLocal(false)
-                          setElectionStartedAtLocal(null)
-                          setElectionStoppedLocal(false)
+                          await sb.from('sim_runs').update({
+                            nominations_open: true,
+                            nominations_closed: false,
+                            election_open: false,
+                            election_stopped: false,
+                            election_started_at: null,
+                            election_duration_min: null,
+                            election_econ_score: null,
+                            election_stability: null,
+                            election_inflation: null,
+                          }).eq('id', simId!)
                           setLocalVoteOverrides({})
                         }}
                           className="w-full font-body text-body-sm font-medium bg-action text-white py-2 rounded-lg hover:bg-action/90 transition-colors mb-2">
@@ -974,7 +970,7 @@ export function FacilitatorDashboard() {
                       )}
 
                       {(nomOpen || isAuto) && (() => {
-                        const nomsClosed = (simRun?.schedule as Record<string,unknown>)?.nominations_closed === true || nominationsClosedLocal
+                        const nomsClosed = simRun?.nominations_closed === true
                         const currentNoms = electionNominations.filter(n => n.election_type === activeNomEvent.subtype)
                         const columbiaRoles = roles.filter(r => r.country_code === 'columbia' && r.status === 'active')
                         const nominatedIds = new Set(currentNoms.map(n => n.role_id))
@@ -1050,10 +1046,8 @@ export function FacilitatorDashboard() {
                           {/* Close & Approve button */}
                           <button onClick={async () => {
                             if (!confirm(`Close nominations with ${currentNoms.length} candidate${currentNoms.length !== 1 ? 's' : ''}?\n\nThis will finalize the candidate list for the R${activeNomEvent.round} election.`)) return
-                            const sched = { ...((simRun?.schedule as Record<string,unknown>) || {}), nominations_closed: true }
                             const { supabase: sb } = await import('@/lib/supabase')
-                            await sb.from('sim_runs').update({ schedule: sched }).eq('id', simId!)
-                            setNominationsClosedLocal(true)
+                            await sb.from('sim_runs').update({ nominations_closed: true }).eq('id', simId!)
                           }}
                             disabled={currentNoms.length === 0}
                             className="w-full font-body text-caption font-medium bg-success/10 text-success py-1.5 rounded hover:bg-success/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
@@ -1067,10 +1061,9 @@ export function FacilitatorDashboard() {
                   })()}
 
                   {activeElecEvent && !elecResolved && (() => {
-                    const sched = (simRun?.schedule as Record<string,unknown>) || {}
-                    const elecStarted = sched.election_open === true || electionStartedLocal
-                    const elecStartedAt = (sched.election_started_at as string | null) || electionStartedAtLocal
-                    const elecDurationMin = (sched.election_duration_min as number) || 10
+                    const elecStarted = simRun?.election_open === true
+                    const elecStartedAt = simRun?.election_started_at ?? null
+                    const elecDurationMin = simRun?.election_duration_min ?? 10
 
                     // Economy indicator for moderator
                     const colState = (() => {
@@ -1104,7 +1097,7 @@ export function FacilitatorDashboard() {
                           else voterMap[rid] = cid
                         }
                         // Economy score — use cached from start, or treat as unknown
-                        const econNote = (sched.election_econ_score as string) || null
+                        const econNote = simRun?.election_econ_score != null ? String(simRun.election_econ_score) : null
                         // If no cached score, we'll load it via ElectionEconIndicator
                         // For weight calc, default to bonus=true if unknown (conservative)
                         const hasBonus = econNote ? parseFloat(econNote) < 0.5 : true
@@ -1122,12 +1115,15 @@ export function FacilitatorDashboard() {
                             const infl = cs?.[0]?.inflation ?? 0
                             const eScore = Math.max(0, (stab - 2) / 10) * 0.45 + Math.max(0, 1 - infl / 12) * 0.55
                             const startedAt = new Date().toISOString()
-                            const newSched = { ...sched, election_open: true, election_started_at: startedAt, election_duration_min: 10,
-                              election_econ_score: eScore.toFixed(3), election_stability: stab.toFixed(1), election_inflation: infl.toFixed(1) }
-                            await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                            setElectionStartedLocal(true)
-                            setElectionStartedAtLocal(startedAt)
-                            setElectionStoppedLocal(false)
+                            await sb.from('sim_runs').update({
+                              election_open: true,
+                              election_started_at: startedAt,
+                              election_duration_min: 10,
+                              election_econ_score: parseFloat(eScore.toFixed(3)),
+                              election_stability: parseFloat(Number(stab).toFixed(1)),
+                              election_inflation: parseFloat(Number(infl).toFixed(1)),
+                              election_stopped: false,
+                            }).eq('id', simId!)
                           }}
                             className="w-full font-body text-body-sm font-medium bg-warning text-white py-2 rounded-lg hover:bg-warning/90 transition-colors">
                             Start Election
@@ -1140,7 +1136,7 @@ export function FacilitatorDashboard() {
                             const elapsed = elecStartedAt ? (Date.now() - new Date(elecStartedAt).getTime()) / 1000 : 0
                             const total = elecDurationMin * 60
                             const timerExpired = elecDurationMin > 0 && elapsed >= total
-                            const stopped = sched.election_stopped === true || electionStoppedLocal || elecDurationMin === 0 || timerExpired
+                            const stopped = simRun?.election_stopped === true || elecDurationMin === 0 || timerExpired
 
                             if (stopped) {
                               return (
@@ -1156,16 +1152,15 @@ export function FacilitatorDashboard() {
                               <div className="flex items-center justify-between mb-1">
                                 <span className="font-data text-caption text-warning">{mm}:{ss}</span>
                                 <button onClick={async () => {
-                                  const newSched = { ...sched, election_duration_min: elecDurationMin + 5 }
                                   const { supabase: sb } = await import('@/lib/supabase')
-                                  await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                  await sb.from('sim_runs').update({ election_duration_min: elecDurationMin + 5 }).eq('id', simId!)
                                 }} className="font-body text-caption text-text-secondary hover:text-action px-1">+5m</button>
                               </div>
                             )
                           })()}
 
                           {/* Economy indicator — load live if not captured at start */}
-                          <ElectionEconIndicator simId={simId!} sched={sched} />
+                          <ElectionEconIndicator simId={simId!} simRun={simRun} />
 
                           {/* Voter table: role → vote dropdown → weight */}
                           <div className="bg-card border border-border rounded divide-y divide-border mb-2">
@@ -1241,16 +1236,14 @@ export function FacilitatorDashboard() {
                             const elapsed = elecStartedAt ? (Date.now() - new Date(elecStartedAt).getTime()) / 1000 : 0
                             const total = elecDurationMin * 60
                             const timerDone = elecDurationMin > 0 && elapsed >= total
-                            const isStopped = sched.election_stopped === true || electionStoppedLocal || elecDurationMin === 0 || timerDone
+                            const isStopped = simRun?.election_stopped === true || elecDurationMin === 0 || timerDone
 
                             return (
                               <div className="flex gap-2">
                                 {!isStopped ? (
                                   <button onClick={async () => {
-                                      const newSched = { ...sched, election_stopped: true }
                                       const { supabase: sb } = await import('@/lib/supabase')
-                                      await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                                      setElectionStoppedLocal(true)
+                                      await sb.from('sim_runs').update({ election_stopped: true }).eq('id', simId!)
                                     }}
                                     className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 transition-colors">
                                     Stop Voting
@@ -1266,9 +1259,12 @@ export function FacilitatorDashboard() {
                                   if (!confirm('Restart election? All votes will be deleted.')) return
                                   const { supabase: sb } = await import('@/lib/supabase')
                                   await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
-                                  const newSched = { ...sched, election_open: true, election_stopped: false, election_started_at: new Date().toISOString(), election_duration_min: 10 }
-                                  await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                                  setElectionStoppedLocal(false)
+                                  await sb.from('sim_runs').update({
+                                    election_open: true,
+                                    election_stopped: false,
+                                    election_started_at: new Date().toISOString(),
+                                    election_duration_min: 10,
+                                  }).eq('id', simId!)
                                   setTimeout(() => refetchElectionVotes(), 500)
                                 }}
                                   className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">
@@ -1489,13 +1485,13 @@ const COMBAT_LABELS: Record<string,string> = {
   naval_bombardment:'Naval Bombardment', launch_missile_conventional:'Missile Launch',
 }
 
-function ElectionEconIndicator({ simId, sched }: { simId: string; sched: Record<string, unknown> }) {
+function ElectionEconIndicator({ simId, simRun }: { simId: string; simRun: SimRun | null }) {
   const [econ, setEcon] = useState<{ stab: string; infl: string; score: string } | null>(null)
 
   useEffect(() => {
-    // Use cached values from schedule if available
-    if (sched.election_stability && sched.election_inflation && sched.election_econ_score) {
-      setEcon({ stab: String(sched.election_stability), infl: String(sched.election_inflation), score: String(sched.election_econ_score) })
+    // Use cached values from columns if available
+    if (simRun?.election_stability && simRun?.election_inflation && simRun?.election_econ_score) {
+      setEcon({ stab: String(simRun.election_stability), infl: String(simRun.election_inflation), score: String(simRun.election_econ_score) })
       return
     }
     // Otherwise load live
@@ -1507,7 +1503,7 @@ function ElectionEconIndicator({ simId, sched }: { simId: string; sched: Record<
         const sc = Math.max(0, (stab - 2) / 10) * 0.45 + Math.max(0, 1 - infl / 12) * 0.55
         setEcon({ stab: Number(stab).toFixed(1), infl: Number(infl).toFixed(1), score: sc.toFixed(3) })
       })
-  }, [simId, sched.election_stability, sched.election_inflation, sched.election_econ_score])
+  }, [simId, simRun?.election_stability, simRun?.election_inflation, simRun?.election_econ_score])
 
   if (!econ) return null
   const scoreNum = parseFloat(econ.score)

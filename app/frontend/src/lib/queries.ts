@@ -43,6 +43,15 @@ export interface SimRun {
   auto_approve?: boolean
   auto_attack?: boolean
   dice_mode?: boolean
+  nominations_open?: boolean
+  nominations_closed?: boolean
+  election_open?: boolean
+  election_stopped?: boolean
+  election_started_at?: string | null
+  election_duration_min?: number
+  election_econ_score?: number | null
+  election_stability?: number | null
+  election_inflation?: number | null
 }
 
 export interface SimRunRole {

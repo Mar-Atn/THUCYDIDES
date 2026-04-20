@@ -777,11 +777,10 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [selectedElectionCandidate, setSelectedElectionCandidate] = useState<string>('')
 
   // Check if nominations are open/closed (moderator controls)
-  // Derive nomination state from parent's realtime simRun
-  const simSchedule = (parentSimRun?.schedule as Record<string, unknown>) || {}
-  const autoApprove = !!(parentSimRun as Record<string,unknown>|null)?.auto_approve
-  const nominationsClosed = activeNominationEvent ? simSchedule.nominations_closed === true : false
-  const nominationsOpen = activeNominationEvent ? (!nominationsClosed && (simSchedule.nominations_open === true || autoApprove)) : false
+  // Derive nomination state from parent's realtime simRun (proper columns, not JSONB)
+  const autoApprove = !!parentSimRun?.auto_approve
+  const nominationsClosed = activeNominationEvent ? parentSimRun?.nominations_closed === true : false
+  const nominationsOpen = activeNominationEvent ? (!nominationsClosed && (parentSimRun?.nominations_open === true || autoApprove)) : false
 
   // Check if this role is a sitting parliament member (cannot nominate for midterms unless seat is for reelection)
   const [isParliamentMember, setIsParliamentMember] = useState(false)
@@ -813,8 +812,8 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const isNominated = localNominated === true || (localNominated === null && !!myNomination)
   const showNomination = isColumbia && activeNominationEvent && !isNominated && nominationsOpen
     && (activeNominationEvent.subtype !== 'parliamentary_midterm' || canNominateForMidterm)
-  // Derive election open state from parent's realtime simRun
-  const electionOpen = activeElectionEvent ? (simSchedule.election_open === true || autoApprove) : false
+  // Derive election open state from parent's realtime simRun (proper column)
+  const electionOpen = activeElectionEvent ? (parentSimRun?.election_open === true || autoApprove) : false
 
   const showElectionVote = isColumbia && activeElectionEvent && !myElectionVote && !electionResolved && electionCandidates.length > 0 && electionOpen
 
