@@ -15,7 +15,7 @@ from engine.services.supabase import get_client
 logger = logging.getLogger(__name__)
 
 SUCCESS_PROB = 0.55
-DETECTION_PROB = 0.25
+DETECTION_PROB = 1.0   # always detected (2026-04-20)
 ATTRIBUTION_PROB = 0.20
 BASE_EFFECT = 0.3  # stability change
 DIMINISHING_FACTOR = 0.5  # each repeat halves the effect

@@ -81,7 +81,6 @@ POSITION_ACTIONS: dict[str, set[str]] = {
         "ground_move",
         # Covert
         "intelligence",
-        "covert_operation",
         "assassination",
     },
     "economy": {
@@ -127,8 +126,8 @@ COLUMBIA_ELECTION_ACTIONS: set[str] = {"self_nominate", "cast_election_vote"}
 # ---------------------------------------------------------------------------
 ACTION_LIMITS: dict[Optional[str], dict[str, int]] = {
     "head_of_state": {"arrest": 4},
-    "security": {"intelligence": 5, "covert_operation": 5, "assassination": 3, "arrest": 4},
-    "military": {"intelligence": 5, "covert_operation": 5, "assassination": 2},
+    "security": {"intelligence": 5, "covert_operation": 7, "assassination": 3, "arrest": 4},
+    "military": {"intelligence": 5, "assassination": 2},
     "diplomat": {"intelligence": 1},
     "opposition": {"intelligence": 2},
     None: {},  # citizen with no position — no limited actions

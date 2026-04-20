@@ -18,7 +18,7 @@ from engine.services.supabase import get_client
 logger = logging.getLogger(__name__)
 
 SUCCESS_PROB = 0.50
-DETECTION_PROB = 0.50
+DETECTION_PROB = 1.0   # always detected (2026-04-20)
 ATTRIBUTION_PROB = 0.50
 
 # Damage constants per target_type
@@ -59,25 +59,26 @@ def execute_sabotage(
     if success:
         if target_type == "infrastructure":
             damage_value = _damage_infrastructure(client, sim_run_id, round_num, target_country)
-            damage_description = f"-{INFRASTRUCTURE_COIN_DAMAGE} coin from {target_country} treasury"
+            damage_description = "Infrastructure sabotage led to substantial economic losses."
 
         elif target_type == "nuclear_tech":
             damage_value = _damage_nuclear(client, sim_run_id, round_num, target_country)
-            damage_description = f"-30% nuclear R&D progress for {target_country}"
+            damage_description = "R&D facility destroyed, slowing nuclear technology progress."
 
         elif target_type == "military":
             mil_roll = pre.get("military_roll", random.random())
             damage_value = _damage_military(client, sim_run_id, round_num, target_country, mil_roll)
             if damage_value:
-                damage_description = f"destroyed unit {damage_value} of {target_country}"
+                damage_description = "One military unit destroyed in covert operation."
             else:
-                damage_description = f"military sabotage attempt on {target_country} — no unit destroyed (50% roll failed)"
+                damage_description = "Military sabotage attempted but failed to destroy any assets."
 
     # --- NARRATIVE ---
+    tc_upper = target_country.upper()
     if success:
-        narrative = f"Sabotage SUCCESS: {target_type} attack on {target_country} — {damage_description}"
+        narrative = f"Covert operation against {tc_upper} successful. {damage_description}"
     else:
-        narrative = f"Sabotage FAILED: {target_type} attempt on {target_country} — operation compromised"
+        narrative = f"Covert operation against {tc_upper} failed. Operatives were unable to complete the mission."
 
     # --- EVENTS ---
     scenario_id = _get_scenario_id(client, sim_run_id)

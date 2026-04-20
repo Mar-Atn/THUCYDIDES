@@ -111,6 +111,8 @@ const PUBLIC_NEWS_EVENTS = new Set([
   'martial_law', 'arrest', 'release_arrest',
   'election_result',
   'assassination_attributed', 'assassination_anonymous',
+  'sabotage_detected_attributed', 'sabotage_detected_anonymous',
+  'propaganda_detected_attributed', 'propaganda_detected_anonymous',
   // Diplomatic (public by nature)
   'public_statement', 'propose_agreement', 'sign_agreement',
   // Economic (public policy)
