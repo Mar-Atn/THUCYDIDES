@@ -375,6 +375,18 @@ export function ParticipantDashboard() {
       {/* Arrested banner — blocks all actions */}
       {myRole?.status === 'arrested' && <ArrestedBanner simId={simId!} roleId={myRole.id} round={round} />}
 
+      {/* Killed banner */}
+      {myRole?.status === 'killed' && (
+        <div className="bg-danger/10 border-b-2 border-danger/40 px-6 py-4">
+          <div className="max-w-7xl mx-auto">
+            <p className="font-heading text-h3 text-danger">You Have Been Killed</p>
+            <p className="font-body text-body-sm text-text-primary">
+              Your character has been assassinated. You can no longer take any actions in this simulation.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Nuclear Flight Banner — shown to ALL participants during Phase 3 */}
       {(() => {
         const resolvedAction = !activeFlightAction && !nuclearBannerDismissed && (globalNuclearActions as unknown as {
@@ -469,15 +481,17 @@ export function ParticipantDashboard() {
 
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
-        {tab==='actions'&&myRole&&myRole.status==='arrested'&&(
+        {tab==='actions'&&myRole&&(myRole.status==='arrested'||myRole.status==='killed')&&(
           <div className="bg-danger/5 border border-danger/20 rounded-lg p-6 text-center">
-            <h3 className="font-heading text-h3 text-danger mb-2">Arrested</h3>
+            <h3 className="font-heading text-h3 text-danger mb-2">{myRole.status === 'killed' ? 'Eliminated' : 'Arrested'}</h3>
             <p className="font-body text-body-sm text-text-secondary">
-              You cannot take any actions while under arrest. You will be released at the end of this round.
+              {myRole.status === 'killed'
+                ? 'Your character has been assassinated. No actions are available.'
+                : 'You cannot take any actions while under arrest. You will be released at the end of this round.'}
             </p>
           </div>
         )}
-        {tab==='actions'&&myRole&&myRole.status!=='arrested'&&(
+        {tab==='actions'&&myRole&&myRole.status!=='arrested'&&myRole.status!=='killed'&&(
           activeAction
             ? <ActionForm
                 actionType={activeAction}
