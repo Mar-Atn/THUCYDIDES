@@ -1075,14 +1075,35 @@ export function FacilitatorDashboard() {
                         </span>
                       </div>
 
-                      {!elecStarted ? (
+                      {(() => {
+                        const OPPOSITION = new Set(['tribune', 'challenger'])
+                        const ALL_VOTERS = ['dealer','volt','anchor','shadow','shield','tribune','challenger']
+                        const candidates = electionNominations.filter(n => n.election_type === activeElecEvent.subtype)
+                        // Build voter map: role_id -> candidate voted for
+                        const voterMap: Record<string,string> = {}
+                        electionVotes.filter(v => v.election_type === activeElecEvent.subtype).forEach(v => {
+                          voterMap[v.voter_role_id] = v.candidate_role_id
+                        })
+                        // Economy score (loaded from country data if available)
+                        const colCountry = roles.find(r => r.country_id === 'columbia')
+                        // We need stability/inflation — load async, use placeholder for now
+                        const econNote = (sched.election_econ_score as string) || null
+                        const hasBonus = econNote ? parseFloat(econNote) < 0.5 : false
+
+                        return !elecStarted ? (
                         <>
                           <div className="font-body text-caption text-text-secondary mb-2">
-                            {electionNominations.filter(n => n.election_type === activeElecEvent.subtype).length} candidates ready. Start voting (10 min timer).
+                            {candidates.length} candidates ready. Start voting (10 min timer).
                           </div>
                           <button onClick={async () => {
-                            const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
+                            // Load economy score at election start for display
                             const { supabase: sb } = await import('@/lib/supabase')
+                            const { data: cs } = await sb.from('countries').select('stability,inflation').eq('sim_run_id', simId!).eq('id','columbia').limit(1)
+                            const stab = cs?.[0]?.stability ?? 0
+                            const infl = cs?.[0]?.inflation ?? 0
+                            const eScore = Math.max(0, (stab - 2) / 10) * 0.45 + Math.max(0, 1 - infl / 12) * 0.55
+                            const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10,
+                              election_econ_score: eScore.toFixed(3), election_stability: stab.toFixed(1), election_inflation: infl.toFixed(1) }
                             await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
                           }}
                             className="w-full font-body text-body-sm font-medium bg-warning text-white py-2 rounded-lg hover:bg-warning/90 transition-colors">
@@ -1100,56 +1121,99 @@ export function FacilitatorDashboard() {
                             const ss = String(Math.floor(rem % 60)).padStart(2, '0')
                             return (
                               <div className="flex items-center justify-between mb-1">
-                                <span className="font-data text-caption text-warning">{mm}:{ss} remaining</span>
+                                <span className="font-data text-caption text-warning">{mm}:{ss}</span>
                                 <div className="flex gap-1">
                                   <button onClick={async () => {
                                     const newSched = { ...sched, election_duration_min: elecDurationMin + 5 }
                                     const { supabase: sb } = await import('@/lib/supabase')
                                     await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
                                   }} className="font-body text-caption text-text-secondary hover:text-action px-1">+5m</button>
-                                  <button onClick={async () => {
-                                    const newSched = { ...sched, election_duration_min: 0 }
-                                    const { supabase: sb } = await import('@/lib/supabase')
-                                    await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                                  }} className="font-body text-caption text-text-secondary hover:text-danger px-1">Stop</button>
                                 </div>
                               </div>
                             )
                           })()}
 
-                          {/* Vote progress */}
-                          <div className="font-body text-caption text-text-secondary mb-1">
-                            {elecVoteCount} of 7 Columbia citizens have voted
+                          {/* Economy indicator */}
+                          <div className="bg-base rounded p-2 mb-2 font-data text-caption">
+                            <div className="flex gap-3">
+                              <span className="text-text-secondary">Stability: <span className="text-text-primary">{sched.election_stability || '?'}</span></span>
+                              <span className="text-text-secondary">Inflation: <span className="text-text-primary">{sched.election_inflation || '?'}%</span></span>
+                              <span className="text-text-secondary">Score: <span className={`font-medium ${econNote && parseFloat(econNote) < 0.5 ? 'text-danger' : 'text-success'}`}>{econNote || '?'}</span></span>
+                              <span className="text-text-secondary/50">Threshold: 0.50</span>
+                            </div>
                           </div>
 
-                          {/* Secret tally for moderator */}
-                          {Object.keys(elecTallies).length > 0 && (
-                            <div className="font-data text-caption text-text-primary mb-1">
-                              Tally: {Object.entries(elecTallies).sort((a,b) => b[1]-a[1]).map(([c,n]) =>
-                                `${c}: ${n}`
-                              ).join(', ')}
+                          {/* Voter table: role → voted for → weight */}
+                          <div className="bg-card border border-border rounded divide-y divide-border mb-2">
+                            {ALL_VOTERS.map(rid => {
+                              const voted = voterMap[rid]
+                              const isOpp = OPPOSITION.has(rid)
+                              const weight = isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1
+                              return (
+                                <div key={rid} className="flex items-center gap-2 px-3 py-1.5 text-caption">
+                                  <span className="font-body text-text-primary w-20 capitalize">{rid}</span>
+                                  <span className={`font-body flex-1 ${voted ? 'text-action' : 'text-text-secondary/40'}`}>
+                                    {voted ? <span className="capitalize">{voted}</span> : '—'}
+                                  </span>
+                                  <span className={`font-data ${isOpp ? 'text-warning font-medium' : 'text-text-secondary'}`}>
+                                    {weight}
+                                  </span>
+                                </div>
+                              )
+                            })}
+                          </div>
+
+                          {/* Candidate totals */}
+                          {candidates.length > 0 && (
+                            <div className="bg-base rounded p-2 mb-2">
+                              <div className="font-body text-caption text-text-secondary mb-1">Weighted totals:</div>
+                              <div className="flex gap-3">
+                                {candidates.map(c => {
+                                  const total = ALL_VOTERS.reduce((sum, rid) => {
+                                    if (voterMap[rid] !== c.role_id) return sum
+                                    const isOpp = OPPOSITION.has(rid)
+                                    const w = isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1
+                                    return sum + w
+                                  }, 0)
+                                  const maxVotes = ALL_VOTERS.reduce((sum, rid) => {
+                                    const isOpp = OPPOSITION.has(rid)
+                                    return sum + (isOpp ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1)
+                                  }, 0)
+                                  const majority = Math.floor(maxVotes / 2) + 1
+                                  return (
+                                    <span key={c.role_id} className={`font-data text-caption ${total >= majority ? 'text-success font-bold' : 'text-text-primary'}`}>
+                                      <span className="capitalize">{c.role_id}</span>: {total}
+                                    </span>
+                                  )
+                                })}
+                                <span className="text-text-secondary/50 font-data text-caption ml-auto">
+                                  need {Math.floor(ALL_VOTERS.reduce((s, r) => s + (OPPOSITION.has(r) ? (econNote && parseFloat(econNote) < 0.5 ? 3 : 2) : 1), 0) / 2) + 1}
+                                </span>
+                              </div>
                             </div>
                           )}
 
-                          {/* Economy indicator */}
-                          <div className="font-body text-caption text-text-secondary/60 mb-2">
-                            Economy score determines vote weight. Opposition bonus: score &lt; 0.50
-                          </div>
-
-                          {/* Resolve + Restart buttons */}
+                          {/* Stop + Approve / Restart */}
                           <div className="flex gap-2">
-                            <button onClick={handleResolveElection}
+                            <button onClick={async () => {
+                                if (!confirm('Stop election and approve results?')) return
+                                // Stop timer
+                                const newSched = { ...sched, election_duration_min: 0 }
+                                const { supabase: sb } = await import('@/lib/supabase')
+                                await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                // Resolve
+                                handleResolveElection()
+                              }}
                               disabled={electionResolving || elecVoteCount === 0}
                               className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                              {electionResolving ? 'Resolving...' : 'Resolve Election'}
+                              {electionResolving ? 'Resolving...' : 'Stop and Approve Results'}
                             </button>
                             <button onClick={async () => {
-                              if (!confirm('Restart election? All votes will be deleted and voting reopened.')) return
+                              if (!confirm('Restart election? All votes will be deleted.')) return
                               const { supabase: sb } = await import('@/lib/supabase')
                               await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
                               const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
                               await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                              // Force refetch to clear stale vote data
                               setTimeout(() => refetchElectionVotes(), 500)
                             }}
                               className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">
@@ -1157,7 +1221,8 @@ export function FacilitatorDashboard() {
                             </button>
                           </div>
                         </>
-                      )}
+                      )
+                      })()}
                     </div>
                     )
                   })()}
