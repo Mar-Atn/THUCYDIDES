@@ -1968,13 +1968,33 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState<string|null>(null)
   const [error, setError] = useState<string|null>(null)
+  const [chairedOrgs, setChairedOrgs] = useState<{id:string;name:string}[]>([])
+  const [speakingAs, setSpeakingAs] = useState<string>('personal') // 'personal' or org_id
+
+  // Load organizations where this role is chairman
+  useEffect(() => {
+    supabase.from('organizations').select('id,sim_name,chair_role_id')
+      .eq('sim_run_id', simId).eq('chair_role_id', roleId)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setChairedOrgs(data.map(o => ({ id: o.id, name: o.sim_name || o.id })))
+        }
+      })
+  }, [simId, roleId])
 
   const handleSubmit = async () => {
     if (!text.trim()) return
     setSubmitting(true)
     setError(null)
     try {
-      const res = await submitAction(simId, 'public_statement', roleId, countryId, { content: text.trim() })
+      const params: Record<string, string> = { content: text.trim() }
+      if (speakingAs !== 'personal') {
+        params.org_id = speakingAs
+        params.statement_type = 'org_decision'
+        const org = chairedOrgs.find(o => o.id === speakingAs)
+        if (org) params.org_name = org.name
+      }
+      const res = await submitAction(simId, 'public_statement', roleId, countryId, params)
       setResult(res.narrative as string ?? 'Statement published')
       setText('')
     } catch (e) {
@@ -1994,10 +2014,34 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
       </div>
 
       <div className="bg-card border border-border rounded-lg p-6 space-y-4">
+        {/* Speaking as selector */}
         <div>
-          <label className="font-body text-caption text-text-secondary block mb-2">
-            Speaking as <strong className="text-text-primary">{roleName}</strong> ({countryId})
-          </label>
+          <label className="font-body text-caption text-text-secondary block mb-2">Speaking as</label>
+          <div className="space-y-1.5">
+            <label className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors ${
+              speakingAs === 'personal' ? 'bg-action/5 border border-action/30' : 'hover:bg-base border border-transparent'
+            }`}>
+              <input type="radio" name="speaking_as" value="personal" checked={speakingAs === 'personal'}
+                onChange={() => setSpeakingAs('personal')} className="accent-action"/>
+              <span className="font-body text-body-sm text-text-primary">
+                <strong>{roleName}</strong> <span className="text-text-secondary">({countryId})</span>
+              </span>
+            </label>
+            {chairedOrgs.map(org => (
+              <label key={org.id} className={`flex items-center gap-2 px-3 py-2 rounded cursor-pointer transition-colors ${
+                speakingAs === org.id ? 'bg-warning/5 border border-warning/30' : 'hover:bg-base border border-transparent'
+              }`}>
+                <input type="radio" name="speaking_as" value={org.id} checked={speakingAs === org.id}
+                  onChange={() => setSpeakingAs(org.id)} className="accent-warning"/>
+                <span className="font-body text-body-sm text-warning font-medium">
+                  Official Decision of {org.name}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div>
           <textarea
             value={text}
             onChange={(e) => setText(e.target.value)}
@@ -2022,7 +2066,7 @@ function PublicStatementForm({roleId,roleName,countryId,simId,onClose,onSubmitte
             disabled={submitting || text.trim().length < 10}
             className="bg-action text-white font-body text-body-sm font-medium px-6 py-2.5 rounded-lg hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {submitting ? 'Publishing...' : 'Publish Statement'}
+            {submitting ? 'Publishing...' : speakingAs === 'personal' ? 'Publish Statement' : `Publish Official Decision`}
           </button>
           <button
             onClick={onClose}

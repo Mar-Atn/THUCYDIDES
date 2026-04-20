@@ -114,7 +114,7 @@ const PUBLIC_NEWS_EVENTS = new Set([
   'sabotage_detected_attributed', 'sabotage_detected_anonymous',
   'propaganda_detected_attributed', 'propaganda_detected_anonymous',
   // Diplomatic (public by nature)
-  'public_statement', 'propose_agreement', 'sign_agreement',
+  'public_statement', 'org_decision', 'propose_agreement', 'sign_agreement',
   // Economic (public policy)
   'set_sanctions', 'set_tariffs',
   // System

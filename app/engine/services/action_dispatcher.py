@@ -1071,17 +1071,27 @@ def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, act
 
 
 def _log_public_statement(sim_run_id: str, round_num: int, action: dict) -> dict:
-    """Log a public statement to observatory (no engine processing)."""
+    """Log a public statement or official org decision to observatory."""
     client = get_client()
     scenario_id = get_scenario_id(client, sim_run_id)
     role_id = action.get("role_id", "unknown")
     statement = action.get("content", "")
     country_code = action.get("country_code", "")
+    org_id = action.get("org_id")
+    org_name = action.get("org_name")
+    statement_type = action.get("statement_type", "personal")
 
-    narrative = f"PUBLIC STATEMENT by {role_id}: {statement[:200]}"
+    if statement_type == "org_decision" and org_name:
+        narrative = f"OFFICIAL DECISION of {org_name}: {statement[:200]}"
+        event_type = "org_decision"
+        payload = {"role_id": role_id, "content": statement, "org_id": org_id, "org_name": org_name}
+    else:
+        narrative = f"PUBLIC STATEMENT by {role_id}: {statement[:200]}"
+        event_type = "public_statement"
+        payload = {"role_id": role_id, "content": statement}
+
     write_event(client, sim_run_id, scenario_id, round_num, country_code,
-                "public_statement", narrative,
-                {"role_id": role_id, "content": statement},
+                event_type, narrative, payload,
                 phase="A", category="diplomatic", role_name=role_id)
 
     return {"success": True, "narrative": narrative}
