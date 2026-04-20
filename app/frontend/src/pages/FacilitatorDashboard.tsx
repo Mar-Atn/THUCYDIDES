@@ -335,6 +335,7 @@ export function FacilitatorDashboard() {
 
   const [electionResolving, setElectionResolving] = useState(false)
   const [electionStoppedLocal, setElectionStoppedLocal] = useState(false)
+  const [localVoteOverrides, setLocalVoteOverrides] = useState<Record<string, string | null>>({})
 
   // Derive active election events from key_events + current round
   const elecRound = simRunRT?.current_round ?? 0
@@ -1080,11 +1081,16 @@ export function FacilitatorDashboard() {
                         const OPPOSITION = new Set(['tribune', 'challenger'])
                         const ALL_VOTERS = ['dealer','volt','anchor','shadow','shield','tribune','challenger']
                         const candidates = electionNominations.filter(n => n.election_type === activeElecEvent.subtype)
-                        // Build voter map: role_id -> candidate voted for
+                        // Build voter map: role_id -> candidate voted for (with local overrides)
                         const voterMap: Record<string,string> = {}
                         electionVotes.filter(v => v.election_type === activeElecEvent.subtype).forEach(v => {
                           voterMap[v.voter_role_id] = v.candidate_role_id
                         })
+                        // Apply local overrides
+                        for (const [rid, cid] of Object.entries(localVoteOverrides)) {
+                          if (cid === null || cid === '') delete voterMap[rid]
+                          else voterMap[rid] = cid
+                        }
                         // Economy score — use cached from start, or treat as unknown
                         const econNote = (sched.election_econ_score as string) || null
                         // If no cached score, we'll load it via ElectionEconIndicator
@@ -1147,12 +1153,13 @@ export function FacilitatorDashboard() {
                                 <div key={rid} className="flex items-center gap-2 px-3 py-1.5 text-caption">
                                   <span className="font-body text-text-primary w-20 capitalize">{rid}</span>
                                   <select value={voted || ''} onChange={async (e) => {
-                                    const { supabase: sb } = await import('@/lib/supabase')
                                     const newCandidate = e.target.value
-                                    // Delete existing vote for this voter
+                                    // Optimistic local update
+                                    setLocalVoteOverrides(prev => ({ ...prev, [rid]: newCandidate || null }))
+                                    // Persist to DB
+                                    const { supabase: sb } = await import('@/lib/supabase')
                                     await sb.from('election_votes').delete()
                                       .eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype).eq('voter_role_id', rid)
-                                    // Insert new vote if not clearing
                                     if (newCandidate) {
                                       await sb.from('election_votes').insert({
                                         sim_run_id: simId, election_type: activeElecEvent.subtype,
@@ -1160,7 +1167,6 @@ export function FacilitatorDashboard() {
                                         candidate_role_id: newCandidate, country_code: 'columbia',
                                       })
                                     }
-                                    setTimeout(() => refetchElectionVotes(), 300)
                                   }}
                                     className="flex-1 font-body text-caption bg-base border border-border rounded px-1 py-0.5">
                                     <option value="">—</option>
