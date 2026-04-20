@@ -336,7 +336,14 @@ def restart_simulation(sim_id: str) -> dict:
         # Recompute role_actions from restored positions
         from engine.services.position_helpers import recompute_all_role_actions
         recompute_all_role_actions(client, sim_id)
-        logger.info("Restart: roles + role_actions restored from template")
+        # Reset uses_remaining = uses_total for all limited actions
+        limited_rows = [r for r in
+            (client.table("role_actions").select("id,uses_total").eq("sim_run_id", sim_id).execute().data or [])
+            if r.get("uses_total") is not None]
+        for ra in limited_rows:
+            if ra.get("uses_total") is not None:
+                client.table("role_actions").update({"uses_remaining": ra["uses_total"]}).eq("id", ra["id"]).execute()
+        logger.info("Restart: roles + role_actions restored, %d limited actions reset", len(limited_rows))
     except Exception as e:
         logger.warning("Restart: roles reset failed: %s", e)
 
