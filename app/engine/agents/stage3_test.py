@@ -66,7 +66,7 @@ TOOL_SCHEMAS = [
         "name": "get_my_identity",
         "description": (
             "Returns your canonical identity: character_name, title, "
-            "real-world parallel, objectives, powers, and ticking_clock "
+            "real-world parallel, objectives, and powers "
             "(time pressure). Call this first to understand WHO you are "
             "and what you care about."
         ),

@@ -129,7 +129,6 @@ def _parse_role(row: dict) -> dict[str, Any]:
         "personal_coins": float(row.get("personal_coins", 0)),
         "powers": [p.strip() for p in row.get("powers", "").split(";") if p.strip()],
         "objectives": [o.strip() for o in row.get("objectives", "").split(";") if o.strip()],
-        "ticking_clock": "",  # DEPRECATED 2026-04-17
         "brief_file": row.get("brief_file", ""),
         "is_diplomat": row.get("is_diplomat", "false").lower() == "true",
         # Cards

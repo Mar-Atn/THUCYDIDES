@@ -548,7 +548,6 @@ export interface Role {
   protest_stim_cards: number
   powers: string[]
   objectives: string[]
-  ticking_clock: string
   status: string
 }
 

@@ -349,11 +349,6 @@ def _build_objectives(role: dict) -> str:
     return "## Your Objectives\n\n" + "\n".join(f"- {o}" for o in objs)
 
 
-def _build_ticking_clock(role: dict) -> str:
-    # DEPRECATED 2026-04-17 — ticking_clock field cleared from DB
-    return ""
-
-
 def _build_naming_rule(country: dict) -> str:
     return f"""## CRITICAL: USE ONLY SIM NAMES (READ FIRST, APPLY ALWAYS)
 
@@ -428,6 +423,5 @@ def build_rich_block1(
         _build_powers(role),
         _build_mechanics(role),
         _build_objectives(role),
-        _build_ticking_clock(role),
     ]
     return "\n\n".join(s for s in sections if s)

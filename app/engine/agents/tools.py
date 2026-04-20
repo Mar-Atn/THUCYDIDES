@@ -1019,7 +1019,7 @@ def get_tech_state(
 def get_my_identity(country_code: str) -> dict:
     """Return canonical HoS role data from the ``roles`` table.
 
-    Returns character_name, title, parallel, objectives, powers, ticking_clock.
+    Returns character_name, title, parallel, objectives, powers.
     Picks the first is_head_of_state row for this country.
     """
     try:

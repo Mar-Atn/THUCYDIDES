@@ -54,9 +54,6 @@ You live in the SIM world. NEVER use real-world country names.
 
 ## Your Objectives
 {objectives_list}
-
-## Ticking Clock
-{ticking_clock}
 """
 
 
@@ -141,7 +138,7 @@ class LeaderAgent:
         self.cognitive.set_goals_text(
             f"OBJECTIVES:\n"
             + "\n".join(f"- {obj}" for obj in self.role["objectives"])
-            + f"\n\nTICKING CLOCK: {self.role['ticking_clock']}\n\n"
+            + "\n\n"
             f"INITIAL STRATEGY: Assess the situation. Establish key relationships. "
             f"Prioritize {self.role['objectives'][0] if self.role['objectives'] else 'survival'}.\n\n"
             f"PLANS: To be developed based on initial assessment."
@@ -323,7 +320,6 @@ class LeaderAgent:
             f"[{self.role['character_name']}, {self.role['title']} of {self.country['sim_name']}]\n"
             f"(Sync mode — no LLM call)\n"
             f"My priorities: {', '.join(self.role['objectives'][:3])}\n"
-            f"Ticking clock: {self.role['ticking_clock']}\n"
             f"Your message: {message}"
         )
 
@@ -606,8 +602,7 @@ class LeaderAgent:
             f"YOUR IDENTITY:\n{self.cognitive.block2_identity}\n\n"
             f"YOUR OBJECTIVES (from role brief):\n"
             + "\n".join(f"- {obj}" for obj in self.role["objectives"])
-            + f"\n\nYOUR TICKING CLOCK: {self.role['ticking_clock']}\n\n"
-            f"YOUR COUNTRY:\n"
+            + "\n\nYOUR COUNTRY:\n"
             f"- GDP: {self.country['gdp']} ({self.country['regime_type']})\n"
             f"- Stability: {self.country['stability']}\n"
             f"- Military: {self.country['mil_ground']} ground, {self.country['mil_naval']} naval, {self.country['mil_tactical_air']} air\n"
