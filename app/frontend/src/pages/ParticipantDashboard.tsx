@@ -4435,6 +4435,16 @@ function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [result, setResult] = useState<string|null>(null)
   const [error, setError] = useState<string|null>(null)
 
+  // Realtime: my outgoing invitations
+  const { data: myOutgoingRaw } = useRealtimeTable<Record<string, unknown>>(
+    'meeting_invitations', simId,
+    { eq: { inviter_role_id: roleId } },
+  )
+  const myOutgoing = (myOutgoingRaw as unknown as {
+    id:string; invitation_type:string; invitee_role_id:string|null; org_id:string|null; org_name:string|null;
+    message:string; status:string; expires_at:string; responses:Record<string, {response:string; message?:string}>;
+  }[]).filter(inv => inv.status === 'pending' || Object.keys(inv.responses || {}).length > 0)
+
   useEffect(() => {
     Promise.all([
       supabase.from('roles').select('id,character_name,country_id')
@@ -4513,6 +4523,46 @@ function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
             }`}>Organization Meeting</button>
         )}
       </div>
+
+      {/* Outgoing invitations with responses */}
+      {myOutgoing.length > 0 && (
+        <div className="space-y-2">
+          <label className="font-body text-caption text-text-secondary">Your active invitations</label>
+          {myOutgoing.map(inv => {
+            const responses = inv.responses || {}
+            const responseList = Object.entries(responses)
+            const isExpired = new Date(inv.expires_at).getTime() < Date.now()
+            return (
+              <div key={inv.id} className={`bg-card border rounded-lg p-3 ${isExpired ? 'border-border opacity-60' : 'border-action/20'}`}>
+                <div className="font-body text-caption text-text-primary font-medium">
+                  {inv.invitation_type === 'one_on_one'
+                    ? `To: ${inv.invitee_role_id}`
+                    : `${inv.org_name || inv.org_id} meeting`}
+                  {isExpired && <span className="text-text-secondary/50 ml-2">(expired)</span>}
+                </div>
+                {responseList.length > 0 ? (
+                  <div className="mt-1 space-y-0.5">
+                    {responseList.map(([rid, resp]) => (
+                      <div key={rid} className="font-body text-caption flex items-center gap-2">
+                        <span className="text-text-primary capitalize">{rid}</span>
+                        <span className={
+                          resp.response === 'accept' ? 'text-success font-medium' :
+                          resp.response === 'later' ? 'text-warning' : 'text-danger'
+                        }>
+                          {resp.response === 'accept' ? 'accepted' : resp.response === 'later' ? 'not now, but later' : 'declined'}
+                        </span>
+                        {resp.message && <span className="text-text-secondary">— {resp.message}</span>}
+                      </div>
+                    ))}
+                  </div>
+                ) : !isExpired ? (
+                  <div className="font-body text-caption text-text-secondary/50 mt-1">Awaiting response...</div>
+                ) : null}
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {result ? (
         <div className="bg-success/5 border border-success/20 rounded-lg p-4">
