@@ -1918,6 +1918,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'change_leader') return <ChangeLeaderForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'reassign_types') return <ReassignPowersForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'arrest') return <ArrestForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'assassination') return <AssassinationForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -4290,6 +4291,137 @@ interface QueuedMove {
   target_global_row?: number
   target_global_col?: number
   label: string
+}
+
+function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
+  roleId:string;countryId:string;simId:string;onClose:()=>void;onSubmitted:()=>void
+}) {
+  const [loading, setLoading] = useState(true)
+  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_id:string;positions:string[];status:string}[]>([])
+  const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string}[]>([])
+  const [targetId, setTargetId] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string|null>(null)
+  const [result, setResult] = useState<{narrative:string;killed:boolean;attributed:boolean}|null>(null)
+  const [remaining, setRemaining] = useState<number|null>(null)
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from('roles').select('id,character_name,country_id,positions,status')
+        .eq('sim_run_id', simId).eq('status', 'active'),
+      supabase.from('countries').select('id,sim_name,color_ui')
+        .eq('sim_run_id', simId).order('sim_name'),
+      supabase.from('role_actions').select('uses_remaining')
+        .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'assassination').limit(1),
+    ]).then(([rolesRes, countriesRes, usageRes]) => {
+      if (rolesRes.data) setAllRoles(rolesRes.data as typeof allRoles)
+      if (countriesRes.data) setCountries(countriesRes.data as typeof countries)
+      setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
+    }).finally(() => setLoading(false))
+  }, [simId, countryId, roleId])
+
+  // Group targets by country (exclude self)
+  const targets = allRoles.filter(r => r.id !== roleId)
+  const byCountry = countries.map(c => ({
+    ...c,
+    roles: targets.filter(r => r.country_id === c.id),
+  })).filter(c => c.roles.length > 0)
+
+  const handleSubmit = async () => {
+    if (!targetId) return
+    const targetRole = targets.find(r => r.id === targetId)
+    if (!confirm(`Attempt assassination of ${targetRole?.character_name}?\n\nSuccess is not guaranteed. There is a chance the operation will be disclosed.\n\nThis will be sent to the moderator for confirmation.`)) return
+    setSubmitting(true); setError(null)
+    try {
+      const res = await submitAction(simId, 'assassination', roleId, countryId, {
+        changes: { target_role: targetId },
+      })
+      if (res.status === 'pending') {
+        setResult({ narrative: 'Assassination order submitted — awaiting moderator confirmation', killed: false, attributed: false })
+      } else if (res.success !== false) {
+        setResult({ narrative: res.narrative || 'Operation executed', killed: res.killed || false, attributed: res.attributed || false })
+        if (remaining !== null) setRemaining(Math.max(0, remaining - 1))
+      } else {
+        setError(res.narrative || 'Failed')
+      }
+      onSubmitted()
+    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
+    finally { setSubmitting(false) }
+  }
+
+  if (loading) return <div className="p-4 text-text-secondary">Loading...</div>
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-h2 text-text-primary">Assassination</h2>
+        <button onClick={onClose}
+          className="font-body text-caption text-text-secondary hover:text-text-primary px-3 py-1 rounded border border-border">
+          ← Back
+        </button>
+      </div>
+
+      <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+        <p className="font-body text-body-sm text-text-primary">
+          Order an assassination of any active participant. Success is <strong className="text-danger">not guaranteed</strong>, and there is a chance the operation will be disclosed.
+        </p>
+        {remaining !== null && (
+          <p className={`font-data text-caption mt-2 ${remaining > 0 ? 'text-text-secondary' : 'text-danger'}`}>
+            {remaining > 0 ? `${remaining} attempt${remaining !== 1 ? 's' : ''} remaining this simulation` : 'No attempts remaining'}
+          </p>
+        )}
+      </div>
+
+      {remaining === 0 ? (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4 text-center">
+          <p className="font-body text-body-sm text-danger font-medium">All assassination attempts have been used.</p>
+        </div>
+      ) : result ? (
+        <div className={`${result.killed ? 'bg-danger/5 border-danger/20' : 'bg-action/5 border-action/20'} border rounded-lg p-4`}>
+          <p className="font-body text-body-sm text-text-primary">{result.narrative}</p>
+        </div>
+      ) : (
+        <>
+          <div>
+            <label className="font-body text-caption text-text-secondary block mb-2">Select target</label>
+            <div className="bg-card border border-border rounded-lg divide-y divide-border max-h-[400px] overflow-y-auto">
+              {byCountry.map(c => (
+                <div key={c.id}>
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-base">
+                    <div className="w-2.5 h-2.5 rounded" style={{backgroundColor: c.color_ui || '#666'}} />
+                    <span className="font-body text-caption text-text-secondary font-medium uppercase tracking-wider">{c.sim_name}</span>
+                  </div>
+                  {c.roles.map(r => (
+                    <label key={r.id} className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors ${
+                      targetId === r.id ? 'bg-danger/5' : 'hover:bg-base'
+                    }`}>
+                      <input type="radio" name="assassination_target" value={r.id} checked={targetId === r.id}
+                        onChange={() => setTargetId(r.id)} className="accent-danger"/>
+                      <span className="font-body text-body-sm text-text-primary flex-1">{r.character_name}</span>
+                      <span className="font-body text-caption text-text-secondary">
+                        {(r.positions || []).length > 0 ? (r.positions || []).map(p => POS[p] ?? p).join(' + ') : 'Citizen'}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button onClick={handleSubmit} disabled={!targetId || submitting || remaining === 0}
+            className="w-full bg-danger text-white font-body text-body-sm font-medium py-2.5 rounded-lg hover:bg-danger/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+            {submitting ? 'Submitting...' : targetId ? `Order Assassination of ${targets.find(r=>r.id===targetId)?.character_name}` : 'Select a target'}
+          </button>
+        </>
+      )}
+
+      {error && (
+        <div className="bg-danger/5 border border-danger/20 rounded-lg p-4">
+          <p className="font-body text-body-sm text-danger">{error}</p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{

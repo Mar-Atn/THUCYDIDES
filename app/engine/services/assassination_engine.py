@@ -1,10 +1,15 @@
-"""Assassination Engine — card-based targeted killing.
+"""Assassination Engine — covert targeted killing.
 
-Success: domestic 30%, international 20%, Levantia 50%.
-Detection: 100% (always). Attribution: 50%.
-Outcome on success: 50/50 kill vs survive-injured.
-  Kill: target status='killed' + martyr effect (+15 support)
-  Survive: sympathy effect (+10 support)
+Approved design (2026-04-20):
+  - Who: Security position only. 3 attempts per SIM.
+  - Target: Any active role, any country (domestic + international). HoS can be targeted.
+  - Success: 20% flat. Levantia bonus: 50%.
+  - Outcome: Success = target killed (out for rest of SIM). No survive/injured.
+  - Detection: Always 100% — public knows it happened.
+  - Attribution: 50% chance attacker is identified.
+  - Kill effect: Target status → killed. Country stability +1.5 (martyr).
+  - Failed: No status change, no stability effect.
+  - Moderator: Confirmation required (unless auto-approve).
 """
 
 from __future__ import annotations
@@ -12,18 +17,15 @@ from __future__ import annotations
 import logging
 import random
 
-from engine.services.run_roles import get_run_role, update_role_status
+from engine.config.position_actions import has_position
 from engine.services.supabase import get_client
 
 logger = logging.getLogger(__name__)
 
-SUCCESS_PROB_DOMESTIC = 0.30
-SUCCESS_PROB_INTERNATIONAL = 0.20
-SUCCESS_PROB_LEVANTIA = 0.50
-KILL_VS_SURVIVE_PROB = 0.50  # <0.5 = kill, >=0.5 = survive
-ATTRIBUTION_PROB = 0.50
-MARTYR_STABILITY_BOOST = 1.5  # 2026-04-15: converted from support +15 to stability scale
-SYMPATHY_STABILITY_BOOST = 1.0  # 2026-04-15: converted from support +10 to stability scale
+SUCCESS_PROB = 0.20          # flat 20% for all targets
+SUCCESS_PROB_LEVANTIA = 0.50 # Levantia bonus (either attacker or target)
+ATTRIBUTION_PROB = 0.50      # 50% chance attacker is identified
+MARTYR_STABILITY_BOOST = 1.5 # killed → target country stability +1.5
 
 
 def execute_assassination(
@@ -32,112 +34,132 @@ def execute_assassination(
     attacker_role: str,
     attacker_country: str,
     target_role: str,
-    domestic: bool = False,
     precomputed_rolls: dict | None = None,
 ) -> dict:
     """Execute an assassination attempt.
 
-    Returns ``{success, killed, detected, attributed, support_change, narrative}``.
+    Returns ``{success, killed, detected, attributed, narrative}``.
     """
     client = get_client()
     pre = precomputed_rolls or {}
 
+    # Validate attacker has security position
+    attacker_data = client.table("roles") \
+        .select("id, character_name, positions, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", attacker_role).limit(1).execute().data
+    if not attacker_data:
+        return {"success": False, "narrative": f"Attacker {attacker_role} not found"}
+    attacker = attacker_data[0]
+    if not has_position(attacker, "security"):
+        return {"success": False, "narrative": f"{attacker_role} does not have security position — cannot assassinate"}
+
+    attacker_name = attacker["character_name"]
+    attacker_cc = attacker["country_id"]
+
     # Get target info
-    target = get_run_role(sim_run_id, target_role)
-    if not target:
+    target_data = client.table("roles") \
+        .select("id, character_name, status, country_id") \
+        .eq("sim_run_id", sim_run_id).eq("id", target_role).limit(1).execute().data
+    if not target_data:
         return {"success": False, "narrative": f"Target {target_role} not found"}
+    target = target_data[0]
+
     if target["status"] != "active":
         return {"success": False, "narrative": f"Target {target_role} is already {target['status']}"}
 
-    target_country = target["country_code"]
+    target_name = target["character_name"]
+    target_cc = target["country_id"]
 
     # Determine success probability
-    if attacker_country == "levantia" or target_country == "levantia":
+    if attacker_cc == "levantia" or target_cc == "levantia":
         success_prob = SUCCESS_PROB_LEVANTIA
-    elif domestic:
-        success_prob = SUCCESS_PROB_DOMESTIC
     else:
-        success_prob = SUCCESS_PROB_INTERNATIONAL
+        success_prob = SUCCESS_PROB
 
     # Rolls
     success_roll = pre.get("success_roll", random.random())
-    kill_roll = pre.get("kill_roll", random.random())
     attribution_roll = pre.get("attribution_roll", random.random())
 
     success = success_roll < success_prob
     attributed = attribution_roll < ATTRIBUTION_PROB
-    # Detection is ALWAYS 100%
-    detected = True
-
-    killed = False
-    support_change = 0
-    narrative = ""
 
     if success:
-        killed = kill_roll < KILL_VS_SURVIVE_PROB
+        # Target killed — out for rest of SIM
+        client.table("roles").update({
+            "status": "killed",
+            "status_detail": {
+                "killed_by": attacker_role if attributed else "unknown",
+                "killed_by_name": attacker_name if attributed else "unknown",
+                "killed_by_country": attacker_cc if attributed else "unknown",
+                "round": round_num,
+                "attributed": attributed,
+            },
+        }).eq("sim_run_id", sim_run_id).eq("id", target_role).execute()
 
-        if killed:
-            # Target killed
-            update_role_status(sim_run_id, target_role, "killed",
-                               changed_by=attacker_role,
-                               reason=f"Assassinated in round {round_num}",
-                               round_num=round_num)
-            stability_change = MARTYR_STABILITY_BOOST
-            narrative = f"ASSASSINATION: {target_role} ({target.get('character_name', '?')}) KILLED — martyr effect +{MARTYR_STABILITY_BOOST} stability"
+        # Martyr effect — target country stability +1.5
+        _apply_stability_change(client, sim_run_id, target_cc, MARTYR_STABILITY_BOOST)
+
+        if attributed:
+            narrative = (f"There is sufficient evidence {attacker_name} ({attacker_cc.upper()}) was behind "
+                         f"the successful attempt to assassinate {target_name}.")
         else:
-            # Target survives injured
-            stability_change = SYMPATHY_STABILITY_BOOST
-            narrative = f"ASSASSINATION ATTEMPT: {target_role} ({target.get('character_name', '?')}) SURVIVED (injured) — sympathy +{SYMPATHY_STABILITY_BOOST} stability"
-
-        # Apply stability boost to target's country (2026-04-15: replaces political_support)
-        _apply_stability_change(client, sim_run_id, round_num, target_country, stability_change)
+            narrative = (f"{target_name} has been assassinated in {target_cc.upper()}. "
+                         f"Perpetrators unknown.")
     else:
-        narrative = f"ASSASSINATION ATTEMPT FAILED: attack on {target_role} ({target.get('character_name', '?')}) unsuccessful"
+        # Failed attempt
+        if attributed:
+            narrative = (f"There is sufficient evidence {attacker_name} ({attacker_cc.upper()}) was behind "
+                         f"an unsuccessful attempt to assassinate {target_name}.")
+        else:
+            narrative = (f"An unsuccessful assassination attempt on {target_name} in {target_cc.upper()}. "
+                         f"Perpetrators unknown.")
 
     # Events — ALWAYS public (detection = 100%)
     scenario_id = _get_scenario_id(client, sim_run_id)
-
+    event_type = "assassination_attributed" if attributed else "assassination_anonymous"
+    payload = {
+        "target_role": target_role,
+        "target_name": target_name,
+        "target_country": target_cc,
+        "success": success,
+        "attributed": attributed,
+        "category": "political",
+    }
     if attributed:
-        _write_event(client, sim_run_id, scenario_id, round_num, target_country,
-                     "assassination_attributed",
-                     f"{narrative} — ordered by {attacker_country} ({attacker_role})",
-                     {"attacker": attacker_country, "attacker_role": attacker_role,
-                      "target_role": target_role, "killed": killed, "success": success,
-                      "support_change": support_change, "attributed": True})
-    else:
-        _write_event(client, sim_run_id, scenario_id, round_num, target_country,
-                     "assassination_anonymous",
-                     f"{narrative} — perpetrator unknown",
-                     {"target_role": target_role, "killed": killed, "success": success,
-                      "support_change": support_change, "attributed": False})
+        payload["attacker_role"] = attacker_role
+        payload["attacker_name"] = attacker_name
+        payload["attacker_country"] = attacker_cc
 
-    logger.info("[assassination] %s→%s: success=%s killed=%s attributed=%s support=%+d",
-                attacker_role, target_role, success, killed, attributed, support_change)
+    _write_event(client, sim_run_id, scenario_id, round_num, target_cc,
+                 event_type, narrative, payload)
+
+    logger.info("[assassination] %s(%s)→%s(%s): success=%s attributed=%s",
+                attacker_role, attacker_cc, target_role, target_cc, success, attributed)
 
     return {
-        "success": success,
-        "killed": killed,
+        "success": True,  # action executed (not whether target died)
+        "killed": success,
         "detected": True,
         "attributed": attributed,
         "target_role": target_role,
-        "target_country": target_country,
-        "support_change": support_change,
+        "target_name": target_name,
+        "target_country": target_cc,
         "narrative": narrative,
     }
 
 
-def _apply_stability_change(client, sim_run_id, round_num, target_cc, change):
-    """Apply stability change (replaces old political_support change). 2026-04-15 simplification."""
+def _apply_stability_change(client, sim_run_id, country_code, change):
+    """Apply stability change to country (martyr effect)."""
     try:
-        row = client.table("country_states_per_round").select("stability") \
-            .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-            .eq("country_code", target_cc).limit(1).execute().data
+        row = client.table("countries").select("stability") \
+            .eq("sim_run_id", sim_run_id).eq("id", country_code).limit(1).execute().data
         if row:
             old = float(row[0]["stability"]) if row[0].get("stability") is not None else 5.0
             new = max(0.0, min(10.0, old + change))
-            client.table("country_states_per_round").update({"stability": new}) \
-                .eq("sim_run_id", sim_run_id).eq("round_num", round_num) \
-                .eq("country_code", target_cc).execute()
+            client.table("countries").update({"stability": new}) \
+                .eq("sim_run_id", sim_run_id).eq("id", country_code).execute()
+            logger.info("[assassination] %s stability: %.1f → %.1f (+%.1f martyr)",
+                        country_code, old, new, change)
     except Exception as e:
         logger.warning("stability change failed: %s", e)
 
@@ -158,6 +180,7 @@ def _write_event(client, sim_run_id, scenario_id, round_num, country_code, event
             "sim_run_id": sim_run_id, "scenario_id": scenario_id,
             "round_num": round_num, "event_type": event_type,
             "country_code": country_code, "summary": summary, "payload": payload,
+            "category": "political",
         }).execute()
     except Exception as e:
         logger.debug("event write failed: %s", e)

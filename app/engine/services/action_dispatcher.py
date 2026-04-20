@@ -195,10 +195,9 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
 
     if action_type == "assassination":
         from engine.services.assassination_engine import execute_assassination
+        target = (action.get("changes") or {}).get("target_role") or action.get("target_role", "")
         return execute_assassination(
-            sim_run_id, round_num, role_id, country_code,
-            action.get("target_role"),
-            domestic=action.get("domestic", True))
+            sim_run_id, round_num, role_id, country_code, target)
 
     if action_type == "change_leader":
         from engine.services.change_leader import initiate_change_leader
