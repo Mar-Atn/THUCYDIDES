@@ -996,31 +996,31 @@ async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)
     from engine.services.sim_run_manager import (
         end_phase_a, end_phase_b, advance_round, get_state,
     )
+    import asyncio
     try:
-        run = get_state(sim_id)
+        run = await asyncio.to_thread(get_state, sim_id)
         phase = run["current_phase"]
         if phase == "A":
-            state = end_phase_a(sim_id)
+            state = await asyncio.to_thread(end_phase_a, sim_id)
             # Trigger Phase B engine processing
             round_num = run["current_round"]
             logger.info("Sim %s Phase A ended → triggering Phase B engines for R%d", sim_id, round_num)
             try:
                 await _run_phase_b(sim_id, round_num)
                 # Auto-advance to inter_round after engines complete
-                state = end_phase_b(sim_id)
+                state = await asyncio.to_thread(end_phase_b, sim_id)
                 logger.info("Sim %s Phase B complete → inter_round", sim_id)
             except Exception as e:
                 logger.exception("Phase B engine failed for sim %s R%d: %s", sim_id, round_num, e)
-                # Stay in processing state so moderator can retry or skip
                 return APIResponse(
                     success=False,
                     data=state,
                     error=f"Phase B engines failed: {e}. Sim is in processing state — click Next Phase to skip to inter-round.",
                 )
         elif phase == "B":
-            state = end_phase_b(sim_id)
+            state = await asyncio.to_thread(end_phase_b, sim_id)
         elif phase == "inter_round":
-            state = advance_round(sim_id)
+            state = await asyncio.to_thread(advance_round, sim_id)
         else:
             raise ValueError(f"Cannot end phase '{phase}'")
         logger.info("Sim %s phase %s ended by %s", sim_id, phase, user.id)
@@ -1237,8 +1237,9 @@ async def sim_go_back(sim_id: str, user: AuthUser = Depends(require_moderator)):
 async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
     """Restart simulation from beginning. Deletes all runtime data."""
     from engine.services.sim_run_manager import restart_simulation
+    import asyncio
     try:
-        state = restart_simulation(sim_id)
+        state = await asyncio.to_thread(restart_simulation, sim_id)
         logger.info("Sim %s RESTARTED (full cleanup) by %s", sim_id, user.id)
         return APIResponse(data=state)
     except ValueError as e:
@@ -1607,8 +1608,10 @@ async def submit_action(
         })
 
     # 5. Immediate dispatch (no confirmation needed)
+    # Run in thread to avoid blocking the async event loop (sync DB + engine calls)
+    import asyncio
     try:
-        result = dispatch_action(sim_id, round_num, action_payload)
+        result = await asyncio.to_thread(dispatch_action, sim_id, round_num, action_payload)
     except Exception as e:
         logger.exception("Action dispatch failed: %s", e)
         raise HTTPException(status_code=500, detail=f"Engine error: {e}")
@@ -1690,8 +1693,9 @@ async def confirm_pending_action(
     # Remove internal flag
     payload.pop("_requires_dice", None)
 
+    import asyncio
     try:
-        result = dispatch_action(sim_id, round_num, payload)
+        result = await asyncio.to_thread(dispatch_action, sim_id, round_num, payload)
     except Exception as e:
         logger.exception("Confirmed action dispatch failed: %s", e)
         raise HTTPException(status_code=500, detail=f"Engine error: {e}")
