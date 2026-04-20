@@ -60,4 +60,41 @@
 
 ---
 
+---
+
+## Session Continued — Evening 2026-04-20
+
+### 10. Covert Operations — Sabotage + Propaganda
+- **Who:** Security only, 7 shared uses per SIM
+- **Sabotage:** target any foreign country — Infrastructure / Nuclear Site / Military
+  - Success 50%, Detection 100%, Attribution 50%
+  - Effects: -1 treasury / -30% R&D / 50% destroy random unit
+- **Propaganda:** target any country (incl. own) — Support / Undermine stability
+  - Success 55%, Detection 100%, Attribution 20%
+  - Effect: ±0.3 stability (diminishing returns)
+- **No election meddling** (covered by propaganda)
+- UI: unified form with op type selector, target country, immediate execution
+- Public news for detected operations (attributed / anonymous)
+
+### 11. Intelligence — LLM-Powered Reports
+- **Who:** Security(5), Military(5), Diplomat(1), Opposition(2) per SIM
+- **Flow:** Free-form question → LLM generates classified briefing → artefact in Confidential tab
+- **Context:** 24KB world state including:
+  - All 20 countries (GDP, stability, inflation, nuclear, AI, debt)
+  - Military deployments (all units per country per branch)
+  - Relationships, agreements, recent events (last 3 rounds)
+  - Nuclear status, blockades, basing rights
+  - Game mechanics & rules (for analysis, not disclosed)
+- **LLM:** Gemini Flash (cost-efficient), ~20-25% noise injection
+- **Artefact:** Classified report styled as intelligence briefing
+- **Systemic fix:** `call_llm_sync()` in llm.py handles async-from-sync context
+
+### Systemic Improvements
+- `call_llm_sync()` — reusable sync wrapper for async LLM calls from FastAPI sync endpoints
+- Intelligence context builder migrated from deprecated tables to live `countries` + `deployments`
+- `roles_status_check` constraint updated: added 'killed'
+- Restart: resets `uses_remaining` for all limited actions
+
+---
+
 *Session by Marat Atn + Claude Opus 4.6*
