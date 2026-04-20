@@ -105,7 +105,7 @@ const PHASE_RESTRICTED: Record<string, string> = { move_units: 'inter_round' }
 
 const CATS: { key: string; label: string; actions: { id: string; label: string }[] }[] = [
   { key:'general', label:'General', actions:[
-    {id:'public_statement',label:'Public Statement'},{id:'set_meetings',label:'Set Meetings'},
+    {id:'public_statement',label:'Public Statement'},{id:'invite_to_meet',label:'Set Meetings'},
   ]},
   { key:'economic', label:'Economic', actions:[
     {id:'set_budget',label:'Set Budget'},{id:'set_tariffs',label:'Set Tariffs'},
@@ -2000,7 +2000,7 @@ function ActionForm({actionType,roleId,roleName,countryId,simId,onClose,onSubmit
   if (actionType === 'assassination') return <AssassinationForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'covert_operation') return <CovertOpsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
   if (actionType === 'intelligence') return <IntelligenceForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
-  if (actionType === 'set_meetings') return <SetMeetingsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
+  if (actionType === 'set_meetings' || actionType === 'invite_to_meet' || actionType === 'call_org_meeting') return <SetMeetingsForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
 
   // Unified attack form — single entry point for all combat types
   if (actionType === 'attack') return <AttackForm {...{roleId,countryId,simId,onClose,onSubmitted}} />
@@ -4471,7 +4471,7 @@ function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
         params.org_name = myOrgs.find(o => o.id === targetOrg)?.name || targetOrg
         params.theme = theme.trim()
       }
-      const res = await submitAction(simId, 'set_meetings', roleId, countryId, params)
+      const res = await submitAction(simId, 'invite_to_meet', roleId, countryId, params)
       if (res.success) {
         setResult(res.narrative || 'Invitation sent')
         setMessage(''); setTheme(''); setTargetRole(''); setTargetOrg('')
