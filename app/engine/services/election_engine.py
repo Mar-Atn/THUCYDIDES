@@ -323,7 +323,7 @@ def resolve_election(
         "election_type": election_type,
         "election_round": round_num,
         "country_code": "columbia",
-        "winner_role_id": winner,
+        "winner_role_id": winner or "none",  # DB column is NOT NULL
         "ai_score": round(economy_score, 4),  # stored as economy_score in ai_score column
         "participant_votes": weighted_votes,
         "population_votes": {"economy_score": round(economy_score, 4),

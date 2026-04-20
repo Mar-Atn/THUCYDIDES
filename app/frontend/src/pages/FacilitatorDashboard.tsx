@@ -1119,23 +1119,31 @@ export function FacilitatorDashboard() {
                         </>
                       ) : (
                         <>
-                          {/* Timer */}
-                          {elecStartedAt && (() => {
-                            const elapsed = (Date.now() - new Date(elecStartedAt).getTime()) / 1000
+                          {/* Timer or Closed label */}
+                          {(() => {
+                            const elapsed = elecStartedAt ? (Date.now() - new Date(elecStartedAt).getTime()) / 1000 : 0
                             const total = elecDurationMin * 60
+                            const timerExpired = elecDurationMin > 0 && elapsed >= total
+                            const stopped = sched.election_stopped === true || electionStoppedLocal || elecDurationMin === 0 || timerExpired
+
+                            if (stopped) {
+                              return (
+                                <div className="bg-warning/10 border border-warning/30 rounded p-2 mb-1">
+                                  <span className="font-body text-caption text-warning font-medium">Voting closed — {elecVoteCount} votes cast</span>
+                                </div>
+                              )
+                            }
                             const rem = Math.max(0, total - elapsed)
                             const mm = String(Math.floor(rem / 60)).padStart(2, '0')
                             const ss = String(Math.floor(rem % 60)).padStart(2, '0')
                             return (
                               <div className="flex items-center justify-between mb-1">
                                 <span className="font-data text-caption text-warning">{mm}:{ss}</span>
-                                <div className="flex gap-1">
-                                  <button onClick={async () => {
-                                    const newSched = { ...sched, election_duration_min: elecDurationMin + 5 }
-                                    const { supabase: sb } = await import('@/lib/supabase')
-                                    await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
-                                  }} className="font-body text-caption text-text-secondary hover:text-action px-1">+5m</button>
-                                </div>
+                                <button onClick={async () => {
+                                  const newSched = { ...sched, election_duration_min: elecDurationMin + 5 }
+                                  const { supabase: sb } = await import('@/lib/supabase')
+                                  await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                                }} className="font-body text-caption text-text-secondary hover:text-action px-1">+5m</button>
                               </div>
                             )
                           })()}
