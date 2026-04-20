@@ -95,6 +95,69 @@
 - `roles_status_check` constraint updated: added 'killed'
 - Restart: resets `uses_remaining` for all limited actions
 
+### 12. Public Statement — Official Org Decisions
+- Chairman of any organization can publish "Official Decision of [Org Name]"
+- Radio selector: personal statement vs org decision (one per chaired org)
+- Event type: `org_decision` (distinct from `public_statement`)
+- Appears on public screen as official organization announcement
+
+### 13. Set Meetings — Unified 1:1 + Org Meetings
+- **1:1 Meeting:** Select any role from any country + message (300 chars)
+- **Organization Meeting:** Select org (member orgs only) + theme + message
+- Invitee sees card in Actions Expected Now with Accept/Decline/Not now
+- **10-minute expiry** — auto-expires if no response
+- **Max 2 active invitations** per role
+- Initiator sees responses in real-time (accepted/declined/later + messages)
+- Org invitations: only shown to org members (not all participants)
+- Phase B: meetings + communication allowed alongside move_units
+- Future hook: AI-Human and AI-AI conversation endpoint
+
+### Phase B Restriction Update
+- Inter-round now allows: move_units + all communication actions
+  (invite_to_meet, respond_meeting, public_statement, call_org_meeting)
+
+---
+
+## Complete Action Inventory — What's Built
+
+| Action | Status | UI | Engine |
+|--------|--------|-----|--------|
+| Ground Attack | DONE | AttackForm | military.py |
+| Air Strike | DONE | AttackForm | military.py |
+| Naval Combat | DONE | AttackForm | military.py |
+| Naval Bombardment | DONE | AttackForm | military.py |
+| Missile (conventional) | DONE | AttackForm | military.py |
+| Naval Blockade | DONE | BlockadeForm | blockade_engine.py |
+| Move Units | DONE | MoveUnitsForm | movement.py |
+| Ground Move | DONE | AttackForm | action_dispatcher.py |
+| Nuclear Test | DONE | NuclearTestForm | nuclear_chain.py |
+| Nuclear Launch | DONE | NuclearLaunchForm | nuclear_chain.py |
+| Nuclear Authorize | DONE | reactive card | nuclear_chain.py |
+| Nuclear Intercept | DONE | reactive card | nuclear_chain.py |
+| Set Budget | DONE | BudgetForm | batch |
+| Set Tariffs | DONE | TariffSanctionForm | batch |
+| Set Sanctions | DONE | TariffSanctionForm | batch |
+| Set OPEC | DONE | CartelProductionForm | batch |
+| Declare War | DONE | DeclareWarForm | action_dispatcher.py |
+| Propose Agreement | DONE | ProposeAgreementForm | agreement_engine.py |
+| Sign Agreement | DONE | reactive card | agreement_engine.py |
+| Propose Transaction | DONE | ProposeTransactionForm | transaction engine |
+| Accept Transaction | DONE | reactive card | transaction engine |
+| Basing Rights | DONE | BasingRightsForm | basing_rights_engine.py |
+| Martial Law | DONE | MartialLawForm | martial_law_engine.py |
+| Change Leader | DONE | ChangeLeaderForm | change_leader.py |
+| Reassign Powers | DONE | ReassignPowersForm | action_dispatcher.py |
+| Arrest | DONE | ArrestForm + release | arrest_engine.py |
+| Assassination | DONE | AssassinationForm | assassination_engine.py |
+| Covert Operation | DONE | CovertOpsForm | sabotage/propaganda engines |
+| Intelligence | DONE | IntelligenceForm | intelligence_engine.py + LLM |
+| Public Statement | DONE | PublicStatementForm + org | action_dispatcher.py |
+| Set Meetings | DONE | SetMeetingsForm | action_dispatcher.py |
+| Self-Nominate | DONE | election UI | election_engine.py |
+| Cast Election Vote | DONE | election UI | election_engine.py |
+
+**32 of 35 designed actions are fully implemented with human interfaces.**
+
 ---
 
 *Session by Marat Atn + Claude Opus 4.6*
