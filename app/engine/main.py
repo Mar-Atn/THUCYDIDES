@@ -61,10 +61,19 @@ app.add_middleware(
 @app.get("/debug/env")
 async def debug_env():
     """Temporary — check env var loading."""
+    import os
     return {
-        "supabase_url": settings.supabase_url[:25] if settings.supabase_url else "EMPTY",
-        "anon_key": settings.supabase_anon_key[:15] if settings.supabase_anon_key else "EMPTY",
-        "service_key": settings.supabase_service_role_key[:15] if settings.supabase_service_role_key else "EMPTY",
+        "from_settings": {
+            "supabase_url": settings.supabase_url[:25] if settings.supabase_url else "EMPTY",
+            "anon_key": settings.supabase_anon_key[:15] if settings.supabase_anon_key else "EMPTY",
+            "service_key": settings.supabase_service_role_key[:15] if settings.supabase_service_role_key else "EMPTY",
+        },
+        "from_os_environ": {
+            "SUPABASE_URL": os.environ.get("SUPABASE_URL", "NOT_SET")[:25],
+            "SUPABASE_ANON_KEY": os.environ.get("SUPABASE_ANON_KEY", "NOT_SET")[:15],
+            "SUPABASE_SERVICE_ROLE_KEY": os.environ.get("SUPABASE_SERVICE_ROLE_KEY", "NOT_SET")[:15],
+        },
+        "all_supabase_vars": [k for k in os.environ if "SUPA" in k.upper()],
     }
 
 @app.get("/health", response_model=APIResponse)
