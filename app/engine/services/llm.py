@@ -312,3 +312,43 @@ def get_health_stats() -> dict:
         }
         for provider, health in _health.items()
     }
+
+
+def call_llm_sync(
+    use_case: "LLMUseCase",
+    messages: list[dict],
+    system: Optional[str] = None,
+    max_tokens: Optional[int] = None,
+    temperature: float = 0.7,
+) -> "LLMResponse":
+    """Synchronous wrapper for call_llm.
+
+    Handles the async-from-sync problem: when called from sync code inside
+    an already-running event loop (e.g., FastAPI sync endpoint → dispatcher),
+    runs the async call in a separate thread.
+
+    Use this instead of asyncio.run(call_llm(...)) which fails when an
+    event loop is already running.
+    """
+    import asyncio
+    import concurrent.futures
+
+    coro = call_llm(
+        use_case=use_case,
+        messages=messages,
+        system=system,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
+
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+
+    if loop and loop.is_running():
+        # Already in async context — run in a thread
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+            return pool.submit(asyncio.run, coro).result(timeout=60)
+    else:
+        return asyncio.run(coro)

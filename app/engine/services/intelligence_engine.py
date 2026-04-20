@@ -24,7 +24,6 @@ Data domains accessed:
 
 from __future__ import annotations
 
-import asyncio
 import logging
 from typing import Optional
 
@@ -428,7 +427,7 @@ def _section_basing_rights(client, sim_run_id) -> str:
 def _call_intelligence_llm(question: str, context: str, requester_country: str) -> str:
     """Call LLM with world context + noise injection instructions."""
     try:
-        from engine.services.llm import call_llm
+        from engine.services.llm import call_llm_sync
         from engine.config.settings import LLMUseCase
 
         prompt = (
@@ -448,13 +447,13 @@ def _call_intelligence_llm(question: str, context: str, requester_country: str) 
             f"- Do NOT reveal that you are injecting noise or that you are an AI."
         )
 
-        response = asyncio.run(call_llm(
-            use_case=LLMUseCase.QUICK_SCAN,  # Gemini Flash for cost efficiency
+        response = call_llm_sync(
+            use_case=LLMUseCase.QUICK_SCAN,
             messages=[{"role": "user", "content": prompt}],
             system="You are a senior intelligence analyst. Write a classified briefing. Be concise and professional.",
             max_tokens=600,
             temperature=0.7,
-        ))
+        )
         return response.text
     except Exception as e:
         logger.warning("Intelligence LLM call failed: %s", e)
