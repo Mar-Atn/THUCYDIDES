@@ -11,22 +11,22 @@ class TestHexNeighbors:
         """Odd row (3), center of map — should have 6 neighbors."""
         n = hex_neighbors(3, 5)
         assert len(n) == 6
-        # Odd row: (-1,0) (-1,+1) (0,-1) (0,+1) (+1,0) (+1,+1)
-        assert set(n) == {(2, 5), (2, 6), (3, 4), (3, 6), (4, 5), (4, 6)}
+        # 1-indexed odd row (not shifted): (-1,-1) (-1,0) (0,-1) (0,+1) (+1,-1) (+1,0)
+        assert set(n) == {(2, 4), (2, 5), (3, 4), (3, 6), (4, 4), (4, 5)}
 
     def test_even_row_center(self):
         """Even row (4), center of map — should have 6 neighbors."""
         n = hex_neighbors(4, 5)
         assert len(n) == 6
-        # Even row: (-1,-1) (-1,0) (0,-1) (0,+1) (+1,-1) (+1,0)
-        assert set(n) == {(3, 4), (3, 5), (4, 4), (4, 6), (5, 4), (5, 5)}
+        # 1-indexed even row (shifted right): (-1,0) (-1,+1) (0,-1) (0,+1) (+1,0) (+1,+1)
+        assert set(n) == {(3, 5), (3, 6), (4, 4), (4, 6), (5, 5), (5, 6)}
 
     def test_row_1_col_1_corner(self):
         """Top-left corner — 6 raw neighbors, some out of bounds."""
         n = hex_neighbors(1, 1)
         assert len(n) == 6
-        # Row 1 is odd: (-1,0)=(0,1) (-1,+1)=(0,2) (0,-1)=(1,0) (0,+1)=(1,2) (+1,0)=(2,1) (+1,+1)=(2,2)
-        assert (0, 1) in n  # out of bounds
+        # Row 1 is odd (not shifted): (-1,-1)=(0,0) (-1,0)=(0,1) (0,-1)=(1,0) (0,+1)=(1,2) (+1,-1)=(2,0) (+1,0)=(2,1)
+        assert (0, 0) in n  # out of bounds
         assert (1, 0) in n  # out of bounds
         assert (2, 1) in n  # valid
 

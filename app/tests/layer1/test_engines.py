@@ -770,12 +770,11 @@ class TestStability:
 class TestElections:
     """Elections scheduled at correct rounds, formula produces valid results."""
 
-    def test_scheduled_rounds(self):
-        """Correct election events at R2, R3, R4, R5."""
-        assert 2 in SCHEDULED_EVENTS
-        assert any(e["subtype"] == "columbia_midterms" for e in SCHEDULED_EVENTS[2])
-        assert 5 in SCHEDULED_EVENTS
-        assert any(e["subtype"] == "columbia_presidential" for e in SCHEDULED_EVENTS[5])
+    def test_scheduled_events_deprecated(self):
+        """SCHEDULED_EVENTS dict is empty — elections now via sim_runs.key_events."""
+        # Elections are configured per-sim in key_events JSONB, not hardcoded.
+        # This test verifies the old dict is empty (simplification 2026-04-15).
+        assert SCHEDULED_EVENTS == {}
 
     def test_midterm_result(self):
         """Columbia midterm produces incumbent win/loss decision."""
