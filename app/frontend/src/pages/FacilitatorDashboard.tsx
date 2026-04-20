@@ -1614,56 +1614,6 @@ function PendingActionCard({pa, simRun, onConfirm, onReject}:{
     )
   }
 
-  // Assassination: two-stage (simulate → confirm/discard)
-  if (pa.action_type === 'assassination') {
-    const target = (payload.changes as Record<string,unknown>)?.target_role as string || payload.target_role as string || '?'
-    const simResult = (payload as Record<string,unknown>).assassination_result as Record<string,unknown> | undefined
-    return (
-      <div className="bg-base rounded-lg border border-danger/30 p-3 space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="font-body text-body-sm text-danger font-medium">Assassination</span>
-          <span className="font-body text-caption text-text-secondary">{pa.target_info || `${pa.role_id} → ${target}`}</span>
-        </div>
-
-        {!simResult ? (
-          <div className="flex gap-2">
-            <button onClick={async () => {
-                setResolving(true)
-                try {
-                  const res = await onConfirm()
-                  setActionDone('approved')
-                } catch { /* ignore */ }
-                finally { setResolving(false) }
-              }} disabled={resolving}
-              className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1 rounded hover:bg-action/90 disabled:opacity-50 transition-colors">
-              {resolving ? '...' : 'Confirm'}
-            </button>
-            <button onClick={() => handleQuickReject()} disabled={resolving}
-              className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 disabled:opacity-50 transition-colors">
-              Discard
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className={`rounded p-2 ${simResult.killed ? 'bg-danger/10' : 'bg-action/5'}`}>
-              <p className="font-body text-caption text-text-primary">{simResult.narrative as string}</p>
-            </div>
-            <div className="flex gap-2">
-              <button onClick={() => setActionDone('approved')}
-                className="flex-1 font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors">
-                Publish Result
-              </button>
-              <button onClick={() => handleQuickReject()}
-                className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors">
-                Discard
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    )
-  }
-
   // Non-combat: simple card with loading state
   if (!isCombat) {
     return (
