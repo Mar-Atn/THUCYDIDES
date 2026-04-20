@@ -1136,12 +1136,24 @@ export function FacilitatorDashboard() {
                             Economy score determines vote weight. Opposition bonus: score &lt; 0.50
                           </div>
 
-                          {/* Resolve button */}
-                          <button onClick={handleResolveElection}
-                            disabled={electionResolving || elecVoteCount === 0}
-                            className="w-full font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                            {electionResolving ? 'Resolving...' : 'Resolve Election'}
-                          </button>
+                          {/* Resolve + Restart buttons */}
+                          <div className="flex gap-2">
+                            <button onClick={handleResolveElection}
+                              disabled={electionResolving || elecVoteCount === 0}
+                              className="flex-1 font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                              {electionResolving ? 'Resolving...' : 'Resolve Election'}
+                            </button>
+                            <button onClick={async () => {
+                              if (!confirm('Restart election? All votes will be deleted and voting reopened.')) return
+                              const { supabase: sb } = await import('@/lib/supabase')
+                              await sb.from('election_votes').delete().eq('sim_run_id', simId!).eq('election_type', activeElecEvent.subtype)
+                              const newSched = { ...sched, election_open: true, election_started_at: new Date().toISOString(), election_duration_min: 10 }
+                              await sb.from('sim_runs').update({ schedule: newSched }).eq('id', simId!)
+                            }}
+                              className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1.5 rounded hover:bg-danger/20 transition-colors">
+                              Restart
+                            </button>
+                          </div>
                         </>
                       )}
                     </div>
