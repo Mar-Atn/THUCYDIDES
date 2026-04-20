@@ -1279,9 +1279,6 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           <p className="font-body text-caption text-text-secondary">
             Select a candidate and cast your vote. Your choice will not be revealed to other participants.
           </p>
-          <p className="font-body text-caption text-text-secondary">
-            Opposition candidates carry 2 votes each (may increase to 3 under economic hardship). All other roles carry 1 vote each.
-          </p>
         </div>
 
         <div className="bg-card border border-border rounded-lg divide-y divide-border">
@@ -1294,9 +1291,6 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 onChange={() => setSelectedElectionCandidate(c.role_id)}
                 className="accent-action"/>
               <span className="font-body text-body-sm text-text-primary flex-1 capitalize">{c.role_id}</span>
-              <span className={`font-body text-caption px-2 py-0.5 rounded ${
-                c.camp === 'opposition' ? 'bg-action/10 text-action' : 'bg-text-secondary/10 text-text-secondary'
-              }`}>{c.camp === 'opposition' ? 'Opposition (2+ votes)' : 'Government (1 vote)'}</span>
             </label>
           ))}
         </div>
