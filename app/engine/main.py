@@ -1515,13 +1515,20 @@ async def submit_action(
         or (body.action_type in COMBAT_DICE_ACTIONS and not auto_attack)
     )
     if needs_confirmation:
-        target = body.params.get("target_role", body.params.get("target_country", ""))
+        changes = body.params.get("changes", {}) or {}
+        target = changes.get("target_role") or body.params.get("target_role", body.params.get("target_country", ""))
         if body.action_type in COMBAT_DICE_ACTIONS:
             tr = body.params.get("target_row", "?")
             tc = body.params.get("target_col", "?")
             target_info = f"{role['character_name']} ({body.country_code}) → ({tr},{tc})"
         else:
-            target_info = f"{role['character_name']} → {target}" if target else role["character_name"]
+            # Resolve target character name if possible
+            target_name = target
+            if target:
+                t_data = client.table("roles").select("character_name").eq("sim_run_id", sim_id).eq("id", target).limit(1).execute().data
+                if t_data:
+                    target_name = t_data[0]["character_name"]
+            target_info = f"{role['character_name']} → {target_name}" if target else role["character_name"]
 
         pa_result = client.table("pending_actions").insert({
             "sim_run_id": sim_id,
