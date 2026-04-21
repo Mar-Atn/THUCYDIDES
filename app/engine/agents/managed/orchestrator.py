@@ -124,7 +124,7 @@ class AIOrchestrator:
         db = get_client()
         run_data = (
             db.table("sim_runs")
-            .select("scenario_id, current_round, scenario_code")
+            .select("scenario_id, current_round")
             .eq("id", self.sim_run_id)
             .limit(1)
             .execute()
@@ -133,23 +133,24 @@ class AIOrchestrator:
             return {"error": f"SimRun {self.sim_run_id} not found", "agents_initialized": 0}
 
         run = run_data.data[0]
-        self._scenario_code = run.get("scenario_code", "base")
+        # scenario_code for tools.py — use sim_run_id directly (resolves via sim_run_manager)
+        self._scenario_code = self.sim_run_id
         self.round_num = run.get("current_round", 1)
 
         # Load roles to initialize
         if role_ids:
             roles_data = (
                 db.table("roles")
-                .select("role_id, country_code, character_name, title")
+                .select("id, country_code, character_name, title")
                 .eq("sim_run_id", self.sim_run_id)
-                .in_("role_id", role_ids)
+                .in_("id", role_ids)
                 .execute()
             )
         else:
             # Get all AI-operated roles
             roles_data = (
                 db.table("roles")
-                .select("role_id, country_code, character_name, title, is_ai_operated")
+                .select("id, country_code, character_name, title, is_ai_operated")
                 .eq("sim_run_id", self.sim_run_id)
                 .eq("is_ai_operated", True)
                 .execute()
@@ -169,7 +170,7 @@ class AIOrchestrator:
         errors = []
 
         for role in roles:
-            role_id = role["role_id"]
+            role_id = role["id"]
             country_code = role["country_code"]
             character_name = role.get("character_name", role_id)
             title = role.get("title", "Leader")
@@ -228,7 +229,7 @@ class AIOrchestrator:
             description=(
                 f"{len(initialized)} agents initialized, {len(errors)} errors"
             ),
-            metadata={"initialized": [a["role_id"] for a in initialized], "errors": errors},
+            metadata={"initialized": [a.get("role_id") or a.get("id") for a in initialized], "errors": errors},
         )
 
         return {
