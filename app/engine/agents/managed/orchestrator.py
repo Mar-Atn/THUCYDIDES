@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
+from engine.agents.managed.conversations import ConversationRouter
 from engine.agents.managed.event_handler import (
     log_transcript_to_observatory,
     write_agent_log_event,
@@ -92,6 +93,7 @@ class AIOrchestrator:
         self.sim_run_id = sim_run_id
         self.config = config or OrchestratorConfig()
         self.session_manager = ManagedSessionManager()
+        self.conversation_router = ConversationRouter(self.session_manager, sim_run_id)
         self.agents: dict[str, SessionContext] = {}  # role_id -> session
         self.agent_states: dict[str, str] = {}  # role_id -> IDLE|ACTING|IN_MEETING|FROZEN
         self.round_num: int = 1
@@ -276,10 +278,16 @@ class AIOrchestrator:
         )
 
         pulse_results = []
+        meeting_results = []
 
         for pulse in range(1, self.config.pulses_per_round + 1):
             pulse_result = await self.send_pulse(pulse)
             pulse_results.append(pulse_result)
+
+            # After each pulse, check for and run accepted meetings
+            mtg_results = await self._process_meetings()
+            if mtg_results:
+                meeting_results.extend(mtg_results)
 
             # Auto-advance: wait between pulses
             if self.config.auto_advance and pulse < self.config.pulses_per_round:
@@ -468,6 +476,89 @@ class AIOrchestrator:
                 self.agent_states[role_id] = IDLE
 
         return result
+
+    # ------------------------------------------------------------------
+    # Meeting processing
+    # ------------------------------------------------------------------
+
+    async def _process_meetings(self) -> list[dict]:
+        """Check for and run any pending accepted meetings.
+
+        Queries meetings table for accepted meetings where both
+        participants are IDLE. Runs each meeting sequentially
+        (agents are IN_MEETING during relay, so parallelism is
+        not applicable per pair).
+
+        Returns:
+            List of meeting result dicts.
+        """
+        ready = await self.conversation_router.check_pending_meetings(
+            self.agents, self.agent_states,
+        )
+
+        if not ready:
+            return []
+
+        results = []
+        for meeting in ready:
+            meeting_id = meeting["id"]
+            role_a = meeting["participant_a_role_id"]
+            role_b = meeting["participant_b_role_id"]
+
+            agent_a = self.agents.get(role_a)
+            agent_b = self.agents.get(role_b)
+
+            if not agent_a or not agent_b:
+                logger.warning(
+                    "[orchestrator] Meeting %s skipped: missing agent (%s or %s)",
+                    meeting_id, role_a, role_b,
+                )
+                continue
+
+            # Check both still IDLE (could have changed since query)
+            if self.agent_states.get(role_a) != IDLE:
+                continue
+            if self.agent_states.get(role_b) != IDLE:
+                continue
+
+            logger.info(
+                "[orchestrator] Running meeting %s: %s vs %s",
+                meeting_id, role_a, role_b,
+            )
+
+            try:
+                result = await self.conversation_router.run_meeting(
+                    meeting_id=meeting_id,
+                    agent_a=agent_a,
+                    agent_b=agent_b,
+                    agent_states=self.agent_states,
+                    round_num=self.round_num,
+                    max_turns=self.config.max_turns_per_meeting,
+                )
+                results.append(result)
+
+                # Update meeting stats
+                stats_a = self.round_stats.get(role_a)
+                stats_b = self.round_stats.get(role_b)
+                if stats_a:
+                    stats_a.meetings_used += 1
+                if stats_b:
+                    stats_b.meetings_used += 1
+
+            except Exception as e:
+                logger.exception(
+                    "[orchestrator] Meeting %s failed: %s", meeting_id, e,
+                )
+                # Ensure agents are returned to IDLE on failure
+                self.agent_states[role_a] = IDLE
+                self.agent_states[role_b] = IDLE
+                results.append({
+                    "meeting_id": meeting_id,
+                    "error": str(e),
+                    "turns": 0,
+                })
+
+        return results
 
     # ------------------------------------------------------------------
     # Pulse message building
