@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 class ToolExecutor:
     """Dispatches tool calls for a specific agent session.
 
-    Binds country_code, sim_run_id, scenario_code, and round_num at
-    creation so the agent doesn't need to pass them.
+    Binds country_code, sim_run_id, scenario_code, round_num, and
+    role_id at creation so the agent doesn't need to pass them.
     """
 
     def __init__(
@@ -31,11 +31,13 @@ class ToolExecutor:
         scenario_code: str,
         sim_run_id: str,
         round_num: int = 1,
+        role_id: str = "",
     ):
         self.country_code = country_code
         self.scenario_code = scenario_code
         self.sim_run_id = sim_run_id
         self.round_num = round_num
+        self.role_id = role_id or f"{country_code}_hos"
         self.call_log: list[dict] = []
 
     def execute(self, tool_name: str, tool_input: dict) -> str:
@@ -104,6 +106,50 @@ class ToolExecutor:
             return self._write_notes(
                 key=tool_input.get("key", "notes"),
                 content=tool_input.get("content", ""),
+            )
+
+        # --- New Phase 1B tools (9-16) ---
+
+        if tool_name == "read_notes":
+            return self._read_notes(key=tool_input.get("key"))
+
+        if tool_name == "get_country_info":
+            return self._get_country_info(
+                country_code=tool_input.get("country_code", ""),
+            )
+
+        if tool_name == "get_hex_info":
+            return agent_tools.get_hex_info(
+                row=tool_input.get("row", 1),
+                col=tool_input.get("col", 1),
+                scope=tool_input.get("scope", "global"),
+                scenario_code=sc,
+                round_num=rn,
+            )
+
+        if tool_name == "get_organizations":
+            return agent_tools.get_organization_memberships(cc)
+
+        if tool_name == "get_my_artefacts":
+            return self._get_my_artefacts(
+                unread_only=tool_input.get("unread_only", False),
+            )
+
+        if tool_name == "get_action_rules":
+            return self._get_action_rules(
+                action_type=tool_input.get("action_type"),
+            )
+
+        if tool_name == "request_meeting":
+            return self._request_meeting(
+                target_country=tool_input.get("target_country", ""),
+                agenda=tool_input.get("agenda", ""),
+            )
+
+        if tool_name == "respond_to_invitation":
+            return self._respond_to_invitation(
+                invitation_id=tool_input.get("invitation_id", ""),
+                decision=tool_input.get("decision", "decline"),
             )
 
         # Fallback: check if it matches an existing tool name directly
@@ -321,3 +367,313 @@ class ToolExecutor:
         except Exception as e:
             logger.exception("get_pending_proposals failed")
             return {"error": str(e), "received": [], "sent": []}
+
+    # --- New Phase 1B helper methods ---
+
+    def _read_notes(self, key: str | None = None) -> dict:
+        """Read a specific memory note by key, or list all keys."""
+        try:
+            client = get_client()
+            if key:
+                # Read specific note
+                result = (
+                    client.table("agent_memories")
+                    .select("content,round_num,updated_at,memory_key")
+                    .eq("sim_run_id", self.sim_run_id)
+                    .eq("country_code", self.country_code)
+                    .eq("memory_key", key)
+                    .execute()
+                )
+                if not result.data:
+                    return {"exists": False, "memory_key": key, "content": None}
+                row = result.data[0]
+                return {
+                    "exists": True,
+                    "memory_key": key,
+                    "content": row.get("content"),
+                    "round_num": row.get("round_num"),
+                    "updated_at": row.get("updated_at"),
+                }
+            else:
+                # List all keys with previews
+                result = (
+                    client.table("agent_memories")
+                    .select("memory_key,content,round_num,updated_at")
+                    .eq("sim_run_id", self.sim_run_id)
+                    .eq("country_code", self.country_code)
+                    .order("updated_at", desc=True)
+                    .execute()
+                )
+                rows = result.data or []
+                return {
+                    "country": self.country_code,
+                    "memory_count": len(rows),
+                    "memories": [
+                        {
+                            "memory_key": r["memory_key"],
+                            "round_num": r.get("round_num"),
+                            "updated_at": r.get("updated_at"),
+                            "preview": (r.get("content") or "")[:200],
+                        }
+                        for r in rows
+                    ],
+                }
+        except Exception as e:
+            logger.exception("read_notes failed")
+            return {"error": str(e)}
+
+    def _get_country_info(self, country_code: str) -> dict:
+        """Public info about any specific country (GDP, regime, wars, etc.)."""
+        if not country_code:
+            return {"error": "country_code is required"}
+        sc = self.scenario_code
+        rn = self.round_num
+        try:
+            strategic = agent_tools.get_strategic_context(country_code, sc, rn)
+            economic = agent_tools.get_economic_state(country_code, sc, rn)
+            return {
+                "country": country_code,
+                "strategic": strategic,
+                "economic": economic,
+            }
+        except Exception as e:
+            logger.exception("get_country_info failed for %s", country_code)
+            return {"error": str(e)}
+
+    def _get_my_artefacts(self, unread_only: bool = False) -> dict:
+        """Query artefacts table for this role's intel/cables."""
+        try:
+            client = get_client()
+            q = (
+                client.table("artefacts")
+                .select("*")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("role_id", self.role_id)
+                .order("round_delivered", desc=True)
+            )
+            if unread_only:
+                q = q.eq("is_read", False)
+            result = q.execute()
+            rows = result.data or []
+
+            artefacts = [
+                {
+                    "id": a.get("id"),
+                    "artefact_type": a.get("artefact_type"),
+                    "classification": a.get("classification"),
+                    "title": a.get("title"),
+                    "subtitle": a.get("subtitle"),
+                    "from_entity": a.get("from_entity"),
+                    "content_html": a.get("content_html"),
+                    "round_delivered": a.get("round_delivered"),
+                    "is_read": a.get("is_read"),
+                }
+                for a in rows
+            ]
+
+            # Mark as read
+            unread_ids = [a["id"] for a in rows if not a.get("is_read")]
+            if unread_ids:
+                for aid in unread_ids:
+                    try:
+                        client.table("artefacts").update({"is_read": True}).eq("id", aid).execute()
+                    except Exception:
+                        pass  # Best-effort mark-as-read
+
+            return {
+                "role_id": self.role_id,
+                "artefact_count": len(artefacts),
+                "artefacts": artefacts,
+            }
+        except Exception as e:
+            logger.exception("get_my_artefacts failed")
+            return {"error": str(e), "artefacts": []}
+
+    def _get_action_rules(self, action_type: str | None = None) -> dict:
+        """Return structured info about action types from Pydantic models."""
+        from engine.agents.action_schemas import ACTION_TYPE_TO_MODEL
+
+        if not action_type:
+            # List all available action types
+            return {
+                "available_actions": sorted(ACTION_TYPE_TO_MODEL.keys()),
+                "hint": "Call get_action_rules with a specific action_type to see required fields.",
+            }
+
+        if action_type not in ACTION_TYPE_TO_MODEL:
+            return {
+                "error": f"Unknown action_type '{action_type}'",
+                "available_actions": sorted(ACTION_TYPE_TO_MODEL.keys()),
+            }
+
+        model_cls = ACTION_TYPE_TO_MODEL[action_type]
+        schema = model_cls.model_json_schema()
+        properties = schema.get("properties", {})
+        required = schema.get("required", [])
+
+        fields = []
+        for field_name, field_info in properties.items():
+            entry: dict = {
+                "name": field_name,
+                "type": field_info.get("type", field_info.get("anyOf", "object")),
+                "required": field_name in required,
+            }
+            if "description" in field_info:
+                entry["description"] = field_info["description"]
+            if "enum" in field_info:
+                entry["allowed_values"] = field_info["enum"]
+            if "const" in field_info:
+                entry["fixed_value"] = field_info["const"]
+            if "default" in field_info:
+                entry["default"] = field_info["default"]
+            if "minimum" in field_info:
+                entry["minimum"] = field_info["minimum"]
+            if "maximum" in field_info:
+                entry["maximum"] = field_info["maximum"]
+            # Pydantic v2 uses ge/le via exclusiveMinimum/exclusiveMaximum or directly
+            if "exclusiveMinimum" in field_info:
+                entry["exclusive_minimum"] = field_info["exclusiveMinimum"]
+            if "exclusiveMaximum" in field_info:
+                entry["exclusive_maximum"] = field_info["exclusiveMaximum"]
+            fields.append(entry)
+
+        docstring = model_cls.__doc__ or ""
+
+        return {
+            "action_type": action_type,
+            "description": docstring.strip(),
+            "fields": fields,
+        }
+
+    def _request_meeting(self, target_country: str, agenda: str) -> dict:
+        """Create a meeting invitation to another country's leader."""
+        if not target_country:
+            return {"error": "target_country is required"}
+        if not agenda:
+            return {"error": "agenda is required"}
+
+        try:
+            from datetime import datetime, timezone, timedelta
+            client = get_client()
+
+            # Check limit: max 2 active invitations per role
+            now_iso = datetime.now(timezone.utc).isoformat()
+            active = (
+                client.table("meeting_invitations")
+                .select("id")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("inviter_role_id", self.role_id)
+                .eq("status", "pending")
+                .gte("expires_at", now_iso)
+                .execute()
+                .data or []
+            )
+            if len(active) >= 2:
+                return {
+                    "success": False,
+                    "narrative": "You already have 2 active invitations. Wait for them to expire or be answered.",
+                }
+
+            # Target role_id defaults to HoS of target country
+            target_role_id = f"{target_country}_hos"
+            expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
+
+            row = {
+                "sim_run_id": self.sim_run_id,
+                "invitation_type": "one_on_one",
+                "inviter_role_id": self.role_id,
+                "inviter_country_code": self.country_code,
+                "invitee_role_id": target_role_id,
+                "message": agenda[:300],
+                "expires_at": expires_at,
+                "status": "pending",
+                "responses": {},
+            }
+            result = client.table("meeting_invitations").insert(row).execute()
+            inv_id = result.data[0]["id"] if result.data else None
+
+            logger.info(
+                "[meeting] %s invited %s (id=%s)",
+                self.role_id, target_role_id, inv_id,
+            )
+            return {
+                "success": True,
+                "narrative": f"Meeting invitation sent to {target_country}",
+                "invitation_id": inv_id,
+            }
+        except Exception as e:
+            logger.exception("request_meeting failed")
+            return {"success": False, "error": str(e)}
+
+    def _respond_to_invitation(self, invitation_id: str, decision: str) -> dict:
+        """Accept or decline a meeting invitation."""
+        if not invitation_id:
+            return {"error": "invitation_id is required"}
+        if decision not in ("accept", "decline"):
+            return {"error": "decision must be 'accept' or 'decline'"}
+
+        try:
+            from engine.services.meeting_service import create_meeting
+            client = get_client()
+
+            inv_rows = (
+                client.table("meeting_invitations")
+                .select("*")
+                .eq("id", invitation_id)
+                .limit(1)
+                .execute()
+                .data
+            )
+            if not inv_rows:
+                return {"success": False, "narrative": "Invitation not found"}
+            inv = inv_rows[0]
+
+            if inv["status"] != "pending":
+                return {"success": False, "narrative": "Invitation has expired or already been answered"}
+
+            # Update responses
+            responses = inv.get("responses") or {}
+            responses[self.role_id] = {"response": decision, "message": ""}
+            update_payload: dict = {"responses": responses}
+
+            meeting_id = None
+            if decision == "accept":
+                # If invitation already has a meeting, don't duplicate
+                if inv.get("meeting_id"):
+                    return {
+                        "success": True,
+                        "narrative": "Meeting already exists for this invitation.",
+                        "meeting_id": inv["meeting_id"],
+                    }
+
+                inviter_role_id = inv.get("inviter_role_id", "")
+                inviter_country = inv.get("inviter_country_code", "")
+
+                meeting = create_meeting(
+                    sim_run_id=self.sim_run_id,
+                    invitation_id=invitation_id,
+                    participant_a_role_id=inviter_role_id,
+                    participant_a_country=inviter_country,
+                    participant_b_role_id=self.role_id,
+                    participant_b_country=self.country_code,
+                    agenda=inv.get("message"),
+                    round_num=self.round_num,
+                )
+                if not meeting.get("id"):
+                    return {"success": False, "narrative": "Accepted, but failed to create meeting channel."}
+                meeting_id = meeting["id"]
+                update_payload["status"] = "accepted"
+                update_payload["meeting_id"] = meeting_id
+            else:
+                update_payload["status"] = "rejected"
+
+            client.table("meeting_invitations").update(update_payload).eq("id", invitation_id).execute()
+
+            label = "accepted" if decision == "accept" else "declined"
+            result: dict = {"success": True, "narrative": f"You {label} the meeting invitation."}
+            if meeting_id:
+                result["meeting_id"] = meeting_id
+            return result
+        except Exception as e:
+            logger.exception("respond_to_invitation failed")
+            return {"success": False, "error": str(e)}

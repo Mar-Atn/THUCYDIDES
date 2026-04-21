@@ -1,6 +1,6 @@
 """Phase 2 — Custom tool JSON schemas for Managed Agent sessions.
 
-Defines 8 game tools that the agent can call. Our code executes them
+Defines 16 game tools that the agent can call. Our code executes them
 against the real DB via tool_executor.py.
 
 Tool design: composite tools that bundle related queries (e.g.,
@@ -164,10 +164,172 @@ WRITE_NOTES_SCHEMA: dict = {
 
 
 # ---------------------------------------------------------------------------
-# All tool schemas for agent creation
+# New Phase 1B tools (9-16)
+# ---------------------------------------------------------------------------
+
+READ_NOTES_SCHEMA: dict = {
+    "name": "read_notes",
+    "description": (
+        "Read a specific note from your private notebook by key, or list all "
+        "note keys if no key is provided. If key is given, returns the full "
+        "content. If key is omitted, returns all keys with previews."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "key": {
+                "type": "string",
+                "description": "Note key to read (e.g., 'strategic_plan'). Omit to list all keys.",
+            },
+        },
+        "required": [],
+    },
+}
+
+GET_COUNTRY_INFO_SCHEMA: dict = {
+    "name": "get_country_info",
+    "description": (
+        "Returns public info about ANY specific country (not just yours): "
+        "GDP, treasury, regime type, stability, wars, military totals, "
+        "nuclear level. Use get_all_countries first for valid codes."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "country_code": {
+                "type": "string",
+                "description": "Country code to look up (e.g., 'cathay', 'columbia').",
+            },
+        },
+        "required": ["country_code"],
+    },
+}
+
+GET_HEX_INFO_SCHEMA: dict = {
+    "name": "get_hex_info",
+    "description": (
+        "Returns info about a specific hex: terrain, units present, theater "
+        "link. Scope is 'global' (1..10 x 1..20) or a theater name "
+        "('eastern_ereb' or 'mashriq', both 1..10 x 1..10)."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "row": {"type": "integer", "description": "Row coordinate (1-indexed)."},
+            "col": {"type": "integer", "description": "Column coordinate (1-indexed)."},
+            "scope": {
+                "type": "string",
+                "description": "Coordinate scope: 'global', 'eastern_ereb', or 'mashriq'.",
+            },
+        },
+        "required": ["row", "col", "scope"],
+    },
+}
+
+GET_ORGANIZATIONS_SCHEMA: dict = {
+    "name": "get_organizations",
+    "description": (
+        "Returns international organizations you belong to plus the full "
+        "catalog (UNSC, NATO, BRICS, OPEC, EREB_UNION) with their members."
+    ),
+    "input_schema": {"type": "object", "properties": {}, "required": []},
+}
+
+GET_MY_ARTEFACTS_SCHEMA: dict = {
+    "name": "get_my_artefacts",
+    "description": (
+        "Returns your role's artefacts: intelligence reports, diplomatic "
+        "cables, letters, and other classified documents delivered to you. "
+        "These contain asymmetric information only you can see."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "unread_only": {
+                "type": "boolean",
+                "description": "If true, return only unread artefacts. Default false.",
+            },
+        },
+        "required": [],
+    },
+}
+
+GET_ACTION_RULES_SCHEMA: dict = {
+    "name": "get_action_rules",
+    "description": (
+        "Returns the rules and required fields for a specific action type. "
+        "Call this BEFORE submit_action to understand what fields you need. "
+        "Returns field names, types, descriptions, and constraints."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "action_type": {
+                "type": "string",
+                "description": (
+                    "Action type to look up, e.g. 'declare_attack', 'set_tariff', "
+                    "'propose_transaction'. Omit to list all available types."
+                ),
+            },
+        },
+        "required": [],
+    },
+}
+
+REQUEST_MEETING_SCHEMA: dict = {
+    "name": "request_meeting",
+    "description": (
+        "Send a meeting invitation to another country's leader. They must "
+        "accept before you can talk. Max 2 active invitations at a time. "
+        "Expires in 10 minutes if not answered."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "target_country": {
+                "type": "string",
+                "description": "Country code of the leader you want to meet.",
+            },
+            "agenda": {
+                "type": "string",
+                "description": "Brief agenda or message (max 300 chars).",
+            },
+        },
+        "required": ["target_country", "agenda"],
+    },
+}
+
+RESPOND_TO_INVITATION_SCHEMA: dict = {
+    "name": "respond_to_invitation",
+    "description": (
+        "Accept or decline a meeting invitation you received. Use "
+        "get_pending_proposals to see your pending invitations first. "
+        "Accepting creates a meeting channel for conversation."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "invitation_id": {
+                "type": "string",
+                "description": "ID of the invitation to respond to.",
+            },
+            "decision": {
+                "type": "string",
+                "description": "Your decision: 'accept' or 'decline'.",
+                "enum": ["accept", "decline"],
+            },
+        },
+        "required": ["invitation_id", "decision"],
+    },
+}
+
+
+# ---------------------------------------------------------------------------
+# All tool schemas for agent creation (16 tools)
 # ---------------------------------------------------------------------------
 
 MANAGED_TOOL_SCHEMAS: list[dict] = [
+    # Original 8
     GET_MY_COUNTRY_SCHEMA,
     GET_ALL_COUNTRIES_SCHEMA,
     GET_RELATIONSHIPS_SCHEMA,
@@ -176,6 +338,15 @@ MANAGED_TOOL_SCHEMAS: list[dict] = [
     GET_PENDING_PROPOSALS_SCHEMA,
     SUBMIT_ACTION_SCHEMA,
     WRITE_NOTES_SCHEMA,
+    # New 8 (Phase 1B)
+    READ_NOTES_SCHEMA,
+    GET_COUNTRY_INFO_SCHEMA,
+    GET_HEX_INFO_SCHEMA,
+    GET_ORGANIZATIONS_SCHEMA,
+    GET_MY_ARTEFACTS_SCHEMA,
+    GET_ACTION_RULES_SCHEMA,
+    REQUEST_MEETING_SCHEMA,
+    RESPOND_TO_INVITATION_SCHEMA,
 ]
 
 

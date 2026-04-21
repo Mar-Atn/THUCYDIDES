@@ -1,11 +1,14 @@
 """Phase 1 — Build Layer 1 (IMMUTABLE) system prompt from DB data.
 
-Assembles the full system prompt for a Managed Agent session:
-  - Character identity from roles table
-  - Condensed world rules (actions, mechanics, diplomacy)
-  - Autonomy doctrine
+Assembles the full system prompt for a Managed Agent session from 4 sources:
+  1. World context (roster, geography, theaters, situation)
+  2. Game rules (all action types, combat, economy, diplomacy, covert, nuclear)
+  3. Character identity + traits + assertiveness nudge
+  4. Autonomy doctrine + meta-awareness (static)
 
-Reuses: world_context.build_rich_block1, profiles.load_role/load_country_context
+Reuses: world_context.build_rich_block1, profiles.load_role/load_country_context,
+        game_rules_context.build_game_rules_context,
+        meta_context.build_meta_awareness_static
 """
 from __future__ import annotations
 
@@ -13,6 +16,8 @@ import logging
 
 from engine.agents.world_context import build_rich_block1
 from engine.agents.profiles import load_role, load_country_context
+from engine.agents.managed.game_rules_context import build_game_rules_context
+from engine.agents.managed.meta_context import build_meta_awareness_static
 
 logger = logging.getLogger(__name__)
 
@@ -45,60 +50,107 @@ with a name, a country, objectives, and a political survival imperative.
 Speak and decide as that person would."""
 
 
-ROUND_INSTRUCTIONS = """## HOW ROUNDS WORK
+CHARACTER_TRAIT_FRAMEWORK = """## YOUR CHARACTER TRAITS
 
-When a round starts, you will receive a message describing the current situation.
-Your workflow:
+Based on your identity as {character_name}, self-assign these traits on first activation.
+These shape HOW you make decisions (not WHAT you decide).
 
-1. **Read your notes** — use list_my_memories / read_memory to recall your prior thinking
-2. **Assess the situation** — use get_my_country, get_relationships, get_my_forces, get_recent_events
-3. **Decide and act** — use submit_action to execute your decisions (up to 3 per round)
-4. **Record your thinking** — use write_notes to save observations, plans, and relationship notes
+- **Conflict style** (Thomas-Kilmann): competing / collaborating / compromising / avoiding / accommodating
+- **Risk orientation** (1-5): 1=very cautious, 5=very bold
+- **Decision speed** (1-5): 1=very deliberate, 5=impulsive
+- **Trust default** (1-5): 1=deeply suspicious, 5=readily trusting
+- **Communication style** (1-5): 1=very guarded, 5=very transparent
+- **Strategic horizon** (1-5): 1=reactive/tactical, 5=long-term planner
 
-You may also receive mid-round alerts (military movements, proposals, crises).
-React to them as you see fit.
+Write your trait self-assessment to memory (key: "character_traits") on your first action.
+These traits should be consistent with your character's background, age, regime type,
+and political position. Let them guide your tone, risk appetite, and negotiation style
+throughout the simulation."""
 
-At round end, you will be asked for mandatory inputs (budget, tariffs).
-Submit them or face defaults imposed by your parliament.
 
-**Quality over quantity.** One decisive action is better than three half-hearted ones."""
+ASSERTIVENESS_COOPERATIVE = (
+    "\n\n**World disposition:** The world tends toward cooperation. "
+    "Diplomatic solutions are valued. Consider others' interests alongside your own. "
+    "Escalation carries higher reputational cost than usual."
+)
+
+ASSERTIVENESS_COMPETITIVE = (
+    "\n\n**World disposition:** The world is competitive. Strength is respected. "
+    "Protect your interests assertively. Others will do the same. "
+    "Accommodation without leverage is perceived as weakness."
+)
 
 
 def build_system_prompt(
     role_id: str,
     *,
+    assertiveness: int = 5,
     countries: dict | None = None,
     world_state: dict | None = None,
 ) -> str:
     """Build the complete Layer 1 system prompt for a Managed Agent.
 
+    This prompt is IMMUTABLE for the session. Round-specific context
+    (pulse number, resource state, events) is sent per-pulse by the
+    orchestrator via meta_context.build_meta_context().
+
     Args:
         role_id: Role identifier (e.g., "dealer" for Columbia HoS).
+        assertiveness: Global assertiveness dial (1=cooperative, 10=assertive).
+            Default 5 = neutral (no nudge).
         countries: Optional live country state dict.
         world_state: Optional live world state dict.
 
     Returns:
-        Complete system prompt (~4-6K tokens).
+        Complete system prompt (~5-8K tokens).
     """
-    # Block 1 — world context (identity, roster, geography, mechanics, powers)
+    # ── Source 1: World context (identity, roster, geography, situation) ──
     block1 = build_rich_block1(
         role_id=role_id,
         countries=countries,
         world_state=world_state,
     )
 
-    # Load role for character context
+    # ── Source 2: Game rules ──
+    game_rules = build_game_rules_context()
+
+    # ── Source 3: Character identity + traits + assertiveness ──
     role = load_role(role_id)
     country = load_country_context(role["country_code"])
 
+    character_brief = _build_character_brief(role, country)
+    traits = CHARACTER_TRAIT_FRAMEWORK.format(
+        character_name=role.get("character_name", role_id),
+    )
+
+    # Assertiveness nudge (only when not neutral)
+    assertiveness_nudge = ""
+    if assertiveness < 5:
+        assertiveness_nudge = ASSERTIVENESS_COOPERATIVE
+    elif assertiveness > 5:
+        assertiveness_nudge = ASSERTIVENESS_COMPETITIVE
+
+    # ── Source 4: Autonomy doctrine + static meta-awareness ──
+    meta_static = build_meta_awareness_static()
+
+    # ── Assembly ──
     sections = [
         block1,
+        game_rules,
+        character_brief,
+        traits + assertiveness_nudge,
         AUTONOMY_DOCTRINE,
-        ROUND_INSTRUCTIONS,
-        _build_character_brief(role, country),
+        meta_static,
     ]
 
-    return "\n\n".join(s for s in sections if s)
+    prompt = "\n\n".join(s for s in sections if s)
+    logger.info(
+        "Built Layer 1 prompt for %s: %d chars (~%d tokens est.)",
+        role_id,
+        len(prompt),
+        len(prompt) // 4,
+    )
+    return prompt
 
 
 def _build_character_brief(role: dict, country: dict) -> str:
