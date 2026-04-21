@@ -46,7 +46,7 @@ class SessionContext:
     country_code: str
     sim_run_id: str
     scenario_code: str
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "claude-sonnet-4-6"
     round_num: int = 1
     tool_executor: ToolExecutor | None = None
     total_input_tokens: int = 0
@@ -132,7 +132,7 @@ class ManagedSessionManager:
         sim_run_id: str,
         scenario_code: str,
         round_num: int = 1,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = "claude-sonnet-4-6",
     ) -> SessionContext:
         """Create a full managed agent session.
 

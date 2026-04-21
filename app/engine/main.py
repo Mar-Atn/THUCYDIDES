@@ -2070,6 +2070,262 @@ async def end_meeting_endpoint(
 
 
 # ---------------------------------------------------------------------------
+# M5 AI Orchestrator — Managed Agent control endpoints
+# ---------------------------------------------------------------------------
+
+
+class AIInitRequest(BaseModel):
+    """Request body for AI agent initialization."""
+    role_ids: list[str] | None = None
+    assertiveness: int = 5
+    pulses_per_round: int = 8
+    model: str = "claude-sonnet-4-20250514"
+    auto_advance: bool = False
+    round_duration_seconds: int = 300
+
+
+class AIRunRoundRequest(BaseModel):
+    """Request body for running a round."""
+    round_num: int | None = None  # None = use current_round from sim_run
+
+
+class AIPulseRequest(BaseModel):
+    """Request body for sending a single pulse."""
+    pulse_num: int = 1
+
+
+class AICriticalInterruptRequest(BaseModel):
+    """Request body for critical interrupt."""
+    role_ids: list[str]
+    message: str
+
+
+@app.post("/api/sim/{sim_id}/ai/initialize", response_model=APIResponse)
+async def ai_initialize(
+    sim_id: str,
+    body: AIInitRequest,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Initialize all AI agents for a simulation.
+
+    Creates managed agent sessions for each AI-operated role (or specific
+    roles if role_ids is provided). Each agent receives an initialization
+    message and begins assessing their situation.
+    """
+    from engine.agents.managed.orchestrator import (
+        create_orchestrator, get_orchestrator, OrchestratorConfig,
+    )
+
+    # Check if orchestrator already exists
+    existing = get_orchestrator(sim_id)
+    if existing and existing._initialized:
+        return APIResponse(
+            success=False,
+            data={"error": "AI agents already initialized for this sim. Shut down first."},
+        )
+
+    config = OrchestratorConfig(
+        assertiveness=body.assertiveness,
+        pulses_per_round=body.pulses_per_round,
+        model=body.model,
+        auto_advance=body.auto_advance,
+        round_duration_seconds=body.round_duration_seconds,
+    )
+
+    orch = create_orchestrator(sim_id, config)
+    result = await orch.initialize_agents(body.role_ids)
+
+    logger.info(
+        "AI initialized for sim %s: %d agents by %s",
+        sim_id, result.get("agents_initialized", 0), user.id,
+    )
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/run-round", response_model=APIResponse)
+async def ai_run_round(
+    sim_id: str,
+    body: AIRunRoundRequest,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Run a complete round for all AI agents.
+
+    Sends all configured pulses to all agents in parallel, batching
+    events between pulses. Returns round summary with actions per agent,
+    costs, and errors.
+    """
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator for this sim. Call /ai/initialize first.")
+
+    # Determine round number
+    round_num = body.round_num
+    if round_num is None:
+        from engine.services.sim_run_manager import get_state
+        try:
+            run = get_state(sim_id)
+            round_num = run.get("current_round", 1)
+        except ValueError:
+            raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
+
+    result = await orch.run_round(round_num)
+
+    logger.info(
+        "AI round %d complete for sim %s: %d actions, $%.2f",
+        round_num, sim_id, result.get("total_actions", 0), result.get("total_cost_usd", 0),
+    )
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/send-pulse", response_model=APIResponse)
+async def ai_send_pulse(
+    sim_id: str,
+    body: AIPulseRequest,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Send a single pulse to all eligible AI agents.
+
+    Useful for manual step-through of AI rounds. Each pulse collects
+    events since the last pulse, builds per-agent messages, and sends
+    them in parallel.
+    """
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator for this sim. Call /ai/initialize first.")
+
+    result = await orch.send_pulse(body.pulse_num)
+    return APIResponse(data=result)
+
+
+@app.get("/api/sim/{sim_id}/ai/status", response_model=APIResponse)
+async def ai_status(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Get all AI agent states, costs, and activity summary."""
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    return APIResponse(data=orch.get_status())
+
+
+@app.post("/api/sim/{sim_id}/ai/freeze/{role_id}", response_model=APIResponse)
+async def ai_freeze_agent(
+    sim_id: str,
+    role_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Freeze one AI agent — stops receiving pulses, events queue."""
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    result = orch.freeze_agent(role_id)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Freeze failed"))
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/resume/{role_id}", response_model=APIResponse)
+async def ai_resume_agent(
+    sim_id: str,
+    role_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Resume one frozen AI agent — receives batched events at next pulse."""
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    result = orch.resume_agent(role_id)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Resume failed"))
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/freeze-all", response_model=APIResponse)
+async def ai_freeze_all(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Freeze all AI agents — global pause, humans continue."""
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    result = orch.freeze_all()
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/resume-all", response_model=APIResponse)
+async def ai_resume_all(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Resume all frozen AI agents."""
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    result = orch.resume_all()
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/interrupt", response_model=APIResponse)
+async def ai_critical_interrupt(
+    sim_id: str,
+    body: AICriticalInterruptRequest,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Send a critical interrupt to specific agents, bypassing pulse schedule.
+
+    Use for nuclear launches, direct attacks, or other existential events.
+    IDLE agents receive immediately; IN_MEETING/FROZEN agents get queued.
+    """
+    from engine.agents.managed.orchestrator import get_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    result = await orch.send_critical_interrupt(body.role_ids, body.message)
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/ai/shutdown", response_model=APIResponse)
+async def ai_shutdown(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Shut down the AI orchestrator — archive all sessions."""
+    from engine.agents.managed.orchestrator import get_orchestrator, remove_orchestrator
+
+    orch = get_orchestrator(sim_id)
+    if not orch:
+        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+
+    await orch.shutdown()
+    remove_orchestrator(sim_id)
+
+    return APIResponse(data={"status": "shutdown", "sim_run_id": sim_id})
+
+
+# ---------------------------------------------------------------------------
 # Standalone runner
 # ---------------------------------------------------------------------------
 
