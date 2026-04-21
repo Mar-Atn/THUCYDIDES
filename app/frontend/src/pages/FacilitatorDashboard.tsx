@@ -22,6 +22,7 @@ import {
 } from '@/lib/queries'
 import { supabase } from '@/lib/supabase'
 import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
+import { requestQueue } from '@/lib/requestQueue'
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -230,6 +231,9 @@ function formatTimer(seconds: number): string {
 export function FacilitatorDashboard() {
   const { id: simId } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
+  // Clear stale request queue on mount
+  useEffect(() => { requestQueue.reset() }, [])
 
   /* State ----------------------------------------------------------------- */
   const [roles, setRoles] = useState<SimRunRole[]>([])

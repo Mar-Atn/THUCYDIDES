@@ -337,10 +337,12 @@ def _create_meeting_invitation(sim_run_id: str, round_num: int, action: dict) ->
     inv_type = action.get("invitation_type", "one_on_one")
     message = action.get("message", "")[:300]
 
-    # Check limit: max 2 active invitations per role
+    # Check limit: max 2 active (non-expired) invitations per role
+    from datetime import datetime, timezone as tz
+    now_iso = datetime.now(tz.utc).isoformat()
     active = client.table("meeting_invitations").select("id") \
         .eq("sim_run_id", sim_run_id).eq("inviter_role_id", role_id) \
-        .eq("status", "pending").execute().data or []
+        .eq("status", "pending").gte("expires_at", now_iso).execute().data or []
     if len(active) >= 2:
         return {"success": False, "narrative": "You already have 2 active invitations. Wait for them to expire or be answered."}
 
@@ -381,7 +383,13 @@ def _create_meeting_invitation(sim_run_id: str, round_num: int, action: dict) ->
 
 
 def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
-    """Respond to a meeting invitation."""
+    """Respond to a meeting invitation.
+
+    When response is 'accept', creates a meetings record and links it
+    back to the invitation via meeting_id.
+    """
+    from engine.services.meeting_service import create_meeting
+
     client = get_client()
     inv_id = action.get("invitation_id", "")
     role_id = action.get("role_id", "")
@@ -397,12 +405,58 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
     if inv["status"] != "pending":
         return {"success": False, "narrative": "Invitation has expired"}
 
+    # If invitation already has a meeting_id, don't create a duplicate
+    if inv.get("meeting_id"):
+        return {
+            "success": True,
+            "narrative": "Meeting already exists for this invitation.",
+            "meeting_id": inv["meeting_id"],
+        }
+
     responses = inv.get("responses") or {}
     responses[role_id] = {"response": response, "message": message}
-    client.table("meeting_invitations").update({"responses": responses}).eq("id", inv_id).execute()
+    update_payload: dict = {"responses": responses}
+
+    # On accept: create a meeting record and link it to the invitation
+    meeting_id = None
+    if response == "accept":
+        try:
+            # Determine participant countries
+            inviter_role_id = inv.get("inviter_role_id", "")
+            inviter_country = inv.get("inviter_country_code", "")
+            accepter_country = action.get("country_code", "")
+
+            meeting = create_meeting(
+                sim_run_id=sim_run_id,
+                invitation_id=inv_id,
+                participant_a_role_id=inviter_role_id,
+                participant_a_country=inviter_country,
+                participant_b_role_id=role_id,
+                participant_b_country=accepter_country,
+                agenda=inv.get("message"),
+                round_num=inv.get("round_num"),
+            )
+            if not meeting.get("id"):
+                logger.error("[meeting] Failed to create meeting for invitation %s: %s",
+                             inv_id, meeting.get("error", "unknown"))
+                return {"success": False, "narrative": "Accepted, but failed to create meeting channel."}
+            meeting_id = meeting["id"]
+            update_payload["status"] = "accepted"
+            update_payload["meeting_id"] = meeting_id
+            logger.info("[meeting] Invitation %s accepted → meeting %s", inv_id, meeting_id)
+        except Exception as exc:
+            logger.error("[meeting] Failed to create meeting for invitation %s: %s", inv_id, exc)
+            return {"success": False, "narrative": "Accepted, but failed to create meeting channel."}
+    elif response == "reject":
+        update_payload["status"] = "rejected"
+
+    client.table("meeting_invitations").update(update_payload).eq("id", inv_id).execute()
 
     label = {"accept": "accepted", "reject": "declined", "later": "asked to meet later"}.get(response, response)
-    return {"success": True, "narrative": f"You {label} the meeting invitation."}
+    result = {"success": True, "narrative": f"You {label} the meeting invitation."}
+    if meeting_id:
+        result["meeting_id"] = meeting_id
+    return result
 
 
 def _reassign_position(sim_run_id: str, round_num: int, role_id: str, country_code: str, action: dict) -> dict:

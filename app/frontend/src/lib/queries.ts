@@ -926,3 +926,122 @@ export async function simAction(
   const data = await resp.json()
   return data.data
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Meeting Chat API                                                          */
+/* -------------------------------------------------------------------------- */
+
+export interface MeetingMessage {
+  id: string
+  meeting_id: string
+  role_id: string
+  country_code: string
+  content: string
+  channel: 'text' | 'system'
+  turn_number: number
+  created_at: string
+}
+
+export interface MeetingData {
+  id: string
+  sim_run_id: string
+  invitation_id: string
+  round_num: number | null
+  participant_a_role_id: string
+  participant_a_country: string
+  participant_b_role_id: string
+  participant_b_country: string
+  agenda: string | null
+  status: 'active' | 'completed'
+  turn_count: number
+  max_turns: number
+  modality: string
+  ended_at: string | null
+  created_at: string
+}
+
+/** Fetch meeting details + all messages. */
+export async function getMeetingDetail(
+  simId: string,
+  meetingId: string,
+): Promise<{ meeting: MeetingData; messages: MeetingMessage[] }> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}`, {
+    headers: {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Failed to load meeting' }))
+    throw new Error(err.detail || err.error || 'Failed to load meeting')
+  }
+  const json = await resp.json()
+  return json.data as { meeting: MeetingData; messages: MeetingMessage[] }
+}
+
+/** Send a message in a meeting. */
+export async function sendMeetingMessage(
+  simId: string,
+  meetingId: string,
+  roleId: string,
+  countryCode: string,
+  content: string,
+): Promise<Record<string, unknown>> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/message`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ role_id: roleId, country_code: countryCode, content }),
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Failed to send message' }))
+    throw new Error(err.detail || err.error || 'Failed to send message')
+  }
+  const json = await resp.json()
+  return json.data
+}
+
+/** End a meeting. */
+export async function endMeeting(
+  simId: string,
+  meetingId: string,
+  roleId: string,
+): Promise<Record<string, unknown>> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ role_id: roleId }),
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Failed to end meeting' }))
+    throw new Error(err.detail || err.error || 'Failed to end meeting')
+  }
+  const json = await resp.json()
+  return json.data
+}
+
+/** Fetch active meetings for a role. */
+export async function getActiveMeetings(
+  simId: string,
+  roleId: string,
+): Promise<MeetingData[]> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/active/${roleId}`, {
+    headers: {
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Failed to load meetings' }))
+    throw new Error(err.detail || err.error || 'Failed to load meetings')
+  }
+  const json = await resp.json()
+  return (json.data ?? []) as MeetingData[]
+}

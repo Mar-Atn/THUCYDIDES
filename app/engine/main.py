@@ -9,6 +9,7 @@ from typing import Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 
 from engine.auth.models import AuthUser
 from engine.auth.dependencies import get_current_user, require_moderator
@@ -1942,6 +1943,129 @@ async def resolve_nuclear_action(
     orch = NuclearChainOrchestrator()
     result = orch.resolve(action_id)
     logger.info("Nuclear action %s resolved by %s", action_id, user.id)
+    return APIResponse(data=result)
+
+
+# ---------------------------------------------------------------------------
+# M5 Spike: AI Agent observation endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/api/sim/{sim_id}/agent-log", response_model=APIResponse)
+async def get_agent_log(
+    sim_id: str,
+    country_code: Optional[str] = None,
+    limit: int = 50,
+):
+    """Return AI agent log entries from observatory_events.
+
+    Filters to event_type='ai_agent_log' for this sim_run.
+    Optional: filter by country_code.
+    """
+    from engine.services.supabase import get_client
+    client = get_client()
+    q = (
+        client.table("observatory_events")
+        .select("*")
+        .eq("sim_run_id", sim_id)
+        .eq("event_type", "ai_agent_log")
+        .order("created_at", desc=True)
+        .limit(limit)
+    )
+    if country_code:
+        q = q.eq("country_code", country_code)
+    result = q.execute()
+    return APIResponse(data=result.data or [], meta={"count": len(result.data or [])})
+
+
+# ---------------------------------------------------------------------------
+# Meeting chat endpoints
+# ---------------------------------------------------------------------------
+
+class MeetingMessageRequest(BaseModel):
+    """POST body for sending a meeting message."""
+    role_id: str
+    country_code: str
+    content: str
+
+
+class MeetingEndRequest(BaseModel):
+    """POST body for ending a meeting."""
+    role_id: str
+
+
+@app.get("/api/sim/{sim_id}/meetings/active/{role_id}", response_model=APIResponse)
+async def get_active_meetings_endpoint(
+    sim_id: str,
+    role_id: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """List active meetings for a role."""
+    from engine.services.meeting_service import get_active_meetings
+    meetings = get_active_meetings(sim_run_id=sim_id, role_id=role_id)
+    return APIResponse(data=meetings, meta={"count": len(meetings)})
+
+
+@app.get("/api/sim/{sim_id}/meetings/{meeting_id}", response_model=APIResponse)
+async def get_meeting_detail(
+    sim_id: str,
+    meeting_id: str,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Get meeting details + all messages."""
+    from engine.services.meeting_service import get_meeting
+    result = get_meeting(meeting_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="Meeting not found")
+    # Verify the meeting belongs to this sim
+    if result["meeting"].get("sim_run_id") != sim_id:
+        raise HTTPException(status_code=404, detail="Meeting not found in this SIM")
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/meetings/{meeting_id}/message", response_model=APIResponse)
+async def send_meeting_message(
+    sim_id: str,
+    meeting_id: str,
+    body: MeetingMessageRequest,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Send a message in a meeting."""
+    from engine.services.meeting_service import send_message, get_meeting
+
+    # Verify meeting belongs to this sim
+    meeting_data = get_meeting(meeting_id)
+    if not meeting_data or meeting_data["meeting"].get("sim_run_id") != sim_id:
+        raise HTTPException(status_code=404, detail="Meeting not found in this SIM")
+
+    result = send_message(
+        meeting_id=meeting_id,
+        role_id=body.role_id,
+        country_code=body.country_code,
+        content=body.content,
+    )
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["narrative"])
+    return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/meetings/{meeting_id}/end", response_model=APIResponse)
+async def end_meeting_endpoint(
+    sim_id: str,
+    meeting_id: str,
+    body: MeetingEndRequest,
+    user: AuthUser = Depends(get_current_user),
+):
+    """End a meeting."""
+    from engine.services.meeting_service import end_meeting, get_meeting
+
+    # Verify meeting belongs to this sim
+    meeting_data = get_meeting(meeting_id)
+    if not meeting_data or meeting_data["meeting"].get("sim_run_id") != sim_id:
+        raise HTTPException(status_code=404, detail="Meeting not found in this SIM")
+
+    result = end_meeting(meeting_id=meeting_id, role_id=body.role_id)
+    if not result["success"]:
+        raise HTTPException(status_code=400, detail=result["narrative"])
     return APIResponse(data=result)
 
 

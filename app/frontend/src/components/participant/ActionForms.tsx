@@ -764,16 +764,22 @@ export function NuclearTestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   }, [testType, countryId])
 
   useEffect(() => {
+    if (!simId || !countryId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     supabase.from('countries').select('nuclear_level, nuclear_confirmed, nuclear_rd_progress')
       .eq('sim_run_id', simId).eq('id', countryId).limit(1)
       .then(({data, error: err}) => {
-        if (err) { setError('Failed to load nuclear status'); setLoading(false); return }
+        if (cancelled) return
+        if (err) { setError('Failed to load nuclear status'); return }
         const row = data?.[0]
         setNuclearLevel(row?.nuclear_level ?? 0)
         setNuclearConfirmed(row?.nuclear_confirmed === true)
         setNuclearProgress(row?.nuclear_rd_progress ?? 0)
-        setLoading(false)
-      })
+      }).catch(err => console.error('NuclearTestForm load failed:', err))
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId])
 
   const startTest = async (type: 'underground'|'surface') => {
@@ -1063,10 +1069,15 @@ export function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
 
   // Load nuclear status + deployed missiles
   useEffect(() => {
-    (async () => {
+    if (!simId || !countryId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
+    ;(async () => {
       const { data: cs } = await supabase.from('countries')
         .select('nuclear_level, nuclear_confirmed')
         .eq('sim_run_id', simId).eq('id', countryId).limit(1)
+      if (cancelled) return
       const row = cs?.[0]
       setNuclearLevel(row?.nuclear_level ?? 0)
       setNuclearConfirmed(row?.nuclear_confirmed === true)
@@ -1076,9 +1087,11 @@ export function NuclearLaunchForm({roleId,countryId,simId,onClose,onSubmitted}:{
         .select('unit_id, unit_type, unit_status, global_row, global_col')
         .eq('sim_run_id', simId).eq('country_code', countryId)
         .eq('unit_type', 'strategic_missile').eq('unit_status', 'active')
+      if (cancelled) return
       setMissiles((deps ?? []) as typeof missiles)
-      setLoading(false)
-    })()
+    })().catch(err => console.error('NuclearLaunchForm load failed:', err))
+    .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId])
 
   // Listen for hex clicks (target assignment)
@@ -1487,7 +1500,7 @@ export function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [error,setError]=useState<string|null>(null)
   const [selectedLevel,setSelectedLevel]=useState<Record<string,string>>({})
 
-  const loadData = async () => {
+  const loadData = async (signal?: {cancelled:boolean}) => {
     setLoading(true)
     try {
       const token = await getToken()
@@ -1496,15 +1509,23 @@ export function BlockadeForm({roleId,countryId,simId,onClose,onSubmitted}:{
       })
       if (!resp.ok) throw new Error('Failed to load blockade data')
       const json = await resp.json()
+      if (signal?.cancelled) return
       setChokepoints(json.data?.chokepoints ?? [])
     } catch (e) {
+      if (signal?.cancelled) return
       setError(e instanceof Error ? e.message : 'Failed to load')
     } finally {
-      setLoading(false)
+      if (!signal?.cancelled) setLoading(false)
     }
   }
 
-  useEffect(() => { loadData() }, [simId])
+  useEffect(() => {
+    if (!simId) { setLoading(false); return }
+    const signal = {cancelled: false}
+    const timeout = setTimeout(() => { if (!signal.cancelled) setLoading(false) }, 5000)
+    loadData(signal)
+    return () => { signal.cancelled = true; clearTimeout(timeout) }
+  }, [simId])
 
   const handleEstablish = async (zoneId: string) => {
     const level = selectedLevel[zoneId] || 'full'
@@ -2556,9 +2577,14 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const myOutgoing = (myOutgoingRaw as unknown as {
     id:string; invitation_type:string; invitee_role_id:string|null; org_id:string|null; org_name:string|null;
     message:string; status:string; expires_at:string; responses:Record<string, {response:string; message?:string}>;
-  }[]).filter(inv => inv.status === 'pending' || Object.keys(inv.responses || {}).length > 0)
+  }[]).filter(inv => inv.status === 'pending' && new Date(inv.expires_at).getTime() > Date.now())
 
   useEffect(() => {
+    if (!simId || !countryId || !roleId) { setLoading(false); return }
+    let cancelled = false
+    // Safety: force loading off after 5s no matter what
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     Promise.all([
       supabase.from('roles').select('id,character_name,country_code')
         .eq('sim_run_id', simId).eq('status', 'active'),
@@ -2569,13 +2595,15 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       supabase.from('countries').select('id,sim_name,color_ui')
         .eq('sim_run_id', simId).order('sim_name'),
     ]).then(([rolesRes, memsRes, orgsRes, countriesRes]) => {
+      if (cancelled) return
       if (rolesRes.data) setAllRoles(rolesRes.data.filter((r: Record<string,unknown>) => r.id !== roleId) as typeof allRoles)
       if (countriesRes.data) setCountries(countriesRes.data as typeof countries)
-      // Match my org memberships to org names
       const myOrgIds = new Set((memsRes.data || []).map((m: Record<string,unknown>) => m.org_id as string))
       const orgMap = (orgsRes.data || []) as {id:string;sim_name:string}[]
       setMyOrgs(orgMap.filter(o => myOrgIds.has(o.id)).map(o => ({ id: o.id, name: o.sim_name || o.id })))
-    }).finally(() => setLoading(false))
+    }).catch(err => console.error('SetMeetingsForm load failed:', err))
+    .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId, roleId])
 
   const handleSubmit = async () => {
@@ -2641,39 +2669,27 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       {myOutgoing.length > 0 && (
         <div className="space-y-2">
           <label className="font-body text-caption text-text-secondary">Your active invitations</label>
-          {myOutgoing.map(inv => {
-            const responses = inv.responses || {}
-            const responseList = Object.entries(responses)
-            const isExpired = new Date(inv.expires_at).getTime() < Date.now()
-            return (
-              <div key={inv.id} className={`bg-card border rounded-lg p-3 ${isExpired ? 'border-border opacity-60' : 'border-action/20'}`}>
+          {myOutgoing.map(inv => (
+              <div key={inv.id} className="relative bg-card border border-action/20 rounded-lg p-3">
                 <div className="font-body text-caption text-text-primary font-medium">
                   {inv.invitation_type === 'one_on_one'
                     ? `To: ${inv.invitee_role_id}`
                     : `${inv.org_name || inv.org_id} meeting`}
-                  {isExpired && <span className="text-text-secondary/50 ml-2">(expired)</span>}
                 </div>
-                {responseList.length > 0 ? (
-                  <div className="mt-1 space-y-0.5">
-                    {responseList.map(([rid, resp]) => (
-                      <div key={rid} className="font-body text-caption flex items-center gap-2">
-                        <span className="text-text-primary capitalize">{rid}</span>
-                        <span className={
-                          resp.response === 'accept' ? 'text-success font-medium' :
-                          resp.response === 'later' ? 'text-warning' : 'text-danger'
-                        }>
-                          {resp.response === 'accept' ? 'accepted' : resp.response === 'later' ? 'not now, but later' : 'declined'}
-                        </span>
-                        {resp.message && <span className="text-text-secondary">— {resp.message}</span>}
-                      </div>
-                    ))}
-                  </div>
-                ) : !isExpired ? (
-                  <div className="font-body text-caption text-text-secondary/50 mt-1">Awaiting response...</div>
-                ) : null}
+                <div className="font-body text-caption text-text-secondary/50 mt-1">Awaiting response...</div>
+                <button
+                  onClick={async () => {
+                    await supabase.from('meeting_invitations').update({ status: 'cancelled' }).eq('id', inv.id)
+                  }}
+                  className="absolute top-2 right-2 text-text-secondary/40 hover:text-danger p-1 transition-colors"
+                  title="Cancel invitation"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 6 6 18M6 6l12 12"/>
+                  </svg>
+                </button>
               </div>
-            )
-          })}
+          ))}
         </div>
       )}
 
@@ -2890,14 +2906,21 @@ export function CovertOpsForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [remaining, setRemaining] = useState<number|null>(null)
 
   useEffect(() => {
+    if (!simId || !roleId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     Promise.all([
       supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id', simId).order('sim_name'),
       supabase.from('role_actions').select('uses_remaining')
         .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'covert_operation').limit(1),
     ]).then(([countriesRes, usageRes]) => {
+      if (cancelled) return
       if (countriesRes.data) setCountries(countriesRes.data as typeof countries)
       setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
-    }).finally(() => setLoading(false))
+    }).catch(err => console.error('CovertOpsForm load failed:', err))
+    .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, roleId])
 
   const handleSubmit = async () => {
@@ -3078,6 +3101,10 @@ export function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [pendingId, setPendingId] = useState<string|null>(null)
 
   useEffect(() => {
+    if (!simId || !roleId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     Promise.all([
       supabase.from('roles').select('id,character_name,country_code,positions,status')
         .eq('sim_run_id', simId).eq('status', 'active'),
@@ -3086,10 +3113,13 @@ export function AssassinationForm({roleId,countryId,simId,onClose,onSubmitted}:{
       supabase.from('role_actions').select('uses_remaining')
         .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'assassination').limit(1),
     ]).then(([rolesRes, countriesRes, usageRes]) => {
+      if (cancelled) return
       if (rolesRes.data) setAllRoles(rolesRes.data as typeof allRoles)
       if (countriesRes.data) setCountries(countriesRes.data as typeof countries)
       setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
-    }).finally(() => setLoading(false))
+    }).catch(err => console.error('AssassinationForm load failed:', err))
+    .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId, roleId])
 
   // Group targets by country (exclude self)
@@ -3221,18 +3251,25 @@ export function ArrestForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const [remaining, setRemaining] = useState<number|null>(null)
 
   const loadRoles = useCallback(() => {
+    if (!simId || !countryId || !roleId) { setLoading(false); return () => {} }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     Promise.all([
       supabase.from('roles').select('id,character_name,positions,status')
         .eq('sim_run_id', simId).eq('country_code', countryId).in('status', ['active', 'arrested']),
       supabase.from('role_actions').select('uses_remaining')
         .eq('sim_run_id', simId).eq('role_id', roleId).eq('action_id', 'arrest').limit(1),
     ]).then(([rolesRes, usageRes]) => {
+      if (cancelled) return
       if (rolesRes.data) setRoles(rolesRes.data as typeof roles)
       setRemaining(usageRes.data?.[0]?.uses_remaining ?? null)
-    }).finally(() => setLoading(false))
+    }).catch(err => console.error('ArrestForm load failed:', err))
+    .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId, roleId])
 
-  useEffect(() => { loadRoles() }, [loadRoles])
+  useEffect(() => { return loadRoles() }, [loadRoles])
 
   // Arrest targets: active, not self, not HoS
   const targets = roles.filter(r => r.id !== roleId && r.status === 'active' && !(r.positions || []).includes('head_of_state'))
@@ -3397,11 +3434,18 @@ export function ReassignPowersForm({roleId,countryId,simId,onClose,onSubmitted}:
   ]
 
   useEffect(() => {
+    if (!simId || !countryId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     supabase.from('roles').select('id,character_name,positions,title')
       .eq('sim_run_id', simId).eq('country_code', countryId).eq('status', 'active')
       .then(({ data }) => {
+        if (cancelled) return
         if (data) setRoles(data as typeof roles)
-      }).finally(() => setLoading(false))
+      }).catch(err => console.error('ReassignForm load failed:', err))
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId])
 
   // Who currently holds the selected position?
@@ -3555,16 +3599,22 @@ export function ChangeLeaderForm({roleId,countryId,simId,onClose,onSubmitted}:{
   const threshold = 4.0
 
   useEffect(() => {
+    if (!simId || !countryId) { setLoading(false); return }
+    let cancelled = false
+    const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
+    setLoading(true)
     Promise.all([
       supabase.from('countries').select('stability').eq('sim_run_id',simId).eq('id',countryId).limit(1),
       supabase.from('roles').select('id,character_name,positions').eq('sim_run_id',simId).eq('country_code',countryId).contains('positions',['head_of_state']).eq('status','active').limit(1),
     ]).then(([cs, rs]) => {
+      if (cancelled) return
       setStability(cs.data?.[0]?.stability ?? 10)
       setHosName(rs.data?.[0]?.character_name ?? 'Unknown')
       setIsHosSelf(rs.data?.[0]?.id === roleId)
     }).catch(() => {
-      setError('Failed to load — please retry')
-    }).finally(() => setLoading(false))
+      if (!cancelled) setError('Failed to load — please retry')
+    }).finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; clearTimeout(timeout) }
   }, [simId, countryId, roleId])
 
   // HoS can resign without stability check; citizens need stability ≤ threshold
@@ -3693,7 +3743,7 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       })
   },[simId,countryId])
 
-  const loadUnits = useCallback(async () => {
+  const loadUnits = useCallback(async (signal?: {cancelled:boolean}) => {
     setLoading(true)
     try {
       const token = await getToken()
@@ -3702,15 +3752,22 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       })
       if (!resp.ok) throw new Error('Failed to load units')
       const json = await resp.json()
+      if (signal?.cancelled) return
       const data = json.data || json
       setActiveUnits(data.active ?? [])
       setReserveUnits(data.reserve ?? [])
       setEmbarkedUnits(data.embarked ?? [])
-    } catch (e) { setError(e instanceof Error ? e.message : 'Failed') }
-    finally { setLoading(false) }
+    } catch (e) { if (!signal?.cancelled) setError(e instanceof Error ? e.message : 'Failed') }
+    finally { if (!signal?.cancelled) setLoading(false) }
   }, [simId, countryId])
 
-  useEffect(() => { loadUnits() }, [loadUnits])
+  useEffect(() => {
+    if (!simId || !countryId) { setLoading(false); return }
+    const signal = {cancelled: false}
+    const timeout = setTimeout(() => { if (!signal.cancelled) setLoading(false) }, 5000)
+    loadUnits(signal)
+    return () => { signal.cancelled = true; clearTimeout(timeout) }
+  }, [loadUnits])
 
   // Effective reserve: original reserve + withdrawn units - deployed units
   // Effective reserve: original reserve (minus deployed) + withdrawn units, deduplicated

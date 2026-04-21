@@ -14,11 +14,14 @@ import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { channelManager, type RealtimeListener } from '@/lib/channelManager'
 import { submitAction, getToken, type SimRun } from '@/lib/queries'
+import { requestQueue } from '@/lib/requestQueue'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
 import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 import {
   ActionForm, TransactionReview, ArrestedBanner, UnitIcon,
 } from '@/components/participant/ActionForms'
+import { MeetingChat } from '@/components/participant/MeetingChat'
+import { getActiveMeetings, endMeeting, type MeetingData } from '@/lib/queries'
 
 /* ── Hex → Country lookup (canonical from map_config.py) ──────────────── */
 const HEX_OWNERS: Record<string, string> = {
@@ -142,6 +145,9 @@ export function ParticipantDashboard() {
   const { simId } = useParams<{ simId: string }>()
   const { user, profile } = useAuth()
 
+  // Clear stale request queue on mount (prevents Loading... stuck state after navigation)
+  useEffect(() => { requestQueue.reset() }, [])
+
   // Proxy mode: ?role=sabre allows moderator to view as a specific role
   const urlParams = new URLSearchParams(window.location.search)
   const proxyRoleId = urlParams.get('role')
@@ -162,6 +168,7 @@ export function ParticipantDashboard() {
   const [myOrgMemberships, setMyOrgMemberships] = useState<{org_id:string;role_in_org:string;has_veto:boolean}[]>([])
   const [personalRels, setPersonalRels] = useState<{other_role:string;type:string;notes:string}[]>([])
   const [activeAction, setActiveAction] = useState<string|null>(null)
+  const [activeChatMeetingId, setActiveChatMeetingId] = useState<string|null>(null)
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
@@ -505,7 +512,8 @@ export function ParticipantDashboard() {
                 simId={simId!} countryId={myRole.country_code} roleId={myRole.id} dataVersion={dataVersion}
                 nuclearActionsData={globalNuclearActions}
                 parentOrgIds={new Set(myOrgMemberships.map(m=>m.org_id))}
-                parentSimRun={simRun}/>
+                parentSimRun={simRun}
+                onOpenChat={setActiveChatMeetingId}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{
@@ -518,18 +526,31 @@ export function ParticipantDashboard() {
           <iframe src={`/map/deployments.html?display=clean&sim_run_id=${simId}`} className="absolute inset-0 w-full h-full border-0 rounded-lg" title="Map"/>
         </div>}
       </main>
+
+      {/* Meeting Chat overlay */}
+      {activeChatMeetingId && myRole && (
+        <MeetingChat
+          meetingId={activeChatMeetingId}
+          simId={simId!}
+          myRoleId={myRole.id}
+          myCountryCode={myRole.country_code}
+          myCharacterName={myRole.character_name}
+          onClose={() => { setActiveChatMeetingId(null); setDataVersion(v => v + 1) }}
+        />
+      )}
     </div>
   )
 }
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion, nuclearActionsData, parentOrgIds, parentSimRun}:{
+function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion, nuclearActionsData, parentOrgIds, parentSimRun, onOpenChat}:{
   roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void
   simId:string; countryId:string; roleId:string; dataVersion?:number
   nuclearActionsData?:Record<string, unknown>[]
   parentOrgIds?:Set<string>
   parentSimRun?:SimRun|null
+  onOpenChat?:(meetingId:string)=>void
 }) {
   const avail = new Set(roleActions)
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
@@ -570,14 +591,37 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const handleMeetingResponse = async (invId: string, response: string, msg: string) => {
     setMeetingSubmitting(true)
     try {
-      await submitAction(simId, 'respond_meeting', roleId, countryId, {
+      const result = await submitAction(simId, 'respond_meeting', roleId, countryId, {
         invitation_id: invId, response, message: msg,
       })
+      console.log('[meeting] respond result:', result)
       setRespondingTo(null)
       setMeetingMessage('')
-    } catch { /* ignore */ }
+      // Auto-open chat when accepting a meeting
+      if (response === 'accept' && onOpenChat) {
+        const meetingId = result?.meeting_id as string
+        if (meetingId) {
+          onOpenChat(meetingId)
+        } else {
+          // Fallback: check the invitation for meeting_id
+          const { data: inv } = await supabase.from('meeting_invitations')
+            .select('meeting_id').eq('id', invId).limit(1)
+          if (inv?.[0]?.meeting_id) {
+            onOpenChat(inv[0].meeting_id as string)
+          }
+        }
+        // Refresh active meetings list
+        getActiveMeetings(simId, roleId).then(setActiveMeetings).catch(() => {})
+      }
+    } catch (err) { console.error('[meeting] respond failed:', err) }
     finally { setMeetingSubmitting(false) }
   }
+
+  /* Active meetings for this role — for "Open Chat" buttons */
+  const [activeMeetings, setActiveMeetings] = useState<MeetingData[]>([])
+  useEffect(() => {
+    getActiveMeetings(simId, roleId).then(setActiveMeetings).catch(() => {})
+  }, [simId, roleId, dataVersion])
 
   /* Realtime hooks replace 5s polling for pending transactions + agreements */
   const { data: pendingTxnsRaw } = useRealtimeTable<Record<string, unknown>>(
@@ -1549,6 +1593,51 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
           </div>
         }
       </div>
+
+      {/* Active Meetings — chat buttons */}
+      {activeMeetings.length > 0 && (
+        <div className="bg-card border border-action/20 rounded-lg p-4">
+          <h3 className="font-heading text-caption text-text-secondary uppercase tracking-wider mb-3">Active Meetings</h3>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+            {activeMeetings.map(m => {
+              const isA = m.participant_a_role_id === roleId
+              const otherRole = isA ? m.participant_b_role_id : m.participant_a_role_id
+              const otherCountry = isA ? m.participant_b_country : m.participant_a_country
+              return (
+                <div key={m.id} className="relative bg-base hover:bg-action/5 border border-action/30 hover:border-action/50 rounded-lg px-4 py-3 transition-colors group">
+                  <button onClick={() => onOpenChat?.(m.id)} className="text-left w-full">
+                    <span className="font-body text-body-sm text-text-primary group-hover:text-action block">
+                      {otherRole}
+                    </span>
+                    <span className="font-body text-caption text-text-secondary block">
+                      {otherCountry.toUpperCase()}
+                    </span>
+                    <span className="font-body text-caption text-action/60 group-hover:text-action mt-0.5 block">
+                      Open Chat
+                    </span>
+                  </button>
+                  <button
+                    onClick={async (e) => {
+                      e.stopPropagation()
+                      try {
+                        await endMeeting(simId, m.id, roleId)
+                        setActiveMeetings(prev => prev.filter(x => x.id !== m.id))
+                      } catch { /* ignore */ }
+                    }}
+                    className="absolute top-2 right-2 text-text-secondary/40 hover:text-danger p-1 transition-colors"
+                    title="End meeting"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {CATS.map(cat=>{
         const ATTACK_ACTIONS = ['ground_attack','air_strike','naval_combat','naval_bombardment','launch_missile_conventional']
         const acts=cat.actions.filter(a=>{
