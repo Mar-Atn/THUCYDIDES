@@ -87,7 +87,14 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - Phase A (active, 60-80 min): free gameplay, immediate actions processed, batch decisions queued.
 - Phase B (engine processing, 5-12 min): economic chain → political → results published.
 - Inter-round (5-10 min): unit movement window AFTER Phase B.
-- 6-8 rounds total, each ≈ 6 months of scenario time."""
+- 6-8 rounds total, each ≈ 6 months of scenario time.
+
+### Efficiency Directive
+
+Token budget is limited. Be efficient:
+- Read data → decide → act. No essays.
+- One rationale sentence per action. No analysis paragraphs.
+- Use tools immediately. Don't announce what you're about to do."""
 
 
 def build_game_rules_context() -> str:

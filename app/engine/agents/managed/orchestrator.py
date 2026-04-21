@@ -171,56 +171,72 @@ class AIOrchestrator:
         initialized = []
         errors = []
 
-        for role in roles:
+        async def _init_one_agent(role: dict) -> dict:
+            """Initialize a single agent — runs in thread pool (sync SDK)."""
             role_id = role["id"]
             country_code = role["country_code"]
             character_name = role.get("character_name", role_id)
             title = role.get("title", "Leader")
 
-            try:
-                # Create managed agent session
-                ctx = self.session_manager.create_session(
+            loop = asyncio.get_event_loop()
+
+            # Create managed agent session (sync → thread)
+            ctx = await loop.run_in_executor(
+                None,
+                lambda: self.session_manager.create_session(
                     role_id=role_id,
                     country_code=country_code,
                     sim_run_id=self.sim_run_id,
                     scenario_code=self._scenario_code,
                     round_num=self.round_num,
                     model=self.config.model,
-                )
+                ),
+            )
 
-                self.agents[role_id] = ctx
-                self.agent_states[role_id] = IDLE
-                self.round_stats[role_id] = AgentRoundStats()
-                self._queued_events[role_id] = []
+            self.agents[role_id] = ctx
+            self.agent_states[role_id] = IDLE
+            self.round_stats[role_id] = AgentRoundStats()
+            self._queued_events[role_id] = []
 
-                # Send initialization message
-                init_msg = (
-                    f"The simulation has begun. You are {character_name}, "
-                    f"{title} of {country_code}. "
-                    f"This is Round {self.round_num}. Assess your situation."
-                )
-                transcript = self.session_manager.send_event(ctx, init_msg)
+            # Send initialization message (sync → thread)
+            init_msg = (
+                f"The simulation has begun. You are {character_name}, "
+                f"{title} of {country_code}. "
+                f"This is Round {self.round_num}. Assess your situation."
+            )
+            transcript = await loop.run_in_executor(
+                None, self.session_manager.send_event, ctx, init_msg
+            )
 
-                # Log initialization to observatory
-                log_transcript_to_observatory(
-                    self.sim_run_id, country_code, self.round_num, transcript
-                )
+            # Log initialization to observatory
+            log_transcript_to_observatory(
+                self.sim_run_id, country_code, self.round_num, transcript
+            )
 
-                initialized.append({
-                    "role_id": role_id,
-                    "country_code": country_code,
-                    "character_name": character_name,
-                    "session_id": ctx.session_id,
-                    "status": "ready",
-                })
-                logger.info(
-                    "Initialized agent: %s (%s) session=%s",
-                    role_id, country_code, ctx.session_id,
-                )
+            logger.info(
+                "Initialized agent: %s (%s) session=%s",
+                role_id, country_code, ctx.session_id,
+            )
+            return {
+                "role_id": role_id,
+                "country_code": country_code,
+                "character_name": character_name,
+                "session_id": ctx.session_id,
+                "status": "ready",
+            }
 
-            except Exception as e:
-                logger.exception("Failed to initialize agent %s", role_id)
-                errors.append({"role_id": role_id, "error": str(e)})
+        # Initialize all agents in parallel
+        results = await asyncio.gather(
+            *[_init_one_agent(r) for r in roles], return_exceptions=True
+        )
+
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                role_id = roles[i]["id"]
+                logger.exception("Failed to initialize agent %s: %s", role_id, result)
+                errors.append({"role_id": role_id, "error": str(result)})
+            else:
+                initialized.append(result)
 
         self._initialized = True
 

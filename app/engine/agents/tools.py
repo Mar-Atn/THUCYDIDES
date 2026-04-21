@@ -702,7 +702,8 @@ def get_country_codes_list(template_code: str = "ttt_v1_0") -> dict:
 
         countries: list[dict] = []
         for code in codes:
-            stats = all_stats.get(code) or {}
+            raw_stats = all_stats.get(code)
+            stats = raw_stats if isinstance(raw_stats, dict) else {}
             row = name_lookup.get(code, {})
             countries.append({
                 "country_code": code,
@@ -868,9 +869,10 @@ def get_political_state(
         c_result = (
             client.table("countries")
             .select(
-                "stability,political_support,war_tiredness,regime_type,"
+                "stability,war_tiredness,regime_type,"
                 # DEPRECATED 2026-04-15: dem_rep_split removed — parliament simplified to 3 seats
                 # "dem_rep_split_dem,dem_rep_split_rep,"
+                # DEPRECATED 2026-04-21: political_support column removed from DB
                 "team_type,team_size_min,team_size_max"
             )
             .eq("id", country_code)
@@ -888,7 +890,7 @@ def get_political_state(
             return v
 
         stability = float(pick("stability") or 0)
-        support = float(pick("political_support") or 0)
+        support = float(pick("support") or pick("political_support") or 0)
         war_tiredness = float(pick("war_tiredness") or 0)
 
         annotations: list[str] = []

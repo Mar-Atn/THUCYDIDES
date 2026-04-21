@@ -221,6 +221,19 @@ class MissileLaunchOrder(BaseModel):
     rationale: str
 
 
+class BudgetOrder(BaseModel):
+    """Set budget allocations — social spending, military production, tech R&D.
+
+    Batch action queued for Phase B engine processing.
+    See CONTRACT_BUDGET v1.1 for full specification.
+    """
+    action_type: Literal["set_budget"] = "set_budget"
+    social_pct: float = Field(1.0, ge=0.5, le=1.5, description="Social spending multiplier (0.5-1.5× baseline)")
+    military_coins: float = Field(0.0, ge=0.0, description="Coins allocated to military production")
+    tech_coins: float = Field(0.0, ge=0.0, description="Coins allocated to technology/R&D")
+    rationale: str
+
+
 class NuclearTestOrder(BaseModel):
     """Conduct a nuclear test."""
     action_type: Literal["nuclear_test"] = "nuclear_test"
@@ -251,6 +264,7 @@ AnyAction = Union[
     BlockadeOrder,
     MissileLaunchOrder,
     NuclearTestOrder,
+    BudgetOrder,
 ]
 
 ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
@@ -264,6 +278,7 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
     "martial_law": MartialLawOrder,
     # Economic
     "set_sanction": SanctionOrder,
+    "set_budget": BudgetOrder,
     "set_tariff": TariffOrder,
     "rd_investment": RDInvestmentOrder,
     # Covert
@@ -313,4 +328,5 @@ __all__ = [
     "BlockadeOrder",
     "MissileLaunchOrder",
     "NuclearTestOrder",
+    "BudgetOrder",
 ]
