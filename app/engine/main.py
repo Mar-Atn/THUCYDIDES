@@ -2220,11 +2220,26 @@ async def ai_status(
     user: AuthUser = Depends(require_moderator),
 ):
     """Get all AI agent states, costs, and activity summary."""
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.orchestrator import get_orchestrator, create_orchestrator, OrchestratorConfig
 
     orch = get_orchestrator(sim_id)
     if not orch:
-        # Return empty status — dashboard polls this continuously, 404 floods console
+        # Try to reconnect from DB sessions (backend may have restarted)
+        try:
+            orch = create_orchestrator(sim_id, OrchestratorConfig())
+            result = orch.reconnect_from_db()
+            if result.get("agents_reconnected", 0) > 0:
+                logger.info("Auto-reconnected orchestrator for sim %s: %d agents", sim_id, result["agents_reconnected"])
+            else:
+                # No sessions in DB either — truly not initialized
+                from engine.agents.managed.orchestrator import remove_orchestrator
+                remove_orchestrator(sim_id)
+                orch = None
+        except Exception as e:
+            logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
+            orch = None
+
+    if not orch:
         return APIResponse(data={
             "sim_run_id": sim_id, "round_num": 0, "pulse_num": 0,
             "total_agents": 0, "agents_idle": 0, "agents_frozen": 0,

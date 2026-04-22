@@ -105,6 +105,85 @@ class AIOrchestrator:
         self._initialized: bool = False
 
     # ------------------------------------------------------------------
+    # Reconnect from DB (after backend restart)
+    # ------------------------------------------------------------------
+
+    def reconnect_from_db(self) -> dict:
+        """Rebuild orchestrator state from existing DB sessions.
+
+        Called when the backend restarts but agent sessions are still
+        alive on Anthropic. Reconstructs self.agents and self.agent_states
+        from ai_agent_sessions table without creating new sessions.
+
+        Returns:
+            Summary: {agents_reconnected, roles}.
+        """
+        db = get_client()
+
+        # Load sim run info
+        run_data = db.table("sim_runs").select("current_round").eq("id", self.sim_run_id).limit(1).execute()
+        if run_data.data:
+            self.round_num = run_data.data[0].get("current_round", 1)
+        self._scenario_code = self.sim_run_id
+
+        # Load active sessions from DB
+        sessions = (
+            db.table("ai_agent_sessions")
+            .select("*")
+            .eq("sim_run_id", self.sim_run_id)
+            .in_("status", ["initializing", "ready", "active"])
+            .execute()
+        )
+
+        reconnected = []
+        for s in sessions.data or []:
+            role_id = s["role_id"]
+            country_code = s["country_code"]
+
+            # Reconstruct SessionContext from DB data
+            from engine.agents.managed.tool_executor import ToolExecutor
+            executor = ToolExecutor(
+                country_code=country_code,
+                scenario_code=self._scenario_code,
+                sim_run_id=self.sim_run_id,
+                round_num=self.round_num,
+                role_id=role_id,
+            )
+
+            ctx = SessionContext(
+                agent_id=s["agent_id"],
+                agent_version=1,
+                environment_id=s["environment_id"],
+                session_id=s["session_id"],
+                role_id=role_id,
+                country_code=country_code,
+                sim_run_id=self.sim_run_id,
+                scenario_code=self._scenario_code,
+                model=s.get("model", self.config.model),
+                round_num=self.round_num,
+                tool_executor=executor,
+                total_input_tokens=s.get("total_input_tokens", 0),
+                total_output_tokens=s.get("total_output_tokens", 0),
+                events_sent=s.get("events_sent", 0),
+                actions_submitted=s.get("actions_submitted", 0),
+                tool_calls=s.get("tool_calls", 0),
+            )
+
+            self.agents[role_id] = ctx
+            self.agent_states[role_id] = IDLE
+            self.round_stats[role_id] = AgentRoundStats()
+            self._queued_events[role_id] = []
+            self.session_manager._sessions[s["session_id"]] = ctx
+
+            reconnected.append({"role_id": role_id, "country_code": country_code, "session_id": s["session_id"]})
+            logger.info("Reconnected agent: %s (%s) session=%s", role_id, country_code, s["session_id"])
+
+        self._initialized = len(reconnected) > 0
+
+        logger.info("Reconnected %d agents for sim %s", len(reconnected), self.sim_run_id)
+        return {"agents_reconnected": len(reconnected), "roles": reconnected}
+
+    # ------------------------------------------------------------------
     # Initialization
     # ------------------------------------------------------------------
 
