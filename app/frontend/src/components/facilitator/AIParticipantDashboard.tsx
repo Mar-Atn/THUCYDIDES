@@ -134,7 +134,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   }
 
   /* AI roles that need initialization */
-  const aiRoles = roles.filter(r => r.is_ai_operated)
+  const aiRoles = roles.filter(r => r.is_ai_operated && r.status !== 'inactive')
 
   const handleInitialize = async () => {
     setInitializing(true)
