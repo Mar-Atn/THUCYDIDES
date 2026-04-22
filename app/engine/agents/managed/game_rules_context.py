@@ -34,7 +34,14 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - `propose_agreement` — formal treaty (security, trade, basing, tech sharing). Requires countersignature.
 - `respond_exchange` / `sign_agreement` — respond to incoming proposals.
 - `call_org_meeting` — convene NATO, EU, BRICS+, OPEC, etc. with agenda.
-- Meetings: request 1-on-1 meetings via tools. Max 2 active invitations. 8 turns per side.
+
+**BILATERAL MEETINGS — YOUR MOST POWERFUL DIPLOMATIC TOOL:**
+- Use `request_meeting(target_country, agenda)` to invite another leader to talk.
+- Meetings are private 1-on-1 conversations — the primary way to negotiate deals, build alliances, coordinate strategy, issue threats, or explore compromises.
+- Public statements broadcast; meetings NEGOTIATE. Most impactful moves require face-to-face discussion.
+- Max 2 active invitations. Max 5 meetings per round. 8 messages per side.
+- You SHOULD request meetings when: proposing deals, responding to threats, building coalitions, exploring ceasefires, coordinating with allies.
+- When in a meeting: speak naturally (1-3 sentences), be direct, make concrete proposals.
 
 **COVERT (immediate, cards consumed permanently):**
 - `intelligence` — 60% success, always returns data (85% accurate if success, 45% if fail — you don't know which).

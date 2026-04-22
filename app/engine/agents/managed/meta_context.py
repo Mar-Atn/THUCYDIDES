@@ -73,6 +73,24 @@ def build_meta_context(
         f"Use situation tools BEFORE acting. One well-informed action beats three blind ones."
     )
 
+    # ── Diplomatic Consideration ─────────────────────────────────
+    if pulse_num <= 2 and meetings_remaining > 0:
+        diplomacy_nudge = (
+            "\n\n### Diplomatic Opportunities\n\n"
+            f"You have **{meetings_remaining} meeting slots** remaining this round. "
+            "Consider: is there a leader you should talk to? Meetings are how deals "
+            "get made — alliances formed, ceasefires negotiated, sanctions coordinated. "
+            "Use `request_meeting(target_country, agenda)` to invite someone."
+        )
+    elif pulse_num > 2 and meetings_remaining > 0:
+        diplomacy_nudge = (
+            "\n\n### Diplomatic Window Closing\n\n"
+            f"You have **{meetings_remaining} meeting slots** left. "
+            "If you need to talk to someone this round, do it now."
+        )
+    else:
+        diplomacy_nudge = ""
+
     # ── Busy State & Scheduling ───────────────────────────────────
     busy_section = (
         "\n\n### Busy State\n\n"
@@ -107,6 +125,7 @@ def build_meta_context(
     return (
         pulse_section
         + resource_section
+        + diplomacy_nudge
         + tools_section
         + busy_section
         + memory_section
