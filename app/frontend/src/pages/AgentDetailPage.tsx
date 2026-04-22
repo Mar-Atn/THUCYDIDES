@@ -77,7 +77,7 @@ interface AgentDecision {
   payload: Record<string, unknown>
   status: string
   rationale: string | null
-  submitted_at: string
+  created_at: string
 }
 
 interface Meeting {
@@ -85,8 +85,8 @@ interface Meeting {
   sim_run_id: string
   round_num: number
   status: string
-  initiator_role_id: string
-  invitee_role_id: string
+  participant_a_role_id: string
+  participant_b_role_id: string
   created_at: string
   completed_at: string | null
 }
@@ -283,7 +283,7 @@ export function AgentDetailPage() {
         .select('*')
         .eq('sim_run_id', simId)
         .eq('country_code', role.country_code)
-        .order('submitted_at', { ascending: false })
+        .order('created_at', { ascending: false })
       if (decData) setDecisions(decData as AgentDecision[])
 
       /* Meetings — where this role is initiator or invitee */
@@ -291,7 +291,7 @@ export function AgentDetailPage() {
         .from('meetings')
         .select('*')
         .eq('sim_run_id', simId)
-        .or(`initiator_role_id.eq.${roleId},invitee_role_id.eq.${roleId}`)
+        .or(`participant_a_role_id.eq.${roleId},participant_b_role_id.eq.${roleId}`)
         .order('created_at', { ascending: false })
       if (mtgData) setMeetings(mtgData as Meeting[])
     } catch {
@@ -542,9 +542,9 @@ export function AgentDetailPage() {
               {meetings.map((mtg) => {
                 const isExpanded = expandedMeetings.has(mtg.id)
                 const isActive = mtg.status === 'active' || mtg.status === 'in_progress'
-                const counterpartId = mtg.initiator_role_id === roleId
-                  ? mtg.invitee_role_id
-                  : mtg.initiator_role_id
+                const counterpartId = mtg.participant_a_role_id === roleId
+                  ? mtg.participant_b_role_id
+                  : mtg.participant_a_role_id
                 const counterpart = getRoleName(counterpartId)
                 const msgs = meetingMessages[mtg.id] ?? []
 
@@ -771,7 +771,7 @@ export function AgentDetailPage() {
               </div>
               <div>
                 <span className="text-text-secondary">Cost</span>
-                <p className="text-text-primary">${session.total_cost_usd.toFixed(4)}</p>
+                <p className="text-text-primary">${((session.total_output_tokens || 0) * 15 / 1000000).toFixed(4)}</p>
               </div>
               <div>
                 <span className="text-text-secondary">Events Sent</span>
