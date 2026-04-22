@@ -87,6 +87,10 @@ def dispatch_action(
     # Log to observatory
     _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result)
 
+    # Auto-pulse AI agents affected by this action (fire-and-forget)
+    if result.get("success"):
+        _auto_pulse_for_action(sim_run_id, round_num, action_type, action, result)
+
     return result
 
 
@@ -1588,9 +1592,150 @@ def _generate_nuclear_test_artefacts(
         logger.warning("Nuclear test artefact generation failed: %s", e)
 
 
+def _lookup_character_name(sim_run_id: str, role_id: str, fallback: str = "") -> str:
+    """Look up character_name for a role. Returns fallback on failure."""
+    try:
+        db = get_client()
+        r = db.table("roles").select("character_name").eq(
+            "sim_run_id", sim_run_id
+        ).eq("id", role_id).limit(1).execute()
+        if r.data:
+            return r.data[0].get("character_name", fallback)
+    except Exception:
+        pass
+    return fallback or role_id
+
+
 def _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result):
     """Log action dispatch result for audit trail."""
     success = result.get("success", False)
     level = logging.INFO if success else logging.WARNING
     logger.log(level, "[dispatch] %s by %s → %s",
                action_type, role_id, "OK" if success else "FAILED")
+
+
+# ── Auto-pulse AI agents ──────────────────────────────────────────────
+
+def _auto_pulse_for_action(
+    sim_run_id: str,
+    round_num: int,
+    action_type: str,
+    action: dict,
+    result: dict,
+) -> None:
+    """Check if a dispatched action affects an AI agent and fire a pulse.
+
+    Called after every successful action dispatch. Determines the affected
+    AI agent (if any) and sends them an event-specific pulse via auto_pulse.py.
+    All pulses are fire-and-forget — never blocks the action response.
+    """
+    from engine.agents.managed.auto_pulse import fire_pulse
+
+    try:
+        country_code = action.get("country_code", "")
+
+        # ── Meeting invitations ──────────────────────────────────────
+        if action_type in ("invite_to_meet", "set_meetings", "call_org_meeting", "meet_freely"):
+            invitee = action.get("invitee_role_id", "")
+            inv_id = result.get("invitation_id", "")
+            inviter_name = _lookup_character_name(sim_run_id, action.get("role_id", ""), country_code)
+            agenda = action.get("message", "")
+            if invitee and inv_id:
+                from engine.agents.managed.auto_pulse import on_meeting_invitation
+                fire_pulse(on_meeting_invitation(
+                    sim_run_id, invitee, inviter_name, inv_id, agenda,
+                ))
+
+        # ── Meeting accepted (notify AI inviter) ─────────────────────
+        elif action_type == "respond_meeting":
+            response = action.get("response", "")
+            meeting_id = result.get("meeting_id", "")
+            if response == "accept" and meeting_id:
+                # Look up the invitation to find the inviter
+                try:
+                    inv_id = action.get("invitation_id", "")
+                    if inv_id:
+                        db = get_client()
+                        inv = db.table("meeting_invitations").select(
+                            "inviter_role_id, message"
+                        ).eq("id", inv_id).limit(1).execute()
+                        if inv.data:
+                            inviter = inv.data[0]["inviter_role_id"]
+                            agenda = inv.data[0].get("message", "")
+                            accepter_name = action.get("role_id", country_code)
+                            from engine.agents.managed.auto_pulse import on_meeting_accepted
+                            fire_pulse(on_meeting_accepted(
+                                sim_run_id, inviter, accepter_name, meeting_id, agenda,
+                            ))
+                except Exception as e:
+                    logger.warning("[auto-pulse] Failed to notify inviter: %s", e)
+
+        # ── Transaction proposed ─────────────────────────────────────
+        elif action_type == "propose_transaction":
+            target = action.get("target_country", action.get("to_country", ""))
+            transaction_id = result.get("transaction_id", result.get("id", ""))
+            terms = result.get("narrative", "Trade proposal")
+            if target and transaction_id:
+                from engine.agents.managed.auto_pulse import on_transaction_proposed
+                fire_pulse(on_transaction_proposed(
+                    sim_run_id, target, country_code, terms, transaction_id,
+                ))
+
+        # ── Agreement proposed ───────────────────────────────────────
+        elif action_type == "propose_agreement":
+            target = action.get("target_country", action.get("to_country", ""))
+            agreement_id = result.get("agreement_id", result.get("id", ""))
+            agreement_type = action.get("agreement_type", "general")
+            if target and agreement_id:
+                from engine.agents.managed.auto_pulse import on_agreement_proposed
+                fire_pulse(on_agreement_proposed(
+                    sim_run_id, target, country_code, agreement_type, agreement_id,
+                ))
+
+        # ── Combat: attack against a country ─────────────────────────
+        elif action_type in ("ground_attack", "air_strike", "naval_combat",
+                             "naval_bombardment", "launch_missile_conventional"):
+            target_country = action.get("target_country", "")
+            target_row = action.get("target_row", "?")
+            target_col = action.get("target_col", "?")
+            details = result.get("narrative", f"Attack at ({target_row},{target_col})")
+            if target_country and target_country != country_code:
+                from engine.agents.managed.auto_pulse import on_attack_declared
+                fire_pulse(on_attack_declared(
+                    sim_run_id, target_country, country_code, action_type, details,
+                ))
+
+        # ── War declared ─────────────────────────────────────────────
+        elif action_type == "declare_war":
+            target = action.get("target_country", "")
+            if target:
+                from engine.agents.managed.auto_pulse import on_war_declared
+                fire_pulse(on_war_declared(sim_run_id, target, country_code))
+
+        # ── Nuclear chain ────────────────────────────────────────────
+        elif action_type == "nuclear_launch_initiate":
+            # After initiation, the authorize step needs to notify the authorizer
+            authorizer = result.get("authorizer_role_id", "")
+            nuclear_action_id = result.get("nuclear_action_id", result.get("action_id", ""))
+            initiator_name = action.get("role_id", country_code)
+            target_desc = result.get("target_description", "multiple targets")
+            if authorizer and nuclear_action_id:
+                from engine.agents.managed.auto_pulse import on_nuclear_authorize_request
+                fire_pulse(on_nuclear_authorize_request(
+                    sim_run_id, authorizer, initiator_name,
+                    nuclear_action_id, target_desc,
+                ))
+
+        elif action_type == "nuclear_authorize":
+            # If authorized and launches happen, notify target countries
+            if result.get("launched") or result.get("status") == "launched":
+                target_countries = result.get("target_countries", [])
+                target_desc = result.get("target_description", "your territory")
+                for tgt in target_countries:
+                    from engine.agents.managed.auto_pulse import on_nuclear_launch_against
+                    fire_pulse(on_nuclear_launch_against(
+                        sim_run_id, tgt, country_code, target_desc,
+                    ))
+
+    except Exception as e:
+        logger.warning("[auto-pulse] Error in _auto_pulse_for_action: %s", e)
