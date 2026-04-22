@@ -25,9 +25,10 @@ from engine.services.supabase import get_client
 logger = logging.getLogger(__name__)
 
 # Tier check intervals (seconds)
-TIER_1_INTERVAL = 3
-TIER_2_INTERVAL = 5
-TIER_3_INTERVAL = 30  # Configurable per sim
+# Higher intervals reduce Supabase connection pressure on macOS
+TIER_1_INTERVAL = 5
+TIER_2_INTERVAL = 10
+TIER_3_INTERVAL = 30
 
 # Agent states
 IDLE = "IDLE"
