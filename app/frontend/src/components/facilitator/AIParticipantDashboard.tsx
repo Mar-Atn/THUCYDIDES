@@ -389,52 +389,49 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
               className="px-5 py-2 cursor-pointer hover:bg-base/50 transition-colors"
               onClick={() => { console.log('Open agent detail:', role.id) }}
             >
-              {/* Line 1: dot | Name | STATUS_BADGE | Activity | N act | pause/resume */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${style.dot}`} />
-                  <span className="font-body text-body-sm text-text-primary font-medium truncate">
-                    {charName}
-                  </span>
-                  <span className={`font-data text-caption px-1.5 py-0.5 rounded flex-shrink-0 ${style.badge}`}>
-                    {agentState === 'NOT_INITIALIZED' ? 'waiting' : agentState}
-                  </span>
-                  <span className="font-body text-caption text-text-secondary truncate">
-                    {activity}
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span className="font-data text-caption text-text-secondary">
-                    {actions} act
-                  </span>
-                  {isActive && agentState !== 'NOT_INITIALIZED' && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        agentState === 'FROZEN' ? handleResumeOne(role.id) : handleFreezeOne(role.id)
-                      }}
-                      disabled={actionLoading === `freeze-${role.id}` || actionLoading === `resume-${role.id}`}
-                      className={`font-body text-caption px-2 py-0.5 rounded transition-colors disabled:opacity-40 ${
-                        agentState === 'FROZEN'
-                          ? 'bg-success/10 text-success hover:bg-success/20'
-                          : 'bg-text-secondary/10 text-text-secondary hover:bg-text-secondary/20'
-                      }`}
-                      title={agentState === 'FROZEN' ? 'Resume' : 'Freeze'}
-                    >
-                      {agentState === 'FROZEN' ? '\u25B6' : '\u23F8'}
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Line 2: country (small) | meetings count */}
-              <div className="flex items-center justify-between ml-5 mt-0.5">
-                <span className="font-body text-caption text-text-secondary">
-                  {country}
+              {/* Grid: fixed columns for alignment across rows */}
+              <div className="grid items-center gap-x-3" style={{ gridTemplateColumns: '8px 120px 90px 1fr 50px 50px 28px' }}>
+                {/* Row 1 */}
+                <span className={`w-2 h-2 rounded-full ${style.dot}`} />
+                <span className="font-body text-body-sm text-text-primary font-medium truncate">
+                  {charName}
                 </span>
-                <span className="font-data text-caption text-text-secondary mr-8">
+                <span className={`font-data text-caption px-1.5 py-0.5 rounded text-center ${style.badge}`}>
+                  {agentState === 'NOT_INITIALIZED' ? 'waiting' : agentState}
+                </span>
+                <span className="font-body text-caption text-text-secondary truncate">
+                  {activity}
+                </span>
+                <span className="font-data text-caption text-text-secondary text-right">
+                  {actions} act
+                </span>
+                <span className="font-data text-caption text-text-secondary text-right">
                   {meetings} mtg
                 </span>
+                {isActive && agentState !== 'NOT_INITIALIZED' ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      agentState === 'FROZEN' ? handleResumeOne(role.id) : handleFreezeOne(role.id)
+                    }}
+                    disabled={actionLoading === `freeze-${role.id}` || actionLoading === `resume-${role.id}`}
+                    className={`font-body text-caption px-1 py-0.5 rounded transition-colors disabled:opacity-40 text-center ${
+                      agentState === 'FROZEN'
+                        ? 'bg-success/10 text-success hover:bg-success/20'
+                        : 'bg-text-secondary/10 text-text-secondary hover:bg-text-secondary/20'
+                    }`}
+                    title={agentState === 'FROZEN' ? 'Resume' : 'Freeze'}
+                  >
+                    {agentState === 'FROZEN' ? '\u25B6' : '\u23F8'}
+                  </button>
+                ) : <span />}
+
+                {/* Row 2: country below name */}
+                <span />
+                <span className="font-body text-caption text-text-secondary -mt-1">
+                  {country}
+                </span>
+                <span /><span /><span /><span /><span />
               </div>
             </div>
           )
