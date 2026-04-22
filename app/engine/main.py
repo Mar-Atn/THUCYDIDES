@@ -2079,7 +2079,7 @@ class AIInitRequest(BaseModel):
     role_ids: list[str] | None = None
     assertiveness: int = 5
     pulses_per_round: int = 8
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "claude-sonnet-4-6"
     auto_advance: bool = False
     round_duration_seconds: int = 300
 
@@ -2133,13 +2133,26 @@ async def ai_initialize(
     )
 
     orch = create_orchestrator(sim_id, config)
-    result = await orch.initialize_agents(body.role_ids)
 
-    logger.info(
-        "AI initialized for sim %s: %d agents by %s",
-        sim_id, result.get("agents_initialized", 0), user.id,
-    )
-    return APIResponse(data=result)
+    # Run initialization in background — it takes minutes per agent
+    import asyncio
+    async def _run_init():
+        try:
+            result = await orch.initialize_agents(body.role_ids)
+            logger.info(
+                "AI initialized for sim %s: %d agents by %s",
+                sim_id, result.get("agents_initialized", 0), user.id,
+            )
+        except Exception as e:
+            logger.error("AI initialization failed for sim %s: %s", sim_id, e)
+
+    asyncio.create_task(_run_init())
+
+    return APIResponse(data={
+        "status": "initializing",
+        "message": "AI agent initialization started in background. Check /ai/status for progress.",
+        "sim_run_id": sim_id,
+    })
 
 
 @app.post("/api/sim/{sim_id}/ai/run-round", response_model=APIResponse)
