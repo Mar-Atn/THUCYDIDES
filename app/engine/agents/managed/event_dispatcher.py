@@ -462,6 +462,36 @@ class EventDispatcher:
             metadata=metadata,
         )
 
+    # -- Round transition --------------------------------------------------
+
+    def enqueue_round_results(self, round_num: int, results_by_country: dict) -> None:
+        """Enqueue round results for all AI agents.
+
+        Called by the engine after round processing completes.
+        Each agent gets their country's results + public events.
+        """
+        for role_id, ctx in self.agents.items():
+            country_results = results_by_country.get(ctx.country_code, {})
+            message = (
+                f"Round {round_num} complete. Results for {ctx.country_code}: "
+                f"{country_results}"
+            )
+            self.enqueue(
+                role_id=role_id,
+                tier=3,
+                event_type="round_results",
+                message=message,
+                metadata={
+                    "round_num": round_num,
+                    "country_code": ctx.country_code,
+                    "results": country_results,
+                },
+            )
+        logger.info(
+            "[dispatcher] Enqueued round %d results for %d agents",
+            round_num, len(self.agents),
+        )
+
     # -- Shutdown ----------------------------------------------------------
 
     async def shutdown(self) -> None:
@@ -478,6 +508,130 @@ class EventDispatcher:
         self.agents.clear()
         self.agent_states.clear()
         logger.info("[dispatcher] Shutdown complete for sim %s", self.sim_run_id)
+
+
+# -- SIM lifecycle: cleanup on restart -------------------------------------
+
+async def cleanup_sim_ai_state(
+    sim_run_id: str,
+    clear_memories: bool = False,
+    clear_decisions: bool = False,
+) -> dict:
+    """Clean up ALL AI state for a sim_run. Called on SIM restart.
+
+    1. Stop dispatcher if running
+    2. Archive all Anthropic sessions
+    3. Set ai_agent_sessions status='archived'
+    4. Clear unprocessed events from agent_event_queue
+    5. Optionally clear agent_memories (configurable)
+    6. Optionally clear agent_decisions (configurable)
+
+    Returns summary of what was cleaned.
+    """
+    summary: dict = {
+        "sim_run_id": sim_run_id,
+        "dispatcher_stopped": False,
+        "sessions_archived": 0,
+        "db_sessions_archived": 0,
+        "events_cleared": 0,
+        "memories_cleared": 0,
+        "decisions_cleared": 0,
+    }
+
+    # 1. Stop dispatcher if running
+    dispatcher = get_dispatcher(sim_run_id)
+    if dispatcher:
+        await dispatcher.shutdown()
+        remove_dispatcher(sim_run_id)
+        summary["dispatcher_stopped"] = True
+        summary["sessions_archived"] = len(dispatcher.agents)
+        logger.info("[cleanup] Dispatcher stopped and sessions archived for sim %s", sim_run_id)
+
+    # 2+3. Archive any remaining DB sessions that weren't handled by dispatcher
+    db = get_client()
+    try:
+        active = (
+            db.table("ai_agent_sessions")
+            .select("id, session_id, agent_id, role_id")
+            .eq("sim_run_id", sim_run_id)
+            .in_("status", ["initializing", "ready", "active", "frozen"])
+            .execute()
+        )
+        if active.data:
+            # Archive via Anthropic API (best-effort)
+            from anthropic import AsyncAnthropic
+            try:
+                from engine.config import settings
+                api_key = settings.anthropic_api_key or None
+            except Exception:
+                api_key = None
+            client = AsyncAnthropic(api_key=api_key)
+
+            for s in active.data:
+                try:
+                    await client.beta.sessions.archive(s["session_id"])
+                except Exception as e:
+                    logger.warning("[cleanup] Failed to archive Anthropic session %s: %s", s["session_id"], e)
+                try:
+                    await client.beta.agents.archive(s["agent_id"])
+                except Exception as e:
+                    logger.warning("[cleanup] Failed to archive Anthropic agent %s: %s", s["agent_id"], e)
+
+            # Update DB status
+            db.table("ai_agent_sessions").update(
+                {"status": "archived"}
+            ).eq("sim_run_id", sim_run_id).in_(
+                "status", ["initializing", "ready", "active", "frozen"]
+            ).execute()
+            summary["db_sessions_archived"] = len(active.data)
+            logger.info("[cleanup] Archived %d DB sessions", len(active.data))
+    except Exception as e:
+        logger.error("[cleanup] Failed to archive DB sessions: %s", e)
+
+    # 4. Clear unprocessed events
+    try:
+        result = (
+            db.table("agent_event_queue")
+            .delete()
+            .eq("sim_run_id", sim_run_id)
+            .is_("processed_at", "null")
+            .execute()
+        )
+        summary["events_cleared"] = len(result.data or [])
+        logger.info("[cleanup] Cleared %d unprocessed events", summary["events_cleared"])
+    except Exception as e:
+        logger.error("[cleanup] Failed to clear event queue: %s", e)
+
+    # 5. Optionally clear agent_memories
+    if clear_memories:
+        try:
+            result = (
+                db.table("agent_memories")
+                .delete()
+                .eq("sim_run_id", sim_run_id)
+                .execute()
+            )
+            summary["memories_cleared"] = len(result.data or [])
+            logger.info("[cleanup] Cleared %d agent memories", summary["memories_cleared"])
+        except Exception as e:
+            logger.error("[cleanup] Failed to clear memories: %s", e)
+
+    # 6. Optionally clear agent_decisions
+    if clear_decisions:
+        try:
+            result = (
+                db.table("agent_decisions")
+                .delete()
+                .eq("sim_run_id", sim_run_id)
+                .execute()
+            )
+            summary["decisions_cleared"] = len(result.data or [])
+            logger.info("[cleanup] Cleared %d agent decisions", summary["decisions_cleared"])
+        except Exception as e:
+            logger.error("[cleanup] Failed to clear decisions: %s", e)
+
+    logger.info("[cleanup] AI state cleanup complete for sim %s: %s", sim_run_id, summary)
+    return summary
 
 
 # -- Helper: find HoS role for a country -----------------------------------

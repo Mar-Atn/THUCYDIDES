@@ -1280,8 +1280,17 @@ async def sim_go_back(sim_id: str, user: AuthUser = Depends(require_moderator)):
 async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
     """Restart simulation from beginning. Deletes all runtime data."""
     from engine.services.sim_run_manager import restart_simulation
+    from engine.agents.managed.event_dispatcher import cleanup_sim_ai_state
     import asyncio
     try:
+        # Clean up AI state first (dispatcher, sessions, queue)
+        ai_summary = await cleanup_sim_ai_state(
+            sim_run_id=sim_id,
+            clear_memories=True,
+            clear_decisions=True,
+        )
+        logger.info("Sim %s AI cleanup: %s", sim_id, ai_summary)
+
         state = await asyncio.to_thread(restart_simulation, sim_id)
         logger.info("Sim %s RESTARTED (full cleanup) by %s", sim_id, user.id)
         return APIResponse(data=state)
@@ -2142,6 +2151,16 @@ async def end_meeting_endpoint(
     result = end_meeting(meeting_id=meeting_id, role_id=body.role_id)
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
+
+    # Set both meeting participants back to IDLE in the dispatcher
+    from engine.agents.managed.event_dispatcher import get_dispatcher, IDLE
+    dispatcher = get_dispatcher(sim_id)
+    if dispatcher:
+        meeting = meeting_data["meeting"]
+        for rid in (meeting.get("participant_a_role_id"), meeting.get("participant_b_role_id")):
+            if rid and rid in dispatcher.agents:
+                dispatcher.set_agent_state(rid, IDLE)
+
     return APIResponse(data=result)
 
 
@@ -2525,6 +2544,48 @@ async def ai_shutdown(
         remove_orchestrator(sim_id)
 
     return APIResponse(data={"status": "shutdown", "sim_run_id": sim_id})
+
+
+class AIRestartRequest(BaseModel):
+    """Request body for AI restart — configurable cleanup."""
+    clear_memories: bool = False
+    clear_decisions: bool = False
+
+
+@app.post("/api/sim/{sim_id}/ai/restart", response_model=APIResponse)
+async def ai_restart(
+    sim_id: str,
+    body: AIRestartRequest | None = None,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Clean up ALL AI state for a sim. Called on SIM restart or manual reset.
+
+    1. Stops dispatcher if running
+    2. Archives all Anthropic sessions
+    3. Sets ai_agent_sessions status='archived'
+    4. Clears unprocessed events from agent_event_queue
+    5. Optionally clears agent_memories (if clear_memories=true)
+    6. Optionally clears agent_decisions (if clear_decisions=true)
+
+    After this, the moderator can click "Initialize AI Agents" again.
+    """
+    from engine.agents.managed.event_dispatcher import cleanup_sim_ai_state
+    from engine.agents.managed.orchestrator import get_orchestrator, remove_orchestrator
+
+    # Also shut down orchestrator if present
+    orch = get_orchestrator(sim_id)
+    if orch:
+        await orch.shutdown()
+        remove_orchestrator(sim_id)
+
+    req = body or AIRestartRequest()
+    summary = await cleanup_sim_ai_state(
+        sim_run_id=sim_id,
+        clear_memories=req.clear_memories,
+        clear_decisions=req.clear_decisions,
+    )
+    logger.info("AI restart for sim %s by %s: %s", sim_id, user.id, summary)
+    return APIResponse(data=summary)
 
 
 # ---------------------------------------------------------------------------

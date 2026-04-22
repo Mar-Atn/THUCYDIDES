@@ -44,15 +44,35 @@ class ConversationRouter:
 
     Uses the meetings + meeting_messages tables (shared with human UI).
     Messages appear in the same chat interface humans use.
+
+    When a dispatcher is provided, state transitions go through
+    dispatcher.set_agent_state() so the dispatcher loop correctly
+    skips agents that are IN_MEETING and resumes delivery when
+    they return to IDLE.
     """
 
     def __init__(
         self,
         session_manager: ManagedSessionManager,
         sim_run_id: str,
+        dispatcher: Any | None = None,
     ):
         self.session_manager = session_manager
         self.sim_run_id = sim_run_id
+        self._dispatcher = dispatcher
+
+    # ------------------------------------------------------------------
+    # State transitions — route through dispatcher when available
+    # ------------------------------------------------------------------
+
+    def _set_agent_state(
+        self, agent_states: dict[str, str], role_id: str, state: str
+    ) -> None:
+        """Set agent state via dispatcher (preferred) or direct dict write."""
+        if self._dispatcher:
+            self._dispatcher.set_agent_state(role_id, state)
+        else:
+            agent_states[role_id] = state
 
     # ------------------------------------------------------------------
     # Discovery: find accepted meetings ready to start
@@ -154,9 +174,9 @@ class ConversationRouter:
         Returns:
             Meeting summary dict.
         """
-        # Set both busy
-        agent_states[agent_a.role_id] = "IN_MEETING"
-        agent_states[agent_b.role_id] = "IN_MEETING"
+        # Set both busy (routed through dispatcher when available)
+        self._set_agent_state(agent_states, agent_a.role_id, "IN_MEETING")
+        self._set_agent_state(agent_states, agent_b.role_id, "IN_MEETING")
 
         logger.info(
             "[conversations] Starting meeting %s: %s vs %s",
@@ -167,8 +187,8 @@ class ConversationRouter:
         meeting_data = get_meeting(meeting_id)
         if not meeting_data:
             logger.error("[conversations] Meeting %s not found", meeting_id)
-            agent_states[agent_a.role_id] = "IDLE"
-            agent_states[agent_b.role_id] = "IDLE"
+            self._set_agent_state(agent_states, agent_a.role_id, "IDLE")
+            self._set_agent_state(agent_states, agent_b.role_id, "IDLE")
             return {"meeting_id": meeting_id, "error": "Meeting not found", "turns": 0}
 
         meeting = meeting_data["meeting"]
@@ -216,8 +236,8 @@ class ConversationRouter:
             # Agent A failed to respond — abort meeting
             end_reason = "speaker_error"
             await self._end_meeting_safe(meeting_id, agent_a.role_id, end_reason)
-            agent_states[agent_a.role_id] = "IDLE"
-            agent_states[agent_b.role_id] = "IDLE"
+            self._set_agent_state(agent_states, agent_a.role_id, "IDLE")
+            self._set_agent_state(agent_states, agent_b.role_id, "IDLE")
             return {
                 "meeting_id": meeting_id,
                 "turns": 0,
@@ -233,8 +253,8 @@ class ConversationRouter:
         if self._wants_to_end(first_msg.get("content", "")):
             end_reason = "ended_by_speaker"
             await self._end_meeting_safe(meeting_id, agent_a.role_id, end_reason)
-            agent_states[agent_a.role_id] = "IDLE"
-            agent_states[agent_b.role_id] = "IDLE"
+            self._set_agent_state(agent_states, agent_a.role_id, "IDLE")
+            self._set_agent_state(agent_states, agent_b.role_id, "IDLE")
             return {
                 "meeting_id": meeting_id,
                 "turns": total_turns,
@@ -310,9 +330,9 @@ class ConversationRouter:
         # End meeting
         await self._end_meeting_safe(meeting_id, agent_a.role_id, end_reason)
 
-        # Return both agents to IDLE
-        agent_states[agent_a.role_id] = "IDLE"
-        agent_states[agent_b.role_id] = "IDLE"
+        # Return both agents to IDLE (routed through dispatcher)
+        self._set_agent_state(agent_states, agent_a.role_id, "IDLE")
+        self._set_agent_state(agent_states, agent_b.role_id, "IDLE")
 
         # Log to observatory
         write_agent_log_event(
