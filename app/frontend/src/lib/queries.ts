@@ -1045,3 +1045,192 @@ export async function getActiveMeetings(
   const json = await resp.json()
   return (json.data ?? []) as MeetingData[]
 }
+
+/* -------------------------------------------------------------------------- */
+/*  AI Participant Observability (M5.6)                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Per-agent cost breakdown from the orchestrator. */
+export interface AIAgentCost {
+  model: string
+  input_tokens: number
+  output_tokens: number
+  input_cost_usd: number
+  output_cost_usd: number
+  total_cost_usd: number
+  events_sent: number
+  actions_submitted: number
+  tool_calls: number
+}
+
+/** Per-agent round stats. */
+export interface AIAgentRoundStats {
+  actions: number
+  tool_calls: number
+  meetings_used: number
+  pulses_received: number
+  errors: number
+}
+
+/** Single agent status entry from /ai/status. */
+export interface AIAgentStatus {
+  role_id: string
+  country_code: string
+  state: 'IDLE' | 'ACTING' | 'IN_MEETING' | 'FROZEN' | 'TERMINATED' | string
+  session_id: string
+  round_num: number
+  cost: AIAgentCost
+  round_stats: AIAgentRoundStats
+}
+
+/** Full response from GET /api/sim/{sim_id}/ai/status. */
+export interface AIStatusResponse {
+  sim_run_id: string
+  round_num: number
+  pulse_num: number
+  total_agents: number
+  agents_idle: number
+  agents_frozen: number
+  agents_in_meeting: number
+  agents_acting: number
+  total_input_tokens: number
+  total_output_tokens: number
+  total_cost_usd: number
+  agents: AIAgentStatus[]
+}
+
+/** Agent log entry from observatory_events. */
+export interface AgentLogEntry {
+  id: string
+  sim_run_id: string
+  round_num: number
+  event_type: string
+  country_code: string | null
+  summary: string
+  payload: Record<string, unknown> | null
+  phase: string | null
+  category: string | null
+  role_name: string | null
+  created_at: string
+}
+
+/** Agent memory note from agent_memories. */
+export interface AgentMemory {
+  id: string
+  sim_run_id: string
+  country_code: string
+  role_id: string
+  round_num: number
+  memory_type: string
+  content: string
+  created_at: string
+}
+
+/** Fetch AI status from the orchestrator. Returns null if no orchestrator active. */
+export async function getAIStatus(simId: string): Promise<AIStatusResponse | null> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/status`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+  })
+  if (resp.status === 404) return null
+  if (!resp.ok) throw new Error('Failed to get AI status')
+  const json = await resp.json()
+  return json.data as AIStatusResponse
+}
+
+/** Freeze one AI agent. */
+export async function freezeAgent(simId: string, roleId: string): Promise<void> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/freeze/${roleId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Freeze failed' }))
+    throw new Error(err.detail || err.error || 'Freeze failed')
+  }
+}
+
+/** Resume one frozen AI agent. */
+export async function resumeAgent(simId: string, roleId: string): Promise<void> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/resume/${roleId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Resume failed' }))
+    throw new Error(err.detail || err.error || 'Resume failed')
+  }
+}
+
+/** Freeze all AI agents — global pause. */
+export async function freezeAllAgents(simId: string): Promise<void> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/freeze-all`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Freeze all failed' }))
+    throw new Error(err.detail || err.error || 'Freeze all failed')
+  }
+}
+
+/** Resume all frozen AI agents. */
+export async function resumeAllAgents(simId: string): Promise<void> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/resume-all`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Resume all failed' }))
+    throw new Error(err.detail || err.error || 'Resume all failed')
+  }
+}
+
+/** Fetch AI agent log entries from observatory_events. */
+export async function getAgentLog(
+  simId: string,
+  countryCode?: string,
+  limit: number = 50,
+): Promise<AgentLogEntry[]> {
+  const token = await getToken()
+  const params = new URLSearchParams({ limit: String(limit) })
+  if (countryCode) params.set('country_code', countryCode)
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/agent-log?${params}`, {
+    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+  })
+  if (!resp.ok) throw new Error('Failed to get agent log')
+  const json = await resp.json()
+  return (json.data ?? []) as AgentLogEntry[]
+}
+
+/** Fetch agent memory notes from agent_memories table. */
+export async function getAgentMemories(
+  simId: string,
+  countryCode: string,
+): Promise<AgentMemory[]> {
+  const { data, error } = await supabase
+    .from('agent_memories')
+    .select('*')
+    .eq('sim_run_id', simId)
+    .eq('country_code', countryCode)
+    .order('round_num', { ascending: false })
+
+  if (error) throw error
+  return (data ?? []) as AgentMemory[]
+}

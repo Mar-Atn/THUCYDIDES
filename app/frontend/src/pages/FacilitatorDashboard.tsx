@@ -23,6 +23,7 @@ import {
 import { supabase } from '@/lib/supabase'
 import { useRealtimeRow, useRealtimeTable } from '@/hooks/useRealtimeTable'
 import { requestQueue } from '@/lib/requestQueue'
+import { AIParticipantDashboard } from '@/components/facilitator/AIParticipantDashboard'
 
 /* -------------------------------------------------------------------------- */
 /*  Types                                                                     */
@@ -1363,42 +1364,8 @@ export function FacilitatorDashboard() {
 
           {/* ── RIGHT COLUMN: Monitoring & Tools ─────────────────────── */}
           <div className="space-y-6">
-            {/* AI Participants */}
-            <DashboardSection title="AI Participants" badge={aiRoles.length > 0 ? String(aiRoles.length) : undefined}>
-              {aiRoles.length === 0 ? (
-                <EmptyState message="No AI participants" />
-              ) : (
-                <>
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {aiRoles.map((role) => (
-                      <span
-                        key={role.id}
-                        className="font-body text-caption bg-base border border-border rounded-full px-3 py-1 text-text-primary"
-                      >
-                        {role.character_name}{' '}
-                        <span className="text-text-secondary">
-                          ({role.country_code})
-                        </span>
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => doAction('ai/trigger')}
-                      className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 transition-colors"
-                    >
-                      Trigger Now
-                    </button>
-                    <button
-                      onClick={() => doAction('ai/pause-all')}
-                      className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors"
-                    >
-                      Pause All
-                    </button>
-                  </div>
-                </>
-              )}
-            </DashboardSection>
+            {/* AI Participants — full observability dashboard */}
+            <AIParticipantDashboard simId={simId!} />
 
             {/* Public Screen */}
             <DashboardSection title="Public Screen">
