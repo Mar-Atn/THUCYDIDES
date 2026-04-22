@@ -1,4 +1,4 @@
-"""Phase 1C — Hardened Managed Agent session lifecycle.
+"""Phase 1C — Hardened Managed Agent session lifecycle (async).
 
 Creates and manages a Claude Managed Agent session:
   1. Create agent (system prompt + custom tools)
@@ -11,17 +11,21 @@ Creates and manages a Claude Managed Agent session:
   8. Retry logic for transient API errors
 
 Dependencies: anthropic SDK with managed-agents-2026-04-01 beta.
+
+Migration note (2026-04-21): Converted from sync Anthropic to AsyncAnthropic
+to eliminate thread exhaustion ([Errno 35] Resource temporarily unavailable)
+when 8+ agents run in parallel. Pure async — no threads, single event loop.
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
-import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 
-from anthropic import Anthropic
+from anthropic import AsyncAnthropic
 
 from engine.agents.managed.system_prompt import build_system_prompt
 from engine.agents.managed.tool_definitions import get_custom_tools_for_agent
@@ -62,10 +66,13 @@ class ManagedSessionManager:
 
     Production-hardened with DB persistence, health checks, session
     recovery, freeze/resume, and retry logic for transient errors.
+
+    Uses AsyncAnthropic for pure async operation — no threads needed,
+    supports 20+ concurrent agents on a single event loop.
     """
 
     def __init__(self, api_key: str | None = None):
-        self.client = Anthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
+        self.client = AsyncAnthropic(api_key=api_key or os.environ.get("ANTHROPIC_API_KEY"))
         self._sessions: dict[str, SessionContext] = {}
 
     # ------------------------------------------------------------------
@@ -125,7 +132,7 @@ class ManagedSessionManager:
     # Session creation
     # ------------------------------------------------------------------
 
-    def create_session(
+    async def create_session(
         self,
         role_id: str,
         country_code: str,
@@ -155,8 +162,8 @@ class ManagedSessionManager:
         custom_tools = get_custom_tools_for_agent()
         logger.info("Defined %d custom tools", len(custom_tools))
 
-        # Create agent
-        agent = self.client.beta.agents.create(
+        # Create agent (async)
+        agent = await self.client.beta.agents.create(
             name=f"TTT-{role_id}-{country_code}",
             model=model,
             system=system_prompt,
@@ -164,8 +171,8 @@ class ManagedSessionManager:
         )
         logger.info("Created agent: %s (version %d)", agent.id, agent.version)
 
-        # Create environment
-        environment = self.client.beta.environments.create(
+        # Create environment (async)
+        environment = await self.client.beta.environments.create(
             name=f"ttt-{sim_run_id[:8]}",
             config={
                 "type": "cloud",
@@ -174,8 +181,8 @@ class ManagedSessionManager:
         )
         logger.info("Created environment: %s", environment.id)
 
-        # Create session
-        session = self.client.beta.sessions.create(
+        # Create session (async)
+        session = await self.client.beta.sessions.create(
             agent=agent.id,
             environment_id=environment.id,
             title=f"TTT: {role_id} R{round_num}",
@@ -215,7 +222,7 @@ class ManagedSessionManager:
     # Event sending (with retry)
     # ------------------------------------------------------------------
 
-    def send_event(self, ctx: SessionContext, message: str) -> list[dict]:
+    async def send_event(self, ctx: SessionContext, message: str) -> list[dict]:
         """Send a message to the session and process the full response.
 
         Handles the event stream: dispatches custom tool calls, logs agent
@@ -231,7 +238,7 @@ class ManagedSessionManager:
         """
         for attempt in range(1, MAX_RETRIES + 1):
             try:
-                return self._send_event_inner(ctx, message)
+                return await self._send_event_inner(ctx, message)
             except ConnectionError as e:
                 if attempt < MAX_RETRIES:
                     wait = RETRY_BACKOFF_SECONDS * attempt
@@ -239,7 +246,7 @@ class ManagedSessionManager:
                         "Connection error on attempt %d/%d, retrying in %ds: %s",
                         attempt, MAX_RETRIES, wait, e,
                     )
-                    time.sleep(wait)
+                    await asyncio.sleep(wait)
                 else:
                     logger.error("Connection error after %d attempts: %s", MAX_RETRIES, e)
                     raise
@@ -256,15 +263,20 @@ class ManagedSessionManager:
                         "Transient error on attempt %d/%d, retrying in %ds: %s",
                         attempt, MAX_RETRIES, wait, e,
                     )
-                    time.sleep(wait)
+                    await asyncio.sleep(wait)
                 else:
                     raise
 
         # Should not reach here, but just in case
-        return self._send_event_inner(ctx, message)
+        return await self._send_event_inner(ctx, message)
 
-    def _send_event_inner(self, ctx: SessionContext, message: str) -> list[dict]:
-        """Core send_event logic (no retry wrapper)."""
+    async def _send_event_inner(self, ctx: SessionContext, message: str) -> list[dict]:
+        """Core send_event logic (no retry wrapper).
+
+        Includes robust interrupt-before-send: checks session status, sends
+        interrupt if stuck (requires_action), and retries up to 3 times on
+        400 errors about 'waiting on responses'.
+        """
         transcript: list[dict] = []
         ctx.events_sent += 1
 
@@ -273,26 +285,77 @@ class ManagedSessionManager:
 
         transcript.append({"type": "user_message", "content": message})
 
-        # Update last_active_at in DB
+        # Update last_active_at in DB (sync — fast)
         self._update_session_field(ctx, status="active", events_sent=ctx.events_sent)
 
-        # Check session status — if it's waiting for tool results, interrupt first
+        # Robust interrupt-before-send: check status and clear stuck state
+        await self._ensure_session_idle(ctx)
+
+        # Retry loop for sending the message (handles 400 "waiting on responses")
+        send_attempts = 3
+        for send_attempt in range(1, send_attempts + 1):
+            try:
+                return await self._stream_event(ctx, message, transcript)
+            except Exception as e:
+                err_str = str(e).lower()
+                is_waiting_error = any(
+                    tok in err_str
+                    for tok in ("waiting on responses", "waiting for tool", "requires_action", "not idle")
+                )
+                if is_waiting_error and send_attempt < send_attempts:
+                    logger.warning(
+                        "Session stuck on attempt %d/%d, sending interrupt and retrying: %s",
+                        send_attempt, send_attempts, e,
+                    )
+                    try:
+                        await self.client.beta.sessions.events.send(
+                            ctx.session_id,
+                            events=[{"type": "user.interrupt"}],
+                        )
+                    except Exception as int_e:
+                        logger.warning("Interrupt failed: %s", int_e)
+                    await asyncio.sleep(2)
+                    # Re-check status after interrupt
+                    await self._ensure_session_idle(ctx)
+                else:
+                    raise
+
+        # Should not reach here, but just in case
+        return await self._stream_event(ctx, message, transcript)
+
+    async def _ensure_session_idle(self, ctx: SessionContext) -> None:
+        """Check session status; if not idle, send interrupt and wait."""
         try:
-            status = self.client.beta.sessions.retrieve(ctx.session_id)
-            if status.status != "idle":
-                logger.warning("Session status is '%s', sending interrupt before new message",
-                               status.status)
-                self.client.beta.sessions.events.send(
+            status = await self.client.beta.sessions.retrieve(ctx.session_id)
+            session_status = getattr(status, "status", "unknown")
+            if session_status not in ("idle", "unknown"):
+                logger.warning(
+                    "Session status is '%s', sending interrupt before new message",
+                    session_status,
+                )
+                await self.client.beta.sessions.events.send(
                     ctx.session_id,
                     events=[{"type": "user.interrupt"}],
                 )
-                time.sleep(1)
+                await asyncio.sleep(2)
+                # Verify it's idle now
+                status2 = await self.client.beta.sessions.retrieve(ctx.session_id)
+                status2_val = getattr(status2, "status", "unknown")
+                if status2_val not in ("idle", "unknown"):
+                    logger.warning(
+                        "Session still '%s' after interrupt, proceeding anyway",
+                        status2_val,
+                    )
         except Exception as e:
             logger.warning("Could not check/interrupt session: %s", e)
 
-        with self.client.beta.sessions.events.stream(ctx.session_id) as stream:
+    async def _stream_event(
+        self, ctx: SessionContext, message: str, transcript: list[dict]
+    ) -> list[dict]:
+        """Open a stream, send user.message, and process events until idle."""
+        async with await self.client.beta.sessions.events.stream(ctx.session_id) as stream:
             # Send the user message
-            self.client.beta.sessions.events.send(
+            await self.client.beta.sessions.events.send(
                 ctx.session_id,
                 events=[
                     {
@@ -303,10 +366,23 @@ class ManagedSessionManager:
             )
 
             # Process streaming events
-            for event in stream:
+            async for event in stream:
                 try:
                     entry = self._handle_event(ctx, event)
                     if entry:
+                        # If this was a tool call, send the result back (async)
+                        tool_result = entry.pop("_tool_result_to_send", None)
+                        if tool_result:
+                            await self.client.beta.sessions.events.send(
+                                ctx.session_id,
+                                events=[
+                                    {
+                                        "type": "user.custom_tool_result",
+                                        "custom_tool_use_id": tool_result["event_id"],
+                                        "content": [{"type": "text", "text": tool_result["result"]}],
+                                    },
+                                ],
+                            )
                         transcript.append(entry)
                 except Exception as e:
                     logger.error("Error handling event %s: %s", event.type, e)
@@ -324,7 +400,7 @@ class ManagedSessionManager:
                         logger.info("Session requires action for %d pending tools", len(pending_ids))
                         for eid in pending_ids:
                             try:
-                                self.client.beta.sessions.events.send(
+                                await self.client.beta.sessions.events.send(
                                     ctx.session_id,
                                     events=[{
                                         "type": "user.custom_tool_result",
@@ -367,7 +443,13 @@ class ManagedSessionManager:
     # ------------------------------------------------------------------
 
     def _handle_event(self, ctx: SessionContext, event: Any) -> dict | None:
-        """Handle a single SSE event from the stream."""
+        """Handle a single SSE event from the stream.
+
+        Note: This method is intentionally sync. The tool executor calls
+        Supabase (sync client) for DB operations which are fast (<100ms).
+        Tool results are returned as metadata — the caller (_stream_event)
+        sends them back to the agent via the async client.
+        """
         etype = event.type
 
         # Agent text message
@@ -396,7 +478,7 @@ class ManagedSessionManager:
             logger.info("Agent calls tool: %s(%s)", tool_name,
                         str(tool_input)[:100])
 
-            # Execute the tool
+            # Execute the tool (SYNC — Supabase client is sync, fast <100ms)
             result = ctx.tool_executor.execute(tool_name, tool_input)
 
             # Track actions and tool calls
@@ -404,23 +486,16 @@ class ManagedSessionManager:
             if tool_name in ("submit_action", "commit_action"):
                 ctx.actions_submitted += 1
 
-            # Send result back to the agent
-            self.client.beta.sessions.events.send(
-                ctx.session_id,
-                events=[
-                    {
-                        "type": "user.custom_tool_result",
-                        "custom_tool_use_id": event.id,
-                        "content": [{"type": "text", "text": result}],
-                    },
-                ],
-            )
-
+            # Return tool result metadata — _stream_event sends it async
             return {
                 "type": "tool_call",
                 "tool": tool_name,
                 "input": tool_input,
                 "result_preview": result[:300] if len(result) > 300 else result,
+                "_tool_result_to_send": {
+                    "event_id": event.id,
+                    "result": result,
+                },
             }
 
         # Token usage tracking
@@ -446,14 +521,14 @@ class ManagedSessionManager:
     # Health check
     # ------------------------------------------------------------------
 
-    def health_check(self, ctx: SessionContext) -> str:
+    async def health_check(self, ctx: SessionContext) -> str:
         """Check session health via the Anthropic API.
 
         Returns:
             Status string: 'idle', 'running', 'terminated', or 'unknown'.
         """
         try:
-            status = self.client.beta.sessions.retrieve(ctx.session_id)
+            status = await self.client.beta.sessions.retrieve(ctx.session_id)
             session_status = getattr(status, "status", "unknown")
             if session_status == "terminated":
                 logger.warning(
@@ -470,7 +545,7 @@ class ManagedSessionManager:
     # Session recovery
     # ------------------------------------------------------------------
 
-    def recover_session(self, ctx: SessionContext) -> SessionContext:
+    async def recover_session(self, ctx: SessionContext) -> SessionContext:
         """Recover a terminated session by creating a new one with memory context.
 
         Loads the agent's memory notes from agent_memories and injects them
@@ -488,11 +563,11 @@ class ManagedSessionManager:
             ctx.role_id, ctx.country_code, ctx.session_id,
         )
 
-        # Load memory notes from agent_memories
+        # Load memory notes from agent_memories (sync — DB query)
         memory_notes = self._load_agent_memories(ctx.sim_run_id, ctx.country_code)
 
-        # Create a fresh session
-        new_ctx = self.create_session(
+        # Create a fresh session (async)
+        new_ctx = await self.create_session(
             role_id=ctx.role_id,
             country_code=ctx.country_code,
             sim_run_id=ctx.sim_run_id,
@@ -529,7 +604,7 @@ class ManagedSessionManager:
             )
 
         logger.info("Sending recovery message (%d chars) to new session", len(recovery_msg))
-        self.send_event(new_ctx, recovery_msg)
+        await self.send_event(new_ctx, recovery_msg)
 
         # Remove old session from local cache
         self._sessions.pop(ctx.session_id, None)
@@ -670,21 +745,21 @@ class ManagedSessionManager:
     # Cleanup
     # ------------------------------------------------------------------
 
-    def cleanup(self, ctx: SessionContext) -> None:
+    async def cleanup(self, ctx: SessionContext) -> None:
         """Archive and clean up session resources."""
         try:
-            self.client.beta.sessions.archive(ctx.session_id)
+            await self.client.beta.sessions.archive(ctx.session_id)
             logger.info("Archived session %s", ctx.session_id)
         except Exception as e:
             logger.warning("Failed to archive session: %s", e)
 
         try:
-            self.client.beta.agents.archive(ctx.agent_id)
+            await self.client.beta.agents.archive(ctx.agent_id)
             logger.info("Archived agent %s", ctx.agent_id)
         except Exception as e:
             logger.warning("Failed to archive agent: %s", e)
 
-        # Mark as archived in DB
+        # Mark as archived in DB (sync)
         self._update_session_field(ctx, status="archived")
 
         # Remove from local cache

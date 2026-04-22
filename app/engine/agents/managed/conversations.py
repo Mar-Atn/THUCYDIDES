@@ -76,10 +76,8 @@ class ConversationRouter:
         Returns:
             List of meeting dicts ready to run.
         """
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, self._check_pending_sync, agents, agent_states,
-        )
+        # Sync DB call — fast (<100ms), no need for executor
+        return self._check_pending_sync(agents, agent_states)
 
     def _check_pending_sync(
         self,
@@ -381,8 +379,8 @@ class ConversationRouter:
             Dict with role_id, country_code, content, turn_num.
             None if the speaker's session is dead or unresponsive.
         """
-        # Health check before sending
-        health = self.session_manager.health_check(speaker)
+        # Health check before sending (async)
+        health = await self.session_manager.health_check(speaker)
         if health == "terminated":
             logger.warning(
                 "[conversations] Speaker %s session terminated mid-meeting",
@@ -390,12 +388,9 @@ class ConversationRouter:
             )
             return None
 
-        # Send event (synchronous) via executor
-        loop = asyncio.get_event_loop()
+        # Send event (async — no threads)
         try:
-            transcript = await loop.run_in_executor(
-                None, self.session_manager.send_event, speaker, prompt_prefix,
-            )
+            transcript = await self.session_manager.send_event(speaker, prompt_prefix)
         except Exception as e:
             logger.error(
                 "[conversations] send_event failed for %s: %s",
@@ -476,10 +471,8 @@ class ConversationRouter:
     ) -> None:
         """End a meeting, catching any errors."""
         try:
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(
-                None, end_meeting, meeting_id, role_id,
-            )
+            # Sync DB call — fast (<100ms), no need for executor
+            end_meeting(meeting_id, role_id)
             logger.info(
                 "[conversations] Meeting %s ended (reason=%s, ended_by=%s)",
                 meeting_id, reason, role_id,

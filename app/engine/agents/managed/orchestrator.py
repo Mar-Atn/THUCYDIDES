@@ -17,12 +17,17 @@ Key responsibilities:
   9. Auto-advance (co-moderator mode) — unmanned testing
   10. Track costs — aggregate token usage across all agents
 
-Dependencies: session_manager (Phase 1C), meta_context, event_handler.
+Migration note (2026-04-21): Converted from sync (run_in_executor) to pure
+async. All session_manager calls are now awaited directly — no threads.
+Supports 20+ concurrent agents with asyncio.gather.
+
+Dependencies: session_manager (Phase 1C async), meta_context, event_handler.
 """
 from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
@@ -87,6 +92,9 @@ class AIOrchestrator:
 
     Manages session lifecycle, pulse scheduling, event batching,
     busy state, and round transitions for 1-40 AI agents.
+
+    Pure async — no threads. Uses asyncio.gather for parallel agent
+    processing and AsyncAnthropic for all API calls.
     """
 
     def __init__(self, sim_run_id: str, config: OrchestratorConfig | None = None):
@@ -103,6 +111,8 @@ class AIOrchestrator:
         self._queued_events: dict[str, list[dict]] = {}  # role_id -> events queued while busy
         self._scenario_code: str = ""
         self._initialized: bool = False
+        # Semaphore to limit concurrent session creation (API rate limit)
+        self._init_semaphore = asyncio.Semaphore(4)
 
     # ------------------------------------------------------------------
     # Reconnect from DB (after backend restart)
@@ -214,11 +224,11 @@ class AIOrchestrator:
             logger.info("Cleaning up %d orphaned sessions", len(old_sessions.data))
             for old in old_sessions.data:
                 try:
-                    self.session_manager.client.beta.sessions.archive(old["session_id"])
+                    await self.session_manager.client.beta.sessions.archive(old["session_id"])
                 except Exception:
                     pass  # May already be archived
                 try:
-                    self.session_manager.client.beta.agents.archive(old["agent_id"])
+                    await self.session_manager.client.beta.agents.archive(old["agent_id"])
                 except Exception:
                     pass
             db.table("ai_agent_sessions").update({"status": "archived"}).eq(
@@ -270,83 +280,66 @@ class AIOrchestrator:
                 "errors": ["No AI-operated roles found for this sim run"],
             }
 
-        logger.info("Found %d AI roles to initialize", len(roles))
+        logger.info("Found %d AI roles to initialize (async, max 4 concurrent)", len(roles))
 
         initialized = []
         errors = []
 
-        # Phase 1: Create all sessions FAST (sequential, ~2s each = ~16s for 8)
-        # Session creation is lightweight — just API calls to Anthropic.
-        for role in roles:
+        # Initialize agents with concurrency limit (semaphore)
+        async def _init_one(role: dict, index: int) -> None:
             role_id = role["id"]
             country_code = role["country_code"]
             character_name = role.get("character_name", role_id)
+            title = role.get("title", "Leader")
 
-            try:
-                ctx = self.session_manager.create_session(
-                    role_id=role_id,
-                    country_code=country_code,
-                    sim_run_id=self.sim_run_id,
-                    scenario_code=self._scenario_code,
-                    round_num=self.round_num,
-                    model=self.config.model,
-                )
-                self.agents[role_id] = ctx
-                self.agent_states[role_id] = IDLE
-                self.round_stats[role_id] = AgentRoundStats()
-                self._queued_events[role_id] = []
+            async with self._init_semaphore:
+                try:
+                    # Create session (async)
+                    ctx = await self.session_manager.create_session(
+                        role_id=role_id,
+                        country_code=country_code,
+                        sim_run_id=self.sim_run_id,
+                        scenario_code=self._scenario_code,
+                        round_num=self.round_num,
+                        model=self.config.model,
+                    )
+                    self.agents[role_id] = ctx
+                    self.agent_states[role_id] = IDLE
+                    self.round_stats[role_id] = AgentRoundStats()
+                    self._queued_events[role_id] = []
 
-                initialized.append({
-                    "role_id": role_id,
-                    "country_code": country_code,
-                    "character_name": character_name,
-                    "session_id": ctx.session_id,
-                    "status": "ready",
-                })
-                logger.info("Created session for %s (%s): %s", role_id, country_code, ctx.session_id)
-            except Exception as e:
-                logger.error("Failed to create session for %s: %s", role_id, e)
-                errors.append({"role_id": role_id, "error": str(e)})
+                    # Send init message and wait for completion (async)
+                    init_msg = (
+                        f"The simulation has begun. You are {character_name}, "
+                        f"{title} of {country_code}. "
+                        f"This is Round {self.round_num}. Assess your situation."
+                    )
+                    transcript = await self.session_manager.send_event(ctx, init_msg)
 
-        # Phase 2: Send init messages in background (agents explore on their own)
-        # This is the slow part (~1-2 min per agent) but doesn't block initialization.
-        async def _send_init_messages():
-            sem = asyncio.Semaphore(2)
-            loop = asyncio.get_event_loop()
+                    # Log to observatory (sync — DB only)
+                    log_transcript_to_observatory(
+                        self.sim_run_id, country_code, self.round_num, transcript,
+                    )
 
-            async def _init_msg(role_id: str, ctx_inner: 'SessionContext'):
-                async with sem:
-                    try:
-                        country_code = ctx_inner.country_code
-                        char_name = next(
-                            (r["character_name"] for r in roles if r["id"] == role_id),
-                            role_id,
-                        )
-                        title = next(
-                            (r.get("title", "Leader") for r in roles if r["id"] == role_id),
-                            "Leader",
-                        )
-                        init_msg = (
-                            f"The simulation has begun. You are {char_name}, "
-                            f"{title} of {country_code}. "
-                            f"This is Round {self.round_num}. Assess your situation."
-                        )
-                        transcript = await loop.run_in_executor(
-                            None, self.session_manager.send_event, ctx_inner, init_msg,
-                        )
-                        log_transcript_to_observatory(
-                            self.sim_run_id, country_code, self.round_num, transcript,
-                        )
-                        logger.info("Init message complete for %s", role_id)
-                    except Exception as e:
-                        logger.error("Init message failed for %s: %s", role_id, e)
+                    initialized.append({
+                        "role_id": role_id,
+                        "country_code": country_code,
+                        "character_name": character_name,
+                        "session_id": ctx.session_id,
+                        "status": "ready",
+                    })
+                    logger.info(
+                        "Initialized agent %d/%d: %s (%s) session=%s",
+                        index + 1, len(roles), role_id, country_code, ctx.session_id,
+                    )
+                except Exception as e:
+                    logger.error("Failed to initialize %s: %s", role_id, e)
+                    errors.append({"role_id": role_id, "error": str(e)})
 
-            await asyncio.gather(
-                *[_init_msg(rid, ctx) for rid, ctx in self.agents.items()],
-                return_exceptions=True,
-            )
-
-        asyncio.create_task(_send_init_messages())
+        # Run all initializations concurrently (semaphore limits to 4)
+        await asyncio.gather(*[
+            _init_one(role, i) for i, role in enumerate(roles)
+        ])
 
         self._initialized = True
 
@@ -495,12 +488,12 @@ class AIOrchestrator:
                     queued.append(evt)
                 continue
 
-            # Health check before pulse
-            health = self.session_manager.health_check(ctx)
+            # Health check before pulse (async)
+            health = await self.session_manager.health_check(ctx)
             if health == "terminated":
                 logger.warning("Session terminated for %s, recovering...", role_id)
                 try:
-                    new_ctx = self.session_manager.recover_session(ctx)
+                    new_ctx = await self.session_manager.recover_session(ctx)
                     self.agents[role_id] = new_ctx
                     ctx = new_ctx
                 except Exception as e:
@@ -551,21 +544,15 @@ class AIOrchestrator:
         pulse_num: int,
         events: dict,
     ) -> dict:
-        """Send a pulse to one agent and process the response.
-
-        Runs in a thread pool because session_manager.send_event is synchronous.
-        """
+        """Send a pulse to one agent and process the response (async)."""
         self.agent_states[role_id] = ACTING
 
         try:
-            # Build pulse message
+            # Build pulse message (sync — pure string formatting)
             message = self._build_pulse_message(role_id, ctx, pulse_num, events)
 
-            # Send event (synchronous — run in executor)
-            loop = asyncio.get_event_loop()
-            transcript = await loop.run_in_executor(
-                None, self.session_manager.send_event, ctx, message
-            )
+            # Send event (async — no threads)
+            transcript = await self.session_manager.send_event(ctx, message)
 
             # Log to observatory
             log_transcript_to_observatory(
@@ -821,10 +808,9 @@ class AIOrchestrator:
         Returns:
             {public: [...], private: [...], pending: [...]}.
         """
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(
-            None, self._collect_events_sync, role_id, country_code
-        )
+        # Event collection uses sync Supabase client — fast DB queries (<100ms)
+        # No need for run_in_executor; just call directly from async context.
+        return self._collect_events_sync(role_id, country_code)
 
     def _collect_events_sync(self, role_id: str, country_code: str) -> dict:
         """Synchronous event collection from observatory_events."""
@@ -1002,10 +988,7 @@ class AIOrchestrator:
             "Assess the situation and respond immediately."
         )
 
-        loop = asyncio.get_event_loop()
-        transcript = await loop.run_in_executor(
-            None, self.session_manager.send_event, ctx, interrupt_msg
-        )
+        transcript = await self.session_manager.send_event(ctx, interrupt_msg)
 
         log_transcript_to_observatory(
             self.sim_run_id, ctx.country_code, self.round_num, transcript
@@ -1181,12 +1164,18 @@ class AIOrchestrator:
         """Archive all sessions and persist final state to DB."""
         logger.info("Shutting down orchestrator for sim %s", self.sim_run_id)
 
-        for role_id, ctx in self.agents.items():
+        # Archive all sessions in parallel
+        async def _cleanup_one(role_id: str, ctx: SessionContext) -> None:
             try:
-                self.session_manager.cleanup(ctx)
+                await self.session_manager.cleanup(ctx)
                 logger.info("Archived session for %s", role_id)
             except Exception as e:
                 logger.warning("Failed to archive session for %s: %s", role_id, e)
+
+        await asyncio.gather(
+            *[_cleanup_one(rid, ctx) for rid, ctx in self.agents.items()],
+            return_exceptions=True,
+        )
 
         write_agent_log_event(
             self.sim_run_id, "", self.round_num,
@@ -1270,10 +1259,7 @@ class AIOrchestrator:
                     "Submit now using submit_action."
                 )
                 try:
-                    loop = asyncio.get_event_loop()
-                    transcript = await loop.run_in_executor(
-                        None, self.session_manager.send_event, ctx, reminder
-                    )
+                    transcript = await self.session_manager.send_event(ctx, reminder)
                     log_transcript_to_observatory(
                         self.sim_run_id, ctx.country_code, self.round_num, transcript
                     )
