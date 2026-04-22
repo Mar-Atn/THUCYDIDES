@@ -170,12 +170,13 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   }
 
   /* Derived data */
-  const aiRoles = roles.filter(r => r.is_ai_operated && r.status !== 'inactive')
+  const aiRoles = roles.filter(r => r.is_ai_operated && r.status === 'active')
   const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
+  const activeSessions = dbSessions.filter(s => s.status !== 'archived' && s.status !== 'terminated')
   const totalActions = status?.agents.reduce((s, a) => s + a.round_stats.actions, 0) ?? 0
   const totalToolCalls = status?.agents.reduce((s, a) => s + a.round_stats.tool_calls, 0) ?? 0
   const agentCount = status?.total_agents ?? 0
-  const isActive = agentCount > 0  // orchestrator has agents
+  const isActive = agentCount > 0 || activeSessions.length > 0  // orchestrator OR DB sessions
   const noAiRoles = aiRoles.length === 0
 
   const handleInitialize = async () => {
