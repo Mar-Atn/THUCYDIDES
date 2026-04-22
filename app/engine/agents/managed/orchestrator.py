@@ -149,12 +149,13 @@ class AIOrchestrator:
                 .execute()
             )
         else:
-            # Get all AI-operated roles
+            # Get all ACTIVE AI-operated roles (exclude inactive from reduced templates)
             roles_data = (
                 db.table("roles")
                 .select("id, country_code, character_name, title, is_ai_operated")
                 .eq("sim_run_id", self.sim_run_id)
                 .eq("is_ai_operated", True)
+                .eq("status", "active")
                 .execute()
             )
 
@@ -225,9 +226,16 @@ class AIOrchestrator:
                 "status": "ready",
             }
 
-        # Initialize all agents in parallel
+        # Initialize agents with limited concurrency (max 3 at a time to avoid
+        # [Errno 35] Resource temporarily unavailable from too many threads)
+        sem = asyncio.Semaphore(3)
+
+        async def _init_with_semaphore(role: dict) -> dict:
+            async with sem:
+                return await _init_one_agent(role)
+
         results = await asyncio.gather(
-            *[_init_one_agent(r) for r in roles], return_exceptions=True
+            *[_init_with_semaphore(r) for r in roles], return_exceptions=True
         )
 
         for i, result in enumerate(results):
