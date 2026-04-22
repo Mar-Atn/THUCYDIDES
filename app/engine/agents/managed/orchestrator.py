@@ -122,8 +122,32 @@ class AIOrchestrator:
         """
         logger.info("Initializing AI agents for sim %s", self.sim_run_id)
 
-        # Load sim run info
+        # Clean up any orphaned sessions from previous runs
         db = get_client()
+        old_sessions = (
+            db.table("ai_agent_sessions")
+            .select("session_id,agent_id,role_id,status")
+            .eq("sim_run_id", self.sim_run_id)
+            .in_("status", ["initializing", "ready", "active", "frozen"])
+            .execute()
+        )
+        if old_sessions.data:
+            logger.info("Cleaning up %d orphaned sessions", len(old_sessions.data))
+            for old in old_sessions.data:
+                try:
+                    self.session_manager.client.beta.sessions.archive(old["session_id"])
+                except Exception:
+                    pass  # May already be archived
+                try:
+                    self.session_manager.client.beta.agents.archive(old["agent_id"])
+                except Exception:
+                    pass
+            db.table("ai_agent_sessions").update({"status": "archived"}).eq(
+                "sim_run_id", self.sim_run_id
+            ).in_("status", ["initializing", "ready", "active", "frozen"]).execute()
+            logger.info("Orphaned sessions archived")
+
+        # Load sim run info
         run_data = (
             db.table("sim_runs")
             .select("scenario_id, current_round")
