@@ -1,0 +1,1898 @@
+{
+  "id": "3b431689-945b-44d0-89f0-7b32a7f63b47",
+  "code": "ttt_v1_0",
+  "name": "TTT Main Template",
+  "version": "1.0",
+  "description": "Canonical TTT template locked 2026-04-05 after Map+Units finalization. 20 countries, 10x20 global hex grid, 2 tactical theaters (eastern_ereb, mashriq), 345 default units.",
+  "status": "published",
+  "map_config": {
+    "global": {
+      "cols": 20,
+      "grid": [
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "freeland"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "thule"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "albion"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "freeland"
+          },
+          {
+            "owner": "ruthenia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "choson"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "albion"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "teutonia"
+          },
+          {
+            "owner": "teutonia"
+          },
+          {
+            "owner": "ruthenia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sarmatia"
+          },
+          {
+            "owner": "hanguk"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "yamato"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "gallia"
+          },
+          {
+            "owner": "gallia"
+          },
+          {
+            "owner": "phrygia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sogdiana"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "yamato"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "ponte"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "levantia"
+          },
+          {
+            "owner": "phrygia"
+          },
+          {
+            "owner": "persia"
+          },
+          {
+            "owner": "sogdiana"
+          },
+          {
+            "owner": "sogdiana"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "columbia"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "ponte"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "solaria"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "persia"
+          },
+          {
+            "owner": "bharata"
+          },
+          {
+            "owner": "bharata"
+          },
+          {
+            "owner": "cathay"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "formosa"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "solaria"
+          },
+          {
+            "owner": "mirage"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "persia"
+          },
+          {
+            "owner": "bharata"
+          },
+          {
+            "owner": "bharata"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "caribe"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "horn"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "bharata"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ],
+        [
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          },
+          {
+            "owner": "sea"
+          }
+        ]
+      ],
+      "rows": 10,
+      "die_hards": {},
+      "chokepoints": {
+        "gulf_gate": {
+          "col": 11,
+          "row": 7,
+          "name": "Gulf Gate"
+        },
+        "caribe_passage": {
+          "col": 3,
+          "row": 7,
+          "name": "Caribe Passage"
+        },
+        "formosa_strait": {
+          "col": 16,
+          "row": 6,
+          "name": "Formosa Strait"
+        }
+      }
+    },
+    "hex_type": "pointy_top",
+    "theaters": {
+      "mashriq": {
+        "cols": 10,
+        "grid": [
+          [
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            }
+          ],
+          [
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            }
+          ],
+          [
+            {
+              "owner": "phrygia",
+              "global_link": "6,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "6,12"
+            }
+          ],
+          [
+            {
+              "owner": "solaria",
+              "global_link": "7,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            }
+          ],
+          [
+            {
+              "owner": "solaria",
+              "global_link": "7,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            }
+          ],
+          [
+            {
+              "owner": "solaria",
+              "global_link": "7,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "7,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "7,13"
+            }
+          ],
+          [
+            {
+              "owner": "solaria",
+              "global_link": "7,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            }
+          ],
+          [
+            {
+              "owner": "solaria",
+              "global_link": "7,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            }
+          ],
+          [
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            }
+          ],
+          [
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "mirage",
+              "global_link": "8,11"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "sea",
+              "global_link": "8,12"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            },
+            {
+              "owner": "persia",
+              "global_link": "8,13"
+            }
+          ]
+        ],
+        "rows": 10,
+        "chokepoints": {}
+      },
+      "eastern_ereb": {
+        "cols": 10,
+        "grid": [
+          [
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            }
+          ],
+          [
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,3"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4",
+              "occupied_by": null
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            },
+            {
+              "owner": "sarmatia",
+              "global_link": "12,4"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "12,4",
+              "occupied_by": "sarmatia"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            }
+          ],
+          [
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "ruthenia",
+              "global_link": "11,4"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            },
+            {
+              "owner": "sea"
+            }
+          ]
+        ],
+        "rows": 10,
+        "chokepoints": {}
+      }
+    },
+    "hex_offset": "odd_r",
+    "coordinate_convention": "1-indexed (row, col), row first. JSON arrays are 0-indexed."
+  },
+  "default_country_stats": {
+    "_note": "Abbreviated stats. Full 48-field per-country data in 2 SEED/C_MECHANICS/C4_DATA/countries.csv v1.0",
+    "ponte": {
+      "gdp": 22,
+      "parallel": "Italy",
+      "mil_ground": 4,
+      "mil_tactical_air": 2
+    },
+    "albion": {
+      "gdp": 33,
+      "parallel": "United Kingdom",
+      "mil_naval": 2,
+      "mil_ground": 4,
+      "regime_type": "democracy",
+      "nuclear_level": 2,
+      "mil_air_defense": 2,
+      "mil_tactical_air": 3,
+      "mil_strategic_missiles": 2
+    },
+    "caribe": {
+      "gdp": 2,
+      "parallel": "Cuba + Venezuela",
+      "mil_ground": 3
+    },
+    "cathay": {
+      "gdp": 190,
+      "ai_level": 3,
+      "parallel": "China",
+      "treasury": 50,
+      "inflation": 0.5,
+      "mil_naval": 7,
+      "stability": 8,
+      "mil_ground": 25,
+      "at_war_with": [],
+      "regime_type": "autocracy",
+      "nuclear_level": 2,
+      "mil_air_defense": 3,
+      "mil_tactical_air": 12,
+      "mil_strategic_missiles": 4
+    },
+    "choson": {
+      "gdp": 0.3,
+      "parallel": "North Korea",
+      "mil_ground": 8,
+      "nuclear_level": 1,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 1,
+      "mil_strategic_missiles": 2
+    },
+    "gallia": {
+      "gdp": 34,
+      "parallel": "France",
+      "mil_naval": 1,
+      "mil_ground": 6,
+      "regime_type": "democracy",
+      "nuclear_level": 2,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 4,
+      "mil_strategic_missiles": 2
+    },
+    "hanguk": {
+      "gdp": 18,
+      "parallel": "South Korea",
+      "mil_naval": 1,
+      "mil_ground": 5,
+      "mil_air_defense": 2,
+      "mil_tactical_air": 3
+    },
+    "mirage": {
+      "gdp": 5,
+      "parallel": "UAE",
+      "mil_ground": 2,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 2
+    },
+    "persia": {
+      "gdp": 5,
+      "parallel": "Iran",
+      "treasury": 1,
+      "inflation": 50.0,
+      "mil_naval": 0,
+      "stability": 4,
+      "mil_ground": 8,
+      "at_war_with": [
+        "columbia",
+        "levantia"
+      ],
+      "regime_type": "hybrid",
+      "nuclear_level": 0,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 6,
+      "mil_strategic_missiles": 0
+    },
+    "yamato": {
+      "gdp": 43,
+      "parallel": "Japan",
+      "mil_naval": 2,
+      "mil_ground": 3,
+      "mil_air_defense": 2,
+      "mil_tactical_air": 3
+    },
+    "bharata": {
+      "gdp": 42,
+      "parallel": "India",
+      "mil_naval": 2,
+      "mil_ground": 12,
+      "nuclear_level": 1,
+      "mil_air_defense": 2,
+      "mil_tactical_air": 4
+    },
+    "formosa": {
+      "gdp": 8,
+      "parallel": "Taiwan",
+      "mil_ground": 4,
+      "mil_air_defense": 2,
+      "mil_tactical_air": 3
+    },
+    "phrygia": {
+      "gdp": 11,
+      "parallel": "Turkey",
+      "mil_naval": 1,
+      "mil_ground": 6,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 3
+    },
+    "solaria": {
+      "gdp": 11,
+      "parallel": "Saudi Arabia",
+      "mil_ground": 3,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 3
+    },
+    "columbia": {
+      "gdp": 280,
+      "ai_level": 3,
+      "parallel": "United States",
+      "treasury": 30,
+      "inflation": 3.5,
+      "mil_naval": 11,
+      "stability": 7,
+      "mil_ground": 22,
+      "at_war_with": [
+        "persia"
+      ],
+      "regime_type": "democracy",
+      "nuclear_level": 3,
+      "mil_air_defense": 6,
+      "mil_tactical_air": 15,
+      "mil_strategic_missiles": 12
+    },
+    "freeland": {
+      "gdp": 9,
+      "parallel": "Poland",
+      "mil_ground": 5,
+      "regime_type": "democracy",
+      "mil_air_defense": 1,
+      "mil_tactical_air": 2
+    },
+    "levantia": {
+      "gdp": 5,
+      "parallel": "Israel",
+      "mil_ground": 6,
+      "at_war_with": [
+        "persia"
+      ],
+      "nuclear_level": 1,
+      "mil_air_defense": 3,
+      "mil_tactical_air": 4,
+      "mil_strategic_missiles": 3
+    },
+    "ruthenia": {
+      "gdp": 2.2,
+      "parallel": "Ukraine",
+      "treasury": 5,
+      "inflation": 7.5,
+      "mil_naval": 0,
+      "stability": 5,
+      "mil_ground": 11,
+      "at_war_with": [
+        "sarmatia"
+      ],
+      "regime_type": "democracy",
+      "nuclear_level": 0,
+      "mil_air_defense": 1,
+      "mil_tactical_air": 3,
+      "mil_strategic_missiles": 0
+    },
+    "sarmatia": {
+      "gdp": 20,
+      "parallel": "Russia",
+      "treasury": 18,
+      "inflation": 5.0,
+      "mil_naval": 2,
+      "stability": 5,
+      "mil_ground": 18,
+      "at_war_with": [
+        "ruthenia"
+      ],
+      "regime_type": "autocracy",
+      "nuclear_level": 3,
+      "mil_air_defense": 3,
+      "mil_tactical_air": 8,
+      "mil_strategic_missiles": 12
+    },
+    "teutonia": {
+      "gdp": 45,
+      "parallel": "Germany",
+      "mil_ground": 6,
+      "regime_type": "democracy",
+      "mil_air_defense": 1,
+      "mil_tactical_air": 3
+    }
+  },
+  "default_relationships": {
+    "_todo": "Convert to canonical JSONB shape",
+    "_source": "2 SEED/C_MECHANICS/C4_DATA/relationships.csv",
+    "_status": "placeholder"
+  },
+  "default_unit_layout_id": "a74ca4c8-2663-4b8a-81cc-e2f36a3cbe58",
+  "default_role_briefings": {
+    "_todo": "Assemble from roles.csv",
+    "_source": "2 SEED/C_MECHANICS/C4_DATA/roles.csv",
+    "_status": "placeholder"
+  },
+  "formula_coefficients": {
+    "_note": "These values are currently HARDCODED in the engine. Shown here for reference only. They will become configurable in a future update.",
+    "economic": {
+      "gdp_floor": 0.5,
+      "oil_base_price": 80.0,
+      "sanctions_floor": 0.15,
+      "dollar_credibility_floor": 20.0,
+      "money_printing_inflation_multiplier": 60.0
+    },
+    "military": {
+      "missile_intercept_prob_per_ad": 0.25,
+      "nuclear_launch_hit_probability": 0.8,
+      "assassination_stability_boost_kill": 1.5,
+      "assassination_stability_boost_survive": 1.0
+    },
+    "political": {
+      "change_leader_threshold": 4.0
+    },
+    "technology": {
+      "rd_multiplier": 0.8,
+      "rare_earth_penalty_per_level": 0.15
+    }
+  },
+  "organizations": {
+    "NATO": {
+      "code": "NATO",
+      "name": "North Atlantic Treaty Organization",
+      "description": "Collective defense alliance.",
+      "default_members": [],
+      "enforcement_status": "none"
+    },
+    "OPEC": {
+      "code": "OPEC",
+      "name": "Organization of Petroleum Exporting Countries",
+      "description": "Oil producers cartel.",
+      "default_members": [],
+      "enforcement_status": "none"
+    },
+    "UNSC": {
+      "code": "UNSC",
+      "name": "United Nations Security Council",
+      "description": "Global security governance body.",
+      "default_members": [],
+      "enforcement_status": "none"
+    },
+    "BRICS": {
+      "code": "BRICS",
+      "name": "BRICS bloc",
+      "description": "Emerging-economies alignment.",
+      "default_members": [],
+      "enforcement_status": "none"
+    },
+    "EREB_UNION": {
+      "code": "EREB_UNION",
+      "name": "Ereb Union",
+      "description": "Regional political+economic union (Europe parallel).",
+      "default_members": [],
+      "enforcement_status": "none"
+    }
+  },
+  "allowed_round_counts": [
+    6,
+    8
+  ],
+  "allowed_oil_price_range": "[50.0,150.0]",
+  "allowed_phase_a_duration_range": "[300,1201)",
+  "allowed_theaters": [
+    "eastern_ereb",
+    "mashriq"
+  ],
+  "created_at": "2026-04-05T13:33:05.698729+00:00",
+  "created_by": "build-team",
+  "schedule_defaults": {
+    "default_rounds": 6,
+    "break_duration_min": 15,
+    "round_1_duration_min": 80,
+    "change_leader_threshold": 4.0,
+    "debriefing_duration_min": 30,
+    "reflection_duration_min": 20,
+    "introduction_duration_min": 30,
+    "subsequent_round_duration_min": 60
+  },
+  "key_events_defaults": [
+    {
+      "name": "Columbia Mid-Term Parliamentary Elections",
+      "type": "election",
+      "round": 2,
+      "subtype": "parliamentary_midterm",
+      "country_code": "columbia",
+      "nominations_round": 1
+    },
+    {
+      "name": "Columbia Presidential Election",
+      "type": "election",
+      "round": 6,
+      "subtype": "presidential",
+      "country_code": "columbia",
+      "nominations_round": 5
+    },
+    {
+      "name": "Ereb Union Session",
+      "type": "mandatory_meeting",
+      "round": 1,
+      "subtype": "organization_session",
+      "organization": "the_ereb_union"
+    },
+    {
+      "name": "The Cartel Meeting",
+      "type": "mandatory_meeting",
+      "round": 1,
+      "subtype": "organization_session",
+      "organization": "the_cartel"
+    },
+    {
+      "name": "Global Security Council Session on Persia Crisis",
+      "type": "mandatory_meeting",
+      "round": 1,
+      "subtype": "organization_session",
+      "organization": "the_council"
+    },
+    {
+      "name": "Columbia Parliament Session",
+      "type": "mandatory_meeting",
+      "round": 1,
+      "subtype": "organization_session",
+      "organization": "columbia_parliament"
+    },
+    {
+      "name": "Phrygia Peace Talks",
+      "note": "Representatives, not Heads of State",
+      "type": "mandatory_meeting",
+      "round": 1,
+      "subtype": "trilateral_negotiation",
+      "participants": [
+        {
+          "role_id": "shadow",
+          "country_code": "columbia",
+          "character_name": "Shadow"
+        },
+        {
+          "role_id": "broker",
+          "country_code": "ruthenia",
+          "character_name": "Broker"
+        },
+        {
+          "role_id": "compass",
+          "country_code": "sarmatia",
+          "character_name": "Compass"
+        }
+      ]
+    },
+    {
+      "name": "The New League Meeting",
+      "type": "mandatory_meeting",
+      "round": 2,
+      "subtype": "organization_session",
+      "organization": "the_league"
+    },
+    {
+      "name": "Western Treaty Session",
+      "type": "mandatory_meeting",
+      "round": 2,
+      "subtype": "organization_session",
+      "organization": "western_treaty"
+    }
+  ]
+}
