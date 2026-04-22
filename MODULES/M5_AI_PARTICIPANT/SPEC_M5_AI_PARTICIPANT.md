@@ -41,10 +41,11 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 └──────────────────────┬──────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────┐
-│  LAYER 3: ORCHESTRATOR (Invisible to agent)         │
-│  Creates/manages sessions, sends pulses,             │
-│  mediates conversations, enforces timing + busy      │
-│  state, monitors cost, logs everything               │
+│  LAYER 3: EVENT DISPATCHER (Invisible to agent)     │
+│  Unified event queue: everything writes to queue,    │
+│  single dispatcher delivers. No concurrent streams.  │
+│  Tier 1 (critical) <5s, Tier 2 (urgent) <10s,      │
+│  Tier 3 (routine) batched at pulse interval.         │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -54,12 +55,14 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 
 | Sub-Module | Location | Responsibility | Status |
 |------------|----------|----------------|--------|
-| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from role + country + rules + meta | Spike done, expand |
-| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | Spike 8 tools, expand to 16 |
-| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | Create/manage Managed Agent sessions, SSE event loop, recovery | Spike done, harden |
-| **M5.4 Orchestrator** | `engine/agents/managed/orchestrator.py` | **THE CORE** — pulse scheduling, event batching, multi-agent coordination, busy state, timing | TO BUILD |
-| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI and AI↔Human, voice delegation | TO BUILD |
-| **M5.6 Observer** | API endpoints + facilitator UI components | AI dashboard, agent activity log, freeze/resume controls | PARTIAL (endpoint done) |
+| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta | DONE |
+| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | DONE |
+| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch | DONE (async) |
+| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, tiered delivery, single dispatch loop | BUILDING |
+| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI and AI↔Human via direct send_event | DONE |
+| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with queue depth, agent detail with full activity log | DONE |
+
+**Architecture change (2026-04-22):** M5.4 changed from "Orchestrator" (dual-path: scheduled pulses + auto-pulse) to "Event Dispatcher" (single unified queue). All events flow through one queue, one dispatcher. Eliminates race conditions, lost events, stuck sessions. See `SPRINT_UNIFIED_QUEUE.md` for full design.
 
 ---
 
