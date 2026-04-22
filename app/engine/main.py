@@ -2351,19 +2351,21 @@ async def ai_status(
 
     dispatcher = get_dispatcher(sim_id)
 
-    if not dispatcher or not dispatcher.agents:
+    if not dispatcher or (not dispatcher.agents and not dispatcher._running):
         # Try to reconnect from DB sessions (backend may have restarted)
+        # But ONLY if no dispatcher is already running
         try:
             if not dispatcher:
                 dispatcher = create_dispatcher(sim_id)
-            count = await dispatcher.reconnect_from_db()
-            if count > 0:
-                await dispatcher.start()
-                logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sim_id, count)
-            else:
-                from engine.agents.managed.event_dispatcher import remove_dispatcher
-                remove_dispatcher(sim_id)
-                dispatcher = None
+            if not dispatcher._running:
+                count = await dispatcher.reconnect_from_db()
+                if count > 0:
+                    await dispatcher.start()
+                    logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sim_id, count)
+                else:
+                    from engine.agents.managed.event_dispatcher import remove_dispatcher
+                    remove_dispatcher(sim_id)
+                    dispatcher = None
         except Exception as e:
             logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
             dispatcher = None
