@@ -292,7 +292,7 @@ export function AgentDetailPage() {
         .select('*')
         .eq('sim_run_id', simId)
         .or(`participant_a_role_id.eq.${roleId},participant_b_role_id.eq.${roleId}`)
-        .order('created_at', { ascending: false })
+        .order('started_at', { ascending: false })
       if (mtgData) setMeetings(mtgData as Meeting[])
     } catch {
       /* non-critical */
