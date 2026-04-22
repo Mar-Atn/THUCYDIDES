@@ -2122,10 +2122,9 @@ async def send_meeting_message(
             tier=2,
             event_type="chat_message",
             message=(
-                f"You are in a meeting (meeting_id: {meeting_id}). "
-                f"Here is the conversation:\n\n{chat_text}\n\n"
-                f"Respond naturally. 1-3 sentences. Stay in character. "
-                f"Use the send_message tool with meeting_id='{meeting_id}' to reply."
+                f"You are in a meeting. Here is the conversation:\n\n{chat_text}\n\n"
+                f"Respond to the latest message naturally. 1-3 sentences, like texting. "
+                f"Stay in character. Just speak — your words will be delivered directly."
             ),
             metadata={"meeting_id": meeting_id, "sender": body.role_id},
         )
