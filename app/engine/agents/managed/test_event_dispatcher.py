@@ -72,7 +72,7 @@ async def test_1_enqueue_dequeue() -> bool:
     logger.info("Enqueued events: T3=%s, T1=%s, T2=%s", id1, id2, id3)
 
     # Dequeue — should return in tier order (1, 2, 3)
-    events = dispatcher.dequeue(VIZIER_ROLE_ID)
+    events = await dispatcher.dequeue(VIZIER_ROLE_ID)
     assert len(events) == 3, f"Expected 3 events, got {len(events)}"
     assert events[0]["tier"] == 1, f"First event should be Tier 1, got {events[0]['tier']}"
     assert events[1]["tier"] == 2, f"Second event should be Tier 2, got {events[1]['tier']}"
@@ -80,17 +80,17 @@ async def test_1_enqueue_dequeue() -> bool:
     logger.info("PASS: Events returned in tier order (1, 2, 3)")
 
     # Dequeue with max_tier=1 — should only get Tier 1
-    events_t1 = dispatcher.dequeue(VIZIER_ROLE_ID, max_tier=1)
+    events_t1 = await dispatcher.dequeue(VIZIER_ROLE_ID, max_tier=1)
     assert len(events_t1) == 1, f"Expected 1 Tier-1 event, got {len(events_t1)}"
     assert events_t1[0]["tier"] == 1
     logger.info("PASS: max_tier=1 filter works")
 
     # Mark all processed
     event_ids = [e["id"] for e in events]
-    dispatcher.mark_processed(event_ids)
+    await dispatcher.mark_processed(event_ids)
 
     # Dequeue again — should be empty
-    events_after = dispatcher.dequeue(VIZIER_ROLE_ID)
+    events_after = await dispatcher.dequeue(VIZIER_ROLE_ID)
     assert len(events_after) == 0, f"Expected 0 after marking, got {len(events_after)}"
     logger.info("PASS: Events marked as processed, queue empty")
 
@@ -198,19 +198,19 @@ async def test_3_queue_depth_and_clear() -> bool:
     dispatcher.enqueue(VIZIER_ROLE_ID, 3, "round_update", "Round update event 1")
 
     # Check queue depth
-    depth = dispatcher.get_queue_depth(VIZIER_ROLE_ID)
+    depth = await dispatcher.get_queue_depth(VIZIER_ROLE_ID)
     assert depth[1] == 2, f"Expected 2 Tier-1 events, got {depth[1]}"
     assert depth[2] == 1, f"Expected 1 Tier-2 event, got {depth[2]}"
     assert depth[3] == 2, f"Expected 2 Tier-3 events, got {depth[3]}"
     logger.info("PASS: Queue depth correct: T1=%d, T2=%d, T3=%d", depth[1], depth[2], depth[3])
 
     # Clear queue
-    cleared = dispatcher.clear_queue(VIZIER_ROLE_ID)
+    cleared = await dispatcher.clear_queue(VIZIER_ROLE_ID)
     assert cleared == 5, f"Expected 5 cleared, got {cleared}"
     logger.info("PASS: Cleared %d events", cleared)
 
     # Verify empty
-    depth_after = dispatcher.get_queue_depth(VIZIER_ROLE_ID)
+    depth_after = await dispatcher.get_queue_depth(VIZIER_ROLE_ID)
     total = sum(depth_after.values())
     assert total == 0, f"Expected 0 after clear, got {total}"
     logger.info("PASS: Queue empty after clear")

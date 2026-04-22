@@ -316,7 +316,7 @@ async def test_4a_cleanup_sim_ai_state() -> bool:
     dispatcher.enqueue(VIZIER_ROLE_ID, 2, "test_cleanup_1", "Event to be cleared 1")
     dispatcher.enqueue(VIZIER_ROLE_ID, 3, "test_cleanup_2", "Event to be cleared 2")
 
-    depth_before = dispatcher.get_queue_depth(VIZIER_ROLE_ID)
+    depth_before = await dispatcher.get_queue_depth(VIZIER_ROLE_ID)
     total_before = sum(depth_before.values())
     assert total_before >= 2, f"Expected >= 2 queued events, got {total_before}"
     logger.info("Queue depth before cleanup: %s (total=%d)", depth_before, total_before)
@@ -447,7 +447,7 @@ async def test_4b_enqueue_round_results() -> bool:
     dispatcher.enqueue_round_results(round_num=2, results_by_country=results_by_country)
 
     # Check that events were created
-    events = dispatcher.dequeue(VIZIER_ROLE_ID, max_tier=3)
+    events = await dispatcher.dequeue(VIZIER_ROLE_ID, max_tier=3)
     round_events = [e for e in events if e["event_type"] == "round_results"]
     assert len(round_events) >= 1, f"Expected >= 1 round_results event, got {len(round_events)}"
 
@@ -463,7 +463,7 @@ async def test_4b_enqueue_round_results() -> bool:
     logger.info("PASS: Round results event has correct tier, message, and metadata")
 
     # Mark processed so they don't pollute other tests
-    dispatcher.mark_processed([e["id"] for e in events])
+    await dispatcher.mark_processed([e["id"] for e in events])
 
     remove_dispatcher(SIM_RUN_ID)
     cleanup_test_events()
@@ -575,13 +575,13 @@ async def test_4c_full_lifecycle() -> bool:
             VIZIER_ROLE_ID, 3, "reinit_test",
             "Post-restart test event — acknowledge briefly."
         )
-        depth = new_dispatcher.get_queue_depth(VIZIER_ROLE_ID)
+        depth = await new_dispatcher.get_queue_depth(VIZIER_ROLE_ID)
         total = sum(depth.values())
         assert total >= 1, f"Expected >= 1 event after re-init, got {total}"
         logger.info("PASS: Events can be enqueued after re-initialization")
 
         # Clean up
-        new_dispatcher.clear_queue()
+        await new_dispatcher.clear_queue()
     else:
         logger.warning("No agents to reconnect after cleanup — session may have been truly archived on Anthropic side")
         logger.info("SKIP: Re-initialization verification (session archived)")

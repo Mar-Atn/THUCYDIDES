@@ -2379,7 +2379,7 @@ async def ai_status(
             "total_cost_usd": 0, "agents": [], "not_initialized": True,
         })
 
-    return APIResponse(data=dispatcher.get_status())
+    return APIResponse(data=await dispatcher.get_status())
 
 
 @app.post("/api/sim/{sim_id}/ai/freeze/{role_id}", response_model=APIResponse)
@@ -2439,7 +2439,7 @@ async def ai_resume_agent(
     ctx = dispatcher.agents[role_id]
     dispatcher.session_manager.resume_session(ctx)
 
-    queue_depth = dispatcher.get_queue_depth(role_id)
+    queue_depth = await dispatcher.get_queue_depth(role_id)
     return APIResponse(data={
         "success": True, "role_id": role_id,
         "state": IDLE, "queue_depth": queue_depth,

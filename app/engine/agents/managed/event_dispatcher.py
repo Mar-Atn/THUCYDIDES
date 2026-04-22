@@ -11,6 +11,12 @@ Tiers:
   1 = Critical (attacks, nuclear) — checked every 3s
   2 = Urgent (chat, meetings, transactions) — checked every 5s
   3 = Routine (round updates, news) — checked at pulse interval
+
+Async DB Migration (2026-04-22):
+  Queue reads (dequeue, mark_processed, get_queue_depth, clear_queue) use the
+  async Supabase client to avoid blocking the event loop. Writes from sync
+  callers (enqueue, enqueue_for_country) keep the sync client for compatibility
+  with action_dispatcher which runs in threads.
 """
 
 import asyncio
@@ -21,6 +27,7 @@ from typing import Optional
 from engine.agents.managed.session_manager import ManagedSessionManager, SessionContext
 from engine.agents.managed.tool_executor import ToolExecutor
 from engine.services.supabase import get_client
+from engine.services.async_db import get_async_client
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +73,8 @@ class EventDispatcher:
     ) -> str:
         """Write an event to the queue. Called from anywhere (sync).
 
+        STAYS SYNC — called from sync action_dispatcher (runs in threads).
+        Uses the sync Supabase client for a single fast insert (<100ms).
         Returns the event ID.
         """
         db = get_client()
@@ -84,13 +93,16 @@ class EventDispatcher:
         )
         return event_id
 
-    def dequeue(self, role_id: str, max_tier: int = 3) -> list[dict]:
+    async def dequeue(self, role_id: str, max_tier: int = 3) -> list[dict]:
         """Get all unprocessed events for a role, up to max_tier.
+
+        ASYNC — called from dispatch loop. Uses async Supabase client
+        to avoid blocking the event loop.
 
         Returns events ordered by tier (critical first), then created_at.
         """
-        db = get_client()
-        result = (
+        db = await get_async_client()
+        result = await (
             db.table("agent_event_queue")
             .select("*")
             .eq("sim_run_id", self.sim_run_id)
@@ -103,21 +115,27 @@ class EventDispatcher:
         )
         return result.data or []
 
-    def mark_processed(self, event_ids: list[str], error: str | None = None) -> None:
-        """Mark events as processed (or failed)."""
+    async def mark_processed(self, event_ids: list[str], error: str | None = None) -> None:
+        """Mark events as processed (or failed).
+
+        ASYNC — called from dispatch loop.
+        """
         if not event_ids:
             return
-        db = get_client()
+        db = await get_async_client()
         update: dict = {"processed_at": datetime.now(timezone.utc).isoformat()}
         if error:
             update["processing_error"] = error
         for eid in event_ids:
-            db.table("agent_event_queue").update(update).eq("id", eid).execute()
+            await db.table("agent_event_queue").update(update).eq("id", eid).execute()
 
-    def get_queue_depth(self, role_id: str) -> dict:
-        """Get count of unprocessed events by tier for a role."""
-        db = get_client()
-        events = (
+    async def get_queue_depth(self, role_id: str) -> dict:
+        """Get count of unprocessed events by tier for a role.
+
+        ASYNC — called from dispatch loop and async endpoints.
+        """
+        db = await get_async_client()
+        events = await (
             db.table("agent_event_queue")
             .select("tier")
             .eq("sim_run_id", self.sim_run_id)
@@ -130,9 +148,12 @@ class EventDispatcher:
             tiers[e["tier"]] = tiers.get(e["tier"], 0) + 1
         return tiers
 
-    def clear_queue(self, role_id: str | None = None) -> int:
-        """Clear unprocessed events. If role_id given, clear only for that role."""
-        db = get_client()
+    async def clear_queue(self, role_id: str | None = None) -> int:
+        """Clear unprocessed events. If role_id given, clear only for that role.
+
+        ASYNC — called from shutdown and async endpoints.
+        """
+        db = await get_async_client()
         query = (
             db.table("agent_event_queue")
             .delete()
@@ -141,7 +162,7 @@ class EventDispatcher:
         )
         if role_id:
             query = query.eq("role_id", role_id)
-        result = query.execute()
+        result = await query.execute()
         count = len(result.data or [])
         logger.info("[dispatcher] Cleared %d queued events (role=%s)", count, role_id or "ALL")
         return count
@@ -221,7 +242,7 @@ class EventDispatcher:
             if state != IDLE:
                 continue  # Skip busy/frozen agents
 
-            events = self.dequeue(role_id, max_tier=max_tier)
+            events = await self.dequeue(role_id, max_tier=max_tier)
             if not events:
                 continue
 
@@ -233,7 +254,7 @@ class EventDispatcher:
             self.set_agent_state(role_id, ACTING)
             try:
                 transcript = await self.session_manager.send_event(ctx, message)
-                self.mark_processed(event_ids)
+                await self.mark_processed(event_ids)
 
                 # Log to observatory
                 from engine.agents.managed.event_handler import log_transcript_to_observatory
@@ -254,7 +275,7 @@ class EventDispatcher:
 
             except Exception as e:
                 logger.error("[dispatcher] Delivery failed for %s: %s", role_id, e)
-                self.mark_processed(event_ids, error=str(e))
+                await self.mark_processed(event_ids, error=str(e))
             finally:
                 self.set_agent_state(role_id, IDLE)
 
@@ -286,6 +307,8 @@ class EventDispatcher:
         respond with text. If the agent didn't explicitly use the send_message
         tool, we extract the first agent_message from the transcript and
         write it as a meeting message.
+
+        STAYS SYNC — fast single write after send_event completes.
         """
         # Check if agent already used send_message tool
         used_send_message = any(
@@ -308,12 +331,13 @@ class EventDispatcher:
 
     # -- Status & helpers --------------------------------------------------
 
-    def get_status(self) -> dict:
+    async def get_status(self) -> dict:
         """Get all agent states, costs, queue depths, and activity summary.
 
-        Reads token counts and action counts from DB (survives restarts).
+        ASYNC — reads token counts and action counts from DB (survives restarts).
+        Uses async client to avoid blocking the event loop.
         """
-        db = get_client()
+        db = await get_async_client()
         agents_status = []
         total_input_tokens = 0
         total_output_tokens = 0
@@ -322,7 +346,7 @@ class EventDispatcher:
 
         for role_id, ctx in self.agents.items():
             # Read from DB for accurate cross-session totals
-            db_session = (
+            db_session = await (
                 db.table("ai_agent_sessions")
                 .select("total_input_tokens,total_output_tokens,events_sent,actions_submitted,tool_calls")
                 .eq("sim_run_id", self.sim_run_id)
@@ -344,7 +368,7 @@ class EventDispatcher:
             total_tool_calls += tools
 
             cost_usd = round(inp * 3.0 / 1_000_000 + out * 15.0 / 1_000_000, 4)
-            queue = self.get_queue_depth(role_id)
+            queue = await self.get_queue_depth(role_id)
 
             agents_status.append({
                 "role_id": role_id,
@@ -369,7 +393,13 @@ class EventDispatcher:
         )
 
         # Get round info from sim_run
-        run_data = db.table("sim_runs").select("current_round").eq("id", self.sim_run_id).limit(1).execute()
+        run_data = await (
+            db.table("sim_runs")
+            .select("current_round")
+            .eq("id", self.sim_run_id)
+            .limit(1)
+            .execute()
+        )
         current_round = run_data.data[0]["current_round"] if run_data.data else 1
 
         return {
@@ -454,10 +484,10 @@ class EventDispatcher:
             Summary: {agents_initialized, roles, errors}.
         """
         logger.info("[dispatcher] Initializing all AI agents for sim %s", self.sim_run_id)
-        db = get_client()
+        db = await get_async_client()
 
         # Clean up orphaned sessions from previous runs
-        old_sessions = (
+        old_sessions = await (
             db.table("ai_agent_sessions")
             .select("session_id,agent_id,role_id,status")
             .eq("sim_run_id", self.sim_run_id)
@@ -475,12 +505,16 @@ class EventDispatcher:
                     await self.session_manager.client.beta.agents.archive(old["agent_id"])
                 except Exception:
                     pass
-            db.table("ai_agent_sessions").update({"status": "archived"}).eq(
-                "sim_run_id", self.sim_run_id
-            ).in_("status", ["initializing", "ready", "active", "frozen"]).execute()
+            await (
+                db.table("ai_agent_sessions")
+                .update({"status": "archived"})
+                .eq("sim_run_id", self.sim_run_id)
+                .in_("status", ["initializing", "ready", "active", "frozen"])
+                .execute()
+            )
 
         # Load sim run info
-        run_data = (
+        run_data = await (
             db.table("sim_runs")
             .select("scenario_id, current_round")
             .eq("id", self.sim_run_id)
@@ -495,7 +529,7 @@ class EventDispatcher:
 
         # Load roles to initialize
         if role_ids:
-            roles_data = (
+            roles_data = await (
                 db.table("roles")
                 .select("id, country_code, character_name, title")
                 .eq("sim_run_id", self.sim_run_id)
@@ -503,7 +537,7 @@ class EventDispatcher:
                 .execute()
             )
         else:
-            roles_data = (
+            roles_data = await (
                 db.table("roles")
                 .select("id, country_code, character_name, title, is_ai_operated")
                 .eq("sim_run_id", self.sim_run_id)
@@ -586,9 +620,12 @@ class EventDispatcher:
     # -- Reconnect from DB -------------------------------------------------
 
     async def reconnect_from_db(self) -> int:
-        """Rebuild dispatcher state from DB sessions after backend restart."""
-        db = get_client()
-        sessions = (
+        """Rebuild dispatcher state from DB sessions after backend restart.
+
+        ASYNC — uses async client for DB reads.
+        """
+        db = await get_async_client()
+        sessions = await (
             db.table("ai_agent_sessions")
             .select("*")
             .eq("sim_run_id", self.sim_run_id)
@@ -660,6 +697,7 @@ class EventDispatcher:
     ) -> str | None:
         """Enqueue an event for a country's HoS (if AI-operated).
 
+        STAYS SYNC — called from sync action_dispatcher.
         Returns event ID if enqueued, None if no AI HoS found.
         """
         hos_role_id = _find_hos_for_country(self.sim_run_id, country_code)
@@ -678,7 +716,7 @@ class EventDispatcher:
     def enqueue_round_results(self, round_num: int, results_by_country: dict) -> None:
         """Enqueue round results for all AI agents.
 
-        Called by the engine after round processing completes.
+        STAYS SYNC — called by the engine after round processing completes.
         Each agent gets their country's results + public events.
         """
         for role_id, ctx in self.agents.items():
@@ -715,7 +753,7 @@ class EventDispatcher:
             except Exception as e:
                 logger.warning("[dispatcher] Cleanup failed for %s: %s", role_id, e)
 
-        self.clear_queue()
+        await self.clear_queue()
         self.agents.clear()
         self.agent_states.clear()
         logger.info("[dispatcher] Shutdown complete for sim %s", self.sim_run_id)
@@ -729,6 +767,8 @@ async def cleanup_sim_ai_state(
     clear_decisions: bool = False,
 ) -> dict:
     """Clean up ALL AI state for a sim_run. Called on SIM restart.
+
+    ASYNC — uses async Supabase client for all DB operations.
 
     1. Stop dispatcher if running
     2. Archive all Anthropic sessions
@@ -759,9 +799,9 @@ async def cleanup_sim_ai_state(
         logger.info("[cleanup] Dispatcher stopped and sessions archived for sim %s", sim_run_id)
 
     # 2+3. Archive any remaining DB sessions that weren't handled by dispatcher
-    db = get_client()
+    db = await get_async_client()
     try:
-        active = (
+        active = await (
             db.table("ai_agent_sessions")
             .select("id, session_id, agent_id, role_id")
             .eq("sim_run_id", sim_run_id)
@@ -789,11 +829,13 @@ async def cleanup_sim_ai_state(
                     logger.warning("[cleanup] Failed to archive Anthropic agent %s: %s", s["agent_id"], e)
 
             # Update DB status
-            db.table("ai_agent_sessions").update(
-                {"status": "archived"}
-            ).eq("sim_run_id", sim_run_id).in_(
-                "status", ["initializing", "ready", "active", "frozen"]
-            ).execute()
+            await (
+                db.table("ai_agent_sessions")
+                .update({"status": "archived"})
+                .eq("sim_run_id", sim_run_id)
+                .in_("status", ["initializing", "ready", "active", "frozen"])
+                .execute()
+            )
             summary["db_sessions_archived"] = len(active.data)
             logger.info("[cleanup] Archived %d DB sessions", len(active.data))
     except Exception as e:
@@ -801,7 +843,7 @@ async def cleanup_sim_ai_state(
 
     # 4. Clear unprocessed events
     try:
-        result = (
+        result = await (
             db.table("agent_event_queue")
             .delete()
             .eq("sim_run_id", sim_run_id)
@@ -815,7 +857,7 @@ async def cleanup_sim_ai_state(
 
     # 4a. Clear observatory AI agent logs
     try:
-        result = (
+        result = await (
             db.table("observatory_events")
             .delete()
             .eq("sim_run_id", sim_run_id)
@@ -830,7 +872,7 @@ async def cleanup_sim_ai_state(
     # 4b. Clear meetings and meeting messages
     try:
         # Delete messages first (FK constraint)
-        meeting_ids = (
+        meeting_ids = await (
             db.table("meetings")
             .select("id")
             .eq("sim_run_id", sim_run_id)
@@ -839,13 +881,13 @@ async def cleanup_sim_ai_state(
         mid_list = [m["id"] for m in (meeting_ids.data or [])]
         msgs_cleared = 0
         for mid in mid_list:
-            r = db.table("meeting_messages").delete().eq("meeting_id", mid).execute()
+            r = await db.table("meeting_messages").delete().eq("meeting_id", mid).execute()
             msgs_cleared += len(r.data or [])
         # Then delete meetings
-        r = db.table("meetings").delete().eq("sim_run_id", sim_run_id).execute()
+        r = await db.table("meetings").delete().eq("sim_run_id", sim_run_id).execute()
         meetings_cleared = len(r.data or [])
         # Clear invitations too
-        r = db.table("meeting_invitations").delete().eq("sim_run_id", sim_run_id).execute()
+        r = await db.table("meeting_invitations").delete().eq("sim_run_id", sim_run_id).execute()
         invitations_cleared = len(r.data or [])
         summary["meetings_cleared"] = meetings_cleared
         summary["meeting_messages_cleared"] = msgs_cleared
@@ -858,7 +900,7 @@ async def cleanup_sim_ai_state(
     # 5. Optionally clear agent_memories
     if clear_memories:
         try:
-            result = (
+            result = await (
                 db.table("agent_memories")
                 .delete()
                 .eq("sim_run_id", sim_run_id)
@@ -872,7 +914,7 @@ async def cleanup_sim_ai_state(
     # 6. Optionally clear agent_decisions
     if clear_decisions:
         try:
-            result = (
+            result = await (
                 db.table("agent_decisions")
                 .delete()
                 .eq("sim_run_id", sim_run_id)
@@ -890,7 +932,10 @@ async def cleanup_sim_ai_state(
 # -- Helper: find HoS role for a country -----------------------------------
 
 def _find_hos_for_country(sim_run_id: str, country_code: str) -> str | None:
-    """Find the AI-operated Head of State role_id for a country."""
+    """Find the AI-operated Head of State role_id for a country.
+
+    STAYS SYNC — called from sync enqueue_for_country (action_dispatcher context).
+    """
     try:
         db = get_client()
         result = (
