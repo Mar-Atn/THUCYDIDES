@@ -62,10 +62,22 @@ interface LatestEvent {
 
 /** Map latest observatory event to a human-readable activity label. */
 function getActivityDescriptor(latestEvent: LatestEvent | null, agentState: string): string {
-  if (!latestEvent) {
-    if (agentState === 'INITIALIZING') return 'Initializing session'
-    return 'Waiting for update'
+  // State-based descriptors take priority when agent is not actively processing
+  if (agentState === 'IDLE' && !latestEvent) return 'Ready'
+  if (agentState === 'IDLE') {
+    // Agent is idle — show what it LAST did, not what it's doing now
+    // Only show active descriptors when ACTING
+    return 'Ready'
   }
+  if (agentState === 'INITIALIZING') return 'Initializing session'
+  if (agentState === 'IN_MEETING') return 'In meeting'
+  if (agentState === 'FROZEN') {
+    if (!latestEvent) return 'Frozen'
+    // Show last activity
+  }
+  if (agentState === 'NOT_INITIALIZED') return 'Not initialized'
+
+  if (!latestEvent) return 'Waiting for update'
 
   const cat = latestEvent.category
   const sum = (latestEvent.summary || '').toLowerCase()
@@ -106,11 +118,7 @@ function getActivityDescriptor(latestEvent: LatestEvent | null, agentState: stri
 
   if (cat === 'agent_reasoning') return prefix + 'Analyzing situation'
 
-  if (agentState === 'IN_MEETING') return 'In meeting'
-  if (agentState === 'IDLE') return 'Waiting for update'
-  if (agentState === 'INITIALIZING') return 'First assessment'
-
-  return prefix + 'Waiting for update'
+  return prefix + 'Processing'
 }
 
 /* -------------------------------------------------------------------------- */
