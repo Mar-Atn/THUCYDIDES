@@ -55,6 +55,8 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [initializing, setInitializing] = useState(false)
+  const [initDismissed, setInitDismissed] = useState(false)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   /* Fetch roles once for character_name lookup */
@@ -133,8 +135,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* AI roles that need initialization */
   const aiRoles = roles.filter(r => r.is_ai_operated)
-  const [initializing, setInitializing] = useState(false)
-  const [initDismissed, setInitDismissed] = useState(false)
 
   const handleInitialize = async () => {
     setInitializing(true)
