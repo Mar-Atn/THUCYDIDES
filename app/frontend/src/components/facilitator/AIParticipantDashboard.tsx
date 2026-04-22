@@ -389,7 +389,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             <div
               key={role.id}
               className="px-5 py-2 cursor-pointer hover:bg-base/50 transition-colors"
-              onClick={() => { navigate(`/sim/${simId}/agent/${role.id}`) }}
+              onClick={() => { window.open(`/sim/${simId}/agent/${role.id}`, '_blank') }}
             >
               {/* Grid: fixed columns for alignment across rows */}
               <div className="grid items-center gap-x-3" style={{ gridTemplateColumns: '8px 120px 90px 1fr 50px 50px 28px' }}>
