@@ -1,27 +1,14 @@
-"""Phase 2 — AI Orchestrator: manages all AI participants in a simulation.
+"""DEPRECATED: Use event_dispatcher.py instead.
 
+The orchestrator was the original pulse-based system. It has been replaced
+by the EventDispatcher (unified event queue) as of 2026-04-22.
+Keep this file for reference only. No new code should import from here.
+
+Original description:
+Phase 2 — AI Orchestrator: manages all AI participants in a simulation.
 Coordinates session lifecycle, pulse scheduling, event batching, busy state,
 parallel agent execution, round transitions, and cost tracking for 1-40 AI
-agents. The orchestrator is INVISIBLE to agents — it provides context and
-lets each agent decide autonomously.
-
-Key responsibilities:
-  1. Initialize all AI agents for a sim_run
-  2. Run rounds — send N pulses to all agents in parallel
-  3. Batch events — gather observatory events, categorize public/private
-  4. Build pulse messages — events + resource dashboard + meta context
-  5. Manage agent states — IDLE, ACTING, IN_MEETING, FROZEN
-  6. Handle critical interrupts — nuclear, direct attack bypass schedule
-  7. Enforce timing — pulse intervals from round duration
-  8. Between-round transitions — results summary, reflection
-  9. Auto-advance (co-moderator mode) — unmanned testing
-  10. Track costs — aggregate token usage across all agents
-
-Migration note (2026-04-21): Converted from sync (run_in_executor) to pure
-async. All session_manager calls are now awaited directly — no threads.
-Supports 20+ concurrent agents with asyncio.gather.
-
-Dependencies: session_manager (Phase 1C async), meta_context, event_handler.
+agents.
 """
 from __future__ import annotations
 

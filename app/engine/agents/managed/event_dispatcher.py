@@ -428,6 +428,160 @@ class EventDispatcher:
 
         return ctx
 
+    async def initialize_all_agents(
+        self,
+        role_ids: list[str] | None = None,
+        model: str = "claude-sonnet-4-6",
+    ) -> dict:
+        """Initialize all AI-operated agents for this sim_run.
+
+        1. Clean up orphaned sessions from previous runs
+        2. Load AI roles from DB
+        3. Create Anthropic sessions (with semaphore for rate limiting)
+        4. Register each with dispatcher
+        5. Enqueue init message for each (Tier 2)
+
+        The caller should call dispatcher.start() after this to begin
+        delivering queued events.
+
+        Args:
+            role_ids: Specific roles to initialize. If None, loads all
+                      AI-operated active roles from the roles table.
+            model: Claude model ID.
+
+        Returns:
+            Summary: {agents_initialized, roles, errors}.
+        """
+        logger.info("[dispatcher] Initializing all AI agents for sim %s", self.sim_run_id)
+        db = get_client()
+
+        # Clean up orphaned sessions from previous runs
+        old_sessions = (
+            db.table("ai_agent_sessions")
+            .select("session_id,agent_id,role_id,status")
+            .eq("sim_run_id", self.sim_run_id)
+            .in_("status", ["initializing", "ready", "active", "frozen"])
+            .execute()
+        )
+        if old_sessions.data:
+            logger.info("[dispatcher] Cleaning up %d orphaned sessions", len(old_sessions.data))
+            for old in old_sessions.data:
+                try:
+                    await self.session_manager.client.beta.sessions.archive(old["session_id"])
+                except Exception:
+                    pass
+                try:
+                    await self.session_manager.client.beta.agents.archive(old["agent_id"])
+                except Exception:
+                    pass
+            db.table("ai_agent_sessions").update({"status": "archived"}).eq(
+                "sim_run_id", self.sim_run_id
+            ).in_("status", ["initializing", "ready", "active", "frozen"]).execute()
+
+        # Load sim run info
+        run_data = (
+            db.table("sim_runs")
+            .select("scenario_id, current_round")
+            .eq("id", self.sim_run_id)
+            .limit(1)
+            .execute()
+        )
+        if not run_data.data:
+            return {"error": f"SimRun {self.sim_run_id} not found", "agents_initialized": 0}
+
+        run = run_data.data[0]
+        round_num = run.get("current_round", 1)
+
+        # Load roles to initialize
+        if role_ids:
+            roles_data = (
+                db.table("roles")
+                .select("id, country_code, character_name, title")
+                .eq("sim_run_id", self.sim_run_id)
+                .in_("id", role_ids)
+                .execute()
+            )
+        else:
+            roles_data = (
+                db.table("roles")
+                .select("id, country_code, character_name, title, is_ai_operated")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("is_ai_operated", True)
+                .eq("status", "active")
+                .execute()
+            )
+
+        roles = roles_data.data or []
+        if not roles:
+            return {
+                "agents_initialized": 0,
+                "roles": [],
+                "errors": ["No AI-operated roles found for this sim run"],
+            }
+
+        logger.info("[dispatcher] Found %d AI roles to initialize", len(roles))
+
+        # Semaphore to limit concurrent session creation (API rate limit)
+        sem = asyncio.Semaphore(4)
+        initialized: list[dict] = []
+        errors: list[str] = []
+
+        async def _init_one(role: dict) -> None:
+            role_id = role["id"]
+            country_code = role["country_code"]
+            character_name = role.get("character_name", role_id)
+            title = role.get("title", "Leader")
+
+            async with sem:
+                try:
+                    ctx = await self.session_manager.create_session(
+                        role_id=role_id,
+                        country_code=country_code,
+                        sim_run_id=self.sim_run_id,
+                        scenario_code=self.sim_run_id,
+                        round_num=round_num,
+                        model=model,
+                    )
+                    self.register_agent(role_id, ctx)
+
+                    # Enqueue init event (Tier 2 — dispatcher loop delivers it)
+                    self.enqueue(
+                        role_id=role_id,
+                        tier=2,
+                        event_type="initialization",
+                        message=(
+                            f"The simulation has begun. You are {character_name}, "
+                            f"{title} of {country_code}. "
+                            f"This is Round {round_num}. Assess your situation."
+                        ),
+                    )
+
+                    initialized.append({
+                        "role_id": role_id,
+                        "country_code": country_code,
+                        "session_id": ctx.session_id,
+                    })
+                    logger.info(
+                        "[dispatcher] Initialized %s (%s) session=%s",
+                        role_id, country_code, ctx.session_id,
+                    )
+                except Exception as e:
+                    err = f"Failed to initialize {role_id}: {e}"
+                    errors.append(err)
+                    logger.error("[dispatcher] %s", err)
+
+        # Run all initializations concurrently (bounded by semaphore)
+        await asyncio.gather(*[_init_one(r) for r in roles])
+
+        summary = {
+            "agents_initialized": len(initialized),
+            "roles": initialized,
+            "errors": errors,
+            "round_num": round_num,
+        }
+        logger.info("[dispatcher] Initialization complete: %s", summary)
+        return summary
+
     # -- Reconnect from DB -------------------------------------------------
 
     async def reconnect_from_db(self) -> int:
@@ -469,6 +623,22 @@ class EventDispatcher:
                 actions_submitted=s.get("actions_submitted", 0),
                 tool_calls=s.get("tool_calls", 0),
             )
+
+            # Health check: skip terminated sessions
+            try:
+                health = await self.session_manager.health_check(ctx)
+                if health == "terminated":
+                    logger.warning(
+                        "[dispatcher] Session %s (role=%s) terminated, skipping",
+                        ctx.session_id, role_id,
+                    )
+                    continue
+            except Exception as e:
+                logger.warning(
+                    "[dispatcher] Health check failed for %s, registering anyway: %s",
+                    role_id, e,
+                )
+
             self.register_agent(role_id, ctx)
             count += 1
 
@@ -641,6 +811,20 @@ async def cleanup_sim_ai_state(
         logger.info("[cleanup] Cleared %d unprocessed events", summary["events_cleared"])
     except Exception as e:
         logger.error("[cleanup] Failed to clear event queue: %s", e)
+
+    # 4a. Clear observatory AI agent logs
+    try:
+        result = (
+            db.table("observatory_events")
+            .delete()
+            .eq("sim_run_id", sim_run_id)
+            .eq("event_type", "ai_agent_log")
+            .execute()
+        )
+        summary["observatory_events_cleared"] = len(result.data or [])
+        logger.info("[cleanup] Cleared %d observatory AI logs", summary["observatory_events_cleared"])
+    except Exception as e:
+        logger.error("[cleanup] Failed to clear observatory events: %s", e)
 
     # 4b. Clear meetings and meeting messages
     try:

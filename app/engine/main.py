@@ -37,10 +37,7 @@ async def lifespan(app: FastAPI):
     logger.info("Anthropic: %s", "configured" if settings.has_anthropic else "NOT configured")
     logger.info("Gemini: %s", "configured" if settings.has_gemini else "NOT configured")
 
-    # Register event loop for cross-thread auto-pulse scheduling (legacy, kept for now)
     import asyncio
-    from engine.agents.managed.auto_pulse import register_event_loop
-    register_event_loop(asyncio.get_running_loop())
 
     # Auto-reconnect dispatchers for any sim_runs with active AI sessions
     from engine.agents.managed.event_dispatcher import create_dispatcher, get_dispatcher
@@ -2202,15 +2199,12 @@ async def ai_initialize(
 ):
     """Initialize all AI agents for a simulation.
 
-    Creates managed agent sessions via the EventDispatcher for each
-    AI-operated role (or specific roles if role_ids is provided).
-    Also creates an orchestrator for legacy round/pulse operations.
+    Creates managed agent sessions via the EventDispatcher (single execution
+    path) for each AI-operated role. Init messages are enqueued as Tier 2
+    events and delivered by the dispatcher loop.
     """
     from engine.agents.managed.event_dispatcher import (
         create_dispatcher, get_dispatcher, remove_dispatcher,
-    )
-    from engine.agents.managed.orchestrator import (
-        create_orchestrator, get_orchestrator, OrchestratorConfig,
     )
 
     # Check if dispatcher already exists with agents
@@ -2221,33 +2215,21 @@ async def ai_initialize(
             data={"error": "AI agents already initialized for this sim. Shut down first."},
         )
 
-    # Create orchestrator (still used for run-round, send-pulse)
-    config = OrchestratorConfig(
-        assertiveness=body.assertiveness,
-        pulses_per_round=body.pulses_per_round,
-        model=body.model,
-        auto_advance=body.auto_advance,
-        round_duration_seconds=body.round_duration_seconds,
-    )
-    orch = create_orchestrator(sim_id, config)
-
-    # Create dispatcher for event queue delivery
+    # Create dispatcher (single owner of sessions, queue, delivery)
     if existing_d:
         remove_dispatcher(sim_id)
     dispatcher = create_dispatcher(sim_id)
 
-    # Run initialization in background — it takes minutes per agent
+    # Run initialization in background — session creation takes time
     import asyncio
     async def _run_init():
         try:
-            # Use orchestrator for session creation (handles cleanup, concurrency)
-            result = await orch.initialize_agents(body.role_ids)
+            result = await dispatcher.initialize_all_agents(
+                role_ids=body.role_ids,
+                model=body.model,
+            )
 
-            # Register all orchestrator agents with the dispatcher
-            for role_id, ctx in orch.agents.items():
-                dispatcher.register_agent(role_id, ctx)
-
-            # Start the dispatch loop
+            # Start the dispatch loop (delivers enqueued init events)
             await dispatcher.start()
 
             logger.info(
@@ -2272,17 +2254,16 @@ async def ai_run_round(
     body: AIRunRoundRequest,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Run a complete round for all AI agents.
+    """Run a round pulse for all AI agents via the unified dispatcher.
 
-    Sends all configured pulses to all agents in parallel, batching
-    events between pulses. Returns round summary with actions per agent,
-    costs, and errors.
+    Enqueues a round_pulse event (Tier 3) for each registered agent.
+    The dispatcher loop delivers them normally. Returns agent status.
     """
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.event_dispatcher import get_dispatcher
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator for this sim. Call /ai/initialize first.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher or not dispatcher.agents:
+        raise HTTPException(status_code=404, detail="No AI dispatcher for this sim. Call /ai/initialize first.")
 
     # Determine round number
     round_num = body.round_num
@@ -2294,13 +2275,31 @@ async def ai_run_round(
         except ValueError:
             raise HTTPException(status_code=404, detail=f"SimRun {sim_id} not found")
 
-    result = await orch.run_round(round_num)
+    # Enqueue round pulse events for all agents
+    enqueued = 0
+    for role_id in dispatcher.agents:
+        dispatcher.enqueue(
+            role_id=role_id,
+            tier=3,
+            event_type="round_pulse",
+            message=(
+                f"Round {round_num} update. Assess your situation, check intelligence, "
+                f"and take strategic actions. Use your tools to gather information and act."
+            ),
+            metadata={"round_num": round_num},
+        )
+        enqueued += 1
 
     logger.info(
-        "AI round %d complete for sim %s: %d actions, $%.2f",
-        round_num, sim_id, result.get("total_actions", 0), result.get("total_cost_usd", 0),
+        "AI round %d: enqueued %d round_pulse events for sim %s by %s",
+        round_num, enqueued, sim_id, user.id,
     )
-    return APIResponse(data=result)
+    return APIResponse(data={
+        "round_num": round_num,
+        "agents_pulsed": enqueued,
+        "status": "round_pulse_enqueued",
+        "message": f"Enqueued round {round_num} pulse for {enqueued} agents. Dispatcher delivers them.",
+    })
 
 
 @app.post("/api/sim/{sim_id}/ai/send-pulse", response_model=APIResponse)
@@ -2309,20 +2308,37 @@ async def ai_send_pulse(
     body: AIPulseRequest,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Send a single pulse to all eligible AI agents.
+    """Send a single pulse to all eligible AI agents via the unified dispatcher.
 
-    Useful for manual step-through of AI rounds. Each pulse collects
-    events since the last pulse, builds per-agent messages, and sends
-    them in parallel.
+    Enqueues a manual_pulse event (Tier 3) for each idle agent.
+    The dispatcher loop delivers them normally.
     """
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.event_dispatcher import get_dispatcher, IDLE
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator for this sim. Call /ai/initialize first.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher or not dispatcher.agents:
+        raise HTTPException(status_code=404, detail="No AI dispatcher for this sim. Call /ai/initialize first.")
 
-    result = await orch.send_pulse(body.pulse_num)
-    return APIResponse(data=result)
+    enqueued = 0
+    for role_id in dispatcher.agents:
+        if dispatcher.agent_states.get(role_id) == IDLE:
+            dispatcher.enqueue(
+                role_id=role_id,
+                tier=3,
+                event_type="manual_pulse",
+                message=(
+                    f"Pulse #{body.pulse_num}. Review your situation and take any actions "
+                    f"you deem necessary. Use your tools to gather information and act."
+                ),
+                metadata={"pulse_num": body.pulse_num},
+            )
+            enqueued += 1
+
+    return APIResponse(data={
+        "pulse_num": body.pulse_num,
+        "agents_pulsed": enqueued,
+        "total_agents": len(dispatcher.agents),
+    })
 
 
 @app.get("/api/sim/{sim_id}/ai/status", response_model=APIResponse)
@@ -2332,7 +2348,6 @@ async def ai_status(
 ):
     """Get all AI agent states, costs, queue depths, and activity summary."""
     from engine.agents.managed.event_dispatcher import get_dispatcher, create_dispatcher
-    from engine.agents.managed.orchestrator import get_orchestrator, create_orchestrator, OrchestratorConfig
 
     dispatcher = get_dispatcher(sim_id)
 
@@ -2352,17 +2367,6 @@ async def ai_status(
         except Exception as e:
             logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
             dispatcher = None
-
-        # Also try orchestrator reconnect for legacy endpoints
-        if not get_orchestrator(sim_id):
-            try:
-                orch = create_orchestrator(sim_id, OrchestratorConfig())
-                result = orch.reconnect_from_db()
-                if not result.get("agents_reconnected", 0):
-                    from engine.agents.managed.orchestrator import remove_orchestrator
-                    remove_orchestrator(sim_id)
-            except Exception:
-                pass
 
     if not dispatcher:
         return APIResponse(data={
@@ -2524,23 +2528,16 @@ async def ai_shutdown(
     sim_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Shut down the AI dispatcher + orchestrator — archive all sessions."""
+    """Shut down the AI dispatcher — archive all sessions."""
     from engine.agents.managed.event_dispatcher import get_dispatcher, remove_dispatcher
-    from engine.agents.managed.orchestrator import get_orchestrator, remove_orchestrator
 
     dispatcher = get_dispatcher(sim_id)
-    orch = get_orchestrator(sim_id)
 
-    if not dispatcher and not orch:
+    if not dispatcher:
         raise HTTPException(status_code=404, detail="No AI system active for this sim.")
 
-    if dispatcher:
-        await dispatcher.shutdown()
-        remove_dispatcher(sim_id)
-
-    if orch:
-        await orch.shutdown()
-        remove_orchestrator(sim_id)
+    await dispatcher.shutdown()
+    remove_dispatcher(sim_id)
 
     return APIResponse(data={"status": "shutdown", "sim_run_id": sim_id})
 
@@ -2563,19 +2560,13 @@ async def ai_restart(
     2. Archives all Anthropic sessions
     3. Sets ai_agent_sessions status='archived'
     4. Clears unprocessed events from agent_event_queue
-    5. Optionally clears agent_memories (if clear_memories=true)
-    6. Optionally clears agent_decisions (if clear_decisions=true)
+    5. Clears observatory AI agent logs
+    6. Optionally clears agent_memories (if clear_memories=true)
+    7. Optionally clears agent_decisions (if clear_decisions=true)
 
     After this, the moderator can click "Initialize AI Agents" again.
     """
     from engine.agents.managed.event_dispatcher import cleanup_sim_ai_state
-    from engine.agents.managed.orchestrator import get_orchestrator, remove_orchestrator
-
-    # Also shut down orchestrator if present
-    orch = get_orchestrator(sim_id)
-    if orch:
-        await orch.shutdown()
-        remove_orchestrator(sim_id)
 
     req = body or AIRestartRequest()
     summary = await cleanup_sim_ai_state(
