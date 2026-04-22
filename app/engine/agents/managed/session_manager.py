@@ -147,8 +147,8 @@ class ManagedSessionManager:
         Returns:
             SessionContext with all IDs and the tool executor.
         """
-        # Build system prompt (Layer 1)
-        system_prompt = build_system_prompt(role_id)
+        # Build system prompt (Layer 1) — use DB context when sim_run_id available
+        system_prompt = build_system_prompt(role_id, sim_run_id=sim_run_id)
         logger.info("Built system prompt for %s (%d chars)", role_id, len(system_prompt))
 
         # Get custom tool definitions

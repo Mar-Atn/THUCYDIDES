@@ -104,6 +104,7 @@ ASSERTIVENESS_COMPETITIVE = (
 
 def build_system_prompt(
     role_id: str,
+    sim_run_id: str | None = None,
     *,
     assertiveness: int = 5,
     countries: dict | None = None,
@@ -117,20 +118,26 @@ def build_system_prompt(
 
     Args:
         role_id: Role identifier (e.g., "dealer" for Columbia HoS).
+        sim_run_id: UUID of the sim_run. When provided, reads world context
+            from DB tables (actual sim state) instead of CSV template files.
         assertiveness: Global assertiveness dial (1=cooperative, 10=assertive).
             Default 5 = neutral (no nudge).
-        countries: Optional live country state dict.
-        world_state: Optional live world state dict.
+        countries: Optional live country state dict (CSV fallback only).
+        world_state: Optional live world state dict (CSV fallback only).
 
     Returns:
         Complete system prompt (~5-8K tokens).
     """
     # ── Source 1: World context (identity, roster, geography, situation) ──
-    block1 = build_rich_block1(
-        role_id=role_id,
-        countries=countries,
-        world_state=world_state,
-    )
+    if sim_run_id:
+        from engine.agents.managed.db_context import build_db_world_context
+        block1 = build_db_world_context(sim_run_id, role_id)
+    else:
+        block1 = build_rich_block1(
+            role_id=role_id,
+            countries=countries,
+            world_state=world_state,
+        )
 
     # ── Source 2: Game rules ──
     game_rules = build_game_rules_context()
