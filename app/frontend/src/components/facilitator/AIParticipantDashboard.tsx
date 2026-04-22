@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import {
   getAIStatus,
   initializeAIAgents,
+  shutdownAIAgents,
   freezeAgent,
   resumeAgent,
   freezeAllAgents,
@@ -157,6 +158,17 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     finally { setActionLoading(null) }
   }
 
+  const handleShutdown = async () => {
+    if (!confirm('Shut down all AI agents? This archives all sessions.')) return
+    setActionLoading('shutdown')
+    try {
+      await shutdownAIAgents(simId)
+      setInitializing(false)
+      await fetchStatus()
+    } catch (e) { alert(e instanceof Error ? e.message : 'Shutdown failed') }
+    finally { setActionLoading(null) }
+  }
+
   /* Derived data */
   const aiRoles = roles.filter(r => r.is_ai_operated && r.status !== 'inactive')
   const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
@@ -251,6 +263,13 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                     className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
                   >
                     {actionLoading === 'resume-all' ? '...' : 'Resume All'}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleShutdown() }}
+                    disabled={actionLoading === 'shutdown'}
+                    className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors disabled:opacity-40"
+                  >
+                    {actionLoading === 'shutdown' ? '...' : 'Shutdown'}
                   </button>
                 </>
               )}

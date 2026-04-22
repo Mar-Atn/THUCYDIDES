@@ -1221,6 +1221,22 @@ export async function resumeAllAgents(simId: string): Promise<void> {
   }
 }
 
+/** Shutdown all AI agents — archive sessions, clean up. */
+export async function shutdownAIAgents(simId: string): Promise<void> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/shutdown`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ error: 'Shutdown failed' }))
+    throw new Error(err.detail || err.error || 'Shutdown failed')
+  }
+}
+
 /** Fetch AI agent log entries from observatory_events. */
 export async function getAgentLog(
   simId: string,
