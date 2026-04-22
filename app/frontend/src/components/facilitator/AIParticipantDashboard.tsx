@@ -157,178 +157,66 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     finally { setActionLoading(null) }
   }
 
-  /* Derived totals */
+  /* Derived data */
+  const aiRoles = roles.filter(r => r.is_ai_operated && r.status !== 'inactive')
+  const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
   const totalActions = status?.agents.reduce((s, a) => s + a.round_stats.actions, 0) ?? 0
   const totalToolCalls = status?.agents.reduce((s, a) => s + a.round_stats.tool_calls, 0) ?? 0
   const agentCount = status?.total_agents ?? 0
-
-  /* Empty / loading states */
-  if (loading) {
-    return (
-      <section className="bg-card border border-border rounded-lg p-5">
-        <h3 className="font-heading text-h3 text-text-primary">AI Participants</h3>
-        <p className="font-body text-body-sm text-text-secondary py-2">Loading...</p>
-      </section>
-    )
-  }
-
-  /* AI roles that need initialization */
-  const aiRoles = roles.filter(r => r.is_ai_operated && r.status !== 'inactive')
+  const isActive = agentCount > 0  // orchestrator has agents
+  const noAiRoles = aiRoles.length === 0
 
   const handleInitialize = async () => {
     setInitializing(true)
     try {
       await initializeAIAgents(simId)
-      // Don't reset initializing — keep showing progress until agents appear in status poll
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Initialization failed')
       setInitializing(false)
     }
   }
 
-  // Auto-clear initializing state when agents appear
-  if (initializing && status && status.total_agents > 0) {
+  // Auto-clear initializing when all agents appear
+  if (initializing && agentCount >= aiRoles.length && aiRoles.length > 0) {
     setInitializing(false)
   }
 
-  if (initializing) {
-    const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
-    const onlineCount = dbSessions.filter(s => s.status !== 'initializing').length
+  // Build agent status lookup from orchestrator status (when available)
+  const orchAgentMap = new Map(
+    (status?.agents ?? []).map((a: AIAgentStatus) => [a.role_id, a])
+  )
 
-    return (
-      <section className="bg-card border border-action/30 rounded-lg p-5">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-4 h-4 border-2 border-action border-t-transparent rounded-full animate-spin" />
-          <h3 className="font-heading text-h3 text-text-primary">
-            Initializing AI Participants ({onlineCount}/{aiRoles.length})
-          </h3>
-        </div>
-
-        <div className="space-y-1">
-          {aiRoles.map(role => {
-            const session = dbSessionMap.get(role.id)
-            const sessionStatus = (session?.status as string) || 'waiting'
-            const activity = latestActivity[role.country_code] || ''
-            const isOnline = session && sessionStatus !== 'initializing'
-            const isCreating = session && sessionStatus === 'initializing'
-
-            return (
-              <div key={role.id} className="flex items-center gap-2 py-1.5 px-2 rounded bg-base">
-                {/* Status dot */}
-                <div className={`w-2 h-2 rounded-full shrink-0 ${
-                  isOnline ? 'bg-success' : isCreating ? 'bg-action animate-pulse' : 'bg-text-secondary/30'
-                }`} />
-
-                {/* Name + country */}
-                <span className="font-body text-body-sm text-text-primary w-32 truncate">
-                  {role.character_name}
-                </span>
-                <span className="font-body text-caption text-text-secondary uppercase w-20 truncate">
-                  {role.country_code}
-                </span>
-
-                {/* Status */}
-                <span className={`font-body text-caption w-20 ${
-                  isOnline ? 'text-success' : isCreating ? 'text-action' : 'text-text-secondary/50'
-                }`}>
-                  {isOnline ? 'ready' : isCreating ? 'creating...' : 'waiting'}
-                </span>
-
-                {/* Latest activity */}
-                <span className="font-body text-caption text-text-secondary/70 flex-1 truncate">
-                  {activity || (isCreating ? 'Setting up session...' : '')}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-
-        <p className="font-body text-caption text-text-secondary mt-3">
-          Agents initialize in parallel. Each explores the game state on first contact.
-        </p>
-      </section>
-    )
-  }
-
-  if (!status || status.total_agents === 0) {
-    // Show initialization prompt if there are AI roles
-    if (aiRoles.length > 0 && !initDismissed) {
-      return (
-        <section className="bg-card border border-action/30 rounded-lg p-5">
-          <h3 className="font-heading text-h3 text-text-primary mb-2">AI Participants</h3>
-          <p className="font-body text-body-sm text-text-primary mb-1">
-            This simulation has <strong>{aiRoles.length} AI-operated role{aiRoles.length !== 1 ? 's' : ''}</strong>:
-          </p>
-          <div className="font-body text-caption text-text-secondary mb-3 flex flex-wrap gap-1">
-            {aiRoles.map(r => (
-              <span key={r.id} className="bg-action/10 text-action px-2 py-0.5 rounded">
-                {r.character_name} ({r.country_code})
-              </span>
-            ))}
-          </div>
-          <p className="font-body text-body-sm text-text-secondary mb-3">
-            Initialize them now? This creates AI agent sessions and may take 1-2 minutes.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleInitialize}
-              disabled={initializing}
-              className="font-body text-caption font-medium bg-action text-white px-4 py-2 rounded hover:bg-action/80 disabled:opacity-50 transition-colors"
-            >
-              Yes, Initialize AI
-            </button>
-            <button
-              onClick={() => setInitDismissed(true)}
-              className="font-body text-caption text-text-secondary px-4 py-2 rounded border border-border hover:bg-base transition-colors"
-            >
-              Later
-            </button>
-          </div>
-          {initializing && (
-            <p className="font-body text-caption text-action mt-2 animate-pulse">
-              Creating AI sessions... This may take a minute.
-            </p>
-          )}
-        </section>
-      )
-    }
-
+  // No AI roles at all
+  if (noAiRoles && !loading) {
     return (
       <section className="bg-card border border-border rounded-lg p-5">
         <h3 className="font-heading text-h3 text-text-primary">AI Participants</h3>
-        <p className="font-body text-body-sm text-text-secondary py-2">
-          {aiRoles.length > 0
-            ? 'AI agents not yet initialized.'
-            : 'No AI-operated roles in this simulation.'}
-        </p>
-        {aiRoles.length > 0 && (
-          <button
-            onClick={handleInitialize}
-            disabled={initializing}
-            className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 disabled:opacity-50 transition-colors mt-1"
-          >
-            {initializing ? 'Initializing...' : 'Initialize AI Agents'}
-          </button>
-        )}
+        <p className="font-body text-body-sm text-text-secondary py-2">No AI-operated roles in this simulation.</p>
       </section>
     )
   }
 
+  /* ── ONE CONSISTENT LAYOUT — always shows the agent table ────────────── */
   return (
     <section className="bg-card border border-border rounded-lg">
-      {/* ── Collapsible Header ──────────────────────────────────────── */}
+      {/* ── Header ─────────────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-base/50 transition-colors"
         onClick={() => setCollapsed(!collapsed)}
       >
         <div className="flex items-center gap-2">
+          {initializing && (
+            <div className="w-3.5 h-3.5 border-2 border-action border-t-transparent rounded-full animate-spin" />
+          )}
           <h3 className="font-heading text-h3 text-text-primary">AI Participants</h3>
           <span className="font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded-full">
-            {agentCount}
+            {isActive ? agentCount : aiRoles.length}
           </span>
-          <span className="font-data text-caption text-text-secondary">
-            ${status.total_cost_usd.toFixed(2)}
-          </span>
+          {isActive && (
+            <span className="font-data text-caption text-text-secondary">
+              ${status!.total_cost_usd.toFixed(2)}
+            </span>
+          )}
         </div>
         <span className="font-body text-caption text-text-secondary">
           {collapsed ? '\u25BC' : '\u25B2'}
@@ -337,46 +225,90 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
       {!collapsed && (
         <div className="px-5 pb-5">
-          {/* ── Global Controls ──────────────────────────────────── */}
+          {/* ── Controls ──────────────────────────────────────────── */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex gap-2">
-              <button
-                onClick={(e) => { e.stopPropagation(); handleFreezeAll() }}
-                disabled={actionLoading === 'freeze-all'}
-                className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors disabled:opacity-40"
-              >
-                {actionLoading === 'freeze-all' ? '...' : 'Freeze All'}
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); handleResumeAll() }}
-                disabled={actionLoading === 'resume-all'}
-                className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
-              >
-                {actionLoading === 'resume-all' ? '...' : 'Resume All'}
-              </button>
+              {!isActive && !initializing && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleInitialize() }}
+                  className="font-body text-caption font-medium bg-action text-white px-3 py-1.5 rounded hover:bg-action/80 transition-colors"
+                >
+                  Initialize AI Agents
+                </button>
+              )}
+              {isActive && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleFreezeAll() }}
+                    disabled={actionLoading === 'freeze-all'}
+                    className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors disabled:opacity-40"
+                  >
+                    {actionLoading === 'freeze-all' ? '...' : 'Freeze All'}
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleResumeAll() }}
+                    disabled={actionLoading === 'resume-all'}
+                    className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
+                  >
+                    {actionLoading === 'resume-all' ? '...' : 'Resume All'}
+                  </button>
+                </>
+              )}
+              {initializing && (
+                <span className="font-body text-caption text-action animate-pulse">
+                  Initializing {agentCount}/{aiRoles.length}...
+                </span>
+              )}
             </div>
             <div className="font-data text-caption text-text-secondary">
-              {totalActions} actions | {totalToolCalls} tool calls | R{status.round_num} P{status.pulse_num}
+              {isActive
+                ? `${totalActions} actions | ${totalToolCalls} tool calls | R${status!.round_num} P${status!.pulse_num}`
+                : `${aiRoles.length} AI roles`}
             </div>
           </div>
 
-          {/* ── Agent Rows ───────────────────────────────────────── */}
+          {/* ── Agent Rows — ALWAYS shows all AI roles ─────────────── */}
           <div className="space-y-1">
-            {status.agents.map((agent) => {
-              const style = stateStyle(agent.state)
-              const isSelected = selectedAgent === agent.role_id
-              const isFrozen = agent.state === 'FROZEN'
-              const charName = getCharName(agent.role_id)
-              const country = getCountryCode(agent)
+            {aiRoles.map((role) => {
+              // Merge data from orchestrator status (if running) + DB sessions (during init)
+              const orchAgent = orchAgentMap.get(role.id)
+              const dbSession = dbSessionMap.get(role.id)
+
+              // Determine state
+              let agentState = 'NOT_INITIALIZED'
+              let actions = 0
+              let costUsd = 0
+              let activity = latestActivity[role.country_code] || ''
+
+              if (orchAgent) {
+                agentState = orchAgent.state
+                actions = orchAgent.round_stats.actions
+                costUsd = orchAgent.cost.total_cost_usd
+              } else if (dbSession) {
+                const dbStatus = dbSession.status as string
+                agentState = dbStatus === 'ready' ? 'IDLE' : dbStatus === 'initializing' ? 'INITIALIZING' : dbStatus.toUpperCase()
+                actions = (dbSession.actions_submitted as number) || 0
+                costUsd = ((dbSession.total_output_tokens as number) || 0) * 15 / 1000000
+              }
+
+              const style = agentState === 'NOT_INITIALIZED'
+                ? { dot: 'bg-text-secondary/30', text: 'text-text-secondary/50', bg: 'bg-base' }
+                : agentState === 'INITIALIZING'
+                ? { dot: 'bg-action animate-pulse', text: 'text-action', bg: 'bg-action/5' }
+                : stateStyle(agentState)
+
+              const isSelected = selectedAgent === role.id
+              const charName = role.character_name
+              const country = role.country_code
 
               return (
-                <div key={agent.role_id}>
+                <div key={role.id}>
                   {/* Row */}
                   <div
                     className={`flex items-center justify-between px-3 py-2 rounded cursor-pointer transition-colors ${
                       isSelected ? 'bg-base' : 'hover:bg-base/50'
                     }`}
-                    onClick={() => setSelectedAgent(isSelected ? null : agent.role_id)}
+                    onClick={() => setSelectedAgent(isSelected ? null : role.id)}
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       {/* Status dot */}
@@ -390,43 +322,51 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                       </span>
                       {/* State badge */}
                       <span className={`font-data text-caption px-1.5 py-0.5 rounded ${style.bg} ${style.text}`}>
-                        {agent.state}
+                        {agentState === 'NOT_INITIALIZED' ? 'waiting' : agentState === 'INITIALIZING' ? 'starting...' : agentState}
                       </span>
+                      {/* Latest activity (shown during init or when not expanded) */}
+                      {activity && !isSelected && (
+                        <span className="font-body text-caption text-text-secondary/60 truncate max-w-[200px] hidden lg:inline">
+                          {activity}
+                        </span>
+                      )}
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <span className="font-data text-caption text-text-secondary">
-                        {agent.round_stats.actions} act
+                        {actions} act
                       </span>
                       <span className="font-data text-caption text-text-secondary">
-                        ${agent.cost.total_cost_usd.toFixed(2)}
+                        ${costUsd.toFixed(2)}
                       </span>
-                      {/* Per-agent freeze/resume */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          isFrozen ? handleResumeOne(agent.role_id) : handleFreezeOne(agent.role_id)
-                        }}
-                        disabled={actionLoading === `freeze-${agent.role_id}` || actionLoading === `resume-${agent.role_id}`}
-                        className={`font-body text-caption px-2 py-0.5 rounded transition-colors disabled:opacity-40 ${
-                          isFrozen
-                            ? 'bg-success/10 text-success hover:bg-success/20'
-                            : 'bg-text-secondary/10 text-text-secondary hover:bg-text-secondary/20'
-                        }`}
-                        title={isFrozen ? 'Resume' : 'Freeze'}
-                      >
-                        {isFrozen ? '\u25B6' : '\u23F8'}
-                      </button>
+                      {/* Per-agent freeze/resume (only when active) */}
+                      {isActive && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            agentState === 'FROZEN' ? handleResumeOne(role.id) : handleFreezeOne(role.id)
+                          }}
+                          disabled={actionLoading === `freeze-${role.id}` || actionLoading === `resume-${role.id}`}
+                          className={`font-body text-caption px-2 py-0.5 rounded transition-colors disabled:opacity-40 ${
+                            agentState === 'FROZEN'
+                              ? 'bg-success/10 text-success hover:bg-success/20'
+                              : 'bg-text-secondary/10 text-text-secondary hover:bg-text-secondary/20'
+                          }`}
+                          title={agentState === 'FROZEN' ? 'Resume' : 'Freeze'}
+                        >
+                          {agentState === 'FROZEN' ? '\u25B6' : '\u23F8'}
+                        </button>
+                      )}
                     </div>
                   </div>
 
                   {/* Level 2: Detail View */}
-                  {isSelected && (
+                  {isSelected && orchAgent && (
                     <AgentDetailPanel
                       simId={simId}
-                      agent={agent}
+                      agent={orchAgent}
                       charName={charName}
-                      onFreeze={() => handleFreezeOne(agent.role_id)}
-                      onResume={() => handleResumeOne(agent.role_id)}
+                      onFreeze={() => handleFreezeOne(role.id)}
+                      onResume={() => handleResumeOne(role.id)}
                     />
                   )}
                 </div>
