@@ -87,9 +87,9 @@ def dispatch_action(
     # Log to observatory
     _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, result)
 
-    # Auto-pulse AI agents affected by this action (fire-and-forget)
+    # Enqueue events for AI agents affected by this action
     if result.get("success"):
-        _auto_pulse_for_action(sim_run_id, round_num, action_type, action, result)
+        _enqueue_for_ai_agents(sim_run_id, round_num, action_type, action, result)
 
     return result
 
@@ -1614,24 +1614,27 @@ def _log_dispatch(sim_run_id, round_num, action_type, role_id, country_code, res
                action_type, role_id, "OK" if success else "FAILED")
 
 
-# ── Auto-pulse AI agents ──────────────────────────────────────────────
+# ── Enqueue events for AI agents ─────────────────────────────────────
 
-def _auto_pulse_for_action(
+def _enqueue_for_ai_agents(
     sim_run_id: str,
     round_num: int,
     action_type: str,
     action: dict,
     result: dict,
 ) -> None:
-    """Check if a dispatched action affects an AI agent and fire a pulse.
+    """Check if a dispatched action affects an AI agent and enqueue an event.
 
-    Called after every successful action dispatch. Determines the affected
-    AI agent (if any) and sends them an event-specific pulse via auto_pulse.py.
-    All pulses are fire-and-forget — never blocks the action response.
+    Called after every successful action dispatch. Uses the EventDispatcher
+    to write events to the unified queue. The dispatcher loop delivers them.
     """
-    from engine.agents.managed.auto_pulse import fire_pulse
+    from engine.agents.managed.event_dispatcher import get_dispatcher
 
     try:
+        dispatcher = get_dispatcher(sim_run_id)
+        if not dispatcher:
+            return  # No active dispatcher — AI not initialized for this sim
+
         country_code = action.get("country_code", "")
 
         # ── Meeting invitations ──────────────────────────────────────
@@ -1641,17 +1644,29 @@ def _auto_pulse_for_action(
             inviter_name = _lookup_character_name(sim_run_id, action.get("role_id", ""), country_code)
             agenda = action.get("message", "")
             if invitee and inv_id:
-                from engine.agents.managed.auto_pulse import on_meeting_invitation
-                fire_pulse(on_meeting_invitation(
-                    sim_run_id, invitee, inviter_name, inv_id, agenda,
-                ))
+                dispatcher.enqueue(
+                    role_id=invitee,
+                    tier=2,
+                    event_type="meeting_invitation",
+                    message=(
+                        f"MEETING INVITATION RECEIVED\n\n"
+                        f"You have received a meeting invitation from {inviter_name}.\n"
+                        f"Agenda: {agenda or 'No agenda specified'}\n"
+                        f"Invitation ID: {inv_id}\n\n"
+                        f"Decide whether to accept or decline this meeting. "
+                        f"Use the respond_to_invitation tool with invitation_id='{inv_id}' "
+                        f"and your decision ('accept' or 'reject').\n\n"
+                        f"Consider: Is this meeting useful for your strategy? "
+                        f"Do you have time? Is this person trustworthy?"
+                    ),
+                    metadata={"inviter": inviter_name, "invitation_id": inv_id, "agenda": agenda},
+                )
 
         # ── Meeting accepted (notify AI inviter) ─────────────────────
         elif action_type == "respond_meeting":
             response = action.get("response", "")
             meeting_id = result.get("meeting_id", "")
             if response == "accept" and meeting_id:
-                # Look up the invitation to find the inviter
                 try:
                     inv_id = action.get("invitation_id", "")
                     if inv_id:
@@ -1663,12 +1678,25 @@ def _auto_pulse_for_action(
                             inviter = inv.data[0]["inviter_role_id"]
                             agenda = inv.data[0].get("message", "")
                             accepter_name = action.get("role_id", country_code)
-                            from engine.agents.managed.auto_pulse import on_meeting_accepted
-                            fire_pulse(on_meeting_accepted(
-                                sim_run_id, inviter, accepter_name, meeting_id, agenda,
-                            ))
+                            dispatcher.enqueue(
+                                role_id=inviter,
+                                tier=2,
+                                event_type="meeting_accepted",
+                                message=(
+                                    f"MEETING STARTED\n\n"
+                                    f"Your meeting with {accepter_name} has been accepted and is now active.\n"
+                                    f"Meeting ID: {meeting_id}\n"
+                                    f"Agenda: {agenda or 'General discussion'}\n\n"
+                                    f"You initiated this meeting, so you speak first. "
+                                    f"Use the send_message tool with meeting_id='{meeting_id}' "
+                                    f"to begin the conversation.\n\n"
+                                    f"Keep your opening message focused — state what you want to discuss. "
+                                    f"1-3 sentences, stay in character."
+                                ),
+                                metadata={"meeting_id": meeting_id, "accepter": accepter_name, "agenda": agenda},
+                            )
                 except Exception as e:
-                    logger.warning("[auto-pulse] Failed to notify inviter: %s", e)
+                    logger.warning("[enqueue] Failed to notify inviter: %s", e)
 
         # ── Transaction proposed ─────────────────────────────────────
         elif action_type == "propose_transaction":
@@ -1676,10 +1704,23 @@ def _auto_pulse_for_action(
             transaction_id = result.get("transaction_id", result.get("id", ""))
             terms = result.get("narrative", "Trade proposal")
             if target and transaction_id:
-                from engine.agents.managed.auto_pulse import on_transaction_proposed
-                fire_pulse(on_transaction_proposed(
-                    sim_run_id, target, country_code, terms, transaction_id,
-                ))
+                dispatcher.enqueue_for_country(
+                    country_code=target,
+                    tier=2,
+                    event_type="transaction_proposed",
+                    message=(
+                        f"TRANSACTION PROPOSAL RECEIVED\n\n"
+                        f"{country_code.upper()} has proposed a transaction to your country.\n"
+                        f"Terms: {terms}\n"
+                        f"Transaction ID: {transaction_id}\n\n"
+                        f"Review this proposal carefully. You can accept, reject, or counter-offer.\n"
+                        f"Use submit_action with action_type='accept_transaction', "
+                        f"transaction_id='{transaction_id}', and response='accept' or 'reject'.\n\n"
+                        f"Consider: Is this deal fair? What do you gain? What do you lose? "
+                        f"Does this serve your strategic interests?"
+                    ),
+                    metadata={"transaction_id": transaction_id, "proposer": country_code, "terms": terms},
+                )
 
         # ── Agreement proposed ───────────────────────────────────────
         elif action_type == "propose_agreement":
@@ -1687,10 +1728,22 @@ def _auto_pulse_for_action(
             agreement_id = result.get("agreement_id", result.get("id", ""))
             agreement_type = action.get("agreement_type", "general")
             if target and agreement_id:
-                from engine.agents.managed.auto_pulse import on_agreement_proposed
-                fire_pulse(on_agreement_proposed(
-                    sim_run_id, target, country_code, agreement_type, agreement_id,
-                ))
+                dispatcher.enqueue_for_country(
+                    country_code=target,
+                    tier=2,
+                    event_type="agreement_proposed",
+                    message=(
+                        f"AGREEMENT PROPOSAL RECEIVED\n\n"
+                        f"{country_code.upper()} proposes a {agreement_type} agreement.\n"
+                        f"Agreement ID: {agreement_id}\n\n"
+                        f"Review this agreement. You can sign or decline.\n"
+                        f"Use submit_action with action_type='sign_agreement', "
+                        f"agreement_id='{agreement_id}', and confirm=true (to sign) or confirm=false (to decline).\n\n"
+                        f"Consider: Does this agreement benefit your country? "
+                        f"What obligations does it impose? Can you trust the other party?"
+                    ),
+                    metadata={"agreement_id": agreement_id, "proposer": country_code, "type": agreement_type},
+                )
 
         # ── Combat: attack against a country ─────────────────────────
         elif action_type in ("ground_attack", "air_strike", "naval_combat",
@@ -1700,42 +1753,96 @@ def _auto_pulse_for_action(
             target_col = action.get("target_col", "?")
             details = result.get("narrative", f"Attack at ({target_row},{target_col})")
             if target_country and target_country != country_code:
-                from engine.agents.managed.auto_pulse import on_attack_declared
-                fire_pulse(on_attack_declared(
-                    sim_run_id, target_country, country_code, action_type, details,
-                ))
+                dispatcher.enqueue_for_country(
+                    country_code=target_country,
+                    tier=1,
+                    event_type="attack_declared",
+                    message=(
+                        f"ALERT: MILITARY ATTACK\n\n"
+                        f"{country_code.upper()} has launched a {action_type} attack "
+                        f"against your territory!\n"
+                        f"Details: {details}\n\n"
+                        f"This requires immediate response. Assess the situation:\n"
+                        f"1. Use get_my_forces to check your military position\n"
+                        f"2. Consider retaliatory strikes or defensive repositioning\n"
+                        f"3. Consider diplomatic responses (public statement, request allies)\n"
+                        f"4. Update your strategic notes with write_notes\n\n"
+                        f"Act decisively — your nation is under attack."
+                    ),
+                    metadata={"attacker": country_code, "attack_type": action_type, "details": details},
+                )
 
         # ── War declared ─────────────────────────────────────────────
         elif action_type == "declare_war":
             target = action.get("target_country", "")
             if target:
-                from engine.agents.managed.auto_pulse import on_war_declared
-                fire_pulse(on_war_declared(sim_run_id, target, country_code))
+                dispatcher.enqueue_for_country(
+                    country_code=target,
+                    tier=1,
+                    event_type="war_declared",
+                    message=(
+                        f"WAR DECLARED\n\n"
+                        f"{country_code.upper()} has declared WAR on your country!\n\n"
+                        f"This is a critical moment. You must:\n"
+                        f"1. Assess your military readiness (get_my_forces)\n"
+                        f"2. Review your alliances (get_relationships)\n"
+                        f"3. Consider requesting emergency meetings with allies\n"
+                        f"4. Issue a public statement responding to the declaration\n"
+                        f"5. Prepare defensive or offensive military plans\n\n"
+                        f"Your nation's survival may depend on your next decisions."
+                    ),
+                    metadata={"declarer": country_code},
+                )
 
         # ── Nuclear chain ────────────────────────────────────────────
         elif action_type == "nuclear_launch_initiate":
-            # After initiation, the authorize step needs to notify the authorizer
             authorizer = result.get("authorizer_role_id", "")
             nuclear_action_id = result.get("nuclear_action_id", result.get("action_id", ""))
             initiator_name = action.get("role_id", country_code)
             target_desc = result.get("target_description", "multiple targets")
             if authorizer and nuclear_action_id:
-                from engine.agents.managed.auto_pulse import on_nuclear_authorize_request
-                fire_pulse(on_nuclear_authorize_request(
-                    sim_run_id, authorizer, initiator_name,
-                    nuclear_action_id, target_desc,
-                ))
+                dispatcher.enqueue(
+                    role_id=authorizer,
+                    tier=1,
+                    event_type="nuclear_authorize_request",
+                    message=(
+                        f"NUCLEAR AUTHORIZATION REQUEST\n\n"
+                        f"{initiator_name} has initiated a nuclear launch and requires your authorization.\n"
+                        f"Target: {target_desc}\n"
+                        f"Nuclear Action ID: {nuclear_action_id}\n\n"
+                        f"This is the most consequential decision you can make. "
+                        f"You must authorize or refuse.\n"
+                        f"Use submit_action with action_type='nuclear_authorize', "
+                        f"nuclear_action_id='{nuclear_action_id}', and confirm=true or confirm=false.\n\n"
+                        f"Consider the consequences carefully. A nuclear strike will "
+                        f"cause massive destruction and reshape all international relationships."
+                    ),
+                    metadata={"nuclear_action_id": nuclear_action_id, "initiator": initiator_name, "target": target_desc},
+                )
 
         elif action_type == "nuclear_authorize":
-            # If authorized and launches happen, notify target countries
             if result.get("launched") or result.get("status") == "launched":
                 target_countries = result.get("target_countries", [])
                 target_desc = result.get("target_description", "your territory")
                 for tgt in target_countries:
-                    from engine.agents.managed.auto_pulse import on_nuclear_launch_against
-                    fire_pulse(on_nuclear_launch_against(
-                        sim_run_id, tgt, country_code, target_desc,
-                    ))
+                    dispatcher.enqueue_for_country(
+                        country_code=tgt,
+                        tier=1,
+                        event_type="nuclear_launch_against",
+                        message=(
+                            f"NUCLEAR STRIKE INCOMING\n\n"
+                            f"{country_code.upper()} has launched a NUCLEAR STRIKE against your territory!\n"
+                            f"Target: {target_desc}\n\n"
+                            f"This is an existential crisis. Immediate actions:\n"
+                            f"1. Assess damage potential and your nuclear capability\n"
+                            f"2. Consider retaliatory nuclear strike if you have the capability\n"
+                            f"3. Issue an emergency public statement\n"
+                            f"4. Request emergency allied support\n"
+                            f"5. Record this moment in your notes\n\n"
+                            f"The world is watching. Every decision matters."
+                        ),
+                        metadata={"attacker": country_code, "target": target_desc},
+                    )
 
     except Exception as e:
-        logger.warning("[auto-pulse] Error in _auto_pulse_for_action: %s", e)
+        logger.warning("[enqueue] Error in _enqueue_for_ai_agents: %s", e)

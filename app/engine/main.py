@@ -37,12 +37,42 @@ async def lifespan(app: FastAPI):
     logger.info("Anthropic: %s", "configured" if settings.has_anthropic else "NOT configured")
     logger.info("Gemini: %s", "configured" if settings.has_gemini else "NOT configured")
 
-    # Register event loop for cross-thread auto-pulse scheduling
+    # Register event loop for cross-thread auto-pulse scheduling (legacy, kept for now)
     import asyncio
     from engine.agents.managed.auto_pulse import register_event_loop
     register_event_loop(asyncio.get_running_loop())
 
+    # Auto-reconnect dispatchers for any sim_runs with active AI sessions
+    from engine.agents.managed.event_dispatcher import create_dispatcher, get_dispatcher
+    try:
+        from engine.services.supabase import get_client
+        db = get_client()
+        active_sims = (
+            db.table("ai_agent_sessions")
+            .select("sim_run_id")
+            .in_("status", ["initializing", "ready", "active"])
+            .execute()
+        )
+        sim_ids = set(s["sim_run_id"] for s in (active_sims.data or []))
+        for sid in sim_ids:
+            if not get_dispatcher(sid):
+                d = create_dispatcher(sid)
+                count = await d.reconnect_from_db()
+                if count > 0:
+                    await d.start()
+                    logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sid, count)
+    except Exception as e:
+        logger.warning("Auto-reconnect dispatchers failed: %s", e)
+
     yield
+
+    # Shutdown all dispatchers on exit
+    from engine.agents.managed.event_dispatcher import _dispatchers
+    for d in list(_dispatchers.values()):
+        try:
+            await d.stop()
+        except Exception:
+            pass
     logger.info("TTT Engine shutting down")
 
 
@@ -2052,7 +2082,7 @@ async def send_meeting_message(
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
 
-    # Auto-pulse AI counterpart: if the OTHER participant is AI, deliver message immediately
+    # Enqueue chat event for AI counterpart via unified dispatcher
     meeting = meeting_data["meeting"]
     other_role_id = (
         meeting["participant_b_role_id"]
@@ -2060,14 +2090,36 @@ async def send_meeting_message(
         else meeting["participant_a_role_id"]
     )
 
-    from engine.agents.managed.auto_pulse import on_chat_message, fire_pulse
-    fire_pulse(on_chat_message(
-        sim_run_id=sim_id,
-        meeting_id=meeting_id,
-        sender_role_id=body.role_id,
-        sender_country=body.country_code,
-        other_role_id=other_role_id,
-    ))
+    from engine.agents.managed.event_dispatcher import get_dispatcher
+    dispatcher = get_dispatcher(sim_id)
+    if dispatcher:
+        # Build conversation context (last 6 messages)
+        from engine.services.supabase import get_client as _get_db
+        _db = _get_db()
+        all_msgs = (
+            _db.table("meeting_messages")
+            .select("role_id,content")
+            .eq("meeting_id", meeting_id)
+            .order("created_at")
+            .execute()
+        )
+        chat_lines = []
+        for m in all_msgs.data or []:
+            chat_lines.append(f'{m["role_id"]}: "{m["content"]}"')
+        chat_text = "\n".join(chat_lines[-6:])
+
+        dispatcher.enqueue(
+            role_id=other_role_id,
+            tier=2,
+            event_type="chat_message",
+            message=(
+                f"You are in a meeting (meeting_id: {meeting_id}). "
+                f"Here is the conversation:\n\n{chat_text}\n\n"
+                f"Respond naturally. 1-3 sentences. Stay in character. "
+                f"Use the send_message tool with meeting_id='{meeting_id}' to reply."
+            ),
+            metadata={"meeting_id": meeting_id, "sender": body.role_id},
+        )
 
     return APIResponse(data=result)
 
@@ -2132,22 +2184,26 @@ async def ai_initialize(
 ):
     """Initialize all AI agents for a simulation.
 
-    Creates managed agent sessions for each AI-operated role (or specific
-    roles if role_ids is provided). Each agent receives an initialization
-    message and begins assessing their situation.
+    Creates managed agent sessions via the EventDispatcher for each
+    AI-operated role (or specific roles if role_ids is provided).
+    Also creates an orchestrator for legacy round/pulse operations.
     """
+    from engine.agents.managed.event_dispatcher import (
+        create_dispatcher, get_dispatcher, remove_dispatcher,
+    )
     from engine.agents.managed.orchestrator import (
         create_orchestrator, get_orchestrator, OrchestratorConfig,
     )
 
-    # Check if orchestrator already exists
-    existing = get_orchestrator(sim_id)
-    if existing and existing._initialized:
+    # Check if dispatcher already exists with agents
+    existing_d = get_dispatcher(sim_id)
+    if existing_d and existing_d.agents:
         return APIResponse(
             success=False,
             data={"error": "AI agents already initialized for this sim. Shut down first."},
         )
 
+    # Create orchestrator (still used for run-round, send-pulse)
     config = OrchestratorConfig(
         assertiveness=body.assertiveness,
         pulses_per_round=body.pulses_per_round,
@@ -2155,16 +2211,29 @@ async def ai_initialize(
         auto_advance=body.auto_advance,
         round_duration_seconds=body.round_duration_seconds,
     )
-
     orch = create_orchestrator(sim_id, config)
+
+    # Create dispatcher for event queue delivery
+    if existing_d:
+        remove_dispatcher(sim_id)
+    dispatcher = create_dispatcher(sim_id)
 
     # Run initialization in background — it takes minutes per agent
     import asyncio
     async def _run_init():
         try:
+            # Use orchestrator for session creation (handles cleanup, concurrency)
             result = await orch.initialize_agents(body.role_ids)
+
+            # Register all orchestrator agents with the dispatcher
+            for role_id, ctx in orch.agents.items():
+                dispatcher.register_agent(role_id, ctx)
+
+            # Start the dispatch loop
+            await dispatcher.start()
+
             logger.info(
-                "AI initialized for sim %s: %d agents by %s",
+                "AI initialized for sim %s: %d agents, dispatcher started by %s",
                 sim_id, result.get("agents_initialized", 0), user.id,
             )
         except Exception as e:
@@ -2243,36 +2312,50 @@ async def ai_status(
     sim_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Get all AI agent states, costs, and activity summary."""
+    """Get all AI agent states, costs, queue depths, and activity summary."""
+    from engine.agents.managed.event_dispatcher import get_dispatcher, create_dispatcher
     from engine.agents.managed.orchestrator import get_orchestrator, create_orchestrator, OrchestratorConfig
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
+    dispatcher = get_dispatcher(sim_id)
+
+    if not dispatcher or not dispatcher.agents:
         # Try to reconnect from DB sessions (backend may have restarted)
         try:
-            orch = create_orchestrator(sim_id, OrchestratorConfig())
-            result = orch.reconnect_from_db()
-            if result.get("agents_reconnected", 0) > 0:
-                logger.info("Auto-reconnected orchestrator for sim %s: %d agents", sim_id, result["agents_reconnected"])
+            if not dispatcher:
+                dispatcher = create_dispatcher(sim_id)
+            count = await dispatcher.reconnect_from_db()
+            if count > 0:
+                await dispatcher.start()
+                logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sim_id, count)
             else:
-                # No sessions in DB either — truly not initialized
-                from engine.agents.managed.orchestrator import remove_orchestrator
-                remove_orchestrator(sim_id)
-                orch = None
+                from engine.agents.managed.event_dispatcher import remove_dispatcher
+                remove_dispatcher(sim_id)
+                dispatcher = None
         except Exception as e:
             logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
-            orch = None
+            dispatcher = None
 
-    if not orch:
+        # Also try orchestrator reconnect for legacy endpoints
+        if not get_orchestrator(sim_id):
+            try:
+                orch = create_orchestrator(sim_id, OrchestratorConfig())
+                result = orch.reconnect_from_db()
+                if not result.get("agents_reconnected", 0):
+                    from engine.agents.managed.orchestrator import remove_orchestrator
+                    remove_orchestrator(sim_id)
+            except Exception:
+                pass
+
+    if not dispatcher:
         return APIResponse(data={
-            "sim_run_id": sim_id, "round_num": 0, "pulse_num": 0,
+            "sim_run_id": sim_id, "round_num": 0,
             "total_agents": 0, "agents_idle": 0, "agents_frozen": 0,
             "agents_in_meeting": 0, "agents_acting": 0,
             "total_input_tokens": 0, "total_output_tokens": 0,
             "total_cost_usd": 0, "agents": [], "not_initialized": True,
         })
 
-    return APIResponse(data=orch.get_status())
+    return APIResponse(data=dispatcher.get_status())
 
 
 @app.post("/api/sim/{sim_id}/ai/freeze/{role_id}", response_model=APIResponse)
@@ -2281,17 +2364,27 @@ async def ai_freeze_agent(
     role_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Freeze one AI agent — stops receiving pulses, events queue."""
-    from engine.agents.managed.orchestrator import get_orchestrator
+    """Freeze one AI agent — stops receiving events from the dispatcher."""
+    from engine.agents.managed.event_dispatcher import get_dispatcher, FROZEN
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
 
-    result = orch.freeze_agent(role_id)
-    if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error", "Freeze failed"))
-    return APIResponse(data=result)
+    if role_id not in dispatcher.agents:
+        raise HTTPException(status_code=400, detail=f"Agent {role_id} not found")
+
+    prev_state = dispatcher.agent_states.get(role_id, "UNKNOWN")
+    dispatcher.set_agent_state(role_id, FROZEN)
+
+    # Also freeze in session manager (DB status)
+    ctx = dispatcher.agents[role_id]
+    dispatcher.session_manager.freeze_session(ctx)
+
+    return APIResponse(data={
+        "success": True, "role_id": role_id,
+        "state": FROZEN, "previous_state": prev_state,
+    })
 
 
 @app.post("/api/sim/{sim_id}/ai/resume/{role_id}", response_model=APIResponse)
@@ -2300,17 +2393,33 @@ async def ai_resume_agent(
     role_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Resume one frozen AI agent — receives batched events at next pulse."""
-    from engine.agents.managed.orchestrator import get_orchestrator
+    """Resume one frozen AI agent — receives batched events at next dispatch."""
+    from engine.agents.managed.event_dispatcher import get_dispatcher, FROZEN, IDLE
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
 
-    result = orch.resume_agent(role_id)
-    if not result.get("success"):
-        raise HTTPException(status_code=400, detail=result.get("error", "Resume failed"))
-    return APIResponse(data=result)
+    if role_id not in dispatcher.agents:
+        raise HTTPException(status_code=400, detail=f"Agent {role_id} not found")
+
+    if dispatcher.agent_states.get(role_id) != FROZEN:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Agent {role_id} is not frozen (state: {dispatcher.agent_states.get(role_id)})",
+        )
+
+    dispatcher.set_agent_state(role_id, IDLE)
+
+    # Also resume in session manager (DB status)
+    ctx = dispatcher.agents[role_id]
+    dispatcher.session_manager.resume_session(ctx)
+
+    queue_depth = dispatcher.get_queue_depth(role_id)
+    return APIResponse(data={
+        "success": True, "role_id": role_id,
+        "state": IDLE, "queue_depth": queue_depth,
+    })
 
 
 @app.post("/api/sim/{sim_id}/ai/freeze-all", response_model=APIResponse)
@@ -2319,14 +2428,21 @@ async def ai_freeze_all(
     user: AuthUser = Depends(require_moderator),
 ):
     """Freeze all AI agents — global pause, humans continue."""
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.event_dispatcher import get_dispatcher, FROZEN
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
 
-    result = orch.freeze_all()
-    return APIResponse(data=result)
+    frozen_count = 0
+    for rid in list(dispatcher.agents.keys()):
+        if dispatcher.agent_states.get(rid) != FROZEN:
+            dispatcher.set_agent_state(rid, FROZEN)
+            ctx = dispatcher.agents[rid]
+            dispatcher.session_manager.freeze_session(ctx)
+            frozen_count += 1
+
+    return APIResponse(data={"frozen_count": frozen_count})
 
 
 @app.post("/api/sim/{sim_id}/ai/resume-all", response_model=APIResponse)
@@ -2335,14 +2451,21 @@ async def ai_resume_all(
     user: AuthUser = Depends(require_moderator),
 ):
     """Resume all frozen AI agents."""
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.event_dispatcher import get_dispatcher, FROZEN, IDLE
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
 
-    result = orch.resume_all()
-    return APIResponse(data=result)
+    resumed_count = 0
+    for rid in list(dispatcher.agents.keys()):
+        if dispatcher.agent_states.get(rid) == FROZEN:
+            dispatcher.set_agent_state(rid, IDLE)
+            ctx = dispatcher.agents[rid]
+            dispatcher.session_manager.resume_session(ctx)
+            resumed_count += 1
+
+    return APIResponse(data={"resumed_count": resumed_count})
 
 
 @app.post("/api/sim/{sim_id}/ai/interrupt", response_model=APIResponse)
@@ -2351,19 +2474,31 @@ async def ai_critical_interrupt(
     body: AICriticalInterruptRequest,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Send a critical interrupt to specific agents, bypassing pulse schedule.
+    """Send a critical interrupt to specific agents via the event queue.
 
-    Use for nuclear launches, direct attacks, or other existential events.
-    IDLE agents receive immediately; IN_MEETING/FROZEN agents get queued.
+    Enqueues Tier 1 (critical) events — delivered within 3 seconds.
     """
-    from engine.agents.managed.orchestrator import get_orchestrator
+    from engine.agents.managed.event_dispatcher import get_dispatcher
 
-    orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
 
-    result = await orch.send_critical_interrupt(body.role_ids, body.message)
-    return APIResponse(data=result)
+    enqueued = []
+    for rid in body.role_ids:
+        if rid in dispatcher.agents:
+            dispatcher.enqueue(
+                role_id=rid,
+                tier=1,
+                event_type="critical_interrupt",
+                message=body.message,
+            )
+            enqueued.append(rid)
+
+    return APIResponse(data={
+        "enqueued": len(enqueued),
+        "role_ids": enqueued,
+    })
 
 
 @app.post("/api/sim/{sim_id}/ai/shutdown", response_model=APIResponse)
@@ -2371,15 +2506,23 @@ async def ai_shutdown(
     sim_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Shut down the AI orchestrator — archive all sessions."""
+    """Shut down the AI dispatcher + orchestrator — archive all sessions."""
+    from engine.agents.managed.event_dispatcher import get_dispatcher, remove_dispatcher
     from engine.agents.managed.orchestrator import get_orchestrator, remove_orchestrator
 
+    dispatcher = get_dispatcher(sim_id)
     orch = get_orchestrator(sim_id)
-    if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
 
-    await orch.shutdown()
-    remove_orchestrator(sim_id)
+    if not dispatcher and not orch:
+        raise HTTPException(status_code=404, detail="No AI system active for this sim.")
+
+    if dispatcher:
+        await dispatcher.shutdown()
+        remove_dispatcher(sim_id)
+
+    if orch:
+        await orch.shutdown()
+        remove_orchestrator(sim_id)
 
     return APIResponse(data={"status": "shutdown", "sim_run_id": sim_id})
 

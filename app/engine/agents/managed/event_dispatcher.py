@@ -241,6 +241,13 @@ class EventDispatcher:
                     ctx.round_num, transcript,
                 )
 
+                # Handle chat_message events — write AI response to meeting_messages
+                for ev in events:
+                    if ev["event_type"] == "chat_message":
+                        meeting_id = (ev.get("metadata") or {}).get("meeting_id")
+                        if meeting_id and transcript:
+                            self._write_chat_response(role_id, meeting_id, transcript)
+
                 # Update DB session stats
                 self.session_manager._update_token_counts(ctx)
 
@@ -266,6 +273,84 @@ class EventDispatcher:
             + "\n\n".join(lines)
             + "\n\nProcess these and respond."
         )
+
+    # -- Chat response writeback -------------------------------------------
+
+    def _write_chat_response(
+        self, role_id: str, meeting_id: str, transcript: list[dict]
+    ) -> None:
+        """Write AI agent's chat response to meeting_messages.
+
+        After the dispatcher delivers a chat_message event, the agent may
+        respond with text. If the agent didn't explicitly use the send_message
+        tool, we extract the first agent_message from the transcript and
+        write it as a meeting message.
+        """
+        # Check if agent already used send_message tool
+        used_send_message = any(
+            e.get("type") == "tool_call" and e.get("tool") == "send_message"
+            for e in transcript
+        )
+        if used_send_message:
+            return  # Agent handled it
+
+        from engine.services.meeting_service import send_message
+
+        for entry in transcript:
+            if entry.get("type") == "agent_message" and entry.get("content"):
+                text = entry["content"].strip()
+                if text and len(text) > 3:
+                    ctx = self.agents.get(role_id)
+                    if ctx:
+                        send_message(meeting_id, role_id, ctx.country_code, text[:500])
+                    break
+
+    # -- Status & helpers --------------------------------------------------
+
+    def get_status(self) -> dict:
+        """Get all agent states, costs, queue depths, and activity summary."""
+        agents_status = []
+        total_input_tokens = 0
+        total_output_tokens = 0
+
+        for role_id, ctx in self.agents.items():
+            cost = self.session_manager.get_cost_estimate(ctx)
+            queue = self.get_queue_depth(role_id)
+
+            total_input_tokens += cost.get("input_tokens", 0)
+            total_output_tokens += cost.get("output_tokens", 0)
+
+            agents_status.append({
+                "role_id": role_id,
+                "country_code": ctx.country_code,
+                "state": self.agent_states.get(role_id, "UNKNOWN"),
+                "session_id": ctx.session_id,
+                "round_num": ctx.round_num,
+                "cost": cost,
+                "queue_depth": queue,
+            })
+
+        total_cost = (
+            (total_input_tokens * 3.0 / 1_000_000)
+            + (total_output_tokens * 15.0 / 1_000_000)
+        )
+
+        return {
+            "sim_run_id": self.sim_run_id,
+            "total_agents": len(self.agents),
+            "agents_idle": sum(1 for s in self.agent_states.values() if s == IDLE),
+            "agents_frozen": sum(1 for s in self.agent_states.values() if s == FROZEN),
+            "agents_in_meeting": sum(
+                1 for s in self.agent_states.values() if s == IN_MEETING
+            ),
+            "agents_acting": sum(
+                1 for s in self.agent_states.values() if s == ACTING
+            ),
+            "total_input_tokens": total_input_tokens,
+            "total_output_tokens": total_output_tokens,
+            "total_cost_usd": round(total_cost, 2),
+            "agents": agents_status,
+        }
 
     # -- Initialization ----------------------------------------------------
 
@@ -352,6 +437,33 @@ class EventDispatcher:
 
     # -- Shutdown ----------------------------------------------------------
 
+    # -- Country-level enqueue ---------------------------------------------
+
+    def enqueue_for_country(
+        self,
+        country_code: str,
+        tier: int,
+        event_type: str,
+        message: str,
+        metadata: dict | None = None,
+    ) -> str | None:
+        """Enqueue an event for a country's HoS (if AI-operated).
+
+        Returns event ID if enqueued, None if no AI HoS found.
+        """
+        hos_role_id = _find_hos_for_country(self.sim_run_id, country_code)
+        if not hos_role_id:
+            return None
+        return self.enqueue(
+            role_id=hos_role_id,
+            tier=tier,
+            event_type=event_type,
+            message=message,
+            metadata=metadata,
+        )
+
+    # -- Shutdown ----------------------------------------------------------
+
     async def shutdown(self) -> None:
         """Stop dispatcher, archive all sessions, clear queue."""
         await self.stop()
@@ -366,6 +478,30 @@ class EventDispatcher:
         self.agents.clear()
         self.agent_states.clear()
         logger.info("[dispatcher] Shutdown complete for sim %s", self.sim_run_id)
+
+
+# -- Helper: find HoS role for a country -----------------------------------
+
+def _find_hos_for_country(sim_run_id: str, country_code: str) -> str | None:
+    """Find the AI-operated Head of State role_id for a country."""
+    try:
+        db = get_client()
+        result = (
+            db.table("roles")
+            .select("id, is_ai_operated, positions")
+            .eq("sim_run_id", sim_run_id)
+            .eq("country_code", country_code)
+            .eq("status", "active")
+            .execute()
+        )
+        for role in result.data or []:
+            positions = role.get("positions") or []
+            if "head_of_state" in positions:
+                return role["id"] if role.get("is_ai_operated") else None
+        return None
+    except Exception as e:
+        logger.warning("[dispatcher] Failed to find HoS for %s: %s", country_code, e)
+        return None
 
 
 # -- Global dispatcher registry -------------------------------------------
