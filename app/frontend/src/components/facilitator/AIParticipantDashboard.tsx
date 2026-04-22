@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { supabase } from '@/lib/supabase'
 import {
   getAIStatus,
   initializeAIAgents,
@@ -57,12 +58,50 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [initializing, setInitializing] = useState(false)
   const [initDismissed, setInitDismissed] = useState(false)
+  const [dbSessions, setDbSessions] = useState<Record<string, unknown>[]>([])
+  const [latestActivity, setLatestActivity] = useState<Record<string, string>>({}) // role_id → latest summary
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   /* Fetch roles once for character_name lookup */
   useEffect(() => {
     getSimRunRoles(simId).then(setRoles).catch(() => {})
   }, [simId])
+
+  /* Poll DB directly for agent sessions + latest activity (works during init) */
+  useEffect(() => {
+    if (!initializing && status && status.total_agents > 0) return // orchestrator status is available, no need
+    const poll = async () => {
+      try {
+        const { data: sessions } = await supabase
+          .from('ai_agent_sessions')
+          .select('role_id,country_code,status,total_output_tokens,actions_submitted,tool_calls,last_active_at')
+          .eq('sim_run_id', simId)
+        if (sessions) setDbSessions(sessions)
+
+        // Latest activity per agent from observatory
+        const { data: logs } = await supabase
+          .from('observatory_events')
+          .select('country_code,summary,created_at')
+          .eq('sim_run_id', simId)
+          .eq('event_type', 'ai_agent_log')
+          .order('created_at', { ascending: false })
+          .limit(20)
+        if (logs) {
+          const latest: Record<string, string> = {}
+          for (const log of logs) {
+            const cc = log.country_code as string
+            if (!latest[cc]) {
+              latest[cc] = (log.summary as string || '').slice(0, 80)
+            }
+          }
+          setLatestActivity(latest)
+        }
+      } catch { /* ignore */ }
+    }
+    poll()
+    const interval = setInterval(poll, 3000) // 3s during init for responsiveness
+    return () => clearInterval(interval)
+  }, [simId, initializing, status?.total_agents])
 
   /* Poll AI status every 5 seconds */
   const fetchStatus = useCallback(async () => {
@@ -153,23 +192,60 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   }
 
   if (initializing) {
+    const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
+    const onlineCount = dbSessions.filter(s => s.status !== 'initializing').length
+
     return (
       <section className="bg-card border border-action/30 rounded-lg p-5">
-        <h3 className="font-heading text-h3 text-text-primary mb-2">AI Participants</h3>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           <div className="w-4 h-4 border-2 border-action border-t-transparent rounded-full animate-spin" />
-          <p className="font-body text-body-sm text-action">
-            Initializing {aiRoles.length} AI agents... Creating sessions and running first assessment.
-          </p>
+          <h3 className="font-heading text-h3 text-text-primary">
+            Initializing AI Participants ({onlineCount}/{aiRoles.length})
+          </h3>
         </div>
-        <p className="font-body text-caption text-text-secondary mt-2">
-          This takes 1-2 minutes (agents run in parallel). The dashboard will update automatically.
+
+        <div className="space-y-1">
+          {aiRoles.map(role => {
+            const session = dbSessionMap.get(role.id)
+            const sessionStatus = (session?.status as string) || 'waiting'
+            const activity = latestActivity[role.country_code] || ''
+            const isOnline = session && sessionStatus !== 'initializing'
+            const isCreating = session && sessionStatus === 'initializing'
+
+            return (
+              <div key={role.id} className="flex items-center gap-2 py-1.5 px-2 rounded bg-base">
+                {/* Status dot */}
+                <div className={`w-2 h-2 rounded-full shrink-0 ${
+                  isOnline ? 'bg-success' : isCreating ? 'bg-action animate-pulse' : 'bg-text-secondary/30'
+                }`} />
+
+                {/* Name + country */}
+                <span className="font-body text-body-sm text-text-primary w-32 truncate">
+                  {role.character_name}
+                </span>
+                <span className="font-body text-caption text-text-secondary uppercase w-20 truncate">
+                  {role.country_code}
+                </span>
+
+                {/* Status */}
+                <span className={`font-body text-caption w-20 ${
+                  isOnline ? 'text-success' : isCreating ? 'text-action' : 'text-text-secondary/50'
+                }`}>
+                  {isOnline ? 'ready' : isCreating ? 'creating...' : 'waiting'}
+                </span>
+
+                {/* Latest activity */}
+                <span className="font-body text-caption text-text-secondary/70 flex-1 truncate">
+                  {activity || (isCreating ? 'Setting up session...' : '')}
+                </span>
+              </div>
+            )
+          })}
+        </div>
+
+        <p className="font-body text-caption text-text-secondary mt-3">
+          Agents initialize in parallel. Each explores the game state on first contact.
         </p>
-        {status && status.total_agents > 0 && (
-          <p className="font-body text-caption text-success mt-1">
-            {status.total_agents} of {aiRoles.length} agents online...
-          </p>
-        )}
       </section>
     )
   }
