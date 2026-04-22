@@ -226,12 +226,14 @@ class AIOrchestrator:
                 "status": "ready",
             }
 
-        # Initialize agents with limited concurrency (max 3 at a time to avoid
-        # [Errno 35] Resource temporarily unavailable from too many threads)
-        sem = asyncio.Semaphore(3)
+        # Initialize agents with limited concurrency (max 2 at a time).
+        # macOS has tight thread limits — [Errno 35] Resource temporarily
+        # unavailable with 3+ concurrent run_in_executor calls.
+        sem = asyncio.Semaphore(2)
 
         async def _init_with_semaphore(role: dict) -> dict:
             async with sem:
+                await asyncio.sleep(0.5)  # Brief stagger to avoid thread exhaustion
                 return await _init_one_agent(role)
 
         results = await asyncio.gather(
