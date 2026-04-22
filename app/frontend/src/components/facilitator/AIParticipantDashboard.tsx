@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import {
   getAIStatus,
@@ -117,6 +118,7 @@ function getActivityDescriptor(latestEvent: LatestEvent | null, agentState: stri
 /* -------------------------------------------------------------------------- */
 
 export function AIParticipantDashboard({ simId }: { simId: string }) {
+  const navigate = useNavigate()
   const [status, setStatus] = useState<AIStatusResponse | null>(null)
   const [roles, setRoles] = useState<SimRunRole[]>([])
   const [collapsed, setCollapsed] = useState(false)
@@ -387,7 +389,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             <div
               key={role.id}
               className="px-5 py-2 cursor-pointer hover:bg-base/50 transition-colors"
-              onClick={() => { console.log('Open agent detail:', role.id) }}
+              onClick={() => { navigate(`/sim/${simId}/agent/${role.id}`) }}
             >
               {/* Grid: fixed columns for alignment across rows */}
               <div className="grid items-center gap-x-3" style={{ gridTemplateColumns: '8px 120px 90px 1fr 50px 50px 28px' }}>

@@ -18,6 +18,7 @@ import { TemplateEditor } from '@/pages/TemplateEditor'
 import { FacilitatorDashboard } from '@/pages/FacilitatorDashboard'
 import { PublicScreen } from '@/pages/PublicScreen'
 import { ParticipantDashboard } from '@/pages/ParticipantDashboard'
+import { AgentDetailPage } from '@/pages/AgentDetailPage'
 
 export function App() {
   return (
@@ -102,6 +103,16 @@ export function App() {
         element={
           <ProtectedRoute>
             <FacilitatorDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Agent detail — AI participant deep-dive (facilitator) */}
+      <Route
+        path="/sim/:simId/agent/:roleId"
+        element={
+          <ProtectedRoute>
+            <AgentDetailPage />
           </ProtectedRoute>
         }
       />
