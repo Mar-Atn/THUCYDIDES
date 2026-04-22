@@ -172,81 +172,78 @@ class AIOrchestrator:
         initialized = []
         errors = []
 
-        async def _init_one_agent(role: dict) -> dict:
-            """Initialize a single agent — runs in thread pool (sync SDK)."""
+        # Phase 1: Create all sessions FAST (sequential, ~2s each = ~16s for 8)
+        # Session creation is lightweight — just API calls to Anthropic.
+        for role in roles:
             role_id = role["id"]
             country_code = role["country_code"]
             character_name = role.get("character_name", role_id)
-            title = role.get("title", "Leader")
 
-            loop = asyncio.get_event_loop()
-
-            # Create managed agent session (sync → thread)
-            ctx = await loop.run_in_executor(
-                None,
-                lambda: self.session_manager.create_session(
+            try:
+                ctx = self.session_manager.create_session(
                     role_id=role_id,
                     country_code=country_code,
                     sim_run_id=self.sim_run_id,
                     scenario_code=self._scenario_code,
                     round_num=self.round_num,
                     model=self.config.model,
-                ),
+                )
+                self.agents[role_id] = ctx
+                self.agent_states[role_id] = IDLE
+                self.round_stats[role_id] = AgentRoundStats()
+                self._queued_events[role_id] = []
+
+                initialized.append({
+                    "role_id": role_id,
+                    "country_code": country_code,
+                    "character_name": character_name,
+                    "session_id": ctx.session_id,
+                    "status": "ready",
+                })
+                logger.info("Created session for %s (%s): %s", role_id, country_code, ctx.session_id)
+            except Exception as e:
+                logger.error("Failed to create session for %s: %s", role_id, e)
+                errors.append({"role_id": role_id, "error": str(e)})
+
+        # Phase 2: Send init messages in background (agents explore on their own)
+        # This is the slow part (~1-2 min per agent) but doesn't block initialization.
+        async def _send_init_messages():
+            sem = asyncio.Semaphore(2)
+            loop = asyncio.get_event_loop()
+
+            async def _init_msg(role_id: str, ctx_inner: 'SessionContext'):
+                async with sem:
+                    try:
+                        country_code = ctx_inner.country_code
+                        char_name = next(
+                            (r["character_name"] for r in roles if r["id"] == role_id),
+                            role_id,
+                        )
+                        title = next(
+                            (r.get("title", "Leader") for r in roles if r["id"] == role_id),
+                            "Leader",
+                        )
+                        init_msg = (
+                            f"The simulation has begun. You are {char_name}, "
+                            f"{title} of {country_code}. "
+                            f"This is Round {self.round_num}. Assess your situation."
+                        )
+                        transcript = await loop.run_in_executor(
+                            None, self.session_manager.send_event, ctx_inner, init_msg,
+                        )
+                        log_transcript_to_observatory(
+                            self.sim_run_id, country_code, self.round_num, transcript,
+                        )
+                        logger.info("Init message complete for %s", role_id)
+                    except Exception as e:
+                        logger.error("Init message failed for %s: %s", role_id, e)
+
+            await asyncio.gather(
+                *[_init_msg(rid, ctx) for rid, ctx in self.agents.items()],
+                return_exceptions=True,
             )
 
-            self.agents[role_id] = ctx
-            self.agent_states[role_id] = IDLE
-            self.round_stats[role_id] = AgentRoundStats()
-            self._queued_events[role_id] = []
-
-            # Send initialization message (sync → thread)
-            init_msg = (
-                f"The simulation has begun. You are {character_name}, "
-                f"{title} of {country_code}. "
-                f"This is Round {self.round_num}. Assess your situation."
-            )
-            transcript = await loop.run_in_executor(
-                None, self.session_manager.send_event, ctx, init_msg
-            )
-
-            # Log initialization to observatory
-            log_transcript_to_observatory(
-                self.sim_run_id, country_code, self.round_num, transcript
-            )
-
-            logger.info(
-                "Initialized agent: %s (%s) session=%s",
-                role_id, country_code, ctx.session_id,
-            )
-            return {
-                "role_id": role_id,
-                "country_code": country_code,
-                "character_name": character_name,
-                "session_id": ctx.session_id,
-                "status": "ready",
-            }
-
-        # Initialize agents with limited concurrency (max 2 at a time).
-        # macOS has tight thread limits — [Errno 35] Resource temporarily
-        # unavailable with 3+ concurrent run_in_executor calls.
-        sem = asyncio.Semaphore(2)
-
-        async def _init_with_semaphore(role: dict) -> dict:
-            async with sem:
-                await asyncio.sleep(0.5)  # Brief stagger to avoid thread exhaustion
-                return await _init_one_agent(role)
-
-        results = await asyncio.gather(
-            *[_init_with_semaphore(r) for r in roles], return_exceptions=True
-        )
-
-        for i, result in enumerate(results):
-            if isinstance(result, Exception):
-                role_id = roles[i]["id"]
-                logger.exception("Failed to initialize agent %s: %s", role_id, result)
-                errors.append({"role_id": role_id, "error": str(result)})
-            else:
-                initialized.append(result)
+        asyncio.create_task(_send_init_messages())
 
         self._initialized = True
 
