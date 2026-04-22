@@ -2045,6 +2045,91 @@ async def send_meeting_message(
     )
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
+
+    # Auto-pulse AI counterpart: if the OTHER participant is AI, deliver message immediately
+    meeting = meeting_data["meeting"]
+    other_role_id = (
+        meeting["participant_b_role_id"]
+        if meeting["participant_a_role_id"] == body.role_id
+        else meeting["participant_a_role_id"]
+    )
+
+    import asyncio
+    async def _auto_pulse_ai():
+        try:
+            from engine.services.supabase import get_client as _gc
+            db = _gc()
+            other_role = db.table("roles").select("is_ai_operated").eq(
+                "sim_run_id", sim_id
+            ).eq("id", other_role_id).limit(1).execute()
+
+            if not other_role.data or not other_role.data[0].get("is_ai_operated"):
+                return  # Other participant is human — nothing to do
+
+            # Find AI session
+            ai_session = db.table("ai_agent_sessions").select("*").eq(
+                "sim_run_id", sim_id
+            ).eq("role_id", other_role_id).in_(
+                "status", ["ready", "active"]
+            ).limit(1).execute()
+
+            if not ai_session.data:
+                return  # No active AI session
+
+            s = ai_session.data[0]
+            from engine.agents.managed.session_manager import ManagedSessionManager, SessionContext
+            from engine.agents.managed.tool_executor import ToolExecutor
+
+            mgr = ManagedSessionManager()
+            executor = ToolExecutor(
+                country_code=s["country_code"], scenario_code=sim_id,
+                sim_run_id=sim_id, round_num=1, role_id=other_role_id,
+            )
+            ctx = SessionContext(
+                agent_id=s["agent_id"], agent_version=1,
+                environment_id=s["environment_id"], session_id=s["session_id"],
+                role_id=other_role_id, country_code=s["country_code"],
+                sim_run_id=sim_id, scenario_code=sim_id,
+                model=s.get("model", "claude-sonnet-4-6"), round_num=1,
+                tool_executor=executor,
+            )
+
+            # Get conversation so far
+            all_msgs = db.table("meeting_messages").select(
+                "role_id,content"
+            ).eq("meeting_id", meeting_id).order("created_at").execute()
+
+            chat_lines = []
+            for m in all_msgs.data or []:
+                speaker = m["role_id"]
+                chat_lines.append(f'{speaker}: "{m["content"]}"')
+            chat_text = "\n".join(chat_lines[-6:])  # Last 6 messages for context
+
+            # Pulse the AI agent
+            transcript = await mgr.send_event(ctx,
+                f"You are in a meeting. Here is the conversation:\n\n{chat_text}\n\n"
+                f"Respond naturally. 1-3 sentences. Stay in character."
+            )
+
+            # Write AI response to meeting_messages
+            for entry in transcript:
+                if entry.get("type") == "agent_message" and entry.get("content"):
+                    text = entry["content"].strip()
+                    # Remove any "VIZIER:" or "**VIZIER:**" prefix the agent might add
+                    for prefix in [f"**{other_role_id.upper()}:**", f"{other_role_id.upper()}:", f"**{s['country_code'].upper()}:**"]:
+                        if text.startswith(prefix):
+                            text = text[len(prefix):].strip()
+                    if text and len(text) > 3:
+                        send_message(meeting_id, other_role_id, s["country_code"], text[:500])
+                        break
+
+            logger.info("Auto-pulsed AI agent %s in meeting %s", other_role_id, meeting_id[:8])
+        except Exception as e:
+            logger.warning("Auto-pulse AI failed for %s: %s", other_role_id, e)
+
+    # Fire and forget — don't block the response
+    asyncio.create_task(_auto_pulse_ai())
+
     return APIResponse(data=result)
 
 
