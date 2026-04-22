@@ -68,9 +68,8 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     getSimRunRoles(simId).then(setRoles).catch(() => {})
   }, [simId])
 
-  /* Poll DB directly for agent sessions + latest activity (works during init) */
+  /* Poll DB directly for agent sessions + latest activity (always — survives backend restart) */
   useEffect(() => {
-    if (!initializing && status && status.total_agents > 0) return // orchestrator status is available, no need
     const poll = async () => {
       try {
         const { data: sessions } = await supabase
@@ -102,7 +101,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     poll()
     const interval = setInterval(poll, 3000) // 3s during init for responsiveness
     return () => clearInterval(interval)
-  }, [simId, initializing, status?.total_agents])
+  }, [simId])
 
   /* Poll AI status every 5 seconds */
   const fetchStatus = useCallback(async () => {
