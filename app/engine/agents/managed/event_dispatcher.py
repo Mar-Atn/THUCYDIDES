@@ -308,17 +308,42 @@ class EventDispatcher:
     # -- Status & helpers --------------------------------------------------
 
     def get_status(self) -> dict:
-        """Get all agent states, costs, queue depths, and activity summary."""
+        """Get all agent states, costs, queue depths, and activity summary.
+
+        Reads token counts and action counts from DB (survives restarts).
+        """
+        db = get_client()
         agents_status = []
         total_input_tokens = 0
         total_output_tokens = 0
+        total_actions = 0
+        total_tool_calls = 0
 
         for role_id, ctx in self.agents.items():
-            cost = self.session_manager.get_cost_estimate(ctx)
-            queue = self.get_queue_depth(role_id)
+            # Read from DB for accurate cross-session totals
+            db_session = (
+                db.table("ai_agent_sessions")
+                .select("total_input_tokens,total_output_tokens,events_sent,actions_submitted,tool_calls")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("role_id", role_id)
+                .limit(1)
+                .execute()
+            )
+            db_data = db_session.data[0] if db_session.data else {}
 
-            total_input_tokens += cost.get("input_tokens", 0)
-            total_output_tokens += cost.get("output_tokens", 0)
+            inp = db_data.get("total_input_tokens", 0) or 0
+            out = db_data.get("total_output_tokens", 0) or 0
+            actions = db_data.get("actions_submitted", 0) or 0
+            tools = db_data.get("tool_calls", 0) or 0
+            events = db_data.get("events_sent", 0) or 0
+
+            total_input_tokens += inp
+            total_output_tokens += out
+            total_actions += actions
+            total_tool_calls += tools
+
+            cost_usd = round(inp * 3.0 / 1_000_000 + out * 15.0 / 1_000_000, 4)
+            queue = self.get_queue_depth(role_id)
 
             agents_status.append({
                 "role_id": role_id,
@@ -326,17 +351,30 @@ class EventDispatcher:
                 "state": self.agent_states.get(role_id, "UNKNOWN"),
                 "session_id": ctx.session_id,
                 "round_num": ctx.round_num,
-                "cost": cost,
+                "actions_submitted": actions,
+                "tool_calls": tools,
+                "events_sent": events,
+                "cost": {
+                    "input_tokens": inp,
+                    "output_tokens": out,
+                    "total_cost_usd": cost_usd,
+                },
                 "queue_depth": queue,
             })
 
-        total_cost = (
-            (total_input_tokens * 3.0 / 1_000_000)
-            + (total_output_tokens * 15.0 / 1_000_000)
+        total_cost = round(
+            total_input_tokens * 3.0 / 1_000_000
+            + total_output_tokens * 15.0 / 1_000_000, 2
         )
+
+        # Get round info from sim_run
+        run_data = db.table("sim_runs").select("current_round").eq("id", self.sim_run_id).limit(1).execute()
+        current_round = run_data.data[0]["current_round"] if run_data.data else 1
 
         return {
             "sim_run_id": self.sim_run_id,
+            "round_num": current_round,
+            "pulse_num": 0,
             "total_agents": len(self.agents),
             "agents_idle": sum(1 for s in self.agent_states.values() if s == IDLE),
             "agents_frozen": sum(1 for s in self.agent_states.values() if s == FROZEN),
@@ -348,7 +386,9 @@ class EventDispatcher:
             ),
             "total_input_tokens": total_input_tokens,
             "total_output_tokens": total_output_tokens,
-            "total_cost_usd": round(total_cost, 2),
+            "total_cost_usd": total_cost,
+            "total_actions": total_actions,
+            "total_tool_calls": total_tool_calls,
             "agents": agents_status,
         }
 
@@ -601,6 +641,34 @@ async def cleanup_sim_ai_state(
         logger.info("[cleanup] Cleared %d unprocessed events", summary["events_cleared"])
     except Exception as e:
         logger.error("[cleanup] Failed to clear event queue: %s", e)
+
+    # 4b. Clear meetings and meeting messages
+    try:
+        # Delete messages first (FK constraint)
+        meeting_ids = (
+            db.table("meetings")
+            .select("id")
+            .eq("sim_run_id", sim_run_id)
+            .execute()
+        )
+        mid_list = [m["id"] for m in (meeting_ids.data or [])]
+        msgs_cleared = 0
+        for mid in mid_list:
+            r = db.table("meeting_messages").delete().eq("meeting_id", mid).execute()
+            msgs_cleared += len(r.data or [])
+        # Then delete meetings
+        r = db.table("meetings").delete().eq("sim_run_id", sim_run_id).execute()
+        meetings_cleared = len(r.data or [])
+        # Clear invitations too
+        r = db.table("meeting_invitations").delete().eq("sim_run_id", sim_run_id).execute()
+        invitations_cleared = len(r.data or [])
+        summary["meetings_cleared"] = meetings_cleared
+        summary["meeting_messages_cleared"] = msgs_cleared
+        summary["invitations_cleared"] = invitations_cleared
+        logger.info("[cleanup] Cleared %d meetings, %d messages, %d invitations",
+                    meetings_cleared, msgs_cleared, invitations_cleared)
+    except Exception as e:
+        logger.error("[cleanup] Failed to clear meetings: %s", e)
 
     # 5. Optionally clear agent_memories
     if clear_memories:
