@@ -140,12 +140,38 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     setInitializing(true)
     try {
       await initializeAIAgents(simId)
-      await fetchStatus()
+      // Don't reset initializing — keep showing progress until agents appear in status poll
     } catch (e) {
       alert(e instanceof Error ? e.message : 'Initialization failed')
-    } finally {
       setInitializing(false)
     }
+  }
+
+  // Auto-clear initializing state when agents appear
+  if (initializing && status && status.total_agents > 0) {
+    setInitializing(false)
+  }
+
+  if (initializing) {
+    return (
+      <section className="bg-card border border-action/30 rounded-lg p-5">
+        <h3 className="font-heading text-h3 text-text-primary mb-2">AI Participants</h3>
+        <div className="flex items-center gap-3">
+          <div className="w-4 h-4 border-2 border-action border-t-transparent rounded-full animate-spin" />
+          <p className="font-body text-body-sm text-action">
+            Initializing {aiRoles.length} AI agents... Creating sessions and running first assessment.
+          </p>
+        </div>
+        <p className="font-body text-caption text-text-secondary mt-2">
+          This takes 1-2 minutes (agents run in parallel). The dashboard will update automatically.
+        </p>
+        {status && status.total_agents > 0 && (
+          <p className="font-body text-caption text-success mt-1">
+            {status.total_agents} of {aiRoles.length} agents online...
+          </p>
+        )}
+      </section>
+    )
   }
 
   if (!status || status.total_agents === 0) {
@@ -173,7 +199,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
               disabled={initializing}
               className="font-body text-caption font-medium bg-action text-white px-4 py-2 rounded hover:bg-action/80 disabled:opacity-50 transition-colors"
             >
-              {initializing ? 'Initializing...' : 'Yes, Initialize AI'}
+              Yes, Initialize AI
             </button>
             <button
               onClick={() => setInitDismissed(true)}
