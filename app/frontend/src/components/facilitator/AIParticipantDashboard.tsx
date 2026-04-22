@@ -243,8 +243,8 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const aiRoles = roles.filter(r => r.is_ai_operated && r.status === 'active')
   const dbSessionMap = new Map(dbSessions.map(s => [s.role_id as string, s]))
   const activeSessions = dbSessions.filter(s => s.status !== 'archived' && s.status !== 'terminated')
-  const totalActions = status?.agents.reduce((s, a) => s + a.round_stats.actions, 0) ?? 0
-  const totalToolCalls = status?.agents.reduce((s, a) => s + a.round_stats.tool_calls, 0) ?? 0
+  const totalActions = status?.agents?.reduce((s: number, a: Record<string, unknown>) => s + ((a.round_stats as Record<string, number>)?.actions ?? (a as Record<string, number>).actions_submitted ?? 0), 0) ?? 0
+  const totalToolCalls = status?.agents?.reduce((s: number, a: Record<string, unknown>) => s + ((a.round_stats as Record<string, number>)?.tool_calls ?? (a as Record<string, number>).tool_calls ?? 0), 0) ?? 0
   const agentCount = status?.total_agents ?? 0
   const isActive = agentCount > 0 || activeSessions.length > 0  // orchestrator OR DB sessions
   const noAiRoles = aiRoles.length === 0
@@ -369,8 +369,8 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
           if (orchAgent) {
             agentState = orchAgent.state
-            actions = orchAgent.round_stats.actions
-            meetings = orchAgent.round_stats.meetings_used
+            actions = orchAgent.round_stats?.actions ?? orchAgent.actions_submitted ?? 0
+            meetings = orchAgent.round_stats?.meetings_used ?? 0
           } else if (dbSession) {
             const dbStatus = dbSession.status as string
             agentState = dbStatus === 'ready' ? 'IDLE' : dbStatus === 'initializing' ? 'INITIALIZING' : dbStatus.toUpperCase()
