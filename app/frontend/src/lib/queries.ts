@@ -1138,6 +1138,25 @@ export async function getAIStatus(simId: string): Promise<AIStatusResponse | nul
   return json.data as AIStatusResponse
 }
 
+/** Initialize AI agents for a sim run. */
+export async function initializeAIAgents(simId: string): Promise<Record<string, unknown>> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/initialize`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({}),
+  })
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({ detail: 'Initialize failed' }))
+    throw new Error(err.detail || 'Failed to initialize AI agents')
+  }
+  const json = await resp.json()
+  return json.data
+}
+
 /** Freeze one AI agent. */
 export async function freezeAgent(simId: string, roleId: string): Promise<void> {
   const token = await getToken()

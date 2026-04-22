@@ -2211,7 +2211,14 @@ async def ai_status(
 
     orch = get_orchestrator(sim_id)
     if not orch:
-        raise HTTPException(status_code=404, detail="No AI orchestrator active for this sim.")
+        # Return empty status — dashboard polls this continuously, 404 floods console
+        return APIResponse(data={
+            "sim_run_id": sim_id, "round_num": 0, "pulse_num": 0,
+            "total_agents": 0, "agents_idle": 0, "agents_frozen": 0,
+            "agents_in_meeting": 0, "agents_acting": 0,
+            "total_input_tokens": 0, "total_output_tokens": 0,
+            "total_cost_usd": 0, "agents": [], "not_initialized": True,
+        })
 
     return APIResponse(data=orch.get_status())
 

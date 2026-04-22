@@ -11,6 +11,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react'
 import {
   getAIStatus,
+  initializeAIAgents,
   freezeAgent,
   resumeAgent,
   freezeAllAgents,
@@ -130,13 +131,83 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     )
   }
 
-  if (!status || status.agents.length === 0) {
+  /* AI roles that need initialization */
+  const aiRoles = roles.filter(r => r.is_ai_operated)
+  const [initializing, setInitializing] = useState(false)
+  const [initDismissed, setInitDismissed] = useState(false)
+
+  const handleInitialize = async () => {
+    setInitializing(true)
+    try {
+      await initializeAIAgents(simId)
+      await fetchStatus()
+    } catch (e) {
+      alert(e instanceof Error ? e.message : 'Initialization failed')
+    } finally {
+      setInitializing(false)
+    }
+  }
+
+  if (!status || status.total_agents === 0) {
+    // Show initialization prompt if there are AI roles
+    if (aiRoles.length > 0 && !initDismissed) {
+      return (
+        <section className="bg-card border border-action/30 rounded-lg p-5">
+          <h3 className="font-heading text-h3 text-text-primary mb-2">AI Participants</h3>
+          <p className="font-body text-body-sm text-text-primary mb-1">
+            This simulation has <strong>{aiRoles.length} AI-operated role{aiRoles.length !== 1 ? 's' : ''}</strong>:
+          </p>
+          <div className="font-body text-caption text-text-secondary mb-3 flex flex-wrap gap-1">
+            {aiRoles.map(r => (
+              <span key={r.id} className="bg-action/10 text-action px-2 py-0.5 rounded">
+                {r.character_name} ({r.country_code})
+              </span>
+            ))}
+          </div>
+          <p className="font-body text-body-sm text-text-secondary mb-3">
+            Initialize them now? This creates AI agent sessions and may take 1-2 minutes.
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={handleInitialize}
+              disabled={initializing}
+              className="font-body text-caption font-medium bg-action text-white px-4 py-2 rounded hover:bg-action/80 disabled:opacity-50 transition-colors"
+            >
+              {initializing ? 'Initializing...' : 'Yes, Initialize AI'}
+            </button>
+            <button
+              onClick={() => setInitDismissed(true)}
+              className="font-body text-caption text-text-secondary px-4 py-2 rounded border border-border hover:bg-base transition-colors"
+            >
+              Later
+            </button>
+          </div>
+          {initializing && (
+            <p className="font-body text-caption text-action mt-2 animate-pulse">
+              Creating AI sessions... This may take a minute.
+            </p>
+          )}
+        </section>
+      )
+    }
+
     return (
       <section className="bg-card border border-border rounded-lg p-5">
         <h3 className="font-heading text-h3 text-text-primary">AI Participants</h3>
         <p className="font-body text-body-sm text-text-secondary py-2">
-          No AI orchestrator active
+          {aiRoles.length > 0
+            ? 'AI agents not yet initialized.'
+            : 'No AI-operated roles in this simulation.'}
         </p>
+        {aiRoles.length > 0 && (
+          <button
+            onClick={handleInitialize}
+            disabled={initializing}
+            className="font-body text-caption font-medium bg-action/10 text-action px-3 py-1 rounded hover:bg-action/20 disabled:opacity-50 transition-colors mt-1"
+          >
+            {initializing ? 'Initializing...' : 'Initialize AI Agents'}
+          </button>
+        )}
       </section>
     )
   }
