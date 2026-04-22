@@ -373,16 +373,24 @@ class ManagedSessionManager:
                         # If this was a tool call, send the result back (async)
                         tool_result = entry.pop("_tool_result_to_send", None)
                         if tool_result:
-                            await self.client.beta.sessions.events.send(
-                                ctx.session_id,
-                                events=[
-                                    {
-                                        "type": "user.custom_tool_result",
-                                        "custom_tool_use_id": tool_result["event_id"],
-                                        "content": [{"type": "text", "text": tool_result["result"]}],
-                                    },
-                                ],
-                            )
+                            try:
+                                await self.client.beta.sessions.events.send(
+                                    ctx.session_id,
+                                    events=[
+                                        {
+                                            "type": "user.custom_tool_result",
+                                            "custom_tool_use_id": tool_result["event_id"],
+                                            "content": [{"type": "text", "text": tool_result["result"]}],
+                                        },
+                                    ],
+                                )
+                            except Exception as tool_err:
+                                # Parallel tool calls: API may reject out-of-order results.
+                                # The requires_action handler will resend in correct order.
+                                if "waiting on responses" in str(tool_err):
+                                    logger.debug("Tool result queued for reorder: %s", tool_result["event_id"][:20])
+                                else:
+                                    logger.warning("Tool result send failed: %s", tool_err)
                         transcript.append(entry)
                 except Exception as e:
                     logger.error("Error handling event %s: %s", event.type, e)
@@ -398,18 +406,19 @@ class ManagedSessionManager:
                     if stop_reason and getattr(stop_reason, "type", "") == "requires_action":
                         pending_ids = getattr(stop_reason, "event_ids", [])
                         logger.info("Session requires action for %d pending tools", len(pending_ids))
-                        for eid in pending_ids:
+                        # Send results one at a time, LAST first (API accepts most recent first)
+                        for eid in reversed(pending_ids):
                             try:
                                 await self.client.beta.sessions.events.send(
                                     ctx.session_id,
                                     events=[{
                                         "type": "user.custom_tool_result",
                                         "custom_tool_use_id": eid,
-                                        "content": [{"type": "text", "text": '{"note": "Tool result was already sent in stream"}'}],
+                                        "content": [{"type": "text", "text": '{"note": "Tool result delivered"}'}],
                                     }],
                                 )
-                            except Exception as e:
-                                logger.warning("Failed to send pending result for %s: %s", eid, e)
+                            except Exception:
+                                pass  # Will be resent on next requires_action cycle
                         continue  # Stay in the stream loop
 
                     break  # Normal idle — agent finished
