@@ -899,6 +899,11 @@ export async function getToken(): Promise<string> {
   _tokenExpiry = Date.now() + 300000 // 5 min cache
   return _cachedToken
 }
+/** Invalidate cached token — call on 401 to force refresh on next request. */
+export function invalidateToken(): void {
+  _cachedToken = null
+  _tokenExpiry = 0
+}
 // Refresh token on auth state change
 supabase.auth.onAuthStateChange((_event, session) => {
   _cachedToken = session?.access_token ?? null
@@ -966,11 +971,21 @@ export async function getMeetingDetail(
   meetingId: string,
 ): Promise<{ meeting: MeetingData; messages: MeetingMessage[] }> {
   const token = await getToken()
-  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}`, {
+  let resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}`, {
     headers: {
       ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     },
   })
+  // On 401, invalidate token and retry once with a fresh token
+  if (resp.status === 401) {
+    invalidateToken()
+    const freshToken = await getToken()
+    resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}`, {
+      headers: {
+        ...(freshToken ? { 'Authorization': `Bearer ${freshToken}` } : {}),
+      },
+    })
+  }
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: 'Failed to load meeting' }))
     throw new Error(err.detail || err.error || 'Failed to load meeting')
@@ -988,7 +1003,7 @@ export async function sendMeetingMessage(
   content: string,
 ): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/message`, {
+  let resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/message`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -996,6 +1011,19 @@ export async function sendMeetingMessage(
     },
     body: JSON.stringify({ role_id: roleId, country_code: countryCode, content }),
   })
+  // On 401, invalidate token and retry once with a fresh token
+  if (resp.status === 401) {
+    invalidateToken()
+    const freshToken = await getToken()
+    resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/message`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(freshToken ? { 'Authorization': `Bearer ${freshToken}` } : {}),
+      },
+      body: JSON.stringify({ role_id: roleId, country_code: countryCode, content }),
+    })
+  }
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: 'Failed to send message' }))
     throw new Error(err.detail || err.error || 'Failed to send message')
@@ -1011,7 +1039,7 @@ export async function endMeeting(
   roleId: string,
 ): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
+  let resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -1019,6 +1047,19 @@ export async function endMeeting(
     },
     body: JSON.stringify({ role_id: roleId }),
   })
+  // On 401, invalidate token and retry once with a fresh token
+  if (resp.status === 401) {
+    invalidateToken()
+    const freshToken = await getToken()
+    resp = await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(freshToken ? { 'Authorization': `Bearer ${freshToken}` } : {}),
+      },
+      body: JSON.stringify({ role_id: roleId }),
+    })
+  }
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: 'Failed to end meeting' }))
     throw new Error(err.detail || err.error || 'Failed to end meeting')

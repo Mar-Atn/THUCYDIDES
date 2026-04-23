@@ -4281,20 +4281,39 @@ export function ProposeTransactionForm({roleId,countryId,simId,onClose,onSubmitt
   const [error,setError]=useState<string|null>(null)
 
   useEffect(()=>{
-    supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name')
-      .then(({data})=>setCountries((data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries))
-    supabase.from('deployments').select('unit_id,unit_type').eq('sim_run_id',simId).eq('country_code',countryId).eq('unit_status','reserve')
-      .then(({data})=>setMyReserves((data??[]) as typeof myReserves))
-    supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1)
-      .then(({data})=>{if(data?.[0]) setMyCountry(data[0])})
+    let cancelled = false
+    const load = async (attempt = 1): Promise<void> => {
+      const [countriesRes, reservesRes, myCountryRes] = await Promise.all([
+        supabase.from('countries').select('id,sim_name,color_ui').eq('sim_run_id',simId).order('sim_name'),
+        supabase.from('deployments').select('unit_id,unit_type').eq('sim_run_id',simId).eq('country_code',countryId).eq('unit_status','reserve'),
+        supabase.from('countries').select('*').eq('sim_run_id',simId).eq('id',countryId).limit(1),
+      ])
+      if (cancelled) return
+      const gotData = countriesRes.data && countriesRes.data.length > 0
+      if (!gotData && attempt < 3) {
+        // Data empty or error — retry after brief delay (auth/connection recovery)
+        await new Promise(r=>setTimeout(r, 800 * attempt))
+        return load(attempt+1)
+      }
+      setCountries((countriesRes.data??[]).filter((c:{id:string})=>c.id!==countryId) as typeof countries)
+      setMyReserves((reservesRes.data??[]) as typeof myReserves)
+      if (myCountryRes.data?.[0]) setMyCountry(myCountryRes.data[0])
+    }
+    load()
+    return ()=>{ cancelled=true }
   },[simId,countryId])
 
   const [outgoing, setOutgoing] = useState<{id:string;counterpart:string;status:string}[]>([])
 
   useEffect(()=>{
-    supabase.from('exchange_transactions').select('id,counterpart,status')
-      .eq('sim_run_id',simId).eq('proposer',countryId).in('status',['pending','countered'])
-      .then(({data})=>setOutgoing((data??[]) as typeof outgoing))
+    let cancelled = false
+    const load = async () => {
+      const { data } = await supabase.from('exchange_transactions').select('id,counterpart,status')
+        .eq('sim_run_id',simId).eq('proposer',countryId).in('status',['pending','countered'])
+      if (!cancelled) setOutgoing((data??[]) as typeof outgoing)
+    }
+    load()
+    return ()=>{ cancelled=true }
   },[simId,countryId])
 
   const handleWithdraw = async (txnId:string) => {

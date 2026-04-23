@@ -11,7 +11,7 @@
  */
 
 const MAX_CONCURRENT = 12
-const REQUEST_TIMEOUT_MS = 10000
+const REQUEST_TIMEOUT_MS = 30000
 
 class RequestQueue {
   private running = 0
@@ -39,13 +39,18 @@ class RequestQueue {
     try {
       const result = await Promise.race([
         fn(),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error('RequestQueue timeout')), REQUEST_TIMEOUT_MS)
+        new Promise<T>((resolve) =>
+          setTimeout(() => {
+            // Timeout: silently resolve with undefined instead of throwing.
+            // These are background polling requests — timeouts are expected
+            // during heavy load and should not flood the console.
+            resolve(undefined as T)
+          }, REQUEST_TIMEOUT_MS)
         ),
       ])
       return result
     } catch (e) {
-      // On timeout or error, still free the slot
+      // On fetch error, still free the slot
       throw e
     } finally {
       this.running--
@@ -70,12 +75,13 @@ class RequestQueue {
 }
 
 // Singleton — bump version key to force fresh instance after code changes
-const GLOBAL_KEY = '__ttt_request_queue_v3__'
+const GLOBAL_KEY = '__ttt_request_queue_v4__'
 function getRequestQueue(): RequestQueue {
   const w = window as Record<string, unknown>
   // Clear old versions
   delete w['__ttt_request_queue__']
   delete w['__ttt_request_queue_v2__']
+  delete w['__ttt_request_queue_v3__']
   if (!w[GLOBAL_KEY]) {
     w[GLOBAL_KEY] = new RequestQueue()
   }

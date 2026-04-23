@@ -109,9 +109,10 @@ SUBMIT_ACTION_SCHEMA: dict = {
     "description": (
         "Execute a game action (REAL WRITE). Up to 3 per round. "
         "action_type + rationale required. "
-        "Types: move_units, declare_attack, naval_bombardment, declare_blockade, nuclear_test, "
-        "set_budget, set_tariff, set_sanction, set_opec, rd_investment, "
-        "public_statement, call_org_meeting, covert_op, propose_transaction."
+        "Types: move_units, declare_attack, naval_blockade, nuclear_test, "
+        "set_budget, set_tariffs, set_sanctions, set_opec, rd_investment, "
+        "public_statement, call_org_meeting, covert_operation, propose_transaction, "
+        "respond_exchange, basing_rights, change_leader, arrest."
     ),
     "input_schema": {
         "type": "object",
@@ -121,15 +122,15 @@ SUBMIT_ACTION_SCHEMA: dict = {
                 "description": (
                     "MILITARY: move_units(decision,rationale,changes.moves[]), "
                     "declare_attack(attacker_unit_codes[],target_global_row,target_global_col), "
-                    "naval_bombardment(naval_unit_codes[],target_global_row,target_global_col), "
-                    "declare_blockade(zone_id,level:full|partial), nuclear_test(test_type). "
+                    "naval_blockade(zone_id,level:full|partial), nuclear_test(test_type). "
                     "ECONOMIC: set_budget(social_pct:0.5-1.5,military_coins,tech_coins), "
-                    "set_tariff(target_country,level:0-3), set_sanction(target_country,level:0-3), "
+                    "set_tariffs(target_country,level:0-3), set_sanctions(target_country,level:0-3), "
                     "set_opec(production:cut|maintain|increase). "
                     "TECH: rd_investment(domain:nuclear|ai,amount). "
                     "COMMS: public_statement(content), call_org_meeting(organization_code,agenda). "
-                    "COVERT: covert_op(op_type,target_country). "
-                    "TRANSACTION: propose_transaction(counterpart_country,terms)."
+                    "COVERT: covert_operation(op_type,target_country). "
+                    "TRANSACTION: propose_transaction(counterpart_country_code,offer,request), "
+                    "respond_exchange(transaction_id,response:accept|decline)."
                 ),
             },
         },

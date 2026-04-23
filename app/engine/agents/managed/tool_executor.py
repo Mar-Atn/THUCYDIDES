@@ -192,7 +192,14 @@ class ToolExecutor:
         return {"error": f"Unknown tool: {tool_name}"}
 
     def _submit_action(self, action: dict) -> dict:
-        """Submit a game action directly using sim_run_id (bypasses scenario_code resolution)."""
+        """Submit a game action — validates, records, and EXECUTES through the action dispatcher.
+
+        Flow:
+        1. Validate action_type against known schemas
+        2. Validate payload with Pydantic model
+        3. Record in agent_decisions (audit trail)
+        4. Execute through dispatch_action (real game state change)
+        """
         from engine.agents.action_schemas import ACTION_TYPE_TO_MODEL
         try:
             action_type = action.get("action_type")
@@ -217,6 +224,7 @@ class ToolExecutor:
             run = client.table("sim_runs").select("scenario_id").eq("id", self.sim_run_id).limit(1).execute()
             scenario_id = run.data[0]["scenario_id"] if run.data else None
 
+            # Record in agent_decisions (audit trail)
             insert_row = {
                 "sim_run_id": self.sim_run_id,
                 "scenario_id": scenario_id,
@@ -228,9 +236,39 @@ class ToolExecutor:
                 "round_num": self.round_num,
             }
             ins = client.table("agent_decisions").insert(insert_row).execute()
-            row = (ins.data or [{}])[0]
-            return {"success": True, "action_id": row.get("id"),
-                    "action_type": action_type, "validation_status": "passed"}
+            decision_id = (ins.data or [{}])[0].get("id")
+
+            # EXECUTE through action dispatcher — real game state change
+            from engine.services.action_dispatcher import dispatch_action
+            dispatch_payload = {
+                **payload_dict,
+                "action_type": action_type,
+                "role_id": self.role_id,
+                "country_code": self.country_code,
+            }
+            result = dispatch_action(
+                sim_run_id=self.sim_run_id,
+                round_num=self.round_num,
+                action=dispatch_payload,
+            )
+
+            # Update agent_decisions with dispatch result
+            dispatch_success = result.get("success", False)
+            try:
+                client.table("agent_decisions").update({
+                    "validation_status": "executed" if dispatch_success else "dispatch_failed",
+                    "validation_notes": result.get("narrative", ""),
+                }).eq("id", decision_id).execute()
+            except Exception:
+                pass  # Non-critical — audit update
+
+            return {
+                "success": dispatch_success,
+                "action_id": decision_id,
+                "action_type": action_type,
+                "validation_status": "executed" if dispatch_success else "dispatch_failed",
+                "result": result.get("narrative", ""),
+            }
         except Exception as e:
             logger.exception("submit_action failed")
             return {"success": False, "validation_status": "rejected",

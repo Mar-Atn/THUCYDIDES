@@ -14,8 +14,8 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 **MILITARY (immediate unless noted):**
 - `declare_attack` — ground (RISK dice, adjacent hex), air strike (2-hex range, 12% hit / 6% if AD), naval combat (RISK dice at sea), naval bombardment (sea→adjacent land, 10% hit)
 - `move_units` — ground advance to adjacent land hex; must leave 1 unit behind; max 3 units per move. Processed during inter-round movement window.
-- `blockade` — establish/lift at chokepoints (Caribe Passage, Gulf Gate, Formosa Strait). Requires ground forces at standard chokepoints. Formosa: naval in 3+/6 surrounding sea zones.
-- `launch_missile` — conventional missile strike. Consumed on firing. Range: T1=2 hex, T2=4 hex, T3=global. 80% hit (30% if AD present).
+- `naval_blockade` — establish/lift at chokepoints (Caribe Passage, Gulf Gate, Formosa Strait). Requires ground forces at standard chokepoints. Formosa: naval in 3+/6 surrounding sea zones.
+- `launch_missile_conventional` — conventional missile strike. Consumed on firing. Range: T1=2 hex, T2=4 hex, T3=global. 80% hit (30% if AD present).
 - `basing_rights` — grant or revoke foreign military basing
 - `martial_law` — HoS only, one-time per country per SIM. Emergency powers.
 - `nuclear_test` — underground (-0.2 stability) or overground (-0.5 self, -0.3 global). +5 support. Requires 3-way auth: HoS + Military Chief + Moderator.
@@ -23,8 +23,8 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 
 **ECONOMIC (batch — queued for Phase B engine processing):**
 - `set_budget` — social spending (0.5-1.5× baseline), military production, tech R&D allocation. Cutting social spending damages stability/support; increasing boosts both.
-- `set_tariff` — per-country, levels 0-3. Hurts BOTH sides (target more).
-- `set_sanction` — per-country, levels -3 to +3. S-curve damage model — coverage below 0.3 = minimal, above 0.7 = severe. Negative = evasion support.
+- `set_tariffs` — per-country, levels 0-3. Hurts BOTH sides (target more).
+- `set_sanctions` — per-country, levels -3 to +3. S-curve damage model — coverage below 0.3 = minimal, above 0.7 = severe. Negative = evasion support.
 - `set_opec` — production level: min/low/normal/high/max. Affects global oil price. OPEC members only.
 - `rd_investment` — invest coins in nuclear, AI, or strategic missile track.
 
@@ -44,6 +44,7 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - When in a meeting: speak naturally (1-3 sentences), be direct, make concrete proposals.
 
 **COVERT (immediate, cards consumed permanently):**
+- `covert_operation` with op_type:
 - `intelligence` — 60% success, always returns data (85% accurate if success, 45% if fail — you don't know which).
 - `sabotage` — 45% success, 2% GDP damage. Detection 40%, attribution 50%.
 - `cyber` — 50% success, 1% GDP damage.
@@ -55,8 +56,8 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - `arrest` — HoS arrests team member. Requires moderator confirmation.
 - `assassination` — 1 card per role per game. Domestic 60% / international 20% hit. Requires moderator confirmation.
 - `change_leader` — replaces HoS. Requires low stability, non-HoS initiator, 3+ team. Moderator confirmation.
-- `reassign_powers` — HoS reassigns military/economic/foreign affairs control.
-- `call_early_elections` / `submit_nomination` / `cast_vote` — election mechanics.
+- `reassign_types` — HoS reassigns military/economic/foreign affairs control.
+- `call_early_elections` / `self_nominate` / `cast_vote` — election mechanics.
 
 ### Combat Resolution
 

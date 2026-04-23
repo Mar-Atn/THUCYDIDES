@@ -271,31 +271,44 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
     # Military
     "move_units": MoveUnitsOrder,
     "declare_attack": AttackDeclarationOrder,
+    "ground_attack": AttackDeclarationOrder,     # canonical dispatcher alias
+    "air_strike": AttackDeclarationOrder,         # canonical dispatcher alias
+    "naval_combat": AttackDeclarationOrder,       # canonical dispatcher alias
+    "naval_bombardment": AttackDeclarationOrder,  # canonical dispatcher alias
     "blockade": BlockadeOrder,
+    "naval_blockade": BlockadeOrder,              # canonical dispatcher alias
     "launch_missile": MissileLaunchOrder,
+    "launch_missile_conventional": MissileLaunchOrder,  # canonical dispatcher alias
     "nuclear_test": NuclearTestOrder,
     "basing_rights": BasingRightsOrder,
     "martial_law": MartialLawOrder,
     # Economic
     "set_sanction": SanctionOrder,
+    "set_sanctions": SanctionOrder,               # canonical dispatcher alias
     "set_budget": BudgetOrder,
     "set_tariff": TariffOrder,
+    "set_tariffs": TariffOrder,                   # canonical dispatcher alias
     "rd_investment": RDInvestmentOrder,
     # Covert
     "covert_op": CovertOpOrder,
+    "covert_operation": CovertOpOrder,            # canonical dispatcher alias
     # Transactions
     "propose_transaction": TransactionOrder,
     "propose_agreement": TransactionOrder,
     "respond_exchange": RespondExchangeOrder,
+    "accept_transaction": RespondExchangeOrder,   # canonical dispatcher alias
     "sign_agreement": SignAgreementOrder,
     # Domestic / Political
     "arrest": ArrestOrder,
     "assassination": AssassinationOrder,
     "change_leader": ChangeLeaderOrder,
     "reassign_powers": ReassignPowersOrder,
+    "reassign_types": ReassignPowersOrder,        # canonical dispatcher alias
     "call_early_elections": CallEarlyElectionsOrder,
     "submit_nomination": SubmitNominationOrder,
+    "self_nominate": SubmitNominationOrder,        # canonical dispatcher alias
     "cast_vote": CastVoteOrder,
+    "cast_election_vote": CastVoteOrder,          # canonical dispatcher alias
     # Communications
     "public_statement": PublicStatementOrder,
     "call_org_meeting": OrgMeetingOrder,

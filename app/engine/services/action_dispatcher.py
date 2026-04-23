@@ -1700,7 +1700,7 @@ def _enqueue_for_ai_agents(
 
         # ── Transaction proposed ─────────────────────────────────────
         elif action_type == "propose_transaction":
-            target = action.get("target_country", action.get("to_country", ""))
+            target = action.get("counterpart_country_code", action.get("target_country", action.get("to_country", "")))
             transaction_id = result.get("transaction_id", result.get("id", ""))
             terms = result.get("narrative", "Trade proposal")
             if target and transaction_id:
@@ -1714,8 +1714,8 @@ def _enqueue_for_ai_agents(
                         f"Terms: {terms}\n"
                         f"Transaction ID: {transaction_id}\n\n"
                         f"Review this proposal carefully. You can accept, reject, or counter-offer.\n"
-                        f"Use submit_action with action_type='accept_transaction', "
-                        f"transaction_id='{transaction_id}', and response='accept' or 'reject'.\n\n"
+                        f"Use submit_action with action_type='respond_exchange', "
+                        f"transaction_id='{transaction_id}', and response='accept' or 'decline'.\n\n"
                         f"Consider: Is this deal fair? What do you gain? What do you lose? "
                         f"Does this serve your strategic interests?"
                     ),
@@ -1724,7 +1724,12 @@ def _enqueue_for_ai_agents(
 
         # ── Agreement proposed ───────────────────────────────────────
         elif action_type == "propose_agreement":
+            # Agreements have signatories list; notify all non-proposer signatories
+            signatories = action.get("signatories", [])
             target = action.get("target_country", action.get("to_country", ""))
+            # If no explicit target, use first non-proposer signatory
+            if not target and signatories:
+                target = next((s for s in signatories if s != country_code), "")
             agreement_id = result.get("agreement_id", result.get("id", ""))
             agreement_type = action.get("agreement_type", "general")
             if target and agreement_id:

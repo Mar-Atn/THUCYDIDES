@@ -137,6 +137,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [initDismissed, setInitDismissed] = useState(false)
   const [dbSessions, setDbSessions] = useState<Record<string, unknown>[]>([])
   const [latestActivity, setLatestActivity] = useState<Record<string, LatestEvent>>({}) // role_id → latest event
+  const [activeMeetings, setActiveMeetings] = useState<Record<string, number>>({}) // role_id → active meeting count
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   /* Fetch roles once for character_name lookup */
@@ -175,6 +176,24 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
           }
           setLatestActivity(latest)
         }
+
+      } catch { /* ignore session/activity errors */ }
+
+      // Active meetings per AI role — separate try so it always runs
+      try {
+        const { data: meetings } = await supabase
+          .from('meetings')
+          .select('participant_a_role_id,participant_b_role_id')
+          .eq('sim_run_id', simId)
+          .eq('status', 'active')
+        const counts: Record<string, number> = {}
+        for (const m of (meetings ?? [])) {
+          const a = m.participant_a_role_id as string
+          const b = m.participant_b_role_id as string
+          counts[a] = (counts[a] || 0) + 1
+          counts[b] = (counts[b] || 0) + 1
+        }
+        setActiveMeetings(counts)
       } catch { /* ignore */ }
     }
     poll()
@@ -277,11 +296,13 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     (status?.agents ?? []).map((a: AIAgentStatus) => [a.role_id, a])
   )
 
-  // Footer counters
+  // Footer counters — use orchestrator status, supplement with DB meeting data
+  const aiRoleIds = new Set(aiRoles.map(r => r.id))
+  const aiInMeetingCount = Object.entries(activeMeetings).filter(([rid]) => aiRoleIds.has(rid)).length
   const countByState = { idle: 0, meeting: 0, frozen: 0 }
   if (status) {
     countByState.idle = status.agents_idle
-    countByState.meeting = status.agents_in_meeting
+    countByState.meeting = Math.max(status.agents_in_meeting, aiInMeetingCount)
     countByState.frozen = status.agents_frozen
   }
 
@@ -378,11 +399,19 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
           if (orchAgent) {
             agentState = orchAgent.state
             actions = orchAgent.actions_submitted ?? orchAgent.round_stats?.actions ?? 0
-            meetings = orchAgent.round_stats?.meetings_used ?? 0
           } else if (dbSession) {
             const dbStatus = dbSession.status as string
             agentState = dbStatus === 'ready' ? 'IDLE' : dbStatus === 'initializing' ? 'INITIALIZING' : dbStatus.toUpperCase()
             actions = (dbSession.actions_submitted as number) || 0
+          }
+          // Active meetings count from DB (real-time, not from orchestrator)
+          meetings = activeMeetings[role.id] || 0
+
+          // Override display state: if agent has active meetings, show IN_MEETING
+          // even when dispatcher reports IDLE (agent is idle between chat messages
+          // but still logically "in a meeting")
+          if (meetings > 0 && (agentState === 'IDLE' || agentState === 'ACTING')) {
+            agentState = 'IN_MEETING'
           }
 
           const style = agentState === 'NOT_INITIALIZED'

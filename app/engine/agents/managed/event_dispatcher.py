@@ -32,9 +32,9 @@ from engine.services.async_db import get_async_client
 logger = logging.getLogger(__name__)
 
 # Tier check intervals (seconds)
-# Higher intervals reduce Supabase connection pressure on macOS
-TIER_1_INTERVAL = 5
-TIER_2_INTERVAL = 10
+# T1/T2 kept fast for responsive chat; T3 for routine polling
+TIER_1_INTERVAL = 3
+TIER_2_INTERVAL = 5
 TIER_3_INTERVAL = 30
 
 # Agent states
@@ -250,8 +250,9 @@ class EventDispatcher:
             message = self._format_events(events)
             event_ids = [e["id"] for e in events]
 
-            # Deliver
-            self.set_agent_state(role_id, ACTING)
+            # Deliver — use IN_MEETING state for chat events
+            has_chat = any(e["event_type"] == "chat_message" for e in events)
+            self.set_agent_state(role_id, IN_MEETING if has_chat else ACTING)
             try:
                 transcript = await self.session_manager.send_event(ctx, message)
                 await self.mark_processed(event_ids)
@@ -304,30 +305,48 @@ class EventDispatcher:
         """Write AI agent's chat response to meeting_messages.
 
         After the dispatcher delivers a chat_message event, the agent may
-        respond with text. If the agent didn't explicitly use the send_message
-        tool, we extract the first agent_message from the transcript and
-        write it as a meeting message.
+        respond with text. We extract the LAST agent_message from the
+        transcript (most complete response) and write it as a meeting
+        message, after checking for duplicates.
 
         STAYS SYNC — fast single write after send_event completes.
         """
-        # Check if agent already used send_message tool
-        used_send_message = any(
-            e.get("type") == "tool_call" and e.get("tool") == "send_message"
-            for e in transcript
-        )
-        if used_send_message:
-            return  # Agent handled it
-
         from engine.services.meeting_service import send_message
 
+        # Find the last agent_message (most complete response)
+        response_text = None
         for entry in transcript:
             if entry.get("type") == "agent_message" and entry.get("content"):
                 text = entry["content"].strip()
                 if text and len(text) > 3:
-                    ctx = self.agents.get(role_id)
-                    if ctx:
-                        send_message(meeting_id, role_id, ctx.country_code, text[:500])
-                    break
+                    response_text = text
+
+        if not response_text:
+            return
+
+        ctx = self.agents.get(role_id)
+        if not ctx:
+            return
+
+        # Dedup: check if we already wrote this exact message recently
+        try:
+            db = get_client()
+            recent = (
+                db.table("meeting_messages")
+                .select("content")
+                .eq("meeting_id", meeting_id)
+                .eq("role_id", role_id)
+                .order("created_at", desc=True)
+                .limit(1)
+                .execute()
+            )
+            if recent.data and recent.data[0]["content"] == response_text[:500]:
+                logger.debug("[dispatcher] Skipping duplicate chat response for %s", role_id)
+                return
+        except Exception as e:
+            logger.warning("[dispatcher] Dedup check failed, writing anyway: %s", e)
+
+        send_message(meeting_id, role_id, ctx.country_code, response_text[:500])
 
     # -- Status & helpers --------------------------------------------------
 
