@@ -46,14 +46,14 @@ AI_RD_THRESHOLDS: dict[int, float] = {
 }
 
 # Cal-3 v3: Tech boost applied to GROWTH RATE, not GDP multiplier.
-# L3 adds +1.5 percentage points to growth rate (not x1.15 to GDP).
-# L4 adds +3.0pp. This prevents unrealistic GDP doubling over 8 rounds.
+# Aligned to economic.py canonical values.
+# L2 adds +0.3pp, L3 adds +1.0pp, L4 adds +2.5pp (avg; actual is rolled).
 AI_LEVEL_TECH_FACTOR: dict[int, float] = {
     0: 0.0,
     1: 0.0,
-    2: 0.005,
-    3: 0.015,
-    4: 0.030,
+    2: 0.003,
+    3: 0.010,
+    4: 0.025,
 }
 
 # Combat bonus from AI level
@@ -61,8 +61,8 @@ AI_LEVEL_COMBAT_BONUS: dict[int, int] = {
     0: 0,
     1: 0,
     2: 0,
-    3: 1,
-    4: 2,
+    3: 0,
+    4: 1,
 }
 
 # Rare earth restriction: each level = -15% R&D efficiency, floor at 40%
@@ -248,9 +248,9 @@ def get_ai_tech_growth_bonus(ai_level: int) -> float:
     """Return GDP growth rate bonus from AI level.
 
     L0-L1: 0.0
-    L2: +0.5pp
-    L3: +1.5pp
-    L4: +3.0pp
+    L2: +0.3pp
+    L3: +1.0pp
+    L4: +2.5pp (avg; actual is rolled)
     """
     return AI_LEVEL_TECH_FACTOR.get(ai_level, 0.0)
 
@@ -258,9 +258,8 @@ def get_ai_tech_growth_bonus(ai_level: int) -> float:
 def get_ai_combat_bonus(ai_level: int) -> int:
     """Return combat die bonus from AI level.
 
-    L0-L2: 0
-    L3: +1
-    L4: +2
+    L0-L3: 0
+    L4: +1
     """
     return AI_LEVEL_COMBAT_BONUS.get(ai_level, 0)
 

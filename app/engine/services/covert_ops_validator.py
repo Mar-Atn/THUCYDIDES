@@ -1,10 +1,10 @@
 """Covert ops validator — CARD_ACTIONS §4.1-4.4.
 
-Unified validator for all 4 covert op types:
-  - intelligence: always succeeds (LLM report with noise)
+Unified validator for 2 covert op types:
   - sabotage: 50% success, card-based (consumable)
   - propaganda: 55% success, card-based
-  - election_meddling: 40% success, election rounds only, card-based
+
+Note: intelligence is a SEPARATE standalone action, not a covert op subtype.
 """
 
 from __future__ import annotations
@@ -16,18 +16,15 @@ CANONICAL_COUNTRIES: frozenset[str] = frozenset({
     "teutonia", "yamato",
 })
 
-VALID_OP_TYPES = frozenset({"intelligence", "sabotage", "propaganda", "election_meddling"})
+VALID_OP_TYPES = frozenset({"sabotage", "propaganda"})
 VALID_SABOTAGE_TARGETS = frozenset({"infrastructure", "nuclear_tech", "military"})
 VALID_PROPAGANDA_INTENTS = frozenset({"boost", "destabilize"})
-VALID_MEDDLING_DIRECTIONS = frozenset({"boost", "undermine"})
 RATIONALE_MIN = 30
 
 # Card pool field names (from roles.csv)
 CARD_POOL_FIELDS = {
-    "intelligence": "intelligence_pool",
     "sabotage": "sabotage_cards",
     "propaganda": "disinfo_cards",
-    "election_meddling": "election_meddling_cards",
 }
 
 
@@ -57,7 +54,7 @@ def validate_covert_op(
         return {"valid": False, "errors": errors, "warnings": [], "normalized": None}
 
     # Card availability check
-    if roles and role_id and op_type != "intelligence":
+    if roles and role_id:
         role_info = roles.get(role_id) or {}
         pool_field = CARD_POOL_FIELDS.get(op_type, "")
         cards_available = int(role_info.get(pool_field, 0) or 0)
@@ -65,12 +62,7 @@ def validate_covert_op(
             errors.append(f"NO_CARDS: {role_id!r} has 0 {pool_field} cards")
 
     # Type-specific validation
-    if op_type == "intelligence":
-        question = payload.get("question")
-        if not question or not isinstance(question, str) or len(question.strip()) < 10:
-            errors.append("MISSING_QUESTION: intelligence op requires a question (≥10 chars)")
-
-    elif op_type == "sabotage":
+    if op_type == "sabotage":
         target_country = payload.get("target_country")
         target_type = payload.get("target_type")
         if not target_country or target_country not in CANONICAL_COUNTRIES:
@@ -88,14 +80,6 @@ def validate_covert_op(
         if intent not in VALID_PROPAGANDA_INTENTS:
             errors.append(f"INVALID_INTENT: {intent!r} not in {sorted(VALID_PROPAGANDA_INTENTS)}")
 
-    elif op_type == "election_meddling":
-        target_country = payload.get("target_country")
-        direction = payload.get("direction")
-        if not target_country or target_country not in CANONICAL_COUNTRIES:
-            errors.append(f"INVALID_TARGET_COUNTRY: {target_country!r}")
-        if direction not in VALID_MEDDLING_DIRECTIONS:
-            errors.append(f"INVALID_DIRECTION: {direction!r} not in {sorted(VALID_MEDDLING_DIRECTIONS)}")
-
     if errors:
         return {"valid": False, "errors": errors, "warnings": [], "normalized": None}
 
@@ -109,18 +93,11 @@ def validate_covert_op(
     }
 
     # Copy type-specific fields
-    if op_type == "intelligence":
-        normalized["question"] = payload["question"].strip()
-    elif op_type == "sabotage":
+    if op_type == "sabotage":
         normalized["target_country"] = payload["target_country"]
         normalized["target_type"] = payload["target_type"]
     elif op_type == "propaganda":
         normalized["target"] = payload["target"]
         normalized["intent"] = payload["intent"]
         normalized["content"] = (payload.get("content") or "").strip()
-    elif op_type == "election_meddling":
-        normalized["target_country"] = payload["target_country"]
-        normalized["direction"] = payload["direction"]
-        normalized["candidate"] = payload.get("candidate")
-
     return {"valid": True, "errors": [], "warnings": [], "normalized": normalized}

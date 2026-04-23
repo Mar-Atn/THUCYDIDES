@@ -55,32 +55,22 @@ FORMOSA_SURROUNDING_ZONES: list[str] = [
 ]
 
 # --- AI combat bonus (from SEED world_state.py) ---
-AI_LEVEL_COMBAT_BONUS: dict[int, int] = {0: 0, 1: 0, 2: 0, 3: 1, 4: 2}
+AI_LEVEL_COMBAT_BONUS: dict[int, int] = {0: 0, 1: 0, 2: 0, 3: 0, 4: 1}
 
 # --- Covert ops probability tables ---
 COVERT_BASE_PROBABILITY: dict[str, float] = {
-    "espionage":         0.60,
     "sabotage":          0.45,
-    "cyber":             0.50,
-    "disinformation":    0.55,
-    "election_meddling": 0.40,
+    "propaganda":        0.55,
 }
 
 COVERT_DETECTION_BASE: dict[str, float] = {
-    "espionage":         0.30,
     "sabotage":          0.40,
-    "cyber":             0.35,
-    "disinformation":    0.25,
-    "election_meddling": 0.45,
+    "propaganda":        0.25,
 }
 
 COVERT_ATTRIBUTION_PROBABILITY: dict[str, float] = {
-    "espionage":         0.30,
-    "intelligence":      0.30,
     "sabotage":          0.50,
-    "cyber":             0.40,
-    "disinformation":    0.20,
-    "election_meddling": 0.50,
+    "propaganda":        0.20,
 }
 
 # Countries with enhanced covert capabilities
@@ -93,12 +83,8 @@ MAX_COVERT_OPS_PER_ROUND: dict[str, int] = {
 
 # Covert-op card field mapping (role field name per op type)
 COVERT_CARD_FIELD_MAP: dict[str, str] = {
-    "espionage":         "intelligence_pool",
-    "intelligence":      "intelligence_pool",
     "sabotage":          "sabotage_cards",
-    "cyber":             "cyber_cards",
-    "disinformation":    "disinfo_cards",
-    "election_meddling": "election_meddling_cards",
+    "propaganda":        "disinfo_cards",
 }
 
 # --- Amphibious assault ---
@@ -171,12 +157,8 @@ class BlockadeLevel(str, Enum):
 
 
 class CovertOpType(str, Enum):
-    ESPIONAGE = "espionage"
-    INTELLIGENCE = "intelligence"
     SABOTAGE = "sabotage"
-    CYBER = "cyber"
-    DISINFORMATION = "disinformation"
-    ELECTION_MEDDLING = "election_meddling"
+    PROPAGANDA = "propaganda"
 
 
 class NuclearTestType(str, Enum):
@@ -242,9 +224,7 @@ class RoleInfo(BaseModel):
     status: str = "active"
     intelligence_pool: int = 0
     sabotage_cards: int = 0
-    cyber_cards: int = 0
     disinfo_cards: int = 0
-    election_meddling_cards: int = 0
     assassination_cards: int = 0
 
 
@@ -904,7 +884,7 @@ class NavalBombardmentResult(BaseModel):
 
 
 class IntelligenceReport(BaseModel):
-    """Intelligence report from espionage — accuracy varies but format is constant."""
+    """Intelligence report — accuracy varies but format is constant."""
     gdp_estimate: float = 0.0
     treasury_estimate: float = 0.0
     stability_estimate: float = 0.0
@@ -930,12 +910,9 @@ class CovertOpResult(BaseModel):
     attributed: bool = False
     success_probability: float = 0.0
     detection_probability: float = 0.0
-    # Intelligence result (espionage only)
-    intelligence: Optional[IntelligenceReport] = None
-    accuracy: Optional[float] = None
-    # Sabotage / cyber
+    # Sabotage
     gdp_damage: Optional[float] = None
-    # Disinformation
+    # Propaganda
     stability_impact: Optional[float] = None
     support_impact: Optional[float] = None
     # Card consumed
@@ -1801,27 +1778,13 @@ def resolve_covert_op(inp: CovertOpInput) -> CovertOpResult:
     # Apply effects
     tc = inp.target_country
 
-    if op_type in ("espionage", "intelligence"):
-        # ALWAYS returns an answer -- accuracy varies by success
-        accuracy = 0.85 if success else 0.45
-        result.intelligence = _gather_intelligence(tc, accuracy)
-        result.accuracy = accuracy
-
-    elif op_type == "sabotage" and success:
+    if op_type == "sabotage" and success:
         damage = tc.gdp * 0.02
         result.gdp_damage = round(damage, 2)
 
-    elif op_type == "cyber" and success:
-        damage = tc.gdp * 0.01
-        result.gdp_damage = round(damage, 2)
-
-    elif op_type == "disinformation" and success:
+    elif op_type == "propaganda" and success:
         result.stability_impact = -0.3
         result.support_impact = -3.0
-
-    elif op_type == "election_meddling" and success:
-        shift = random.uniform(2, 5)  # 2-5% shift
-        result.support_impact = round(-shift, 1)
 
     return result
 
