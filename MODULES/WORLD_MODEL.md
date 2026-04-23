@@ -1,7 +1,7 @@
 # TTT WORLD MODEL — The Simulation Specification
 
-**Version:** 2.0 DRAFT | **Date:** 2026-04-22
-**Status:** UNDER REVIEW — Marat must validate before this becomes canonical
+**Version:** 3.0 | **Date:** 2026-04-23
+**Status:** STAGE GATE REVIEW — 10 decisions resolved with Marat, fixes applied
 **Purpose:** Single source of truth for what the TTT simulation IS — its entities, rules, actions, and lifecycle.
 **Audience:** Developers, AI agents, facilitators, product owner.
 
@@ -113,11 +113,11 @@ Each role represents one participant character:
 | Category | Key Attributes |
 |----------|---------------|
 | **Identity** | character_name, title, country_code |
-| **Position** | position_type: head_of_state, minister, general, diplomat, special |
+| **Position** | positions array: head_of_state, military, economy, diplomat, security, opposition. Empty = citizen. Multiple positions possible. |
 | **Permissions** | positions array (determines which actions this role can take via `role_actions` table) |
 | **Flags** | is_head_of_state, is_military_chief, is_diplomat, is_economy_officer |
 | **Capabilities** | powers (special abilities), objectives (personal goals) |
-| **Covert cards** | intelligence, sabotage, cyber, disinformation, election_meddling, assassination (integer counts, consumed permanently on use) |
+| **Covert cards** | sabotage_cards, disinfo_cards, assassination_cards, protest_stim_cards (consumed permanently on use). intelligence_pool (not consumed — reusable). |
 | **Content** | public_bio (visible to all), confidential_brief (only this player sees it) |
 | **Status** | active, arrested, killed |
 
@@ -133,9 +133,9 @@ Each role represents one participant character:
 | `strategic_missile` | Long-range conventional or nuclear strike. Consumed on firing. |
 | `air_defense` | Intercepts missiles, reduces air strike effectiveness |
 
-Units have: `unit_id`, `country_code`, `unit_type`, position (`global_row/col` + `theater/row/col`), `unit_status` (active/reserve/destroyed/captured), `embarked_on` (carrier unit for transport).
+Units have: `unit_id`, `country_code`, `unit_type`, position (`global_row/col` + `theater/row/col`), `unit_status` (active/reserve/embarked/destroyed), `embarked_on` (carrier unit for transport). Capture is modeled as ownership transfer (country_code flipped to attacker) + status set to reserve.
 
-**Producible types:** Only ground, naval, and tactical_air can be produced via budget allocation. Strategic missiles and air defense are template-defined starting assets.
+**Production:** All five unit types have production code paths. Production capacity is set per country in template data (currently strategic_missile and air_defense have capacity=0 for most countries). Budget allocation drives production of ground, naval, tactical_air. Special cases: wartime countries auto-produce +1 ground/round; template-configurable strategic_missile_growth for specific countries.
 
 ### Organizations
 
@@ -160,9 +160,10 @@ Each country pair has a bilateral relationship record:
 
 | Field | Values | Effect |
 |-------|--------|--------|
-| **relationship** | allied, friendly, neutral, tense, hostile | Diplomatic context |
-| **status** | peace, at_war | Determines combat legality |
+| **relationship** | alliance, economic_partnership, neutral, hostile, at_war | Determines diplomatic context AND combat legality |
 | **basing_rights** | a_to_b, b_to_a (boolean each) | Allows military presence on foreign territory |
+
+Auto-updates: `declare_war` → sets to `at_war`. Agreement activation: military_alliance → `alliance` (priority 5), trade_agreement → `economic_partnership` (4), peace_treaty → `neutral` (3), ceasefire → `hostile` (2). Higher priority dominates — alliance won't be downgraded by a trade agreement.
 
 ### Sanctions
 
@@ -187,7 +188,7 @@ Formal treaties between countries. Types: security, trade, basing, technology_sh
 
 Bilateral asset exchanges. One side offers, the other provides. Tradeable assets: coins, units (specific units from reserve), technology (nuclear or AI progress), basing rights. Counterpart can accept, decline, or counter-offer. Can be public or secret.
 
-**Technology transfer values:** Nuclear = +0.20 progress to recipient. AI = +0.15 progress.
+**Technology transfer:** Level SET — recipient receives the specified nuclear or AI level directly. Nuclear transfer requires the recipient to still conduct a successful nuclear test (`nuclear_confirmed`) before they can launch. AI transfer is immediate.
 
 ---
 
@@ -210,7 +211,7 @@ Every action has: a canonical name, required fields, an engine that processes it
 | `naval_bombardment` | 10% hit per naval unit, sea → adjacent land hex. Each hit destroys one random ground defender. |
 | `launch_missile_conventional` | Two-phase: AD interception (50% per AD unit in zone), then hit roll (75% flat). 4 target choices (military, infrastructure, nuclear_site, AD). Range by nuclear tier: T1=2 hex, T2=4 hex, T3=global. Missile consumed on firing. |
 
-**Combat modifiers (ground):** AI L4 (+1 die, 50% chance determined at level-up), low morale (-1 if stability ≤3), die-hard terrain (+1 defender), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land). *Note: technology.py defines L3=+1 and L4=+2, but military.py combat resolution only implements L4=+1. See Appendix for divergence.*
+**Combat modifiers (ground):** AI L4 (+1 die, 50% chance determined at level-up), low morale (-1 if stability ≤3), die-hard terrain (+1 defender), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land).
 
 #### Military — Non-Combat (7 actions)
 
@@ -224,7 +225,7 @@ Every action has: a canonical name, required fields, an engine that processes it
 | `nuclear_launch_initiate` | Begin nuclear launch chain. 4-phase: initiate → authorize → intercept → resolve. 3-way authorization required. |
 | `nuclear_authorize` / `nuclear_intercept` | Steps in the nuclear chain. Allowed even when simulation is paused. |
 
-#### Economic (6 actions)
+#### Economic (4 actions)
 
 | Action | What it does |
 |--------|-------------|
@@ -232,12 +233,10 @@ Every action has: a canonical name, required fields, an engine that processes it
 | `set_tariffs` | Set tariff level (0–3) against a specific country. Hurts both sides. |
 | `set_sanctions` | Set sanction level (-3 to +3) against a specific country. |
 | `set_opec` | Set production level (min/low/normal/high/max). Affects global oil price. OPEC members only. |
-| `propose_transaction` | Propose bilateral asset exchange (coins, units, tech, basing). |
-| `accept_transaction` | Accept, decline, or counter a proposed transaction. |
 
-*Budget, tariffs, sanctions, and OPEC are submitted during Phase A but processed in batch during Phase B by the economic engine.*
+*These four are submitted during Phase A but processed in batch during Phase B by the economic engine.*
 
-#### Diplomatic (5+ actions)
+#### Diplomatic (7 actions)
 
 | Action | What it does |
 |--------|-------------|
@@ -246,15 +245,15 @@ Every action has: a canonical name, required fields, an engine that processes it
 | `propose_agreement` | Propose a formal treaty. |
 | `sign_agreement` | Countersign a proposed agreement to activate it. |
 | `call_org_meeting` | Convene an organization meeting with an agenda. |
-
-*Meeting invitations are handled through the meeting system (see Section 6), not as standard actions.*
+| `propose_transaction` | Propose bilateral asset exchange (coins, units, tech, basing). |
+| `accept_transaction` | Accept, decline, or counter a proposed transaction. |
 
 #### Covert (2 actions)
 
 | Action | What it does |
 |--------|-------------|
-| `covert_operation` | Execute covert op. Subtypes: espionage (60%), sabotage (45%, 2% GDP damage), cyber (50%, 1% GDP), disinformation (55%, -0.3 stability / -3 support), election_meddling (40%, -2 to -5% support). Cards consumed permanently. AI level adds +5% per level. Repeated ops vs same target: -5% success, +10% detection. |
-| `intelligence` | AI-generated analytical report on a target. NOT a covert card operation — does not consume cards. Returns data with 85% accuracy on success, 45% on failure (you don't know which). |
+| `covert_operation` | Execute covert op. Two subtypes: **sabotage** (45% success, 2% GDP damage, consumes sabotage_card) and **propaganda** (55% success, -0.3 stability / -3 support, consumes disinfo_card). AI level adds +5% per level. Repeated ops vs same target: -5% success, +10% detection. |
+| `intelligence` | AI-generated analytical report on a target. NOT a covert card operation — uses intelligence_pool (not consumed). Returns data with 85% accuracy on success, 45% on failure (you don't know which). |
 
 #### Political (6 actions)
 
@@ -328,7 +327,7 @@ Transactions and agreements create proposals requiring counterpart response. Tra
 - Economic engine runs: oil → GDP → revenue → budget → production → tech → inflation → debt → crisis state → momentum → contagion → market indexes
 - Political engine runs: stability, elections (if scheduled), war tiredness
 - Results written to per-round snapshot tables
-- Unit movement (`move_units`) allowed during this phase — military repositioning
+- Unit movement (`move_units`) is the ONLY player action allowed during this phase
 - Moderator reviews results, can adjust before publishing
 - Results published → all participants see updated world → next round's Phase A begins
 
@@ -477,29 +476,29 @@ Cards-based system. Success rates per type (see Section 5). Detection and attrib
 | Track | Levels | Progression Thresholds | Effects |
 |-------|--------|----------------------|---------|
 | **Nuclear** | 0→1→2→3 | 0.60 / 0.80 / 1.00 | Unlocks nuclear test, then launch. Missile range increases: T1=2 hex, T2=4 hex, T3=global. |
-| **AI** | 0→1→2→3→4 | 0.20 / 0.40 / 0.60 / 1.00 | +5% covert ops per level. L2: +0.5% GDP. L3: +1.5% GDP. L4: +3.0% GDP. Combat bonus: see note below. |
+| **AI** | 0→1→2→3→4 | 0.20 / 0.40 / 0.60 / 1.00 | +5% covert ops per level. L2: +0.3% GDP. L3: +1.0% GDP. L4: +2.5% GDP, +1 combat die (50% chance). Future: L4 effects to be AI-generated/unpredictable. |
 
 **R&D formula:** `progress += (investment / GDP) × 0.8 × rare_earth_factor`
 
 **Rare earth restrictions:** Each level reduces R&D efficiency by 15% (floor 40%).
 
-**Technology transfer:** Via transactions. Nuclear: +0.20 progress to recipient. AI: +0.15 progress. Donor must be ≥1 level ahead. Does not directly level up — adds to progress.
+**Technology transfer:** Via transactions. Level SET — recipient receives the specified level directly. Nuclear transfer still requires a successful test before launch capability. Donor must be ≥1 level ahead.
 
 ---
 
-## APPENDIX: Known Spec-Code Divergences
+## APPENDIX: Known Code Fixes Needed
 
-These were discovered during verification and need resolution:
-
-| Issue | Spec Says | Code Does | Resolution Needed |
-|-------|-----------|-----------|-------------------|
-| ground_move leave-1-behind | Must leave 1 unit behind | Does not enforce | Add enforcement for foreign occupied hexes |
-| Phase count | 2 phases (design intent) | 3 states in code (A, B, inter_round) | Align code terminology or document inter_round as Phase B sub-step |
-| AI combat bonus | technology.py: L3=+1, L4=+2 | military.py: only L4=+1, L3 ignored | Align combat code with technology spec |
-| Legacy v1 vs v2 combat | v2 is canonical | Both exist in military.py | Remove or clearly deprecate v1 functions |
+| Issue | World Model Says | Code Currently Does | Fix Required |
+|-------|-----------------|---------------------|-------------|
+| ground_move leave-1-behind | Must leave 1 unit behind on foreign hexes | Does not enforce | Add enforcement in `_ground_advance()` |
+| Phase B allowed actions | Only `move_units` | Allows 6 actions | Update `INTER_ROUND_ALLOWED` to `{"move_units"}` only |
+| AI combat bonus constants | L4=+1 only | technology.py/military.py tables say L3=+1, L4=+2 | Update both tables to `{3:0, 4:1}` |
+| AI GDP boost in technology.py | L2=+0.3%, L3=+1.0%, L4=+2.5% | technology.py says L2=+0.5%, L3=+1.5%, L4=+3.0% | Align technology.py to economic.py values |
+| Covert op types | sabotage + propaganda only | Validator has 4 types, engine has 5 | Remove espionage, cyber, election_meddling from validator and engine |
+| Legacy v1 combat functions | v2 is canonical | Both exist in military.py | Deprecate or remove v1 functions |
 
 ---
 
 *Note on country-specific mechanics:* Some engine rules reference specific countries by name (assassination bonuses, semiconductor dependency, intelligence powers). These are hardcoded engine constants — changing them requires code changes, not template configuration. They reflect asymmetric game design.
 
-*Version 2.0 DRAFT — Built from verified engine code (economic.py 2191 lines, military.py 3076 lines, political.py, technology.py), DB schema audit (54 tables), module SPECs (M4, M6, M9), and MODULE_REGISTRY. All constants verified with line numbers. Template-specific data removed — only world rules remain.*
+*Version 3.0 — Stage gate review with Marat. 10 decisions resolved. Built from verified engine code, DB schema audit (54 tables), module SPECs, and MODULE_REGISTRY. Template-specific data removed — only world rules remain.*
