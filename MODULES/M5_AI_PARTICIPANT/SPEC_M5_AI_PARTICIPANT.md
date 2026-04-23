@@ -1,8 +1,8 @@
 # SPEC: M5 — AI Participant Module
 
-**Version:** 1.0
-**Date:** 2026-04-21
-**Status:** APPROVED DECISIONS — Ready for build planning
+**Version:** 1.1
+**Date:** 2026-04-23
+**Status:** PAUSED — Stage gate review in progress. Existing code is spike/iteration quality. Clean rebuild planned after Layer 2 documentation complete.
 **Depends on:** M1 (Engines), M2 (Communication), M3 (Data), M4 (Sim Runner)
 **Spike:** PASSED (2026-04-20) — Managed Agent played 2 rounds, 10 valid actions, $0.35
 **External Dependencies:** M6 chat interface (shared), game rules reference (shared M5/M6)
@@ -55,12 +55,14 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 
 | Sub-Module | Location | Responsibility | Status |
 |------------|----------|----------------|--------|
-| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta | DONE |
-| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | DONE |
-| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch | DONE (async) |
-| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, tiered delivery, single dispatch loop | BUILDING |
-| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI and AI↔Human via direct send_event | DONE |
-| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with queue depth, agent detail with full activity log | DONE |
+| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta | SPIKE |
+| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | SPIKE |
+| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch | SPIKE |
+| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, tiered delivery, single dispatch loop | SPIKE |
+| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI and AI↔Human via direct send_event | SPIKE |
+| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with queue depth, agent detail with full activity log | SPIKE |
+
+> **Note:** M5.1-M5.5 were built as exploration/spike code. The managed agents architecture is validated but the implementation needs rebuilding to align with World Model v3.0 and canonical action names.
 
 **Architecture change (2026-04-22):** M5.4 changed from "Orchestrator" (dual-path: scheduled pulses + auto-pulse) to "Event Dispatcher" (single unified queue). All events flow through one queue, one dispatcher. Eliminates race conditions, lost events, stuck sessions. See `SPRINT_UNIFIED_QUEUE.md` for full design.
 
@@ -378,4 +380,142 @@ For fast testing, the orchestrator plays co-moderator role:
 
 ---
 
-*Decisions made in collaboration with Marat Atn, 2026-04-21. All Q1-Q14 resolved. Ready for build planning and Phase 1 implementation.*
+---
+
+## 13. Agent DB Tables
+
+Four tables support M5 agent state. All created via Supabase migrations.
+
+### `ai_agent_sessions`
+Tracks active Claude Managed Agent sessions. One row per sim_run + role.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | UUID PK | Row identifier |
+| `sim_run_id` | UUID | Which simulation |
+| `role_id` | TEXT | Which role this agent plays |
+| `country_code` | TEXT | Country shorthand |
+| `agent_id` | TEXT | Anthropic Agent ID |
+| `environment_id` | TEXT | Anthropic Environment ID |
+| `session_id` | TEXT | Anthropic Session ID (for reconnect) |
+| `status` | TEXT | `initializing` / `ready` / `active` / `frozen` / `terminated` / `archived` |
+| `model` | TEXT | LLM model used (default: `claude-sonnet-4-6`) |
+| `round_num` | INT | Current round the agent is in |
+| `total_input_tokens` | BIGINT | Cumulative input token usage |
+| `total_output_tokens` | BIGINT | Cumulative output token usage |
+| `events_sent` | INT | Events delivered to this agent |
+| `actions_submitted` | INT | Actions this agent has submitted |
+| `tool_calls` | INT | Total tool calls made |
+| `metadata` | JSONB | Extensible metadata |
+
+Unique constraint: `(sim_run_id, role_id)`.
+
+### `agent_event_queue`
+Unified event queue for all AI agent event delivery. The EventDispatcher reads pending events and delivers to idle agents.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | UUID PK | Row identifier |
+| `sim_run_id` | UUID | Which simulation |
+| `role_id` | TEXT | Target agent |
+| `tier` | INT | Priority: 1 (critical, <5s), 2 (urgent, <10s), 3 (routine, batched) |
+| `event_type` | TEXT | Event category (e.g. `round_pulse`, `critical_interrupt`, `manual_pulse`) |
+| `message` | TEXT | Human-readable event content delivered to agent |
+| `metadata` | JSONB | Structured event data |
+| `processed_at` | TIMESTAMPTZ | NULL while pending, set when delivered |
+| `processing_error` | TEXT | Error message if delivery failed |
+
+Indexed on `(sim_run_id, role_id, tier) WHERE processed_at IS NULL` for fast pending-event lookup.
+
+### `agent_memories`
+Self-authored agent memory. Agents write notes via `write_notes` tool and recall via `read_notes`. Survives session crashes.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | UUID PK | Row identifier |
+| `sim_run_id` | UUID | Which simulation |
+| `country_code` | TEXT | Which country's agent |
+| `scenario_id` | UUID | Scenario reference |
+| `memory_key` | TEXT | Agent-chosen key (e.g. `strategy`, `round_2_reflection`) |
+| `content` | TEXT | Free-form memory content |
+| `round_num` | INT | Round when written/updated |
+| `updated_at` | TIMESTAMPTZ | Last update timestamp |
+
+Upsert key: `(sim_run_id, country_code, memory_key)`. Agent decides what to remember.
+
+### `agent_decisions`
+Audit trail of every action an AI agent submits. Written before dispatch, updated with result.
+
+| Column | Type | Purpose |
+|--------|------|---------|
+| `id` | UUID PK | Row identifier |
+| `sim_run_id` | UUID | Which simulation |
+| `scenario_id` | UUID | Scenario reference |
+| `country_code` | TEXT | Acting country |
+| `action_type` | TEXT | Canonical action type (e.g. `set_budget`, `ground_attack`) |
+| `action_payload` | JSONB | Full validated action payload |
+| `rationale` | TEXT | Agent's stated reason for the action |
+| `validation_status` | TEXT | `passed` → `executed` or `dispatch_failed` |
+| `validation_notes` | TEXT | Narrative from dispatch result |
+| `round_num` | INT | Round when submitted |
+
+---
+
+## 14. M4↔M5 Integration
+
+### API Endpoints (all under `/api/sim/{sim_id}/ai/`)
+
+| Endpoint | Method | Purpose |
+|----------|--------|---------|
+| `/ai/initialize` | POST | Create managed agent sessions for all AI roles, start dispatcher loop |
+| `/ai/run-round` | POST | Enqueue `round_pulse` (Tier 3) for all agents — triggers round activity |
+| `/ai/send-pulse` | POST | Send a manual pulse to all idle agents |
+| `/ai/status` | GET | Dashboard data: agent states, costs, queue depths, token usage |
+| `/ai/freeze/{role_id}` | POST | Freeze one agent (stops receiving events) |
+| `/ai/resume/{role_id}` | POST | Resume one frozen agent (batched events delivered) |
+| `/ai/freeze-all` | POST | Global AI pause — humans continue |
+| `/ai/resume-all` | POST | Resume all frozen agents |
+| `/ai/interrupt` | POST | Send Tier 1 critical interrupt to specific agents (<5s delivery) |
+| `/ai/shutdown` | POST | Archive all sessions, stop dispatcher |
+| `/ai/restart` | POST | Full cleanup: archive sessions, clear queue, optionally clear memories/decisions |
+| `/ai/trigger` | POST | Legacy stub: trigger AI decisions via simple defaults (pre-M5) |
+
+### How M4 Starts AI Agents
+
+1. Moderator clicks "Initialize AI Agents" in the facilitator UI.
+2. Frontend calls `POST /ai/initialize` with optional `role_ids` and `model`.
+3. Backend creates an `EventDispatcher` for the sim, which creates Managed Agent sessions (one per AI role) via the Anthropic SDK.
+4. Sessions are recorded in `ai_agent_sessions` with status `initializing` -> `ready`.
+5. The dispatcher's background loop starts, delivering any enqueued init events.
+
+### How M4 Stops AI Agents
+
+1. Moderator clicks "Shutdown AI" or sim completes.
+2. Frontend calls `POST /ai/shutdown`.
+3. Dispatcher archives all Anthropic sessions and sets DB status to `archived`.
+4. Dispatcher is removed from the in-memory registry.
+5. For full reset (e.g. sim restart): `POST /ai/restart` clears queue, optionally clears memories and decisions.
+
+### How AI Actions Flow Through the Dispatcher
+
+1. Agent receives an event (pulse, interrupt) via the EventDispatcher.
+2. Agent reasons using its tools (`get_my_country`, `get_relationships`, etc.) — these are read-only DB queries.
+3. Agent calls `submit_action(action)` tool with a validated payload.
+4. `ToolExecutor.submit_action()` validates the payload via Pydantic action schemas.
+5. The action is recorded in `agent_decisions` (audit trail).
+6. The action is dispatched via `engine.services.action_dispatcher.dispatch_action()` — the **same pipeline** used for human-submitted actions.
+7. `agent_decisions` is updated with the dispatch result (`executed` or `dispatch_failed`).
+8. The result is returned to the agent as tool output.
+
+### How Round Transitions Notify AI Agents
+
+1. M4's round advancement logic (facilitator clicks "Next Round" or auto-advance triggers).
+2. Frontend or orchestrator calls `POST /ai/run-round` with the new round number.
+3. The endpoint enqueues a `round_pulse` event (Tier 3) for every registered agent.
+4. The EventDispatcher's background loop picks up pending events and delivers them to idle agents.
+5. Agents that are `FROZEN` or `IN_MEETING` receive their events when they return to `IDLE` state.
+6. Critical events (nuclear launch, direct attack) use `POST /ai/interrupt` for Tier 1 delivery (<5s).
+
+---
+
+*Decisions made in collaboration with Marat Atn, 2026-04-21. All Q1-Q14 resolved. Status updated 2026-04-23: PAUSED for stage gate review.*
