@@ -612,8 +612,27 @@ class ToolExecutor:
                     "narrative": "You already have 2 active invitations. Wait for them to expire or be answered.",
                 }
 
-            # Target role_id defaults to HoS of target country
-            target_role_id = f"{target_country}_hos"
+            # Look up the HoS role_id for target country from DB
+            target_roles = (
+                client.table("roles")
+                .select("id,positions")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("country_code", target_country)
+                .eq("status", "active")
+                .execute()
+                .data or []
+            )
+            target_role_id = None
+            for r in target_roles:
+                positions = r.get("positions") or []
+                if "head_of_state" in positions:
+                    target_role_id = r["id"]
+                    break
+            if not target_role_id and target_roles:
+                target_role_id = target_roles[0]["id"]  # fallback: first active role
+            if not target_role_id:
+                return {"success": False, "error": f"No active role found for {target_country}"}
+
             expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
 
             row = {

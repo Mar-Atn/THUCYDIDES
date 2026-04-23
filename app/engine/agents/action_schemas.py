@@ -31,7 +31,7 @@ class MoveUnitsOrder(BaseModel):
 class AttackDeclarationOrder(BaseModel):
     """Declare attack against an enemy position."""
 
-    action_type: Literal["declare_attack"] = "declare_attack"
+    action_type: Literal["declare_attack", "ground_attack", "air_strike", "naval_combat", "naval_bombardment"] = "declare_attack"
     attacker_unit_codes: list[str]
     target_global_row: int
     target_global_col: int
@@ -45,7 +45,7 @@ class AttackDeclarationOrder(BaseModel):
 class SanctionOrder(BaseModel):
     """Impose (or relax) sanctions on another country."""
 
-    action_type: Literal["set_sanction"] = "set_sanction"
+    action_type: Literal["set_sanction", "set_sanctions"] = "set_sanction"
     target_country: str
     sanction_type: str  # e.g. "oil_export_ban", "financial", "tech_export"
     level: int = Field(..., ge=-3, le=3)
@@ -55,7 +55,7 @@ class SanctionOrder(BaseModel):
 class TariffOrder(BaseModel):
     """Impose tariffs on another country."""
 
-    action_type: Literal["set_tariff"] = "set_tariff"
+    action_type: Literal["set_tariff", "set_tariffs"] = "set_tariff"
     target_country: str
     level: int = Field(..., ge=0, le=3)
     rationale: str
@@ -87,7 +87,7 @@ class OrgMeetingOrder(BaseModel):
 
 class CovertOpOrder(BaseModel):
     """Covert operation."""
-    action_type: Literal["covert_op"] = "covert_op"
+    action_type: Literal["covert_op", "covert_operation"] = "covert_op"
     op_type: str  # intelligence | sabotage | propaganda | election_meddling
     target_country: Optional[str] = None
     target_type: Optional[str] = None  # infrastructure | nuclear_tech | military (sabotage)
@@ -112,7 +112,7 @@ class TransactionOrder(BaseModel):
 
 class RespondExchangeOrder(BaseModel):
     """Respond to a proposed transaction (accept/decline/counter)."""
-    action_type: Literal["respond_exchange"] = "respond_exchange"
+    action_type: Literal["respond_exchange", "accept_transaction"] = "respond_exchange"
     transaction_id: str
     response: Literal["accept", "decline", "counter"]
     counter_offer: Optional[dict] = None
@@ -167,7 +167,7 @@ class ChangeLeaderOrder(BaseModel):
 
 class ReassignPowersOrder(BaseModel):
     """Reassign power category to a different role (HoS only)."""
-    action_type: Literal["reassign_powers"] = "reassign_powers"
+    action_type: Literal["reassign_powers", "reassign_types"] = "reassign_powers"
     power_type: Literal["military", "economic", "foreign_affairs"]
     new_holder_role: str
     rationale: str
@@ -181,7 +181,7 @@ class CallEarlyElectionsOrder(BaseModel):
 
 class SubmitNominationOrder(BaseModel):
     """Self-nominate for an upcoming election (Columbia only)."""
-    action_type: Literal["submit_nomination"] = "submit_nomination"
+    action_type: Literal["submit_nomination", "self_nominate"] = "submit_nomination"
     election_type: str  # columbia_midterms | columbia_presidential
     election_round: int  # the round the election happens
     rationale: str
@@ -189,7 +189,7 @@ class SubmitNominationOrder(BaseModel):
 
 class CastVoteOrder(BaseModel):
     """Cast a secret vote in an election (Columbia only)."""
-    action_type: Literal["cast_vote"] = "cast_vote"
+    action_type: Literal["cast_vote", "cast_election_vote"] = "cast_vote"
     election_type: str
     candidate_role_id: str
     rationale: str
@@ -206,7 +206,7 @@ class BasingRightsOrder(BaseModel):
 
 class BlockadeOrder(BaseModel):
     """Impose a naval blockade on a chokepoint."""
-    action_type: Literal["blockade"] = "blockade"
+    action_type: Literal["blockade", "naval_blockade"] = "blockade"
     zone_id: str  # chokepoint zone
     imposer_units: list[str]  # unit codes
     rationale: str
@@ -214,7 +214,7 @@ class BlockadeOrder(BaseModel):
 
 class MissileLaunchOrder(BaseModel):
     """Launch conventional missile strike."""
-    action_type: Literal["launch_missile"] = "launch_missile"
+    action_type: Literal["launch_missile", "launch_missile_conventional"] = "launch_missile"
     launcher_unit_code: str
     target_global_row: int
     target_global_col: int
