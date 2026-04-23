@@ -4,16 +4,18 @@
 
 ---
 
+## Source of Truth
+
+All code implements the **World Model + Contracts** (see root CLAUDE.md Section 2).
+Before coding: read `MODULES/MODULE_REGISTRY.md` and relevant module SPEC.
+Never hardcode action names, field names, or protocol details — import from canonical sources.
+
 ## Languages & Frameworks
 
 - **Backend/Engines:** Python 3.11+, FastAPI, async handlers
 - **Frontend:** TypeScript, React 18+, Vite
 - **Database:** Supabase (PostgreSQL + Realtime + Edge Functions + Auth)
-- **AI/LLM:** Dual provider — Gemini + Claude, centrally configurable. **See `app/config/LLM_MODELS.md` for current model IDs, pricing, and usage guide.** This file is the single source of truth for all LLM model references — update it when new models launch.
-
-## Check KING First
-
-Before building any module, review `/Users/marat/CODING/KING/app/` for reusable patterns. This is a strong recommendation — critically evaluate what fits, adapt what almost fits, build fresh only when necessary. Track all reuse decisions in `EVOLVING METHODOLOGY/KING_REUSE_LOG.md`.
+- **AI/LLM:** Claude (Managed Agents for AI participants, Messages API for other uses). See `app/config/LLM_MODELS.md` for model IDs and pricing.
 
 ## Commit Conventions
 

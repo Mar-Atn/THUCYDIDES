@@ -4,111 +4,94 @@
 
 ---
 
+## Source of Truth
+
+**World Model + Contracts** govern what actions exist, what fields they take, and how they route.
+Before writing ANY engine code:
+1. Read `MODULES/MODULE_REGISTRY.md` — canonical 33 action types (ACTION_NAMING section)
+2. Read relevant contract in `MODULES/CONTRACTS/`
+3. IMPORT canonical names — never hardcode action type strings
+4. If a name or field is unclear → look it up, don't guess
+
+**Design heritage** (`2 SEED/D_ENGINES/`, `3 DETAILED DESIGN/DET_D8`) — useful for understanding formula intent. Not the current specification.
+
+---
+
 ## Language & Framework
 
-- Python 3.11+
-- FastAPI with async handlers
+- Python 3.11+, FastAPI with async handlers
 - Pydantic v2 for all data models
-- async where possible — especially DB operations, LLM calls, inter-engine orchestration
-
-## Source of Truth: SEED Engine Code
-
-Port from `2 SEED/D_ENGINES/*.py`. These files contain the validated engine logic:
-- Economic engine (GDP, trade, sanctions, tariffs)
-- Military engine (force projection, combat resolution, deterrence)
-- Political engine (stability, elections, regime dynamics, alliances)
-- Technology engine (R&D, tech transfer, dual-use)
-- World model orchestrator (round resolution, domain integration)
-
-**Porting rules:**
-- Preserve every formula EXACTLY as specified in DET_D8
-- Do not optimize formulas for performance until correctness is proven (Layer 1 tests pass)
-- If a formula seems wrong, do NOT fix it silently — raise to LEAD
-- Add type hints and Pydantic models around the ported logic
-
-## Testing Requirement
-
-**Every formula must have a Layer 1 test before merge.** No exceptions.
-- Test file lives in `/app/tests/layer1/` (mirroring engine module structure)
-- pytest with parametrized test cases
-- Generated from DET_D8 formula specifications
-- Happy path + edge cases + boundary values + zero/negative inputs
-
-## Key Specifications
-
-| Spec | What It Contains |
-|------|-----------------|
-| DET_D8 | All formulas — the mathematical source of truth |
-| DET_F5 | Engine API — how the orchestrator calls engines |
-| DET_C1 | System contracts — inter-module communication |
-| DET_B1 | Database schema — what gets persisted |
-| SEED engine code | Reference implementation to port from |
-
-## Map + Units: Source of Truth
-
-- **`app/engine/config/map_config.py` is THE source** for global/theater grid dimensions and the canonical theater↔global linkage table. Any new engine code touching map grids, theater linkage, or coord conversions MUST import from this module — never hardcode dimensions, link mappings, or coord tables elsewhere.
-- JS counterpart: `app/test-interface/static/map_config.js`. Keep the two in lock-step.
-- Unit entity contract: see `3 DETAILED DESIGN/DET_UNIT_MODEL_v1.md`. Pydantic model lives in `app/engine/models/unit.py` (to be created). Validation library: `app/engine/services/unit_validator.py` (to be created).
-- Coord convention: `(row, col)`, row first, 1-indexed. Global: [1..10]×[1..20]. Theater: [1..10]×[1..10]. Never deviate.
+- async where possible — especially DB operations, LLM calls
 
 ## Architecture Rules
 
-- **No direct engine-to-engine calls.** The orchestrator mediates all inter-engine communication. Economic engine does not import military engine.
-- **Engines are stateless.** They receive game state as input, return updated state as output. No engine holds state between calls.
-- **Orchestrator controls round flow.** It calls engines in the correct order, passes outputs as inputs, handles conflicts.
-- **Dual LLM provider.** Gemini + Claude, centrally configurable via `/app/engine/config/`. Engine code calls a provider-agnostic interface, never a specific LLM SDK directly.
+- **No direct engine-to-engine calls.** Orchestrator mediates all inter-engine communication.
+- **Engines are stateless.** Receive game state as input, return updated state. No engine holds state between calls.
+- **All engine functions are PURE** (no DB calls). DB access lives in orchestrator/services only.
+- **Action names:** Use ONLY the canonical names from MODULE_REGISTRY. Never invent, alias, or abbreviate.
 
-## Check KING For
+## Map + Units
 
-- **Reflection service:** How KING processes AI reasoning chains
-- **Queue system:** How KING handles async task execution
-- **Atomic updates:** How KING ensures DB consistency during multi-step operations
-- Location: `/Users/marat/CODING/KING/app/`
+- **`app/engine/config/map_config.py`** — THE source for map grids, theater linkage, hex topology.
+- JS counterpart: `app/test-interface/static/map_config.js`. Keep in lock-step.
+- Coord convention: `(row, col)`, row first, 1-indexed. Global: [1..10]x[1..20]. Theater: [1..10]x[1..10].
+- Unit model: individual rows (1 unit per row) in `deployments` table. Positioned by hex coordinates.
 
-## File Structure (updated 2026-04-06 — post-reunification)
+## File Structure
 
 ```
 engine/
 ├── CLAUDE.md              ← THIS FILE
-├── main.py                ← FastAPI app, route registration
+├── main.py                ← FastAPI app, route registration, all API endpoints
 ├── config/
-│   ├── settings.py        ← Environment + LLM model config (dual-provider)
+│   ├── settings.py        ← Environment + LLM model config
 │   └── map_config.py      ← Map grids, theater linkage, hex topology
-├── engines/               ← CANONICAL — all engine work goes here
-│   ├── economic.py        ← GDP, trade, sanctions, tariffs (2K lines, pure)
-│   ├── military.py        ← Combat (unit-level v2 + zone-deprecated v1) (2.5K lines)
-│   ├── political.py       ← Stability, elections, alliances (836 lines, pure)
-│   ├── technology.py      ← R&D, tech transfer (357 lines, pure)
-│   ├── orchestrator.py    ← Designed orchestrator (sim_runs-based, 543 lines)
-│   └── round_tick.py      ← NEW: per-round engine tick bridge (scenario-based)
+├── engines/               ← PURE engine functions (no DB calls)
+│   ├── economic.py        ← GDP, trade, sanctions, tariffs
+│   ├── military.py        ← Combat resolution (unit-level)
+│   ├── political.py       ← Stability, elections, alliances
+│   ├── technology.py      ← R&D, tech transfer
+│   ├── orchestrator.py    ← Round resolution orchestrator
+│   └── round_tick.py      ← Per-round engine tick bridge
 ├── agents/                ← AI participant code
-│   ├── leader.py          ← CANONICAL LeaderAgent (4-block cognitive model)
-│   ├── leader_round.py    ← CANONICAL single-agent round runner (tool-use)
-│   ├── full_round_runner.py ← 20-agent parallel runner (Observatory)
+│   ├── managed/           ← Managed Agents (Claude SDK) — M5
+│   │   ├── session_manager.py   ← Agent session lifecycle (async)
+│   │   ├── event_dispatcher.py  ← Unified event queue + dispatch loop
+│   │   ├── tool_executor.py     ← Game tool execution
+│   │   ├── tool_definitions.py  ← Tool schemas for managed agents
+│   │   ├── system_prompt.py     ← Layer 1 identity builder
+│   │   ├── game_rules_context.py ← Game rules for AI context
+│   │   ├── db_context.py        ← World context from DB
+│   │   └── conversations.py     ← Bilateral meeting router
+│   ├── tools.py           ← Domain query tools (shared)
 │   ├── profiles.py        ← Role + country data loaders
-│   ├── memory.py          ← CognitiveState persistent memory
-│   ├── decisions.py       ← Per-category decision functions (budget, tariff, etc.)
-│   ├── tools.py           ← Domain tools (get_my_forces, commit_action, etc.)
-│   ├── stage*_test.py     ← DEPRECATED — replaced by leader_round.py
-│   └── runner.py          ← DESIGNED full-sim runner (in-memory, for later)
-├── context/               ← Context Assembly Service (SEED D9)
-│   ├── assembler.py       ← Block-based context builder
-│   └── blocks.py          ← Block registry + builders
-├── round_engine/          ← DEPRECATED — being replaced by engines/*
-│   ├── resolve_round.py   ← Decision processor (still used for combat/movement)
-│   ├── combat.py          ← DEPRECATED — use engines/military.py v2
-│   └── movement.py        ← DEPRECATED — will merge into engines/
+│   └── action_schemas.py  ← Pydantic action validation models
 ├── services/
-│   ├── llm.py             ← Dual-provider plain-text LLM calls
-│   ├── llm_tools.py       ← Dual-provider tool-use adapter (Anthropic ↔ Gemini)
-│   └── supabase.py        ← Supabase client operations
+│   ├── action_dispatcher.py  ← Routes all 33 action types to engines
+│   ├── supabase.py        ← Sync Supabase client
+│   ├── async_db.py        ← Async Supabase client (for dispatch loop)
+│   ├── meeting_service.py ← Meeting lifecycle
+│   ├── transaction_engine.py ← Exchange transactions
+│   ├── agreement_engine.py   ← Formal agreements
+│   └── [other engines]    ← Per-domain service modules
 └── models/
     └── db.py              ← Pydantic models for DB tables
 ```
 
-## Deprecation rules (2026-04-06)
+## Deprecation Rules
 
-- **NEVER add new logic to `round_engine/`** — all combat/movement work goes in `engines/military.py` (unit-level v2 section)
-- **NEVER add new agent test stages** — use `agents/leader_round.py` for tool-use agent loops
-- **NEVER bypass `services/llm_tools.py`** for tool-use calls — it handles dual-provider routing
-- **All engine functions are PURE** (no DB calls). DB access lives in orchestrator/round_tick/services only.
+- **NEVER add new logic to `round_engine/`** — all combat/movement in `engines/military.py`
+- **NEVER hardcode action type strings** — import from canonical source
+- **NEVER bypass `services/action_dispatcher.py`** — all actions route through it
+- **`agents/leader.py`, `leader_round.py`** — old agent system, superseded by `agents/managed/`
+
+## Testing
+
+Every formula must have a Layer 1 test before merge. No exceptions.
+- Location: `/app/tests/layer1/`
+- pytest with parametrized test cases
+- Happy path + edge cases + boundary values
+
+## KING Reference
+
+`/Users/marat/CODING/KING/app/` — evaluate critically for reusable patterns (queue system, atomic updates, reflection service). Not mandatory.
