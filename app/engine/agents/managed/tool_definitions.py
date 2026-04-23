@@ -107,12 +107,17 @@ GET_MY_FORCES_SCHEMA: dict = {
 SUBMIT_ACTION_SCHEMA: dict = {
     "name": "submit_action",
     "description": (
-        "Execute a game action (REAL WRITE). Up to 3 per round. "
-        "action_type + rationale required. "
-        "Types: move_units, declare_attack, naval_blockade, nuclear_test, "
-        "set_budget, set_tariffs, set_sanctions, set_opec, rd_investment, "
-        "public_statement, call_org_meeting, covert_operation, propose_transaction, "
-        "respond_exchange, basing_rights, change_leader, arrest."
+        "Execute a game action (REAL WRITE). action_type + rationale required. "
+        "MILITARY: ground_attack, air_strike, naval_combat, naval_bombardment, "
+        "ground_move, move_units, naval_blockade, basing_rights, martial_law, "
+        "nuclear_test, nuclear_launch_initiate. "
+        "ECONOMIC: set_budget, set_tariffs, set_sanctions, set_opec. "
+        "COMMUNICATION: public_statement, call_org_meeting. "
+        "DIPLOMATIC: declare_war, propose_agreement, sign_agreement, "
+        "propose_transaction, accept_transaction. "
+        "COVERT: covert_operation (sabotage|propaganda), intelligence. "
+        "POLITICAL: arrest, assassination, change_leader, reassign_types, "
+        "self_nominate, cast_vote."
     ),
     "input_schema": {
         "type": "object",
@@ -120,17 +125,17 @@ SUBMIT_ACTION_SCHEMA: dict = {
             "action": {
                 "type": "object",
                 "description": (
-                    "MILITARY: move_units(decision,rationale,changes.moves[]), "
-                    "declare_attack(attacker_unit_codes[],target_global_row,target_global_col), "
-                    "naval_blockade(zone_id,level:full|partial), nuclear_test(test_type). "
+                    "MILITARY: ground_attack(attacker_unit_codes[],target_global_row,target_global_col), "
+                    "move_units(decision:change,changes.moves[]), "
+                    "naval_blockade(zone_id,imposer_units[]), nuclear_test(rationale). "
                     "ECONOMIC: set_budget(social_pct:0.5-1.5,military_coins,tech_coins), "
-                    "set_tariffs(target_country,level:0-3), set_sanctions(target_country,level:0-3), "
-                    "set_opec(production:cut|maintain|increase). "
-                    "TECH: rd_investment(domain:nuclear|ai,amount). "
-                    "COMMS: public_statement(content), call_org_meeting(organization_code,agenda). "
-                    "COVERT: covert_operation(op_type,target_country). "
-                    "TRANSACTION: propose_transaction(counterpart_country_code,offer,request), "
-                    "respond_exchange(transaction_id,response:accept|decline)."
+                    "set_tariffs(target_country,level:0-3), set_sanctions(target_country,level:-3 to +3), "
+                    "set_opec(production:min|low|normal|high|max). "
+                    "COMMS: public_statement(content). "
+                    "DIPLOMATIC: declare_war(target_country), "
+                    "propose_transaction(counterpart_country_code,offer,request), "
+                    "accept_transaction(transaction_id,response:accept|decline). "
+                    "COVERT: covert_operation(op_type:sabotage|propaganda,target_country)."
                 ),
             },
         },

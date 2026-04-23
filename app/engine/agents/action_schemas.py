@@ -241,9 +241,41 @@ class BudgetOrder(BaseModel):
     rationale: str
 
 
+class SetOpecOrder(BaseModel):
+    """Set OPEC production level."""
+    action_type: Literal["set_opec"] = "set_opec"
+    production: str  # min | low | normal | high | max
+    rationale: str
+
+
 class NuclearTestOrder(BaseModel):
     """Conduct a nuclear test."""
     action_type: Literal["nuclear_test"] = "nuclear_test"
+    rationale: str
+
+
+class NuclearLaunchOrder(BaseModel):
+    """Initiate nuclear launch sequence."""
+    action_type: Literal["nuclear_launch_initiate"] = "nuclear_launch_initiate"
+    target_country: str
+    target_global_row: Optional[int] = None
+    target_global_col: Optional[int] = None
+    rationale: str
+
+
+class NuclearAuthorizeOrder(BaseModel):
+    """Authorize or deny a nuclear launch (co-authorization step)."""
+    action_type: Literal["nuclear_authorize"] = "nuclear_authorize"
+    nuclear_action_id: str
+    authorize: bool = True
+    rationale: str
+
+
+class NuclearInterceptOrder(BaseModel):
+    """Attempt to intercept an incoming nuclear strike."""
+    action_type: Literal["nuclear_intercept"] = "nuclear_intercept"
+    nuclear_action_id: str
+    intercept: bool = True
     rationale: str
 
 
@@ -285,16 +317,16 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
     "naval_blockade": BlockadeOrder,
     "launch_missile_conventional": MissileLaunchOrder,
     "nuclear_test": NuclearTestOrder,
-    "nuclear_launch_initiate": NuclearTestOrder,
-    "nuclear_authorize": NuclearTestOrder,
-    "nuclear_intercept": NuclearTestOrder,
+    "nuclear_launch_initiate": NuclearLaunchOrder,
+    "nuclear_authorize": NuclearAuthorizeOrder,
+    "nuclear_intercept": NuclearInterceptOrder,
     "basing_rights": BasingRightsOrder,
     "martial_law": MartialLawOrder,
     # Economic
     "set_budget": BudgetOrder,
     "set_sanctions": SanctionOrder,
     "set_tariffs": TariffOrder,
-    "set_opec": RDInvestmentOrder,
+    "set_opec": SetOpecOrder,
     "rd_investment": RDInvestmentOrder,
     # Covert
     "covert_operation": CovertOpOrder,

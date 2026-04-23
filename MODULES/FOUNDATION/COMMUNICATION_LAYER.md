@@ -61,7 +61,7 @@ Three dispatch modes:
 ### Covert (2)
 | Action | Engine |
 |--------|--------|
-| `covert_operation` | `engines/military` (subtypes: sabotage, propaganda, cyber, espionage, election_meddling) |
+| `covert_operation` | `engines/military` (subtypes: sabotage, propaganda) |
 | `intelligence` | AI-generated analytical report |
 
 ### Political (6)
