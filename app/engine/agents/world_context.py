@@ -336,9 +336,9 @@ def _build_mechanics(role: dict) -> str:
 - **Tariffs**: L0 (none) to L3 (heavy) per target country. Hurt both sides asymmetrically.
 - **Sanctions**: L0-L3. Coalition-based — stacking matters. Cost the imposer 30-50% of damage inflicted.
 - **Military**: ground attack (needs co-sign / authorization), naval/air, blockade, strategic missiles (nuclear authority gated).
-- **Covert**: espionage, sabotage, cyber, disinfo — bounded by your intelligence pool ({intel} per round).
+- **Covert**: sabotage, propaganda — bounded by your intelligence pool ({intel} per round). Intelligence is a separate standalone action.
 - **Transactions**: arms sales, coin transfers, treaties, basing rights — bilateral, both parties must confirm.
-- **Political**: propaganda (+stability), repression (autocracy only), public statements, election meddling.
+- **Political**: public statements, repression (autocracy only).
 - **Nothing is free.** Every action has costs and visible or covert consequences."""
 
 

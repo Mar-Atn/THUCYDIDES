@@ -87,7 +87,7 @@ UNRESTRICTED_ACTIONS: frozenset[str] = frozenset({
     "intelligence",
     "sabotage",
     "propaganda",
-    "election_meddling",
+    "propaganda",
     "assassination",    # card-gated
     "mass_protest",     # card-gated
     "nuclear_test",     # goes through 3-way authorization chain

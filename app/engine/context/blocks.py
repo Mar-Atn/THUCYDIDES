@@ -350,7 +350,7 @@ def _build_available_actions(ctx: ContextAssembler, *, scope: str | None = None,
 - Make public statement
 
 ## Covert (if intelligence pool > 0)
-- Espionage, sabotage, cyber attack, disinformation, election interference
+- Sabotage, propaganda
 """
 
 

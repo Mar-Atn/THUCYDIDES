@@ -48,7 +48,7 @@ You live in the SIM world. NEVER use real-world country names.
 - Tariffs: L0 (none) to L3 (heavy) per target country. Hurt both sides asymmetrically.
 - Sanctions: L0-L3. Coalition-based. Cost imposer 30-50% of damage inflicted.
 - Military: ground attack (needs co-sign), naval/air/blockade, strategic missiles
-- Covert: espionage, sabotage, cyber, disinfo (limited by intelligence pool: {intel_pool})
+- Covert: sabotage, propaganda (limited by intelligence pool: {intel_pool}). Intelligence is a separate standalone action.
 - Transactions: arms sales, coin transfers, treaties, basing rights (bilateral, both confirm)
 - Political: propaganda (+stability), repression (autocracy), public statements
 

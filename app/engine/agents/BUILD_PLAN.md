@@ -59,7 +59,7 @@ For each capability: implement → test via interface → verify output format �
 - [ ] **TEST:** War country (e.g., Sarmatia) makes attack/defend decisions
 
 ### 2E. Covert operations
-- [ ] `decide_action()` returning covert ops (sabotage, espionage, etc.)
+- [ ] `decide_action()` returning covert ops (sabotage, propaganda)
 - [ ] Context: intelligence pool, targets, detection risk
 - [ ] **TEST:** Agent with intel pool uses it strategically
 

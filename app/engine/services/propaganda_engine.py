@@ -1,4 +1,4 @@
-"""Propaganda Engine — stability manipulation via disinformation.
+"""Propaganda Engine — stability manipulation via propaganda.
 
 55% success. Two modes: boost own stability (+0.3) or destabilize
 target (-0.3). Diminishing returns per successive use against same

@@ -926,9 +926,9 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
             target = payload.get("target_country", "")
 
             # Probabilities per CARD_FORMULAS D.9
-            PROBS = {"intelligence": 1.0, "sabotage": 0.50, "propaganda": 0.55, "election_meddling": 0.40}
-            DETECT = {"intelligence": 0.30, "sabotage": 0.50, "propaganda": 0.25, "election_meddling": 0.45}
-            ATTRIB = {"intelligence": 0.30, "sabotage": 0.50, "propaganda": 0.20, "election_meddling": 0.50}
+            PROBS = {"intelligence": 1.0, "sabotage": 0.50, "propaganda": 0.55}
+            DETECT = {"intelligence": 0.30, "sabotage": 0.50, "propaganda": 0.25}
+            ATTRIB = {"intelligence": 0.30, "sabotage": 0.50, "propaganda": 0.20}
 
             success = _rng.random() < PROBS.get(op_type, 0.50)
             detected = _rng.random() < DETECT.get(op_type, 0.30)
@@ -972,11 +972,6 @@ def resolve_round(run_or_scenario: str, round_num: int) -> dict:
                 delta = 0.3 if intent == "boost" else -0.3
                 country_state[target]["stability"] = max(1, min(9, country_state[target].get("stability", 5) + delta))
                 effect = {"stability_delta": delta}
-            elif op_type == "election_meddling" and success and target in country_state:
-                delta = -_rng.randint(2, 5)
-                country_state[target]["political_support"] = max(5, country_state[target].get("political_support", 50) + delta)
-                effect = {"support_delta": delta}
-
             events.append({
                 "sim_run_id": sim_run_id, "scenario_id": scenario_id, "round_num": round_num,
                 "event_type": "covert_op",

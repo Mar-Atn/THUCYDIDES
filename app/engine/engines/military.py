@@ -1702,7 +1702,7 @@ def _apply_nuclear_l2(inp: MissileStrikeInput, result: MissileStrikeResult) -> N
 # ===========================================================================
 
 def resolve_covert_op(inp: CovertOpInput) -> CovertOpResult:
-    """Intelligence, sabotage, cyber, disinformation, election meddling.
+    """Intelligence, sabotage, propaganda.
 
     Rules (updated 2026-03-30 per action review):
     - Per-INDIVIDUAL card pools (from roles.csv: intelligence_pool, sabotage_cards, etc.)

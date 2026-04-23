@@ -80,7 +80,7 @@ COMMIT_ACTION_SCHEMA = {
                     "  call_org_meeting: organization_code, agenda (free text)\n"
                     "\n"
                     "COVERT:\n"
-                    "  covert_op: op_type (espionage|sabotage|cyber|disinformation|election_meddling), "
+                    "  covert_op: op_type (sabotage|propaganda), "
                     "target_country\n"
                     "\n"
                     "TRANSACTIONS (bilateral — counterpart must confirm):\n"
@@ -167,7 +167,7 @@ The commit_action tool accepts these action types:
 - rd_investment: invest in nuclear/ai R&D
 - public_statement: free-text public communication (war declarations, peace offers, threats, speeches)
 - call_org_meeting: call a meeting of an organization you belong to
-- covert_op: espionage/sabotage/cyber/disinformation/election_meddling against a target
+- covert_op: sabotage/propaganda against a target
 - propose_transaction: propose a bilateral deal (any terms — arms, coins, tech, treaty, basing, ceasefire)
 
 Reason briefly, then CALL commit_action with your decision. This is a REAL COMMIT — it writes to the database and represents your country's action for this round.

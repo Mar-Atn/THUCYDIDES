@@ -1010,13 +1010,6 @@ def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
             action.get("target_country"), action.get("intent", "destabilize"),
             action.get("content", ""))
 
-    if op_type == "election_meddling":
-        from engine.services.election_meddling_engine import execute_election_meddling
-        return execute_election_meddling(
-            sim_run_id, round_num, role_id, country_code,
-            action.get("target_country"), action.get("direction", "boost"),
-            action.get("candidate", ""))
-
     return {"success": False, "narrative": f"Unknown covert op_type: {op_type}"}
 
 

@@ -45,12 +45,10 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 
 **COVERT (immediate, cards consumed permanently):**
 - `covert_operation` with op_type:
-- `intelligence` — 60% success, always returns data (85% accurate if success, 45% if fail — you don't know which).
 - `sabotage` — 45% success, 2% GDP damage. Detection 40%, attribution 50%.
-- `cyber` — 50% success, 1% GDP damage.
-- `disinformation` — 55% success, -0.3 stability / -3 support to target. Low detection.
-- `election_meddling` — 40% success, 2-5% support shift. High detection risk.
+- `propaganda` — 55% success, -0.3 stability / -3 support to target. Low detection.
 - AI level adds +5% success per level. Repeated ops vs same target: -5% success, +10% detection each time.
+- Note: `intelligence` is a separate standalone action (not a covert op subtype).
 
 **POLITICAL (immediate, some require moderator confirmation):**
 - `arrest` — HoS arrests team member. Requires moderator confirmation.

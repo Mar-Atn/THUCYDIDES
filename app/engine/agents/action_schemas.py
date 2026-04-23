@@ -95,7 +95,7 @@ class OrgMeetingOrder(BaseModel):
 class CovertOpOrder(BaseModel):
     """Covert operation."""
     action_type: Literal["covert_operation"] = "covert_operation"
-    op_type: str  # intelligence | sabotage | propaganda | election_meddling
+    op_type: str  # intelligence | sabotage | propaganda
     target_country: Optional[str] = None
     target_type: Optional[str] = None  # infrastructure | nuclear_tech | military (sabotage)
     intent: Optional[str] = None  # boost | destabilize (propaganda)

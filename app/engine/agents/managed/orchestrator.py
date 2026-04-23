@@ -1213,8 +1213,7 @@ class AIOrchestrator:
                 .eq("sim_run_id", self.sim_run_id)
                 .eq("country_code", ctx.country_code)
                 .in_("action_type", [
-                    "espionage", "sabotage", "cyber_attack",
-                    "disinformation", "election_meddling", "assassination",
+                    "sabotage", "propaganda", "assassination",
                 ])
                 .execute()
             )

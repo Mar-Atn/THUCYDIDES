@@ -374,9 +374,6 @@ def build_covert_context(country: dict, role: dict, round_context: dict) -> str:
     """Build Layer 2 context for covert operations decisions."""
     intel_pool = role.get("intelligence_pool", 0)
     sabotage = role.get("sabotage_cards", 0)
-    cyber = role.get("cyber_cards", 0)
-    disinfo = role.get("disinfo_cards", 0)
-    election = role.get("election_meddling_cards", 0)
     assassination = role.get("assassination_cards", 0)
 
     covert_history = round_context.get("covert_history", [])
@@ -386,18 +383,13 @@ def build_covert_context(country: dict, role: dict, round_context: dict) -> str:
 ## Your Intelligence Resources
 - Intelligence Pool: {intel_pool}
 - Sabotage Cards: {sabotage}
-- Cyber Cards: {cyber}
-- Disinformation Cards: {disinfo}
-- Election Meddling Cards: {election}
 - Assassination Cards: {assassination}
 
 ## Covert Op Types
-- **espionage**: Gather intelligence on target. Low risk, low cost.
 - **sabotage**: Damage infrastructure/military assets. Medium risk, high impact.
-- **cyber**: Disrupt technology, communications, finances. Medium risk.
-- **disinformation**: Reduce target's stability/support. Low risk, gradual effect.
-- **election_meddling**: Influence elections in target country. High risk, high reward.
+- **propaganda**: Reduce target's stability/support. Low risk, gradual effect.
 - **assassination**: Eliminate key figure. Very high risk, dramatic consequences.
+Note: `intelligence` is a separate standalone action, not a covert op subtype.
 
 ## Detection Risk
 - Each op has ~20-40% base detection chance depending on type
@@ -580,7 +572,7 @@ COVERT_INSTRUCTION = """Decide whether to launch a covert operation this round.
 Return a JSON object:
 {
   "operation": {
-    "type": "<espionage|sabotage|cyber|disinformation|election_meddling|assassination>",
+    "type": "<sabotage|propaganda|assassination>",
     "target_country": "<country_id>",
     "detail": "<brief description>"
   },
@@ -847,8 +839,7 @@ async def decide_covert(
 
     # Validate op type
     if result.get("operation"):
-        valid_ops = {"espionage", "sabotage", "cyber", "disinformation",
-                     "election_meddling", "assassination"}
+        valid_ops = {"sabotage", "propaganda", "assassination"}
         op = result["operation"]
         if isinstance(op, dict) and op.get("type") not in valid_ops:
             result["operation"] = None

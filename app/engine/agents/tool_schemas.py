@@ -192,7 +192,7 @@ COMMIT_ACTION_SCHEMA: dict = {
                     "  call_org_meeting: organization_code, agenda (free text)\n"
                     "\n"
                     "COVERT:\n"
-                    "  covert_op: op_type (espionage|sabotage|cyber|disinformation|election_meddling), "
+                    "  covert_op: op_type (sabotage|propaganda), "
                     "target_country\n"
                     "\n"
                     "TRANSACTIONS (bilateral — counterpart must confirm):\n"
