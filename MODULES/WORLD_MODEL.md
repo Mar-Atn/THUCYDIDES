@@ -196,7 +196,7 @@ Every action has: a canonical name, required fields, an engine that processes it
 | `naval_bombardment` | 10% hit per naval unit, sea → adjacent land hex. Each hit destroys one random ground defender. |
 | `launch_missile_conventional` | Two-phase: AD interception (50% per AD unit in zone), then hit roll (75% flat). 4 target choices (military, infrastructure, nuclear_site, AD). Range by nuclear tier: T1=2 hex, T2=4 hex, T3=global. Missile consumed on firing. |
 
-**Combat modifiers (ground):** AI L3 (+1 die), AI L4 (+2 dice, 50% chance determined at level-up), low morale (-1 if stability ≤3), die-hard terrain (+1 defender), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land).
+**Combat modifiers (ground):** AI L4 (+1 die, 50% chance determined at level-up), low morale (-1 if stability ≤3), die-hard terrain (+1 defender), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land). *Note: technology.py defines L3=+1 and L4=+2, but military.py combat resolution only implements L4=+1. See Appendix for divergence.*
 
 #### Military — Non-Combat (7 actions)
 
@@ -463,7 +463,7 @@ Cards-based system. Success rates per type (see Section 5). Detection and attrib
 | Track | Levels | Progression Thresholds | Effects |
 |-------|--------|----------------------|---------|
 | **Nuclear** | 0→1→2→3 | 0.60 / 0.80 / 1.00 | Unlocks nuclear test, then launch. Missile range increases: T1=2 hex, T2=4 hex, T3=global. |
-| **AI** | 0→1→2→3→4 | 0.20 / 0.40 / 0.60 / 1.00 | +5% covert ops per level. L2: +0.3% GDP. L3: +1.0% GDP, +1 combat die. L4: +2.5% GDP, +2 combat dice (50% chance). |
+| **AI** | 0→1→2→3→4 | 0.20 / 0.40 / 0.60 / 1.00 | +5% covert ops per level. L2: +0.5% GDP. L3: +1.5% GDP. L4: +3.0% GDP. Combat bonus: see note below. |
 
 **R&D formula:** `progress += (investment / GDP) × 0.8 × rare_earth_factor`
 
@@ -481,8 +481,11 @@ These were discovered during verification and need resolution:
 |-------|-----------|-----------|-------------------|
 | ground_move leave-1-behind | Must leave 1 unit behind | Does not enforce | Add enforcement for foreign occupied hexes |
 | Phase count | 2 phases (design intent) | 3 states in code (A, B, inter_round) | Align code terminology or document inter_round as Phase B sub-step |
+| AI combat bonus | technology.py: L3=+1, L4=+2 | military.py: only L4=+1, L3 ignored | Align combat code with technology spec |
 | Legacy v1 vs v2 combat | v2 is canonical | Both exist in military.py | Remove or clearly deprecate v1 functions |
 
 ---
+
+*Note on country-specific mechanics:* Some engine rules reference specific countries by name (assassination bonuses, semiconductor dependency, intelligence powers). These are hardcoded engine constants — changing them requires code changes, not template configuration. They reflect asymmetric game design.
 
 *Version 2.0 DRAFT — Built from verified engine code (economic.py 2191 lines, military.py 3076 lines, political.py, technology.py), DB schema audit (54 tables), module SPECs (M4, M6, M9), and MODULE_REGISTRY. All constants verified with line numbers. Template-specific data removed — only world rules remain.*
