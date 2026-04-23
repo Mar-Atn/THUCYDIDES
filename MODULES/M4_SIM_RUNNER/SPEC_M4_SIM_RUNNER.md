@@ -1,7 +1,7 @@
 # M4 — Sim Runner & Facilitator Controls SPEC
 
-**Version:** 1.1 | **Date:** 2026-04-18
-**Status:** DRAFT — awaiting Marat review
+**Version:** 2.0 | **Date:** 2026-04-23
+**Status:** STAGE GATE PASSED — aligned with World Model v3.0
 **Dependencies:** M1 (engines), M2 (contracts/dispatcher), M3 (data), M9 (template/SimRun), M10.1 (auth)
 
 ---
@@ -49,25 +49,24 @@ Free gameplay. Discussions, meetings, actions submitted.
 - Triggers AI agents 2-3 times during phase
 - Sends explicit "submit your regular decisions now" to AI agents near end of round
 
-### Phase B: Processing (automated, 5-12 minutes)
-World model engines process all round data.
+### Phase B: Processing + Movement (~10 minutes)
+Two PARALLEL activities: (1) World model engines process all round data, (2) Unit movement window — military repositioning. `move_units` is the ONLY player action allowed. ~10 minutes. Moderator reviews results and advances to next round.
 
-**Sequence (from CONTRACT_ROUND_FLOW):**
+**Engine sequence (from CONTRACT_ROUND_FLOW):**
 1. Economic engine (oil → GDP → revenue → budget → production → tech → inflation → debt → crisis → momentum)
 2. Political engine (stability, elections if scheduled, health events)
 3. Results written to `country_states_per_round` and `global_state_per_round`
 4. Observatory events generated (narrative, summaries)
-5. Moderator reviews results, can adjust before publishing
-6. Results published → all participants see updated world
 
-### Inter-Round: Unit Movement (5-10 minutes)
-- Only time unit movement is submitted
+**Unit movement (concurrent with engine processing):**
 - Military commanders and HoS can reposition forces
 - Map updates in real-time as units move
 - Timer-based, moderator can extend
 
+**Completion:** Phase B auto-completes. Results are published automatically. Future enhancement: moderator review gate + AI-powered results commentary.
+
 ### Round End → Next Round
-- Inter-round closes
+- Phase B closes
 - Round counter advances
 - Key events for new round triggered (mandatory meetings, election nominations)
 - Phase A of next round begins
@@ -91,9 +90,13 @@ Some participant actions require moderator approval before execution:
 | **Change Leader** | Changes team leadership — high-impact, emotional | Same flow |
 | **Combat (ground, naval)** | Optional: moderator may input real dice results | If dice mode on: submitted → moderator inputs dice → result calculated |
 
-**Auto-approve mode:** for testing and AI-only runs, moderator can toggle "auto-approve all" which bypasses the confirmation queue.
+**auto_approve:** skips pending_actions confirmation queue. All actions that would normally require moderator approval execute immediately. For testing and AI-only runs.
 
-**Auto-attack mode:** separate toggle next to auto-approve. When OFF (default), all combat actions (ground_attack, naval_combat, air_strike) go through the moderator confirmation queue (pending_actions). When ON, combat actions execute immediately without moderator approval. DB column: `sim_runs.auto_attack` (BOOLEAN DEFAULT FALSE). Toggled via `POST /api/sim/{id}/mode` with `auto_attack: true/false`.
+**auto_attack:** combat executes immediately. When OFF (default), combat goes to the pending queue regardless of dice_mode. When ON, combat actions execute without moderator approval. DB column: `sim_runs.auto_attack` (BOOLEAN DEFAULT FALSE). Toggled via `POST /api/sim/{id}/mode` with `auto_attack: true/false`.
+
+**dice_mode:** physical dice vs computed. Only affects `ground_attack` and `naval_combat` when `auto_attack` is OFF. DB column: `sim_runs.dice_mode` (BOOLEAN). Toggled via `POST /api/sim/{id}/mode` with `dice_mode: true/false`.
+
+**change_leader:** goes through its own voting flow, NOT the pending_actions queue. Participants vote, votes are tallied. Future: add final moderator confirmation after voting completes.
 
 **Timeout:** if moderator doesn't respond within 5 minutes, system can auto-approve (configurable).
 
@@ -101,11 +104,11 @@ Some participant actions require moderator approval before execution:
 
 ## 4. Combat Dice
 
-**Dice Mode Toggle** (Facilitator Dashboard, Pending Actions area): button next to auto-attack toggle. DB column: `sim_runs.dice_mode` (BOOLEAN). Toggled via `POST /api/sim/{id}/mode` with `dice_mode: true/false`.
+**Dice Mode Toggle** (Facilitator Dashboard, Pending Actions area): button next to auto-attack toggle.
 
 Two modes:
 - **Automatic** (default, label "Dice: Auto"): engine rolls probabilistic dice internally
-- **Physical dice** (label "Dice: REAL", red pulsing): moderator enables this globally. When combat is submitted:
+- **Physical dice** (label "Dice: REAL", red pulsing): moderator enables this globally. Only applies to `ground_attack` and `naval_combat` when `auto_attack` is OFF. When combat is submitted:
   1. System calculates how many dice each side rolls (based on units + modifiers)
   2. Moderator sees: "Attacker rolls 3 dice, Defender rolls 2 dice"
   3. Participants physically roll at the table
@@ -115,20 +118,34 @@ Two modes:
 
 ---
 
-## 5. Timer & Round Control
+## 5. State Machine, Timer & Round Control
+
+### State Machine
+All valid sim states: `setup` → `pre_start` → `active` → `processing` → `paused` → `completed` | `aborted`
+
+| State | Description |
+|---|---|
+| **setup** | SimRun created, not yet configured |
+| **pre_start** | Participant assignment, Oracle intro check |
+| **active** | Phase A — free gameplay, actions submitted |
+| **processing** | Phase B — engines running, unit movement window |
+| **paused** | Simulation paused. Allows `nuclear_authorize` and `nuclear_intercept` actions only. |
+| **completed** | Simulation ended normally |
+| **aborted** | Simulation terminated early |
+
+Transitions: `setup` → `pre_start` → `active` ⇄ `processing` (cycles per round). From `active` or `processing`: can transition to `paused`, `completed`, or `aborted`. From `paused`: can resume to `active`.
 
 ### Manual mode (default)
 - Moderator clicks to start each phase
 - Timer counts down but does NOT auto-advance
 - Shows OVERTIME in red if timer expires — moderator decides when to move on
-- Moderator clicks "End Phase A" / "End Inter-Round" / "Next Round"
+- Moderator clicks "End Phase A" / "End Phase B" / "Next Round"
 
 ### Automatic mode
 - Moderator enables at sim start or per-round
 - Timer auto-advances phases when it expires
 - Phase B triggers automatically after Phase A ends
-- Inter-round window runs automatically
-- Next round starts automatically
+- Next round starts automatically after Phase B completes
 - Moderator can still pause, extend, or intervene at any point
 
 ### Timer mechanics (from KING pattern)
@@ -253,7 +270,7 @@ M4 doesn't build the AI agent logic (that's M5). M4 provides:
 - Phase A start: first trigger (AI assesses situation, may initiate actions)
 - Phase A mid-point: second trigger (AI reacts to what's happened so far)
 - Phase A near-end: explicit "submit regular decisions" trigger
-- Inter-round: AI submits unit movement orders
+- Phase B: AI submits unit movement orders
 
 **Monitoring:** Dashboard shows per-agent status (idle/busy/error), action queue depth, current activity.
 
@@ -340,64 +357,85 @@ Participant submits action
 
 ---
 
-## 12. API Endpoints (New)
+## 12. API Endpoints
+
+### Sim Lifecycle
+| Endpoint | Method | What |
+|---|---|---|
+| `POST /api/sim/{id}/start` | POST | Transition setup → active, start Phase A of R1 |
+| `POST /api/sim/{id}/pre-start` | POST | Transition to pre_start state |
+| `POST /api/sim/{id}/pause` | POST | Pause simulation |
+| `POST /api/sim/{id}/resume` | POST | Resume simulation |
+| `POST /api/sim/{id}/end` | POST | End simulation (→ completed) |
+| `POST /api/sim/{id}/abort` | POST | Abort simulation (→ aborted) |
+| `POST /api/sim/{id}/restart` | POST | Restart simulation with full cleanup |
+| `POST /api/sim/{id}/rollback` | POST | Rollback to a specific round |
 
 ### Round Control
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/start` | POST | Moderator | Transition setup → active, start Phase A of R1 |
-| `/api/sim/{id}/phase/end` | POST | Moderator | End current phase, trigger next |
-| `/api/sim/{id}/phase/extend` | POST | Moderator | Add minutes to current phase |
-| `/api/sim/{id}/phase/pause` | POST | Moderator | Pause timer |
-| `/api/sim/{id}/phase/resume` | POST | Moderator | Resume timer |
-| `/api/sim/{id}/end` | POST | Moderator | End simulation |
-| `/api/sim/{id}/mode` | POST | Moderator | Toggle modes: `auto_approve`, `auto_attack`, `dice_mode` (bool fields in body) |
+| Endpoint | Method | What |
+|---|---|---|
+| `POST /api/sim/{id}/phase/end` | POST | End current phase, trigger next |
+| `POST /api/sim/{id}/phase/extend` | POST | Add minutes to current phase |
+| `POST /api/sim/{id}/phase/back` | POST | Go back one phase |
+| `POST /api/sim/{id}/mode` | POST | Toggle modes: `auto_approve`, `auto_attack`, `dice_mode` (bool fields in body) |
 
 ### Actions
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/action` | POST | Any authenticated | Submit an action (validated against role_actions) |
-| `/api/sim/{id}/action/{action_id}/confirm` | POST | Moderator | Approve queued action |
-| `/api/sim/{id}/action/{action_id}/reject` | POST | Moderator | Reject queued action |
-| `/api/sim/{id}/combat/{id}/dice` | POST | Moderator | Input physical dice results |
+| Endpoint | Method | What |
+|---|---|---|
+| `POST /api/sim/{id}/action` | POST | Submit an action (validated against role_actions) |
+| `GET /api/sim/{id}/pending` | GET | List pending actions awaiting confirmation |
+| `POST /api/sim/{id}/pending/{action_id}/confirm` | POST | Approve queued action |
+| `POST /api/sim/{id}/pending/{action_id}/reject` | POST | Reject queued action |
+| `GET /api/sim/{id}/pending/{action_id}/status` | GET | Check status of a pending action |
 
-### Overrides
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/override/state` | PUT | Moderator | Adjust any country/world state value |
-| `/api/sim/{id}/override/action` | POST | Moderator | Submit action as any role |
-| `/api/sim/{id}/broadcast` | POST | Moderator | Send announcement to all |
+### Combat
+| Endpoint | Method | What |
+|---|---|---|
+| `GET /api/sim/{id}/attack/valid-targets` | GET | Returns valid target hexes (`?unit_id=X`). Uses `hex_range()` BFS + `ATTACK_RANGE` per unit type. |
+| `GET /api/sim/{id}/attack/preview` | GET | Preview attack outcome before committing |
 
-### Participants
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/participants` | GET | Moderator | List all assigned participants |
-| `/api/sim/{id}/participants/assign` | POST | Moderator | Assign user to role |
-| `/api/sim/{id}/participants/unassign` | POST | Moderator | Remove user from role |
+### Nuclear Chain
+| Endpoint | Method | What |
+|---|---|---|
+| `GET /api/sim/{id}/nuclear` | GET | Get nuclear status for all countries |
+| `GET /api/sim/{id}/nuclear/active` | GET | Get active nuclear launches |
+| `POST /api/sim/{id}/nuclear/{id}/resolve` | POST | Resolve a nuclear launch |
 
-### AI
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/ai/trigger` | POST | Moderator/System | Trigger AI agent round |
-| `/api/sim/{id}/ai/status` | GET | Moderator | Get all AI agent statuses |
-| `/api/sim/{id}/ai/{role_id}/pause` | POST | Moderator | Pause specific AI agent |
+### Leadership
+| Endpoint | Method | What |
+|---|---|---|
+| `GET /api/sim/{id}/leadership-votes` | GET | List leadership vote sessions |
+| `POST /api/sim/{id}/leadership-votes/{id}/cast` | POST | Cast a leadership vote |
+| `POST /api/sim/{id}/leadership-votes/{id}/resolve` | POST | Resolve a leadership vote |
 
-### Attack Targeting
-| Endpoint | Method | Who | What |
-|---|---|---|---|
-| `/api/sim/{id}/attack/valid-targets` | GET | Moderator | Returns valid target hexes for a unit (`?unit_id=X`). Uses `hex_range()` BFS + `ATTACK_RANGE` per unit type. |
-| `/api/sim/{id}/map/hex-control` | GET | Any | Returns occupied hexes (from `hex_control` table) for territory overlay on map. |
+### Data (read-only)
+| Endpoint | Method | What |
+|---|---|---|
+| `GET /api/sim/{id}/state` | GET | Current simulation state |
+| `GET /api/sim/{id}/countries` | GET | All countries in sim |
+| `GET /api/sim/{id}/country/{id}` | GET | Single country detail |
+| `GET /api/sim/{id}/roles` | GET | All roles in sim |
+| `GET /api/sim/{id}/world` | GET | World/global state |
+| `GET /api/sim/{id}/relationships` | GET | Country relationships |
+| `GET /api/sim/{id}/sanctions` | GET | Active sanctions |
+| `GET /api/sim/{id}/organizations` | GET | International organizations |
+| `GET /api/sim/{id}/deployments` | GET | Military deployments |
+| `GET /api/sim/{id}/blockades` | GET | Active blockades |
+| `GET /api/sim/{id}/zones` | GET | Geographic zones |
+| `GET /api/sim/{id}/map/hex-control` | GET | Occupied hexes for territory overlay |
 
-### Map Attack Mode
-The map supports an attack interaction mode via query parameters and postMessage API:
-- **Entry:** `?mode=attack&country=X` — enables attack mode for a country
-- **postMessage commands (parent → map):**
-  - `highlight-hexes` — highlight valid target hexes on the map
-  - `clear-highlights` — remove all highlights
-  - `navigate-theater` — pan map to a theater
-  - `refresh-units` — reload unit positions after combat
-- **postMessage events (map → parent):**
-  - `hex-click` — user clicked a hex, returns coordinates
+### Moderator Tools
+| Endpoint | Method | What |
+|---|---|---|
+| `POST /api/sim/{id}/recompute-actions` | POST | Recompute available actions for all roles |
+
+### Planned / DEFER
+| Endpoint | Method | What |
+|---|---|---|
+| `PUT /api/sim/{id}/override/state` | PUT | Moderator state override (not yet built) |
+| `POST /api/sim/{id}/broadcast` | POST | Moderator announcement (not yet built) |
+
+> **Note:** Meeting endpoints, AI endpoints, map renderer endpoints, and auth endpoints belong to M5/M6/M8/M10.1 SPECs respectively.
 
 ### Attack Infrastructure (engine)
 - **`hex_range(row, col, distance)`** in `engine/map_config.py` — BFS range calculator returning all hexes within `distance` steps
@@ -411,7 +449,7 @@ The map supports an attack interaction mode via query parameters and postMessage
 | # | Question | Decision |
 |---|----------|----------|
 | Q1 | AI triggers per Phase A | **3 triggers:** (1) Phase A start, (2) midpoint, (3) near-end for regular decisions. Configurable later. |
-| Q2 | Phase B review | **Quick sanity check.** Moderator sees summary, can adjust values if something looks wrong. Not a full approval gate. |
+| Q2 | Phase B review | **Auto-completes.** Results published automatically. Future enhancement: moderator review gate + AI-powered results commentary. |
 | Q3 | Participant lobby | **Role brief immediately** after assignment, then "Waiting for simulation to start" screen until moderator presses Start. |
 | Q4 | Multiple facilitators | **Single moderator** for now. Read-only observer mode for second facilitator can be added later. |
 | Q5 | Dashboard layout | **Events-first, not map-first.** Map accessible via link, not embedded. Priority: pending actions → event feed → AI status → participants. |
@@ -419,14 +457,14 @@ The map supports an attack interaction mode via query parameters and postMessage
 
 ---
 
-*SPEC approved in principle (2026-04-16). Phase 1 implementation begins.*
+*SPEC v2.0 — stage gate passed (2026-04-23). Aligned with World Model v3.0.*
 
 ---
 
 ## 14. Build Progress (Live)
 
 ### Phase 1: Foundation — DONE (2026-04-16)
-- State machine (`sim_run_manager.py`): setup → pre_start → active → processing → inter_round → completed
+- State machine (`sim_run_manager.py`): setup → pre_start → active → processing → paused → completed → aborted
 - 12 facilitator control API endpoints in `main.py`
 - Facilitator Dashboard shell with timer, phase controls, event feed
 - Supabase Python SDK `.update()` chain fix (no `.select().single()`)
