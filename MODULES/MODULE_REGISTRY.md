@@ -42,66 +42,83 @@
 
 ---
 
-## ACTION_NAMING — Canonical 33 Action Types (2026-04-17)
+## ACTION_NAMING — Canonical Action Types (verified 2026-04-22)
 
-Source of truth: `role_actions.action_id` in DB (M9).
-Dispatcher: `engine/services/action_dispatcher.py` — fully aligned.
-Category map: `engine/main.py:ACTION_CATEGORIES` — fully aligned.
+Source of truth: this section. All consumers (dispatcher, schemas, AI tools, frontend) must use these exact names.
+Dispatcher: `engine/services/action_dispatcher.py` — aligned.
+Schemas: `engine/agents/action_schemas.py` — aligned (canonical names only, no aliases).
+Category map: `engine/main.py:ACTION_CATEGORIES` — aligned.
 
-### Military (13)
-| DB action_id | Category | Engine | Status |
+### Military — Combat (6)
+| Canonical Name | Category | Engine | Status |
 |---|---|---|---|
-| `ground_attack` | military | `engines/military.resolve_ground_combat` | **Working** — DB units, losses applied |
-| `air_strike` | military | `engines/military.resolve_air_strike` | **Working** — DB units, losses applied |
-| `naval_combat` | military | `engines/military.resolve_naval_combat` | **Working** — 1v1 dice, ties→defender, DB losses |
-| `naval_bombardment` | military | `engines/military.resolve_naval_bombardment` | **Working** — 10% per naval unit, DB losses |
-| `naval_blockade` | military | `services/blockade_engine` | **Working** — establish/lift/reduce/integrity check, 3 chokepoints, auto-integrity after combat |
-| `launch_missile_conventional` | military | `engines/military.resolve_missile_strike` | **Working** — two-phase model: AD interception (50% per AD) then hit roll (75% flat), 4 targets (military/infrastructure/nuclear_site/AD), range by nuc tier (T1≤2, T2≤4, T3 global), missile consumed |
+| `ground_attack` | military | `engines/military.resolve_ground_combat` | **Working** |
+| `ground_move` | military | `action_dispatcher._ground_advance` | **Working** — unopposed advance, 100% success, captures trophies, records hex_control |
+| `air_strike` | military | `engines/military.resolve_air_strike` | **Working** |
+| `naval_combat` | military | `engines/military.resolve_naval_combat` | **Working** |
+| `naval_bombardment` | military | `engines/military.resolve_naval_bombardment` | **Working** |
+| `launch_missile_conventional` | military | `engines/military.resolve_missile_strike` | **Working** |
+
+### Military — Non-Combat (7)
+| Canonical Name | Category | Engine | Status |
+|---|---|---|---|
+| `move_units` | military | `engines/movement.process_movements` | **Working** — peaceful repositioning, allowed in Phase A + inter-round |
+| `naval_blockade` | military | `services/blockade_engine` | **Working** — establish/lift/reduce, 3 chokepoints |
 | `basing_rights` | military | `services/basing_rights_engine` | Routed |
-| `martial_law` | military | `services/martial_law_engine` | **Working** — 4 eligible countries (Sarmatia 10, Cathay 10, Persia 8, Ruthenia 6), deployments+countries tables, one-time enforcement with martial_law_declared flag |
-| `nuclear_test` | military | `engines/military.resolve_nuclear_test` | Routed (Input object needed) |
-| `move_units` | military | `services/action_dispatcher._process_movement` → `engines/movement.process_movements` | **Working** — dispatcher adapter (deployments ↔ movement engine field mapping), validator (`movement_validator.validate_movement_decision`), batch processing. Deploy from reserve, withdraw to reserve, reposition (hex→hex). Auto-embark on friendly carrier (1 ground + 2 tactical_air capacity). Auto-debark on land move. Basing rights respected. Territory validation (own/basing/previously-occupied). Batch-level: duplicate unit detection, destroyed/not-owned checks. Phase restriction: inter_round only. 18 L2 tests passing. |
+| `martial_law` | military | `services/martial_law_engine` | **Working** |
+| `nuclear_test` | military | `engines/military.resolve_nuclear_test` | Routed |
+| `nuclear_launch_initiate` | military | `orchestrators/nuclear_chain` | Wired |
 | `nuclear_authorize` | military | `orchestrators/nuclear_chain` | Wired |
 | `nuclear_intercept` | military | `orchestrators/nuclear_chain` | Wired |
-| `nuclear_launch_initiate` | military | `orchestrators/nuclear_chain` | Wired |
 
 ### Economic (6)
-| DB action_id | Category | Engine | Status |
+| Canonical Name | Category | Engine | Status |
 |---|---|---|---|
-| `set_budget` | economic | Batch → Phase B | Queued to `agent_decisions` |
-| `set_tariffs` | economic | Batch → Phase B | Queued to `agent_decisions` |
-| `set_sanctions` | economic | Batch → Phase B | Queued to `agent_decisions` |
-| `set_opec` | economic | Batch → Phase B | Queued to `agent_decisions` |
-| `propose_transaction` | economic | `services/transaction_engine` | Routed |
-| `accept_transaction` | economic | `services/transaction_engine` | Routed |
+| `set_budget` | economic | Batch → Phase B | **Working** |
+| `set_tariffs` | economic | Batch → Phase B | **Working** |
+| `set_sanctions` | economic | Batch → Phase B | **Working** |
+| `set_opec` | economic | Batch → Phase B | **Working** |
+| `propose_transaction` | diplomatic | `services/transaction_engine` | Routed |
+| `accept_transaction` | diplomatic | `services/transaction_engine` | Routed |
 
-### Diplomatic (6)
-| DB action_id | Category | Engine | Status |
+### Diplomatic (5)
+| Canonical Name | Category | Engine | Status |
 |---|---|---|---|
 | `public_statement` | diplomatic | Observatory log only | **Working** |
-| `declare_war` | diplomatic | `action_dispatcher._declare_war()` | **Working** — sets both directions at_war, observatory event |
+| `declare_war` | diplomatic | `action_dispatcher._declare_war()` | **Working** |
 | `propose_agreement` | diplomatic | `services/agreement_engine` | Routed |
 | `sign_agreement` | diplomatic | `services/agreement_engine` | Routed |
-| `call_org_meeting` | diplomatic | — | Stub |
-| `meet_freely` | diplomatic | — | Stub |
+| `call_org_meeting` | diplomatic | `action_dispatcher._create_meeting_invitation` | Stub→Working |
 
 ### Covert (2)
-| DB action_id | Category | Engine | Status |
+| Canonical Name | Category | Engine | Status |
 |---|---|---|---|
-| `covert_operation` | covert | `services/*_engine` (by op_type) | Routed |
-| `intelligence` | covert | `services/intelligence_engine` | Routed |
+| `covert_operation` | covert | `engines/military` (by op_type) | Routed |
+| `intelligence` | covert | AI-generated analytical report | Routed |
 
 ### Political (6)
-| DB action_id | Category | Engine | Status |
+| Canonical Name | Category | Engine | Status |
 |---|---|---|---|
-| `arrest` | political | `services/arrest_engine` | Routed (requires confirmation) |
-| `assassination` | political | `services/assassination_engine` | Routed (requires confirmation) |
+| `arrest` | political | `services/arrest_engine` | Routed (moderator confirmation) |
+| `assassination` | political | `engines/political.resolve_assassination` | Routed (moderator confirmation) |
 | `change_leader` | political | `services/change_leader` | **Working** (3-phase voting) |
 | `reassign_types` | political | `services/power_assignments` | Routed |
 | `self_nominate` | political | `services/election_engine` | Routed |
 | `cast_vote` | political | `services/election_engine` | Routed |
 
-### Stale Names REMOVED (2026-04-16)
+### Reactive / System Actions (not player-initiated)
+| Canonical Name | Category | Trigger |
+|---|---|---|
+| `release_arrest` | political | Moderator releases arrested role |
+| `respond_meeting` | diplomatic | Response to meeting invitation |
+| `invite_to_meet` | diplomatic | Meeting invitation (human UI) |
+| `set_meetings` | diplomatic | Meeting setup (alternative path) |
+| `meet_freely` | diplomatic | Free meeting request |
+| `withdraw_nomination` | political | Withdraw from election |
+| `cast_election_vote` | political | Cast vote (variant routing) |
+| `resolve_election` | moderator | Moderator resolves election |
+
+### Stale Names — NEVER USE
 `declare_attack`, `launch_missile`, `blockade`, `covert_op`, `reassign_powers`, `submit_nomination`, `call_early_elections`, `propose_exchange`, `respond_exchange`, `set_tariff`, `set_sanction`, `set_opec_production`
 
 ---

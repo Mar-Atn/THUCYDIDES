@@ -64,9 +64,23 @@ The template data lives in the **default SimRun** (UUID `00000000-...-0000000000
 
 ### Sim Run
 
-When a moderator creates a SimRun, the server copies all game tables from the source SimRun, re-keying `sim_run_id`. Tables copied: countries, roles, role_actions, relationships, zones, deployments, organizations, org_memberships, sanctions, tariffs, world_state (round 0), artefacts.
+When a moderator creates a SimRun, they go through a configuration wizard:
 
-From that point, the SimRun's data is independent and mutable during play.
+1. **Select Template** — choose the base world design
+2. **Configure** — set SimRun name, logo, description
+3. **Countries & Roles** — toggle countries and roles ON/OFF, set each role as Human or AI
+4. **Schedule** — adjust timing:
+   - Total number of rounds
+   - Duration of Round 1 (minutes)
+   - Duration of subsequent rounds (minutes)
+   - Break between rounds (minutes)
+   - Introduction, reflection, debriefing durations
+   - Key event timing (which round for elections, mandatory meetings)
+5. **Review & Create** — server copies all game tables from the template SimRun, re-keying `sim_run_id`
+
+Tables copied: countries, roles, role_actions, relationships, zones, deployments, organizations, org_memberships, sanctions, tariffs, world_state (round 0), artefacts.
+
+From that point, the SimRun's data is independent and mutable during play. The moderator can further edit the SimRun before starting.
 
 **Sim run states:** `setup` → `pre_start` → `active` ↔ `paused` → `processing` → `active` (next round) → ... → `completed` or `aborted`
 
