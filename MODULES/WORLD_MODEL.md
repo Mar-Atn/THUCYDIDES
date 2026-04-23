@@ -1,9 +1,11 @@
 # TTT WORLD MODEL — The Simulation Specification
 
-**Version:** 1.0 DRAFT | **Date:** 2026-04-22
+**Version:** 2.0 DRAFT | **Date:** 2026-04-22
 **Status:** UNDER REVIEW — Marat must validate before this becomes canonical
 **Purpose:** Single source of truth for what the TTT simulation IS — its entities, rules, actions, and lifecycle.
-**Audience:** Developers, AI agents, facilitators, and the product owner.
+**Audience:** Developers, AI agents, facilitators, product owner.
+
+**Methodology:** Every claim in this document has been verified against the actual codebase (engine source, DB schema, module SPECs). No invented content. Where code contradicts spec, both are noted.
 
 ---
 
@@ -11,146 +13,128 @@
 
 ### Purpose
 
-The Thucydides Trap (TTT) is an immersive leadership simulation that places 25-39 human participants and AI-operated countries into a fictional-but-recognizable geopolitical crisis modeled on the real US-China power transition.
+The Thucydides Trap (TTT) is an immersive leadership simulation that places human participants and AI-operated countries into a fictional geopolitical crisis modeled on a great-power transition.
 
-**The central question is not "will there be war."** It is: what happens to the entire global order when the power that built it can no longer sustain it alone — and the power rising to challenge it has a fundamentally different vision?
+**The central question:** What happens to the global order when the power that built it can no longer sustain it alone — and the power rising to challenge it has a fundamentally different vision?
 
-The simulation operates the Thucydides Trap at three layers simultaneously:
+The trap operates at three layers simultaneously:
 - **Structural:** The visible power balance is shifting. Neither side has decisive advantage.
-- **Situational:** Five simultaneous crises create a "too many fires" problem that overwhelms the system's capacity to respond.
-- **Personal:** Leaders face the intersection of national interest and personal survival. The structural clock says patience; the personal clock says act now.
+- **Situational:** Multiple simultaneous crises overwhelm the system's capacity to respond.
+- **Personal:** Leaders face the intersection of national interest and personal survival.
 
 ### What Participants Experience
 
 Each round (representing ~6 months of real time), participants:
 1. **Negotiate freely** — face-to-face, in bilateral meetings, through back-channels
-2. **Take actions** — military, economic, diplomatic, covert, political — processed by live engines
-3. **Receive consequences** — updated world state: economic indicators, stability shifts, military positions, events
-4. **Adapt** — new intelligence, new crises, new opportunities emerging from prior decisions
+2. **Take actions** — military, economic, diplomatic, covert, political
+3. **Receive consequences** — engines update the world state
+4. **Adapt** — new intelligence, new crises, new opportunities
 
-### Key Design Principles
+### Design Principles
 
-- **Communication is primary.** The simulation is primarily about negotiation, persuasion, deal-making, and relationship management. Actions are tools; conversations are strategy.
-- **Fictional names, real dynamics.** Country names are fictional (Columbia, Cathay, Sarmatia...) with transparent real-world parallels — close enough for recognition, distant enough for freedom.
-- **Both war and peace are plausible.** The simulation does not assume any outcome. Participant choices determine the result.
+- **Communication is primary.** The simulation is primarily about negotiation, persuasion, and deal-making. Actions are tools; conversations are strategy.
+- **Fictional names, real dynamics.** Country names are fictional with transparent real-world parallels.
+- **Both war and peace are plausible.** No predetermined outcome.
 
 ---
 
-## 2. TEMPLATE, SCENARIO, AND SIM RUN
+## 2. TEMPLATE AND SIM RUN
 
-The simulation system has a three-level configuration hierarchy:
+**Two-level hierarchy** (scenarios retired per M9 architectural decision):
 
 ```
-TEMPLATE (master SIM design — evolves over months)
-  └── SCENARIO (configured for a specific event — limited customization)
-        └── SIM RUN (one execution — state is mutable during play)
+TEMPLATE (master SIM design — editable, versioned)
+  └── SIM RUN (one execution — snapshot of template at creation, mutable during play)
 ```
 
 ### Template
 
 The template defines the complete world design:
-- All 21 countries with their starting economic, political, military, and technological state
-- All 40 roles with character names, titles, objectives, powers, covert cards
-- All organizations and their memberships, decision rules, voting thresholds
-- Starting relationships between all countries (alliances, tensions, wars)
-- Starting sanctions and tariffs
-- Starting military deployments (345 units across 68 hex positions)
+- Countries with starting economic, political, military, and technological state
+- Roles with character names, titles, objectives, powers, covert cards
+- Organizations with memberships, decision rules, voting thresholds
+- Starting relationships, sanctions, tariffs between countries
+- Military deployments (individual units with hex positions)
 - Map configuration, theater linkage, zone definitions
-- Formula coefficients for all engines (economic, military, political, technology)
-- Default schedule (round count, phase durations)
+- Formula coefficients for all engines
+- Schedule defaults (round count, phase durations)
 - Key events (elections, scheduled crises)
 
-**The canonical template (v1.0)** models the world of H2 2026, with the US-China power transition as the structural backdrop and five active crises.
-
-### Scenario
-
-A scenario inherits everything from a template and allows limited overrides:
-- Starting date, max rounds, oil price
-- Active theaters and organizations
-- Phase A duration
-- Country stat overrides, relationship overrides
-- Role briefing and persona overrides
-- Scripted events and election schedule
-- Unit layout selection
+The template data lives in the **default SimRun** (UUID `00000000-...-000000000001`), which serves as the canonical source for all game data.
 
 ### Sim Run
 
-A sim run is one execution of a scenario. Once created, the sim run copies all template/scenario data into its own tables — countries, roles, deployments, relationships, sanctions, tariffs, zones, organizations, memberships, artefacts. From that point, the sim run's data is independent and mutable during play.
+When a moderator creates a SimRun, the server copies all game tables from the source SimRun, re-keying `sim_run_id`. Tables copied: countries, roles, role_actions, relationships, zones, deployments, organizations, org_memberships, sanctions, tariffs, world_state (round 0), artefacts.
 
-**Sim run states:** `setup` → `pre_start` → `active` → `processing` → `inter_round` → `active` (next round) → ... → `completed`
+From that point, the SimRun's data is independent and mutable during play.
+
+**Sim run states:** `setup` → `pre_start` → `active` ↔ `paused` → `processing` → `active` (next round) → ... → `completed` or `aborted`
+
+The `paused` state is used during nuclear launch sequences (authorization and interception are allowed while paused).
 
 ---
 
 ## 3. ENTITIES
 
-### Countries (21)
+### Countries
 
-Each country has:
+Each country in the template has:
 
-| Category | Key Fields |
-|----------|-----------|
-| **Identity** | sim_name, parallel (real-world equivalent), country_brief |
-| **Team** | regime_type, team_size, whether AI-operated by default |
-| **Economy** | GDP, GDP growth rate, treasury, inflation, trade balance, tax rate, debt burden, debt ratio |
-| **Sectors** | resources, industry, services, technology (relative weights) |
-| **Oil** | oil_producer flag, OPEC member flag, production level |
-| **Military** | counts by type (ground, naval, tactical_air, strategic_missiles, air_defense) |
-| **Production** | per-unit costs, production capacity, maintenance cost per unit |
-| **Political** | stability (0-1), war_tiredness, martial_law flag |
-| **Technology** | nuclear_level (0-3), nuclear R&D progress, AI level (0-5), AI R&D progress |
+| Category | Key Attributes |
+|----------|---------------|
+| **Identity** | sim_name, real-world parallel, country_brief |
+| **Team** | regime_type (democracy, hybrid, autocracy), team_size, AI-operated flag |
+| **Economy** | GDP, GDP growth rate, treasury, inflation, trade balance, tax rate, debt burden, debt ratio, sector weights (resources, industry, services, technology) |
+| **Oil** | oil_producer flag, OPEC member flag, production level (mbpd) |
+| **Military** | unit counts by type (ground, naval, tactical_air, strategic_missiles, air_defense), production costs and capacities, maintenance cost per unit |
+| **Political** | stability (range 1.0–9.0), war_tiredness, martial_law flag |
+| **Technology** | nuclear_level (0–3), nuclear R&D progress, AI level (0–4), AI R&D progress |
 
-**Team countries** (multiple human players): Columbia (USA), Cathay (China), Gallia (France), Teutonia (Germany), Freeland (Poland), Ponte (Italy), Albion (UK), Sarmatia (Russia), Ruthenia (Ukraine), Persia (Iran).
+Countries are organized into **team countries** (multiple human players each) and **solo countries** (1 human or AI each). The specific countries and their parallels are defined by the template.
 
-**Solo countries** (1 human or AI each): Bharata (India), Levantia (Israel), Formosa (Taiwan), Phrygia (Turkey), Yamato (Japan), Solaria (Saudi Arabia), Choson (N. Korea), Hanguk (S. Korea), Caribe (Cuba+Venezuela), Mirage (UAE).
-
-**Special:** Neustadt (Switzerland) — observer/mediator role.
-
-### Roles (40)
+### Roles
 
 Each role represents one participant character:
 
-| Category | Key Fields |
-|----------|-----------|
+| Category | Key Attributes |
+|----------|---------------|
 | **Identity** | character_name, title, country_code |
-| **Position** | position_type (head_of_state, minister, general, diplomat, special), positions array |
+| **Position** | position_type: head_of_state, minister, general, diplomat, special |
+| **Permissions** | positions array (determines which actions this role can take via `role_actions` table) |
 | **Flags** | is_head_of_state, is_military_chief, is_diplomat, is_economy_officer |
-| **Capabilities** | powers (array of special abilities), objectives (personal goals) |
-| **Covert cards** | intelligence, sabotage, cyber, disinformation, election_meddling, assassination, protest_stimulation (integer counts, consumed on use) |
-| **Content** | public_bio, confidential_brief (asymmetric — only this player sees it) |
+| **Capabilities** | powers (special abilities), objectives (personal goals) |
+| **Covert cards** | intelligence, sabotage, cyber, disinformation, election_meddling, assassination (integer counts, consumed permanently on use) |
+| **Content** | public_bio (visible to all), confidential_brief (only this player sees it) |
 | **Status** | active, arrested, killed |
-
-**Positions determine permissions.** Head of state has broadest powers. Ministers/generals have domain-specific actions. The `role_actions` table lists exactly which actions each role can perform.
 
 ### Military Forces
 
-**Individual unit model:** Each unit is one row in the `deployments` table. 345 units at template start.
+**Individual unit model:** Each unit is one row in the `deployments` table.
 
 | Unit Type | Purpose |
 |-----------|---------|
-| `ground` | Land combat, territory control. RISK dice. |
-| `naval` | Sea combat, bombardment, blockade support. |
-| `tactical_air` | Air strikes (2-hex range), air defense counter. |
-| `strategic_missile` | Long-range strike (range by nuclear tier). Consumed on firing. |
-| `air_defense` | Intercepts missiles (50% per AD unit), reduces air strike effectiveness. |
+| `ground` | Land combat (RISK dice), territory control, garrison |
+| `naval` | Sea combat, bombardment of adjacent land, blockade support |
+| `tactical_air` | Air strikes (2-hex range), air defense counter |
+| `strategic_missile` | Long-range conventional or nuclear strike. Consumed on firing. |
+| `air_defense` | Intercepts missiles, reduces air strike effectiveness |
 
 Units have: `unit_id`, `country_code`, `unit_type`, position (`global_row/col` + `theater/row/col`), `unit_status` (active/reserve/destroyed/captured), `embarked_on` (carrier unit for transport).
 
-### Organizations (8+)
+**Producible types:** Only ground, naval, and tactical_air can be produced via budget allocation. Strategic missiles and air defense are template-defined starting assets.
+
+### Organizations
 
 International bodies with distinct decision rules:
 
-| Organization | Parallel | Decision Rule | Special |
-|-------------|----------|---------------|---------|
-| UNSC | UN Security Council | P5 veto | 5 permanent members with veto power |
-| NATO+ | NATO | Consensus | Any member can block |
-| EU | European Union | Unanimity | Any member can block |
-| BRICS+ | BRICS | Consensus | Looser coordination |
-| OPEC | OPEC | Consensus | Controls oil production |
-| G7 | G7 | Consensus | Major economies |
-| Columbia Parliament | US Congress | Majority | Contested swing seat |
-| SCO | SCO | Consensus | Security cooperation |
+| Attribute | Description |
+|-----------|-------------|
+| **decision_rule** | consensus, majority, or unanimity |
+| **chair_role_id** | Who presides |
+| **voting_threshold** | unanimous, simple_majority, etc. |
+| **has_veto** | Per-member flag (e.g., P5 in UNSC) |
 
-Organizations can hold meetings, pass resolutions, and coordinate actions. Players may propose creating new organizations.
+Organizations can hold meetings, and players may propose creating new organizations. The specific organizations and their memberships are defined by the template.
 
 ---
 
@@ -169,101 +153,121 @@ Each country pair has a bilateral relationship record:
 ### Sanctions
 
 Per-country bilateral. Levels -3 to +3:
-- Positive levels = sanctions imposed (S-curve damage model: coverage below 0.3 = minimal, above 0.7 = severe)
-- Negative levels = evasion support (helping target country circumvent others' sanctions)
-- Sanctions hurt the imposer too (secondary effects on trade)
+- Positive = sanctions imposed. S-curve damage model: coverage below 0.3 = minimal, above 0.6 = severe (tipping point at 0.5–0.6). Maximum damage depends on target's economic sector composition.
+- Negative = evasion support (helping target circumvent others' sanctions).
+- Stateless: recomputed every round from current levels and global GDP shares.
 
 ### Tariffs
 
-Per-country bilateral. Levels 0 to 3:
-- Each level increases trade costs for BOTH sides (target suffers more)
-- Direct drag on GDP growth
+Per-country bilateral. Levels 0 to 3. Prisoner's dilemma model: hurts BOTH sides (imposer at 50% of target's pain). Generates customs revenue for imposer. Adds tariff-driven inflation. GDP impact capped at -20%.
 
 ### Agreements
 
-Formal treaties between countries:
-- Types: security, trade, basing, technology_sharing, ceasefire, general
-- Require countersignature (proposer signs, counterpart must sign to activate)
-- Can be public or secret
-- Multiple signatories possible
+Formal treaties between countries. Types: security, trade, basing, technology_sharing, ceasefire, general.
+- Proposer auto-signs; counterpart(s) must countersign to activate.
+- Can be public or secret. Multiple signatories possible.
+- **Auto-relationship update** on activation: military_alliance → sets relationship to "alliance", trade_agreement → "economic_partnership", ceasefire → "hostile" (stops combat but not friendly).
+- No enforcement mechanism — agreements are diplomatic records.
 
 ### Transactions
 
-Bilateral asset exchanges:
-- One country offers: coins, units, technology, basing rights
-- Other country provides: coins, units, technology, basing rights
-- Counterpart can accept, decline, or counter-offer
-- Can be public or secret
+Bilateral asset exchanges. One side offers, the other provides. Tradeable assets: coins, units (specific units from reserve), technology (nuclear or AI progress), basing rights. Counterpart can accept, decline, or counter-offer. Can be public or secret.
+
+**Technology transfer values:** Nuclear = +0.20 progress to recipient. AI = +0.15 progress.
 
 ---
 
 ## 5. ACTIONS
 
-### The Canonical Action Catalog
+### Canonical Action Catalog
 
 **Source of truth:** `MODULES/MODULE_REGISTRY.md`, ACTION_NAMING section.
 
-Every action has: a canonical name, required fields, an engine that processes it, and defined effects.
+Every action has: a canonical name, required fields, an engine that processes it, and defined effects. The `role_actions` table defines which actions each role is permitted to perform.
 
-#### Military (13 actions)
+#### Military — Combat (6 actions)
+
+| Action | Mechanic |
+|--------|----------|
+| `ground_attack` | RISK iterative dice. Attacker rolls min(3, alive), defender rolls min(2, alive). Sorted descending, paired, ties → defender wins. Loop until one side eliminated. Max 50 exchanges. |
+| `ground_move` | Unopposed advance into hex with no enemy ground defenders. 100% success (no dice). Captures non-ground enemy units as trophies (to attacker's reserve). Records territory in `hex_control`. Must leave 1 ground unit behind on foreign occupied hexes. |
+| `air_strike` | Per-unit independent rolls. 12% hit (6% if target has air defense). 2-hex range. Air superiority: +2% per extra unit (cap +4%). Clamped 3–20%. 15% chance attacker downed if AD present. |
+| `naval_combat` | RISK iterative dice at sea. Both sides roll up to 3 dice (unlike ground where defender rolls max 2). Fleet advantage modifier: larger fleet gets +N to highest die (N = size difference, clamped ±3). |
+| `naval_bombardment` | 10% hit per naval unit, sea → adjacent land hex. Each hit destroys one random ground defender. |
+| `launch_missile_conventional` | Two-phase: AD interception (50% per AD unit in zone), then hit roll (75% flat). 4 target choices (military, infrastructure, nuclear_site, AD). Range by nuclear tier: T1=2 hex, T2=4 hex, T3=global. Missile consumed on firing. |
+
+**Combat modifiers (ground):** AI L3 (+1 die), AI L4 (+2 dice, 50% chance determined at level-up), low morale (-1 if stability ≤3), die-hard terrain (+1 defender), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land).
+
+#### Military — Non-Combat (7 actions)
 
 | Action | What it does |
 |--------|-------------|
-| `ground_attack` | RISK dice combat at adjacent hex. Attacker rolls min(3, alive), defender min(2, alive). Modifiers: AI L4, morale, amphibious, air support. |
-| `air_strike` | Per-unit independent rolls. 12% hit (6% if target has air defense). 2-hex range. |
-| `naval_combat` | RISK dice at sea. 1v1 paired combat. |
-| `naval_bombardment` | Sea → adjacent land. 10% hit per naval unit. |
-| `naval_blockade` | Establish/lift blockade at 3 chokepoints (Caribe Passage, Gulf Gate, Formosa Strait). Requires forces at the chokepoint. |
-| `launch_missile_conventional` | Two-phase: AD interception (50% per AD unit), then hit roll (75% flat). 4 target types. Range by nuclear tier. Missile consumed. |
-| `move_units` | Ground advance to adjacent land hex. Leave 1 behind. Max 3 per move. Processed during Phase B. |
-| `basing_rights` | Grant or revoke foreign military access to your territory. |
-| `martial_law` | Emergency powers. One-time per country per simulation. 4 eligible countries. |
-| `nuclear_test` | Underground or overground. Stability impact. Requires 3-way authorization (HoS + military chief + moderator). |
-| `nuclear_launch_initiate` | Begin nuclear launch sequence. 3-way authorization required. |
-| `nuclear_authorize` | Co-authorize a nuclear launch (step 2 of the chain). |
-| `nuclear_intercept` | Attempt to intercept incoming nuclear strike. |
+| `move_units` | Peaceful repositioning of own units. Batch operation: deploy from reserve, withdraw to reserve, reposition between hexes, embark/debark. Own territory or basing rights only. Allowed in both Phase A and inter-round. |
+| `naval_blockade` | Establish, lift, or reduce blockade at chokepoints. Requires naval units at the chokepoint (Gulf Gate also accepts ground on adjacent land). Levels: full or partial. Auto-integrity check after combat: 0 units → auto-lift. |
+| `basing_rights` | Host country grants or revokes foreign military access to their territory. |
+| `martial_law` | Emergency powers. One-time per country per simulation. Eligible countries defined by template. |
+| `nuclear_test` | Underground (-0.2 stability, +5 support) or surface (-0.4 global stability, -0.6 adjacent, -5% own GDP, +5 support). Success: 70% below T2, 95% at T2+. Requires 3-way authorization (HoS + military chief + moderator). |
+| `nuclear_launch_initiate` | Begin nuclear launch chain. 4-phase: initiate → authorize → intercept → resolve. 3-way authorization required. |
+| `nuclear_authorize` / `nuclear_intercept` | Steps in the nuclear chain. Allowed even when simulation is paused. |
 
 #### Economic (6 actions)
 
 | Action | What it does |
 |--------|-------------|
-| `set_budget` | Allocate resources: social spending (0.5-1.5x baseline), military production coins, tech R&D coins. Cutting social spending damages stability. |
-| `set_tariffs` | Set tariff level (0-3) against a specific country. Hurts both sides. |
-| `set_sanctions` | Set sanction level (-3 to +3) against a specific country. S-curve damage model. |
-| `set_opec` | Set OPEC production level (min/low/normal/high/max). Affects global oil price. OPEC members only. |
-| `propose_transaction` | Offer bilateral asset exchange (coins, units, tech, basing). |
+| `set_budget` | Allocate: social spending (0.5–1.5× baseline), military production coins, tech R&D coins. Cutting social spending damages stability and support. Deficit → money printing → inflation. |
+| `set_tariffs` | Set tariff level (0–3) against a specific country. Hurts both sides. |
+| `set_sanctions` | Set sanction level (-3 to +3) against a specific country. |
+| `set_opec` | Set production level (min/low/normal/high/max). Affects global oil price. OPEC members only. |
+| `propose_transaction` | Propose bilateral asset exchange (coins, units, tech, basing). |
 | `accept_transaction` | Accept, decline, or counter a proposed transaction. |
 
-*Note: Budget, tariffs, sanctions, and OPEC are submitted during Phase A but processed in batch during Phase B by the economic engine.*
+*Budget, tariffs, sanctions, and OPEC are submitted during Phase A but processed in batch during Phase B by the economic engine.*
 
-#### Diplomatic (6 actions)
+#### Diplomatic (5+ actions)
 
 | Action | What it does |
 |--------|-------------|
 | `public_statement` | Attributed public text visible to all. Signaling, threats, reassurance. |
 | `declare_war` | Sets bilateral relationship to at_war in both directions. |
-| `propose_agreement` | Propose a formal treaty (security, trade, basing, tech sharing, ceasefire). |
+| `propose_agreement` | Propose a formal treaty. |
 | `sign_agreement` | Countersign a proposed agreement to activate it. |
 | `call_org_meeting` | Convene an organization meeting with an agenda. |
-| `invite_to_meet` | Invite another leader to a bilateral meeting. |
+
+*Meeting invitations are handled through the meeting system (see Section 6), not as standard actions.*
 
 #### Covert (2 actions)
 
 | Action | What it does |
 |--------|-------------|
-| `covert_operation` | Execute covert op: intelligence (60% success), sabotage (45%), cyber (50%), disinformation (55%), election_meddling (40%). Cards consumed. AI level adds +5% per level. Repeated ops vs same target: -5% success, +10% detection each time. |
-| `intelligence` | Dedicated intelligence gathering operation. |
+| `covert_operation` | Execute covert op. Subtypes: espionage (60%), sabotage (45%, 2% GDP damage), cyber (50%, 1% GDP), disinformation (55%, -0.3 stability / -3 support), election_meddling (40%, -2 to -5% support). Cards consumed permanently. AI level adds +5% per level. Repeated ops vs same target: -5% success, +10% detection. |
+| `intelligence` | AI-generated analytical report on a target. NOT a covert card operation — does not consume cards. Returns data with 85% accuracy on success, 45% on failure (you don't know which). |
 
 #### Political (6 actions)
 
 | Action | What it does |
 |--------|-------------|
 | `arrest` | Head of state arrests a team member. Requires moderator confirmation. |
-| `assassination` | 1 card per role per game. Domestic 60% / international 20% success. Requires moderator confirmation. |
-| `change_leader` | Initiate leadership change. Requires low stability, non-HoS initiator, 3+ team. Three-phase voting process. |
-| `reassign_types` | Head of state reassigns military/economic/foreign affairs control to different role. |
+| `assassination` | 1 card per role per game. Domestic 60% / international 20% base (Levantia +30%, Sarmatia +10%). On hit: 50% kill (martyr +15 support), 50% survive-injured (+10 support). Requires moderator confirmation. |
+| `change_leader` | Initiate leadership change. Requires low stability, non-HoS initiator, 3+ team. Three-phase voting. |
+| `reassign_types` | Head of state reassigns military/economic/foreign affairs control to a different role. |
 | `self_nominate` | Self-nominate for an upcoming election. |
 | `cast_vote` | Cast a secret ballot in an election. |
+
+#### Reactive / System Actions
+
+These are triggered by game events, not directly initiated by players:
+
+| Action | Trigger |
+|--------|---------|
+| `release_arrest` | Moderator releases an arrested role |
+| `respond_meeting` | Respond to a meeting invitation |
+| `withdraw_nomination` | Withdraw from an election |
+| `cast_election_vote` | Cast vote in election (variant routing) |
+| `resolve_election` | Moderator resolves election results |
+
+### Moderator Approval Queue
+
+Some actions require moderator confirmation before execution: assassination, arrest, change_leader, and optionally combat (when dice mode is on). These enter the `pending_actions` queue. Auto-approve mode bypasses this for testing.
 
 ---
 
@@ -271,25 +275,25 @@ Every action has: a canonical name, required fields, an engine that processes it
 
 ### Bilateral Meetings
 
-The primary diplomatic tool. Private 1-on-1 conversations between leaders.
+The primary diplomatic tool. Private conversations between leaders.
 
-**For human participants:** Unrestricted. Any format, any number of participants, face-to-face or digital. The simulation does not impose technical limits on human communication.
+**For human participants:** Unrestricted. Any format, any number, face-to-face or digital. No technical limits imposed.
 
-**For AI participants (current implementation):** 1-on-1 bilateral meetings through the meeting system. Meeting lifecycle:
-1. **Invite** — one leader sends invitation with agenda (max 2 active invitations per role, 10-minute expiry)
+**For AI participants:** 1-on-1 bilateral meetings through the meeting system:
+1. **Invite** — leader sends invitation with agenda (max 2 active invitations, 10-minute expiry)
 2. **Accept/Decline** — counterpart responds
-3. **Active meeting** — text-based conversation (max 16 turns per meeting)
-4. **End** — either participant can end the meeting
+3. **Active meeting** — text-based conversation (max 16 turns)
+4. **End** — either participant can end
 
-*Multilateral AI meetings are planned for future implementation.*
+*Multilateral AI meetings planned for future.*
 
 ### Public Statements
 
-Attributed text visible to all participants and on the public screen. Used for signaling, threats, reassurance, propaganda.
+Attributed text visible to all participants and on the public screen.
 
 ### Proposals
 
-Transactions and agreements create proposals that require counterpart response. The counterpart can accept, decline, or counter-offer (transactions only).
+Transactions and agreements create proposals requiring counterpart response. Transactions allow counter-offers; agreements require accept or decline.
 
 ---
 
@@ -297,36 +301,36 @@ Transactions and agreements create proposals that require counterpart response. 
 
 ### Two Phases
 
-```
-PHASE A (Active Round)                    PHASE B (Engine Processing + Movement)
-├── All actions available                 ├── Economic engine runs (batched decisions)
-├── Free communication                    ├── Political engine runs
-├── Negotiations, deals, attacks          ├── Movement orders processed
-├── Timed (80 min Round 1, 60 min after)  ├── World state updated
-└── Moderator ends Phase A               └── Auto-advances to next round's Phase A
-```
+**Phase A — Active Round** (timed, configurable per template):
+- All actions available to participants
+- Free communication and negotiation
+- Immediate actions execute on submission (combat, covert, diplomacy, transactions)
+- Batch decisions (budget, tariffs, sanctions, OPEC) submitted but queued for Phase B
+- AI participants triggered multiple times during Phase A
+- AI explicitly prompted to submit batch decisions near end of round
+- Moderator monitors, approves pending actions, can pause/extend
 
-**Phase A** — The active play phase. All 33 actions are available. Human participants negotiate freely. AI participants observe, reason, communicate, and act. Four economic policy actions (budget, tariffs, sanctions, OPEC) are submitted during Phase A but queued for Phase B processing. All other actions execute immediately.
-
-**Phase B** — Engine processing. No player actions accepted. The economic engine processes all batched decisions in sequence: oil price → GDP → revenue → budget → inflation → debt → crisis state → stability → war tiredness. Movement orders (`move_units`) are also processed during this phase. Phase B is automatic — moderator triggers it by ending Phase A, and it auto-completes.
-
-### Key Scheduled Events
-
-The template defines scheduled events that create dramatic structure:
-- **Round 2:** Columbia mid-term elections (contested parliamentary seat)
-- **Round 3-4:** Ruthenia wartime election, UNGA vote forcing public alliance declarations
-- **Round 5:** Columbia presidential election — the climactic event
+**Phase B — Processing & Movement** (~10 minutes):
+- Economic engine runs: oil → GDP → revenue → budget → production → tech → inflation → debt → crisis state → momentum → contagion → market indexes
+- Political engine runs: stability, elections (if scheduled), war tiredness
+- Results written to per-round snapshot tables
+- Unit movement (`move_units`) allowed during this phase — military repositioning
+- Moderator reviews results, can adjust before publishing
+- Results published → all participants see updated world → next round's Phase A begins
 
 ### Moderator Controls
 
-The facilitator (moderator) has controls to:
-- Start/pause/resume/end/abort the simulation
-- Advance phases, extend time, revert to Phase A
-- Toggle auto-approve (skip confirmation queue for actions)
+- Start / pause / resume / end / abort / restart the simulation
+- Advance phases, extend time
+- Toggle auto-approve (skip confirmation queue)
 - Toggle auto-attack (immediate combat resolution vs. dice queue)
 - Toggle dice mode (physical dice vs. computed)
-- Approve/reject pending actions (arrests, assassinations, nuclear launches)
-- Restart simulation (full reset to initial state)
+- Approve/reject pending actions
+- Override any decision
+
+### Key Events
+
+Templates define scheduled events that create dramatic structure (elections, crises, votes). These are template data — the World Model supports any schedule configuration.
 
 ---
 
@@ -334,33 +338,53 @@ The facilitator (moderator) has controls to:
 
 ### GDP Model
 
-Additive factor model — GDP growth is the sum of:
-- Base growth rate (country-specific)
-- Tariff drag (bilateral, hurts both sides)
-- Sanctions impact (S-curve: low coverage = minimal, high coverage = severe)
-- Oil shock (price deviation from baseline affects oil-dependent economies)
-- War damage (direct GDP destruction from combat)
-- AI technology boost (higher AI level = growth bonus)
-- Momentum (confidence variable, mean-reverting)
-- Crisis multiplier (amplifies damage in crisis states)
+Additive factor model with crisis multiplier. Processing is chained (not parallel):
+
+**Growth formula:** `base_growth + cyclical_factors × crisis_modifier`
+
+Where base growth is protected from shocks, and cyclical factors include:
+- Tariff drag (bilateral, prisoner's dilemma model)
+- Sanctions impact (S-curve: sector-weighted max damage × effectiveness curve)
+- Oil shock (importers hurt by high prices, producers benefit)
+- Semiconductor disruption (Formosa dependency × severity, escalates over rounds)
+- War damage (occupied zones + infrastructure damage)
+- AI technology boost (L2: +0.3%, L3: +1.0%, L4: +2.5%)
+- Blockade impact (chokepoint-specific oil and trade disruption)
+- Bilateral trade drag (if major trade partner is contracting)
+
+Crisis states amplify negative shocks: normal (1.0×), stressed (1.2×), crisis (1.3×), collapse (2.0×).
 
 ### Crisis States
 
 Four-state ladder: `normal` → `stressed` → `crisis` → `collapse`
 
-Each state amplifies economic damage and hurts political stability. Transitions driven by GDP contraction, inflation, debt accumulation.
+**Downward (fast):** 2+ stress triggers → stressed. 2+ crisis triggers → crisis. 3+ rounds in crisis with triggers still active → collapse.
+
+**Upward (slow):** 0 triggers for 2-3 consecutive rounds needed to recover one level.
+
+**Stress triggers:** Oil >$150 (importers), inflation >baseline+15, GDP growth <-1%, empty treasury, stability <4, Formosa disruption with high dependency.
+
+**Crisis triggers:** Oil >$200, inflation >baseline+30, GDP growth <-3%, empty treasury AND high debt, prolonged Formosa disruption.
 
 ### Budget
 
-Revenue is derived from GDP. Mandatory costs (debt service, maintenance) are subtracted. Remaining is discretionary:
-- **Social spending** (0.5-1.5× baseline) — cutting hurts stability and support; increasing boosts both
-- **Military production** (coins → new units)
-- **Technology R&D** (coins → progress on nuclear/AI tracks)
-- Deficit → money printing → inflation spiral
+Revenue = GDP × tax_rate + oil_revenue - debt_service - inflation_erosion - war_damage - sanctions_costs.
 
-### Oil
+Spending: maintenance (mandatory) + social + military production + R&D. Deficit → draw from treasury → if insufficient, print money → inflation spiral (60× multiplier) → debt accumulation.
 
-Global oil price is determined by OPEC production decisions + blockade effects + demand destruction. Oil price affects all economies — oil producers benefit from high prices, oil consumers suffer.
+Social spending effects: cutting hurts stability (4× multiplier) and support (6× multiplier). Increasing boosts both.
+
+### Oil Price
+
+Driven by supply/demand model:
+- **Supply:** OPEC production decisions, sanctions on producers, blockades at Gulf chokepoints
+- **Demand:** Economic health of major economies, demand destruction after prolonged high prices
+- **War premium:** +5% per war involving Gulf countries (cap +15%)
+- **Formula:** `base_price × (demand/supply)^2.5 × (1 + war_premium)`, with inertia (70% new, 30% previous) and soft cap above $200
+
+### Market Indexes
+
+Three regional indexes (Wall Street, Europa, Dragon), range 0–200, baseline 100. Each is a weighted average of component country "health scores." Countries whose primary index falls below 70 suffer stability penalty (-0.10); below 40 = crisis penalty (-0.30).
 
 ---
 
@@ -368,30 +392,25 @@ Global oil price is determined by OPEC production decisions + blockade effects +
 
 ### Map
 
-**Global map:** 10×20 hex grid (200 hexes). Land and sea hexes.
-**Theater maps:** 10×10 hex grids for zoomed-in combat areas.
-**Coordinate convention:** (row, col), row first, 1-indexed.
-
-### Combat Types
-
-| Type | Mechanic | Range |
-|------|----------|-------|
-| Ground | RISK dice (attacker up to 3, defender up to 2, paired highest-to-highest, ties→defender) | Adjacent hex |
-| Air strike | Independent rolls per unit, 12% hit (6% if AD present) | 2-hex range |
-| Naval | RISK dice at sea | Same hex |
-| Naval bombardment | 10% hit per naval unit, sea→adjacent land | Adjacent hex |
-| Missile | Two-phase: AD intercept (50%/unit) then hit (75% flat) | Range by tier |
-
-**Modifiers:** AI Level 4 (+1 die), low morale, amphibious penalty, die-hard defense, air support.
+- **Global map:** 10×20 hex grid, 1-indexed, (row, col) convention, pointy-top hexes
+- **Theater maps:** 10×10 hex grids for zoomed-in areas
+- **Sea hexes:** Defined in map_config (111 global sea hexes)
+- **Chokepoints:** Template-defined strategic locations (e.g., 3 in canonical template)
 
 ### Territory
 
-When ground forces advance into a hex, they capture it. Non-ground enemy units at the captured hex become trophies (captured to reserve). Territory control tracked in `hex_control` table. Must leave 1 unit behind when advancing.
+Ground forces capture territory on advance. `hex_control` table tracks: owner, controlled_by, captured_round. Non-ground enemy units at captured hex become trophies (flipped to attacker's reserve). Must leave 1 ground unit behind on foreign occupied hexes.
 
 ### Nuclear
 
-Three-tier nuclear capability (Level 0-3). R&D investment progresses toward each level.
-Nuclear launch is a multi-step chain: Initiate → Authorize (3-way: HoS + military chief + moderator) → Intercept attempt → Resolve.
+Three-tier capability (Level 0–3). R&D investment progresses toward each level:
+- L0→L1: threshold 0.60 progress
+- L1→L2: threshold 0.80
+- L2→L3: threshold 1.00
+
+Nuclear launch is a multi-step chain: **Initiate → Authorize (3-way) → Alert + Intercept attempts → Resolve.**
+
+Nuclear strike damage: 50% of all military units on target hex destroyed, 30% of target GDP destroyed (divided by number of target hexes). T3 salvo (3+ missiles): -1.5 global stability, -2.5 target stability, 1/6 chance of target leader death.
 
 ---
 
@@ -399,30 +418,41 @@ Nuclear launch is a multi-step chain: Initiate → Authorize (3-way: HoS + milit
 
 ### Stability
 
-Range 0-1. Affected by:
-- Social spending decisions
-- War tiredness (increases with ongoing wars)
-- Economic crisis
-- Martial law (emergency boost, one-time)
-- Covert disinformation operations
-- Election outcomes
+Range **1.0 to 9.0**. Driven by:
+- GDP growth (positive above 2%, negative below -2%)
+- Social spending decisions (up to ±2.0 impact)
+- War (frontline defender -0.10/round, primary belligerent -0.08, other -0.05)
+- Casualties and territory lost/gained
+- War tiredness friction
+- Sanctions friction (-0.1 per level)
+- Inflation friction (above 3pp delta: -0.05/pp, above 20pp: additional -0.03/pp)
+- Crisis state penalty (stressed -0.10, crisis -0.30, collapse -0.50)
+- Market stress (from regional indexes)
+
+Autocracies have 75% resilience (negative deltas reduced). Peaceful non-sanctioned countries have 50% dampening on negative changes.
 
 ### Elections
 
-Template-scheduled events. Types:
-- **Columbia mid-terms** (Round 2) — contested parliamentary seat
-- **Ruthenia wartime election** (Round 3-4) — AI-judged based on actual SIM events
-- **Columbia presidential election** (Round 5) — weighted votes from team members + 50% AI-generated popular vote
+Template-scheduled events. Two voting components:
+- **AI score** (50%): based on GDP growth, stability, war status, crisis state, arrests, agreements, territory
+- **Player vote** (50%): actual votes from team members
+- Incumbent wins at ≥50 combined score
 
-Election process: nominations open → candidates self-nominate → voting period → results.
+### War Tiredness
+
+Accumulates per round while at war: defenders +0.20, attackers +0.15, allies +0.10. Halves after 3+ rounds (society adaptation). Cap: 10.0. Peacetime decay: -20% per round.
 
 ### Leadership Change
 
-Non-electoral path: if stability falls below threshold, non-HoS roles with 3+ team can initiate removal vote → if successful, election for replacement.
+Non-electoral path: if stability falls below threshold, non-HoS roles with 3+ team can initiate removal vote → if successful, election for replacement. Three-phase process.
+
+### Capitulation
+
+Triggered when a country has been in economic crisis state for 3+ consecutive rounds.
 
 ### Covert Operations
 
-Cards-based system. Each role starts with a fixed number of covert cards by type. Cards are consumed permanently when used. Success rates depend on operation type and AI technology level. Detection and attribution are probabilistic.
+Cards-based system. Success rates per type (see Section 5). Detection and attribution are separate probabilistic rolls. AI level adds +5% success per level. Repeated operations against the same target suffer -5% success and +10% detection per prior op.
 
 ---
 
@@ -430,32 +460,29 @@ Cards-based system. Each role starts with a fixed number of covert cards by type
 
 ### R&D Tracks
 
-Two technology tracks with progression:
+| Track | Levels | Progression Thresholds | Effects |
+|-------|--------|----------------------|---------|
+| **Nuclear** | 0→1→2→3 | 0.60 / 0.80 / 1.00 | Unlocks nuclear test, then launch. Missile range increases: T1=2 hex, T2=4 hex, T3=global. |
+| **AI** | 0→1→2→3→4 | 0.20 / 0.40 / 0.60 / 1.00 | +5% covert ops per level. L2: +0.3% GDP. L3: +1.0% GDP, +1 combat die. L4: +2.5% GDP, +2 combat dice (50% chance). |
 
-| Track | Levels | Effect |
-|-------|--------|--------|
-| **Nuclear** | 0 → 1 → 2 → 3 | Unlocks nuclear test, then launch capability. Missile range increases with level. |
-| **AI** | 0 → 1 → 2 → 3 → 4 → 5 | +5% covert ops success per level. L4: +1 combat die. GDP growth bonus. |
+**R&D formula:** `progress += (investment / GDP) × 0.8 × rare_earth_factor`
 
-Progress is driven by R&D coin investment each round. Technology can be shared via transactions (technology transfer).
+**Rare earth restrictions:** Each level reduces R&D efficiency by 15% (floor 40%).
 
----
-
-## APPENDIX: Reactive and System Actions
-
-Beyond the 33 player-initiated actions, the system has reactive actions that are triggered by game events:
-
-| Action | Trigger |
-|--------|---------|
-| `release_arrest` | Moderator releases an arrested role |
-| `respond_meeting` | Respond to a meeting invitation |
-| `withdraw_nomination` | Withdraw from an election |
-| `cast_election_vote` | Cast vote in election (variant of cast_vote) |
-| `resolve_election` | Moderator resolves election results |
-| `ground_move` | Unit repositioning (processed during Phase B) |
-
-These are handled by the action dispatcher but are not player-initiated actions in the traditional sense.
+**Technology transfer:** Via transactions. Nuclear: +0.20 progress to recipient. AI: +0.15 progress. Donor must be ≥1 level ahead. Does not directly level up — adds to progress.
 
 ---
 
-*Version 1.0 DRAFT — Requires Marat validation. Built from audit of actual DB schema (54 tables), action dispatcher code, and MODULE_REGISTRY. Design heritage (CONCEPT, SEED, DET) referenced for purpose and intent.*
+## APPENDIX: Known Spec-Code Divergences
+
+These were discovered during verification and need resolution:
+
+| Issue | Spec Says | Code Does | Resolution Needed |
+|-------|-----------|-----------|-------------------|
+| ground_move leave-1-behind | Must leave 1 unit behind | Does not enforce | Add enforcement for foreign occupied hexes |
+| Phase count | 2 phases (design intent) | 3 states in code (A, B, inter_round) | Align code terminology or document inter_round as Phase B sub-step |
+| Legacy v1 vs v2 combat | v2 is canonical | Both exist in military.py | Remove or clearly deprecate v1 functions |
+
+---
+
+*Version 2.0 DRAFT — Built from verified engine code (economic.py 2191 lines, military.py 3076 lines, political.py, technology.py), DB schema audit (54 tables), module SPECs (M4, M6, M9), and MODULE_REGISTRY. All constants verified with line numbers. Template-specific data removed — only world rules remain.*
