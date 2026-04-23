@@ -1,92 +1,203 @@
 # CLAUDE.md — Thucydides Trap (TTT) Project
 
-**Version:** 3.0 | **Date:** 2026-04-13 | **Phase:** EXECUTION — Module Build
+**Version:** 4.0 | **Date:** 2026-04-22 | **Phase:** EXECUTION
 **Owner:** Marat Atn (marat@metagames.org)
 **Any change to this file must be confirmed by Marat.**
 
 ---
 
-## CURRENT PHASE: EXECUTION (6-week sprint)
-
-**Start here:** `MODULES/ROADMAP.md` — module sequence, timeline, milestones.
-**Build standards:** `MODULES/STANDARDS.md` — per-module protocol, quality gates.
-**Status dashboard:** `MODULES/MODULE_REGISTRY.md` — live status of all modules.
-**Foundation reference:** `MODULES/FOUNDATION/` — what's already built (engines, communication, data).
-
-**Design heritage (frozen reference):**
-- `1. CONCEPT/` — what and why
-- `2 SEED/` — how (specification level)
-- `3 DETAILED DESIGN/` — how (implementation level), includes CONTRACTS/ and CARDS/
-- `3 DETAILED DESIGN/DET_DOCUMENT_REGISTRY.md` — index to all 125+ design documents
-
-**Reference cards:** `3 DETAILED DESIGN/CARDS/` — actions, formulas, architecture, template.
-**Locked contracts:** `3 DETAILED DESIGN/CONTRACTS/` — 28 action specifications.
-
-Every session: check ROADMAP.md and current module SPEC.md. Build to spec. Do not invent — look up.
-
----
-
 ## PRINCIPLE ZERO: FIGHT ENTROPY
 
-This project's biggest risk is not bad design or bad code. It is DISORDER — files in wrong places, docs out of sync, decisions made but not recorded, code that contradicts specs.
+This project's biggest risk is DISORDER — docs out of sync, decisions not recorded, code that contradicts specs, names that don't match.
 
-Every agent, every session, every commit: **MAINTAIN ORDER.** Building features is important. Keeping the system coherent is MORE important. A working feature in a chaotic codebase is worse than no feature in a clean codebase.
+**MAINTAIN ORDER.** Building features is important. Keeping the system coherent is MORE important. A working feature in a chaotic codebase is worse than no feature in a clean codebase.
 
-Marat is a creative product leader, not a project manager. He will push for speed. The team MUST push back with order — not by blocking, but by logging debt and paying it immediately. Never accumulate. Never "fix it later." Fix it now.
+Marat pushes for speed. The team pushes back with order — not by blocking, but by paying debt immediately. Never accumulate. Never "fix it later." Fix it now.
 
 ---
 
 ## 1. What We Are Building
 
-The Thucydides Trap (TTT) — an immersive leadership simulation with 25-39 human participants, 10+ AI-operated countries, 6-8 rounds, and 4 domains (military, economy, politics, technology). Full-stack web platform with autonomous AI participants.
+The Thucydides Trap (TTT) — an immersive leadership simulation with 25-39 human participants, AI-operated countries, 6-8 rounds, and 4 domains (military, economy, politics, technology). Full-stack web platform.
 
-**Current approach: "Unmanned Spacecraft."** Build a fully autonomous simulation first (AI moderator + AI agents + engine + public display), test with 50+ AI runs, calibrate, THEN add human interfaces. The unmanned mode is a permanent product capability, not scaffolding.
-
----
-
-## 2. The Human Partner
-
-**Marat Atn** — product owner and co-creator. All design philosophy and stage-gate decisions require Marat's approval. Sync rhythm:
-- **Weekly:** 30-min status sync (Friday)
-- **Demo points:** Hands-on review at each sprint milestone
-- **On-demand:** Only for decisions the team cannot resolve
-- **Between syncs:** Team works autonomously
+**Current mode:** Mixed human + AI. Human participants play alongside AI-operated countries. Both use the same actions, same contracts, same world. The fully autonomous "unmanned" mode (all-AI) is a future capability.
 
 ---
 
-## 3. The Agent Team
+## 2. Source of Truth
 
-**7 BUILD roles + 3 domain validators.** See `.claude/agents/` for full definitions.
+```
+WORLD MODEL + CONTRACTS (Marat co-owns, machine-verifiable)
+    │
+    ├── Code implements them (verified by contract tests)
+    ├── DB schema conforms to them (verified by schema tests)
+    ├── AI agents read from them (tool definitions derived)
+    └── Human interfaces follow them (forms match contracts)
+```
 
-| Role | Primary Responsibility |
-|------|----------------------|
-| **LEAD** | Sprint planning, code review, integration, Marat sync |
-| **BACKEND** | Engine (Python/FastAPI), DB, API, real-time layer |
-| **AGENT** | AI participants (4-block model), conversations, Claude SDK |
-| **TESTER** | Layer 1/2/3 tests, calibration, results dashboards. NEVER modifies source code. |
-| **FRONTEND** | Public Display, later human interfaces |
-| **QA** | Consistency checks, naming enforcement, integrity guardian |
-| **KNOWLEDGE** | Learning capture, EVOLVING METHODOLOGY, patterns, Story of Work |
-| *KEYNES* | Economics validation (on-demand) |
-| *CLAUSEWITZ* | Military validation (on-demand) |
-| *MACHIAVELLI* | Political validation (on-demand) |
+**Canonical sources (in priority order):**
+
+| Source | What it governs | Location |
+|--------|----------------|----------|
+| **World Model** | Complete SIM specification — entities, actions, protocols, lifecycle | `MODULES/WORLD_MODEL.md` |
+| **Action Contracts** | Per-action specs — name, fields, validation, engine, events | `MODULES/CONTRACTS/` |
+| **Module Registry** | Canonical names, module status, architecture decisions | `MODULES/MODULE_REGISTRY.md` |
+| **Module SPECs** | Per-module build specification | `MODULES/M*/SPEC_*.md` |
+| **DB Schema** | Live table structures (Supabase) | Queryable via MCP |
+
+**The Cardinal Rule:** If code contradicts the World Model or Contracts:
+1. STOP — do not merge
+2. DECIDE: Is the code right or the spec right?
+3. Update the LOSING side FIRST, then the other
+4. Verify with contract test
+5. Then proceed
+
+**Design heritage:** `1. CONCEPT/`, `2 SEED/`, `3 DETAILED DESIGN/` — design history explaining WHY. Useful for understanding intent. NOT the current specification.
 
 ---
 
-## 4. Project Structure
+## 3. Before You Code
+
+**MANDATORY at the start of every coding session:**
+
+1. Read `MODULES/MODULE_REGISTRY.md` — canonical action names, module status
+2. Read the relevant module `SPEC.md` — what you're building
+3. Read `MODULES/WORLD_MODEL.md` — how the SIM world works
+4. IMPORT canonical names from contracts — **never hardcode action type strings**
+5. If unsure about a name, field, or protocol → **LOOK IT UP, don't guess**
+
+If any canonical source is missing or unclear → fix the documentation BEFORE writing code.
+
+---
+
+## 4. Time Allocation
+
+**Every session: minimum 20% on process and documentation.**
+
+| When | What | Time |
+|------|------|------|
+| **Session start** | Integrity check — read canonical sources, verify docs in sync | 10 min |
+| **Every 3 hours** | Consistency check — World Model still matches code? Any drift? | 10 min |
+| **Session end** | Documentation update, clean desk, commit all changes | 10 min |
+| **Marat sync** | Report any process debt or documentation gaps — proactively | Always |
+
+This is not overhead. This is the 20% that prevents the other 80% from being wasted on debugging mismatches.
+
+**Remind Marat** about process and documentation needs. He will push for features. The team's job is to ensure features are built on solid ground.
+
+---
+
+## 5. The Agent Team
+
+**5 core roles. Clear separation. Mandatory cross-checking.**
+
+| Role | Mandate | Key Rule |
+|------|---------|----------|
+| **LEAD** | Process enforcement, documentation oversight, Marat sync. Ensures 20% time on process/docs. Calls other agents. | LEAD polices process, not just plans features. |
+| **BUILDER** | All backend code — engines, API, services, AI integration (Python/FastAPI). | Builds to spec. Calls QA before merge. |
+| **DESIGNER** | All frontend + UX — React, Tailwind, real-time UI. Owns the participant experience. | Owns how the SIM feels to humans in the room. |
+| **QA** | World Model guardian. Verifies every code change matches contracts. Reviews before merge. | Never writes production code. If QA flags it, BUILDER fixes it. |
+| **TESTER** | Independent testing. Contract tests + acceptance. Writes and runs tests. | Never modifies source code. Reports to LEAD. |
+
+**On-demand:**
+
+| Role | When |
+|------|------|
+| **CALIBRATOR** | Engine parameter tuning. Domain expertise (economics, military, politics). |
+
+### Mandatory Cross-Check Process
+
+```
+1. BUILDER/DESIGNER writes code
+2. BUILDER/DESIGNER calls QA: "verify this matches World Model"
+3. QA reviews independently → approves or flags mismatches
+4. If QA flags → BUILDER/DESIGNER fixes → QA re-verifies
+5. TESTER runs contract tests → pass/fail
+6. Only then: LEAD reports to Marat
+```
+
+**No code ships without QA verification.** The agent who built it does NOT verify it.
+
+---
+
+## 6. Per-Module Workflow (Stage Gates)
+
+| Gate | What | Who | When |
+|------|------|-----|------|
+| **1. SPEC written** | Detailed specification from World Model + contracts | LEAD + BUILDER | Before ANY code |
+| **2. Marat approves SPEC** | Questions resolved before first line of code | Marat | Before coding starts |
+| **3. Build to spec** | If spec needs change → update spec FIRST, then code | BUILDER/DESIGNER | During build |
+| **4. QA verification** | Code matches World Model and contracts | QA | Before merge |
+| **5. Contract tests pass** | Automated proof that code matches specs | TESTER | Before merge |
+| **6. Module acceptance** | Hands-on review, real results in DB/UI | Marat | Before reporting DONE |
+| **7. Matrix check** | Verify M1/M2/M3 still valid after delivery | Team | After delivery |
+| **8. World Model updated** | Any system changes reflected in documentation | LEAD + Marat | Same commit as code |
+
+---
+
+## 7. Acceptance Gate
+
+Before any feature is reported as DONE:
+
+1. **Verify end-to-end:** The feature produces the CLAIMED result in DB/UI. Not "code exists" — actually works.
+2. **Independent validation:** Query DB to confirm real state change.
+3. **Honest status:**
+   - **DONE** = works end-to-end, verified by test
+   - **WIRED** = code path exists, not yet verified
+   - **STUB** = placeholder only
+   - NEVER report WIRED as DONE.
+4. **Quality checklist:**
+   - [ ] Contract tests pass
+   - [ ] Feature produces real DB state change
+   - [ ] At least 1 concrete example verified
+   - [ ] QA verified against World Model
+
+---
+
+## 8. Testing Protocol
+
+| Layer | What | When |
+|-------|------|------|
+| **Contract tests** | Code matches World Model — action names, fields, protocols | Every commit |
+| **Layer 1** | Formula unit tests | Every commit (<30 sec) |
+| **Layer 2** | Module integration | Every deployment (<5 min) |
+| **Layer 3** | AI simulation (full SIM) | Sprint milestones (2-40 min) |
+
+TESTER is independent. Never modifies source. Details in `/app/tests/CLAUDE.md`.
+
+---
+
+## 9. Documentation Is Infrastructure
+
+Documentation is not a deliverable — it is INFRASTRUCTURE that prevents entropy.
+
+- **World Model** updated in the SAME commit as code changes
+- **MODULE_REGISTRY** updated when module status changes
+- **Contract tests** verify documentation matches code — if tests fail, either code or docs need fixing
+- Zero documentation debt — if you can't update docs in the same commit, the change is too big
+
+**Marat's role:** Co-owns World Model at the conceptual level. Reviews after every module delivery.
+
+---
+
+## 10. Project Structure
 
 ```
 THUCYDIDES/
 ├── CLAUDE.md                    ← THIS FILE (root constitution)
-├── 1. CONCEPT/                  ← FROZEN. Do not modify.
-├── 2 SEED/                      ← FROZEN. Do not modify.
-├── 3 DETAILED DESIGN/           ← Reference specs for BUILD
-├── 10. TESTS/                   ← All test results
-├── EVOLVING METHODOLOGY/        ← Knowledge base (KNOWLEDGE agent maintains)
-├── CONTEXT/                     ← Reference materials
-├── app/                         ← APPLICATION CODE (BUILD phase)
+├── MODULES/
+│   ├── ROADMAP.md              ← Module sequence, milestones
+│   ├── STANDARDS.md            ← Build standards, quality gates
+│   ├── MODULE_REGISTRY.md      ← Canonical names, status, decisions
+│   ├── WORLD_MODEL.md          ← THE SIM specification (to be created)
+│   ├── CONTRACTS/              ← Per-action and per-protocol contracts
+│   └── M*/                     ← Per-module folders with SPEC.md
+├── 1. CONCEPT/                  ← Design heritage (WHY)
+├── 2 SEED/                      ← Design heritage (WHAT)
+├── 3 DETAILED DESIGN/           ← Design heritage (HOW — historical)
+├── app/                         ← APPLICATION CODE
 │   ├── CLAUDE.md               ← Build standards
-│   ├── engine/                 ← Python engines (FastAPI)
+│   ├── engine/                 ← Python (FastAPI, engines, services)
 │   │   └── CLAUDE.md          ← Engine-specific rules
 │   ├── frontend/               ← React app
 │   │   └── CLAUDE.md          ← Frontend-specific rules
@@ -97,115 +208,13 @@ THUCYDIDES/
 
 ---
 
-## 5. Design Heritage & Code Hierarchy
+## 11. Reference
 
-**Stage-gate process:** IDEA → CONCEPT ✅ → SEED ✅ → DETAILED DESIGN ✅ (2026-04-01) → BUILD ← here
-
-**BUILD combines:** iterative loops + waterfall discipline + mandatory documentation sync.
-
-```
-CONCEPT (frozen) → WHAT and WHY
-  └── SEED (frozen) → Canonical specs
-        └── DET (reference) → HOW exactly
-              └── CODE (active) → Implements DET specs
-```
-
-**The Cardinal Rule:** If code contradicts any design document:
-1. STOP — do not merge
-2. DECIDE: Is the code right or the design right?
-3. If code is right → unfreeze doc → update → integrity check → re-freeze → then merge
-4. If design is right → fix code
-5. Documentation-Implementation Reconciliation is MANDATORY. Code and docs must NEVER diverge.
-
----
-
-## 6. Current Stage
-
-> **BUILD Phase 1: Unmanned Spacecraft**
-> Design gates: CONCEPT ✅ | SEED ✅ | DET in progress
-> BUILD Sprint: 1 of 5
-
-Five sprints (~11 weeks):
-1. Foundation (DB, auth, real-time, scenario configurator)
-2. Engines + Public Display Light
-3. Orchestration (AI Super-Moderator, results export)
-4. AI Agents (4-block model, Tier 1-3, Claude SDK prototype)
-5. Full Unmanned Ship (full display, integration test)
-
----
-
-## 7. Build Standards
-
-- **Check KING first:** Before building anything, review `/Users/marat/CODING/KING` for reusable patterns. Strong recommendation — always critically evaluate, not mandatory to implement.
+- **KING patterns:** `/Users/marat/CODING/KING` — reusable patterns, evaluate critically
 - **Commit prefixes:** `engine:`, `api:`, `frontend:`, `test:`, `fix:`, `docs:`, `config:`
-- **Layer 1 tests must pass before merge.** No exceptions.
-- Detailed coding standards in `/app/CLAUDE.md`
+- **Template/Scenario/Run hierarchy:** Template (evolves) → Scenario (configured) → SimRun (immutable)
+- **Modular CLAUDE.md family:** `/app/CLAUDE.md`, `/app/engine/CLAUDE.md`, `/app/frontend/CLAUDE.md`, `/app/tests/CLAUDE.md`
 
 ---
 
-## 8. Testing Protocol
-
-| Layer | What | When | Time |
-|-------|------|------|------|
-| **Layer 1** | Formula tests | Every commit | <30 sec |
-| **Layer 2** | Module integration | Every deployment | <5 min |
-| **Layer 3** | AI simulation (full SIM) | Per sprint milestone | 2-40 min |
-
-**Speed dial:** Tier 1 (no conversations) → Tier 2 (modelled) → Tier 3 (full text) → Tier 4 (+ voice)
-
-TESTER is independent. Never modifies source. Detailed protocol in `/app/tests/CLAUDE.md`
-
-### Acceptance Gate (mandatory before reporting DONE)
-
-Before any feature is reported as DONE or COMPLETE to Marat:
-
-1. **Verify end-to-end:** The feature must produce the CLAIMED result in the DB/UI. Not "code exists" — actually works.
-2. **Independent validation:** Run an L2 integration test OR query the DB to confirm the feature's output is real. If the feature claims "29 transactions executed" — verify at least 1 transaction actually changed asset ownership in the DB.
-3. **Honest status reporting:**
-   - **DONE** = feature works end-to-end, verified by test
-   - **WIRED** = code path exists, events logged, but outcome not yet verified or incomplete
-   - **STUB** = placeholder, logged only, no real processing
-   - NEVER report WIRED as DONE. NEVER report counts of logged-but-unprocessed events as if they were successful outcomes.
-4. **Quality checklist before DONE claim:**
-   - [ ] L1 tests pass
-   - [ ] Feature produces real DB state change (not just event log)
-   - [ ] At least 1 concrete example verified in DB
-   - [ ] Edge cases considered (what if counterpart doesn't respond? what if asset insufficient?)
-
-Violation of this protocol erodes trust and creates false progress signals.
-
----
-
-## 9. Integrity Protocol
-
-| When | What |
-|------|------|
-| **Every session start** | Integrity check — docs in sync? stale references? |
-| **Every merge** | Layer 1 pass? Design reconciliation needed? |
-| **Every session end** | CLAUDE.md current? Checklist updated? All committed? Clean desk. |
-| **Every 3 hours** | Mandatory consistency check. Non-negotiable. |
-| **Weekly Friday** | Full cross-document review. |
-
-**Clean Desk Rule:** At session end, a NEW Claude instance could start with zero prior context.
-
----
-
-## 10. Template / Scenario / Run
-
-```
-TEMPLATE (master SIM design — evolves over months)
-  └── SCENARIO (configured for event — limited customization)
-        └── SIM-RUN (one execution — immutable once started)
-```
-
-**Template v1.0 milestone reached 2026-04-05.** Canonical map + units spec: `2 SEED/C_MECHANICS/SEED_C_MAP_UNITS_MASTER_v1.md`. DB schema draft: `CONCEPT TEST/db_schema_v1.sql`. Unit engineering contract: `3 DETAILED DESIGN/DET_UNIT_MODEL_v1.md`. Reconciliation status: `CONCEPT TEST/CHANGES_LOG.md`.
-
----
-
-## 11. Learning Organization
-
-KNOWLEDGE agent maintains `EVOLVING METHODOLOGY/`. After each sprint: retrospective → promote best practices to CLAUDE.md. See agent definition for details.
-
----
-
-*Modular CLAUDE.md family. Subfolder files: `/app/CLAUDE.md`, `/app/engine/CLAUDE.md`, `/app/frontend/CLAUDE.md`, `/app/tests/CLAUDE.md`. Each <100 lines. This root file: ~100 lines.*
+*Version 4.0 — Process Reset. World Model + Contracts replace SEED/DET as source of truth. 5-agent team with mandatory cross-checks. 20% time on process/documentation.*
