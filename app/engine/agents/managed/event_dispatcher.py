@@ -450,7 +450,7 @@ class EventDispatcher:
         country_code: str,
         character_name: str,
         title: str,
-        model: str = "claude-sonnet-4-6",
+        model: str | None = None,
         round_num: int = 1,
     ) -> SessionContext:
         """Create a managed agent session and register with dispatcher."""
@@ -481,7 +481,7 @@ class EventDispatcher:
     async def initialize_all_agents(
         self,
         role_ids: list[str] | None = None,
-        model: str = "claude-sonnet-4-6",
+        model: str | None = None,
     ) -> dict:
         """Initialize all AI-operated agents for this sim_run.
 
@@ -671,7 +671,7 @@ class EventDispatcher:
                 country_code=s["country_code"],
                 sim_run_id=self.sim_run_id,
                 scenario_code=self.sim_run_id,
-                model=s.get("model", "claude-sonnet-4-6"),
+                model=s.get("model") or None,
                 round_num=s.get("round_num", 1),
                 tool_executor=executor,
                 total_input_tokens=s.get("total_input_tokens", 0),

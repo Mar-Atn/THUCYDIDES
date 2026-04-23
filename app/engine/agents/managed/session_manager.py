@@ -27,6 +27,7 @@ from typing import Any
 
 from anthropic import AsyncAnthropic
 
+from engine.agents.managed.ai_config import get_ai_model
 from engine.agents.managed.system_prompt import build_system_prompt
 from engine.agents.managed.tool_definitions import get_custom_tools_for_agent
 from engine.agents.managed.tool_executor import ToolExecutor
@@ -139,7 +140,7 @@ class ManagedSessionManager:
         sim_run_id: str,
         scenario_code: str,
         round_num: int = 1,
-        model: str = "claude-sonnet-4-6",
+        model: str | None = None,
     ) -> SessionContext:
         """Create a full managed agent session.
 
@@ -149,11 +150,13 @@ class ManagedSessionManager:
             sim_run_id: UUID of the sim_run.
             scenario_code: Scenario code for tool binding.
             round_num: Starting round number.
-            model: Claude model ID.
+            model: Claude model ID. If None, reads from M9 AI Settings (sim_config).
 
         Returns:
             SessionContext with all IDs and the tool executor.
         """
+        if model is None:
+            model = get_ai_model("decisions")
         # Build system prompt (Layer 1) — use DB context when sim_run_id available
         system_prompt = build_system_prompt(role_id, sim_run_id=sim_run_id)
         logger.info("Built system prompt for %s (%d chars)", role_id, len(system_prompt))
