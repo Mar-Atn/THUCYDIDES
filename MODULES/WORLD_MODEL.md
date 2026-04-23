@@ -236,17 +236,23 @@ Every action has: a canonical name, required fields, an engine that processes it
 
 *These four are submitted during Phase A but processed in batch during Phase B by the economic engine.*
 
-#### Diplomatic (7 actions)
+#### Communication (3 actions — available to all participants)
 
 | Action | What it does |
 |--------|-------------|
 | `public_statement` | Attributed public text visible to all. Signaling, threats, reassurance. |
-| `declare_war` | Sets bilateral relationship to at_war in both directions. |
-| `propose_agreement` | Propose a formal treaty. |
-| `sign_agreement` | Countersign a proposed agreement to activate it. |
-| `call_org_meeting` | Convene an organization meeting with an agenda. |
-| `propose_transaction` | Propose bilateral asset exchange (coins, units, tech, basing). |
-| `accept_transaction` | Accept, decline, or counter a proposed transaction. |
+| `invite_to_meet` | Invite another leader to a private bilateral meeting. Max 2 active invitations, 10-minute expiry. |
+| `call_org_meeting` | Convene an organization meeting with an agenda. Org members only. |
+
+#### Diplomatic (5 actions — position-restricted)
+
+| Action | What it does |
+|--------|-------------|
+| `declare_war` | Sets bilateral relationship to at_war in both directions. HoS only. |
+| `propose_agreement` | Propose a formal treaty. HoS + diplomat. |
+| `sign_agreement` | Countersign a proposed agreement to activate it. Reactive. |
+| `propose_transaction` | Propose bilateral asset exchange (coins, units, tech, basing). HoS + diplomat. |
+| `accept_transaction` | Accept, decline, or counter a proposed transaction. Reactive. |
 
 #### Covert (2 actions)
 
@@ -274,13 +280,15 @@ These are triggered by game events, not directly initiated by players:
 |--------|---------|
 | `release_arrest` | Moderator releases an arrested role |
 | `respond_meeting` | Respond to a meeting invitation |
+| `set_meetings` | Meeting setup (alternative routing) |
+| `meet_freely` | Free meeting request (alternative routing) |
 | `withdraw_nomination` | Withdraw from an election |
 | `cast_election_vote` | Cast vote in election (variant routing) |
 | `resolve_election` | Moderator resolves election results |
 
 ### Moderator Approval Queue
 
-Some actions require moderator confirmation before execution: assassination, arrest, change_leader, and optionally combat (when dice mode is on). These enter the `pending_actions` queue. Auto-approve mode bypasses this for testing.
+Some actions require moderator confirmation before execution: assassination, arrest (via `pending_actions` queue). Combat actions (all 6 types) queue when `auto_attack` is OFF (the default). `change_leader` uses its own separate voting flow. Future: add final moderator confirmation after change_leader voting completes. Auto-approve mode bypasses the pending queue for testing.
 
 ---
 

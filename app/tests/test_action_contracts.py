@@ -23,9 +23,10 @@ CANONICAL_PLAYER_ACTIONS = {
     # Economic
     "set_budget", "set_tariffs", "set_sanctions", "set_opec",
     "propose_transaction", "accept_transaction",
+    # Communication
+    "public_statement", "call_org_meeting",
     # Diplomatic
-    "public_statement", "declare_war", "propose_agreement", "sign_agreement",
-    "call_org_meeting",
+    "declare_war", "propose_agreement", "sign_agreement",
     # Covert
     "covert_operation", "intelligence",
     # Political
@@ -34,7 +35,7 @@ CANONICAL_PLAYER_ACTIONS = {
 }
 
 REACTIVE_ACTIONS = {
-    "release_arrest", "respond_meeting", "invite_to_meet", "set_meetings",
+    "release_arrest", "respond_meeting", "set_meetings",
     "meet_freely", "withdraw_nomination", "cast_election_vote", "resolve_election",
 }
 
@@ -42,7 +43,11 @@ REACTIVE_ACTIONS = {
 # documentation, but not standalone dispatched actions
 SCHEMA_ONLY = {"rd_investment"}
 
-ALL_CANONICAL = CANONICAL_PLAYER_ACTIONS | REACTIVE_ACTIONS | SCHEMA_ONLY
+# Tool-routed actions: player-initiated but handled by dedicated tools,
+# not through submit_action → dispatcher. No Pydantic schema needed.
+TOOL_ROUTED = {"invite_to_meet"}
+
+ALL_CANONICAL = CANONICAL_PLAYER_ACTIONS | REACTIVE_ACTIONS | SCHEMA_ONLY | TOOL_ROUTED
 
 
 # -- Test 1: Every canonical action is handled by the dispatcher ------------

@@ -71,24 +71,29 @@ Category map: `engine/main.py:ACTION_CATEGORIES` — aligned.
 | `nuclear_authorize` | military | `orchestrators/nuclear_chain` | Wired |
 | `nuclear_intercept` | military | `orchestrators/nuclear_chain` | Wired |
 
-### Economic (6)
+### Economic (4 — batched for Phase B)
 | Canonical Name | Category | Engine | Status |
 |---|---|---|---|
 | `set_budget` | economic | Batch → Phase B | **Working** |
 | `set_tariffs` | economic | Batch → Phase B | **Working** |
 | `set_sanctions` | economic | Batch → Phase B | **Working** |
 | `set_opec` | economic | Batch → Phase B | **Working** |
-| `propose_transaction` | diplomatic | `services/transaction_engine` | Routed |
-| `accept_transaction` | diplomatic | `services/transaction_engine` | Routed |
 
-### Diplomatic (5)
+### Communication (3 — available to all participants)
 | Canonical Name | Category | Engine | Status |
 |---|---|---|---|
-| `public_statement` | diplomatic | Observatory log only | **Working** |
+| `public_statement` | communication | Observatory log only | **Working** |
+| `invite_to_meet` | communication | `action_dispatcher._create_meeting_invitation` | **Working** |
+| `call_org_meeting` | communication | `action_dispatcher._create_meeting_invitation` | Stub→Working |
+
+### Diplomatic (5 — position-restricted)
+| Canonical Name | Category | Engine | Status |
+|---|---|---|---|
 | `declare_war` | diplomatic | `action_dispatcher._declare_war()` | **Working** |
 | `propose_agreement` | diplomatic | `services/agreement_engine` | Routed |
 | `sign_agreement` | diplomatic | `services/agreement_engine` | Routed |
-| `call_org_meeting` | diplomatic | `action_dispatcher._create_meeting_invitation` | Stub→Working |
+| `propose_transaction` | diplomatic | `services/transaction_engine` | Routed |
+| `accept_transaction` | diplomatic | `services/transaction_engine` | Routed |
 
 ### Covert (2)
 | Canonical Name | Category | Engine | Status |
@@ -110,10 +115,9 @@ Category map: `engine/main.py:ACTION_CATEGORIES` — aligned.
 | Canonical Name | Category | Trigger |
 |---|---|---|
 | `release_arrest` | political | Moderator releases arrested role |
-| `respond_meeting` | diplomatic | Response to meeting invitation |
-| `invite_to_meet` | diplomatic | Meeting invitation (human UI) |
-| `set_meetings` | diplomatic | Meeting setup (alternative path) |
-| `meet_freely` | diplomatic | Free meeting request |
+| `respond_meeting` | communication | Response to meeting invitation |
+| `set_meetings` | communication | Meeting setup (alternative routing) |
+| `meet_freely` | communication | Free meeting request (alternative routing) |
 | `withdraw_nomination` | political | Withdraw from election |
 | `cast_election_vote` | political | Cast vote (variant routing) |
 | `resolve_election` | moderator | Moderator resolves election |
