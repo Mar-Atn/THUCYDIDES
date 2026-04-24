@@ -140,9 +140,12 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [activeMeetings, setActiveMeetings] = useState<Record<string, number>>({}) // role_id → active meeting count
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  /* Fetch roles once for character_name lookup */
+  /* Fetch roles — poll every 5s so AI/human toggles in participant management show up */
   useEffect(() => {
-    getSimRunRoles(simId).then(setRoles).catch(() => {})
+    const fetchRoles = () => getSimRunRoles(simId).then(setRoles).catch(() => {})
+    fetchRoles()
+    const interval = setInterval(fetchRoles, 5000)
+    return () => clearInterval(interval)
   }, [simId])
 
   /* Poll DB directly for agent sessions + latest activity (always — survives backend restart) */
@@ -153,6 +156,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
           .from('ai_agent_sessions')
           .select('role_id,country_code,status,total_output_tokens,actions_submitted,tool_calls,last_active_at')
           .eq('sim_run_id', simId)
+          .not('status', 'in', '("archived","terminated")')
         if (sessions) setDbSessions(sessions)
 
         // Latest activity per agent from observatory
