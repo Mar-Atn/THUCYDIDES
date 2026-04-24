@@ -262,10 +262,30 @@ class EventDispatcher:
                     for e in transcript
                 )
                 if not has_content:
-                    logger.warning(
-                        "[dispatcher] Empty response from %s — will retry on next poll",
-                        role_id,
-                    )
+                    # Check if session is dead (multiple empty responses)
+                    if ctx.events_sent >= 3 and ctx.total_output_tokens == 0:
+                        logger.error(
+                            "[dispatcher] Dead session for %s (sent=%d, tokens=0) — recreating",
+                            role_id, ctx.events_sent,
+                        )
+                        try:
+                            await self.session_manager.cleanup(ctx)
+                            new_ctx = await self.session_manager.create_session(
+                                role_id=role_id,
+                                country_code=ctx.country_code,
+                                sim_run_id=self.sim_run_id,
+                                scenario_code=self.sim_run_id,
+                                round_num=ctx.round_num,
+                            )
+                            self.agents[role_id] = new_ctx
+                            logger.info("[dispatcher] Recreated session for %s", role_id)
+                        except Exception as recreate_err:
+                            logger.error("[dispatcher] Failed to recreate session for %s: %s", role_id, recreate_err)
+                    else:
+                        logger.warning(
+                            "[dispatcher] Empty response from %s — will retry on next poll",
+                            role_id,
+                        )
                     # Do NOT mark processed — event stays in queue for retry
                     continue
 
