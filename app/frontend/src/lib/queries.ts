@@ -916,7 +916,7 @@ export async function simAction(
   params?: Record<string, unknown>
 ): Promise<Record<string, unknown>> {
   const token = await getToken()
-  const resp = await fetch(`${API_BASE}/api/sim/${simId}/${action}`, {
+  let resp = await fetch(`${API_BASE}/api/sim/${simId}/${action}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -924,6 +924,19 @@ export async function simAction(
     },
     body: params ? JSON.stringify(params) : undefined,
   })
+  // On 401, invalidate token and retry once
+  if (resp.status === 401) {
+    invalidateToken()
+    const freshToken = await getToken()
+    resp = await fetch(`${API_BASE}/api/sim/${simId}/${action}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${freshToken}`,
+      },
+      body: params ? JSON.stringify(params) : undefined,
+    })
+  }
   if (!resp.ok) {
     const err = await resp.json().catch(() => ({ error: 'Unknown error' }))
     throw new Error(err.detail || err.error || 'Action failed')
