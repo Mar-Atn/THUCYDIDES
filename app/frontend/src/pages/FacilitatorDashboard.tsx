@@ -675,6 +675,19 @@ export function FacilitatorDashboard() {
               loading={actionLoading === 'restart'}
               variant="danger"
             />
+            {currentRound >= 1 && (
+              <ControlButton
+                label={`↺ R${currentRound}`}
+                onClick={async () => {
+                  if (confirm(`Restart Round ${currentRound}? All events, actions, and meetings from this round will be deleted. Phase A will restart with fresh timer.`)) {
+                    await doAction('restart-round')
+                    window.location.reload()
+                  }
+                }}
+                loading={actionLoading === 'restart-round'}
+                variant="secondary"
+              />
+            )}
             {currentRound > 1 && (
               <ControlButton
                 label={`← R${currentRound - 1}`}

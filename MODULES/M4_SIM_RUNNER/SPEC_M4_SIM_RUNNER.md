@@ -1,6 +1,6 @@
 # M4 — Sim Runner & Facilitator Controls SPEC
 
-**Version:** 2.0 | **Date:** 2026-04-23
+**Version:** 2.1 | **Date:** 2026-04-24
 **Status:** STAGE GATE PASSED — aligned with World Model v3.0
 **Dependencies:** M1 (engines), M2 (contracts/dispatcher), M3 (data), M9 (template/SimRun), M10.1 (auth)
 
@@ -154,6 +154,27 @@ Transitions: `setup` → `pre_start` → `active` ⇄ `processing` (cycles per r
 - If facilitator refreshes, timer recalculates correctly (no drift)
 - Not persisted to DB as a ticking value — only start time + duration stored
 
+### Restart Principles
+
+The system provides two levels of restart. Both must guarantee a **truly clean state** — no stale events, no orphaned sessions, no leftover data from prior execution. When any new runtime table is added to the system, it MUST be added to the appropriate restart cleanup.
+
+**Restart Simulation** (`POST /api/sim/{id}/restart`):
+- Returns to initial template state (pre_start, round 0)
+- Cleans ALL runtime data across ALL tables (26+ tables)
+- Archives AI sessions, stops dispatcher
+- Re-copies state tables from template (countries, deployments, relationships, etc.)
+- Resets sim_runs row (status, round, phase, election state, toggles)
+- Preserves: user-to-role assignments, AI/human flags
+
+**Restart Current Round** (`POST /api/sim/{id}/restart-round`):
+- Returns to start of current round (Phase A, fresh timer)
+- Cleans only THIS round's data (events, combat, meetings, decisions, snapshots)
+- Keeps prior rounds intact, AI sessions alive
+- Clears unprocessed agent events (agents get fresh start to the round)
+- Use case: testing, mid-game corrections, recovering from errors
+
+**Maintenance rule:** When a new table is added that stores runtime data, update `restart_simulation()` in `sim_run_manager.py` to include it. When a new per-round table is added, update both `restart_simulation()` and `restart_current_round()`.
+
 ---
 
 ## 6. Facilitator Dashboard Layout
@@ -168,7 +189,7 @@ The dashboard prioritizes what the moderator DOES, not what the world looks like
 │  Mode: [Manual ○ / Auto ●]    LLM: ✓ ok  Tokens: 82% left  │
 └──────────────────────────────────────────────────────────────┘
 ```
-Phase control bar with full functionality: go back one phase, restart sim, pause, resume, advance, extend, end. Plus LLM/AI model health indicator.
+Phase control bar with full functionality: go back one phase, restart round, restart sim, pause, resume, advance, extend, end. Plus LLM/AI model health indicator.
 
 ### Main Area (scrollable, sections below)
 
@@ -368,7 +389,8 @@ Participant submits action
 | `POST /api/sim/{id}/resume` | POST | Resume simulation |
 | `POST /api/sim/{id}/end` | POST | End simulation (→ completed) |
 | `POST /api/sim/{id}/abort` | POST | Abort simulation (→ aborted) |
-| `POST /api/sim/{id}/restart` | POST | Restart simulation with full cleanup |
+| `POST /api/sim/{id}/restart` | POST | Restart simulation with full cleanup (26+ tables, back to pre_start) |
+| `POST /api/sim/{id}/restart-round` | POST | Restart current round only (clean Phase A, keep prior rounds) |
 | `POST /api/sim/{id}/rollback` | POST | Rollback to a specific round |
 
 ### Round Control
