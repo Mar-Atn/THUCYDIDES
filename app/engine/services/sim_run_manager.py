@@ -413,9 +413,13 @@ def _cleanup_runtime_data(client, sim_id: str, after_round: int) -> None:
     logger.info("Cleaning runtime data for sim %s after round %d", sim_id, after_round)
 
     # Tables with round_num column — delete rows where round_num > after_round
+    # For full restart (after_round=0): delete ALL rows including round 0
     for table in ["observatory_events", "agent_decisions"]:
         try:
-            client.table(table).delete().eq("sim_run_id", sim_id).gt("round_num", after_round).execute()
+            if after_round == 0:
+                client.table(table).delete().eq("sim_run_id", sim_id).execute()
+            else:
+                client.table(table).delete().eq("sim_run_id", sim_id).gt("round_num", after_round).execute()
         except Exception as e:
             logger.warning("Cleanup %s failed: %s", table, e)
 
