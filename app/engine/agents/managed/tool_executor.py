@@ -202,6 +202,15 @@ class ToolExecutor:
         """
         from engine.agents.action_schemas import ACTION_TYPE_TO_MODEL
         try:
+            # Check sim_run status — block actions during pre_start/setup
+            client = get_client()
+            run = client.table("sim_runs").select("status,current_phase").eq("id", self.sim_run_id).limit(1).execute()
+            if run.data:
+                sim_status = run.data[0].get("status", "")
+                if sim_status in ("setup", "pre_start"):
+                    return {"success": False, "validation_status": "rejected",
+                            "validation_notes": f"Simulation is in '{sim_status}' state. Actions are only allowed during active rounds. Use observation tools (get_my_country, get_relationships, etc.) and write_notes to prepare."}
+
             action_type = action.get("action_type")
             if not action_type:
                 return {"success": False, "validation_status": "rejected",
@@ -593,6 +602,11 @@ class ToolExecutor:
         try:
             from datetime import datetime, timezone, timedelta
             client = get_client()
+
+            # Block meetings during pre_start/setup
+            run = client.table("sim_runs").select("status").eq("id", self.sim_run_id).limit(1).execute()
+            if run.data and run.data[0].get("status") in ("setup", "pre_start"):
+                return {"success": False, "error": "Simulation hasn't started yet. Meetings are available once the round begins."}
 
             # Check limit: max 2 active invitations per role
             now_iso = datetime.now(timezone.utc).isoformat()
