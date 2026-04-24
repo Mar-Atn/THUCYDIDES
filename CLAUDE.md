@@ -65,6 +65,7 @@ WORLD MODEL + CONTRACTS (Marat co-owns, machine-verifiable)
 3. Read `MODULES/WORLD_MODEL.md` — how the SIM world works
 4. IMPORT canonical names from contracts — **never hardcode action type strings**
 5. If unsure about a name, field, or protocol → **LOOK IT UP, don't guess**
+6. When facing a new technical issue or integration challenge → **search community best practices** (GitHub issues, SDK docs, developer forums) BEFORE implementing a fix. Understand the root cause. Don't patch symptoms.
 
 If any canonical source is missing or unclear → fix the documentation BEFORE writing code.
 
@@ -189,7 +190,7 @@ THUCYDIDES/
 │   ├── ROADMAP.md              ← Module sequence, milestones
 │   ├── STANDARDS.md            ← Build standards, quality gates
 │   ├── MODULE_REGISTRY.md      ← Canonical names, status, decisions
-│   ├── WORLD_MODEL.md          ← THE SIM specification (to be created)
+│   ├── WORLD_MODEL.md          ← THE SIM specification
 │   ├── CONTRACTS/              ← Per-action and per-protocol contracts
 │   └── M*/                     ← Per-module folders with SPEC.md
 ├── 1. CONCEPT/                  ← Design heritage (WHY)
@@ -212,9 +213,9 @@ THUCYDIDES/
 
 - **KING patterns:** `/Users/marat/CODING/KING` — reusable patterns, evaluate critically
 - **Commit prefixes:** `engine:`, `api:`, `frontend:`, `test:`, `fix:`, `docs:`, `config:`
-- **Template/Scenario/Run hierarchy:** Template (evolves) → Scenario (configured) → SimRun (immutable)
+- **Template/SimRun hierarchy:** Template (master design, evolves) → SimRun (one execution, snapshot at creation)
 - **Modular CLAUDE.md family:** `/app/CLAUDE.md`, `/app/engine/CLAUDE.md`, `/app/frontend/CLAUDE.md`, `/app/tests/CLAUDE.md`
 
 ---
 
-*Version 4.0 — Process Reset. World Model + Contracts replace SEED/DET as source of truth. 5-agent team with mandatory cross-checks. 20% time on process/documentation.*
+*Version 4.1 — Process Reset. World Model + Contracts replace SEED/DET as source of truth. 5-agent team with mandatory cross-checks. 20% time on process/documentation. Best practices lookup for new technical challenges.*
