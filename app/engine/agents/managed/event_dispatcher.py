@@ -555,7 +555,7 @@ class EventDispatcher:
             .execute()
         )
         if old_sessions.data:
-            logger.info("[dispatcher] Cleaning up %d orphaned sessions", len(old_sessions.data))
+            logger.info("[dispatcher] Archiving %d old sessions before fresh init", len(old_sessions.data))
             for old in old_sessions.data:
                 try:
                     await self.session_manager.client.beta.sessions.archive(old["session_id"])
@@ -572,6 +572,8 @@ class EventDispatcher:
                 .in_("status", ["initializing", "ready", "active", "frozen"])
                 .execute()
             )
+            # Wait for Anthropic to fully process the archives
+            await asyncio.sleep(3)
 
         # Load sim run info
         run_data = await (
@@ -679,72 +681,6 @@ class EventDispatcher:
         }
         logger.info("[dispatcher] Initialization complete: %s", summary)
         return summary
-
-    # -- Reconnect from DB -------------------------------------------------
-
-    async def reconnect_from_db(self) -> int:
-        """Rebuild dispatcher state from DB sessions after backend restart.
-
-        ASYNC — uses async client for DB reads.
-        """
-        db = await get_async_client()
-        sessions = await (
-            db.table("ai_agent_sessions")
-            .select("*")
-            .eq("sim_run_id", self.sim_run_id)
-            .in_("status", ["initializing", "ready", "active"])
-            .execute()
-        )
-
-        count = 0
-        for s in sessions.data or []:
-            role_id = s["role_id"]
-            executor = ToolExecutor(
-                country_code=s["country_code"],
-                scenario_code=self.sim_run_id,
-                sim_run_id=self.sim_run_id,
-                round_num=s.get("round_num", 1),
-                role_id=role_id,
-            )
-            ctx = SessionContext(
-                agent_id=s["agent_id"],
-                agent_version=1,
-                environment_id=s["environment_id"],
-                session_id=s["session_id"],
-                role_id=role_id,
-                country_code=s["country_code"],
-                sim_run_id=self.sim_run_id,
-                scenario_code=self.sim_run_id,
-                model=s.get("model") or None,
-                round_num=s.get("round_num", 1),
-                tool_executor=executor,
-                total_input_tokens=s.get("total_input_tokens", 0),
-                total_output_tokens=s.get("total_output_tokens", 0),
-                events_sent=s.get("events_sent", 0),
-                actions_submitted=s.get("actions_submitted", 0),
-                tool_calls=s.get("tool_calls", 0),
-            )
-
-            # Health check: skip terminated sessions
-            try:
-                health = await self.session_manager.health_check(ctx)
-                if health == "terminated":
-                    logger.warning(
-                        "[dispatcher] Session %s (role=%s) terminated, skipping",
-                        ctx.session_id, role_id,
-                    )
-                    continue
-            except Exception as e:
-                logger.warning(
-                    "[dispatcher] Health check failed for %s, registering anyway: %s",
-                    role_id, e,
-                )
-
-            self.register_agent(role_id, ctx)
-            count += 1
-
-        logger.info("[dispatcher] Reconnected %d agents from DB", count)
-        return count
 
     # -- Shutdown ----------------------------------------------------------
 

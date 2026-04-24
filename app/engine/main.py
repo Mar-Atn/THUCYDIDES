@@ -39,27 +39,10 @@ async def lifespan(app: FastAPI):
 
     import asyncio
 
-    # Auto-reconnect dispatchers for any sim_runs with active AI sessions
-    from engine.agents.managed.event_dispatcher import create_dispatcher, get_dispatcher
-    try:
-        from engine.services.supabase import get_client
-        db = get_client()
-        active_sims = (
-            db.table("ai_agent_sessions")
-            .select("sim_run_id")
-            .in_("status", ["initializing", "ready", "active"])
-            .execute()
-        )
-        sim_ids = set(s["sim_run_id"] for s in (active_sims.data or []))
-        for sid in sim_ids:
-            if not get_dispatcher(sid):
-                d = create_dispatcher(sid)
-                count = await d.reconnect_from_db()
-                if count > 0:
-                    await d.start()
-                    logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sid, count)
-    except Exception as e:
-        logger.warning("Auto-reconnect dispatchers failed: %s", e)
+    # No auto-reconnect on server startup.
+    # After server restart, moderator must click "Initialize AI Agents" again.
+    # This prevents stale/archived sessions from being reused.
+    logger.info("Server started. AI agents require manual initialization via dashboard.")
 
     yield
 
@@ -2358,31 +2341,14 @@ async def ai_status(
     sim_id: str,
     user: AuthUser = Depends(require_moderator),
 ):
-    """Get all AI agent states, costs, queue depths, and activity summary."""
-    from engine.agents.managed.event_dispatcher import get_dispatcher, create_dispatcher
+    """Get all AI agent states, costs, queue depths, and activity summary.
+
+    No auto-reconnect. If the server restarted, the moderator must click
+    Initialize again. This prevents stale session conflicts.
+    """
+    from engine.agents.managed.event_dispatcher import get_dispatcher
 
     dispatcher = get_dispatcher(sim_id)
-
-    if not dispatcher or (not dispatcher.agents and not dispatcher._running):
-        # Try to reconnect from DB sessions (backend may have restarted)
-        # But ONLY if no dispatcher is already running
-        try:
-            if not dispatcher:
-                dispatcher = create_dispatcher(sim_id)
-            if not dispatcher._running:
-                count = await dispatcher.reconnect_from_db()
-                if count > 0:
-                    await dispatcher.start()
-                    logger.info("Auto-reconnected dispatcher for sim %s: %d agents", sim_id, count)
-                else:
-                    from engine.agents.managed.event_dispatcher import remove_dispatcher
-                    remove_dispatcher(sim_id)
-                    dispatcher = None
-        except Exception as e:
-            logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
-            from engine.agents.managed.event_dispatcher import remove_dispatcher
-            remove_dispatcher(sim_id)
-            dispatcher = None
 
     if not dispatcher:
         return APIResponse(data={

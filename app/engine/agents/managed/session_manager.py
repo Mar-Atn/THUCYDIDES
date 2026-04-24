@@ -355,7 +355,7 @@ class ManagedSessionManager:
     # Timeout for SSE stream idle (no events received). Known Anthropic issue:
     # streams can hang indefinitely (~10-15% frequency per community reports).
     # See: https://github.com/anthropics/anthropic-sdk-typescript/issues/867
-    STREAM_IDLE_TIMEOUT_SECONDS = 120  # 2 minutes — generous for tool-heavy responses
+    STREAM_IDLE_TIMEOUT_SECONDS = 60  # 1 minute — balances agent response time vs hang detection
 
     async def _stream_event(
         self, ctx: SessionContext, message: str, transcript: list[dict]
