@@ -897,17 +897,16 @@ async def cleanup_sim_ai_state(
     except Exception as e:
         logger.error("[cleanup] Failed to archive DB sessions: %s", e)
 
-    # 4. Clear unprocessed events
+    # 4. Clear ALL events (processed and unprocessed) — clean slate on restart
     try:
         result = await (
             db.table("agent_event_queue")
             .delete()
             .eq("sim_run_id", sim_run_id)
-            .is_("processed_at", "null")
             .execute()
         )
         summary["events_cleared"] = len(result.data or [])
-        logger.info("[cleanup] Cleared %d unprocessed events", summary["events_cleared"])
+        logger.info("[cleanup] Cleared %d events (all)", summary["events_cleared"])
     except Exception as e:
         logger.error("[cleanup] Failed to clear event queue: %s", e)
 
