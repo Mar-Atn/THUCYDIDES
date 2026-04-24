@@ -236,7 +236,7 @@ class EventDispatcher:
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events."""
-        for role_id, ctx in self.agents.items():
+        for role_id, ctx in list(self.agents.items()):
             state = self.agent_states.get(role_id, IDLE)
 
             if state != IDLE:
@@ -397,7 +397,7 @@ class EventDispatcher:
         total_actions = 0
         total_tool_calls = 0
 
-        for role_id, ctx in self.agents.items():
+        for role_id, ctx in list(self.agents.items()):
             # Read from DB for accurate cross-session totals
             db_session = await (
                 db.table("ai_agent_sessions")
@@ -775,7 +775,7 @@ class EventDispatcher:
         STAYS SYNC — called by the engine after round processing completes.
         Each agent gets their country's results + public events.
         """
-        for role_id, ctx in self.agents.items():
+        for role_id, ctx in list(self.agents.items()):
             country_results = results_by_country.get(ctx.country_code, {})
             message = (
                 f"Round {round_num} complete. Results for {ctx.country_code}: "
@@ -803,7 +803,7 @@ class EventDispatcher:
         """Stop dispatcher, archive all sessions, clear queue."""
         await self.stop()
 
-        for role_id, ctx in self.agents.items():
+        for role_id, ctx in list(self.agents.items()):
             try:
                 await self.session_manager.cleanup(ctx)
             except Exception as e:

@@ -2367,6 +2367,8 @@ async def ai_status(
                     dispatcher = None
         except Exception as e:
             logger.warning("Auto-reconnect failed for sim %s: %s", sim_id, e)
+            from engine.agents.managed.event_dispatcher import remove_dispatcher
+            remove_dispatcher(sim_id)
             dispatcher = None
 
     if not dispatcher:
