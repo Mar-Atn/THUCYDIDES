@@ -76,7 +76,7 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
         setData(rows as T[])
       }
       setLoading(false)
-    })
+    }).catch(() => {}).finally(() => setLoading(false))
   }, [table, simId, columns, filter, eq, orderBy, limit, enabled])
 
   useEffect(() => {
@@ -183,7 +183,7 @@ export function useRealtimeRow<T extends Record<string, unknown>>(
         if (rows?.[0]) setData(rows[0] as T)
         setLoading(false)
       })
-    )
+    ).catch(() => {}).finally(() => setLoading(false))
 
     // Subscribe via ChannelManager (deduplicates across HMR and multiple callers)
     const listener: RealtimeListener = (payload) => {
