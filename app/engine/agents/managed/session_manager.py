@@ -352,10 +352,20 @@ class ManagedSessionManager:
         except Exception as e:
             logger.warning("Could not check/interrupt session: %s", e)
 
+    # Timeout for SSE stream idle (no events received). Known Anthropic issue:
+    # streams can hang indefinitely (~10-15% frequency per community reports).
+    # See: https://github.com/anthropics/anthropic-sdk-typescript/issues/867
+    STREAM_IDLE_TIMEOUT_SECONDS = 120  # 2 minutes — generous for tool-heavy responses
+
     async def _stream_event(
         self, ctx: SessionContext, message: str, transcript: list[dict]
     ) -> list[dict]:
-        """Open a stream, send user.message, and process events until idle."""
+        """Open a stream, send user.message, and process events until idle.
+
+        Includes stream idle timeout to handle known Anthropic SSE hang issue.
+        If no events arrive within STREAM_IDLE_TIMEOUT_SECONDS, the stream is
+        abandoned and the method returns whatever transcript was collected.
+        """
         async with await self.client.beta.sessions.events.stream(ctx.session_id) as stream:
             # Send the user message
             await self.client.beta.sessions.events.send(
@@ -368,8 +378,28 @@ class ManagedSessionManager:
                 ],
             )
 
-            # Process streaming events
-            async for event in stream:
+            # Process streaming events with idle timeout
+            async def _next_event():
+                """Get next event from stream, with timeout."""
+                async for ev in stream:
+                    return ev
+                return None  # Stream ended
+
+            while True:
+                try:
+                    event = await asyncio.wait_for(
+                        _next_event(),
+                        timeout=self.STREAM_IDLE_TIMEOUT_SECONDS,
+                    )
+                except asyncio.TimeoutError:
+                    logger.error(
+                        "Stream idle timeout (%ds) for session %s — aborting stream",
+                        self.STREAM_IDLE_TIMEOUT_SECONDS, ctx.session_id,
+                    )
+                    break
+
+                if event is None:
+                    break  # Stream ended normally
                 try:
                     entry = self._handle_event(ctx, event)
                     if entry:
