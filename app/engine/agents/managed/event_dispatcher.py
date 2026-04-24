@@ -537,6 +537,13 @@ class EventDispatcher:
             Summary: {agents_initialized, roles, errors}.
         """
         logger.info("[dispatcher] Initializing all AI agents for sim %s", self.sim_run_id)
+
+        # Clear any previously registered agents (e.g., from auto-reconnect of stale sessions)
+        if self.agents:
+            logger.info("[dispatcher] Clearing %d stale in-memory agents before fresh init", len(self.agents))
+            self.agents.clear()
+            self.agent_states.clear()
+
         db = await get_async_client()
 
         # Clean up orphaned sessions from previous runs
