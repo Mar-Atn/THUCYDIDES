@@ -255,6 +255,20 @@ class EventDispatcher:
             self.set_agent_state(role_id, IN_MEETING if has_chat else ACTING)
             try:
                 transcript = await self.session_manager.send_event(ctx, message)
+
+                # Detect empty response (session not ready or silent failure)
+                has_content = any(
+                    e.get("type") in ("agent_message", "tool_call", "agent_thinking")
+                    for e in transcript
+                )
+                if not has_content:
+                    logger.warning(
+                        "[dispatcher] Empty response from %s — will retry on next poll",
+                        role_id,
+                    )
+                    # Do NOT mark processed — event stays in queue for retry
+                    continue
+
                 await self.mark_processed(event_ids)
 
                 # Log to observatory
@@ -576,7 +590,8 @@ class EventDispatcher:
         logger.info("[dispatcher] Found %d AI roles to initialize", len(roles))
 
         # Semaphore to limit concurrent session creation (API rate limit)
-        sem = asyncio.Semaphore(4)
+        # Keep at 2 to avoid Anthropic rate limits and session readiness issues
+        sem = asyncio.Semaphore(2)
         initialized: list[dict] = []
         errors: list[str] = []
 
@@ -587,6 +602,8 @@ class EventDispatcher:
             title = role.get("title", "Leader")
 
             async with sem:
+                # Small stagger to avoid hitting Anthropic API simultaneously
+                await asyncio.sleep(1)
                 try:
                     ctx = await self.session_manager.create_session(
                         role_id=role_id,
