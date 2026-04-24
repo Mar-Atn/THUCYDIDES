@@ -267,13 +267,17 @@ def go_back_to_phase_a(sim_id: str, phase_duration_seconds: int = 3600) -> dict:
 def restart_simulation(sim_id: str) -> dict:
     """Full restart — delete ALL runtime data and re-copy state tables from source.
 
-    Resets everything to initial template state:
-    - Re-copies: countries, deployments, relationships, sanctions, tariffs,
-      zones, organizations, org_memberships, artefacts
-    - Deletes: agreements, exchange_transactions, hex_control,
-      observatory_events, agent_decisions, pending_actions, leadership_votes,
-      nuclear_actions, world_state
-    - Preserves: roles, role_actions (user assignments don't change)
+    Comprehensive clean slate:
+    - Re-copies from template: countries, deployments, relationships, sanctions,
+      tariffs, zones, organizations, org_memberships, artefacts
+    - Deletes ALL runtime tables: agreements, exchange_transactions, hex_control,
+      blockades, elections, combat_results, covert_ops_log, meetings, invitations,
+      pending_actions, leadership_votes, nuclear_actions, run_roles,
+      power_assignments, basing_rights, round_reports, agent tables
+    - Deletes per-round snapshots: country_states, global_state, unit_states,
+      round_states (round_num > 0), world_state (round_num > 0)
+    - Resets: sim_runs row (status, round, phase, election state, toggles)
+    - Preserves: roles (user assignments), role_actions (recomputed from positions)
     """
     client = _get_client()
     source_id = "00000000-0000-0000-0000-000000000001"  # canonical template sim
@@ -281,14 +285,42 @@ def restart_simulation(sim_id: str) -> dict:
     # 1. Delete ALL runtime-only data
     _cleanup_runtime_data(client, sim_id, after_round=0)
 
-    # 2. Delete tables that don't exist in template (runtime-created)
-    for table in ["agreements", "exchange_transactions", "hex_control", "blockades",
-                   "election_nominations", "election_votes", "election_results",
-                   "observatory_combat_results", "run_roles"]:
+    # 2. Delete ALL runtime-created tables (comprehensive list)
+    RUNTIME_TABLES = [
+        # Diplomatic / Economic
+        "agreements", "exchange_transactions",
+        # Military
+        "hex_control", "blockades",
+        # Political / Elections
+        "election_nominations", "election_votes", "election_results",
+        # Combat display
+        "observatory_combat_results",
+        # Runtime role state
+        "run_roles",
+        # Covert operations
+        "covert_ops_log",
+        # AI agent tables (not handled by cleanup_sim_ai_state)
+        "agent_actions", "agent_conversations", "agent_reflections", "agent_transactions",
+        # Round history
+        "round_reports",
+        # Power delegations (runtime changes)
+        "power_assignments",
+        # Runtime basing rights
+        "basing_rights",
+    ]
+    for table in RUNTIME_TABLES:
         try:
             client.table(table).delete().eq("sim_run_id", sim_id).execute()
         except Exception as e:
             logger.warning("Restart: delete %s failed: %s", table, e)
+
+    # 3. Delete per-round snapshot tables (keep round 0 for world_state)
+    for table in ["country_states_per_round", "global_state_per_round",
+                   "unit_states_per_round", "round_states"]:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).gt("round_num", 0).execute()
+        except Exception as e:
+            logger.warning("Restart: delete %s snapshots failed: %s", table, e)
 
     # 3. Restore state tables from template source
     from engine.services.sim_create import _copy_table
@@ -373,6 +405,82 @@ def restart_simulation(sim_id: str) -> dict:
         "phase_duration_seconds": None,
         "started_at": None,
         "completed_at": None,
+        "auto_advance": False,
+        "auto_approve": False,
+    })
+
+
+def restart_current_round(sim_id: str) -> dict:
+    """Restart the current round — clean slate for the round, keep prior rounds.
+
+    Deletes all runtime data for the current round:
+    - Observatory events, combat results for this round
+    - Pending actions, meetings, invitations for this round
+    - Agent event queue (unprocessed events)
+    - Per-round snapshots for this round
+    Then resets Phase A with fresh timer.
+
+    Does NOT touch: prior round data, countries/deployments state,
+    AI sessions (agents stay alive, just get a fresh start to the round).
+    """
+    client = _get_client()
+    run = _get_run(client, sim_id)
+    current_round = run.get("current_round", 1)
+
+    if current_round < 1:
+        raise ValueError("Cannot restart round 0 (pre-start)")
+
+    logger.info("Restarting round %d for sim %s", current_round, sim_id)
+
+    # Delete current round's runtime data
+    ROUND_TABLES = ["observatory_events", "observatory_combat_results", "pending_actions",
+                     "covert_ops_log", "round_reports"]
+    for table in ROUND_TABLES:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).eq("round_num", current_round).execute()
+        except Exception as e:
+            logger.warning("Restart round: delete %s failed: %s", table, e)
+
+    # Delete current round's per-round snapshots
+    for table in ["country_states_per_round", "global_state_per_round",
+                   "unit_states_per_round", "round_states"]:
+        try:
+            client.table(table).delete().eq("sim_run_id", sim_id).eq("round_num", current_round).execute()
+        except Exception as e:
+            logger.warning("Restart round: delete %s snapshot failed: %s", table, e)
+
+    # Clear meetings/invitations created this round
+    try:
+        meetings = client.table("meetings").select("id").eq("sim_run_id", sim_id).eq("round_num", current_round).execute()
+        for m in (meetings.data or []):
+            client.table("meeting_messages").delete().eq("meeting_id", m["id"]).execute()
+        client.table("meetings").delete().eq("sim_run_id", sim_id).eq("round_num", current_round).execute()
+        client.table("meeting_invitations").delete().eq("sim_run_id", sim_id).execute()
+    except Exception as e:
+        logger.warning("Restart round: meetings cleanup failed: %s", e)
+
+    # Clear agent event queue (unprocessed) — agents will get fresh events
+    try:
+        client.table("agent_event_queue").delete().eq("sim_run_id", sim_id).is_("processed_at", "null").execute()
+    except Exception as e:
+        logger.warning("Restart round: agent queue cleanup failed: %s", e)
+
+    # Clear agent decisions for this round
+    try:
+        client.table("agent_decisions").delete().eq("sim_run_id", sim_id).eq("round_num", current_round).execute()
+    except Exception as e:
+        logger.warning("Restart round: agent decisions cleanup failed: %s", e)
+
+    # Reset to Phase A with fresh timer
+    phase_duration = run.get("phase_duration_seconds", 3600)
+
+    logger.info("Round %d restarted for sim %s — Phase A reset", current_round, sim_id)
+
+    return _update_run(client, sim_id, {
+        "status": "active",
+        "current_phase": "A",
+        "phase_started_at": datetime.now(timezone.utc).isoformat(),
+        "phase_duration_seconds": phase_duration,
     })
 
 

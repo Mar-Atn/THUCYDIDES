@@ -1295,6 +1295,19 @@ async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+@app.post("/api/sim/{sim_id}/restart-round", response_model=APIResponse)
+async def sim_restart_round(sim_id: str, user: AuthUser = Depends(require_moderator)):
+    """Restart the current round — clean slate for this round only."""
+    from engine.services.sim_run_manager import restart_current_round
+    import asyncio
+    try:
+        state = await asyncio.to_thread(restart_current_round, sim_id)
+        logger.info("Sim %s ROUND RESTARTED by %s", sim_id, user.id)
+        return APIResponse(data=state)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 @app.post("/api/sim/{sim_id}/rollback", response_model=APIResponse)
 async def sim_rollback(sim_id: str, target_round: int = 1, user: AuthUser = Depends(require_moderator)):
     """Roll back to the start of a specific round. Deletes data for rounds after target."""
