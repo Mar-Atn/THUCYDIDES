@@ -141,25 +141,30 @@ Route: `/admin/users`
   - Reset password (sends reset email)
   - Delete (with confirmation)
 
-### 3d. AI System Setup (global LLM selection only)
+### 3d. AI System Setup (global AI configuration)
 
 Route: `/admin/ai-setup`
 
-**Global Model Configuration** (used across the entire system):
+**All settings stored in `sim_config` table with `category='ai'`.** Read by `engine/agents/managed/ai_config.py` at runtime. Apply globally across all sim runs.
 
-| Use Case | Setting | Current Default |
-|---|---|---|
-| AI Participants (decisions) | Model selector dropdown | Claude Sonnet 4 |
-| AI Participants (conversations) | Model selector dropdown | Claude Sonnet 4 |
-| AI Engine (moderator/judgment) | Model selector dropdown | Claude Sonnet 4 |
-| Fallback Model 1 | Model selector dropdown | Gemini 2.5 Pro |
-| Fallback Model 2 | Model selector dropdown | Gemini 2.5 Flash |
+**Model Configuration:**
 
-Model options: all models from `app/config/LLM_MODELS.md`.
-Changes saved to `sim_config` table (category: 'llm', key: use_case name).
-These settings are read by `engine/config/settings.py` at runtime.
+| Setting | DB Key | Default | Description |
+|---|---|---|---|
+| AI Participants (decisions) | `model_decisions` | `claude-sonnet-4-6` | Strategic decisions, action selection, tool use |
+| AI Participants (conversations) | `model_conversations` | `claude-sonnet-4-6` | Bilateral meetings, negotiations |
 
-**AI Prompt Management** — placeholder card: "Prompt editor coming in M5 (AI Participant module)."
+**Behavior Configuration:**
+
+| Setting | DB Key | Range | Default | Description |
+|---|---|---|---|---|
+| Assertiveness Dial | `assertiveness` | 1-10 | 5 | 1=cooperative, 5=balanced, 10=competitive. Affects AI system prompt — shifts decision-making tendency. |
+
+**UI:** Model dropdowns + assertiveness slider. Save persists to `sim_config` via upsert.
+
+**Backend integration:** `ai_config.get_ai_model("decisions")` and `ai_config.get_assertiveness()` read these values at session creation time. Falls back to defaults if DB has no entry.
+
+**AI Prompt Management** — placeholder card: "Prompt editor coming in M5."
 
 ---
 

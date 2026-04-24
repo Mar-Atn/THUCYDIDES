@@ -157,8 +157,12 @@ class ManagedSessionManager:
         """
         if model is None:
             model = get_ai_model("decisions")
+        # Read assertiveness from global AI config
+        from engine.agents.managed.ai_config import get_assertiveness
+        assertiveness = get_assertiveness()
+
         # Build system prompt (Layer 1) — use DB context when sim_run_id available
-        system_prompt = build_system_prompt(role_id, sim_run_id=sim_run_id)
+        system_prompt = build_system_prompt(role_id, sim_run_id=sim_run_id, assertiveness=assertiveness)
         logger.info("Built system prompt for %s (%d chars)", role_id, len(system_prompt))
 
         # Get custom tool definitions
