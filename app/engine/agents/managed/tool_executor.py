@@ -537,15 +537,41 @@ class ToolExecutor:
             return {"error": str(e), "artefacts": []}
 
     def _get_action_rules(self, action_type: str | None = None) -> dict:
-        """Return structured info about action types from Pydantic models."""
+        """Return structured info about action types from Pydantic models.
+
+        Also includes current sim phase context so the agent knows
+        what's available NOW vs what requires an active round.
+        """
         from engine.agents.action_schemas import ACTION_TYPE_TO_MODEL
 
+        # Get current sim phase for context
+        phase_context = {}
+        try:
+            client = get_client()
+            run = client.table("sim_runs").select("status,current_phase,current_round").eq("id", self.sim_run_id).limit(1).execute()
+            if run.data:
+                r = run.data[0]
+                sim_status = r.get("status", "")
+                actions_allowed = sim_status == "active"
+                phase_context = {
+                    "sim_status": sim_status,
+                    "current_phase": r.get("current_phase"),
+                    "current_round": r.get("current_round"),
+                    "actions_allowed": actions_allowed,
+                    "phase_note": "Actions and meetings are available." if actions_allowed
+                        else "PRE-START: Only observation tools and write_notes are available. Actions will be available once the round starts.",
+                }
+        except Exception:
+            pass
+
         if not action_type:
-            # List all available action types
-            return {
+            result = {
                 "available_actions": sorted(ACTION_TYPE_TO_MODEL.keys()),
                 "hint": "Call get_action_rules with a specific action_type to see required fields.",
             }
+            if phase_context:
+                result["phase_context"] = phase_context
+            return result
 
         if action_type not in ACTION_TYPE_TO_MODEL:
             return {

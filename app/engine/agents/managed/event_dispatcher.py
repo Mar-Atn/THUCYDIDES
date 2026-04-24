@@ -650,9 +650,12 @@ class EventDispatcher:
                         tier=2,
                         event_type="initialization",
                         message=(
-                            f"The simulation has begun. You are {character_name}, "
+                            f"The simulation is in PRE-START phase (Round {round_num}). You are {character_name}, "
                             f"{title} of {country_code}. "
-                            f"This is Round {round_num}. Assess your situation."
+                            f"EXPLORE ONLY — use observation tools (get_my_country, get_relationships, "
+                            f"get_my_forces, get_all_countries, get_organizations) and write_notes to "
+                            f"assess your situation and plan your strategy. "
+                            f"Do NOT submit actions or request meetings — these are available once the round starts."
                         ),
                     )
 
