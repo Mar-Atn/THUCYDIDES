@@ -2691,7 +2691,11 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.environ.get("PORT", 8000))
-    workers = int(os.environ.get("WEB_CONCURRENCY", 4))
+    # MUST be 1 worker — the EventDispatcher uses in-memory state (agent sessions,
+    # agent_states dict) that can't be shared across worker processes. Multiple
+    # workers cause actions dispatched in one worker to not find the dispatcher
+    # in another → AI agents never receive events from human actions.
+    workers = 1
     reload = os.environ.get("ENGINE_RELOAD", "").lower() in ("1", "true")
 
     uvicorn.run(
