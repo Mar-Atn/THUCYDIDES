@@ -1,17 +1,16 @@
 /**
- * AI System Setup — global AI configuration for the simulation.
+ * AI System Setup — global AI configuration.
  *
- * Settings stored in sim_config table:
- * - category='ai': model selection + assertiveness
- * - Read by ai_config.py at runtime
- *
- * All AI participants across all sim runs use these settings.
+ * Settings stored in ai_settings table (global, not per-sim).
+ * Two categories:
+ *   - Managed agent settings (locked at init): model_decisions, model_conversations, assertiveness
+ *   - Stateless API settings (immediate): model_stateless
  */
 
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '@/components/Header'
-import { getGlobalConfig, setGlobalConfig, getTemplates } from '@/lib/queries'
+import { getAISettings, updateAISetting } from '@/lib/queries'
 
 /* -------------------------------------------------------------------------- */
 /*  Model Definitions                                                         */
@@ -28,37 +27,52 @@ const AVAILABLE_MODELS: ModelOption[] = [
   { value: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5' },
 ]
 
-/**
- * Config keys stored in sim_config with category='ai'.
- * These MUST match the keys in ai_config.py exactly.
- */
-const CONFIG_KEYS = {
-  modelDecisions: 'model_decisions',
-  modelConversations: 'model_conversations',
-  assertiveness: 'assertiveness',
-} as const
-
-const FIELD_LABELS: Record<string, string> = {
-  [CONFIG_KEYS.modelDecisions]: 'AI Participants — Decisions',
-  [CONFIG_KEYS.modelConversations]: 'AI Participants — Conversations',
-  [CONFIG_KEYS.assertiveness]: 'Global Assertiveness Dial',
+interface SettingDef {
+  key: string
+  label: string
+  description: string
+  note: string // reinit or immediate
+  type: 'model' | 'slider'
+  default: string
 }
 
-const FIELD_DESCRIPTIONS: Record<string, string> = {
-  [CONFIG_KEYS.modelDecisions]:
-    'Model for strategic decisions, action selection, and tool use.',
-  [CONFIG_KEYS.modelConversations]:
-    'Model for bilateral meetings and negotiations.',
-  [CONFIG_KEYS.assertiveness]:
-    'Shifts all AI participants toward cooperation (1) or competition (10). Default: 5 (balanced).',
-}
+const MANAGED_SETTINGS: SettingDef[] = [
+  {
+    key: 'model_decisions',
+    label: 'AI Participants — Decisions',
+    description: 'Model for strategic decisions, action selection, and tool use.',
+    note: 'Locked at initialization. Change requires Shutdown → Re-initialize.',
+    type: 'model',
+    default: 'claude-sonnet-4-6',
+  },
+  {
+    key: 'model_conversations',
+    label: 'AI Participants — Conversations',
+    description: 'Model for bilateral meetings and negotiations.',
+    note: 'Locked at initialization. Change requires Shutdown → Re-initialize.',
+    type: 'model',
+    default: 'claude-sonnet-4-6',
+  },
+  {
+    key: 'assertiveness',
+    label: 'Global Assertiveness Dial',
+    description: 'Shifts all AI participants toward cooperation (1) or competition (10). Default: 5 (balanced).',
+    note: 'Applied at initialization. Change requires Shutdown → Re-initialize.',
+    type: 'slider',
+    default: '5',
+  },
+]
 
-/** Default values. Must match ai_config.py defaults. */
-const DEFAULTS: Record<string, string> = {
-  [CONFIG_KEYS.modelDecisions]: 'claude-sonnet-4-6',
-  [CONFIG_KEYS.modelConversations]: 'claude-sonnet-4-6',
-  [CONFIG_KEYS.assertiveness]: '5',
-}
+const STATELESS_SETTINGS: SettingDef[] = [
+  {
+    key: 'model_stateless',
+    label: 'Stateless API Calls',
+    description: 'Model for intelligence reports, chat assistance, Navigator, and other one-shot calls.',
+    note: 'Changes take effect immediately on next API call.',
+    type: 'model',
+    default: 'claude-sonnet-4-6',
+  },
+]
 
 /* -------------------------------------------------------------------------- */
 /*  Component                                                                 */
@@ -67,30 +81,23 @@ const DEFAULTS: Record<string, string> = {
 export function AISetup() {
   const navigate = useNavigate()
 
-  const [config, setConfig] = useState<Record<string, string>>({ ...DEFAULTS })
-  const [templateId, setTemplateId] = useState<string | null>(null)
+  const [config, setConfig] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving] = useState<string | null>(null) // key being saved
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  /* Load template + existing config on mount */
+  /* Load settings on mount */
   useEffect(() => {
     const init = async () => {
       try {
-        const templates = await getTemplates()
-        if (templates.length === 0) {
-          setError('No templates found. Create a template first.')
-          setLoading(false)
-          return
+        const settings = await getAISettings()
+        // Merge with defaults
+        const merged: Record<string, string> = {}
+        for (const s of [...MANAGED_SETTINGS, ...STATELESS_SETTINGS]) {
+          merged[s.key] = settings[s.key] || s.default
         }
-        setTemplateId(templates[0].id)
-
-        // Load existing AI config (category='ai')
-        const existing = await getGlobalConfig('ai')
-        if (Object.keys(existing).length > 0) {
-          setConfig((prev) => ({ ...prev, ...existing }))
-        }
+        setConfig(merged)
       } catch (e) {
         setError(`Failed to load: ${e instanceof Error ? e.message : String(e)}`)
       } finally {
@@ -100,20 +107,17 @@ export function AISetup() {
     init()
   }, [])
 
-  /** Save all settings to DB. */
-  const handleSave = async () => {
-    if (!templateId) return
-    setSaving(true)
+  /** Save a single setting. */
+  const handleSave = async (key: string, value: string) => {
+    setSaving(key)
     setSaveMessage(null)
     try {
-      for (const key of Object.values(CONFIG_KEYS)) {
-        await setGlobalConfig('ai', key, config[key] ?? '', templateId)
-      }
-      setSaveMessage('Configuration saved.')
+      const result = await updateAISetting(key, value)
+      setSaveMessage(result.message)
     } catch (e) {
       setSaveMessage(`Save failed: ${e instanceof Error ? e.message : String(e)}`)
     } finally {
-      setSaving(false)
+      setSaving(null)
     }
   }
 
@@ -122,7 +126,25 @@ export function AISetup() {
     setSaveMessage(null)
   }
 
-  const assertiveness = parseInt(config[CONFIG_KEYS.assertiveness] || '5', 10)
+  /** Save all settings at once. */
+  const handleSaveAll = async () => {
+    setSaving('all')
+    setSaveMessage(null)
+    try {
+      for (const s of [...MANAGED_SETTINGS, ...STATELESS_SETTINGS]) {
+        if (config[s.key]) {
+          await updateAISetting(s.key, config[s.key])
+        }
+      }
+      setSaveMessage('All settings saved.')
+    } catch (e) {
+      setSaveMessage(`Save failed: ${e instanceof Error ? e.message : String(e)}`)
+    } finally {
+      setSaving(null)
+    }
+  }
+
+  const assertiveness = parseInt(config['assertiveness'] || '5', 10)
   const assertivenessLabel =
     assertiveness <= 2 ? 'Very Cooperative' :
     assertiveness <= 4 ? 'Cooperative' :
@@ -130,6 +152,30 @@ export function AISetup() {
     assertiveness <= 7 ? 'Assertive' :
     assertiveness <= 9 ? 'Very Assertive' :
     'Maximum Competition'
+
+  const renderModelField = (s: SettingDef) => (
+    <div key={s.key} className="bg-card border border-border rounded-lg p-4">
+      <label htmlFor={s.key} className="block font-heading text-h3 text-text-primary mb-1">
+        {s.label}
+      </label>
+      <p className="font-body text-caption text-text-secondary mb-1">
+        {s.description}
+      </p>
+      <p className="font-body text-caption text-warning/80 mb-3 italic">
+        {s.note}
+      </p>
+      <select
+        id={s.key}
+        value={config[s.key] ?? ''}
+        onChange={(e) => handleChange(s.key, e.target.value)}
+        className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary focus:outline-none focus:border-action transition-colors"
+      >
+        {AVAILABLE_MODELS.map((m) => (
+          <option key={m.value} value={m.value}>{m.label}</option>
+        ))}
+      </select>
+    </div>
+  )
 
   return (
     <div className="min-h-screen bg-base">
@@ -153,36 +199,20 @@ export function AISetup() {
 
         {!loading && !error && (
           <>
-            {/* ---- Model Selection ---- */}
+            {/* ---- Managed Agent Settings (locked at init) ---- */}
             <section className="mb-10">
               <h2 className="font-heading text-h2 text-text-primary mb-2">
-                AI Model Configuration
+                Managed Agent Settings
               </h2>
-              <p className="font-body text-body-sm text-text-secondary mb-6">
-                Select which Claude models power AI participants. Applies globally across all simulation runs.
+              <p className="font-body text-body-sm text-text-secondary mb-1">
+                These settings are applied when AI agents are initialized. They are <strong>locked for the duration of the session</strong>.
+              </p>
+              <p className="font-body text-caption text-warning/70 mb-6">
+                To change: Shutdown AI agents → update settings → Re-initialize. Agent memory notes in DB survive reinitialization.
               </p>
 
               <div className="space-y-4">
-                {[CONFIG_KEYS.modelDecisions, CONFIG_KEYS.modelConversations].map((key) => (
-                  <div key={key} className="bg-card border border-border rounded-lg p-4">
-                    <label htmlFor={key} className="block font-heading text-h3 text-text-primary mb-1">
-                      {FIELD_LABELS[key]}
-                    </label>
-                    <p className="font-body text-caption text-text-secondary mb-3">
-                      {FIELD_DESCRIPTIONS[key]}
-                    </p>
-                    <select
-                      id={key}
-                      value={config[key] ?? ''}
-                      onChange={(e) => handleChange(key, e.target.value)}
-                      className="w-full bg-base border border-border rounded px-3 py-2 font-body text-body-sm text-text-primary focus:outline-none focus:border-action transition-colors"
-                    >
-                      {AVAILABLE_MODELS.map((m) => (
-                        <option key={m.value} value={m.value}>{m.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                ))}
+                {MANAGED_SETTINGS.filter(s => s.type === 'model').map(renderModelField)}
               </div>
             </section>
 
@@ -194,10 +224,13 @@ export function AISetup() {
 
               <div className="bg-card border border-border rounded-lg p-4">
                 <label htmlFor="assertiveness" className="block font-heading text-h3 text-text-primary mb-1">
-                  {FIELD_LABELS[CONFIG_KEYS.assertiveness]}
+                  Global Assertiveness Dial
                 </label>
-                <p className="font-body text-caption text-text-secondary mb-4">
-                  {FIELD_DESCRIPTIONS[CONFIG_KEYS.assertiveness]}
+                <p className="font-body text-caption text-text-secondary mb-1">
+                  Shifts all AI participants toward cooperation (1) or competition (10). Default: 5 (balanced).
+                </p>
+                <p className="font-body text-caption text-warning/80 mb-4 italic">
+                  Applied at initialization. Change requires Shutdown → Re-initialize.
                 </p>
 
                 <div className="flex items-center gap-4">
@@ -208,7 +241,7 @@ export function AISetup() {
                     min="1"
                     max="10"
                     value={assertiveness}
-                    onChange={(e) => handleChange(CONFIG_KEYS.assertiveness, e.target.value)}
+                    onChange={(e) => handleChange('assertiveness', e.target.value)}
                     className="flex-1 h-2 bg-border rounded-lg appearance-none cursor-pointer accent-action"
                   />
                   <span className="font-body text-caption text-text-secondary w-24 text-right">Competitive</span>
@@ -220,14 +253,28 @@ export function AISetup() {
               </div>
             </section>
 
+            {/* ---- Stateless API Settings (immediate) ---- */}
+            <section className="mb-10">
+              <h2 className="font-heading text-h2 text-text-primary mb-2">
+                Stateless API Settings
+              </h2>
+              <p className="font-body text-body-sm text-text-secondary mb-6">
+                These settings apply to one-shot LLM calls (intelligence reports, chat, Navigator). Changes take effect <strong>immediately</strong>.
+              </p>
+
+              <div className="space-y-4">
+                {STATELESS_SETTINGS.map(renderModelField)}
+              </div>
+            </section>
+
             {/* ---- Save ---- */}
             <div className="flex items-center gap-4">
               <button
-                onClick={handleSave}
-                disabled={saving}
+                onClick={handleSaveAll}
+                disabled={saving !== null}
                 className="bg-action text-white font-body text-body-sm font-medium py-2 px-6 rounded hover:opacity-90 transition-opacity disabled:opacity-50"
               >
-                {saving ? 'Saving...' : 'Save Configuration'}
+                {saving ? 'Saving...' : 'Save All Settings'}
               </button>
               {saveMessage && (
                 <span className={`font-body text-body-sm ${saveMessage.startsWith('Save failed') ? 'text-danger' : 'text-success'}`}>

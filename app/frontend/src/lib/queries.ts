@@ -1291,6 +1291,48 @@ export async function shutdownAIAgents(simId: string): Promise<void> {
   }
 }
 
+/** STOP ALL AI — freeze all agents + clear pending event queues. Emergency brake. */
+export async function stopAllAgents(simId: string): Promise<{ frozen_count: number; events_cleared: number }> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/stop-all`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+  })
+  const json = await resp.json()
+  if (!resp.ok) throw new Error(json.detail || json.error || 'Stop all failed')
+  return json.data
+}
+
+/** Get all global AI settings. */
+export async function getAISettings(): Promise<Record<string, string>> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/ai-settings`, {
+    headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+  })
+  const json = await resp.json()
+  if (!resp.ok) throw new Error(json.detail || json.error || 'Failed to load AI settings')
+  return json.data?.settings || {}
+}
+
+/** Update a single global AI setting. */
+export async function updateAISetting(key: string, value: string): Promise<{ needs_reinit: boolean; message: string }> {
+  const token = await getToken()
+  const resp = await fetch(`${API_BASE}/api/ai-settings/${key}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify({ value }),
+  })
+  const json = await resp.json()
+  if (!resp.ok) throw new Error(json.detail || json.error || 'Failed to update setting')
+  return json.data
+}
+
 /** Fetch AI agent log entries from observatory_events. */
 export async function getAgentLog(
   simId: string,

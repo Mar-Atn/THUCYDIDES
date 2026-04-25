@@ -19,6 +19,7 @@ import {
   resumeAgent,
   freezeAllAgents,
   resumeAllAgents,
+  stopAllAgents,
   getAgentLog,
   getAgentMemories,
   getSimRunRoles,
@@ -245,6 +246,18 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     finally { setActionLoading(null) }
   }
 
+  const handleStopAll = async () => {
+    if (!confirm('STOP ALL AI?\n\nThis will freeze all agents and clear all pending events.\nAgents will start fresh on resume.')) return
+    setActionLoading('stop-all')
+    try {
+      const result = await stopAllAgents(simId)
+      alert(`Stopped: ${result.frozen_count} agents frozen, ${result.events_cleared} events cleared.`)
+      await fetchStatus()
+    }
+    catch (e) { alert(e instanceof Error ? e.message : 'Stop all failed') }
+    finally { setActionLoading(null) }
+  }
+
   const handleFreezeOne = async (roleId: string) => {
     setActionLoading(`freeze-${roleId}`)
     try { await freezeAgent(simId, roleId); await fetchStatus() }
@@ -367,6 +380,13 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                   className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
                 >
                   {actionLoading === 'resume-all' ? '...' : 'Resume All'}
+                </button>
+                <button
+                  onClick={handleStopAll}
+                  disabled={actionLoading === 'stop-all'}
+                  className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors disabled:opacity-40"
+                >
+                  {actionLoading === 'stop-all' ? '...' : '⏹ Stop All'}
                 </button>
                 <button
                   onClick={handleShutdown}
