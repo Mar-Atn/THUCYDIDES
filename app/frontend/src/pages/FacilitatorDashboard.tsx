@@ -1839,6 +1839,9 @@ function ParticipantPanel({
   const assignedHuman = humanRoles.filter((r) => r.user_id)
   const unassignedHuman = humanRoles.filter((r) => !r.user_id)
 
+  // Load users on mount so assigned names show immediately
+  useEffect(() => { loadUsers() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Group roles by country
   const byCountry = activeRoles.reduce((acc, r) => {
     acc[r.country_code] = acc[r.country_code] || []
