@@ -1053,18 +1053,28 @@ async def sim_end_phase(sim_id: str, user: AuthUser = Depends(require_moderator)
 
 
 async def _run_phase_b(sim_id: str, round_num: int) -> None:
-    """Run Phase B engine pipeline: collect batch decisions → run orchestrator → write events.
+    """Run Phase B engine pipeline with AI solicitation.
 
-    Calls the orchestrator's process_round() which handles:
-    - Economic engine (11 steps: oil → GDP → revenue → budget → inflation → debt → crisis)
-    - Political engine (stability, war tiredness, elections, revolutions)
-    - Persistence to countries + world_state tables
+    Flow:
+    1. SOLICIT AI batch decisions (budget, tariffs, sanctions, OPEC) — wait up to 2 min
+    2. Collect all batch decisions (human + AI)
+    3. Run orchestrator (economic + political engines)
+    4. SOLICIT AI troop movements — wait up to 2 min
+    5. Write summary events
     """
     from engine.engines.orchestrator import process_round
     from engine.services.common import write_event
     from engine.services.supabase import get_client
+    from engine.agents.managed.event_dispatcher import get_dispatcher
 
     client = get_client()
+
+    # STEP 0: Solicit AI batch decisions BEFORE collecting
+    dispatcher = get_dispatcher(sim_id)
+    if dispatcher and dispatcher.agents:
+        logger.info("Phase B: soliciting AI batch decisions for R%d", round_num)
+        batch_result = await dispatcher.solicit_batch_decisions(round_num, timeout_seconds=120)
+        logger.info("Phase B: AI batch decisions — %s", batch_result)
 
     # 1. Collect batch decisions (set_budget, set_tariffs, set_sanctions, set_opec)
     batch_rows = client.table("agent_decisions") \
@@ -1148,6 +1158,12 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
             logger.info("Expired %d pending transactions at end of R%d", len(expired.data), round_num)
     except Exception as e:
         logger.warning("Transaction cleanup failed: %s", e)
+
+    # STEP 5: Solicit AI troop movements AFTER engine processing
+    if dispatcher and dispatcher.agents:
+        logger.info("Phase B: soliciting AI troop movements for R%d", round_num)
+        move_result = await dispatcher.solicit_troop_movements(round_num, timeout_seconds=120)
+        logger.info("Phase B: AI troop movements — %s", move_result)
 
     logger.info("Phase B complete for sim %s R%d: %s", sim_id, round_num, summary_lines[0])
 

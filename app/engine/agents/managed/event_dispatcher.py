@@ -745,6 +745,109 @@ class EventDispatcher:
 
     # -- Shutdown ----------------------------------------------------------
 
+    # -- Phase B Solicitation ------------------------------------------------
+
+    async def solicit_batch_decisions(self, round_num: int, timeout_seconds: int = 120) -> dict:
+        """Ask all AI agents to submit batch decisions (budget, tariffs, sanctions, OPEC).
+
+        Called at the START of Phase B, BEFORE engine processing.
+        Sends one event per agent and waits for all responses or timeout.
+
+        Args:
+            round_num: Current round number.
+            timeout_seconds: Max wait time (default 2 minutes).
+
+        Returns:
+            Summary: {agents_asked, agents_responded, timed_out}.
+        """
+        logger.info("[dispatcher] Soliciting batch decisions for round %d (timeout=%ds)", round_num, timeout_seconds)
+
+        agents_asked = 0
+        for role_id in list(self.agents.keys()):
+            if self.agent_states.get(role_id) == FROZEN:
+                continue
+            self.enqueue(
+                role_id=role_id,
+                tier=1,  # Critical — engines wait for this
+                event_type="batch_decision_request",
+                message=(
+                    f"ROUND {round_num} — SUBMIT YOUR BATCH DECISIONS NOW.\n\n"
+                    f"This is your ONE opportunity this round to set:\n"
+                    f"1. set_budget — social spending, military production, tech R&D allocation\n"
+                    f"2. set_tariffs — tariff levels against specific countries (if desired)\n"
+                    f"3. set_sanctions — sanction levels against specific countries (if desired)\n"
+                    f"4. set_opec — OPEC production level (only if your country is an OPEC member)\n\n"
+                    f"Review your current economic situation with get_my_country first.\n"
+                    f"Submit each decision using submit_action. You will NOT get another chance this round."
+                ),
+                metadata={"round_num": round_num, "solicitation_type": "batch_decisions"},
+            )
+            agents_asked += 1
+
+        # Wait for all agents to process (check every 5s)
+        start = asyncio.get_event_loop().time()
+        agents_responded = 0
+        while asyncio.get_event_loop().time() - start < timeout_seconds:
+            # Check if all agents are back to IDLE
+            busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
+            if busy == 0:
+                agents_responded = agents_asked
+                break
+            await asyncio.sleep(5)
+
+        timed_out = agents_responded < agents_asked
+        logger.info(
+            "[dispatcher] Batch decisions: asked=%d, responded=%d, timed_out=%s",
+            agents_asked, agents_responded, timed_out,
+        )
+        return {"agents_asked": agents_asked, "agents_responded": agents_responded, "timed_out": timed_out}
+
+    async def solicit_troop_movements(self, round_num: int, timeout_seconds: int = 120) -> dict:
+        """Ask all AI agents to submit troop movements (move_units).
+
+        Called AFTER engine processing, before Phase B completes.
+        Sends one event per agent and waits for all responses or timeout.
+        """
+        logger.info("[dispatcher] Soliciting troop movements for round %d (timeout=%ds)", round_num, timeout_seconds)
+
+        agents_asked = 0
+        for role_id in list(self.agents.keys()):
+            if self.agent_states.get(role_id) == FROZEN:
+                continue
+            self.enqueue(
+                role_id=role_id,
+                tier=1,
+                event_type="movement_request",
+                message=(
+                    f"ROUND {round_num} — SUBMIT TROOP MOVEMENTS NOW.\n\n"
+                    f"The round engines have processed. Review updated world state with get_my_country.\n"
+                    f"This is your ONE opportunity to reposition forces using move_units.\n"
+                    f"You can: deploy from reserve, withdraw to reserve, reposition between hexes.\n"
+                    f"If no movement needed, do nothing — your forces stay in place."
+                ),
+                metadata={"round_num": round_num, "solicitation_type": "troop_movements"},
+            )
+            agents_asked += 1
+
+        # Wait for all agents to process
+        start = asyncio.get_event_loop().time()
+        agents_responded = 0
+        while asyncio.get_event_loop().time() - start < timeout_seconds:
+            busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
+            if busy == 0:
+                agents_responded = agents_asked
+                break
+            await asyncio.sleep(5)
+
+        timed_out = agents_responded < agents_asked
+        logger.info(
+            "[dispatcher] Troop movements: asked=%d, responded=%d, timed_out=%s",
+            agents_asked, agents_responded, timed_out,
+        )
+        return {"agents_asked": agents_asked, "agents_responded": agents_responded, "timed_out": timed_out}
+
+    # -- Shutdown ----------------------------------------------------------
+
     async def shutdown(self) -> None:
         """Stop dispatcher, archive all sessions, clear queue."""
         await self.stop()

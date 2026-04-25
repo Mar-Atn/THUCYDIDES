@@ -202,14 +202,25 @@ class ToolExecutor:
         """
         from engine.agents.action_schemas import ACTION_TYPE_TO_MODEL
         try:
-            # Check sim_run status — block actions during pre_start/setup
+            # Check sim_run status and phase restrictions
             client = get_client()
             run = client.table("sim_runs").select("status,current_phase").eq("id", self.sim_run_id).limit(1).execute()
             if run.data:
                 sim_status = run.data[0].get("status", "")
+                current_phase = run.data[0].get("current_phase", "")
+
+                # Block ALL actions during pre_start/setup
                 if sim_status in ("setup", "pre_start"):
                     return {"success": False, "validation_status": "rejected",
-                            "validation_notes": f"Simulation is in '{sim_status}' state. Actions are only allowed during active rounds. Use observation tools (get_my_country, get_relationships, etc.) and write_notes to prepare."}
+                            "validation_notes": f"Simulation is in '{sim_status}' state. Actions are only allowed during active rounds. Use observation tools and write_notes to prepare."}
+
+                # Block batch decisions + move_units during Phase A for AI agents
+                # These are solicited ONCE at the start of Phase B
+                PHASE_B_ONLY_ACTIONS = {"set_budget", "set_tariffs", "set_sanctions", "set_opec", "move_units"}
+                action_type_check = action.get("action_type", "")
+                if sim_status == "active" and current_phase == "A" and action_type_check in PHASE_B_ONLY_ACTIONS:
+                    return {"success": False, "validation_status": "rejected",
+                            "validation_notes": f"'{action_type_check}' is submitted during the Phase B solicitation window, not during Phase A. You will be asked to submit batch decisions (budget, tariffs, sanctions, OPEC) and troop movements at the end of the round. Focus on diplomacy, communication, and strategic actions during Phase A."}
 
             action_type = action.get("action_type")
             if not action_type:
@@ -553,13 +564,23 @@ class ToolExecutor:
                 r = run.data[0]
                 sim_status = r.get("status", "")
                 actions_allowed = sim_status == "active"
+                current_phase = r.get("current_phase", "")
+                if actions_allowed and current_phase == "A":
+                    phase_note = (
+                        "Phase A — all actions available EXCEPT batch decisions (set_budget, set_tariffs, "
+                        "set_sanctions, set_opec) and move_units. These will be solicited at the start of Phase B."
+                    )
+                elif actions_allowed:
+                    phase_note = "Actions available. Submit batch decisions or troop movements as requested."
+                else:
+                    phase_note = "PRE-START: Only observation tools and write_notes available. Actions start once the round begins."
                 phase_context = {
                     "sim_status": sim_status,
-                    "current_phase": r.get("current_phase"),
+                    "current_phase": current_phase,
                     "current_round": r.get("current_round"),
                     "actions_allowed": actions_allowed,
-                    "phase_note": "Actions and meetings are available." if actions_allowed
-                        else "PRE-START: Only observation tools and write_notes are available. Actions will be available once the round starts.",
+                    "batch_actions_phase_b_only": ["set_budget", "set_tariffs", "set_sanctions", "set_opec", "move_units"],
+                    "phase_note": phase_note,
                 }
         except Exception:
             pass

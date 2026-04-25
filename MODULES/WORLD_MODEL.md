@@ -323,21 +323,19 @@ Transactions and agreements create proposals requiring counterpart response. Tra
 ### Two Phases
 
 **Phase A — Active Round** (timed, configurable per template):
-- All actions available to participants
-- Free communication and negotiation
-- Immediate actions execute on submission (combat, covert, diplomacy, transactions)
-- Batch decisions (budget, tariffs, sanctions, OPEC) submitted but queued for Phase B
-- AI participants triggered multiple times during Phase A
-- AI explicitly prompted to submit batch decisions near end of round
+- All immediate actions available: combat, covert, diplomatic, political, communication
+- Free communication and negotiation (meetings, public statements, proposals)
+- Human participants can submit batch decisions (budget, tariffs, sanctions, OPEC) anytime — queued for Phase B
+- AI participants: all actions EXCEPT batch decisions and move_units (these are solicited at Phase B)
 - Moderator monitors, approves pending actions, can pause/extend
 
 **Phase B — Processing & Movement** (~10 minutes):
-- Economic engine runs: oil → GDP → revenue → budget → production → tech → inflation → debt → crisis state → momentum → contagion → market indexes
-- Political engine runs: stability, elections (if scheduled), war tiredness
-- Results written to per-round snapshot tables
-- Unit movement (`move_units`) is the ONLY player action allowed during this phase
-- Moderator reviews results, can adjust before publishing
-- Results published → all participants see updated world → next round's Phase A begins
+1. **AI Batch Decision Solicitation** — all AI agents asked ONCE to submit batch decisions (budget, tariffs, sanctions, OPEC). Wait for all responses or 2-minute timeout.
+2. **Engine Processing** — economic + political engines run with all collected decisions (human + AI)
+3. **AI Troop Movement Solicitation** — all AI agents asked ONCE to submit move_units. Wait for responses or timeout.
+4. **Results published** → all participants see updated world → next round's Phase A begins
+
+Human participants can submit move_units during Phase B as before. The AI solicitation windows are additional, not replacing human flows.
 
 ### Moderator Controls
 
