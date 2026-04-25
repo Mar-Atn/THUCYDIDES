@@ -1847,10 +1847,10 @@ function ParticipantPanel({
   }, {} as Record<string, SimRunRole[]>)
 
   const loadUsers = async () => {
-    if (usersLoaded) return
     try {
       const all = await getAllUsers()
-      setUsers(all.filter((u) => u.status === 'active'))
+      // Include registered + active users — both can be assigned to roles
+      setUsers(all.filter((u) => u.status === 'active' || u.status === 'registered'))
       setUsersLoaded(true)
     } catch {
       setUsers([])
