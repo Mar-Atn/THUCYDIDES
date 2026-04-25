@@ -378,6 +378,17 @@ System-wide settings stored in `ai_settings` table. Managed from the AI Settings
 
 **UI note:** The AI Settings page should clearly indicate which settings require reinitialization and which take effect immediately.
 
+### Participant Connection Flow
+
+After login, participants are automatically connected to the latest active simulation:
+
+1. **Has assigned role:** System queries `roles WHERE user_id = current_user`. If found, routes to that sim run's ParticipantDashboard.
+2. **No role yet:** System finds the latest sim run WHERE status IN ('active', 'pre_start', 'setup'). Participant sees the dashboard with World and Map data, but role-specific tabs (Actions, Confidential, Country) show "Awaiting role assignment."
+3. **Role assigned by moderator:** Dashboard updates instantly via Realtime — no page refresh needed. All tabs populate with role-specific data.
+4. **No active sim:** "No active simulation" message. Participant waits.
+
+Actions availability follows sim lifecycle: empty in R0/pre_start, visible during active rounds per role permissions and phase restrictions.
+
 ### Key Events
 
 Templates define scheduled events that create dramatic structure (elections, crises, votes). These are template data — the World Model supports any schedule configuration.

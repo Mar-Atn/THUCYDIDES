@@ -284,6 +284,25 @@ export function ParticipantDashboard() {
   // Initial data load — once on mount
   useEffect(() => { loadData() }, [loadData])
 
+  // Realtime: auto-reload when moderator assigns a role to this user
+  useEffect(() => {
+    if (!user?.id || !simId || isProxyMode) return
+    const ch = supabase
+      .channel(`role-assign-${user.id}-${simId}`)
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: 'roles',
+        filter: `sim_run_id=eq.${simId}`,
+      }, (payload) => {
+        const newRow = payload.new as Record<string, unknown>
+        if (newRow.user_id === user.id && !myRole) {
+          // Role just assigned to me — reload everything
+          loadData()
+        }
+      })
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [user?.id, simId, isProxyMode, myRole, loadData])
+
   // Reload data when round changes (new round means new country stats, artefacts, etc.)
   useEffect(() => {
     if (simRun === null) return
@@ -322,9 +341,9 @@ export function ParticipantDashboard() {
   const unread = artefacts.filter(a=>!a.is_read).length
 
   const tabs:{id:TabId;label:string;badge?:number;off?:boolean}[] = [
-    {id:'actions',label:'Actions',off:!hasRole},
-    {id:'confidential',label:'Confidential',badge:unread||undefined,off:!hasRole},
-    {id:'country',label:'Country',off:!hasRole},
+    {id:'actions',label:'Actions'},
+    {id:'confidential',label:'Confidential',badge:unread||undefined},
+    {id:'country',label:'Country'},
     {id:'world',label:'World'},
     {id:'map',label:'Map'},
   ]
@@ -487,6 +506,21 @@ export function ParticipantDashboard() {
 
       {/* CONTENT */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
+        {/* Unassigned state — role not yet assigned by moderator */}
+        {!myRole && (tab === 'actions' || tab === 'confidential' || tab === 'country') && !loading && (
+          <div className="bg-card border border-border rounded-lg p-8 text-center">
+            <h3 className="font-heading text-h3 text-text-primary mb-3">Awaiting Role Assignment</h3>
+            <p className="font-body text-body-sm text-text-secondary mb-2">
+              The moderator will assign you a role before the simulation starts.
+            </p>
+            <p className="font-body text-caption text-text-secondary">
+              Once assigned, this tab will show your {tab === 'actions' ? 'available actions' : tab === 'confidential' ? 'confidential briefing and intelligence' : 'country data and statistics'}.
+            </p>
+            <p className="font-body text-caption text-action mt-4">
+              This page updates automatically — no need to refresh.
+            </p>
+          </div>
+        )}
         {tab==='actions'&&myRole&&(myRole.status==='arrested'||myRole.status==='killed')&&(
           <div className="bg-danger/5 border border-danger/20 rounded-lg p-6 text-center">
             <h3 className="font-heading text-h3 text-danger mb-2">{myRole.status === 'killed' ? 'Eliminated' : 'Arrested'}</h3>
