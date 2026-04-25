@@ -148,62 +148,86 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     return () => clearInterval(interval)
   }, [simId])
 
-  /* Poll DB directly for agent sessions + latest activity (always — survives backend restart) */
-  useEffect(() => {
-    const poll = async () => {
-      try {
-        const { data: sessions } = await supabase
-          .from('ai_agent_sessions')
-          .select('role_id,country_code,status,total_output_tokens,actions_submitted,tool_calls,last_active_at')
-          .eq('sim_run_id', simId)
-          .not('status', 'in', '("archived","terminated")')
-        if (sessions) setDbSessions(sessions)
+  /* Fetch DB sessions + latest activity */
+  const fetchDbData = useCallback(async () => {
+    try {
+      const { data: sessions } = await supabase
+        .from('ai_agent_sessions')
+        .select('role_id,country_code,status,total_output_tokens,actions_submitted,tool_calls,last_active_at')
+        .eq('sim_run_id', simId)
+        .not('status', 'in', '("archived","terminated")')
+      if (sessions) setDbSessions(sessions)
 
-        // Latest activity per agent from observatory
-        const { data: logs } = await supabase
-          .from('observatory_events')
-          .select('country_code,category,summary,created_at')
-          .eq('sim_run_id', simId)
-          .eq('event_type', 'ai_agent_log')
-          .order('created_at', { ascending: false })
-          .limit(20)
-        if (logs) {
-          const latest: Record<string, LatestEvent> = {}
-          for (const log of logs) {
-            const cc = log.country_code as string
-            if (!latest[cc]) {
-              latest[cc] = {
-                category: (log.category as string) || '',
-                summary: (log.summary as string) || '',
-              }
+      const { data: logs } = await supabase
+        .from('observatory_events')
+        .select('country_code,category,summary,created_at')
+        .eq('sim_run_id', simId)
+        .eq('event_type', 'ai_agent_log')
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (logs) {
+        const latest: Record<string, LatestEvent> = {}
+        for (const log of logs) {
+          const cc = log.country_code as string
+          if (!latest[cc]) {
+            latest[cc] = {
+              category: (log.category as string) || '',
+              summary: (log.summary as string) || '',
             }
           }
-          setLatestActivity(latest)
         }
+        setLatestActivity(latest)
+      }
+    } catch { /* ignore session/activity errors */ }
 
-      } catch { /* ignore session/activity errors */ }
-
-      // Active meetings per AI role — separate try so it always runs
-      try {
-        const { data: meetings } = await supabase
-          .from('meetings')
-          .select('participant_a_role_id,participant_b_role_id')
-          .eq('sim_run_id', simId)
-          .eq('status', 'active')
-        const counts: Record<string, number> = {}
-        for (const m of (meetings ?? [])) {
-          const a = m.participant_a_role_id as string
-          const b = m.participant_b_role_id as string
-          counts[a] = (counts[a] || 0) + 1
-          counts[b] = (counts[b] || 0) + 1
-        }
-        setActiveMeetings(counts)
-      } catch { /* ignore */ }
-    }
-    poll()
-    const interval = setInterval(poll, 3000) // 3s during init for responsiveness
-    return () => clearInterval(interval)
+    try {
+      const { data: meetings } = await supabase
+        .from('meetings')
+        .select('participant_a_role_id,participant_b_role_id')
+        .eq('sim_run_id', simId)
+        .eq('status', 'active')
+      const counts: Record<string, number> = {}
+      for (const m of (meetings ?? [])) {
+        const a = m.participant_a_role_id as string
+        const b = m.participant_b_role_id as string
+        counts[a] = (counts[a] || 0) + 1
+        counts[b] = (counts[b] || 0) + 1
+      }
+      setActiveMeetings(counts)
+    } catch { /* ignore */ }
   }, [simId])
+
+  /* Realtime subscriptions for agent sessions + activity + fallback poll */
+  useEffect(() => {
+    fetchDbData()
+
+    // Realtime: auto-refresh on ai_agent_sessions changes
+    const sessionChannel = supabase
+      .channel(`ai-sessions-${simId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'ai_agent_sessions',
+        filter: `sim_run_id=eq.${simId}`,
+      }, () => { fetchDbData() })
+      .subscribe()
+
+    // Realtime: auto-refresh on new observatory events (agent activity)
+    const activityChannel = supabase
+      .channel(`ai-activity-${simId}`)
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: 'observatory_events',
+        filter: `sim_run_id=eq.${simId}`,
+      }, () => { fetchDbData() })
+      .subscribe()
+
+    // Fallback poll every 15s (covers connection drops)
+    const interval = setInterval(fetchDbData, 15000)
+
+    return () => {
+      supabase.removeChannel(sessionChannel)
+      supabase.removeChannel(activityChannel)
+      clearInterval(interval)
+    }
+  }, [simId, fetchDbData])
 
   /* Poll AI status every 5 seconds */
   const fetchStatus = useCallback(async () => {

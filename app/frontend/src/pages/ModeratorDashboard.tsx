@@ -3,9 +3,10 @@
  * M9 Phase A: the moderator's home screen.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '@/components/Header'
+import { supabase } from '@/lib/supabase'
 import { getSimRuns, deleteSimRun, duplicateSimRun, simAction, type SimRun } from '@/lib/queries'
 
 export function ModeratorDashboard() {
@@ -13,7 +14,7 @@ export function ModeratorDashboard() {
   const [simRuns, setSimRuns] = useState<SimRun[]>([])
   const [loading, setLoading] = useState(true)
 
-  const loadRuns = async () => {
+  const loadRuns = useCallback(async () => {
     try {
       const runs = await getSimRuns()
       setSimRuns(runs)
@@ -22,11 +23,21 @@ export function ModeratorDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     loadRuns()
-  }, [])
+
+    // Subscribe to sim_runs changes — auto-refresh on INSERT/UPDATE/DELETE
+    const channel = supabase
+      .channel('moderator-sim-runs')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sim_runs' }, () => {
+        loadRuns()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [loadRuns])
 
   const handleDelete = async (id: string, name: string) => {
     const typed = prompt(`To delete this simulation, type its full name:\n\n"${name}"`)

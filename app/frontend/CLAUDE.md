@@ -79,6 +79,48 @@ frontend/
     └── fonts/           ← Self-hosted font files
 ```
 
+## Data Freshness Rule — NO MANUAL REFRESH
+
+**Users must NEVER need to refresh the page to see updated data.** This is a core UX requirement.
+
+Every page that shows data which changes in the background MUST use Supabase Realtime:
+
+| Pattern | When to use | Hook |
+|---------|-------------|------|
+| **Realtime table** | Lists that change (sim runs, events, sessions, actions) | `useRealtimeTable(table, simId, options)` |
+| **Realtime row** | Single records that change (sim state, agent session) | `useRealtimeRow(table, id)` |
+| **Direct channel** | Global data without sim_run_id (e.g., all sim runs) | `supabase.channel().on('postgres_changes', ...).subscribe()` |
+| **Fallback poll** | Supplement to realtime (not replacement). 15-30s minimum. | `setInterval(refetch, 15000)` |
+
+```tsx
+// WRONG — stale on mount, requires manual refresh:
+useEffect(() => { fetchData().then(setData) }, [])
+
+// RIGHT — live updates via Supabase Realtime:
+const { data, loading } = useRealtimeTable('observatory_events', simId, {
+  orderBy: 'created_at.desc', limit: 50,
+})
+
+// RIGHT — global table (no simId filter):
+useEffect(() => {
+  loadData()
+  const ch = supabase.channel('my-channel')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'sim_runs' }, () => loadData())
+    .subscribe()
+  return () => { supabase.removeChannel(ch) }
+}, [])
+```
+
+**Reference implementations:**
+- `FacilitatorDashboard.tsx` — comprehensive realtime (useRealtimeTable for 6+ tables)
+- `PublicScreen.tsx` — realtime + 30s fallback poll (resilience pattern)
+- `ModeratorDashboard.tsx` — direct channel for global sim_runs list
+
+**Infrastructure:**
+- `hooks/useRealtimeTable.ts` — initial fetch + INSERT/UPDATE/DELETE streaming
+- `hooks/useRealtimeRow.ts` — single-row subscription
+- `lib/channelManager.ts` — deduplication + ref counting (prevents resource exhaustion)
+
 ## Key References
 
 | Spec | Content |
