@@ -1259,7 +1259,7 @@ function StepSchedule({
           </h3>
           <div className="grid grid-cols-2 gap-4">
             {Object.entries(schedule)
-              .filter(([key]) => key !== 'default_rounds')
+              .filter(([key]) => key !== 'default_rounds' && key in SCHEDULE_LABELS)
               .map(([key, value]) => (
               <div key={key}>
                 <label className="block font-body text-caption text-text-secondary mb-1">
@@ -1474,10 +1474,12 @@ function StepReview({
         <ReviewSection title="Schedule">
           <div className="grid grid-cols-2 gap-4 mb-4">
             <ReviewField label="Rounds" value={String(maxRounds)} mono />
-            {Object.entries(schedule).map(([key, val]) => (
+            {Object.entries(schedule)
+              .filter(([key]) => key in SCHEDULE_LABELS)
+              .map(([key, val]) => (
               <ReviewField
                 key={key}
-                label={SCHEDULE_LABELS[key] ?? key.replace(/_/g, ' ')}
+                label={SCHEDULE_LABELS[key]}
                 value={`${val} min`}
                 mono
               />

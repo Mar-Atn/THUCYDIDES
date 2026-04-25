@@ -151,7 +151,7 @@ export async function createSimRun(params: {
   role_customizations?: RoleCustomization[]
 }): Promise<SimRun> {
   const token = await getToken()
-  const resp = await fetch('/api/sim/create', {
+  const resp = await fetch(`${API_BASE}/api/sim/create`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
