@@ -142,13 +142,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Fetch roles — poll every 5s so AI/human toggles in participant management show up */
   useEffect(() => {
-    const fetchRoles = () => {
-      const t = performance.now()
-      return getSimRunRoles(simId).then((r) => {
-        console.log(`[AI Dashboard] getSimRunRoles: ${(performance.now() - t).toFixed(0)}ms, ${r.length} roles`)
-        setRoles(r)
-      }).catch(() => {})
-    }
+    const fetchRoles = () => getSimRunRoles(simId).then(setRoles).catch(() => {})
     fetchRoles()
     const interval = setInterval(fetchRoles, 5000)
     return () => clearInterval(interval)
@@ -156,7 +150,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Fetch DB sessions + latest activity — all queries in PARALLEL */
   const fetchDbData = useCallback(async () => {
-    const t0 = performance.now()
     const [sessionsRes, logsRes, meetingsRes] = await Promise.allSettled([
       supabase
         .from('ai_agent_sessions')
@@ -211,7 +204,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     }
 
     setLoading(false)
-    console.log(`[AI Dashboard] fetchDbData completed in ${(performance.now() - t0).toFixed(0)}ms`)
   }, [simId])
 
   /* Realtime subscriptions for agent sessions + activity + fallback poll */
@@ -248,13 +240,11 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Poll AI orchestrator status (backend API — may be slow on cold start) */
   const fetchStatus = useCallback(async () => {
-    const t = performance.now()
     try {
       const data = await getAIStatus(simId)
       setStatus(data)
-      console.log(`[AI Dashboard] getAIStatus: ${(performance.now() - t).toFixed(0)}ms`)
     } catch {
-      console.log(`[AI Dashboard] getAIStatus failed: ${(performance.now() - t).toFixed(0)}ms`)
+      // Orchestrator may not be active
     }
   }, [simId])
 
