@@ -1,6 +1,6 @@
 # M4 — Sim Runner & Facilitator Controls SPEC
 
-**Version:** 2.1 | **Date:** 2026-04-24
+**Version:** 2.2 | **Date:** 2026-04-24
 **Status:** STAGE GATE PASSED — aligned with World Model v3.0
 **Dependencies:** M1 (engines), M2 (contracts/dispatcher), M3 (data), M9 (template/SimRun), M10.1 (auth)
 
@@ -29,10 +29,10 @@ Free gameplay. Discussions, meetings, actions submitted.
 
 **What participants do:**
 - Submit any action available to their role (validated against role_actions)
-- All actions except unit movement and regular decisions are processed immediately
-- Regular decisions (budget, tariffs, sanctions, OPEC) can be submitted anytime — reminder sent X minutes before end of round to relevant participants
-- AI participants are triggered multiple times during Phase A to consider and submit actions
-- AI participants explicitly asked to submit regular decisions a few minutes before round end
+- All actions except unit movement and batch decisions are processed immediately
+- Human participants can submit batch decisions (budget, tariffs, sanctions, OPEC) anytime during Phase A — reminder sent X minutes before end of round to relevant participants
+- AI participants can perform all immediate actions (combat, covert, diplomatic, political, communication) but NOT batch decisions (set_budget, set_tariffs, set_sanctions, set_opec) or move_units — these are solicited at Phase B
+- AI participants are triggered multiple times during Phase A to consider and submit immediate actions
 
 **What the moderator does:**
 - Monitors action feed in real-time
@@ -44,26 +44,33 @@ Free gameplay. Discussions, meetings, actions submitted.
 **What the system does:**
 - Validates and dispatches each action
 - Processes immediate actions (combat, covert ops, intelligence, transactions, agreements)
-- Queues regular decisions for Phase B
+- Queues batch decisions for Phase B
 - Tracks submission status (who has/hasn't submitted budget)
-- Triggers AI agents 2-3 times during phase
-- Sends explicit "submit your regular decisions now" to AI agents near end of round
+- Triggers AI agents 2-3 times during phase for immediate actions
+- AI batch decisions are NOT solicited during Phase A — they are solicited at Phase B
 
-### Phase B: Processing + Movement (~10 minutes)
-Two PARALLEL activities: (1) World model engines process all round data, (2) Unit movement window — military repositioning. `move_units` is the ONLY player action allowed. ~10 minutes. Moderator reviews results and advances to next round.
+### Phase B: Processing + Solicitation + Movement (~10 minutes)
+A 4-step sequential flow. Human batch decisions submitted during Phase A are already queued.
 
-**Engine sequence (from CONTRACT_ROUND_FLOW):**
-1. Economic engine (oil → GDP → revenue → budget → production → tech → inflation → debt → crisis → momentum)
-2. Political engine (stability, elections if scheduled, health events)
-3. Results written to `country_states_per_round` and `global_state_per_round`
-4. Observatory events generated (narrative, summaries)
+**Step 1: AI Batch Decision Solicitation**
+- System asks each AI agent ONCE to submit batch decisions (budget, tariffs, sanctions, OPEC)
+- Wait for all responses or 2-minute timeout
+- Human decisions submitted during Phase A are already queued
 
-**Unit movement (concurrent with engine processing):**
-- Military commanders and HoS can reposition forces
-- Map updates in real-time as units move
-- Timer-based, moderator can extend
+**Step 2: Engine Processing**
+- Economic engine runs (oil → GDP → revenue → budget → production → tech → inflation → debt → crisis → momentum)
+- Political engine runs (stability, elections if scheduled, health events)
+- Results written to `country_states_per_round` and `global_state_per_round`
+- Observatory events generated (narrative, summaries)
 
-**Completion:** Phase B auto-completes. Results are published automatically. Future enhancement: moderator review gate + AI-powered results commentary.
+**Step 3: AI Troop Movement Solicitation**
+- System asks each AI agent ONCE to submit move_units
+- Wait for responses or 2-minute timeout
+- Human participants can also submit movements during Phase B
+
+**Step 4: Results Published, Phase B Complete**
+
+**Completion:** Phase B auto-completes after Step 4. Results are published automatically. Future enhancement: moderator review gate + AI-powered results commentary.
 
 ### Round End → Next Round
 - Phase B closes
@@ -288,10 +295,10 @@ Facilitator dashboard subscribes to both channels on mount. Actions submitted by
 M4 doesn't build the AI agent logic (that's M5). M4 provides:
 
 **Triggering:** Call `full_round_runner.py` (or a subset for solo countries only) at defined moments:
-- Phase A start: first trigger (AI assesses situation, may initiate actions)
+- Phase A start: first trigger (AI assesses situation, may initiate immediate actions)
 - Phase A mid-point: second trigger (AI reacts to what's happened so far)
-- Phase A near-end: explicit "submit regular decisions" trigger
-- Phase B: AI submits unit movement orders
+- Phase B Step 1: `batch_decision_request` — solicits batch decisions (budget, tariffs, sanctions, OPEC). One chance, 2-minute timeout.
+- Phase B Step 3: `movement_request` — solicits troop movements (move_units). One chance, 2-minute timeout.
 
 **Monitoring:** Dashboard shows per-agent status (idle/busy/error), action queue depth, current activity.
 
@@ -479,7 +486,7 @@ Participant submits action
 
 ---
 
-*SPEC v2.0 — stage gate passed (2026-04-23). Aligned with World Model v3.0.*
+*SPEC v2.2 — stage gate passed (2026-04-24). Aligned with World Model v3.0. Phase B AI solicitation design added.*
 
 ---
 

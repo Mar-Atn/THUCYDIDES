@@ -1,7 +1,7 @@
 # SPEC: M5 — AI Participant Module
 
-**Version:** 1.1
-**Date:** 2026-04-23
+**Version:** 1.2
+**Date:** 2026-04-24
 **Status:** PAUSED — Stage gate review in progress. Existing code is spike/iteration quality. Clean rebuild planned after Layer 2 documentation complete.
 **Depends on:** M1 (Engines), M2 (Communication), M3 (Data), M4 (Sim Runner)
 **Spike:** PASSED (2026-04-20) — Managed Agent played 2 rounds, 10 valid actions, $0.35
@@ -207,7 +207,22 @@ VOICE AVATAR (ElevenLabs, "The Mouth")
 
 **Other players see nothing AI-specific.** No indication of who's AI.
 
-### D10: Session Recovery
+### D10: Phase-Aware Action Restrictions
+
+AI agents have different action availability depending on the simulation phase:
+
+**Pre-Start (R0):** Observation tools + write_notes only. No actions, no meetings.
+
+**Phase A (active round):** All immediate actions available — combat (ground_attack, air_strike, naval_combat, etc.), covert operations, diplomatic actions (propose_transaction, declare_war, etc.), political actions, communication (public_statement, invite_to_meet, call_org_meeting).
+NOT available during Phase A: set_budget, set_tariffs, set_sanctions, set_opec, move_units — these are solicited ONCE at Phase B.
+
+**Phase B solicitation windows:**
+1. Batch decisions — agent receives a Tier 1 event: 'Submit your batch decisions NOW.' Agent should use get_my_country to review economic state, then submit set_budget + optionally set_tariffs/set_sanctions/set_opec. One chance per round, 2-minute timeout.
+2. Troop movements — agent receives a Tier 1 event: 'Submit troop movements NOW.' Agent should review forces with get_my_forces, then submit move_units if repositioning needed. One chance per round, 2-minute timeout.
+
+The tool_executor enforces these restrictions: attempting batch actions during Phase A returns a clear error message directing the agent to wait for Phase B solicitation.
+
+### D11: Session Recovery
 
 **Decision:** Managed Agent sessions persist on Anthropic's side. Our server can crash and reconnect.
 
@@ -419,13 +434,23 @@ Unified event queue for all AI agent event delivery. The EventDispatcher reads p
 | `sim_run_id` | UUID | Which simulation |
 | `role_id` | TEXT | Target agent |
 | `tier` | INT | Priority: 1 (critical, <5s), 2 (urgent, <10s), 3 (routine, batched) |
-| `event_type` | TEXT | Event category (e.g. `round_pulse`, `critical_interrupt`, `manual_pulse`) |
+| `event_type` | TEXT | Event category (see event types table below) |
 | `message` | TEXT | Human-readable event content delivered to agent |
 | `metadata` | JSONB | Structured event data |
 | `processed_at` | TIMESTAMPTZ | NULL while pending, set when delivered |
 | `processing_error` | TEXT | Error message if delivery failed |
 
 Indexed on `(sim_run_id, role_id, tier) WHERE processed_at IS NULL` for fast pending-event lookup.
+
+**Event Types:**
+
+| Event Type | Tier | Purpose |
+|------------|------|---------|
+| `round_pulse` | 3 | Regular pulse during Phase A (batched events + situation update) |
+| `critical_interrupt` | 1 | Existential events: nuclear launch, direct attack on territory |
+| `manual_pulse` | 2 | Moderator-triggered manual pulse |
+| `batch_decision_request` | 1 | Solicits batch decisions (budget, tariffs, sanctions, OPEC) at Phase B start |
+| `movement_request` | 1 | Solicits troop movements (move_units) after engine processing in Phase B |
 
 ### `agent_memories`
 Self-authored agent memory. Agents write notes via `write_notes` tool and recall via `read_notes`. Survives session crashes.
@@ -518,4 +543,4 @@ Audit trail of every action an AI agent submits. Written before dispatch, update
 
 ---
 
-*Decisions made in collaboration with Marat Atn, 2026-04-21. All Q1-Q14 resolved. Status updated 2026-04-23: PAUSED for stage gate review.*
+*Decisions made in collaboration with Marat Atn, 2026-04-21. All Q1-Q14 resolved. Status updated 2026-04-24: Phase-aware action restrictions (D10) and event types added. PAUSED for stage gate review.*
