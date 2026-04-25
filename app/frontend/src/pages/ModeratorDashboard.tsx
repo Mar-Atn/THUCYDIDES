@@ -3,7 +3,7 @@
  * M9 Phase A: the moderator's home screen.
  */
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '@/components/Header'
 import { supabase } from '@/lib/supabase'
@@ -13,31 +13,30 @@ export function ModeratorDashboard() {
   const navigate = useNavigate()
   const [simRuns, setSimRuns] = useState<SimRun[]>([])
   const [loading, setLoading] = useState(true)
+  const mountId = useRef(Math.random().toString(36).slice(2, 8))
 
-  const loadRuns = useCallback(async () => {
-    try {
-      const runs = await getSimRuns()
-      setSimRuns(runs)
-    } catch (e) {
-      console.error('Failed to load sim runs:', e)
-    } finally {
-      setLoading(false)
-    }
+  // Initial load — always runs, never blocked by subscription
+  useEffect(() => {
+    let cancelled = false
+    getSimRuns()
+      .then((runs) => { if (!cancelled) setSimRuns(runs) })
+      .catch((e) => console.error('Failed to load sim runs:', e))
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [])
 
+  // Realtime subscription — separate effect, unique channel name per mount
   useEffect(() => {
-    loadRuns()
-
-    // Subscribe to sim_runs changes — auto-refresh on INSERT/UPDATE/DELETE
+    const channelName = `mod-sims-${mountId.current}`
     const channel = supabase
-      .channel('moderator-sim-runs')
+      .channel(channelName)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sim_runs' }, () => {
-        loadRuns()
+        getSimRuns().then(setSimRuns).catch(() => {})
       })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [loadRuns])
+  }, [])
 
   const handleDelete = async (id: string, name: string) => {
     const typed = prompt(`To delete this simulation, type its full name:\n\n"${name}"`)
