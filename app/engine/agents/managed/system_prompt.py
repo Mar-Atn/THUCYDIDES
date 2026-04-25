@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import logging
 
-from engine.agents.world_context import build_rich_block1
-from engine.agents.profiles import load_role, load_country_context
 from engine.agents.managed.game_rules_context import build_game_rules_context
 from engine.agents.managed.meta_context import build_meta_awareness_static
 
@@ -107,8 +105,6 @@ def build_system_prompt(
     sim_run_id: str | None = None,
     *,
     assertiveness: int = 5,
-    countries: dict | None = None,
-    world_state: dict | None = None,
 ) -> str:
     """Build the complete Layer 1 system prompt for a Managed Agent.
 
@@ -116,35 +112,59 @@ def build_system_prompt(
     (pulse number, resource state, events) is sent per-pulse by the
     orchestrator via meta_context.build_meta_context().
 
+    ALL data loaded from DB — no CSV files (Railway has no seed directory).
+
     Args:
         role_id: Role identifier (e.g., "dealer" for Columbia HoS).
-        sim_run_id: UUID of the sim_run. When provided, reads world context
-            from DB tables (actual sim state) instead of CSV template files.
+        sim_run_id: UUID of the sim_run. Falls back to template sim if None.
         assertiveness: Global assertiveness dial (1=cooperative, 10=assertive).
             Default 5 = neutral (no nudge).
-        countries: Optional live country state dict (CSV fallback only).
-        world_state: Optional live world state dict (CSV fallback only).
 
     Returns:
         Complete system prompt (~5-8K tokens).
     """
     # ── Source 1: World context (identity, roster, geography, situation) ──
-    if sim_run_id:
-        from engine.agents.managed.db_context import build_db_world_context
-        block1 = build_db_world_context(sim_run_id, role_id)
-    else:
-        block1 = build_rich_block1(
-            role_id=role_id,
-            countries=countries,
-            world_state=world_state,
-        )
+    # ALWAYS from DB — no CSV fallback
+    from engine.agents.managed.db_context import build_db_world_context
+    _src = sim_run_id or "00000000-0000-0000-0000-000000000001"
+    block1 = build_db_world_context(_src, role_id)
 
     # ── Source 2: Game rules ──
     game_rules = build_game_rules_context()
 
     # ── Source 3: Character identity + traits + assertiveness ──
-    role = load_role(role_id)
-    country = load_country_context(role["country_code"])
+    # ALWAYS from DB — no CSV fallback (Railway has no seed files)
+    from engine.services.supabase import get_client
+    _db = get_client()
+    _src_sim = sim_run_id or "00000000-0000-0000-0000-000000000001"
+
+    _role_rows = _db.table("roles").select("*").eq("sim_run_id", _src_sim).eq("id", role_id).limit(1).execute()
+    if not _role_rows.data:
+        raise ValueError(f"Role {role_id} not found in sim {_src_sim}")
+    _r = _role_rows.data[0]
+    role = {
+        "id": _r["id"], "character_name": _r.get("character_name", role_id),
+        "title": _r.get("title", "Leader"), "country_code": _r.get("country_code", ""),
+        "is_head_of_state": "head_of_state" in (_r.get("positions") or []),
+        "objectives": _r.get("objectives") or [], "powers": _r.get("powers") or [],
+        "public_bio": _r.get("public_bio", ""), "confidential_brief": _r.get("confidential_brief", ""),
+    }
+
+    _country_rows = _db.table("countries").select("*").eq("sim_run_id", _src_sim).eq("id", role["country_code"]).limit(1).execute()
+    if not _country_rows.data:
+        raise ValueError(f"Country {role['country_code']} not found in sim {_src_sim}")
+    _c = _country_rows.data[0]
+    country = {
+        "country_code": _c["id"], "sim_name": _c.get("sim_name", _c["id"]),
+        "gdp": _c.get("gdp", 0), "stability": _c.get("stability", 5),
+        "treasury": _c.get("treasury", 0), "nuclear_level": _c.get("nuclear_level", 0),
+        "ai_level": _c.get("ai_level", 0), "regime_type": _c.get("regime_type", ""),
+        "war_tiredness": _c.get("war_tiredness", 0),
+        "mil_ground": _c.get("mil_ground", 0), "mil_naval": _c.get("mil_naval", 0),
+        "mil_tactical_air": _c.get("mil_tactical_air", 0),
+        "mil_strategic_missiles": _c.get("mil_strategic_missiles", 0),
+        "at_war_with": _c.get("at_war_with", ""),
+    }
 
     character_brief = _build_character_brief(role, country)
     traits = CHARACTER_TRAIT_FRAMEWORK.format(
