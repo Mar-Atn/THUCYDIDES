@@ -235,34 +235,44 @@ class EventDispatcher:
                 await asyncio.sleep(5)  # Back off on error
 
     async def _check_and_deliver(self, max_tier: int) -> None:
-        """Check queue for each idle agent and deliver events."""
+        """Check queue for each idle agent and deliver events IN PARALLEL.
+
+        All idle agents with pending events are processed concurrently
+        via asyncio.gather(). Each agent has its own independent session —
+        no shared state, no race conditions. State machine (IDLE → ACTING →
+        IDLE) prevents double-delivery to the same agent.
+        """
+        # Collect all idle agents with pending events
+        deliveries: list[tuple[str, SessionContext, list[dict]]] = []
         for role_id, ctx in list(self.agents.items()):
             state = self.agent_states.get(role_id, IDLE)
-
             if state != IDLE:
-                continue  # Skip busy/frozen agents
+                continue
 
             events = await self.dequeue(role_id, max_tier=max_tier)
             if not events:
                 continue
 
-            # Build combined message from queued events
+            deliveries.append((role_id, ctx, events))
+
+        if not deliveries:
+            return
+
+        # Deliver to ALL idle agents in parallel
+        async def _deliver_one(role_id: str, ctx: SessionContext, events: list[dict]) -> None:
             message = self._format_events(events)
             event_ids = [e["id"] for e in events]
 
-            # Deliver — use IN_MEETING state for chat events
             has_chat = any(e["event_type"] == "chat_message" for e in events)
             self.set_agent_state(role_id, IN_MEETING if has_chat else ACTING)
             try:
                 transcript = await self.session_manager.send_event(ctx, message)
 
-                # Detect empty response (session not ready or silent failure)
                 has_content = any(
                     e.get("type") in ("agent_message", "tool_call", "agent_thinking")
                     for e in transcript
                 )
                 if not has_content:
-                    # Check if session is dead (multiple empty responses)
                     if ctx.events_sent >= 3 and ctx.total_output_tokens == 0:
                         logger.error(
                             "[dispatcher] Dead session for %s (sent=%d, tokens=0) — recreating",
@@ -286,26 +296,22 @@ class EventDispatcher:
                             "[dispatcher] Empty response from %s — will retry on next poll",
                             role_id,
                         )
-                    # Do NOT mark processed — event stays in queue for retry
-                    continue
+                    return  # Do NOT mark processed — event stays in queue for retry
 
                 await self.mark_processed(event_ids)
 
-                # Log to observatory
                 from engine.agents.managed.event_handler import log_transcript_to_observatory
                 log_transcript_to_observatory(
                     self.sim_run_id, ctx.country_code,
                     ctx.round_num, transcript,
                 )
 
-                # Handle chat_message events — write AI response to meeting_messages
                 for ev in events:
                     if ev["event_type"] == "chat_message":
                         meeting_id = (ev.get("metadata") or {}).get("meeting_id")
                         if meeting_id and transcript:
                             self._write_chat_response(role_id, meeting_id, transcript)
 
-                # Update DB session stats
                 self.session_manager._update_token_counts(ctx)
 
             except Exception as e:
@@ -313,6 +319,12 @@ class EventDispatcher:
                 await self.mark_processed(event_ids, error=str(e))
             finally:
                 self.set_agent_state(role_id, IDLE)
+
+        logger.info("[dispatcher] Delivering to %d agents in parallel", len(deliveries))
+        await asyncio.gather(
+            *[_deliver_one(rid, ctx, evts) for rid, ctx, evts in deliveries],
+            return_exceptions=True,
+        )
 
     def _format_events(self, events: list[dict]) -> str:
         """Format queued events into a single message for the agent."""
