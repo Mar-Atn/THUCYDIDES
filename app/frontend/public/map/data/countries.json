@@ -1,122 +1,368 @@
 {
-  "columbia": {
-    "id": "columbia",
-    "name": "Columbia",
-    "parallel": "United States",
-    "regime": "democracy"
+  "countries": {
+    "columbia": {
+      "id": "columbia",
+      "name": "Columbia",
+      "parallel": "United States",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#3A6B9F",
+        "map": "#9AB5D0",
+        "light": "#E8EFF6"
+      }
+    },
+    "cathay": {
+      "id": "cathay",
+      "name": "Cathay",
+      "parallel": "China",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#C4A030",
+        "map": "#E8D5A3",
+        "light": "#F8F2E5"
+      }
+    },
+    "sarmatia": {
+      "id": "sarmatia",
+      "name": "Sarmatia",
+      "parallel": "Russia",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#A06060",
+        "map": "#D4A5A5",
+        "light": "#F5EAEA"
+      }
+    },
+    "ruthenia": {
+      "id": "ruthenia",
+      "name": "Ruthenia",
+      "parallel": "Ukraine",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#5A9A5A",
+        "map": "#A5C8A5",
+        "light": "#EBF3EB"
+      }
+    },
+    "persia": {
+      "id": "persia",
+      "name": "Persia",
+      "parallel": "Iran",
+      "regime": "hybrid",
+      "colors": {
+        "ui": "#9A7040",
+        "map": "#C8A57A",
+        "light": "#F2EBE0"
+      }
+    },
+    "gallia": {
+      "id": "gallia",
+      "name": "Gallia",
+      "parallel": "France",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#4A6FA0",
+        "map": "#A5B8D4",
+        "light": "#EBF0F6"
+      }
+    },
+    "teutonia": {
+      "id": "teutonia",
+      "name": "Teutonia",
+      "parallel": "Germany",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#3A8A7A",
+        "map": "#8AB5AA",
+        "light": "#E8F2EF"
+      }
+    },
+    "freeland": {
+      "id": "freeland",
+      "name": "Freeland",
+      "parallel": "Poland",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#5A80A0",
+        "map": "#A0B8C8",
+        "light": "#EBF1F5"
+      }
+    },
+    "ponte": {
+      "id": "ponte",
+      "name": "Ponte",
+      "parallel": "Italy",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#6A9A8A",
+        "map": "#A5C8B8",
+        "light": "#EBF3EF"
+      }
+    },
+    "albion": {
+      "id": "albion",
+      "name": "Albion",
+      "parallel": "United Kingdom",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#4A7A8F",
+        "map": "#8AA5B5",
+        "light": "#E8EFF3"
+      }
+    },
+    "bharata": {
+      "id": "bharata",
+      "name": "Bharata",
+      "parallel": "India",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#B87850",
+        "map": "#D4B5A5",
+        "light": "#F5EDE5"
+      }
+    },
+    "levantia": {
+      "id": "levantia",
+      "name": "Levantia",
+      "parallel": "Israel",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#9A9A40",
+        "map": "#D4D4A5",
+        "light": "#F3F3E8"
+      }
+    },
+    "formosa": {
+      "id": "formosa",
+      "name": "Formosa",
+      "parallel": "Taiwan",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#B89048",
+        "map": "#DCC5A0",
+        "light": "#F5EEE0"
+      }
+    },
+    "phrygia": {
+      "id": "phrygia",
+      "name": "Phrygia",
+      "parallel": "Turkey",
+      "regime": "hybrid",
+      "colors": {
+        "ui": "#8A6A48",
+        "map": "#B5A08A",
+        "light": "#F0EBE5"
+      }
+    },
+    "yamato": {
+      "id": "yamato",
+      "name": "Yamato",
+      "parallel": "Japan",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#5A7A9B",
+        "map": "#A5B5C8",
+        "light": "#EBF0F5"
+      }
+    },
+    "solaria": {
+      "id": "solaria",
+      "name": "Solaria",
+      "parallel": "Saudi Arabia",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#A89030",
+        "map": "#C8B896",
+        "light": "#F3F0E5"
+      }
+    },
+    "choson": {
+      "id": "choson",
+      "name": "Choson",
+      "parallel": "North Korea",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#5A5A5A",
+        "map": "#8A8A8A",
+        "light": "#EFEFEF"
+      }
+    },
+    "hanguk": {
+      "id": "hanguk",
+      "name": "Hanguk",
+      "parallel": "South Korea",
+      "regime": "democracy",
+      "colors": {
+        "ui": "#4A8FA8",
+        "map": "#A5C8D4",
+        "light": "#E8F1F5"
+      }
+    },
+    "caribe": {
+      "id": "caribe",
+      "name": "Caribe",
+      "parallel": "Cuba + Venezuela",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#3A7AAA",
+        "map": "#8AACCC",
+        "light": "#E8F0F6"
+      }
+    },
+    "mirage": {
+      "id": "mirage",
+      "name": "Mirage",
+      "parallel": "UAE",
+      "regime": "autocracy",
+      "colors": {
+        "ui": "#A88050",
+        "map": "#D4BFA5",
+        "light": "#F5EEE5"
+      }
+    },
+    "sogdiana": {
+      "id": "sogdiana",
+      "name": "Sogdiana",
+      "colors": {
+        "ui": "#8A8A60",
+        "map": "#C8C8A5",
+        "light": "#F0F0E8"
+      }
+    },
+    "horn": {
+      "id": "horn",
+      "name": "Horn",
+      "colors": {
+        "ui": "#8A7A68",
+        "map": "#B5A896",
+        "light": "#F0ECE8"
+      }
+    },
+    "sea": {
+      "id": "sea",
+      "name": "Sea",
+      "colors": {
+        "ui": "#2a4a6a",
+        "map": "#2a4a6a",
+        "light": "#2a4a6a"
+      }
+    }
   },
-  "cathay": {
-    "id": "cathay",
-    "name": "Cathay",
-    "parallel": "China",
-    "regime": "autocracy"
-  },
-  "sarmatia": {
-    "id": "sarmatia",
-    "name": "Sarmatia",
-    "parallel": "Russia",
-    "regime": "autocracy"
-  },
-  "ruthenia": {
-    "id": "ruthenia",
-    "name": "Ruthenia",
-    "parallel": "Ukraine",
-    "regime": "democracy"
-  },
-  "persia": {
-    "id": "persia",
-    "name": "Persia",
-    "parallel": "Iran",
-    "regime": "hybrid"
-  },
-  "gallia": {
-    "id": "gallia",
-    "name": "Gallia",
-    "parallel": "France",
-    "regime": "democracy"
-  },
-  "teutonia": {
-    "id": "teutonia",
-    "name": "Teutonia",
-    "parallel": "Germany",
-    "regime": "democracy"
-  },
-  "freeland": {
-    "id": "freeland",
-    "name": "Freeland",
-    "parallel": "Poland",
-    "regime": "democracy"
-  },
-  "ponte": {
-    "id": "ponte",
-    "name": "Ponte",
-    "parallel": "Italy",
-    "regime": "democracy"
-  },
-  "albion": {
-    "id": "albion",
-    "name": "Albion",
-    "parallel": "United Kingdom",
-    "regime": "democracy"
-  },
-  "bharata": {
-    "id": "bharata",
-    "name": "Bharata",
-    "parallel": "India",
-    "regime": "democracy"
-  },
-  "levantia": {
-    "id": "levantia",
-    "name": "Levantia",
-    "parallel": "Israel",
-    "regime": "democracy"
-  },
-  "formosa": {
-    "id": "formosa",
-    "name": "Formosa",
-    "parallel": "Taiwan",
-    "regime": "democracy"
-  },
-  "phrygia": {
-    "id": "phrygia",
-    "name": "Phrygia",
-    "parallel": "Turkey",
-    "regime": "hybrid"
-  },
-  "yamato": {
-    "id": "yamato",
-    "name": "Yamato",
-    "parallel": "Japan",
-    "regime": "democracy"
-  },
-  "solaria": {
-    "id": "solaria",
-    "name": "Solaria",
-    "parallel": "Saudi Arabia",
-    "regime": "autocracy"
-  },
-  "choson": {
-    "id": "choson",
-    "name": "Choson",
-    "parallel": "North Korea",
-    "regime": "autocracy"
-  },
-  "hanguk": {
-    "id": "hanguk",
-    "name": "Hanguk",
-    "parallel": "South Korea",
-    "regime": "democracy"
-  },
-  "caribe": {
-    "id": "caribe",
-    "name": "Caribe",
-    "parallel": "Cuba + Venezuela",
-    "regime": "autocracy"
-  },
-  "mirage": {
-    "id": "mirage",
-    "name": "Mirage",
-    "parallel": "UAE",
-    "regime": "autocracy"
+  "palette": {
+    "columbia": {
+      "ui": "#3A6B9F",
+      "map": "#9AB5D0",
+      "light": "#E8EFF6"
+    },
+    "cathay": {
+      "ui": "#C4A030",
+      "map": "#E8D5A3",
+      "light": "#F8F2E5"
+    },
+    "sarmatia": {
+      "ui": "#A06060",
+      "map": "#D4A5A5",
+      "light": "#F5EAEA"
+    },
+    "ruthenia": {
+      "ui": "#5A9A5A",
+      "map": "#A5C8A5",
+      "light": "#EBF3EB"
+    },
+    "persia": {
+      "ui": "#9A7040",
+      "map": "#C8A57A",
+      "light": "#F2EBE0"
+    },
+    "gallia": {
+      "ui": "#4A6FA0",
+      "map": "#A5B8D4",
+      "light": "#EBF0F6"
+    },
+    "teutonia": {
+      "ui": "#3A8A7A",
+      "map": "#8AB5AA",
+      "light": "#E8F2EF"
+    },
+    "albion": {
+      "ui": "#4A7A8F",
+      "map": "#8AA5B5",
+      "light": "#E8EFF3"
+    },
+    "freeland": {
+      "ui": "#5A80A0",
+      "map": "#A0B8C8",
+      "light": "#EBF1F5"
+    },
+    "ponte": {
+      "ui": "#6A9A8A",
+      "map": "#A5C8B8",
+      "light": "#EBF3EF"
+    },
+    "bharata": {
+      "ui": "#B87850",
+      "map": "#D4B5A5",
+      "light": "#F5EDE5"
+    },
+    "formosa": {
+      "ui": "#B89048",
+      "map": "#DCC5A0",
+      "light": "#F5EEE0"
+    },
+    "yamato": {
+      "ui": "#5A7A9B",
+      "map": "#A5B5C8",
+      "light": "#EBF0F5"
+    },
+    "hanguk": {
+      "ui": "#4A8FA8",
+      "map": "#A5C8D4",
+      "light": "#E8F1F5"
+    },
+    "phrygia": {
+      "ui": "#8A6A48",
+      "map": "#B5A08A",
+      "light": "#F0EBE5"
+    },
+    "solaria": {
+      "ui": "#A89030",
+      "map": "#C8B896",
+      "light": "#F3F0E5"
+    },
+    "mirage": {
+      "ui": "#A88050",
+      "map": "#D4BFA5",
+      "light": "#F5EEE5"
+    },
+    "levantia": {
+      "ui": "#9A9A40",
+      "map": "#D4D4A5",
+      "light": "#F3F3E8"
+    },
+    "choson": {
+      "ui": "#5A5A5A",
+      "map": "#8A8A8A",
+      "light": "#EFEFEF"
+    },
+    "caribe": {
+      "ui": "#3A7AAA",
+      "map": "#8AACCC",
+      "light": "#E8F0F6"
+    },
+    "sogdiana": {
+      "ui": "#8A8A60",
+      "map": "#C8C8A5",
+      "light": "#F0F0E8"
+    },
+    "horn": {
+      "ui": "#8A7A68",
+      "map": "#B5A896",
+      "light": "#F0ECE8"
+    },
+    "sea": {
+      "ui": "#2a4a6a",
+      "map": "#2a4a6a",
+      "light": "#2a4a6a"
+    }
   }
 }
