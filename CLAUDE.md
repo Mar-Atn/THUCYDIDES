@@ -1,6 +1,6 @@
 # CLAUDE.md — Thucydides Trap (TTT) Project
 
-**Version:** 4.0 | **Date:** 2026-04-22 | **Phase:** EXECUTION
+**Version:** 4.2 | **Date:** 2026-04-24 | **Phase:** EXECUTION
 **Owner:** Marat Atn (marat@metagames.org)
 **Any change to this file must be confirmed by Marat.**
 
@@ -251,4 +251,4 @@ THUCYDIDES/
 
 ---
 
-*Version 4.1 — Process Reset. World Model + Contracts replace SEED/DET as source of truth. 5-agent team with mandatory cross-checks. 20% time on process/documentation. Best practices lookup for new technical challenges.*
+*Version 4.2 — Process Reset. World Model + Contracts as source of truth. 5-agent team. 20% process/docs. AI Agent Testing Protocol (L1-L4). Best practices lookup.*

@@ -1,5 +1,5 @@
 # BUILD STANDARDS — Execution Phase
-**Version:** 1.0 | **Date:** 2026-04-13
+**Version:** 2.0 | **Date:** 2026-04-24
 
 ---
 
@@ -17,7 +17,7 @@ Every module built to SPEC. No placeholders. No "fix later." Super high standard
 - Note: what to reuse, what to adapt, what to build fresh
 
 ### 2. Write SPEC.md (before coding)
-- Detailed specification derived from SEED/DET/contracts + KING learnings
+- Detailed specification derived from World Model + MODULE_REGISTRY + existing module SPECs
 - Include: purpose, user flows, data model, API endpoints, UI wireframes, test plan
 - No ambiguity — a developer reads SPEC and builds without questions
 
