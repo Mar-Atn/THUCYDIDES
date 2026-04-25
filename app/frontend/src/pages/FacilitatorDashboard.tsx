@@ -1062,7 +1062,7 @@ export function FacilitatorDashboard() {
                             election_open: false,
                             election_stopped: false,
                             election_started_at: null,
-                            election_duration_min: null,
+                            election_duration_min: 10,
                             election_econ_score: null,
                             election_stability: null,
                             election_inflation: null,
