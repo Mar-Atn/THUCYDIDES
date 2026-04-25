@@ -277,12 +277,17 @@ class EventDispatcher:
                     await asyncio.sleep(5)
                     continue
 
-                # Read pulses_per_round from settings (default 8)
+                # Read pulses_per_round from settings (default 8, 0 = manual only)
                 pulses_str = _read_setting("pulses_per_round", "8")
                 try:
-                    pulses_per_round = max(1, min(20, int(pulses_str)))
+                    pulses_per_round = max(0, min(10, int(pulses_str)))
                 except (ValueError, TypeError):
                     pulses_per_round = 8
+
+                # 0 = manual only — no auto-pulses
+                if pulses_per_round == 0:
+                    await asyncio.sleep(10)
+                    continue
 
                 # Calculate interval
                 interval_seconds = max(30, phase_duration / pulses_per_round)

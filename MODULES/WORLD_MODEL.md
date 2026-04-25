@@ -375,6 +375,9 @@ System-wide settings stored in `ai_settings` table. Managed from the AI Settings
 | **Model — Agent decisions** | `model_decisions` | Managed agents (at init) | claude-sonnet-4-6 | Model for AI participant strategic reasoning. Locked at init. |
 | **Model — Agent conversations** | `model_conversations` | Managed agents (at init) | claude-sonnet-4-6 | Model for bilateral meetings. Locked at init. |
 | **Model — Stateless calls** | `model_stateless` | Immediate | claude-sonnet-4-6 | Model for intelligence, chat, Navigator, etc. Changes apply instantly. |
+| **Pulses per round** | `pulses_per_round` | Immediate | 8 | Auto-pulses during Phase A (0-10). 0 = manual only. Moderator-adjustable from AI Dashboard. |
+
+**Auto-pulse system:** During active Phase A, the EventDispatcher sends periodic round_pulse events to all idle AI agents, evenly spaced across the phase duration. The moderator controls the pace via the "Pulses/rnd" control in the AI Participants Dashboard. Setting to 0 disables auto-pulses (manual pulse only). Changes take effect immediately — no reinitialization needed.
 
 **UI note:** The AI Settings page should clearly indicate which settings require reinitialization and which take effect immediately.
 

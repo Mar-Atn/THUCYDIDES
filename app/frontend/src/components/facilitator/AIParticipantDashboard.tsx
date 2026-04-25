@@ -19,6 +19,8 @@ import {
   resumeAgent,
   resumeAllAgents,
   stopAllAgents,
+  getAISettings,
+  updateAISetting,
   getAgentLog,
   getAgentMemories,
   getSimRunRoles,
@@ -138,7 +140,16 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [dbSessions, setDbSessions] = useState<Record<string, unknown>[]>([])
   const [latestActivity, setLatestActivity] = useState<Record<string, LatestEvent>>({}) // role_id → latest event
   const [activeMeetings, setActiveMeetings] = useState<Record<string, number>>({}) // role_id → active meeting count
+  const [pulsesPerRound, setPulsesPerRound] = useState(8)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Load pulses_per_round setting on mount
+  useEffect(() => {
+    getAISettings().then((s) => {
+      const v = parseInt(s.pulses_per_round || '8', 10)
+      if (!isNaN(v)) setPulsesPerRound(Math.max(0, Math.min(10, v)))
+    }).catch(() => {})
+  }, [])
 
   /* Fetch roles — poll every 5s so AI/human toggles in participant management show up */
   useEffect(() => {
@@ -269,6 +280,14 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     finally { setActionLoading(null) }
   }
 
+  const handlePulsesChange = async (val: number) => {
+    const clamped = Math.max(0, Math.min(10, val))
+    setPulsesPerRound(clamped)
+    try {
+      await updateAISetting('pulses_per_round', String(clamped))
+    } catch { /* non-critical */ }
+  }
+
   const handleStopAll = async () => {
     if (!confirm('STOP ALL AI?\n\nThis will freeze all agents and clear all pending events.\nAgents will start fresh on resume.')) return
     setActionLoading('stop-all')
@@ -374,6 +393,20 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             )}
           </div>
           <div className="flex items-center gap-3">
+            {/* Pulses per round control */}
+            {isActive && (
+              <div className="flex items-center gap-1.5" title="Auto-pulses per round during Phase A. 0 = manual only.">
+                <label className="font-body text-caption text-text-secondary">Pulses/rnd:</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={10}
+                  value={pulsesPerRound}
+                  onChange={(e) => handlePulsesChange(parseInt(e.target.value) || 0)}
+                  className="w-12 bg-base border border-border rounded px-1.5 py-0.5 font-data text-caption text-text-primary text-center focus:outline-none focus:border-action"
+                />
+              </div>
+            )}
             {/* Controls */}
             {!isActive && !initializing && (
               <button
