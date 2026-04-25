@@ -185,11 +185,12 @@ class EventDispatcher:
     # -- Dispatch Loop -----------------------------------------------------
 
     async def start(self) -> None:
-        """Start the dispatch loop (background task)."""
+        """Start the dispatch loop + auto-pulse scheduler (background tasks)."""
         self._running = True
         self._tasks.append(asyncio.create_task(self._dispatch_loop()))
+        self._tasks.append(asyncio.create_task(self._auto_pulse_loop()))
         logger.info(
-            "[dispatcher] Started for sim %s with %d agents",
+            "[dispatcher] Started for sim %s with %d agents (dispatch + auto-pulse)",
             self.sim_run_id, len(self.agents),
         )
 
@@ -233,6 +234,94 @@ class EventDispatcher:
             except Exception as e:
                 logger.error("[dispatcher] Loop error: %s", e)
                 await asyncio.sleep(5)  # Back off on error
+
+    async def _auto_pulse_loop(self) -> None:
+        """Auto-pulse scheduler — sends periodic round_pulse events to all agents.
+
+        Per M5 SPEC D4: "N pulses per round, evenly spaced across round duration."
+        Default: 8 pulses per round. Reads pulses_per_round from ai_settings.
+
+        Only sends pulses during active Phase A. Pauses during Phase B,
+        inter_round, pre_start, paused, etc.
+        """
+        from engine.agents.managed.ai_config import _read_setting
+
+        pulse_count = 0
+        last_phase = None
+
+        while self._running:
+            try:
+                # Read sim state
+                db = get_client()
+                run = db.table("sim_runs").select("status,current_phase,current_round,phase_duration_seconds") \
+                    .eq("id", self.sim_run_id).limit(1).execute()
+
+                if not run.data:
+                    await asyncio.sleep(10)
+                    continue
+
+                sim = run.data[0]
+                status = sim.get("status", "")
+                phase = sim.get("current_phase", "")
+                round_num = sim.get("current_round", 0)
+                phase_duration = sim.get("phase_duration_seconds") or 3600  # default 60 min
+
+                # Reset pulse count on phase change
+                current_phase_key = f"{round_num}-{phase}"
+                if current_phase_key != last_phase:
+                    pulse_count = 0
+                    last_phase = current_phase_key
+
+                # Only auto-pulse during active Phase A
+                if status != "active" or phase != "A":
+                    await asyncio.sleep(5)
+                    continue
+
+                # Read pulses_per_round from settings (default 8)
+                pulses_str = _read_setting("pulses_per_round", "8")
+                try:
+                    pulses_per_round = max(1, min(20, int(pulses_str)))
+                except (ValueError, TypeError):
+                    pulses_per_round = 8
+
+                # Calculate interval
+                interval_seconds = max(30, phase_duration / pulses_per_round)
+
+                # Check if we've sent enough pulses this round
+                if pulse_count >= pulses_per_round:
+                    await asyncio.sleep(10)
+                    continue
+
+                # Send pulse to all idle agents
+                pulse_count += 1
+                for role_id in list(self.agents.keys()):
+                    if self.agent_states.get(role_id) in (IDLE,):
+                        self.enqueue(
+                            role_id=role_id,
+                            tier=3,
+                            event_type="round_pulse",
+                            message=(
+                                f"Round {round_num}, Phase A — pulse {pulse_count}/{pulses_per_round}. "
+                                f"Assess your situation, check intelligence, and take strategic actions. "
+                                f"Use your tools to gather information and act."
+                            ),
+                            metadata={"round_num": round_num, "pulse_num": pulse_count,
+                                      "total_pulses": pulses_per_round},
+                        )
+
+                logger.info(
+                    "[auto-pulse] Round %d pulse %d/%d sent to %d agents (interval=%ds)",
+                    round_num, pulse_count, pulses_per_round, len(self.agents), int(interval_seconds),
+                )
+
+                # Wait for next pulse interval
+                await asyncio.sleep(interval_seconds)
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error("[auto-pulse] Error: %s", e)
+                await asyncio.sleep(10)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.
