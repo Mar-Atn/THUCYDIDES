@@ -462,29 +462,33 @@ def _create_meeting_invitation(sim_run_id: str, round_num: int, action: dict) ->
     logger.info("[meeting] %s invited %s (type=%s, id=%s)", role_id,
                 action.get("invitee_role_id") or action.get("org_id"), inv_type, inv_id)
 
-    # Enqueue event to invitee (works for both human→AI and AI→AI paths)
+    # Enqueue event to invitee ONLY if they are AI-operated
     if inv_id and inv_type == "one_on_one":
         invitee_role = action.get("invitee_role_id", "")
         if invitee_role:
-            try:
-                client.table("agent_event_queue").insert({
-                    "sim_run_id": sim_run_id,
-                    "role_id": invitee_role,
-                    "tier": 2,
-                    "event_type": "meeting_invitation_received",
-                    "message": (
-                        f"MEETING INVITATION from {country_code.upper()}\n\n"
-                        f"{country_code.upper()} has invited you to a bilateral meeting.\n"
-                        f"Agenda: {message}\n"
-                        f"Invitation ID: {inv_id}\n\n"
-                        f"Use respond_to_invitation with invitation_id='{inv_id}' "
-                        f"and decision='accept' or 'decline'."
-                    ),
-                    "metadata": {"invitation_id": inv_id, "inviter_country": country_code,
-                                 "inviter_role": role_id, "agenda": message[:200]},
-                }).execute()
-            except Exception as eq_err:
-                logger.warning("Failed to enqueue invitation event: %s", eq_err)
+            _inv_check = client.table("roles").select("is_ai_operated") \
+                .eq("sim_run_id", sim_run_id).eq("id", invitee_role).limit(1).execute()
+            _is_ai = _inv_check.data[0].get("is_ai_operated", False) if _inv_check.data else False
+            if _is_ai:
+                try:
+                    client.table("agent_event_queue").insert({
+                        "sim_run_id": sim_run_id,
+                        "role_id": invitee_role,
+                        "tier": 2,
+                        "event_type": "meeting_invitation_received",
+                        "message": (
+                            f"MEETING INVITATION from {country_code.upper()}\n\n"
+                            f"{country_code.upper()} has invited you to a bilateral meeting.\n"
+                            f"Agenda: {message}\n"
+                            f"Invitation ID: {inv_id}\n\n"
+                            f"Use respond_to_invitation with invitation_id='{inv_id}' "
+                            f"and decision='accept' or 'decline'."
+                        ),
+                        "metadata": {"invitation_id": inv_id, "inviter_country": country_code,
+                                     "inviter_role": role_id, "agenda": message[:200]},
+                    }).execute()
+                except Exception as eq_err:
+                    logger.warning("Failed to enqueue invitation event: %s", eq_err)
 
     return {"success": True, "narrative": narrative, "invitation_id": inv_id}
 
@@ -559,29 +563,35 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
 
     client.table("meeting_invitations").update(update_payload).eq("id", inv_id).execute()
 
-    # Enqueue meeting_started events to BOTH participants when accepted
+    # Enqueue meeting_started events to AI participants only
     if meeting_id:
         inviter_role_id = inv.get("inviter_role_id", "")
         for notify_role in [inviter_role_id, role_id]:
-            if notify_role:
-                try:
-                    client.table("agent_event_queue").insert({
-                        "sim_run_id": sim_run_id,
-                        "role_id": notify_role,
-                        "tier": 1,
-                        "event_type": "meeting_started",
-                        "message": (
-                            f"MEETING STARTED\n\n"
-                            f"A bilateral meeting has been confirmed.\n"
-                            f"Meeting ID: {meeting_id}\n"
-                            f"Agenda: {inv.get('message', 'Bilateral discussion')}\n\n"
-                            f"The meeting is now active. Use send_message to speak, "
-                            f"or the conversation router will manage the exchange."
-                        ),
-                        "metadata": {"meeting_id": meeting_id, "invitation_id": inv_id},
-                    }).execute()
-                except Exception as eq_err:
-                    logger.warning("Failed to enqueue meeting_started for %s: %s", notify_role, eq_err)
+            if not notify_role:
+                continue
+            # Only enqueue to AI-operated roles
+            _role_check = client.table("roles").select("is_ai_operated") \
+                .eq("sim_run_id", sim_run_id).eq("id", notify_role).limit(1).execute()
+            if not (_role_check.data and _role_check.data[0].get("is_ai_operated")):
+                continue
+            try:
+                client.table("agent_event_queue").insert({
+                    "sim_run_id": sim_run_id,
+                    "role_id": notify_role,
+                    "tier": 1,
+                    "event_type": "meeting_started",
+                    "message": (
+                        f"MEETING STARTED\n\n"
+                        f"A bilateral meeting has been confirmed.\n"
+                        f"Meeting ID: {meeting_id}\n"
+                        f"Agenda: {inv.get('message', 'Bilateral discussion')}\n\n"
+                        f"The meeting is now active. Use send_message to speak, "
+                        f"or the conversation router will manage the exchange."
+                    ),
+                    "metadata": {"meeting_id": meeting_id, "invitation_id": inv_id},
+                }).execute()
+            except Exception as eq_err:
+                logger.warning("Failed to enqueue meeting_started for %s: %s", notify_role, eq_err)
 
     label = {"accept": "accepted", "reject": "declined", "later": "asked to meet later"}.get(response, response)
     result = {"success": True, "narrative": f"You {label} the meeting invitation."}

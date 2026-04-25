@@ -299,8 +299,9 @@ def restart_simulation(sim_id: str) -> dict:
         "run_roles",
         # Covert operations
         "covert_ops_log",
-        # AI agent tables (not handled by cleanup_sim_ai_state)
+        # AI agent tables
         "agent_actions", "agent_conversations", "agent_reflections", "agent_transactions",
+        "agent_event_queue", "agent_decisions", "agent_memories", "ai_agent_sessions",
         # Round history
         "round_reports",
         # Power delegations (runtime changes)
@@ -308,7 +309,7 @@ def restart_simulation(sim_id: str) -> dict:
         # Runtime basing rights
         "basing_rights",
         # Meeting system
-        "meeting_invitations",
+        "meeting_invitations", "meetings", "meeting_messages",
     ]
     for table in RUNTIME_TABLES:
         try:

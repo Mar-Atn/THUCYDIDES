@@ -413,6 +413,18 @@ class EventDispatcher:
                         if self.agent_states.get(ai_role, IDLE) != IDLE:
                             continue  # AI busy — wait
 
+                        # Check if we already have a pending chat_message for this AI+meeting
+                        # (prevents duplicate prompts when monitor runs faster than agent processes)
+                        existing_chat = db.table("agent_event_queue") \
+                            .select("id") \
+                            .eq("sim_run_id", self.sim_run_id) \
+                            .eq("role_id", ai_role) \
+                            .eq("event_type", "chat_message") \
+                            .is_("processed_at", "null") \
+                            .limit(1).execute().data or []
+                        if existing_chat:
+                            continue  # Already has a pending chat prompt — don't duplicate
+
                         # Check latest messages — has human spoken since AI's last message?
                         msgs = db.table("meeting_messages") \
                             .select("role_id,content") \
