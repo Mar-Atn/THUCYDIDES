@@ -345,6 +345,16 @@ class EventDispatcher:
             try:
                 db = get_client()
 
+                # Only monitor meetings during Phase A (no meetings during Phase B)
+                run = db.table("sim_runs").select("status,current_phase") \
+                    .eq("id", self.sim_run_id).limit(1).execute()
+                if run.data:
+                    _phase = run.data[0].get("current_phase", "")
+                    _status = run.data[0].get("status", "")
+                    if _phase != "A" or _status != "active":
+                        await asyncio.sleep(MEETING_CHECK_INTERVAL)
+                        continue
+
                 # Find active meetings with turn_count=0 OR with unresponded messages
                 active_meetings = db.table("meetings") \
                     .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status") \

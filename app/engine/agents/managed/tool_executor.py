@@ -214,13 +214,19 @@ class ToolExecutor:
                     return {"success": False, "validation_status": "rejected",
                             "validation_notes": f"Simulation is in '{sim_status}' state. Actions are only allowed during active rounds. Use observation tools and write_notes to prepare."}
 
-                # Block batch decisions + move_units during Phase A for AI agents
-                # These are solicited ONCE at the start of Phase B
+                # Phase-aware action restrictions (M5 SPEC D10 + World Model Section 7)
                 PHASE_B_ONLY_ACTIONS = {"set_budget", "set_tariffs", "set_sanctions", "set_opec", "move_units"}
                 action_type_check = action.get("action_type", "")
+
+                # Phase A: block batch decisions + move_units (solicited at Phase B)
                 if sim_status == "active" and current_phase == "A" and action_type_check in PHASE_B_ONLY_ACTIONS:
                     return {"success": False, "validation_status": "rejected",
-                            "validation_notes": f"'{action_type_check}' is submitted during the Phase B solicitation window, not during Phase A. You will be asked to submit batch decisions (budget, tariffs, sanctions, OPEC) and troop movements at the end of the round. Focus on diplomacy, communication, and strategic actions during Phase A."}
+                            "validation_notes": f"'{action_type_check}' is submitted during the Phase B solicitation window, not during Phase A. Focus on diplomacy, communication, and strategic actions during Phase A."}
+
+                # Phase B / processing / inter_round: ONLY batch decisions + move_units allowed
+                if current_phase in ("B", "inter_round") and action_type_check not in PHASE_B_ONLY_ACTIONS:
+                    return {"success": False, "validation_status": "rejected",
+                            "validation_notes": f"Phase B is for batch decisions and troop movements only. '{action_type_check}' is not available during Phase B. Wait for the next round's Phase A."}
 
             action_type = action.get("action_type")
             if not action_type:
@@ -669,10 +675,15 @@ class ToolExecutor:
             from datetime import datetime, timezone, timedelta
             client = get_client()
 
-            # Block meetings during pre_start/setup
-            run = client.table("sim_runs").select("status").eq("id", self.sim_run_id).limit(1).execute()
-            if run.data and run.data[0].get("status") in ("setup", "pre_start"):
-                return {"success": False, "error": "Simulation hasn't started yet. Meetings are available once the round begins."}
+            # Block meetings outside Phase A
+            run = client.table("sim_runs").select("status,current_phase").eq("id", self.sim_run_id).limit(1).execute()
+            if run.data:
+                _status = run.data[0].get("status", "")
+                _phase = run.data[0].get("current_phase", "")
+                if _status in ("setup", "pre_start"):
+                    return {"success": False, "error": "Simulation hasn't started yet. Meetings are available once the round begins."}
+                if _phase in ("B", "inter_round"):
+                    return {"success": False, "error": "Meetings are only available during Phase A. Phase B is for batch decisions and troop movements."}
 
             # Check limit: max 2 active invitations per role
             now_iso = datetime.now(timezone.utc).isoformat()
