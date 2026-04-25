@@ -164,6 +164,93 @@ function categoryBadgeClass(category: string): string {
   }
 }
 
+/** AI event types — agent thinking/tool calls, not real game actions */
+const AI_EVENT_TYPES = new Set([
+  'ai_agent_log', 'agent_started', 'agent_committed', 'agent_no_commit',
+])
+
+function EventsFeedCard({ events }: { events: ObservatoryEvent[] }) {
+  const [tab, setTab] = useState<'sim' | 'ai'>('sim')
+
+  const simEvents = events.filter((e) => !AI_EVENT_TYPES.has(e.event_type))
+  const aiEvents = events.filter((e) => AI_EVENT_TYPES.has(e.event_type))
+  const displayed = tab === 'sim' ? simEvents : aiEvents
+
+  return (
+    <div className="bg-card border border-border rounded-lg p-5">
+      {/* Tab bar */}
+      <div className="flex items-center gap-1 mb-3">
+        <button
+          onClick={() => setTab('sim')}
+          className={`font-heading text-h3 px-3 py-1 rounded transition-colors ${
+            tab === 'sim'
+              ? 'text-text-primary bg-base'
+              : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          SIM Events
+          {simEvents.length > 0 && (
+            <span className="ml-2 font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded-full">
+              {simEvents.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setTab('ai')}
+          className={`font-heading text-h3 px-3 py-1 rounded transition-colors ${
+            tab === 'ai'
+              ? 'text-text-primary bg-base'
+              : 'text-text-secondary hover:text-text-primary'
+          }`}
+        >
+          AI Reflections
+          {aiEvents.length > 0 && (
+            <span className="ml-2 font-data text-caption bg-accent/10 text-accent px-2 py-0.5 rounded-full">
+              {aiEvents.length}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Event list */}
+      {displayed.length === 0 ? (
+        <div className="min-h-[30vh] flex items-center justify-center">
+          <p className="font-body text-body-sm text-text-secondary">
+            {tab === 'sim' ? 'No game events yet' : 'No AI activity yet'}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-1 min-h-[30vh] max-h-[30vh] overflow-y-auto">
+          {displayed.map((evt) => (
+            <div
+              key={evt.id}
+              className="flex items-start gap-3 px-3 py-2 rounded hover:bg-base transition-colors"
+            >
+              <span className="font-data text-caption text-text-secondary w-14 shrink-0">
+                {new Date(evt.created_at).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
+              <span className="font-body text-body-sm text-text-primary font-medium w-24 shrink-0">
+                {evt.role_name ?? evt.country_code ?? '---'}
+              </span>
+              <span className="font-body text-body-sm text-text-primary flex-1">
+                {evt.summary}
+              </span>
+              <span
+                className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category ?? '')}`}
+              >
+                {evt.category?.toUpperCase().slice(0, 4) ?? evt.event_type?.slice(0, 4).toUpperCase() ?? '---'}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function positionBadgeClass(position: string): string {
   switch (position) {
     case 'head_of_state':
@@ -1324,49 +1411,8 @@ export function FacilitatorDashboard() {
               )}
             </DashboardSection>
 
-            {/* SIM Events Feed (tall, scrollable — stock exchange monitor) */}
-            <div className="bg-card border border-border rounded-lg p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <h3 className="font-heading text-h3 text-text-primary">SIM Events</h3>
-                {events.length > 0 && (
-                  <span className="font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded-full">
-                    {events.length}
-                  </span>
-                )}
-              </div>
-              {events.length === 0 ? (
-                <div className="min-h-[30vh] flex items-center justify-center">
-                  <p className="font-body text-body-sm text-text-secondary">No events yet</p>
-                </div>
-              ) : (
-                <div className="space-y-1 min-h-[30vh] max-h-[30vh] overflow-y-auto">
-                  {events.map((evt) => (
-                    <div
-                      key={evt.id}
-                      className="flex items-start gap-3 px-3 py-2 rounded hover:bg-base transition-colors"
-                    >
-                      <span className="font-data text-caption text-text-secondary w-14 shrink-0">
-                        {new Date(evt.created_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </span>
-                      <span className="font-body text-body-sm text-text-primary font-medium w-24 shrink-0">
-                        {evt.role_name ?? '---'}
-                      </span>
-                      <span className="font-body text-body-sm text-text-primary flex-1">
-                        {evt.summary}
-                      </span>
-                      <span
-                        className={`font-body text-caption font-medium px-2 py-0.5 rounded shrink-0 ${categoryBadgeClass(evt.category ?? '')}`}
-                      >
-                        {evt.category?.toUpperCase().slice(0, 4) ?? evt.event_type?.slice(0, 4).toUpperCase() ?? '---'}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* SIM Events Feed — two tabs: game events vs AI reflections */}
+            <EventsFeedCard events={events} />
 
 
             {/* Participants & Role Assignment */}
