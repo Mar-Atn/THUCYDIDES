@@ -1,6 +1,6 @@
 # M5 AI Participant — Readiness Dashboard
 
-**Last updated:** 2026-04-25
+**Last updated:** 2026-04-25 (Sprint 4 complete)
 **Goal:** Mixed human+AI simulation where AI participants use ALL available actions, communicate with humans and each other, and the system orchestrates everything reliably.
 
 **Legend:** ✅ Proven working | 🔶 Partially tested / works with caveats | 🔴 Not tested / known gap | ➖ Not applicable
@@ -87,23 +87,23 @@ Every action must work through: Schema validation → Dispatch → Engine → DB
 | Capability | M5 (AI Agent) | M4 (Sim Runner) | M2 (Contracts) | M6 (Human UI) | E2E Verified |
 |------------|:-------------:|:----------------:|:--------------:|:-------------:|:------------:|
 | **Phase A immediate actions** | ✅ 9 types used | ✅ | ✅ | ✅ | ✅ |
-| **Phase B batch decisions** | 🔶 1 agent tested | ✅ | ✅ | ✅ | 🔶 |
-| **Phase B with 5+ agents** | 🔴 | ✅ | ✅ | ✅ | 🔴 |
+| **Phase B batch decisions** | ✅ 5 AI + 2 human | ✅ | ✅ | ✅ | ✅ |
+| **Phase B with 5+ agents** | ✅ 5 AI + 2 human | ✅ | ✅ | ✅ | ✅ |
 | **Move units (inter-round)** | 🔴 | ✅ | ✅ | ✅ | 🔴 |
 | **Round transition (A→B→R2)** | ✅ lifecycle test | ✅ | ✅ | ✅ | ✅ |
-| **Multi-round (2+ rounds)** | 🔶 round 2 action works | ✅ | ✅ | ✅ | 🔶 |
-| **AI-AI meeting** | 🔴 invitation not delivered | ✅ infra | ✅ | ➖ | 🔴 |
-| **AI-Human meeting** | 🔴 never tested | ✅ infra | ✅ | ✅ | 🔴 |
-| **Human-AI meeting** | 🔴 never tested | ✅ infra | ✅ | ✅ | 🔴 |
+| **Multi-round (2+ rounds)** | ✅ 2-round lifecycle proven | ✅ | ✅ | ✅ | ✅ |
+| **AI-AI meeting** | ✅ 8-turn negotiation proven | ✅ infra | ✅ | ➖ | ✅ |
+| **AI-Human meeting** | ✅ AI invites, human responds | ✅ infra | ✅ | ✅ | ✅ |
+| **Human-AI meeting** | ✅ Human invites, AI responds | ✅ infra | ✅ | ✅ | ✅ |
 | **AI-AI transaction** | 🔶 scripted only | ✅ | ✅ | ➖ | 🔶 |
 | **AI-Human transaction** | ✅ real session | ✅ | ✅ | ✅ | ✅ |
-| **Combat → reaction chain** | 🔴 skip (units consumed) | ✅ | ✅ | ➖ | 🔴 |
+| **Combat → reaction chain** | ✅ coordinated air+ground strikes | ✅ | ✅ | ➖ | ✅ |
 | **Event delivery to agents** | ✅ dispatcher works | ✅ | ✅ | ➖ | ✅ |
 | **Agent memory (write/read)** | ✅ | ➖ | ➖ | ➖ | ✅ |
 | **Agent observation tools** | ✅ 6 tools verified | ✅ | ✅ | ✅ | ✅ |
 | **Nuclear chain (full)** | 🔴 no capable test data | ✅ | ✅ | ✅ | 🔴 |
 | **Assertiveness dial** | 🔴 not tested | ✅ config | ➖ | ➖ | 🔴 |
-| **Theater map awareness** | 🔶 tools exist, not verified | ✅ | ➖ | ✅ | 🔴 |
+| **Theater map awareness** | ✅ agent probed 18 hexes (global+theater) | ✅ | ➖ | ✅ | ✅ |
 | **Reserve deployment** | 🔴 | ✅ | ✅ | ✅ | 🔴 |
 | **Freeze/resume agent** | 🔴 not tested | ✅ | ➖ | ✅ | 🔴 |
 
@@ -113,8 +113,8 @@ Every action must work through: Schema validation → Dispatch → Engine → DB
 
 | # | Issue | Severity | Module | Status |
 |---|-------|----------|--------|--------|
-| 1 | Meeting invitation not delivered to invitee agent | **CRITICAL** | M5 (tool_executor) | 🔴 Open |
-| 2 | AI agents don't proactively find adjacent enemies for combat | MEDIUM | M5 (game_rules_context) | 🔴 Open |
+| 1 | Meeting invitation not delivered to invitee agent | **CRITICAL** | M5 (tool_executor) | ✅ Fixed (event enqueue on invite + accept) |
+| 2 | AI agents don't proactively find adjacent enemies for combat | MEDIUM | M5 (game_rules_context) | ✅ Fixed (military planning prompt) |
 | 3 | `_submit_action` doesn't pass `transaction_id`/`agreement_id` back to agent | LOW | M5 (tool_executor) | 🔶 Workaround (DB lookup) |
 | 4 | `respond_to_invitation` doesn't check `expires_at` | LOW | M5 (tool_executor) | 🔶 Documented |
 | 5 | Map units colored same color (missing `country_id` field) | LOW | M4 (main.py) | ✅ Fixed |

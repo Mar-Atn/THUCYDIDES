@@ -728,6 +728,33 @@ class ToolExecutor:
                 "[meeting] %s invited %s (id=%s)",
                 self.role_id, target_role_id, inv_id,
             )
+
+            # Enqueue event to invitee so they know about the invitation
+            if inv_id and target_role_id:
+                try:
+                    client.table("agent_event_queue").insert({
+                        "sim_run_id": self.sim_run_id,
+                        "role_id": target_role_id,
+                        "tier": 2,
+                        "event_type": "meeting_invitation_received",
+                        "message": (
+                            f"MEETING INVITATION from {self.country_code.upper()}\n\n"
+                            f"{self.country_code.upper()} has invited you to a bilateral meeting.\n"
+                            f"Agenda: {agenda}\n"
+                            f"Invitation ID: {inv_id}\n\n"
+                            f"Use respond_to_invitation with invitation_id='{inv_id}' "
+                            f"and decision='accept' or 'decline'."
+                        ),
+                        "metadata": {
+                            "invitation_id": inv_id,
+                            "inviter_country": self.country_code,
+                            "agenda": agenda[:200],
+                        },
+                    }).execute()
+                    logger.info("[meeting] Enqueued invitation event for %s", target_role_id)
+                except Exception as eq_err:
+                    logger.warning("Failed to enqueue invitation event: %s", eq_err)
+
             return {
                 "success": True,
                 "narrative": f"Meeting invitation sent to {target_country}",
@@ -800,6 +827,34 @@ class ToolExecutor:
                 update_payload["status"] = "rejected"
 
             client.table("meeting_invitations").update(update_payload).eq("id", invitation_id).execute()
+
+            # Enqueue meeting_started events to both participants
+            if meeting_id:
+                inviter_role_id = inv.get("inviter_role_id", "")
+                for notify_role in [inviter_role_id, self.role_id]:
+                    if notify_role:
+                        try:
+                            client.table("agent_event_queue").insert({
+                                "sim_run_id": self.sim_run_id,
+                                "role_id": notify_role,
+                                "tier": 1,
+                                "event_type": "meeting_started",
+                                "message": (
+                                    f"MEETING STARTED\n\n"
+                                    f"A bilateral meeting has been confirmed.\n"
+                                    f"Meeting ID: {meeting_id}\n"
+                                    f"Agenda: {inv.get('message', 'Bilateral discussion')}\n"
+                                    f"Participants: {inv.get('inviter_country_code', '')} and {self.country_code}\n\n"
+                                    f"The meeting will begin shortly. The conversation router will "
+                                    f"manage the turn-by-turn exchange."
+                                ),
+                                "metadata": {
+                                    "meeting_id": meeting_id,
+                                    "invitation_id": invitation_id,
+                                },
+                            }).execute()
+                        except Exception as eq_err:
+                            logger.warning("Failed to enqueue meeting_started for %s: %s", notify_role, eq_err)
 
             label = "accepted" if decision == "accept" else "declined"
             result: dict = {"success": True, "narrative": f"You {label} the meeting invitation."}

@@ -88,6 +88,22 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - Elderly leaders face per-round incapacitation risk (Dealer 10%, Helmsman/Pathfinder 5-10%).
 - Elections: 50% AI-calculated + 50% player vote. Columbia mid-terms R2, presidential R5-6.
 
+### Military Planning — How to Find and Attack Enemies
+
+**Finding targets:** Use `get_my_forces` to see your units with coordinates (global_row, global_col). Use `get_hex_info(row, col)` to probe neighboring hexes for enemy units. Adjacent hexes are the ONLY valid targets for ground_attack and ground_move. Hex grid uses odd-r offset: even rows shift right, odd rows shift left.
+
+**Attack types by range:**
+- `ground_attack` / `ground_move` — adjacent hex only (distance 1)
+- `air_strike` — 2-hex range from your air unit
+- `naval_bombardment` — naval unit at sea, target adjacent land hex
+- `launch_missile_conventional` — range by tech tier: T1=2 hex, T2=4, T3=global
+
+**Theater maps:** Some regions have detailed 10×10 theater maps (Eastern Ereb, Mashriq). Your forces may show theater_row/theater_col coordinates. Use `get_hex_info(row, col, scope="eastern_ereb")` to probe theater-level positions. Theater combat uses theater coordinates.
+
+**Reserves:** Units with status "reserve" are not positioned on the map. Deploy them during the inter-round movement window using `move_units`. You cannot attack with reserve units.
+
+**Key rule:** You must specify `attacker_unit_codes` (list of your unit IDs) and `target_global_row`/`target_global_col` for all combat actions. Get unit IDs from `get_my_forces`.
+
 ### Round Structure
 
 - Phase A (active, 60-80 min): free gameplay, immediate actions processed, batch decisions queued.
