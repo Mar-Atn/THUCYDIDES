@@ -185,12 +185,13 @@ class EventDispatcher:
     # -- Dispatch Loop -----------------------------------------------------
 
     async def start(self) -> None:
-        """Start the dispatch loop + auto-pulse scheduler (background tasks)."""
+        """Start the dispatch loop + auto-pulse + meeting monitor (background tasks)."""
         self._running = True
         self._tasks.append(asyncio.create_task(self._dispatch_loop()))
         self._tasks.append(asyncio.create_task(self._auto_pulse_loop()))
+        self._tasks.append(asyncio.create_task(self._meeting_monitor_loop()))
         logger.info(
-            "[dispatcher] Started for sim %s with %d agents (dispatch + auto-pulse)",
+            "[dispatcher] Started for sim %s with %d agents (dispatch + auto-pulse + meetings)",
             self.sim_run_id, len(self.agents),
         )
 
@@ -327,6 +328,126 @@ class EventDispatcher:
             except Exception as e:
                 logger.error("[auto-pulse] Error: %s", e)
                 await asyncio.sleep(10)
+
+    async def _meeting_monitor_loop(self) -> None:
+        """Monitor active meetings and drive AI participation.
+
+        Checks every 10s for:
+        1. AI-AI meetings (both participants are AI) → run ConversationRouter
+        2. AI-Human meetings (one AI, one human) → prompt AI to speak when
+           human has sent a message the AI hasn't responded to yet
+
+        Per M5 SPEC D6: AI uses the SAME meeting/chat system as humans.
+        """
+        MEETING_CHECK_INTERVAL = 10  # seconds
+
+        while self._running:
+            try:
+                db = get_client()
+
+                # Find active meetings with turn_count=0 OR with unresponded messages
+                active_meetings = db.table("meetings") \
+                    .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status") \
+                    .eq("sim_run_id", self.sim_run_id) \
+                    .eq("status", "active") \
+                    .execute().data or []
+
+                for meeting in active_meetings:
+                    mid = meeting["id"]
+                    role_a = meeting["participant_a_role_id"]
+                    role_b = meeting["participant_b_role_id"]
+                    turn_count = meeting.get("turn_count", 0)
+
+                    a_is_ai = role_a in self.agents
+                    b_is_ai = role_b in self.agents
+
+                    if not a_is_ai and not b_is_ai:
+                        continue  # Human-Human meeting — not our business
+
+                    if a_is_ai and b_is_ai:
+                        # AI-AI meeting — use ConversationRouter if both IDLE and not yet started
+                        if turn_count == 0:
+                            a_state = self.agent_states.get(role_a, IDLE)
+                            b_state = self.agent_states.get(role_b, IDLE)
+                            if a_state == IDLE and b_state == IDLE:
+                                logger.info("[meetings] Starting AI-AI meeting %s (%s ↔ %s)",
+                                            mid[:8], role_a, role_b)
+                                try:
+                                    from engine.agents.managed.conversations import ConversationRouter
+                                    router = ConversationRouter(
+                                        session_manager=self.session_manager,
+                                        sim_run_id=self.sim_run_id,
+                                        dispatcher=self,
+                                    )
+                                    ctx_a = self.agents[role_a]
+                                    ctx_b = self.agents[role_b]
+                                    # Run meeting in background (don't block monitor loop)
+                                    asyncio.create_task(
+                                        router.run_meeting(
+                                            meeting_id=mid,
+                                            agent_a=ctx_a,
+                                            agent_b=ctx_b,
+                                            agent_states=self.agent_states,
+                                            round_num=ctx_a.round_num,
+                                            max_turns=8,
+                                        )
+                                    )
+                                except Exception as e:
+                                    logger.error("[meetings] Failed to start AI-AI meeting %s: %s", mid[:8], e)
+                    else:
+                        # AI-Human meeting — check if human sent messages AI hasn't responded to
+                        ai_role = role_a if a_is_ai else role_b
+                        human_role = role_b if a_is_ai else role_a
+                        human_country = meeting["participant_b_country"] if a_is_ai else meeting["participant_a_country"]
+
+                        if self.agent_states.get(ai_role, IDLE) != IDLE:
+                            continue  # AI busy — wait
+
+                        # Check latest messages — has human spoken since AI's last message?
+                        msgs = db.table("meeting_messages") \
+                            .select("role_id,content") \
+                            .eq("meeting_id", mid) \
+                            .order("created_at", desc=True) \
+                            .limit(3).execute().data or []
+
+                        if not msgs:
+                            # No messages yet — prompt AI to open the conversation
+                            self.enqueue(
+                                role_id=ai_role,
+                                tier=2,
+                                event_type="chat_message",
+                                message=(
+                                    f"MEETING ACTIVE with {human_country.upper()}\n"
+                                    f"Meeting ID: {mid}\n"
+                                    f"Agenda: {meeting.get('agenda', 'Bilateral discussion')}\n\n"
+                                    f"You are in a bilateral meeting. Speak first — introduce yourself "
+                                    f"and state your agenda. 1-3 sentences, natural tone."
+                                ),
+                                metadata={"meeting_id": mid},
+                            )
+                        elif msgs[0]["role_id"] == human_role:
+                            # Human spoke last — prompt AI to respond
+                            human_text = msgs[0].get("content", "")[:300]
+                            self.enqueue(
+                                role_id=ai_role,
+                                tier=2,
+                                event_type="chat_message",
+                                message=(
+                                    f"MEETING with {human_country.upper()}\n"
+                                    f"Meeting ID: {mid}\n\n"
+                                    f"{human_country.upper()} says: \"{human_text}\"\n\n"
+                                    f"Respond naturally. 1-3 sentences."
+                                ),
+                                metadata={"meeting_id": mid, "responding_to": human_text[:100]},
+                            )
+
+                await asyncio.sleep(MEETING_CHECK_INTERVAL)
+
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error("[meetings] Monitor error: %s", e)
+                await asyncio.sleep(15)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.
