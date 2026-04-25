@@ -58,42 +58,40 @@ def load_global_grid_zones() -> dict[tuple[int, int], dict]:
         {id, global_row, global_col, owner, controlled_by, type,
          theater, is_chokepoint, die_hard}
 
+    PRIMARY SOURCE: GLOBAL_HEX_OWNERS from map_config.py (always available,
+    works on Railway where SEED files don't exist).
+    OPTIONAL: SEED JSON for chokepoints/die-hards metadata.
+
     Cached after first call.
     """
     global _GLOBAL_GRID_ZONES_CACHE
     if _GLOBAL_GRID_ZONES_CACHE is not None:
         return _GLOBAL_GRID_ZONES_CACHE
 
-    data = _load_seed_global_grid()
-    grid = data.get("grid") or []
-    chokepoints = data.get("chokepoints") or {}
-    die_hards_raw = data.get("dieHards") or {}
+    from engine.config.map_config import GLOBAL_HEX_OWNERS, GLOBAL_ROWS, GLOBAL_COLS
 
-    # Build chokepoint lookup keyed by (row, col)
+    # Optional: load chokepoints/die-hards from SEED JSON (may not exist on Railway)
     chokepoint_set: set[tuple[int, int]] = set()
-    for cp in chokepoints.values():
-        if isinstance(cp, dict) and "row" in cp and "col" in cp:
-            chokepoint_set.add((cp["row"], cp["col"]))
-
-    # Build die-hard lookup keyed by (row, col)
     die_hard_set: set[tuple[int, int]] = set()
-    if isinstance(die_hards_raw, dict):
-        for dh in die_hards_raw.values():
-            if isinstance(dh, dict) and "row" in dh and "col" in dh:
-                die_hard_set.add((dh["row"], dh["col"]))
-    elif isinstance(die_hards_raw, list):
-        for dh in die_hards_raw:
+    if os.path.exists(_SEED_GLOBAL_MAP):
+        data = _load_seed_global_grid()
+        for cp in (data.get("chokepoints") or {}).values():
+            if isinstance(cp, dict) and "row" in cp and "col" in cp:
+                chokepoint_set.add((cp["row"], cp["col"]))
+        die_hards_raw = data.get("dieHards") or {}
+        dh_list = die_hards_raw.values() if isinstance(die_hards_raw, dict) else die_hards_raw if isinstance(die_hards_raw, list) else []
+        for dh in dh_list:
             if isinstance(dh, dict) and "row" in dh and "col" in dh:
                 die_hard_set.add((dh["row"], dh["col"]))
 
+    # Build zones from GLOBAL_HEX_OWNERS (canonical, always available)
     out: dict[tuple[int, int], dict] = {}
-    for ri, row in enumerate(grid):
-        for ci, hex_data in enumerate(row):
-            r, c = ri + 1, ci + 1  # 1-indexed
-            owner = (hex_data or {}).get("owner")
+    for r in range(1, GLOBAL_ROWS + 1):
+        for c in range(1, GLOBAL_COLS + 1):
+            owner = GLOBAL_HEX_OWNERS.get((r, c), "sea")
             ztype = "sea" if owner == "sea" else "land"
             out[(r, c)] = {
-                "id": f"{owner or 'unknown'}_{r}_{c}",
+                "id": f"{owner}_{r}_{c}",
                 "global_row": r,
                 "global_col": c,
                 "owner": owner,
@@ -105,6 +103,7 @@ def load_global_grid_zones() -> dict[tuple[int, int], dict]:
             }
 
     _GLOBAL_GRID_ZONES_CACHE = out
+    logger.info("Loaded %d global grid zones (from GLOBAL_HEX_OWNERS)", len(out))
     return out
 
 
