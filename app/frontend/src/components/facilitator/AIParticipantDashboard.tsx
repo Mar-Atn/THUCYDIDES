@@ -17,7 +17,6 @@ import {
   shutdownAIAgents,
   freezeAgent,
   resumeAgent,
-  freezeAllAgents,
   resumeAllAgents,
   stopAllAgents,
   getAgentLog,
@@ -232,13 +231,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const getCountryCode = (agent: AIAgentStatus) => agent.country_code
 
   /* Freeze / Resume handlers */
-  const handleFreezeAll = async () => {
-    setActionLoading('freeze-all')
-    try { await freezeAllAgents(simId); await fetchStatus() }
-    catch (e) { alert(e instanceof Error ? e.message : 'Freeze all failed') }
-    finally { setActionLoading(null) }
-  }
-
   const handleResumeAll = async () => {
     setActionLoading('resume-all')
     try { await resumeAllAgents(simId); await fetchStatus() }
@@ -367,13 +359,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             )}
             {isActive && (
               <>
-                <button
-                  onClick={handleFreezeAll}
-                  disabled={actionLoading === 'freeze-all'}
-                  className="font-body text-caption font-medium bg-text-secondary/10 text-text-secondary px-3 py-1 rounded hover:bg-text-secondary/20 transition-colors disabled:opacity-40"
-                >
-                  {actionLoading === 'freeze-all' ? '...' : 'Freeze All'}
-                </button>
                 <button
                   onClick={handleResumeAll}
                   disabled={actionLoading === 'resume-all'}

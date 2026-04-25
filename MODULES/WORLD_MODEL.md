@@ -353,10 +353,9 @@ Moderator controls for AI-operated participants, accessible from the Facilitator
 
 | Control | Effect |
 |---------|--------|
-| **Freeze one agent** | Stops receiving events. Pending events discarded. Agent stays initialized but idle. |
-| **Freeze all AI** | Global pause for all AI agents. Human participants continue unaffected. |
+| **Freeze one agent** | Stops receiving events. Agent stays initialized but idle. |
 | **Resume one / Resume all** | Agent(s) return to IDLE state. Fresh events delivered from current world state. |
-| **Stop All AI** | Freezes all agents AND clears all pending event queues. Hard reset — agents start fresh on resume. |
+| **Stop All AI** | Freezes ALL agents AND clears all pending event queues. Hard reset — agents start fresh on resume. Human participants continue unaffected. |
 | **Initialize AI** | Creates managed agent sessions for all AI-operated roles. Required before agents can act. |
 | **Shutdown AI** | Terminates all agent sessions. Requires re-initialization to restart. |
 
