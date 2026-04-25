@@ -89,10 +89,10 @@
     try {
       // Core map data (always needed)
       const [g, ee, mq, cs] = await Promise.all([
-        fetchJson('/api/map/global'),
-        fetchJson('/api/map/theater/eastern_ereb'),
-        fetchJson('/api/map/theater/mashriq'),
-        fetchJson('/api/map/countries'),
+        fetchJson('/map/data/global.json'),
+        fetchJson('/map/data/eastern_ereb.json'),
+        fetchJson('/map/data/mashriq.json'),
+        fetchJson('/map/data/countries.json'),
       ]);
       state.global = g;
       state.theaters.eastern_ereb = ee;

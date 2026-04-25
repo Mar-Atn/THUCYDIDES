@@ -1,0 +1,122 @@
+{
+  "columbia": {
+    "id": "columbia",
+    "name": "Columbia",
+    "parallel": "United States",
+    "regime": "democracy"
+  },
+  "cathay": {
+    "id": "cathay",
+    "name": "Cathay",
+    "parallel": "China",
+    "regime": "autocracy"
+  },
+  "sarmatia": {
+    "id": "sarmatia",
+    "name": "Sarmatia",
+    "parallel": "Russia",
+    "regime": "autocracy"
+  },
+  "ruthenia": {
+    "id": "ruthenia",
+    "name": "Ruthenia",
+    "parallel": "Ukraine",
+    "regime": "democracy"
+  },
+  "persia": {
+    "id": "persia",
+    "name": "Persia",
+    "parallel": "Iran",
+    "regime": "hybrid"
+  },
+  "gallia": {
+    "id": "gallia",
+    "name": "Gallia",
+    "parallel": "France",
+    "regime": "democracy"
+  },
+  "teutonia": {
+    "id": "teutonia",
+    "name": "Teutonia",
+    "parallel": "Germany",
+    "regime": "democracy"
+  },
+  "freeland": {
+    "id": "freeland",
+    "name": "Freeland",
+    "parallel": "Poland",
+    "regime": "democracy"
+  },
+  "ponte": {
+    "id": "ponte",
+    "name": "Ponte",
+    "parallel": "Italy",
+    "regime": "democracy"
+  },
+  "albion": {
+    "id": "albion",
+    "name": "Albion",
+    "parallel": "United Kingdom",
+    "regime": "democracy"
+  },
+  "bharata": {
+    "id": "bharata",
+    "name": "Bharata",
+    "parallel": "India",
+    "regime": "democracy"
+  },
+  "levantia": {
+    "id": "levantia",
+    "name": "Levantia",
+    "parallel": "Israel",
+    "regime": "democracy"
+  },
+  "formosa": {
+    "id": "formosa",
+    "name": "Formosa",
+    "parallel": "Taiwan",
+    "regime": "democracy"
+  },
+  "phrygia": {
+    "id": "phrygia",
+    "name": "Phrygia",
+    "parallel": "Turkey",
+    "regime": "hybrid"
+  },
+  "yamato": {
+    "id": "yamato",
+    "name": "Yamato",
+    "parallel": "Japan",
+    "regime": "democracy"
+  },
+  "solaria": {
+    "id": "solaria",
+    "name": "Solaria",
+    "parallel": "Saudi Arabia",
+    "regime": "autocracy"
+  },
+  "choson": {
+    "id": "choson",
+    "name": "Choson",
+    "parallel": "North Korea",
+    "regime": "autocracy"
+  },
+  "hanguk": {
+    "id": "hanguk",
+    "name": "Hanguk",
+    "parallel": "South Korea",
+    "regime": "democracy"
+  },
+  "caribe": {
+    "id": "caribe",
+    "name": "Caribe",
+    "parallel": "Cuba + Venezuela",
+    "regime": "autocracy"
+  },
+  "mirage": {
+    "id": "mirage",
+    "name": "Mirage",
+    "parallel": "UAE",
+    "regime": "autocracy"
+  }
+}

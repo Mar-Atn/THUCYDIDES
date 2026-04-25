@@ -1,0 +1,539 @@
+{
+  "version": 2,
+  "rows": 10,
+  "cols": 10,
+  "countries": {
+    "sea": {
+      "name": "SEA",
+      "color": "#B5CCE0"
+    },
+    "columbia": {
+      "name": "Columbia",
+      "color": "#D4B896"
+    },
+    "cathay": {
+      "name": "Cathay",
+      "color": "#E8D5A3"
+    },
+    "sarmatia": {
+      "name": "Sarmatia",
+      "color": "#D4A5A5"
+    },
+    "ruthenia": {
+      "name": "Ruthenia",
+      "color": "#A5C8A5"
+    },
+    "gallia": {
+      "name": "Gallia",
+      "color": "#B5A5C8"
+    },
+    "teutonia": {
+      "name": "Teutonia",
+      "color": "#8FB59A"
+    },
+    "thule": {
+      "name": "Thule",
+      "color": "#7FA58A"
+    },
+    "freeland": {
+      "name": "Freeland",
+      "color": "#D4B58A"
+    },
+    "ponte": {
+      "name": "Ponte",
+      "color": "#D4A5B5"
+    },
+    "albion": {
+      "name": "Albion",
+      "color": "#8AA5B5"
+    },
+    "persia": {
+      "name": "Persia",
+      "color": "#C8A57A"
+    },
+    "levantia": {
+      "name": "Levantia",
+      "color": "#D4D4A5"
+    },
+    "solaria": {
+      "name": "Solaria",
+      "color": "#C8B896"
+    },
+    "mirage": {
+      "name": "Mirage",
+      "color": "#D4BFA5"
+    },
+    "bharata": {
+      "name": "Bharata",
+      "color": "#D4B5A5"
+    },
+    "phrygia": {
+      "name": "Phrygia",
+      "color": "#B5A08A"
+    },
+    "yamato": {
+      "name": "Yamato",
+      "color": "#A5B5C8"
+    },
+    "formosa": {
+      "name": "Formosa",
+      "color": "#8AC8B5"
+    },
+    "hanguk": {
+      "name": "Hanguk",
+      "color": "#A5C8D4"
+    },
+    "choson": {
+      "name": "Choson",
+      "color": "#8A8A8A"
+    },
+    "caribe": {
+      "name": "Caribe",
+      "color": "#A5C8A0"
+    },
+    "sogdiana": {
+      "name": "Sogdiana",
+      "color": "#C8C8A5"
+    },
+    "horn": {
+      "name": "Horn",
+      "color": "#B5A896"
+    }
+  },
+  "grid": [
+    [
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      }
+    ],
+    [
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,3"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "occupied_by": null,
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sarmatia",
+        "global_link": "12,4"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "ruthenia",
+        "occupied_by": "sarmatia",
+        "global_link": "12,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "ruthenia",
+        "global_link": "11,4"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ]
+  ],
+  "chokepoints": {},
+  "dieHards": {
+    "die_hard_1": {
+      "row": 5,
+      "col": 5,
+      "name": "Die Hard"
+    }
+  },
+  "dieHardDefs": [
+    {
+      "key": "die_hard_1",
+      "name": "Die Hard"
+    },
+    {
+      "key": "die_hard_2_1774633434953",
+      "name": "Die Hard 2"
+    }
+  ],
+  "_coordinate_convention": "IMPORTANT: This JSON uses 0-indexed arrays. All human-facing documents use 1-indexed coordinates. Conversion: display_row = array_row + 1, display_col = array_col + 1. Theater size: 10 rows (display 1-10) x 10 cols (display 1-10)."
+}

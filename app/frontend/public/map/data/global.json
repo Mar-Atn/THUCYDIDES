@@ -1,0 +1,750 @@
+{
+  "version": 2,
+  "rows": 10,
+  "cols": 20,
+  "countries": {
+    "sea": {
+      "name": "SEA",
+      "color": "#B5CCE0"
+    },
+    "columbia": {
+      "name": "Columbia",
+      "color": "#9AB5D0"
+    },
+    "cathay": {
+      "name": "Cathay",
+      "color": "#E8D5A3"
+    },
+    "sarmatia": {
+      "name": "Sarmatia",
+      "color": "#D4A5A5"
+    },
+    "ruthenia": {
+      "name": "Ruthenia",
+      "color": "#A5C8A5"
+    },
+    "gallia": {
+      "name": "Gallia",
+      "color": "#A5B8D4"
+    },
+    "teutonia": {
+      "name": "Teutonia",
+      "color": "#8AB5AA"
+    },
+    "thule": {
+      "name": "Thule",
+      "color": "#8AB5AA"
+    },
+    "freeland": {
+      "name": "Freeland",
+      "color": "#A0B8C8"
+    },
+    "ponte": {
+      "name": "Ponte",
+      "color": "#A5C8B8"
+    },
+    "albion": {
+      "name": "Albion",
+      "color": "#8AA5B5"
+    },
+    "persia": {
+      "name": "Persia",
+      "color": "#C8A57A"
+    },
+    "levantia": {
+      "name": "Levantia",
+      "color": "#D4D4A5"
+    },
+    "solaria": {
+      "name": "Solaria",
+      "color": "#C8B896"
+    },
+    "mirage": {
+      "name": "Mirage",
+      "color": "#D4BFA5"
+    },
+    "bharata": {
+      "name": "Bharata",
+      "color": "#D4B5A5"
+    },
+    "phrygia": {
+      "name": "Phrygia",
+      "color": "#B5A08A"
+    },
+    "yamato": {
+      "name": "Yamato",
+      "color": "#A5B5C8"
+    },
+    "formosa": {
+      "name": "Formosa",
+      "color": "#DCC5A0"
+    },
+    "hanguk": {
+      "name": "Hanguk",
+      "color": "#A5C8D4"
+    },
+    "choson": {
+      "name": "Choson",
+      "color": "#8A8A8A"
+    },
+    "caribe": {
+      "name": "Caribe",
+      "color": "#A5C8A0"
+    },
+    "sogdiana": {
+      "name": "Sogdiana",
+      "color": "#C8C8A5"
+    },
+    "horn": {
+      "name": "Horn",
+      "color": "#B5A896"
+    }
+  },
+  "grid": [
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "freeland"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "thule"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "albion"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "freeland"
+      },
+      {
+        "owner": "ruthenia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "choson"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "albion"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "teutonia"
+      },
+      {
+        "owner": "teutonia"
+      },
+      {
+        "owner": "ruthenia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sarmatia"
+      },
+      {
+        "owner": "hanguk"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "yamato"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "gallia"
+      },
+      {
+        "owner": "gallia"
+      },
+      {
+        "owner": "phrygia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sogdiana"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "yamato"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "ponte"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "levantia"
+      },
+      {
+        "owner": "phrygia"
+      },
+      {
+        "owner": "persia"
+      },
+      {
+        "owner": "sogdiana"
+      },
+      {
+        "owner": "sogdiana"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "columbia"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "ponte"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "solaria"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "persia"
+      },
+      {
+        "owner": "bharata"
+      },
+      {
+        "owner": "bharata"
+      },
+      {
+        "owner": "cathay"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "formosa"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "solaria"
+      },
+      {
+        "owner": "mirage"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "persia"
+      },
+      {
+        "owner": "bharata"
+      },
+      {
+        "owner": "bharata"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "caribe"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "horn"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "bharata"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ],
+    [
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      },
+      {
+        "owner": "sea"
+      }
+    ]
+  ],
+  "chokepoints": {
+    "formosa_strait": {
+      "row": 6,
+      "col": 16,
+      "name": "Formosa Strait"
+    },
+    "gulf_gate": {
+      "row": 7,
+      "col": 11,
+      "name": "Gulf Gate"
+    },
+    "caribe_passage": {
+      "row": 7,
+      "col": 3,
+      "name": "Caribe Passage"
+    }
+  },
+  "dieHards": {},
+  "dieHardDefs": [
+    {
+      "key": "die_hard_1",
+      "name": "Die Hard"
+    }
+  ],
+  "_coordinate_convention": "IMPORTANT: This JSON uses 0-indexed arrays. All human-facing documents use 1-indexed coordinates. Conversion: display_row = array_row + 1, display_col = array_col + 1. Grid size: 10 rows (display 1-10) x 20 cols (display 1-20)."
+}
