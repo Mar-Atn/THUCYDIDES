@@ -1071,14 +1071,35 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
     client = get_client()
 
     # STEP 0: Solicit AI batch decisions BEFORE collecting
+    # Auto-reconnect dispatcher if it was lost (Railway deploy restarts process)
+    from engine.agents.managed.event_dispatcher import get_dispatcher, create_dispatcher, remove_dispatcher
     dispatcher = get_dispatcher(sim_id)
+
+    if not dispatcher or not dispatcher.agents:
+        # Check if AI sessions exist in DB — reconnect if so
+        ai_sessions = client.table("ai_agent_sessions").select("role_id,session_id,country_code") \
+            .eq("sim_run_id", sim_id).in_("status", ["active", "ready"]).execute().data or []
+        if ai_sessions:
+            logger.warning("Phase B: Dispatcher lost but %d AI sessions in DB — reconnecting", len(ai_sessions))
+            if dispatcher:
+                remove_dispatcher(sim_id)
+            dispatcher = create_dispatcher(sim_id)
+            # Re-initialize agents from existing DB sessions (session still alive on Anthropic)
+            result = await dispatcher.initialize_all_agents()
+            await dispatcher.start()
+            logger.info("Phase B: Dispatcher reconnected with %d agents", result.get("agents_initialized", 0))
+
     if dispatcher and dispatcher.agents:
         logger.info("Phase B: soliciting AI batch decisions for R%d (%d agents)", round_num, len(dispatcher.agents))
         batch_result = await dispatcher.solicit_batch_decisions(round_num, timeout_seconds=120)
         logger.info("Phase B: AI batch decisions complete — %s", batch_result)
     else:
-        logger.warning("Phase B: NO dispatcher or NO agents — skipping AI solicitation (dispatcher=%s, agents=%d)",
-                        "exists" if dispatcher else "None", len(dispatcher.agents) if dispatcher else 0)
+        ai_roles = client.table("roles").select("id") \
+            .eq("sim_run_id", sim_id).eq("is_ai_operated", True).eq("status", "active").execute().data or []
+        if ai_roles:
+            logger.warning("Phase B: %d AI roles but no dispatcher — skipping solicitation", len(ai_roles))
+        else:
+            logger.info("Phase B: No AI roles — proceeding immediately")
 
     # 1. Collect batch decisions (set_budget, set_tariffs, set_sanctions, set_opec)
     batch_rows = client.table("agent_decisions") \
@@ -1164,12 +1185,14 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
         logger.warning("Transaction cleanup failed: %s", e)
 
     # STEP 5: Solicit AI troop movements AFTER engine processing
+    # Re-check dispatcher (may have been reconnected in step 0)
+    dispatcher = get_dispatcher(sim_id)
     if dispatcher and dispatcher.agents:
         logger.info("Phase B: soliciting AI troop movements for R%d (%d agents)", round_num, len(dispatcher.agents))
         move_result = await dispatcher.solicit_troop_movements(round_num, timeout_seconds=120)
         logger.info("Phase B: AI troop movements complete — %s", move_result)
     else:
-        logger.warning("Phase B: NO dispatcher for troop movements — skipping")
+        logger.warning("Phase B: No dispatcher for troop movements — skipping")
 
     logger.info("Phase B complete for sim %s R%d: %s", sim_id, round_num, summary_lines[0])
 
