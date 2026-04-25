@@ -57,6 +57,14 @@ export function Register() {
       setError(signUpError.message)
       setLoading(false)
     } else {
+      // Verify we have an active session (confirmation may be required)
+      const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession()
+      if (!session) {
+        // No session — likely needs email confirmation or auto-sign-in failed
+        // Try signing in directly with the credentials we just used
+        const { supabase } = await import('@/lib/supabase')
+        await supabase.auth.signInWithPassword({ email, password })
+      }
       setSuccess(true)
       setTimeout(() => {
         navigate('/dashboard')
