@@ -35,7 +35,7 @@ The `sim_scenarios` table from DET_F is **retired**. All customization that was 
 - Template data lives in the **default SimRun** (`00000000-0000-0000-0000-000000000001`), which serves as the canonical source for all game data.
 - When moderator clicks "Create SimRun", the frontend wizard calls `POST /api/sim/create` which:
   1. Creates the `sim_runs` row with wizard settings (name, schedule, key_events, max_rounds)
-  2. Server-side copies **all 11 game tables** from the source sim, re-keying `sim_run_id` (see `engine/services/sim_create.py`)
+  2. Server-side copies **all 12 game tables** from the source sim, re-keying `sim_run_id` (see `engine/services/sim_create.py`)
   3. Applies wizard customizations: role active/inactive status, human/AI flags
   4. Tables copied: countries (20), roles (40), role_actions (713), relationships (380), zones (57), deployments (146), organizations (7), org_memberships (50), sanctions (43), tariffs (14), world_state (1)
 - The moderator can then further customize the SimRun via the edit wizard. These changes affect ONLY this run.

@@ -14,7 +14,7 @@ M6 is what 25-30 human participants see and interact with during the simulation.
 - Their source of asymmetric information (artefacts)
 - Their connection to the Navigator AI assistant
 
-**M6 is also the full action pipeline integration.** Every one of the 32 action types gets properly wired to contract spec, with validators, submission UI, and outcome display. When M6 is done, every action works correctly — not just routed, but validated and resolved per CONTRACT.
+**M6 is also the full action pipeline integration.** Every one of the 33 action types gets properly wired to contract spec, with validators, submission UI, and outcome display. When M6 is done, every action works correctly — not just routed, but validated and resolved per CONTRACT.
 
 ---
 
@@ -388,7 +388,7 @@ Every action wired to contract spec. See `MODULES/ACTION_CONTRACT_AUDIT.md` for 
 | Card-based sections | White cards with colored borders | Adapt to TTT dark theme |
 | Role header with color | Clan color border | Country color border |
 | Sticky sidebar (Navigator) | Oracle card + objectives | Navigator chat + role info |
-| Decision forms | KingDecisionForm.tsx | Adapt for 32 action types |
+| Decision forms | KingDecisionForm.tsx | Adapt for 33 action types |
 | Voting modal | Ballot.tsx + VotingControls | Reuse for elections + leadership votes |
 | Real-time updates | Supabase subscriptions | Same pattern |
 | Status badges | Complete/In Progress/Not Started | Reuse |
