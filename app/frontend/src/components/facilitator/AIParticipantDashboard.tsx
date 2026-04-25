@@ -131,7 +131,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
   const [roles, setRoles] = useState<SimRunRole[]>([])
   const [collapsed, setCollapsed] = useState(false)
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [initializing, setInitializing] = useState(false)
   const [initDismissed, setInitDismissed] = useState(false)
@@ -142,7 +142,13 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Fetch roles — poll every 5s so AI/human toggles in participant management show up */
   useEffect(() => {
-    const fetchRoles = () => getSimRunRoles(simId).then(setRoles).catch(() => {})
+    const fetchRoles = () => {
+      const t = performance.now()
+      return getSimRunRoles(simId).then((r) => {
+        console.log(`[AI Dashboard] getSimRunRoles: ${(performance.now() - t).toFixed(0)}ms, ${r.length} roles`)
+        setRoles(r)
+      }).catch(() => {})
+    }
     fetchRoles()
     const interval = setInterval(fetchRoles, 5000)
     return () => clearInterval(interval)
@@ -150,6 +156,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Fetch DB sessions + latest activity — all queries in PARALLEL */
   const fetchDbData = useCallback(async () => {
+    const t0 = performance.now()
     const [sessionsRes, logsRes, meetingsRes] = await Promise.allSettled([
       supabase
         .from('ai_agent_sessions')
@@ -203,7 +210,8 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
       setActiveMeetings(counts)
     }
 
-    setLoading(false)  // Always clear loading after parallel queries complete
+    setLoading(false)
+    console.log(`[AI Dashboard] fetchDbData completed in ${(performance.now() - t0).toFixed(0)}ms`)
   }, [simId])
 
   /* Realtime subscriptions for agent sessions + activity + fallback poll */
@@ -240,13 +248,14 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
 
   /* Poll AI orchestrator status (backend API — may be slow on cold start) */
   const fetchStatus = useCallback(async () => {
+    const t = performance.now()
     try {
       const data = await getAIStatus(simId)
       setStatus(data)
+      console.log(`[AI Dashboard] getAIStatus: ${(performance.now() - t).toFixed(0)}ms`)
     } catch {
-      // Orchestrator may not be active — that's fine
+      console.log(`[AI Dashboard] getAIStatus failed: ${(performance.now() - t).toFixed(0)}ms`)
     }
-    // Don't gate loading on this — DB data arrives faster via fetchDbData
   }, [simId])
 
   useEffect(() => {

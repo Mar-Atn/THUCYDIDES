@@ -1180,16 +1180,27 @@ export interface AgentMemory {
   created_at: string
 }
 
-/** Fetch AI status from the orchestrator. Returns null if no orchestrator active. */
+/** Fetch AI status from the orchestrator. Returns null if no orchestrator active.
+ *  Uses 5s timeout — backend may be unreachable (cold start, not running locally). */
 export async function getAIStatus(simId: string): Promise<AIStatusResponse | null> {
   const token = await getToken()
-  const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/status`, {
-    headers: token ? { 'Authorization': `Bearer ${token}` } : {},
-  })
-  if (resp.status === 404) return null
-  if (!resp.ok) throw new Error('Failed to get AI status')
-  const json = await resp.json()
-  return json.data as AIStatusResponse
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), 5000)
+  try {
+    const resp = await fetch(`${API_BASE}/api/sim/${simId}/ai/status`, {
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      signal: controller.signal,
+    })
+    if (resp.status === 404) return null
+    if (!resp.ok) throw new Error('Failed to get AI status')
+    const json = await resp.json()
+    return json.data as AIStatusResponse
+  } catch (e) {
+    if (e instanceof DOMException && e.name === 'AbortError') return null
+    throw e
+  } finally {
+    clearTimeout(timer)
+  }
 }
 
 /** Initialize AI agents for a sim run. */
