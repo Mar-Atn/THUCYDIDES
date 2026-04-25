@@ -1065,21 +1065,35 @@ class EventDispatcher:
             )
             agents_asked += 1
 
-        # Wait for all agents to process (check every 5s)
+        # Phase 1: Wait for agents to START processing (leave IDLE → ACTING)
+        # The enqueue writes to DB; the dispatch loop delivers on next cycle.
+        # We must yield control so the dispatch loop can run.
         start = asyncio.get_event_loop().time()
+        agents_started = False
+        while asyncio.get_event_loop().time() - start < 30:  # 30s max to start
+            await asyncio.sleep(3)  # Let dispatch loop deliver events
+            busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
+            if busy > 0:
+                agents_started = True
+                logger.info("[dispatcher] Batch solicitation: %d agents now processing", busy)
+                break
+
+        if not agents_started:
+            logger.warning("[dispatcher] Batch solicitation: no agents started processing within 30s")
+
+        # Phase 2: Wait for all agents to FINISH (return to IDLE)
         agents_responded = 0
         while asyncio.get_event_loop().time() - start < timeout_seconds:
-            # Check if all agents are back to IDLE
             busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
-            if busy == 0:
+            if busy == 0 and agents_started:
                 agents_responded = agents_asked
                 break
             await asyncio.sleep(5)
 
         timed_out = agents_responded < agents_asked
         logger.info(
-            "[dispatcher] Batch decisions: asked=%d, responded=%d, timed_out=%s",
-            agents_asked, agents_responded, timed_out,
+            "[dispatcher] Batch decisions: asked=%d, responded=%d, timed_out=%s, started=%s",
+            agents_asked, agents_responded, timed_out, agents_started,
         )
         return {"agents_asked": agents_asked, "agents_responded": agents_responded, "timed_out": timed_out}
 
@@ -1111,12 +1125,21 @@ class EventDispatcher:
             )
             agents_asked += 1
 
-        # Wait for all agents to process
+        # Phase 1: Wait for agents to START processing
         start = asyncio.get_event_loop().time()
+        agents_started = False
+        while asyncio.get_event_loop().time() - start < 30:
+            await asyncio.sleep(3)
+            busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
+            if busy > 0:
+                agents_started = True
+                break
+
+        # Phase 2: Wait for all agents to FINISH
         agents_responded = 0
         while asyncio.get_event_loop().time() - start < timeout_seconds:
             busy = sum(1 for rid in self.agents if self.agent_states.get(rid) not in (IDLE, FROZEN))
-            if busy == 0:
+            if busy == 0 and agents_started:
                 agents_responded = agents_asked
                 break
             await asyncio.sleep(5)
