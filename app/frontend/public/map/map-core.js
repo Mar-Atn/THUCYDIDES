@@ -2243,7 +2243,8 @@
       view: state.view,
       units: units.map(u => ({
         unit_id: u.unit_id,
-        country_id: u.country_id,
+        country_id: u.country_id || u.country_code,
+        country_code: u.country_code || u.country_id,
         unit_type: u.unit_type,
         status: u.status || 'active',
       })),

@@ -285,11 +285,13 @@ class EventDispatcher:
                 round_num = sim.get("current_round", 0)
                 phase_duration = sim.get("phase_duration_seconds") or 3600  # default 60 min
 
-                # Reset pulse count on phase change
+                # Reset pulse count on phase change + sync round_num on agents
                 current_phase_key = f"{round_num}-{phase}"
                 if current_phase_key != last_phase:
                     pulse_count = 0
                     last_phase = current_phase_key
+                    # Keep agent round_num in sync with sim
+                    self.sync_round_num(round_num)
 
                 # Only auto-pulse during active Phase A
                 if status != "active" or phase != "A":
@@ -1014,6 +1016,16 @@ class EventDispatcher:
 
     # -- Phase B Solicitation ------------------------------------------------
 
+    def sync_round_num(self, round_num: int) -> None:
+        """Update round_num on all agent sessions + their ToolExecutors.
+
+        Must be called whenever the sim advances rounds (start, advance_round).
+        Without this, agents submit actions with stale round_num.
+        """
+        for role_id, ctx in self.agents.items():
+            self.session_manager.update_round(ctx, round_num)
+        logger.info("[dispatcher] Synced round_num=%d for %d agents", round_num, len(self.agents))
+
     async def solicit_batch_decisions(self, round_num: int, timeout_seconds: int = 120) -> dict:
         """Ask all AI agents to submit batch decisions (budget, tariffs, sanctions, OPEC).
 
@@ -1027,6 +1039,8 @@ class EventDispatcher:
         Returns:
             Summary: {agents_asked, agents_responded, timed_out}.
         """
+        # Sync round_num on all agents before soliciting
+        self.sync_round_num(round_num)
         logger.info("[dispatcher] Soliciting batch decisions for round %d (timeout=%ds)", round_num, timeout_seconds)
 
         agents_asked = 0
@@ -1075,6 +1089,7 @@ class EventDispatcher:
         Called AFTER engine processing, before Phase B completes.
         Sends one event per agent and waits for all responses or timeout.
         """
+        self.sync_round_num(round_num)
         logger.info("[dispatcher] Soliciting troop movements for round %d (timeout=%ds)", round_num, timeout_seconds)
 
         agents_asked = 0

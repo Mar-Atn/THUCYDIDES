@@ -71,11 +71,10 @@ interface AgentDecision {
   sim_run_id: string
   round_num: number
   action_type: string
-  role_id: string
   country_code: string
-  target_info: string
-  payload: Record<string, unknown>
-  status: string
+  action_payload: Record<string, unknown> | null
+  validation_status: string
+  validation_notes: string | null
   rationale: string | null
   created_at: string
 }
@@ -683,10 +682,37 @@ export function AgentDetailPage() {
               {decisions.map((dec) => {
                 const isExpanded = expandedDecisions.has(dec.id)
                 const statusColor =
-                  dec.status === 'approved' ? 'text-success' :
-                  dec.status === 'rejected' ? 'text-danger' :
-                  dec.status === 'pending' ? 'text-warning' :
+                  dec.validation_status === 'executed' ? 'text-success' :
+                  dec.validation_status === 'dispatch_failed' ? 'text-danger' :
+                  dec.validation_status === 'valid' ? 'text-action' :
+                  dec.validation_status === 'rejected' ? 'text-danger' :
                   'text-text-secondary'
+
+                // Build human-readable summary of the decision
+                const p = dec.action_payload || {}
+                let summary = ''
+                if (dec.action_type === 'set_budget')
+                  summary = `social=${p.social_pct}× mil=${p.military_coins} tech=${p.tech_coins}`
+                else if (dec.action_type === 'set_tariffs')
+                  summary = `→ ${p.target_country} level ${p.level}`
+                else if (dec.action_type === 'set_sanctions')
+                  summary = `→ ${p.target_country} level ${p.level}`
+                else if (dec.action_type === 'set_opec')
+                  summary = `production: ${p.production}`
+                else if (dec.action_type === 'public_statement')
+                  summary = String(p.content || '').slice(0, 60)
+                else if (dec.action_type === 'propose_transaction')
+                  summary = `→ ${p.counterpart_country}`
+                else if (dec.action_type === 'propose_agreement')
+                  summary = `${p.agreement_type} → ${p.counterpart_country}`
+                else if (dec.action_type === 'covert_operation')
+                  summary = `${p.op_type} → ${p.target_country}`
+                else if (['ground_attack','air_strike','naval_combat','naval_bombardment'].includes(dec.action_type))
+                  summary = `target (${p.target_global_row},${p.target_global_col})`
+                else if (dec.action_type === 'move_units')
+                  summary = p.decision === 'no_change' ? 'no changes' : `${((p.changes as Record<string,unknown>)?.moves as unknown[] || []).length} moves`
+                else
+                  summary = dec.validation_notes || ''
 
                 return (
                   <div
@@ -701,11 +727,11 @@ export function AgentDetailPage() {
                       <span className="font-data text-caption text-action font-medium flex-shrink-0">
                         {dec.action_type}
                       </span>
-                      <span className="font-body text-caption text-text-primary truncate">
-                        {dec.target_info}
+                      <span className="font-body text-caption text-text-primary truncate flex-1">
+                        {summary}
                       </span>
                       <span className={`font-data text-caption flex-shrink-0 ${statusColor}`}>
-                        {dec.status}
+                        {dec.validation_status}
                       </span>
                       <span className="font-data text-caption text-text-secondary flex-shrink-0 ml-auto">
                         R{dec.round_num}
@@ -721,8 +747,16 @@ export function AgentDetailPage() {
                             </p>
                           </div>
                         )}
+                        {dec.validation_notes && (
+                          <div>
+                            <span className="font-data text-caption text-text-secondary">Result:</span>
+                            <p className="font-body text-caption text-text-primary mt-0.5">
+                              {dec.validation_notes}
+                            </p>
+                          </div>
+                        )}
                         <pre className="font-data text-caption text-text-secondary whitespace-pre-wrap bg-base border border-border rounded p-2 max-h-48 overflow-y-auto">
-                          {JSON.stringify(dec.payload, null, 2)}
+                          {JSON.stringify(dec.action_payload, null, 2)}
                         </pre>
                       </div>
                     )}
