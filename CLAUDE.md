@@ -162,9 +162,42 @@ Before any feature is reported as DONE:
 | **Contract tests** | Code matches World Model — action names, fields, protocols | Every commit |
 | **Layer 1** | Formula unit tests | Every commit (<30 sec) |
 | **Layer 2** | Module integration | Every deployment (<5 min) |
-| **Layer 3** | AI simulation (full SIM) | Sprint milestones (2-40 min) |
+| **Layer 3** | AI agent capability tests | Per sprint (see below) |
+| **Layer 4** | Full AI simulation (multi-agent lifecycle) | Major milestones |
 
 TESTER is independent. Never modifies source. Details in `/app/tests/CLAUDE.md`.
+
+### AI Agent Testing Process (Layer 3-4)
+
+Three-level testing with iterative improvement loops. Each level must pass before advancing.
+
+**Level 1 — Tool Validation (automated):**
+For each canonical action type, submit a valid payload through tool_executor and verify success or correct error. No managed agent needed — direct Python. Catches: schema mismatches, wrong field names, missing handlers.
+
+**Level 2 — Single Agent Round (semi-automated):**
+One AI agent plays one full round lifecycle: R0 exploration → Phase A actions → Phase B solicitation → round transition. Verify: actions execute in DB, no system errors, agent reasoning is coherent.
+
+**Level 3 — Multi-Agent Simulation (full integration):**
+3-5 AI agents play 2+ rounds. Tests: AI-AI meetings, transactions, attacks, reactions, round transitions, assertiveness behavior. The graduation test.
+
+**Iterative Improvement Loop:**
+```
+1. RUN test level → collect results
+2. ASSESS: which actions succeeded? which failed? why?
+3. CLASSIFY: (A) code bug → fix code (B) prompt issue → fix prompt
+   (C) schema mismatch → fix schema (D) needs Marat input → escalate
+4. FIX: apply fixes, document what changed
+5. RE-RUN same test level → verify fix
+6. ADVANCE to next level only when current level passes clean
+```
+
+**Team roles in testing:**
+- **DESIGNER**: creates test scenarios (what to test, expected behavior)
+- **EXECUTOR**: runs tests, collects raw results
+- **ASSESSOR**: evaluates results, classifies failures, decides fixes
+- **BUILDER**: implements fixes when needed
+
+The ASSESSOR decides when a level is PASSED — not the builder who wrote the code. 95% of issues should be fixable without Marat input. Escalate only design questions.
 
 ---
 
