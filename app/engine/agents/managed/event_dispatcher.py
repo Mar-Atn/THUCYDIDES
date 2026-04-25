@@ -58,8 +58,12 @@ class EventDispatcher:
         self.session_manager = ManagedSessionManager(api_key=api_key)
         self.agents: dict[str, SessionContext] = {}  # role_id -> session
         self.agent_states: dict[str, str] = {}  # role_id -> state
+        self._state_since: dict[str, float] = {}  # role_id -> timestamp of last state change
         self._running = False
         self._tasks: list[asyncio.Task] = []
+
+    # Max time an agent can stay in ACTING before forced back to IDLE (seconds)
+    ACTING_TIMEOUT = 180  # 3 minutes
 
     # -- Queue Operations --------------------------------------------------
 
@@ -179,6 +183,7 @@ class EventDispatcher:
         """Update agent state (IDLE, ACTING, IN_MEETING, FROZEN)."""
         old = self.agent_states.get(role_id)
         self.agent_states[role_id] = state
+        self._state_since[role_id] = asyncio.get_event_loop().time()
         if old != state:
             logger.info("[dispatcher] Agent %s: %s -> %s", role_id, old, state)
 
@@ -227,6 +232,19 @@ class EventDispatcher:
                 if now - last_tier3_check >= TIER_3_INTERVAL:
                     await self._check_and_deliver(max_tier=3)
                     last_tier3_check = now
+
+                # Detect stuck agents (ACTING/IN_MEETING too long → force IDLE)
+                now_ts = asyncio.get_event_loop().time()
+                for role_id in list(self.agents.keys()):
+                    state = self.agent_states.get(role_id, IDLE)
+                    if state in (ACTING, IN_MEETING):
+                        since = self._state_since.get(role_id, now_ts)
+                        if now_ts - since > self.ACTING_TIMEOUT:
+                            logger.warning(
+                                "[dispatcher] Agent %s stuck in %s for %ds — forcing IDLE",
+                                role_id, state, int(now_ts - since),
+                            )
+                            self.set_agent_state(role_id, IDLE)
 
                 await asyncio.sleep(1)  # Base check interval
 
