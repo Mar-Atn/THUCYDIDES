@@ -1,6 +1,6 @@
 # M5 AI Participant — Readiness Dashboard
 
-**Last updated:** 2026-04-25 (Sprint 4 complete)
+**Last updated:** 2026-04-25 (Sprint 5 complete)
 **Goal:** Mixed human+AI simulation where AI participants use ALL available actions, communicate with humans and each other, and the system orchestrates everything reliably.
 
 **Legend:** ✅ Proven working | 🔶 Partially tested / works with caveats | 🔴 Not tested / known gap | ➖ Not applicable
@@ -89,7 +89,7 @@ Every action must work through: Schema validation → Dispatch → Engine → DB
 | **Phase A immediate actions** | ✅ 9 types used | ✅ | ✅ | ✅ | ✅ |
 | **Phase B batch decisions** | ✅ 5 AI + 2 human | ✅ | ✅ | ✅ | ✅ |
 | **Phase B with 5+ agents** | ✅ 5 AI + 2 human | ✅ | ✅ | ✅ | ✅ |
-| **Move units (inter-round)** | 🔴 | ✅ | ✅ | ✅ | 🔴 |
+| **Move units (inter-round)** | ✅ move + reserve withdrawal | ✅ | ✅ | ✅ | ✅ |
 | **Round transition (A→B→R2)** | ✅ lifecycle test | ✅ | ✅ | ✅ | ✅ |
 | **Multi-round (2+ rounds)** | ✅ 2-round lifecycle proven | ✅ | ✅ | ✅ | ✅ |
 | **AI-AI meeting** | ✅ 8-turn negotiation proven | ✅ infra | ✅ | ➖ | ✅ |
@@ -102,9 +102,9 @@ Every action must work through: Schema validation → Dispatch → Engine → DB
 | **Agent memory (write/read)** | ✅ | ➖ | ➖ | ➖ | ✅ |
 | **Agent observation tools** | ✅ 6 tools verified | ✅ | ✅ | ✅ | ✅ |
 | **Nuclear chain (full)** | 🔴 no capable test data | ✅ | ✅ | ✅ | 🔴 |
-| **Assertiveness dial** | 🔴 not tested | ✅ config | ➖ | ➖ | 🔴 |
+| **Assertiveness dial** | ✅ behavioral diff confirmed | 🔶 sim_config constraint | ➖ | ➖ | ✅ |
 | **Theater map awareness** | ✅ agent probed 18 hexes (global+theater) | ✅ | ➖ | ✅ | ✅ |
-| **Reserve deployment** | 🔴 | ✅ | ✅ | ✅ | 🔴 |
+| **Reserve deployment** | ✅ withdraw to reserve tested | ✅ | ✅ | ✅ | ✅ |
 | **Freeze/resume agent** | 🔴 not tested | ✅ | ➖ | ✅ | 🔴 |
 
 ---

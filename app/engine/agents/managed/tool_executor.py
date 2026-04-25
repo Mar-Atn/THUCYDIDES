@@ -279,6 +279,11 @@ class ToolExecutor:
             # Nuclear authorize: authorize → confirm
             if action_type == "nuclear_authorize" and "authorize" in dispatch_payload and "confirm" not in dispatch_payload:
                 dispatch_payload["confirm"] = dispatch_payload["authorize"]
+            # move_units: extract moves from changes.moves to top-level
+            if action_type == "move_units" and "moves" not in dispatch_payload:
+                changes = dispatch_payload.get("changes") or {}
+                if isinstance(changes, dict) and "moves" in changes:
+                    dispatch_payload["moves"] = changes["moves"]
 
             result = dispatch_action(
                 sim_run_id=self.sim_run_id,

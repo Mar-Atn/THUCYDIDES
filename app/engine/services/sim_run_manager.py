@@ -307,6 +307,8 @@ def restart_simulation(sim_id: str) -> dict:
         "power_assignments",
         # Runtime basing rights
         "basing_rights",
+        # Meeting system
+        "meeting_invitations",
     ]
     for table in RUNTIME_TABLES:
         try:
