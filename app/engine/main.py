@@ -1073,9 +1073,12 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
     # STEP 0: Solicit AI batch decisions BEFORE collecting
     dispatcher = get_dispatcher(sim_id)
     if dispatcher and dispatcher.agents:
-        logger.info("Phase B: soliciting AI batch decisions for R%d", round_num)
+        logger.info("Phase B: soliciting AI batch decisions for R%d (%d agents)", round_num, len(dispatcher.agents))
         batch_result = await dispatcher.solicit_batch_decisions(round_num, timeout_seconds=120)
-        logger.info("Phase B: AI batch decisions — %s", batch_result)
+        logger.info("Phase B: AI batch decisions complete — %s", batch_result)
+    else:
+        logger.warning("Phase B: NO dispatcher or NO agents — skipping AI solicitation (dispatcher=%s, agents=%d)",
+                        "exists" if dispatcher else "None", len(dispatcher.agents) if dispatcher else 0)
 
     # 1. Collect batch decisions (set_budget, set_tariffs, set_sanctions, set_opec)
     batch_rows = client.table("agent_decisions") \
@@ -1162,9 +1165,11 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
 
     # STEP 5: Solicit AI troop movements AFTER engine processing
     if dispatcher and dispatcher.agents:
-        logger.info("Phase B: soliciting AI troop movements for R%d", round_num)
+        logger.info("Phase B: soliciting AI troop movements for R%d (%d agents)", round_num, len(dispatcher.agents))
         move_result = await dispatcher.solicit_troop_movements(round_num, timeout_seconds=120)
-        logger.info("Phase B: AI troop movements — %s", move_result)
+        logger.info("Phase B: AI troop movements complete — %s", move_result)
+    else:
+        logger.warning("Phase B: NO dispatcher for troop movements — skipping")
 
     logger.info("Phase B complete for sim %s R%d: %s", sim_id, round_num, summary_lines[0])
 
