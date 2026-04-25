@@ -1,6 +1,6 @@
 # M5 AI Participant — Readiness Dashboard
 
-**Last updated:** 2026-04-25 (Sprint 6 complete)
+**Last updated:** 2026-04-25 (Sprint 6 complete — ALL 20/20 ✅)
 **Goal:** Mixed human+AI simulation where AI participants use ALL available actions, communicate with humans and each other, and the system orchestrates everything reliably.
 
 **Legend:** ✅ Proven working | 🔶 Partially tested / works with caveats | 🔴 Not tested / known gap | ➖ Not applicable
@@ -102,10 +102,10 @@ Every action must work through: Schema validation → Dispatch → Engine → DB
 | **Agent memory (write/read)** | ✅ | ➖ | ➖ | ➖ | ✅ |
 | **Agent observation tools** | ✅ 6 tools verified | ✅ | ✅ | ✅ | ✅ |
 | **Nuclear chain (full)** | 🔴 no capable test data | ✅ | ✅ | ✅ | 🔴 |
-| **Assertiveness dial** | ✅ behavioral diff + DB read | ✅ ai_settings table | ➖ | 🔶 UI pending | ✅ |
+| **Assertiveness dial** | ✅ behavioral diff + DB read | ✅ ai_settings table | ➖ | ✅ Slider + save | ✅ |
 | **Theater map awareness** | ✅ agent probed 18 hexes (global+theater) | ✅ | ➖ | ✅ | ✅ |
 | **Reserve deployment** | ✅ withdraw to reserve tested | ✅ | ✅ | ✅ | ✅ |
-| **Freeze/resume/stop-all** | ✅ backend + queue clear | ✅ | ➖ | 🔶 UI pending | ✅ |
+| **Freeze/resume/stop-all** | ✅ backend + queue clear | ✅ | ➖ | ✅ Stop All button | ✅ |
 
 ---
 
