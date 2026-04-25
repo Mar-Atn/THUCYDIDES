@@ -51,7 +51,7 @@ def propose_exchange(
     if units is None or country_state is None:
         units, country_state = _load_world_state(client, sim_run_id, round_num)
     if roles is None:
-        roles = _load_roles(client)
+        roles = _load_roles(client, sim_run_id)
 
     # Validate proposer side
     report = validate_proposal(proposal, units, country_state, roles)
@@ -445,10 +445,13 @@ def _load_world_state(client, sim_run_id, round_num):
     return units, country_state
 
 
-def _load_roles(client):
+def _load_roles(client, sim_run_id: str | None = None):
     """Load role data for authorization checks."""
     try:
-        res = client.table("roles").select("*").execute()
+        q = client.table("roles").select("*")
+        if sim_run_id:
+            q = q.eq("sim_run_id", sim_run_id)
+        res = q.execute()
         return {r.get("id") or r.get("role_id", ""): r for r in (res.data or [])}
     except Exception:
         return {}

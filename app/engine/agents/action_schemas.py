@@ -104,6 +104,15 @@ class CovertOpOrder(BaseModel):
     rationale: str
 
 
+class IntelligenceOrder(BaseModel):
+    """Standalone intelligence report request."""
+    action_type: Literal["intelligence"] = "intelligence"
+    op_type: str = "intelligence"
+    question: Optional[str] = None
+    target_country: Optional[str] = None
+    rationale: str
+
+
 class TransactionOrder(BaseModel):
     """Propose exchange transaction or agreement."""
     action_type: Literal["propose_transaction", "propose_agreement"]
@@ -327,10 +336,10 @@ ACTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
     "set_sanctions": SanctionOrder,
     "set_tariffs": TariffOrder,
     "set_opec": SetOpecOrder,
-    "rd_investment": RDInvestmentOrder,
+    # rd_investment is part of set_budget, not a standalone action
     # Covert
     "covert_operation": CovertOpOrder,
-    "intelligence": CovertOpOrder,
+    "intelligence": IntelligenceOrder,
     # Transactions
     "propose_transaction": TransactionOrder,
     "accept_transaction": RespondExchangeOrder,

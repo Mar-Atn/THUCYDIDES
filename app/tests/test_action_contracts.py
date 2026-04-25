@@ -39,9 +39,9 @@ REACTIVE_ACTIONS = {
     "meet_freely", "withdraw_nomination", "cast_election_vote", "resolve_election",
 }
 
-# Schema-only entries: present in ACTION_TYPE_TO_MODEL for get_action_rules
-# documentation, but not standalone dispatched actions
-SCHEMA_ONLY = {"rd_investment"}
+# Schema-only entries: previously in ACTION_TYPE_TO_MODEL for documentation
+# but not standalone dispatched actions. rd_investment removed (part of set_budget).
+SCHEMA_ONLY: set[str] = set()
 
 # Tool-routed actions: player-initiated but handled by dedicated tools,
 # not through submit_action → dispatcher. No Pydantic schema needed.

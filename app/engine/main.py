@@ -215,6 +215,7 @@ async def get_map_units(sim_id: str):
 
     units = [{
         "unit_id": d.get("unit_id", ""),
+        "country_id": d["country_code"],
         "country_code": d["country_code"],
         "unit_type": d["unit_type"],
         "global_row": d.get("global_row"),

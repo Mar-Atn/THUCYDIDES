@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import random
+import uuid as _uuid
 from typing import Any
 
 from engine.services.supabase import get_client
@@ -20,6 +21,15 @@ from engine.services.common import get_scenario_id, write_event
 from engine.config.map_config import hex_neighbors_bounded, GLOBAL_HEX_OWNERS
 
 logger = logging.getLogger(__name__)
+
+
+def _valid_uuid(val: str) -> bool:
+    """Check if a string is a valid UUID."""
+    try:
+        _uuid.UUID(val)
+        return True
+    except (ValueError, AttributeError):
+        return False
 
 
 def _update_hex_control(
@@ -208,6 +218,12 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         return initiate_change_leader(sim_run_id, round_num, role_id, country_code)
 
     if action_type == "reassign_types":
+        # Normalize agent schema fields → engine fields
+        if "position" not in action and action.get("power_type"):
+            _power_to_position = {"military": "military", "economic": "economy", "foreign_affairs": "diplomat"}
+            action["position"] = _power_to_position.get(action["power_type"], action["power_type"])
+        if "target_role_id" not in action and action.get("new_holder_role"):
+            action["target_role_id"] = action["new_holder_role"]
         return _reassign_position(sim_run_id, round_num, role_id, country_code, action)
 
     if action_type == "self_nominate":
@@ -240,36 +256,95 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
             action.get("election_type"),
             contested_seat_role=action.get("contested_seat_role"))
 
-    # ── Transactions / Agreements ──────────────────���──────────────────
+    # ── Transactions / Agreements ──────────────────────────────────────
     if action_type == "propose_transaction":
         from engine.services.transaction_engine import propose_exchange
+        # Normalize agent schema fields → validator fields
         action["round_num"] = round_num
-        return propose_exchange(action, sim_run_id)
+        if "proposer_country_code" not in action:
+            action["proposer_country_code"] = country_code
+        if "proposer_role_id" not in action:
+            action["proposer_role_id"] = role_id
+        if "counterpart_country_code" not in action and action.get("counterpart_country"):
+            action["counterpart_country_code"] = action["counterpart_country"]
+        if "scope" not in action:
+            action["scope"] = "country"
+        result = propose_exchange(action, sim_run_id)
+        # Normalize return: transaction engine returns {transaction_id, status, errors}
+        is_ok = bool(result.get("status") == "pending" and result.get("transaction_id"))
+        return {
+            "success": is_ok,
+            "narrative": f"Transaction proposed (id={result.get('transaction_id')})" if is_ok
+                         else f"Transaction rejected: {', '.join(result.get('errors', []))}",
+            **result,
+        }
 
     if action_type == "accept_transaction":
         from engine.services.transaction_engine import respond_to_exchange
-        return respond_to_exchange(
-            transaction_id=action.get("transaction_id", ""),
+        txn_id = action.get("transaction_id", "")
+        if not _valid_uuid(txn_id):
+            return {"success": False, "narrative": f"Invalid transaction_id format: {txn_id!r}"}
+        result = respond_to_exchange(
+            transaction_id=txn_id,
             response=action.get("response", "accept"),
             sim_run_id=sim_run_id,
             rationale=action.get("rationale", ""),
             counter_offer=action.get("counter_offer"),
         )
+        # Normalize return
+        status = result.get("status", "")
+        is_ok = status in ("executed", "declined", "countered")
+        return {
+            "success": is_ok,
+            "narrative": f"Transaction {status}" if is_ok
+                         else f"Transaction response failed: {', '.join(result.get('errors', []))}",
+            **result,
+        }
 
     if action_type == "propose_agreement":
         from engine.services.agreement_engine import propose_agreement
+        # Normalize agent schema fields → validator fields
         action["round_num"] = round_num
-        return propose_agreement(action, sim_run_id)
+        if "proposer_country_code" not in action:
+            action["proposer_country_code"] = country_code
+        if "proposer_role_id" not in action:
+            action["proposer_role_id"] = role_id
+        # Build signatories from counterpart_country if not provided
+        if "signatories" not in action and action.get("counterpart_country"):
+            action["signatories"] = sorted(set([country_code, action["counterpart_country"]]))
+        # Ensure terms has content (use rationale as fallback)
+        if not action.get("terms") and action.get("rationale"):
+            action["terms"] = action["rationale"]
+        result = propose_agreement(action, sim_run_id)
+        # Normalize return: agreement engine returns {agreement_id, status, errors}
+        is_ok = bool(result.get("status") == "proposed" and result.get("agreement_id"))
+        return {
+            "success": is_ok,
+            "narrative": f"Agreement proposed (id={result.get('agreement_id')})" if is_ok
+                         else f"Agreement rejected: {', '.join(result.get('errors', []))}",
+            **result,
+        }
 
     if action_type == "sign_agreement":
         from engine.services.agreement_engine import sign_agreement
-        return sign_agreement(
-            agreement_id=action.get("agreement_id", ""),
+        agr_id = action.get("agreement_id", "")
+        if not _valid_uuid(agr_id):
+            return {"success": False, "narrative": f"Invalid agreement_id format: {agr_id!r}"}
+        result = sign_agreement(
+            agreement_id=agr_id,
             country_code=country_code,
             role_id=role_id,
             confirm=action.get("confirm", True),
             comments=action.get("comments", ""),
         )
+        # Normalize return
+        status = result.get("status", "")
+        is_ok = status in ("active", "proposed", "declined") and "errors" not in result
+        return {
+            "success": is_ok,
+            "narrative": f"Agreement {status}" + (" (ACTIVATED)" if result.get("activated") else ""),
+            **result,
+        }
 
     # ── Diplomatic ────────────────────────────────────────────────────
     if action_type == "public_statement":
@@ -301,6 +376,8 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
         orch = NuclearChainOrchestrator()
         action_id = action.get("nuclear_action_id", "")
+        if not _valid_uuid(action_id):
+            return {"success": False, "narrative": f"Invalid nuclear_action_id format: {action_id!r}"}
         confirm = action.get("confirm", True)
         return orch.submit_authorization(action_id, role_id, confirm, action.get("rationale", ""))
 
@@ -308,6 +385,8 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
         from engine.orchestrators.nuclear_chain import NuclearChainOrchestrator
         orch = NuclearChainOrchestrator()
         action_id = action.get("nuclear_action_id", "")
+        if not _valid_uuid(action_id):
+            return {"success": False, "narrative": f"Invalid nuclear_action_id format: {action_id!r}"}
         intercept = action.get("intercept", True)
         return orch.submit_interception(action_id, country_code, intercept, action.get("rationale", ""))
 
@@ -993,20 +1072,20 @@ def _dispatch_covert(sim_run_id: str, round_num: int, action: dict) -> dict:
 
     if op_type == "intelligence":
         from engine.services.intelligence_engine import generate_intelligence_report
+        question = action.get("question", "General situation assessment")
         return generate_intelligence_report(
-            sim_run_id, round_num, role_id, country_code,
-            action.get("target_country"))
+            sim_run_id, round_num, question, country_code, role_id)
 
     if op_type == "sabotage":
         from engine.services.sabotage_engine import execute_sabotage
         return execute_sabotage(
-            sim_run_id, round_num, role_id, country_code,
+            sim_run_id, round_num, country_code, role_id,
             action.get("target_country"), action.get("target_type", "infrastructure"))
 
     if op_type == "propaganda":
         from engine.services.propaganda_engine import execute_propaganda
         return execute_propaganda(
-            sim_run_id, round_num, role_id, country_code,
+            sim_run_id, round_num, country_code, role_id,
             action.get("target_country"), action.get("intent", "destabilize"),
             action.get("content", ""))
 

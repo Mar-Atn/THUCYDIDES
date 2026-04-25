@@ -36,7 +36,7 @@ def propose_agreement(
     client = get_client()
 
     if roles is None:
-        roles = _load_roles(client)
+        roles = _load_roles(client, sim_run_id)
 
     report = validate_agreement_proposal(proposal, roles)
     if not report["valid"]:
@@ -208,9 +208,12 @@ def get_active_agreements(country_code: str, sim_run_id: str) -> list[dict]:
 # ---------------------------------------------------------------------------
 
 
-def _load_roles(client):
+def _load_roles(client, sim_run_id: str | None = None):
     try:
-        res = client.table("roles").select("*").execute()
+        q = client.table("roles").select("*")
+        if sim_run_id:
+            q = q.eq("sim_run_id", sim_run_id)
+        res = q.execute()
         return {r.get("id") or r.get("role_id", ""): r for r in (res.data or [])}
     except Exception:
         return {}

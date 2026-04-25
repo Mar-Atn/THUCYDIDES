@@ -26,7 +26,7 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - `set_tariffs` — per-country, levels 0-3. Hurts BOTH sides (target more).
 - `set_sanctions` — per-country, levels -3 to +3. S-curve damage model — coverage below 0.3 = minimal, above 0.7 = severe. Negative = evasion support.
 - `set_opec` — production level: min/low/normal/high/max. Affects global oil price. OPEC members only.
-- `rd_investment` — invest coins in nuclear, AI, or strategic missile track.
+- R&D investment is part of `set_budget` — use `tech_coins` field to allocate to nuclear/AI/missile.
 
 **DIPLOMATIC (immediate):**
 - `public_statement` — attributed, visible to all. Signaling, threats, reassurance.

@@ -266,6 +266,20 @@ class ToolExecutor:
                 "role_id": self.role_id,
                 "country_code": self.country_code,
             }
+
+            # Field normalization: Pydantic schema names → dispatcher field names
+            # Combat: target_global_row/col → target_row/col
+            if "target_global_row" in dispatch_payload and "target_row" not in dispatch_payload:
+                dispatch_payload["target_row"] = dispatch_payload["target_global_row"]
+            if "target_global_col" in dispatch_payload and "target_col" not in dispatch_payload:
+                dispatch_payload["target_col"] = dispatch_payload["target_global_col"]
+            # Missile: launcher_unit_code (singular) → attacker_unit_codes (list)
+            if "launcher_unit_code" in dispatch_payload and "attacker_unit_codes" not in dispatch_payload:
+                dispatch_payload["attacker_unit_codes"] = [dispatch_payload["launcher_unit_code"]]
+            # Nuclear authorize: authorize → confirm
+            if action_type == "nuclear_authorize" and "authorize" in dispatch_payload and "confirm" not in dispatch_payload:
+                dispatch_payload["confirm"] = dispatch_payload["authorize"]
+
             result = dispatch_action(
                 sim_run_id=self.sim_run_id,
                 round_num=self.round_num,
