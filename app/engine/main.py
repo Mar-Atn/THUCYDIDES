@@ -2185,9 +2185,7 @@ async def end_meeting_endpoint(
 class AIInitRequest(BaseModel):
     """Request body for AI agent initialization."""
     role_ids: list[str] | None = None
-    assertiveness: int = 5
-    pulses_per_round: int = 8
-    model: str = "claude-sonnet-4-6"
+    model: str | None = None  # None = read from ai_settings table
     auto_advance: bool = False
     round_duration_seconds: int = 300
 
