@@ -198,12 +198,20 @@ VOICE AVATAR (ElevenLabs, "The Mouth")
 
 **Moderator controls:**
 
-| Action | Effect |
-|--------|--------|
-| Freeze one agent | Stops receiving pulses, queues events |
-| Freeze all AI | Global pause, humans continue |
-| Resume | Receives batched events from freeze period |
-| Act on behalf | Opens human participant interface for that role (from Manage Participants). Actions tagged `source: moderator_override`. Agent informed at next pulse. |
+| Action | Effect | API |
+|--------|--------|-----|
+| Freeze one agent | Stops receiving events. Agent stays initialized but idle. | `POST /ai/freeze/{role_id}` |
+| Freeze all AI | Global pause for all AI. Humans continue. | `POST /ai/freeze-all` |
+| Resume one / Resume all | Agent(s) return to IDLE. Fresh events from current state. | `POST /ai/resume/{role_id}` or `/ai/resume-all` |
+| **Stop All AI** | Freezes all agents AND clears all pending event queues. Hard reset — agents start completely fresh on resume. | `POST /ai/stop-all` |
+| Shutdown AI | Terminates all sessions. Requires re-initialization. | `POST /ai/shutdown` |
+| Act on behalf | Opens human participant interface for that role (from Manage Participants). Actions tagged `source: moderator_override`. Agent informed at next pulse. | M4 territory |
+
+**Stop All AI** is the emergency brake. It:
+1. Sets all agents to FROZEN state
+2. Deletes all unprocessed events from `agent_event_queue`
+3. Returns count of agents frozen + events cleared
+4. On resume, agents receive fresh events from current world state (no stale backlog)
 
 **Other players see nothing AI-specific.** No indication of who's AI.
 

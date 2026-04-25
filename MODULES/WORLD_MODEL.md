@@ -347,6 +347,38 @@ Human participants can submit move_units during Phase B as before. The AI solici
 - Approve/reject pending actions
 - Override any decision
 
+### AI Agent Controls
+
+Moderator controls for AI-operated participants, accessible from the Facilitator Dashboard:
+
+| Control | Effect |
+|---------|--------|
+| **Freeze one agent** | Stops receiving events. Pending events discarded. Agent stays initialized but idle. |
+| **Freeze all AI** | Global pause for all AI agents. Human participants continue unaffected. |
+| **Resume one / Resume all** | Agent(s) return to IDLE state. Fresh events delivered from current world state. |
+| **Stop All AI** | Freezes all agents AND clears all pending event queues. Hard reset — agents start fresh on resume. |
+| **Initialize AI** | Creates managed agent sessions for all AI-operated roles. Required before agents can act. |
+| **Shutdown AI** | Terminates all agent sessions. Requires re-initialization to restart. |
+
+### Global AI Settings
+
+System-wide settings stored in `ai_settings` table. Managed from the AI Settings page.
+
+**Two categories of AI model usage:**
+
+1. **Managed Agent sessions** (M5 AI Participants) — persistent Claude sessions with memory and tool access. Model + assertiveness are **locked at initialization** — baked into the immutable system prompt. Changing these requires Shutdown → change setting → Re-initialize (agents lose session context; their `write_notes` memory in DB survives).
+
+2. **Stateless API calls** (intelligence reports, chat, Navigator, etc.) — one-shot LLM calls with no persistent session. Model changes take effect **immediately** on next call. No reinitialization needed.
+
+| Setting | Key | Scope | Default | Description |
+|---------|-----|-------|---------|-------------|
+| **Assertiveness dial** | `assertiveness` | Managed agents (at init) | 5 | 1=cooperative, 10=aggressive. Injected into system prompt. |
+| **Model — Agent decisions** | `model_decisions` | Managed agents (at init) | claude-sonnet-4-6 | Model for AI participant strategic reasoning. Locked at init. |
+| **Model — Agent conversations** | `model_conversations` | Managed agents (at init) | claude-sonnet-4-6 | Model for bilateral meetings. Locked at init. |
+| **Model — Stateless calls** | `model_stateless` | Immediate | claude-sonnet-4-6 | Model for intelligence, chat, Navigator, etc. Changes apply instantly. |
+
+**UI note:** The AI Settings page should clearly indicate which settings require reinitialization and which take effect immediately.
+
 ### Key Events
 
 Templates define scheduled events that create dramatic structure (elections, crises, votes). These are template data — the World Model supports any schedule configuration.

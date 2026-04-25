@@ -2489,6 +2489,111 @@ async def ai_resume_all(
     return APIResponse(data={"resumed_count": resumed_count})
 
 
+@app.post("/api/sim/{sim_id}/ai/stop-all", response_model=APIResponse)
+async def ai_stop_all(
+    sim_id: str,
+    user: AuthUser = Depends(require_moderator),
+):
+    """STOP ALL AI — freeze all agents AND clear all pending event queues.
+
+    Emergency brake: agents go FROZEN, all unprocessed events are deleted.
+    On resume, agents start fresh from current world state (no stale backlog).
+    """
+    from engine.agents.managed.event_dispatcher import get_dispatcher, FROZEN
+    from engine.services.supabase import get_client
+
+    dispatcher = get_dispatcher(sim_id)
+    if not dispatcher:
+        raise HTTPException(status_code=404, detail="No AI dispatcher active for this sim.")
+
+    # Step 1: Freeze all agents
+    frozen_count = 0
+    for rid in list(dispatcher.agents.keys()):
+        if dispatcher.agent_states.get(rid) != FROZEN:
+            dispatcher.set_agent_state(rid, FROZEN)
+            ctx = dispatcher.agents[rid]
+            dispatcher.session_manager.freeze_session(ctx)
+            frozen_count += 1
+
+    # Step 2: Clear all pending events from the queue
+    client = get_client()
+    try:
+        cleared = client.table("agent_event_queue") \
+            .delete() \
+            .eq("sim_run_id", sim_id) \
+            .is_("processed_at", "null") \
+            .execute()
+        events_cleared = len(cleared.data or [])
+    except Exception as e:
+        logger.warning("Failed to clear event queue: %s", e)
+        events_cleared = 0
+
+    logger.info(
+        "STOP ALL AI for sim %s: %d agents frozen, %d events cleared by %s",
+        sim_id, frozen_count, events_cleared, user.id,
+    )
+
+    return APIResponse(data={
+        "frozen_count": frozen_count,
+        "events_cleared": events_cleared,
+    })
+
+
+@app.get("/api/ai-settings", response_model=APIResponse)
+async def get_ai_settings(
+    user: AuthUser = Depends(require_moderator),
+):
+    """Get all global AI settings."""
+    from engine.services.supabase import get_client
+    client = get_client()
+    result = client.table("ai_settings").select("key,value,description,updated_at").execute()
+    settings = {r["key"]: r["value"] for r in (result.data or [])}
+    return APIResponse(data={"settings": settings, "rows": result.data or []})
+
+
+@app.put("/api/ai-settings/{key}", response_model=APIResponse)
+async def update_ai_setting(
+    key: str,
+    body: dict,
+    user: AuthUser = Depends(require_moderator),
+):
+    """Update a single global AI setting.
+
+    Body: {"value": "new_value"}
+
+    Note: Changes to model_decisions/model_conversations/assertiveness
+    only take effect on next agent initialization. Changes to model_stateless
+    take effect immediately on next stateless API call.
+    """
+    from engine.services.supabase import get_client
+    from datetime import datetime, timezone
+
+    value = body.get("value")
+    if value is None:
+        raise HTTPException(status_code=400, detail="'value' field required")
+
+    client = get_client()
+    result = client.table("ai_settings").update({
+        "value": str(value),
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+        "updated_by": user.id,
+    }).eq("key", key).execute()
+
+    if not result.data:
+        raise HTTPException(status_code=404, detail=f"Setting '{key}' not found")
+
+    # Indicate whether reinitialization is needed
+    needs_reinit = key in ("model_decisions", "model_conversations", "assertiveness")
+
+    return APIResponse(data={
+        "key": key,
+        "value": str(value),
+        "needs_reinit": needs_reinit,
+        "message": "Setting updated. Reinitialize AI agents for this to take effect." if needs_reinit
+                   else "Setting updated. Takes effect on next API call.",
+    })
+
+
 @app.post("/api/sim/{sim_id}/ai/interrupt", response_model=APIResponse)
 async def ai_critical_interrupt(
     sim_id: str,
