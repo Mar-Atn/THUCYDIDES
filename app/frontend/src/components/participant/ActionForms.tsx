@@ -3735,9 +3735,12 @@ export function MoveUnitsForm({roleId,countryId,simId,onClose,onSubmitted}:{
       .then(({data})=>{
         const countries = new Set<string>()
         ;(data??[]).forEach((r:Record<string,unknown>)=>{
-          // We receive basing FROM them
-          if(r.from_country_code===countryId && r.basing_rights_b_to_a) countries.add(r.to_country_code as string)
-          if(r.to_country_code===countryId && r.basing_rights_a_to_b) countries.add(r.from_country_code as string)
+          // basing_rights_a_to_b=true on (A→B) means A can deploy to B's territory
+          // basing_rights_b_to_a=true on (A→B) means B can deploy to A's territory
+          const a = r.from_country_code as string
+          const b = r.to_country_code as string
+          if(a===countryId && r.basing_rights_a_to_b) countries.add(b) // we (A) can deploy to B
+          if(b===countryId && r.basing_rights_b_to_a) countries.add(a) // we (B) can deploy to A
         })
         setBasingCountries(countries)
       })
