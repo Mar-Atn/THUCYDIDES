@@ -188,6 +188,71 @@ def get_meeting(meeting_id: str) -> Optional[dict]:
     }
 
 
+def save_transcript(meeting_id: str, transcript: str) -> dict:
+    """Save formatted transcript to meeting record.
+
+    Called after avatar conversation completes.
+    """
+    client = get_client()
+    try:
+        result = client.table("meetings").update({
+            "transcript": transcript,
+        }).eq("id", meeting_id).execute()
+        if result.data:
+            logger.info("[meeting] Transcript saved for meeting %s (%d chars)",
+                       meeting_id, len(transcript))
+            return {"success": True}
+        return {"success": False, "narrative": "Meeting not found"}
+    except Exception as e:
+        logger.error("[meeting] Failed to save transcript for %s: %s", meeting_id, e)
+        return {"success": False, "narrative": str(e)}
+
+
+def update_meeting_metadata(meeting_id: str, metadata_update: dict) -> dict:
+    """Merge new keys into meeting metadata JSONB.
+
+    Used for storing intent_note, avatar_context, voice_conversation_id.
+    Reads existing metadata, merges, writes back.
+    """
+    client = get_client()
+    try:
+        # Read current metadata
+        meeting_rows = client.table("meetings").select("metadata") \
+            .eq("id", meeting_id).limit(1).execute().data
+        if not meeting_rows:
+            return {"success": False, "narrative": "Meeting not found"}
+
+        current = meeting_rows[0].get("metadata") or {}
+        current.update(metadata_update)
+
+        result = client.table("meetings").update({
+            "metadata": current,
+        }).eq("id", meeting_id).execute()
+        if result.data:
+            return {"success": True}
+        return {"success": False, "narrative": "Update failed"}
+    except Exception as e:
+        logger.error("[meeting] Failed to update metadata for %s: %s", meeting_id, e)
+        return {"success": False, "narrative": str(e)}
+
+
+def get_meeting_messages(meeting_id: str) -> list[dict]:
+    """Get all messages for a meeting, ordered chronologically.
+
+    Simple helper used by avatar_service to build conversation history.
+    """
+    client = get_client()
+    try:
+        result = client.table("meeting_messages").select("*") \
+            .eq("meeting_id", meeting_id) \
+            .order("created_at") \
+            .execute()
+        return result.data or []
+    except Exception as e:
+        logger.warning("[meeting] Failed to get messages for %s: %s", meeting_id, e)
+        return []
+
+
 def get_active_meetings(sim_run_id: str, role_id: str) -> list[dict]:
     """Get all active meetings for a role in a SIM run.
 

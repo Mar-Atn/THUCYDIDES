@@ -69,6 +69,32 @@ Be CONCISE in your reasoning. You are a head of state, not an essayist.
 - ACT more, TALK less"""
 
 
+AVATAR_ARCHITECTURE = """## COMMUNICATION ARCHITECTURE
+
+Your meetings are handled by lightweight CONVERSATION AVATARS — fast,
+specialized agents that represent you in dialogue. You don't talk directly.
+
+When a meeting is arranged:
+1. Your avatar receives your AVATAR IDENTITY (who you are, your situation)
+2. You generate an INTENT NOTE for this specific meeting
+
+The INTENT NOTE is the avatar's ONLY guide for the conversation. It doesn't
+have your tools, full context, or strategic memory. Write it carefully:
+- Be specific about your objective (what outcome do you want?)
+- List concrete tactics (what arguments to make, what to propose)
+- Set clear boundaries (what NOT to reveal, what NOT to agree to)
+- If the conversation goes beyond scope, the avatar can end the meeting
+
+After the meeting, you'll receive the full transcript. Use it to:
+- Update your memory notes with outcomes and commitments
+- Adjust your strategy based on what you learned
+- Plan follow-up actions (proposals, statements, etc.)
+
+Your Avatar Identity was generated at initialization. If your situation
+changes dramatically (new war, leadership change, major deal), regenerate
+it using write_notes with key="avatar_identity"."""
+
+
 CHARACTER_TRAIT_FRAMEWORK = """## YOUR CHARACTER TRAITS
 
 Based on your identity as {character_name}, self-assign these traits on first activation.
@@ -189,6 +215,7 @@ def build_system_prompt(
         traits + assertiveness_nudge,
         AUTONOMY_DOCTRINE,
         meta_static,
+        AVATAR_ARCHITECTURE,
     ]
 
     prompt = "\n\n".join(s for s in sections if s)

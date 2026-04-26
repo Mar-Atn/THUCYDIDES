@@ -4,7 +4,7 @@
  * Expanded view: Identity, Bio & Objectives, Actions (read-only), Org Memberships (read-only), Relationships (read-only).
  */
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import {
   getTemplateRoles,
   getTemplateCountries,
@@ -21,7 +21,9 @@ import {
   type RoleRelationship,
   type OrgMembership,
 } from '@/lib/queries'
+import { fetchElevenLabsAgents, type ElevenLabsAgent } from '@/lib/elevenlabs-api'
 import { ACTION_LABELS, ACTION_CATEGORIES } from '@/lib/action_constants'
+import { Volume2 } from 'lucide-react'
 
 /* -------------------------------------------------------------------------- */
 /*  Constants                                                                  */
@@ -368,6 +370,60 @@ function RelationshipsSection({ relationships, roleNames }: { relationships: Rol
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Voice agent dropdown                                                       */
+/* -------------------------------------------------------------------------- */
+
+function VoiceAgentField({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
+  const [agents, setAgents] = useState<ElevenLabsAgent[]>([])
+  const [loadingAgents, setLoadingAgents] = useState(false)
+  const [agentError, setAgentError] = useState<string | null>(null)
+  const fetchedRef = useRef(false)
+
+  const loadAgents = async () => {
+    if (fetchedRef.current) return
+    fetchedRef.current = true
+    setLoadingAgents(true)
+    setAgentError(null)
+    try {
+      const data = await fetchElevenLabsAgents()
+      setAgents(data)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to load voice agents'
+      setAgentError(msg)
+      fetchedRef.current = false // allow retry
+    } finally {
+      setLoadingAgents(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-1 mt-3">
+      <label className="font-body text-caption text-text-secondary flex items-center gap-1.5">
+        <Volume2 className="w-3.5 h-3.5" />
+        voice_agent (ElevenLabs)
+      </label>
+      <select
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value || null)}
+        onFocus={loadAgents}
+        className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
+      >
+        <option value="">(none)</option>
+        {loadingAgents && <option disabled>Loading agents...</option>}
+        {agentError && <option disabled>Error: {agentError}</option>}
+        {agents.map((a) => (
+          <option key={a.agent_id} value={a.agent_id}>{a.name}</option>
+        ))}
+        {/* Show current value even if not yet in the fetched list */}
+        {value && !agents.find((a) => a.agent_id === value) && (
+          <option value={value}>{value} (saved)</option>
+        )}
+      </select>
+    </div>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
 /*  Role editor (expanded panel)                                               */
 /* -------------------------------------------------------------------------- */
 
@@ -537,6 +593,12 @@ function RoleEditor({ role, countryIds, actions, memberships, relationships, org
         </label>
       </div>
 
+      {/* 1b. Voice Agent */}
+      <VoiceAgentField
+        value={draft.elevenlabs_agent_id}
+        onChange={(v) => set('elevenlabs_agent_id', v)}
+      />
+
       {/* 2. Bio & Objectives */}
       <SectionHeader title="Bio & Objectives" />
       <div className="space-y-3">
@@ -653,6 +715,9 @@ function CollapsedBadges({ role }: { role: Role }) {
         <span className="font-body text-caption font-medium text-text-secondary bg-border/50 px-1.5 py-0.5 rounded ml-1">
           optional
         </span>
+      )}
+      {role.elevenlabs_agent_id && (
+        <Volume2 className="w-3.5 h-3.5 text-accent ml-1.5" title="Voice agent assigned" />
       )}
     </>
   )

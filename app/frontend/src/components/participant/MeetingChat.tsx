@@ -18,6 +18,7 @@ import {
   type MeetingMessage,
 } from '@/lib/queries'
 import { useTypingAnimation } from '@/hooks/useTypingAnimation'
+import { VoiceCallInterface } from './VoiceCallInterface'
 
 /* ── Props ─────────────────────────────────────────────────────────────── */
 
@@ -77,6 +78,10 @@ export function MeetingChat({
   const [animatingIds, setAnimatingIds] = useState<Set<string>>(new Set())
   const knownIdsRef = useRef<Set<string>>(new Set())
 
+  // Voice call state
+  const [voiceCallActive, setVoiceCallActive] = useState(false)
+  const [counterpartVoiceAgentId, setCounterpartVoiceAgentId] = useState<string | null>(null)
+
   // Participant info lookup (loaded from roles table)
   const [roleNames, setRoleNames] = useState<Record<string, { name: string; country: string }>>({})
 
@@ -116,13 +121,16 @@ export function MeetingChat({
     }
   }, [simId, meetingId])
 
-  /** Load role names for both participants. */
+  /** Load role names + voice agent IDs for both participants. */
   const loadRoleNames = useCallback(async () => {
     if (!meeting) return
     const roleIds = [meeting.participant_a_role_id, meeting.participant_b_role_id]
+    const otherRoleId = meeting.participant_a_role_id === myRoleId
+      ? meeting.participant_b_role_id
+      : meeting.participant_a_role_id
     const { data: roles } = await supabase
       .from('roles')
-      .select('id,character_name,country_code')
+      .select('id,character_name,country_code,elevenlabs_agent_id')
       .in('id', roleIds)
     if (roles) {
       const map: Record<string, { name: string; country: string }> = {}
@@ -131,10 +139,13 @@ export function MeetingChat({
           name: (r.character_name as string) || (r.id as string),
           country: (r.country_code as string) || '',
         }
+        if (r.id === otherRoleId && r.elevenlabs_agent_id) {
+          setCounterpartVoiceAgentId(r.elevenlabs_agent_id as string)
+        }
       }
       setRoleNames(map)
     }
-  }, [meeting?.participant_a_role_id, meeting?.participant_b_role_id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [meeting?.participant_a_role_id, meeting?.participant_b_role_id, myRoleId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { loadMeeting() }, [loadMeeting])
   useEffect(() => { loadRoleNames() }, [loadRoleNames])
@@ -505,18 +516,32 @@ export function MeetingChat({
         {isActive && (
           <div className="px-3 py-3 border-t border-gray-200 bg-gray-50 shrink-0 safe-area-bottom">
             <div className="flex items-end gap-2">
-              {/* Voice button — placeholder */}
-              <button
-                disabled
-                title="Voice coming soon"
-                className="shrink-0 p-2 text-gray-500/30 cursor-not-allowed"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-                  <line x1="12" x2="12" y1="19" y2="22"/>
-                </svg>
-              </button>
+              {/* Voice button — active when counterpart has voice agent */}
+              {counterpartVoiceAgentId ? (
+                <button
+                  onClick={() => setVoiceCallActive(true)}
+                  title="Start voice call"
+                  className="shrink-0 p-2 text-blue-600 hover:text-blue-700 transition-colors"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" x2="12" y1="19" y2="22"/>
+                  </svg>
+                </button>
+              ) : (
+                <button
+                  disabled
+                  title="Voice not available for this participant"
+                  className="shrink-0 p-2 text-gray-500/30 cursor-not-allowed"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                    <line x1="12" x2="12" y1="19" y2="22"/>
+                  </svg>
+                </button>
+              )}
 
               {/* Text input */}
               <textarea
@@ -545,6 +570,28 @@ export function MeetingChat({
               </button>
             </div>
           </div>
+        )}
+
+        {/* ── Voice Call Overlay ──────────────────────────────────────── */}
+        {voiceCallActive && counterpartVoiceAgentId && (
+          <VoiceCallInterface
+            meetingId={meetingId}
+            simId={simId}
+            voiceAgentId={counterpartVoiceAgentId}
+            avatarIdentity=""
+            intentNote=""
+            conversationHistory={messages.map(m => {
+              const name = roleNames[m.role_id]?.name ?? m.role_id
+              return `${name}: ${m.content}`
+            }).join('\n')}
+            counterpartName={otherName}
+            counterpartCountry={otherCountry}
+            myRoleId={myRoleId}
+            myCountryCode={myCountryCode}
+            onEnd={() => {
+              setVoiceCallActive(false)
+            }}
+          />
         )}
       </div>
     </div>

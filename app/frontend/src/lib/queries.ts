@@ -70,6 +70,7 @@ export interface SimRunRole {
   public_bio: string
   status: string
   user_id: string | null
+  elevenlabs_agent_id: string | null
 }
 
 export interface UserRecord {
@@ -221,7 +222,7 @@ export async function duplicateSimRun(sourceId: string, newName: string): Promis
 export async function getSimRunRoles(simRunId: string): Promise<SimRunRole[]> {
   const { data, error } = await supabase
     .from('roles')
-    .select('id, sim_run_id, character_name, country_code, title, position_type, positions, is_ai_operated, expansion_role, public_bio, status, user_id')
+    .select('id, sim_run_id, character_name, country_code, title, position_type, positions, is_ai_operated, expansion_role, public_bio, status, user_id, elevenlabs_agent_id')
     .eq('sim_run_id', simRunId)
     .order('country_code')
 
@@ -558,6 +559,7 @@ export interface Role {
   powers: string[]
   objectives: string[]
   status: string
+  elevenlabs_agent_id: string | null
 }
 
 export interface Organization {

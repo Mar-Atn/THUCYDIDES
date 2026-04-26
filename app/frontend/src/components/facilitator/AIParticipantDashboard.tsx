@@ -24,12 +24,15 @@ import {
   getAgentLog,
   getAgentMemories,
   getSimRunRoles,
+  updateRole,
   type AIStatusResponse,
   type AIAgentStatus,
   type AgentLogEntry,
   type AgentMemory,
   type SimRunRole,
 } from '@/lib/queries'
+import { fetchElevenLabsAgents, type ElevenLabsAgent } from '@/lib/elevenlabs-api'
+import { Volume2 } from 'lucide-react'
 
 /* -------------------------------------------------------------------------- */
 /*  Constants                                                                  */
@@ -121,6 +124,89 @@ function getActivityDescriptor(latestEvent: LatestEvent | null, agentState: stri
   if (cat === 'agent_reasoning') return prefix + 'Analyzing situation'
 
   return prefix + 'Processing'
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Voice agent icon + inline selector                                         */
+/* -------------------------------------------------------------------------- */
+
+/** Shared cache so all rows don't re-fetch. */
+let _agentCache: ElevenLabsAgent[] | null = null
+
+function VoiceAgentIcon({ roleId, hasVoice, onAssigned }: {
+  roleId: string
+  hasVoice: boolean
+  onAssigned: () => void
+}) {
+  const [open, setOpen] = useState(false)
+  const [agents, setAgents] = useState<ElevenLabsAgent[]>(_agentCache ?? [])
+  const [loading, setLoading] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [open])
+
+  const handleOpen = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setOpen(prev => !prev)
+    if (!_agentCache) {
+      setLoading(true)
+      try {
+        const data = await fetchElevenLabsAgents()
+        _agentCache = data
+        setAgents(data)
+      } catch { /* non-critical */ }
+      finally { setLoading(false) }
+    }
+  }
+
+  const handleSelect = async (agentId: string | null, e: React.MouseEvent) => {
+    e.stopPropagation()
+    try {
+      await updateRole(roleId, { elevenlabs_agent_id: agentId } as Record<string, unknown>)
+      onAssigned()
+    } catch { /* non-critical */ }
+    setOpen(false)
+  }
+
+  return (
+    <div ref={ref} className="relative flex items-center justify-center">
+      <button
+        onClick={handleOpen}
+        className={`transition-colors ${hasVoice ? 'text-accent' : 'text-text-secondary/30 hover:text-text-secondary/60'}`}
+        title={hasVoice ? 'Voice agent assigned (click to change)' : 'Assign voice agent'}
+      >
+        <Volume2 className="w-3.5 h-3.5" />
+      </button>
+      {open && (
+        <div className="absolute top-6 right-0 z-50 bg-card border border-border rounded shadow-lg py-1 min-w-[180px]">
+          {loading && <div className="px-3 py-1 font-body text-caption text-text-secondary">Loading...</div>}
+          <button
+            onClick={(e) => handleSelect(null, e)}
+            className="w-full text-left px-3 py-1 font-body text-caption text-text-secondary hover:bg-base/50 transition-colors"
+          >
+            (none)
+          </button>
+          {agents.map((a) => (
+            <button
+              key={a.agent_id}
+              onClick={(e) => handleSelect(a.agent_id, e)}
+              className="w-full text-left px-3 py-1 font-body text-caption text-text-primary hover:bg-base/50 transition-colors truncate"
+            >
+              {a.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 /* -------------------------------------------------------------------------- */
@@ -502,7 +588,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
               onClick={() => { window.open(`/sim/${simId}/agent/${role.id}`, '_blank') }}
             >
               {/* Grid: fixed columns for alignment across rows */}
-              <div className="grid items-center gap-x-3" style={{ gridTemplateColumns: '8px 120px 90px 1fr 50px 50px 28px' }}>
+              <div className="grid items-center gap-x-3" style={{ gridTemplateColumns: '8px 120px 90px 1fr 50px 50px 18px 28px' }}>
                 {/* Row 1 */}
                 <span className={`w-2 h-2 rounded-full ${style.dot}`} />
                 <span className="font-body text-body-sm text-text-primary font-medium truncate">
@@ -520,6 +606,14 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                 <span className="font-data text-caption text-text-secondary text-right">
                   {meetings} mtg
                 </span>
+                <VoiceAgentIcon
+                  roleId={role.id}
+                  hasVoice={!!role.elevenlabs_agent_id}
+                  onAssigned={() => {
+                    // Re-fetch roles to pick up the change
+                    getSimRunRoles(simId).then(setRoles).catch(() => {})
+                  }}
+                />
                 {isActive && agentState !== 'NOT_INITIALIZED' ? (
                   <button
                     onClick={(e) => {
@@ -543,7 +637,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                 <span className="font-body text-caption text-text-secondary -mt-1">
                   {country}
                 </span>
-                <span /><span /><span /><span /><span />
+                <span /><span /><span /><span /><span /><span />
               </div>
             </div>
           )

@@ -2070,6 +2070,16 @@ class MeetingMessageRequest(BaseModel):
     content: str
 
 
+class AvatarTurnRequest(BaseModel):
+    """POST body for requesting a fast avatar response in a meeting.
+
+    The human's message should already be written to meeting_messages
+    before calling avatar-turn. This endpoint reads conversation history
+    from DB and returns the AI avatar's response.
+    """
+    role_id: str  # human's role_id (to identify AI counterpart)
+
+
 class MeetingEndRequest(BaseModel):
     """POST body for ending a meeting."""
     role_id: str
@@ -2128,7 +2138,7 @@ async def send_meeting_message(
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
 
-    # Enqueue chat event for AI counterpart via unified dispatcher
+    # Fast avatar response — call directly instead of routing through managed agent
     meeting = meeting_data["meeting"]
     other_role_id = (
         meeting["participant_b_role_id"]
@@ -2138,35 +2148,59 @@ async def send_meeting_message(
 
     from engine.agents.managed.event_dispatcher import get_dispatcher
     dispatcher = get_dispatcher(sim_id)
-    if dispatcher:
-        # Build conversation context (last 6 messages)
-        from engine.services.supabase import get_client as _get_db
-        _db = _get_db()
-        all_msgs = (
-            _db.table("meeting_messages")
-            .select("role_id,content")
-            .eq("meeting_id", meeting_id)
-            .order("created_at")
-            .execute()
-        )
-        chat_lines = []
-        for m in all_msgs.data or []:
-            chat_lines.append(f'{m["role_id"]}: "{m["content"]}"')
-        chat_text = "\n".join(chat_lines[-6:])
-
-        dispatcher.enqueue(
-            role_id=other_role_id,
-            tier=2,
-            event_type="chat_message",
-            message=(
-                f"MEETING CONVERSATION:\n{chat_text}\n\n"
-                f"Reply in 1-3 sentences. Stay in character. "
-                f"Do NOT call any tools — just respond with your words directly."
-            ),
-            metadata={"meeting_id": meeting_id, "sender": body.role_id},
-        )
+    if dispatcher and other_role_id in (dispatcher.agents or {}):
+        # AI counterpart — trigger avatar response asynchronously
+        # The avatar-turn endpoint is the primary path (frontend calls it),
+        # but we also handle it here as fallback for direct API usage
+        import asyncio
+        asyncio.create_task(_avatar_respond_to_message(sim_id, meeting_id, other_role_id, meeting))
 
     return APIResponse(data=result)
+
+
+async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: str, meeting: dict):
+    """Background task: generate avatar response when human sends a message."""
+    try:
+        from engine.services.meeting_service import get_meeting_messages, send_message
+        from engine.agents.managed.avatar_service import text_avatar_turn
+        from engine.services.supabase import get_client as _get_db
+
+        _db = _get_db()
+        ai_country = meeting["participant_a_country"] if ai_role_id == meeting["participant_a_role_id"] else meeting["participant_b_country"]
+
+        # Fetch avatar identity (agent_memories keyed by country_code, not role_id)
+        identity_row = _db.table("agent_memories").select("content") \
+            .eq("sim_run_id", sim_id) \
+            .eq("country_code", ai_country) \
+            .eq("memory_key", "avatar_identity") \
+            .limit(1).execute()
+        avatar_identity = identity_row.data[0]["content"] if identity_row.data else f"Head of state. Role: {ai_role_id}"
+
+        # Fetch intent note
+        meeting_row = _db.table("meetings").select("metadata").eq("id", meeting_id).limit(1).execute()
+        metadata = (meeting_row.data[0].get("metadata") or {}) if meeting_row.data else {}
+        intent_key = "intent_note_a" if ai_role_id == meeting["participant_a_role_id"] else "intent_note_b"
+        intent_note = metadata.get(intent_key, "")
+
+        # Build conversation history
+        messages = get_meeting_messages(meeting_id)
+        conversation_history = []
+        for msg in messages:
+            if msg.get("channel") == "system":
+                continue
+            role = "assistant" if msg["role_id"] == ai_role_id else "user"
+            conversation_history.append({"role": role, "content": msg["content"]})
+
+        response = await text_avatar_turn(
+            avatar_identity=avatar_identity,
+            intent_note=intent_note,
+            conversation_history=conversation_history,
+        )
+
+        send_message(meeting_id, ai_role_id, ai_country, response)
+
+    except Exception as e:
+        logger.error("[avatar] Background response failed for meeting %s: %s", meeting_id, e)
 
 
 @app.post("/api/sim/{sim_id}/meetings/{meeting_id}/end", response_model=APIResponse)
@@ -2198,6 +2232,119 @@ async def end_meeting_endpoint(
                 dispatcher.set_agent_state(rid, IDLE)
 
     return APIResponse(data=result)
+
+
+@app.post("/api/sim/{sim_id}/meetings/{meeting_id}/avatar-turn", response_model=APIResponse)
+async def avatar_turn(
+    sim_id: str,
+    meeting_id: str,
+    body: AvatarTurnRequest,
+    user: AuthUser = Depends(get_current_user),
+):
+    """Fast avatar response for AI-Human text chat.
+
+    Calls the avatar service directly (~1-3s) instead of routing through
+    the full managed agent session. The human's message should already be
+    written to meeting_messages before calling this endpoint.
+    """
+    from engine.services.meeting_service import get_meeting, get_meeting_messages
+    from engine.agents.managed.avatar_service import text_avatar_turn
+
+    # 1. Verify meeting belongs to sim and is active
+    meeting_data = get_meeting(meeting_id)
+    if not meeting_data or meeting_data["meeting"].get("sim_run_id") != sim_id:
+        raise HTTPException(status_code=404, detail="Meeting not found in this SIM")
+    meeting = meeting_data["meeting"]
+    if meeting["status"] != "active":
+        raise HTTPException(status_code=400, detail="Meeting is not active")
+
+    # 2. Find AI counterpart role_id
+    if meeting["participant_a_role_id"] == body.role_id:
+        ai_role_id = meeting["participant_b_role_id"]
+        ai_country = meeting["participant_b_country"]
+    elif meeting["participant_b_role_id"] == body.role_id:
+        ai_role_id = meeting["participant_a_role_id"]
+        ai_country = meeting["participant_a_country"]
+    else:
+        raise HTTPException(status_code=400, detail="Role not a participant in this meeting")
+
+    # 3. Fetch avatar_identity from agent_memories (keyed by country_code, not role_id)
+    _db = db.get_client()
+    identity_row = _db.table("agent_memories").select("content") \
+        .eq("sim_run_id", sim_id) \
+        .eq("country_code", ai_country).eq("memory_key", "avatar_identity") \
+        .limit(1).execute()
+    avatar_identity = identity_row.data[0]["content"] if identity_row.data else (
+        f"You are a head of state. Role: {ai_role_id}"
+    )
+
+    # 4. Fetch intent_note from meetings.metadata (keyed as intent_note_a / intent_note_b)
+    metadata = meeting.get("metadata") or {}
+    intent_key = "intent_note_a" if ai_role_id == meeting["participant_a_role_id"] else "intent_note_b"
+    intent_note = metadata.get(intent_key, "")
+
+    # 5. Build conversation history from meeting_messages
+    messages = get_meeting_messages(meeting_id)
+    conversation_history: list[dict[str, str]] = []
+    for msg in messages:
+        if msg.get("channel") == "system":
+            continue
+        role = "assistant" if msg["role_id"] == ai_role_id else "user"
+        conversation_history.append({"role": role, "content": msg["content"]})
+
+    # 6. Call avatar service (fast, no tools)
+    try:
+        response_text = await text_avatar_turn(
+            avatar_identity=avatar_identity,
+            intent_note=intent_note,
+            conversation_history=conversation_history,
+        )
+    except Exception as e:
+        logger.error("[avatar-turn] Failed for meeting %s: %s", meeting_id, e)
+        raise HTTPException(status_code=500, detail="Avatar response failed")
+
+    # 7. Write AI response to meeting_messages
+    from engine.services.meeting_service import send_message
+    write_result = send_message(
+        meeting_id=meeting_id,
+        role_id=ai_role_id,
+        country_code=ai_country,
+        content=response_text,
+    )
+    if not write_result["success"]:
+        raise HTTPException(status_code=400, detail=write_result["narrative"])
+
+    return APIResponse(data={
+        "response": response_text,
+        "turn_number": write_result["message"]["turn_number"],
+        "ai_role_id": ai_role_id,
+    })
+
+
+@app.get("/api/elevenlabs/agents", response_model=APIResponse)
+async def list_elevenlabs_agents(
+    user: AuthUser = Depends(require_moderator),
+):
+    """List available ElevenLabs conversational AI agents.
+
+    Used by moderators to assign voice agents to roles.
+    """
+    import httpx
+    if not settings.elevenlabs_api_key:
+        return APIResponse(data={"agents": []}, meta={"error": "ElevenLabs API key not configured"})
+
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://api.elevenlabs.io/v1/convai/agents",
+                headers={"xi-api-key": settings.elevenlabs_api_key},
+                timeout=10.0,
+            )
+            resp.raise_for_status()
+            return APIResponse(data=resp.json())
+    except Exception as e:
+        logger.error("[elevenlabs] Failed to list agents: %s", e)
+        raise HTTPException(status_code=502, detail=f"ElevenLabs API error: {str(e)}")
 
 
 # ---------------------------------------------------------------------------

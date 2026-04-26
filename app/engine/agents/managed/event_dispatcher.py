@@ -179,6 +179,19 @@ class EventDispatcher:
         self.agent_states[role_id] = IDLE
         logger.info("[dispatcher] Registered agent %s", role_id)
 
+        # Ask the managed agent to generate its Avatar Identity
+        self._enqueue_avatar_identity_generation(role_id)
+
+    def _enqueue_avatar_identity_generation(self, role_id: str) -> None:
+        """Ask the managed agent to generate its Avatar Identity."""
+        from engine.agents.managed.avatar_generator import build_avatar_identity_prompt
+        self.enqueue(
+            role_id=role_id,
+            tier=2,
+            event_type="avatar_identity_request",
+            message=build_avatar_identity_prompt(),
+        )
+
     def set_agent_state(self, role_id: str, state: str) -> None:
         """Update agent state (IDLE, ACTING, IN_MEETING, FROZEN)."""
         old = self.agent_states.get(role_id)
@@ -398,92 +411,63 @@ class EventDispatcher:
                         continue  # Human-Human meeting — not our business
 
                     if a_is_ai and b_is_ai:
-                        # AI-AI meeting — use ConversationRouter if both IDLE and not yet started
+                        # AI-AI meeting — use avatar text chat if both IDLE and not yet started
                         if turn_count == 0:
                             a_state = self.agent_states.get(role_a, IDLE)
                             b_state = self.agent_states.get(role_b, IDLE)
                             if a_state == IDLE and b_state == IDLE:
-                                logger.info("[meetings] Starting AI-AI meeting %s (%s ↔ %s)",
+                                logger.info("[meetings] Starting AI-AI avatar meeting %s (%s ↔ %s)",
                                             mid[:8], role_a, role_b)
-                                try:
-                                    from engine.agents.managed.conversations import ConversationRouter
-                                    router = ConversationRouter(
-                                        session_manager=self.session_manager,
-                                        sim_run_id=self.sim_run_id,
-                                        dispatcher=self,
+                                # Set both IN_MEETING immediately (prevents double-start)
+                                self.set_agent_state(role_a, IN_MEETING)
+                                self.set_agent_state(role_b, IN_MEETING)
+
+                                # Fetch avatar identities
+                                identity_a = self._fetch_avatar_identity(role_a)
+                                identity_b = self._fetch_avatar_identity(role_b)
+
+                                # Generate intent notes (fast — direct Claude API)
+                                intent_a = await self._generate_quick_intent(role_a, role_b, meeting)
+                                intent_b = await self._generate_quick_intent(role_b, role_a, meeting)
+
+                                # Store intent notes in meeting metadata
+                                from engine.services.meeting_service import update_meeting_metadata
+                                update_meeting_metadata(mid, {
+                                    "intent_note_a": intent_a,
+                                    "intent_note_b": intent_b,
+                                })
+
+                                # Run avatar meeting in background
+                                asyncio.create_task(
+                                    self._run_avatar_meeting(
+                                        mid, role_a, role_b,
+                                        identity_a, identity_b,
+                                        intent_a, intent_b, meeting,
                                     )
-                                    ctx_a = self.agents[role_a]
-                                    ctx_b = self.agents[role_b]
-                                    # Run meeting in background (don't block monitor loop)
-                                    asyncio.create_task(
-                                        router.run_meeting(
-                                            meeting_id=mid,
-                                            agent_a=ctx_a,
-                                            agent_b=ctx_b,
-                                            agent_states=self.agent_states,
-                                            round_num=ctx_a.round_num,
-                                            max_turns=8,
-                                        )
-                                    )
-                                except Exception as e:
-                                    logger.error("[meetings] Failed to start AI-AI meeting %s: %s", mid[:8], e)
+                                )
                     else:
-                        # AI-Human meeting — check if human sent messages AI hasn't responded to
+                        # AI-Human meeting
+                        # Human message responses are handled by the avatar-turn API
+                        # endpoint (Task #5). The monitor only handles AI-speaks-first.
                         ai_role = role_a if a_is_ai else role_b
-                        human_role = role_b if a_is_ai else role_a
                         human_country = meeting["participant_b_country"] if a_is_ai else meeting["participant_a_country"]
+                        agenda = meeting.get("agenda", "Bilateral discussion")
 
                         if self.agent_states.get(ai_role, IDLE) != IDLE:
                             continue  # AI busy — wait
 
-                        # Check if we already have a pending chat_message for this AI+meeting
-                        # (prevents duplicate prompts when monitor runs faster than agent processes)
-                        existing_chat = db.table("agent_event_queue") \
-                            .select("id") \
-                            .eq("sim_run_id", self.sim_run_id) \
-                            .eq("role_id", ai_role) \
-                            .eq("event_type", "chat_message") \
-                            .is_("processed_at", "null") \
-                            .limit(1).execute().data or []
-                        if existing_chat:
-                            continue  # Already has a pending chat prompt — don't duplicate
-
-                        # Check latest messages — has human spoken since AI's last message?
+                        # Only act if no messages yet — AI needs to open
                         msgs = db.table("meeting_messages") \
-                            .select("role_id,content") \
+                            .select("role_id") \
                             .eq("meeting_id", mid) \
-                            .order("created_at", desc=True) \
-                            .limit(3).execute().data or []
+                            .limit(1).execute().data or []
 
                         if not msgs:
-                            # No messages yet — prompt AI to open the conversation
-                            self.enqueue(
-                                role_id=ai_role,
-                                tier=2,
-                                event_type="chat_message",
-                                message=(
-                                    f"MEETING ACTIVE with {human_country.upper()}\n"
-                                    f"Meeting ID: {mid}\n"
-                                    f"Agenda: {meeting.get('agenda', 'Bilateral discussion')}\n\n"
-                                    f"You are in a bilateral meeting. Speak first — introduce yourself "
-                                    f"and state your agenda. 1-3 sentences, natural tone."
-                                ),
-                                metadata={"meeting_id": mid},
-                            )
-                        elif msgs[0]["role_id"] == human_role:
-                            # Human spoke last — prompt AI to respond
-                            human_text = msgs[0].get("content", "")[:300]
-                            self.enqueue(
-                                role_id=ai_role,
-                                tier=2,
-                                event_type="chat_message",
-                                message=(
-                                    f"MEETING with {human_country.upper()}\n"
-                                    f"Meeting ID: {mid}\n\n"
-                                    f"{human_country.upper()} says: \"{human_text}\"\n\n"
-                                    f"Respond naturally. 1-3 sentences."
-                                ),
-                                metadata={"meeting_id": mid, "responding_to": human_text[:100]},
+                            # No messages yet — AI speaks first via avatar service
+                            asyncio.create_task(
+                                self._avatar_opening_message(
+                                    mid, ai_role, human_country, agenda,
+                                )
                             )
 
                 await asyncio.sleep(MEETING_CHECK_INTERVAL)
@@ -493,6 +477,150 @@ class EventDispatcher:
             except Exception as e:
                 logger.error("[meetings] Monitor error: %s", e)
                 await asyncio.sleep(15)
+
+    # -- Avatar meeting helpers --------------------------------------------
+
+    async def _run_avatar_meeting(
+        self, meeting_id: str, role_a: str, role_b: str,
+        identity_a: str, identity_b: str,
+        intent_a: str, intent_b: str, meeting: dict,
+    ) -> None:
+        """Run an avatar text meeting and handle cleanup.
+
+        Called as a background task. Both agents are already IN_MEETING.
+        """
+        try:
+            from engine.agents.managed.avatar_service import run_text_meeting
+            from engine.services.meeting_service import save_transcript, end_meeting
+
+            ctx_a = self.agents[role_a]
+            ctx_b = self.agents[role_b]
+
+            transcript = await run_text_meeting(
+                meeting_id=meeting_id,
+                agent_a_identity=identity_a,
+                agent_a_intent=intent_a,
+                agent_a_role_id=role_a,
+                agent_a_country=ctx_a.country_code,
+                agent_b_identity=identity_b,
+                agent_b_intent=intent_b,
+                agent_b_role_id=role_b,
+                agent_b_country=ctx_b.country_code,
+                sim_run_id=self.sim_run_id,
+                round_num=ctx_a.round_num,
+                max_turns=16,
+            )
+
+            # Save transcript and end meeting
+            save_transcript(meeting_id, transcript)
+            end_meeting(meeting_id, role_a)
+
+            # Deliver transcript to both agents for reflection
+            for role_id in (role_a, role_b):
+                self.enqueue(
+                    role_id=role_id,
+                    tier=2,
+                    event_type="meeting_transcript",
+                    message=(
+                        f"MEETING COMPLETED\n\nTranscript:\n{transcript}\n\n"
+                        f"Review this conversation. Update your notes with key outcomes, "
+                        f"commitments made, and intelligence gathered."
+                    ),
+                    metadata={"meeting_id": meeting_id},
+                )
+
+            logger.info("[meetings] Avatar meeting %s completed", meeting_id[:8])
+        except Exception as e:
+            logger.error("[meetings] Avatar meeting %s failed: %s", meeting_id[:8], e)
+        finally:
+            self.set_agent_state(role_a, IDLE)
+            self.set_agent_state(role_b, IDLE)
+
+    def _fetch_avatar_identity(self, role_id: str) -> str:
+        """Read avatar_identity from agent_memories table.
+
+        Returns the identity text, or a minimal fallback if not found.
+        agent_memories is keyed by (sim_run_id, country_code, memory_key).
+        """
+        ctx = self.agents.get(role_id)
+        country_code = ctx.country_code if ctx else role_id
+        try:
+            db = get_client()
+            result = (
+                db.table("agent_memories")
+                .select("content")
+                .eq("sim_run_id", self.sim_run_id)
+                .eq("country_code", country_code)
+                .eq("memory_key", "avatar_identity")
+                .limit(1)
+                .execute()
+            )
+            if result.data and result.data[0].get("content"):
+                return result.data[0]["content"]
+        except Exception as e:
+            logger.warning("[meetings] Failed to fetch avatar identity for %s: %s", role_id, e)
+
+        # Fallback: minimal identity from session context
+        if ctx:
+            return f"You are the leader of {ctx.country_code}. Role: {role_id}."
+        return f"You are a head of state. Role: {role_id}."
+
+    async def _generate_quick_intent(
+        self, my_role_id: str, other_role_id: str, meeting: dict,
+    ) -> str:
+        """Generate a quick intent note via direct Claude API call."""
+        from engine.agents.managed.avatar_service import text_avatar_turn
+
+        agenda = meeting.get("agenda", "Bilateral discussion")
+        identity = self._fetch_avatar_identity(my_role_id)
+        prompt = (
+            f"You are about to have a meeting. Agenda: {agenda}. "
+            f"Generate a brief intent note: your objective, approach (2-3 tactics), "
+            f"and boundaries (what not to reveal). Keep it under 200 words."
+        )
+
+        try:
+            intent = await text_avatar_turn(
+                avatar_identity=identity,
+                intent_note="",  # No intent yet — generating it
+                conversation_history=[{"role": "user", "content": prompt}],
+            )
+            return intent
+        except Exception as e:
+            logger.warning("[dispatcher] Failed to generate intent for %s: %s", my_role_id, e)
+            return f"Discuss {agenda} with counterpart. Protect your interests."
+
+    async def _avatar_opening_message(
+        self, meeting_id: str, ai_role: str, human_country: str, agenda: str,
+    ) -> None:
+        """Generate and send an AI opening message via avatar service."""
+        from engine.agents.managed.avatar_service import text_avatar_turn
+        from engine.services.meeting_service import send_message
+
+        self.set_agent_state(ai_role, IN_MEETING)
+        try:
+            identity = self._fetch_avatar_identity(ai_role)
+            ctx = self.agents.get(ai_role)
+            country = ctx.country_code if ctx else ""
+
+            opening = await text_avatar_turn(
+                avatar_identity=identity,
+                intent_note=(
+                    f"Opening a meeting with {human_country}. Agenda: {agenda}. "
+                    f"Speak first — introduce yourself and state your agenda."
+                ),
+                conversation_history=[
+                    {"role": "user", "content": "The meeting has started. You speak first."},
+                ],
+            )
+
+            if opening:
+                send_message(meeting_id, ai_role, country, opening)
+                logger.info("[meetings] Avatar opening sent for %s in meeting %s", ai_role, meeting_id[:8])
+        except Exception as e:
+            logger.error("[meetings] Avatar opening failed for %s: %s", ai_role, e)
+        finally:
+            self.set_agent_state(ai_role, IDLE)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.
