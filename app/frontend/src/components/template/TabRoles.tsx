@@ -379,22 +379,21 @@ function VoiceAgentField({ value, onChange }: { value: string | null; onChange: 
   const [agentError, setAgentError] = useState<string | null>(null)
   const fetchedRef = useRef(false)
 
-  const loadAgents = async () => {
+  // Fetch agents on mount (not on focus — select dropdown needs options ready)
+  useEffect(() => {
     if (fetchedRef.current) return
     fetchedRef.current = true
     setLoadingAgents(true)
     setAgentError(null)
-    try {
-      const data = await fetchElevenLabsAgents()
-      setAgents(data)
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to load voice agents'
-      setAgentError(msg)
-      fetchedRef.current = false // allow retry
-    } finally {
-      setLoadingAgents(false)
-    }
-  }
+    fetchElevenLabsAgents()
+      .then((data) => setAgents(data))
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : 'Failed to load voice agents'
+        setAgentError(msg)
+        fetchedRef.current = false // allow retry on re-mount
+      })
+      .finally(() => setLoadingAgents(false))
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col gap-1 mt-3">
@@ -405,7 +404,6 @@ function VoiceAgentField({ value, onChange }: { value: string | null; onChange: 
       <select
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value || null)}
-        onFocus={loadAgents}
         className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
       >
         <option value="">(none)</option>
