@@ -384,7 +384,6 @@ function VoiceAgentField({ value, onChange }: { value: string | null; onChange: 
 
   // Fetch agents on mount — shared cache across all instances
   useEffect(() => {
-    console.error('[VoiceAgentField] Mount — cache:', !!_voiceAgentCache, 'promise:', !!_voiceAgentFetchPromise)
     if (_voiceAgentCache) {
       setAgents(_voiceAgentCache)
       return
@@ -396,13 +395,11 @@ function VoiceAgentField({ value, onChange }: { value: string | null; onChange: 
     }
     _voiceAgentFetchPromise
       .then((data) => {
-        console.error('[VoiceAgentField] Got', data.length, 'agents')
         _voiceAgentCache = data
         setAgents(data)
       })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : 'Failed to load voice agents'
-        console.error('[VoiceAgentField] FETCH ERROR:', msg)
         setAgentError(msg)
         _voiceAgentFetchPromise = null // allow retry
       })

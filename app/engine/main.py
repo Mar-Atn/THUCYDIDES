@@ -2332,8 +2332,6 @@ async def list_elevenlabs_agents(
     import httpx
     import os
     key = settings.elevenlabs_api_key or os.environ.get("ELEVENLABS_API_KEY", "")
-    logger.info("[elevenlabs] Key from settings: %s, from env: %s",
-                bool(settings.elevenlabs_api_key), bool(os.environ.get("ELEVENLABS_API_KEY")))
     if not key:
         return APIResponse(data={"agents": []}, meta={"error": "ElevenLabs API key not configured"})
 
