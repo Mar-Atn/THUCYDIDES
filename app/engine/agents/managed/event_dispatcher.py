@@ -318,19 +318,22 @@ class EventDispatcher:
                     await asyncio.sleep(10)
                     continue
 
-                # Send pulse to all idle agents
+                # Send enriched pulse to all idle agents
                 pulse_count += 1
                 for role_id in list(self.agents.keys()):
                     if self.agent_states.get(role_id) in (IDLE,):
+                        try:
+                            message = self._build_pulse_context(
+                                role_id, round_num, pulse_count, pulses_per_round)
+                        except Exception as ctx_err:
+                            logger.warning("[auto-pulse] Context build failed for %s: %s", role_id, ctx_err)
+                            message = (f"Round {round_num}, Phase A — pulse {pulse_count}/{pulses_per_round}. "
+                                       f"Assess your situation and take strategic actions.")
                         self.enqueue(
                             role_id=role_id,
                             tier=3,
                             event_type="round_pulse",
-                            message=(
-                                f"Round {round_num}, Phase A — pulse {pulse_count}/{pulses_per_round}. "
-                                f"Assess your situation, check intelligence, and take strategic actions. "
-                                f"Use your tools to gather information and act."
-                            ),
+                            message=message,
                             metadata={"round_num": round_num, "pulse_num": pulse_count,
                                       "total_pulses": pulses_per_round},
                         )
@@ -1016,6 +1019,119 @@ class EventDispatcher:
 
     # -- Phase B Solicitation ------------------------------------------------
 
+    def _build_pulse_context(self, role_id: str, round_num: int,
+                              pulse_num: int, total_pulses: int) -> str:
+        """Build enriched per-pulse context: recent events + pending items + snapshot.
+
+        Per M5 SPEC D4: each pulse contains public events, pending items,
+        resource dashboard. Agents can use tools for full details.
+        """
+        db = get_client()
+        ctx = self.agents.get(role_id)
+        cc = ctx.country_code if ctx else ""
+        lines: list[str] = []
+
+        lines.append(f"Round {round_num}, Phase A — pulse {pulse_num}/{total_pulses}.")
+
+        # Recent public events (last 5 since previous pulse)
+        try:
+            events = db.table("observatory_events") \
+                .select("event_type,summary,country_code") \
+                .eq("sim_run_id", self.sim_run_id) \
+                .eq("round_num", round_num) \
+                .neq("event_type", "ai_agent_log") \
+                .order("created_at", desc=True).limit(5).execute().data or []
+            if events:
+                lines.append("\nRecent events:")
+                for e in events:
+                    lines.append(f"  - {(e.get('summary') or e.get('event_type', ''))[:80]}")
+        except Exception:
+            pass
+
+        # Pending proposals (transactions/agreements awaiting response)
+        try:
+            pending_txns = db.table("exchange_transactions") \
+                .select("id,proposer") \
+                .eq("sim_run_id", self.sim_run_id) \
+                .eq("counterpart", cc).eq("status", "pending").execute().data or []
+            pending_agrs = db.table("agreements") \
+                .select("id,proposer_country_code") \
+                .eq("sim_run_id", self.sim_run_id) \
+                .eq("status", "proposed") \
+                .contains("signatories", [cc]).execute().data or []
+            if pending_txns or pending_agrs:
+                lines.append("\nPending items requiring your response:")
+                for t in pending_txns:
+                    lines.append(f"  - Transaction from {t['proposer']} (id: {t['id'][:8]})")
+                for a in pending_agrs:
+                    lines.append(f"  - Agreement from {a.get('proposer_country_code', '?')} (id: {a['id'][:8]})")
+        except Exception:
+            pass
+
+        # Country snapshot (key numbers only — use tools for full details)
+        try:
+            country = db.table("countries") \
+                .select("gdp,treasury,stability,inflation,nuclear_level,ai_level") \
+                .eq("sim_run_id", self.sim_run_id).eq("id", cc).limit(1).execute()
+            if country.data:
+                c = country.data[0]
+                lines.append(f"\nYour country snapshot: GDP ${c.get('gdp',0):.0f}B, "
+                             f"treasury ${c.get('treasury',0):.1f}B, "
+                             f"stability {c.get('stability',5):.1f}/10, "
+                             f"inflation {c.get('inflation',0):.0f}%")
+        except Exception:
+            pass
+
+        lines.append("\nAssess your situation and take strategic actions. "
+                     "Use get_my_country, get_my_forces, get_relationships for full details.")
+
+        return "\n".join(lines)
+
+    def _build_batch_context(self, role_id: str, round_num: int) -> str:
+        """Build enriched context for batch decision solicitation.
+
+        Includes economic snapshot so agent can make informed budget decisions
+        without needing a separate tool call.
+        """
+        db = get_client()
+        ctx = self.agents.get(role_id)
+        cc = ctx.country_code if ctx else ""
+        lines: list[str] = []
+
+        lines.append(f"ROUND {round_num} — SUBMIT YOUR BATCH DECISIONS NOW.\n")
+
+        # Economic snapshot
+        try:
+            country = db.table("countries") \
+                .select("gdp,treasury,stability,inflation,nuclear_level,ai_level,"
+                        "mil_ground,mil_naval,mil_tactical_air,mil_strategic_missiles,mil_air_defense,"
+                        "opec_member") \
+                .eq("sim_run_id", self.sim_run_id).eq("id", cc).limit(1).execute()
+            if country.data:
+                c = country.data[0]
+                lines.append("YOUR ECONOMIC STATE:")
+                lines.append(f"  GDP: ${c.get('gdp',0):.1f}B | Treasury: ${c.get('treasury',0):.1f}B | "
+                             f"Inflation: {c.get('inflation',0):.0f}% | Stability: {c.get('stability',5):.1f}/10")
+                lines.append(f"  Military: {c.get('mil_ground',0)}G {c.get('mil_naval',0)}N "
+                             f"{c.get('mil_tactical_air',0)}A {c.get('mil_strategic_missiles',0)}M "
+                             f"{c.get('mil_air_defense',0)}AD")
+                lines.append(f"  Nuclear L{c.get('nuclear_level',0)} | AI L{c.get('ai_level',0)}"
+                             + (" | OPEC member" if c.get('opec_member') else ""))
+                lines.append("")
+        except Exception:
+            pass
+
+        lines.append("DECISIONS TO SUBMIT:")
+        lines.append("1. set_budget — social_pct (0.5-1.5), production {branch: 0-4}, research {nuclear_coins, ai_coins}")
+        lines.append("2. set_tariffs — target_country + level 0-3 (optional)")
+        lines.append("3. set_sanctions — target_country + level -3 to +3 (optional)")
+        lines.append("4. set_opec — production: min/low/normal/high/max (OPEC members only)")
+        lines.append("")
+        lines.append("Use get_my_country for full details. Submit each via submit_action. "
+                     "You will NOT get another chance this round.")
+
+        return "\n".join(lines)
+
     def sync_round_num(self, round_num: int) -> None:
         """Update round_num on all agent sessions + their ToolExecutors.
 
@@ -1047,20 +1163,17 @@ class EventDispatcher:
         for role_id in list(self.agents.keys()):
             if self.agent_states.get(role_id) == FROZEN:
                 continue
+            try:
+                message = self._build_batch_context(role_id, round_num)
+            except Exception as ctx_err:
+                logger.warning("[batch] Context build failed for %s: %s", role_id, ctx_err)
+                message = (f"ROUND {round_num} — SUBMIT YOUR BATCH DECISIONS NOW.\n"
+                           f"Submit set_budget, set_tariffs, set_sanctions, set_opec.")
             self.enqueue(
                 role_id=role_id,
-                tier=1,  # Critical — engines wait for this
+                tier=1,
                 event_type="batch_decision_request",
-                message=(
-                    f"ROUND {round_num} — SUBMIT YOUR BATCH DECISIONS NOW.\n\n"
-                    f"This is your ONE opportunity this round to set:\n"
-                    f"1. set_budget — social spending, military production, tech R&D allocation\n"
-                    f"2. set_tariffs — tariff levels against specific countries (if desired)\n"
-                    f"3. set_sanctions — sanction levels against specific countries (if desired)\n"
-                    f"4. set_opec — OPEC production level (only if your country is an OPEC member)\n\n"
-                    f"Review your current economic situation with get_my_country first.\n"
-                    f"Submit each decision using submit_action. You will NOT get another chance this round."
-                ),
+                message=message,
                 metadata={"round_num": round_num, "solicitation_type": "batch_decisions"},
             )
             agents_asked += 1
