@@ -2160,6 +2160,13 @@ async def send_meeting_message(
 
 async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: str, meeting: dict):
     """Background task: generate avatar response when human sends a message."""
+    from engine.agents.managed.event_dispatcher import get_dispatcher, IN_MEETING, IDLE
+    dispatcher = get_dispatcher(sim_id)
+
+    # Set AI to IN_MEETING (busy) while avatar responds
+    if dispatcher and ai_role_id in dispatcher.agents:
+        dispatcher.set_agent_state(ai_role_id, IN_MEETING)
+
     try:
         from engine.services.meeting_service import get_meeting_messages, send_message
         from engine.agents.managed.avatar_service import text_avatar_turn
@@ -2201,6 +2208,10 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
 
     except Exception as e:
         logger.error("[avatar] Background response failed for meeting %s: %s", meeting_id, e)
+    finally:
+        # Return AI to IDLE after avatar response
+        if dispatcher and ai_role_id in dispatcher.agents:
+            dispatcher.set_agent_state(ai_role_id, IDLE)
 
 
 @app.post("/api/sim/{sim_id}/meetings/{meeting_id}/end", response_model=APIResponse)
@@ -2292,7 +2303,13 @@ async def avatar_turn(
         role = "assistant" if msg["role_id"] == ai_role_id else "user"
         conversation_history.append({"role": role, "content": msg["content"]})
 
-    # 6. Call avatar service (fast, no tools)
+    # 6. Set AI agent to IN_MEETING (busy — blocks other actions/meetings)
+    from engine.agents.managed.event_dispatcher import get_dispatcher, IN_MEETING, IDLE
+    dispatcher = get_dispatcher(sim_id)
+    if dispatcher and ai_role_id in dispatcher.agents:
+        dispatcher.set_agent_state(ai_role_id, IN_MEETING)
+
+    # 7. Call avatar service (fast, no tools)
     try:
         response_text = await text_avatar_turn(
             avatar_identity=avatar_identity,
@@ -2301,9 +2318,11 @@ async def avatar_turn(
         )
     except Exception as e:
         logger.error("[avatar-turn] Failed for meeting %s: %s", meeting_id, e)
+        if dispatcher and ai_role_id in dispatcher.agents:
+            dispatcher.set_agent_state(ai_role_id, IDLE)
         raise HTTPException(status_code=500, detail="Avatar response failed")
 
-    # 7. Write AI response to meeting_messages
+    # 8. Write AI response to meeting_messages
     from engine.services.meeting_service import send_message
     write_result = send_message(
         meeting_id=meeting_id,
@@ -2311,6 +2330,11 @@ async def avatar_turn(
         country_code=ai_country,
         content=response_text,
     )
+
+    # 9. Return to IDLE after response written
+    if dispatcher and ai_role_id in dispatcher.agents:
+        dispatcher.set_agent_state(ai_role_id, IDLE)
+
     if not write_result["success"]:
         raise HTTPException(status_code=400, detail=write_result["narrative"])
 
