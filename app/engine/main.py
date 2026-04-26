@@ -2341,7 +2341,10 @@ async def list_elevenlabs_agents(
                 timeout=10.0,
             )
             resp.raise_for_status()
-            return APIResponse(data=resp.json())
+            el_data = resp.json()
+            agents_list = el_data.get("agents", [])
+            logger.info("[elevenlabs] Fetched %d agents from ElevenLabs API", len(agents_list))
+            return APIResponse(data={"agents": agents_list})
     except Exception as e:
         logger.error("[elevenlabs] Failed to list agents: %s", e)
         raise HTTPException(status_code=502, detail=f"ElevenLabs API error: {str(e)}")

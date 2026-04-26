@@ -46,7 +46,11 @@ export async function fetchElevenLabsAgents(): Promise<ElevenLabsAgent[]> {
   }
 
   const json = await resp.json()
+  console.error('[elevenlabs] Raw response keys:', Object.keys(json))
+  console.error('[elevenlabs] json.data type:', typeof json.data, Array.isArray(json.data) ? 'array' : '')
+  console.error('[elevenlabs] json.data keys:', json.data ? Object.keys(json.data) : 'null')
+  console.error('[elevenlabs] json.data.agents?:', json.data?.agents?.length ?? 'undefined')
   const agents = json.data?.agents || json.data || []
-  console.info('[elevenlabs] Fetched', agents.length, 'agents')
+  console.error('[elevenlabs] Fetched', agents.length, 'agents')
   return agents
 }
