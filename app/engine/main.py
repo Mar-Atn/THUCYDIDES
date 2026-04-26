@@ -2150,10 +2150,13 @@ async def send_meeting_message(
     dispatcher = get_dispatcher(sim_id)
     if dispatcher and other_role_id in (dispatcher.agents or {}):
         # AI counterpart — trigger avatar response asynchronously
-        # The avatar-turn endpoint is the primary path (frontend calls it),
-        # but we also handle it here as fallback for direct API usage
         import asyncio
+        logger.info("[meeting-msg] Triggering avatar response for %s in meeting %s", other_role_id, meeting_id[:8])
         asyncio.create_task(_avatar_respond_to_message(sim_id, meeting_id, other_role_id, meeting))
+    else:
+        logger.info("[meeting-msg] No avatar trigger: dispatcher=%s, other_role=%s, agents=%s",
+                    bool(dispatcher), other_role_id,
+                    list(dispatcher.agents.keys())[:5] if dispatcher else "none")
 
     return APIResponse(data=result)
 
