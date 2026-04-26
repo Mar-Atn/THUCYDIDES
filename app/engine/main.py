@@ -2186,11 +2186,27 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
             .limit(1).execute()
         avatar_identity = identity_row.data[0]["content"] if identity_row.data else f"Head of state. Role: {ai_role_id}"
 
-        # Fetch intent note
-        meeting_row = _db.table("meetings").select("metadata").eq("id", meeting_id).limit(1).execute()
-        metadata = (meeting_row.data[0].get("metadata") or {}) if meeting_row.data else {}
+        # Fetch intent note (may be empty for AI-Human meetings)
+        meeting_row = _db.table("meetings").select("metadata,agenda").eq("id", meeting_id).limit(1).execute()
+        meeting_data_row = meeting_row.data[0] if meeting_row.data else {}
+        metadata = meeting_data_row.get("metadata") or {}
         intent_key = "intent_note_a" if ai_role_id == meeting["participant_a_role_id"] else "intent_note_b"
         intent_note = metadata.get(intent_key, "")
+
+        # Build fallback intent from meeting context if no intent note exists
+        if not intent_note:
+            human_role = meeting["participant_b_role_id"] if ai_role_id == meeting["participant_a_role_id"] else meeting["participant_a_role_id"]
+            human_country = meeting["participant_b_country"] if ai_role_id == meeting["participant_a_role_id"] else meeting["participant_a_country"]
+            agenda = meeting.get("agenda") or meeting_data_row.get("agenda") or "Bilateral discussion"
+            # Resolve human's character name
+            human_name_row = _db.table("roles").select("character_name").eq("id", human_role).eq("sim_run_id", sim_id).limit(1).execute()
+            human_name = human_name_row.data[0]["character_name"] if human_name_row.data else human_role
+            intent_note = (
+                f"MEETING WITH: {human_name}, leader of {human_country.upper()}\n"
+                f"AGENDA: {agenda}\n\n"
+                f"Engage naturally. You initiated or accepted this meeting for a reason — "
+                f"pursue the agenda while protecting your interests. Be direct and in character."
+            )
 
         # Build conversation history
         messages = get_meeting_messages(meeting_id)

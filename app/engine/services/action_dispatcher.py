@@ -573,9 +573,20 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
 
     client.table("meeting_invitations").update(update_payload).eq("id", inv_id).execute()
 
-    # Enqueue meeting_started events to AI participants only
+    # Generate intent notes + enqueue meeting_started events for AI participants
     if meeting_id:
         inviter_role_id = inv.get("inviter_role_id", "")
+        inviter_country = inv.get("inviter_country_code", "")
+        accepter_country = action.get("country_code", "")
+        agenda = inv.get("message") or "Bilateral discussion"
+
+        # Build intent notes for AI participants from meeting context
+        _generate_meeting_intent_notes(
+            client, sim_run_id, meeting_id,
+            inviter_role_id, inviter_country,
+            role_id, accepter_country, agenda,
+        )
+
         for notify_role in [inviter_role_id, role_id]:
             if not notify_role:
                 continue
@@ -594,9 +605,10 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
                         f"MEETING STARTED\n\n"
                         f"A bilateral meeting has been confirmed.\n"
                         f"Meeting ID: {meeting_id}\n"
-                        f"Agenda: {inv.get('message', 'Bilateral discussion')}\n\n"
-                        f"The meeting is now active. Use send_message to speak, "
-                        f"or the conversation router will manage the exchange."
+                        f"Agenda: {agenda}\n\n"
+                        f"Your avatar will handle the conversation using your Avatar Identity "
+                        f"and the Intent Note stored in the meeting metadata. "
+                        f"After the meeting, you'll receive the transcript for reflection."
                     ),
                     "metadata": {"meeting_id": meeting_id, "invitation_id": inv_id},
                 }).execute()
@@ -608,6 +620,80 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
     if meeting_id:
         result["meeting_id"] = meeting_id
     return result
+
+
+def _generate_meeting_intent_notes(
+    client, sim_run_id: str, meeting_id: str,
+    role_a: str, country_a: str,
+    role_b: str, country_b: str,
+    agenda: str,
+) -> None:
+    """Generate and store intent notes for AI participants when a meeting is created.
+
+    Builds contextual intent notes from avatar identity + meeting context.
+    Stored in meetings.metadata as intent_note_a / intent_note_b.
+    Called synchronously from _respond_to_meeting when acceptance creates the meeting.
+    """
+    from engine.services.meeting_service import update_meeting_metadata
+
+    intent_notes: dict = {}
+
+    for role_id, country, other_role, other_country, key in [
+        (role_a, country_a, role_b, country_b, "intent_note_a"),
+        (role_b, country_b, role_a, country_a, "intent_note_b"),
+    ]:
+        # Only generate for AI-operated roles
+        role_check = client.table("roles").select("is_ai_operated,character_name") \
+            .eq("sim_run_id", sim_run_id).eq("id", role_id).limit(1).execute()
+        if not (role_check.data and role_check.data[0].get("is_ai_operated")):
+            continue
+
+        # Get counterpart name
+        other_check = client.table("roles").select("character_name") \
+            .eq("sim_run_id", sim_run_id).eq("id", other_role).limit(1).execute()
+        other_name = other_check.data[0]["character_name"] if other_check.data else other_role
+
+        # Get avatar identity for richer context
+        mem_check = client.table("agent_memories").select("content") \
+            .eq("sim_run_id", sim_run_id).eq("country_code", country) \
+            .eq("memory_key", "avatar_identity").limit(1).execute()
+        has_identity = bool(mem_check.data and mem_check.data[0].get("content"))
+
+        # Get strategic plan for even richer intent
+        plan_check = client.table("agent_memories").select("content") \
+            .eq("sim_run_id", sim_run_id).eq("country_code", country) \
+            .eq("memory_key", "strategic_plan").limit(1).execute()
+        strategic_plan = plan_check.data[0]["content"][:500] if plan_check.data and plan_check.data[0].get("content") else ""
+
+        # Get relationship context
+        rel_check = client.table("agent_memories").select("content") \
+            .eq("sim_run_id", sim_run_id).eq("country_code", country) \
+            .eq("memory_key", "relationships").limit(1).execute()
+        relationships = rel_check.data[0]["content"][:300] if rel_check.data and rel_check.data[0].get("content") else ""
+
+        # Build intent note from available context
+        intent_parts = [
+            f"MEETING WITH: {other_name}, leader of {other_country.upper()}",
+            f"AGENDA: {agenda}",
+            "",
+        ]
+
+        if strategic_plan:
+            intent_parts.append(f"YOUR STRATEGIC CONTEXT:\n{strategic_plan}\n")
+        if relationships:
+            intent_parts.append(f"RELATIONSHIP NOTES:\n{relationships}\n")
+
+        intent_parts.extend([
+            "APPROACH: Pursue the agenda. Be direct, strategic, and in character.",
+            "BOUNDARIES: Do not reveal sensitive military or intelligence details unless strategically advantageous.",
+            f"TONE: Appropriate for a bilateral meeting between heads of state.",
+        ])
+
+        intent_notes[key] = "\n".join(intent_parts)
+        logger.info("[meeting] Generated intent note for %s (%s) in meeting %s", role_id, country, meeting_id[:8])
+
+    if intent_notes:
+        update_meeting_metadata(meeting_id, intent_notes)
 
 
 def _reassign_position(sim_run_id: str, round_num: int, role_id: str, country_code: str, action: dict) -> dict:
