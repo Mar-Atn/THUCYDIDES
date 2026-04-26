@@ -2161,12 +2161,21 @@ async def send_meeting_message(
     return APIResponse(data=result)
 
 
+_avatar_responding: set[str] = set()  # meeting_ids currently generating avatar response
+
 async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: str, meeting: dict):
     """Background task: generate avatar response when human sends a message.
 
     Agent state is already IN_MEETING (set at meeting creation in tool_executor).
     Cleared when meeting ends (end_meeting_endpoint).
+    Uses _avatar_responding set to prevent duplicate responses from race conditions.
     """
+    # Dedup: skip if already generating a response for this meeting
+    if meeting_id in _avatar_responding:
+        logger.info("[avatar] Skipping duplicate response for meeting %s (already in progress)", meeting_id[:8])
+        return
+    _avatar_responding.add(meeting_id)
+
     try:
         from engine.services.meeting_service import get_meeting_messages, send_message
         from engine.agents.managed.avatar_service import text_avatar_turn
@@ -2208,6 +2217,8 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
 
     except Exception as e:
         logger.error("[avatar] Background response failed for meeting %s: %s", meeting_id, e)
+    finally:
+        _avatar_responding.discard(meeting_id)
 
 
 @app.post("/api/sim/{sim_id}/meetings/{meeting_id}/end", response_model=APIResponse)
@@ -2229,25 +2240,27 @@ async def end_meeting_endpoint(
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
 
-    # Set AI participants to IDLE + deliver transcript for reflection (SPEC 6.4)
-    from engine.agents.managed.event_dispatcher import get_dispatcher, IDLE
+    # Save transcript (always — even without dispatcher) + deliver to AI agents
     from engine.services.meeting_service import get_meeting_messages, save_transcript
+    meeting = meeting_data["meeting"]
+
+    # Build transcript from messages
+    messages = get_meeting_messages(meeting_id)
+    transcript_lines = []
+    for msg in messages:
+        if msg.get("channel") == "system":
+            continue
+        transcript_lines.append(f"[{msg['role_id']}] {msg['content']}")
+    transcript_text = "\n".join(transcript_lines)
+
+    # Save transcript to meeting record (SPEC 6.4)
+    if transcript_text:
+        save_transcript(meeting_id, transcript_text)
+
+    # Set AI participants to IDLE + deliver transcript for reflection
+    from engine.agents.managed.event_dispatcher import get_dispatcher, IDLE
     dispatcher = get_dispatcher(sim_id)
     if dispatcher:
-        meeting = meeting_data["meeting"]
-        # Build transcript from messages
-        messages = get_meeting_messages(meeting_id)
-        transcript_lines = []
-        for msg in messages:
-            if msg.get("channel") == "system":
-                continue
-            transcript_lines.append(f"[{msg['role_id']}] {msg['content']}")
-        transcript_text = "\n".join(transcript_lines)
-
-        # Save transcript to meeting record
-        if transcript_text:
-            save_transcript(meeting_id, transcript_text)
-
         for rid in (meeting.get("participant_a_role_id"), meeting.get("participant_b_role_id")):
             if rid and rid in dispatcher.agents:
                 dispatcher.set_agent_state(rid, IDLE)
@@ -2266,6 +2279,9 @@ async def end_meeting_endpoint(
                         ),
                         metadata={"meeting_id": meeting_id},
                     )
+
+    # Clean up avatar response lock
+    _avatar_responding.discard(meeting_id)
 
     return APIResponse(data=result)
 
