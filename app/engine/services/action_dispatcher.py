@@ -398,8 +398,18 @@ def _route(sim_run_id: str, round_num: int, action_type: str, action: dict) -> d
     if action_type == "move_units":
         return _process_movement(sim_run_id, round_num, action)
 
-    # ── Not Yet Implemented ───────────────────────────────────────────
+    # ── Meetings / Invitations ───────────────────────────────────────
     if action_type in ("call_org_meeting", "meet_freely", "invite_to_meet", "set_meetings"):
+        # Normalize org meeting fields: schema uses organization_code/agenda,
+        # engine uses org_id/message/invitation_type
+        if action_type == "call_org_meeting":
+            if "org_id" not in action and action.get("organization_code"):
+                action["org_id"] = action["organization_code"]
+                action["org_name"] = action["organization_code"]
+            if "message" not in action and action.get("agenda"):
+                action["message"] = action["agenda"]
+            if "invitation_type" not in action:
+                action["invitation_type"] = "organization"
         return _create_meeting_invitation(sim_run_id, round_num, action)
 
     if action_type == "respond_meeting":

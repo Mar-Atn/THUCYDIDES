@@ -136,9 +136,11 @@ class RespondExchangeOrder(BaseModel):
 
 
 class SignAgreementOrder(BaseModel):
-    """Sign a proposed agreement."""
+    """Sign or decline a proposed agreement."""
     action_type: Literal["sign_agreement"] = "sign_agreement"
     agreement_id: str
+    confirm: bool = True  # True = sign, False = decline
+    comments: str = ""
     rationale: str
 
 
@@ -221,32 +223,51 @@ class BasingRightsOrder(BaseModel):
 
 
 class BlockadeOrder(BaseModel):
-    """Impose a naval blockade on a chokepoint."""
+    """Impose, lift, or reduce a naval blockade on a chokepoint."""
     action_type: Literal["naval_blockade"] = "naval_blockade"
+    operation: Literal["establish", "lift", "reduce"] = "establish"
     zone_id: str  # chokepoint zone
-    imposer_units: list[str]  # unit codes
+    level: Literal["full", "partial"] = "full"
+    imposer_units: list[str] = Field(default_factory=list)  # unit codes (for establish)
     rationale: str
 
 
 class MissileLaunchOrder(BaseModel):
-    """Launch conventional missile strike."""
+    """Launch conventional missile strike.
+
+    target_type selects what the missile aims at:
+    - military: enemy units
+    - infrastructure: GDP damage
+    - nuclear_site: damage nuclear R&D
+    - ad: destroy air defense
+    """
     action_type: Literal["launch_missile_conventional"] = "launch_missile_conventional"
     launcher_unit_code: str
     target_global_row: int
     target_global_col: int
+    target_type: Literal["military", "infrastructure", "nuclear_site", "ad"] = "military"
     rationale: str
 
 
 class BudgetOrder(BaseModel):
-    """Set budget allocations — social spending, military production, tech R&D.
+    """Set budget allocations — CONTRACT_BUDGET v1.1.
 
     Batch action queued for Phase B engine processing.
-    See CONTRACT_BUDGET v1.1 for full specification.
+
+    Fields:
+        social_pct: Social spending multiplier (0.5-1.5× baseline).
+            1.0 = baseline. <1.0 = cut (damages stability/support). >1.0 = boost.
+        production: Per-branch military production levels (0-4).
+            0=none, 1=standard, 2=accelerated (2× cost), 3=surge (3× cost), 4=max (4× cost).
+            Branches: ground, naval, tactical_air, strategic_missile, air_defense.
+        research: R&D coin allocation split between nuclear and AI tracks.
+            nuclear_coins: coins for nuclear R&D (progress = coins/GDP × 0.8).
+            ai_coins: coins for AI R&D.
     """
     action_type: Literal["set_budget"] = "set_budget"
     social_pct: float = Field(1.0, ge=0.5, le=1.5, description="Social spending multiplier (0.5-1.5× baseline)")
-    military_coins: float = Field(0.0, ge=0.0, description="Coins allocated to military production")
-    tech_coins: float = Field(0.0, ge=0.0, description="Coins allocated to technology/R&D")
+    production: Optional[dict] = Field(default_factory=dict, description="Per-branch production levels: {ground: 0-4, naval: 0-4, tactical_air: 0-4, strategic_missile: 0-4, air_defense: 0-4}")
+    research: Optional[dict] = Field(default_factory=dict, description="R&D allocation: {nuclear_coins: int, ai_coins: int}")
     rationale: str
 
 
@@ -258,15 +279,24 @@ class SetOpecOrder(BaseModel):
 
 
 class NuclearTestOrder(BaseModel):
-    """Conduct a nuclear test."""
+    """Conduct a nuclear test.
+
+    test_type: underground (lower risk, -0.2 stability) or surface (higher impact,
+    -0.4 global stability, -0.6 adjacent, -5% own GDP, +5 support).
+    """
     action_type: Literal["nuclear_test"] = "nuclear_test"
+    test_type: Literal["underground", "surface"] = "underground"
     rationale: str
 
 
 class NuclearLaunchOrder(BaseModel):
-    """Initiate nuclear launch sequence."""
+    """Initiate nuclear launch sequence.
+
+    missiles: list of strategic_missile unit_ids to launch (from get_my_forces).
+    """
     action_type: Literal["nuclear_launch_initiate"] = "nuclear_launch_initiate"
     target_country: str
+    missiles: list[str] = Field(default_factory=list, description="Unit IDs of missiles to launch")
     target_global_row: Optional[int] = None
     target_global_col: Optional[int] = None
     rationale: str

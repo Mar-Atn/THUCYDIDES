@@ -15,18 +15,20 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 - `declare_attack` — ground (RISK dice, adjacent hex), air strike (2-hex range, 12% hit / 6% if AD), naval combat (RISK dice at sea), naval bombardment (sea→adjacent land, 10% hit)
 - `move_units` — ground advance to adjacent land hex; must leave 1 unit behind; max 3 units per move. Processed during inter-round movement window.
 - `naval_blockade` — establish/lift at chokepoints (Caribe Passage, Gulf Gate, Formosa Strait). Requires ground forces at standard chokepoints. Formosa: naval in 3+/6 surrounding sea zones.
-- `launch_missile_conventional` — conventional missile strike. Consumed on firing. Range: T1=2 hex, T2=4 hex, T3=global. 80% hit (30% if AD present).
+- `launch_missile_conventional` — conventional missile strike. Consumed on firing. Range: T1=2 hex, T2=4 hex, T3=global. Two-phase: AD intercept (50% per AD unit), then 75% hit. Specify target_type: military|infrastructure|nuclear_site|ad.
 - `basing_rights` — grant or revoke foreign military basing
 - `martial_law` — HoS only, one-time per country per SIM. Emergency powers.
-- `nuclear_test` — underground (-0.2 stability) or overground (-0.5 self, -0.3 global). +5 support. Requires 3-way auth: HoS + Military Chief + Moderator.
+- `nuclear_test` — specify test_type: underground (-0.2 stability, +5 support) or surface (-0.4 global stability, -0.6 adjacent, -5% own GDP, +5 support). Requires 3-way auth.
 - Nuclear launch: initiate → co-authorize → intercept attempt → resolve. Same 3-way auth.
 
 **ECONOMIC (batch — queued for Phase B engine processing):**
-- `set_budget` — social spending (0.5-1.5× baseline), military production, tech R&D allocation. Cutting social spending damages stability/support; increasing boosts both.
+- `set_budget` — three components:
+  - `social_pct` (0.5-1.5): social spending multiplier. <1.0 = cut (damages stability/support), >1.0 = boost.
+  - `production`: per-branch military production levels (0=none, 1=standard, 2=accelerated 2× cost, 3=surge 3× cost, 4=max 4× cost). Branches: ground, naval, tactical_air, strategic_missile, air_defense. Example: `{"ground": 1, "naval": 0, "air_defense": 1}`.
+  - `research`: R&D coin allocation. `{"nuclear_coins": 5, "ai_coins": 3}`. Progress = coins/GDP × 0.8.
 - `set_tariffs` — per-country, levels 0-3. Hurts BOTH sides (target more).
 - `set_sanctions` — per-country, levels -3 to +3. S-curve damage model — coverage below 0.3 = minimal, above 0.7 = severe. Negative = evasion support.
-- `set_opec` — production level: min/low/normal/high/max. Affects global oil price. OPEC members only.
-- R&D investment is part of `set_budget` — use `tech_coins` field to allocate to nuclear/AI/missile.
+- `set_opec` — `production` field: min/low/normal/high/max. Affects global oil price. OPEC members only.
 
 **DIPLOMATIC (immediate):**
 - `public_statement` — attributed, visible to all. Signaling, threats, reassurance.
@@ -59,10 +61,11 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 
 ### Combat Resolution
 
-**Ground:** RISK dice — attacker rolls min(3, alive), defender rolls min(2, alive). Dice sorted, paired highest-to-highest. Ties → defender wins. Modifiers: AI L4 (+1 die), morale, amphibious penalty, die-hard defense, air support.
+**Ground:** RISK dice — attacker rolls min(3, alive), defender rolls min(2, alive). Dice sorted, paired highest-to-highest. Ties → defender wins.
+**Ground modifiers:** AI L4 (+1 die, 50% chance at level-up), low morale (-1 die if stability ≤3), die-hard terrain (+1 defender die), air support (+1 defender, doesn't stack with die-hard), amphibious penalty (-1 attacker for sea-to-land).
 **Air:** Each unit rolls independently. 12% hit (6% if AD present). AD fires back at 15%.
-**Naval:** RISK dice at sea. Bombardment: 10% hit on adjacent land.
-**Missiles:** 80% hit (30% if AD). Consumed on firing.
+**Naval:** RISK dice at sea. Bombardment: 10% hit per unit on adjacent land.
+**Missiles:** Two-phase model. Phase 1: AD intercept (50% per AD unit). Phase 2: 75% hit on surviving missiles. Consumed on firing.
 **Territory:** Victory = capture hex. Non-ground enemy units become trophies. Must leave 1 unit behind.
 
 ### Economy Key Facts
@@ -77,7 +80,7 @@ GAME_RULES_CONTEXT = """## GAME RULES — COMPLETE REFERENCE
 ### Technology
 
 - Nuclear: L0→L1→L2→L3. Progress = (investment/GDP) × 0.8 × rare_earth_factor.
-- AI: L0→L1→L2→L3→L4. Each level gives GDP boost (L2: +0.5pp, L3: +1.5pp, L4: +3.0pp) and L4 may give +1 combat die.
+- AI: L0→L1→L2→L3→L4. Each level gives GDP boost (L2: +0.3%, L3: +1.0%, L4: +2.5%) and L4 may give +1 combat die (50% chance at level-up).
 - Cathay controls rare earths — each restriction level reduces R&D efficiency by 15%.
 - Tech transfer: donor 1+ level ahead gives +0.20 nuclear / +0.15 AI progress boost.
 

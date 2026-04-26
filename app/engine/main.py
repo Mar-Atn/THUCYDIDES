@@ -1134,7 +1134,7 @@ async def _run_phase_b(sim_id: str, round_num: int) -> None:
             if target:
                 actions["sanction_changes"].setdefault(cc, {})[target] = level
         elif at == "set_opec" and isinstance(payload, dict):
-            level = payload.get("production_level", "maintain")
+            level = payload.get("production", payload.get("production_level", "maintain"))
             actions["opec_production"][cc] = level
         elif at == "set_budget" and isinstance(payload, dict):
             actions["budget_decisions"][cc] = payload
