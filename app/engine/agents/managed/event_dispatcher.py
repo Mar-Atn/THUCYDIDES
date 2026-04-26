@@ -393,7 +393,7 @@ class EventDispatcher:
 
                 # Find active meetings with turn_count=0 OR with unresponded messages
                 active_meetings = db.table("meetings") \
-                    .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status") \
+                    .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status,metadata") \
                     .eq("sim_run_id", self.sim_run_id) \
                     .eq("status", "active") \
                     .execute().data or []
@@ -418,7 +418,8 @@ class EventDispatcher:
                             if a_state == IDLE and b_state == IDLE:
                                 logger.info("[meetings] Starting AI-AI avatar meeting %s (%s ↔ %s)",
                                             mid[:8], role_a, role_b)
-                                # Set both IN_MEETING immediately (prevents double-start)
+                                # Agents already IN_MEETING (set by tool_executor on accept)
+                                # If not (e.g. human accepted for both), set now
                                 self.set_agent_state(role_a, IN_MEETING)
                                 self.set_agent_state(role_b, IN_MEETING)
 
@@ -426,16 +427,11 @@ class EventDispatcher:
                                 identity_a = self._fetch_avatar_identity(role_a)
                                 identity_b = self._fetch_avatar_identity(role_b)
 
-                                # Generate intent notes (fast — direct Claude API)
-                                intent_a = await self._generate_quick_intent(role_a, role_b, meeting)
-                                intent_b = await self._generate_quick_intent(role_b, role_a, meeting)
-
-                                # Store intent notes in meeting metadata
-                                from engine.services.meeting_service import update_meeting_metadata
-                                update_meeting_metadata(mid, {
-                                    "intent_note_a": intent_a,
-                                    "intent_note_b": intent_b,
-                                })
+                                # Read intent notes from meetings.metadata
+                                # (written by Managed Agents via tool_executor per SPEC 4.2)
+                                metadata = meeting.get("metadata") or {}
+                                intent_a = metadata.get("intent_note_a", "")
+                                intent_b = metadata.get("intent_note_b", "")
 
                                 # Run avatar meeting in background
                                 asyncio.create_task(
@@ -453,10 +449,8 @@ class EventDispatcher:
                         human_country = meeting["participant_b_country"] if a_is_ai else meeting["participant_a_country"]
                         agenda = meeting.get("agenda", "Bilateral discussion")
 
-                        if self.agent_states.get(ai_role, IDLE) != IDLE:
-                            continue  # AI busy — wait
-
-                        # Only act if no messages yet — AI needs to open
+                        # Agent should be IN_MEETING (set at meeting creation)
+                        # Only check: no messages yet → AI needs to open the conversation
                         msgs = db.table("meeting_messages") \
                             .select("role_id") \
                             .eq("meeting_id", mid) \
@@ -465,9 +459,7 @@ class EventDispatcher:
                         if not msgs:
                             # No messages yet — AI speaks first via avatar service
                             asyncio.create_task(
-                                self._avatar_opening_message(
-                                    mid, ai_role, human_country, agenda,
-                                )
+                                self._avatar_opening_message(mid, ai_role, meeting)
                             )
 
                 await asyncio.sleep(MEETING_CHECK_INTERVAL)
@@ -565,50 +557,35 @@ class EventDispatcher:
             return f"You are the leader of {ctx.country_code}. Role: {role_id}."
         return f"You are a head of state. Role: {role_id}."
 
-    async def _generate_quick_intent(
-        self, my_role_id: str, other_role_id: str, meeting: dict,
-    ) -> str:
-        """Generate a quick intent note via direct Claude API call."""
-        from engine.agents.managed.avatar_service import text_avatar_turn
-
-        agenda = meeting.get("agenda", "Bilateral discussion")
-        identity = self._fetch_avatar_identity(my_role_id)
-        prompt = (
-            f"You are about to have a meeting. Agenda: {agenda}. "
-            f"Generate a brief intent note: your objective, approach (2-3 tactics), "
-            f"and boundaries (what not to reveal). Keep it under 200 words."
-        )
-
-        try:
-            intent = await text_avatar_turn(
-                avatar_identity=identity,
-                intent_note="",  # No intent yet — generating it
-                conversation_history=[{"role": "user", "content": prompt}],
-            )
-            return intent
-        except Exception as e:
-            logger.warning("[dispatcher] Failed to generate intent for %s: %s", my_role_id, e)
-            return f"Discuss {agenda} with counterpart. Protect your interests."
-
     async def _avatar_opening_message(
-        self, meeting_id: str, ai_role: str, human_country: str, agenda: str,
+        self, meeting_id: str, ai_role: str, meeting: dict,
     ) -> None:
-        """Generate and send an AI opening message via avatar service."""
+        """Generate and send an AI opening message via avatar service.
+
+        Reads avatar identity + intent note from DB. Agent is already IN_MEETING
+        (set by tool_executor on meeting creation).
+        """
         from engine.agents.managed.avatar_service import text_avatar_turn
         from engine.services.meeting_service import send_message
 
-        self.set_agent_state(ai_role, IN_MEETING)
         try:
             identity = self._fetch_avatar_identity(ai_role)
             ctx = self.agents.get(ai_role)
             country = ctx.country_code if ctx else ""
 
+            # Read intent note from meetings.metadata (written by Managed Agent per SPEC 4.2)
+            metadata = meeting.get("metadata") or {}
+            intent_key = "intent_note_a" if ai_role == meeting["participant_a_role_id"] else "intent_note_b"
+            intent_note = metadata.get(intent_key, "")
+            agenda = meeting.get("agenda", "Bilateral discussion")
+
+            if not intent_note:
+                # Minimal fallback — agent should have written this
+                intent_note = f"Meeting about: {agenda}. Speak first, introduce yourself."
+
             opening = await text_avatar_turn(
                 avatar_identity=identity,
-                intent_note=(
-                    f"Opening a meeting with {human_country}. Agenda: {agenda}. "
-                    f"Speak first — introduce yourself and state your agenda."
-                ),
+                intent_note=intent_note,
                 conversation_history=[
                     {"role": "user", "content": "The meeting has started. You speak first."},
                 ],
@@ -619,8 +596,6 @@ class EventDispatcher:
                 logger.info("[meetings] Avatar opening sent for %s in meeting %s", ai_role, meeting_id[:8])
         except Exception as e:
             logger.error("[meetings] Avatar opening failed for %s: %s", ai_role, e)
-        finally:
-            self.set_agent_state(ai_role, IDLE)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.

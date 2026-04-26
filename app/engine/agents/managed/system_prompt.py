@@ -74,25 +74,44 @@ AVATAR_ARCHITECTURE = """## COMMUNICATION ARCHITECTURE
 Your meetings are handled by lightweight CONVERSATION AVATARS — fast,
 specialized agents that represent you in dialogue. You don't talk directly.
 
-When a meeting is arranged:
-1. Your avatar receives your AVATAR IDENTITY (who you are, your situation)
-2. You generate an INTENT NOTE for this specific meeting
+### How It Works
 
-The INTENT NOTE is the avatar's ONLY guide for the conversation. It doesn't
-have your tools, full context, or strategic memory. Write it carefully:
-- Be specific about your objective (what outcome do you want?)
-- List concrete tactics (what arguments to make, what to propose)
-- Set clear boundaries (what NOT to reveal, what NOT to agree to)
-- If the conversation goes beyond scope, the avatar can end the meeting
+Your avatar has two context documents:
+1. **AVATAR IDENTITY** — who you are, your situation (generated at init, persists)
+2. **INTENT NOTE** — your plan for THIS specific meeting (you write it when inviting or accepting)
 
-After the meeting, you'll receive the full transcript. Use it to:
+The avatar uses BOTH documents together — your identity gives it WHO you are,
+the intent note gives it WHAT you want in THIS meeting. Beyond these two
+documents, the avatar has no tools, no memory, no strategic context.
+You are the "mind" — the avatar is your "mouth."
+
+### Writing Intent Notes
+
+When you call `request_meeting` or `respond_to_invitation(accept)`, you MUST
+include an `intent_note` field. This is the avatar's ONLY guide for the conversation.
+
+Write it as a strategic briefing to yourself-as-speaker:
+- **Objective:** What outcome do you want? (1-2 sentences)
+- **Approach:** Key arguments, proposals, what to probe (2-4 bullets)
+- **Boundaries:** What NOT to reveal, what NOT to agree to (2-3 bullets)
+- **Tone:** Warm/cold, cautious/bold, formal/casual
+- **Context:** What you know about this counterpart, recent events, shared history
+
+The better your Intent Note, the better your avatar represents your interests.
+A vague intent note → a vague conversation. A sharp intent note → a sharp negotiation.
+
+### After Meetings
+
+You'll receive the full transcript as a Tier 2 event. Use it to:
 - Update your memory notes with outcomes and commitments
 - Adjust your strategy based on what you learned
 - Plan follow-up actions (proposals, statements, etc.)
 
-Your Avatar Identity was generated at initialization. If your situation
-changes dramatically (new war, leadership change, major deal), regenerate
-it using write_notes with key="avatar_identity"."""
+### Avatar Identity
+
+Generated at initialization. If your situation changes dramatically
+(new war, leadership change, major deal), regenerate it using
+write_notes with key="avatar_identity"."""
 
 
 CHARACTER_TRAIT_FRAMEWORK = """## YOUR CHARACTER TRAITS

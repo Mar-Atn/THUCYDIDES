@@ -287,7 +287,10 @@ REQUEST_MEETING_SCHEMA: dict = {
     "description": (
         "Send a meeting invitation to another country's leader. They must "
         "accept before you can talk. Max 2 active invitations at a time. "
-        "Expires in 10 minutes if not answered."
+        "Expires in 10 minutes if not answered.\n\n"
+        "IMPORTANT: Include an intent_note — your conversation avatar uses "
+        "ONLY this note (plus your Avatar Identity) to represent you in the "
+        "meeting. Write it carefully: objective, tactics, boundaries, tone."
     ),
     "input_schema": {
         "type": "object",
@@ -300,8 +303,17 @@ REQUEST_MEETING_SCHEMA: dict = {
                 "type": "string",
                 "description": "Brief agenda or message (max 300 chars).",
             },
+            "intent_note": {
+                "type": "string",
+                "description": (
+                    "Your Intent Note for this meeting. Your avatar will use "
+                    "ONLY this to represent you. Include: objective (what you "
+                    "want), approach (tactics, arguments), boundaries (what NOT "
+                    "to reveal or agree to), tone (warm/cold/cautious/bold)."
+                ),
+            },
         },
-        "required": ["target_country", "agenda"],
+        "required": ["target_country", "agenda", "intent_note"],
     },
 }
 
@@ -309,8 +321,9 @@ RESPOND_TO_INVITATION_SCHEMA: dict = {
     "name": "respond_to_invitation",
     "description": (
         "Accept or decline a meeting invitation you received. Use "
-        "get_pending_proposals to see your pending invitations first. "
-        "Accepting creates a meeting channel for conversation."
+        "get_pending_proposals to see your pending invitations first.\n\n"
+        "When ACCEPTING: include an intent_note — your conversation avatar "
+        "uses ONLY this note to represent you. Write it carefully."
     ),
     "input_schema": {
         "type": "object",
@@ -323,6 +336,14 @@ RESPOND_TO_INVITATION_SCHEMA: dict = {
                 "type": "string",
                 "description": "Your decision: 'accept' or 'decline'.",
                 "enum": ["accept", "decline"],
+            },
+            "intent_note": {
+                "type": "string",
+                "description": (
+                    "Your Intent Note for this meeting (required when accepting). "
+                    "Your avatar will use ONLY this to represent you. Include: "
+                    "objective, approach, boundaries, tone."
+                ),
             },
         },
         "required": ["invitation_id", "decision"],

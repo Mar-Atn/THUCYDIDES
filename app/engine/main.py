@@ -2162,14 +2162,11 @@ async def send_meeting_message(
 
 
 async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: str, meeting: dict):
-    """Background task: generate avatar response when human sends a message."""
-    from engine.agents.managed.event_dispatcher import get_dispatcher, IN_MEETING, IDLE
-    dispatcher = get_dispatcher(sim_id)
+    """Background task: generate avatar response when human sends a message.
 
-    # Set AI to IN_MEETING (busy) while avatar responds
-    if dispatcher and ai_role_id in dispatcher.agents:
-        dispatcher.set_agent_state(ai_role_id, IN_MEETING)
-
+    Agent state is already IN_MEETING (set at meeting creation in tool_executor).
+    Cleared when meeting ends (end_meeting_endpoint).
+    """
     try:
         from engine.services.meeting_service import get_meeting_messages, send_message
         from engine.agents.managed.avatar_service import text_avatar_turn
@@ -2186,27 +2183,11 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
             .limit(1).execute()
         avatar_identity = identity_row.data[0]["content"] if identity_row.data else f"Head of state. Role: {ai_role_id}"
 
-        # Fetch intent note (may be empty for AI-Human meetings)
-        meeting_row = _db.table("meetings").select("metadata,agenda").eq("id", meeting_id).limit(1).execute()
-        meeting_data_row = meeting_row.data[0] if meeting_row.data else {}
-        metadata = meeting_data_row.get("metadata") or {}
+        # Fetch intent note from meetings.metadata (written by Managed Agent per SPEC 4.2)
+        meeting_row = _db.table("meetings").select("metadata").eq("id", meeting_id).limit(1).execute()
+        metadata = (meeting_row.data[0].get("metadata") or {}) if meeting_row.data else {}
         intent_key = "intent_note_a" if ai_role_id == meeting["participant_a_role_id"] else "intent_note_b"
         intent_note = metadata.get(intent_key, "")
-
-        # Build fallback intent from meeting context if no intent note exists
-        if not intent_note:
-            human_role = meeting["participant_b_role_id"] if ai_role_id == meeting["participant_a_role_id"] else meeting["participant_a_role_id"]
-            human_country = meeting["participant_b_country"] if ai_role_id == meeting["participant_a_role_id"] else meeting["participant_a_country"]
-            agenda = meeting.get("agenda") or meeting_data_row.get("agenda") or "Bilateral discussion"
-            # Resolve human's character name
-            human_name_row = _db.table("roles").select("character_name").eq("id", human_role).eq("sim_run_id", sim_id).limit(1).execute()
-            human_name = human_name_row.data[0]["character_name"] if human_name_row.data else human_role
-            intent_note = (
-                f"MEETING WITH: {human_name}, leader of {human_country.upper()}\n"
-                f"AGENDA: {agenda}\n\n"
-                f"Engage naturally. You initiated or accepted this meeting for a reason — "
-                f"pursue the agenda while protecting your interests. Be direct and in character."
-            )
 
         # Build conversation history
         messages = get_meeting_messages(meeting_id)
@@ -2227,10 +2208,6 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
 
     except Exception as e:
         logger.error("[avatar] Background response failed for meeting %s: %s", meeting_id, e)
-    finally:
-        # Return AI to IDLE after avatar response
-        if dispatcher and ai_role_id in dispatcher.agents:
-            dispatcher.set_agent_state(ai_role_id, IDLE)
 
 
 @app.post("/api/sim/{sim_id}/meetings/{meeting_id}/end", response_model=APIResponse)
@@ -2252,14 +2229,43 @@ async def end_meeting_endpoint(
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
 
-    # Set both meeting participants back to IDLE in the dispatcher
+    # Set AI participants to IDLE + deliver transcript for reflection (SPEC 6.4)
     from engine.agents.managed.event_dispatcher import get_dispatcher, IDLE
+    from engine.services.meeting_service import get_meeting_messages, save_transcript
     dispatcher = get_dispatcher(sim_id)
     if dispatcher:
         meeting = meeting_data["meeting"]
+        # Build transcript from messages
+        messages = get_meeting_messages(meeting_id)
+        transcript_lines = []
+        for msg in messages:
+            if msg.get("channel") == "system":
+                continue
+            transcript_lines.append(f"[{msg['role_id']}] {msg['content']}")
+        transcript_text = "\n".join(transcript_lines)
+
+        # Save transcript to meeting record
+        if transcript_text:
+            save_transcript(meeting_id, transcript_text)
+
         for rid in (meeting.get("participant_a_role_id"), meeting.get("participant_b_role_id")):
             if rid and rid in dispatcher.agents:
                 dispatcher.set_agent_state(rid, IDLE)
+                # Deliver transcript to AI agent for reflection (SPEC 6.4)
+                if transcript_text:
+                    agenda = meeting.get("agenda", "Bilateral discussion")
+                    dispatcher.enqueue(
+                        role_id=rid,
+                        tier=2,
+                        event_type="meeting_transcript",
+                        message=(
+                            f"MEETING COMPLETED — Agenda: {agenda}\n\n"
+                            f"Transcript:\n{transcript_text[:3000]}\n\n"
+                            f"Review this conversation. Update your notes with key outcomes, "
+                            f"commitments made, and intelligence gathered."
+                        ),
+                        metadata={"meeting_id": meeting_id},
+                    )
 
     return APIResponse(data=result)
 
@@ -2322,13 +2328,8 @@ async def avatar_turn(
         role = "assistant" if msg["role_id"] == ai_role_id else "user"
         conversation_history.append({"role": role, "content": msg["content"]})
 
-    # 6. Set AI agent to IN_MEETING (busy — blocks other actions/meetings)
-    from engine.agents.managed.event_dispatcher import get_dispatcher, IN_MEETING, IDLE
-    dispatcher = get_dispatcher(sim_id)
-    if dispatcher and ai_role_id in dispatcher.agents:
-        dispatcher.set_agent_state(ai_role_id, IN_MEETING)
-
-    # 7. Call avatar service (fast, no tools)
+    # 6. Call avatar service (fast, no tools)
+    # Agent state is already IN_MEETING (set at meeting creation in tool_executor)
     try:
         response_text = await text_avatar_turn(
             avatar_identity=avatar_identity,
@@ -2337,11 +2338,9 @@ async def avatar_turn(
         )
     except Exception as e:
         logger.error("[avatar-turn] Failed for meeting %s: %s", meeting_id, e)
-        if dispatcher and ai_role_id in dispatcher.agents:
-            dispatcher.set_agent_state(ai_role_id, IDLE)
         raise HTTPException(status_code=500, detail="Avatar response failed")
 
-    # 8. Write AI response to meeting_messages
+    # 7. Write AI response to meeting_messages
     from engine.services.meeting_service import send_message
     write_result = send_message(
         meeting_id=meeting_id,
@@ -2349,10 +2348,6 @@ async def avatar_turn(
         country_code=ai_country,
         content=response_text,
     )
-
-    # 9. Return to IDLE after response written
-    if dispatcher and ai_role_id in dispatcher.agents:
-        dispatcher.set_agent_state(ai_role_id, IDLE)
 
     if not write_result["success"]:
         raise HTTPException(status_code=400, detail=write_result["narrative"])

@@ -144,12 +144,14 @@ class ToolExecutor:
             return self._request_meeting(
                 target_country=tool_input.get("target_country", ""),
                 agenda=tool_input.get("agenda", ""),
+                intent_note=tool_input.get("intent_note", ""),
             )
 
         if tool_name == "respond_to_invitation":
             return self._respond_to_invitation(
                 invitation_id=tool_input.get("invitation_id", ""),
                 decision=tool_input.get("decision", "decline"),
+                intent_note=tool_input.get("intent_note", ""),
             )
 
         # Fallback: check if it matches an existing tool name directly
@@ -664,8 +666,13 @@ class ToolExecutor:
             "fields": fields,
         }
 
-    def _request_meeting(self, target_country: str, agenda: str) -> dict:
-        """Create a meeting invitation to another country's leader."""
+    def _request_meeting(self, target_country: str, agenda: str, intent_note: str = "") -> dict:
+        """Create a meeting invitation to another country's leader.
+
+        The intent_note is stored on the invitation and transferred to
+        meeting metadata when the counterpart accepts. The conversation
+        avatar uses it as its only guide for the meeting.
+        """
         if not target_country:
             return {"error": "target_country is required"}
         if not agenda:
@@ -726,6 +733,8 @@ class ToolExecutor:
 
             expires_at = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
 
+            # Store inviter's intent_note in responses JSONB for transfer to meeting on acceptance
+            responses_init = {"_inviter_intent_note": intent_note} if intent_note else {}
             row = {
                 "sim_run_id": self.sim_run_id,
                 "invitation_type": "one_on_one",
@@ -735,7 +744,7 @@ class ToolExecutor:
                 "message": agenda[:300],
                 "expires_at": expires_at,
                 "status": "pending",
-                "responses": {},
+                "responses": responses_init,
             }
             result = client.table("meeting_invitations").insert(row).execute()
             inv_id = result.data[0]["id"] if result.data else None
@@ -780,8 +789,13 @@ class ToolExecutor:
             logger.exception("request_meeting failed")
             return {"success": False, "error": str(e)}
 
-    def _respond_to_invitation(self, invitation_id: str, decision: str) -> dict:
-        """Accept or decline a meeting invitation."""
+    def _respond_to_invitation(self, invitation_id: str, decision: str, intent_note: str = "") -> dict:
+        """Accept or decline a meeting invitation.
+
+        When accepting, the intent_note is stored in meeting metadata
+        alongside the inviter's intent note (from the invitation).
+        The conversation avatar uses these as its only guide.
+        """
         if not invitation_id:
             return {"error": "invitation_id is required"}
         if decision not in ("accept", "decline"):
@@ -839,6 +853,26 @@ class ToolExecutor:
                 meeting_id = meeting["id"]
                 update_payload["status"] = "accepted"
                 update_payload["meeting_id"] = meeting_id
+
+                # Store intent notes in meeting metadata (SPEC 4.2)
+                # Inviter's intent from invitation, accepter's intent from this call
+                from engine.services.meeting_service import update_meeting_metadata
+                intent_metadata = {}
+                inviter_intent = (inv.get("responses") or {}).get("_inviter_intent_note", "")
+                if inviter_intent:
+                    intent_metadata["intent_note_a"] = inviter_intent
+                if intent_note:
+                    intent_metadata["intent_note_b"] = intent_note
+                if intent_metadata:
+                    update_meeting_metadata(meeting_id, intent_metadata)
+
+                # Set AI participant(s) to IN_MEETING (SPEC: busy during meeting)
+                from engine.agents.managed.event_dispatcher import get_dispatcher, IN_MEETING
+                _dispatcher = get_dispatcher(self.sim_run_id)
+                if _dispatcher:
+                    for _rid in [inviter_role_id, self.role_id]:
+                        if _rid in _dispatcher.agents:
+                            _dispatcher.set_agent_state(_rid, IN_MEETING)
             else:
                 update_payload["status"] = "rejected"
 
