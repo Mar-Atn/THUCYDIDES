@@ -2330,14 +2330,18 @@ async def list_elevenlabs_agents(
     Used by moderators to assign voice agents to roles.
     """
     import httpx
-    if not settings.elevenlabs_api_key:
+    import os
+    key = settings.elevenlabs_api_key or os.environ.get("ELEVENLABS_API_KEY", "")
+    logger.info("[elevenlabs] Key from settings: %s, from env: %s",
+                bool(settings.elevenlabs_api_key), bool(os.environ.get("ELEVENLABS_API_KEY")))
+    if not key:
         return APIResponse(data={"agents": []}, meta={"error": "ElevenLabs API key not configured"})
 
     try:
         async with httpx.AsyncClient() as client:
             resp = await client.get(
                 "https://api.elevenlabs.io/v1/convai/agents",
-                headers={"xi-api-key": settings.elevenlabs_api_key},
+                headers={"xi-api-key": key},
                 timeout=10.0,
             )
             resp.raise_for_status()
