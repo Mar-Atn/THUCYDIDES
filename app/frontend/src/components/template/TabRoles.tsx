@@ -373,33 +373,50 @@ function RelationshipsSection({ relationships, roleNames }: { relationships: Rol
 /*  Voice agent dropdown                                                       */
 /* -------------------------------------------------------------------------- */
 
+// Module-level cache so multiple VoiceAgentField instances share one fetch
+let _voiceAgentCache: ElevenLabsAgent[] | null = null
+let _voiceAgentFetchPromise: Promise<ElevenLabsAgent[]> | null = null
+
 function VoiceAgentField({ value, onChange }: { value: string | null; onChange: (v: string | null) => void }) {
-  const [agents, setAgents] = useState<ElevenLabsAgent[]>([])
+  const [agents, setAgents] = useState<ElevenLabsAgent[]>(_voiceAgentCache ?? [])
   const [loadingAgents, setLoadingAgents] = useState(false)
   const [agentError, setAgentError] = useState<string | null>(null)
-  const fetchedRef = useRef(false)
 
-  // Fetch agents on mount (not on focus — select dropdown needs options ready)
+  // Fetch agents on mount — shared cache across all instances
   useEffect(() => {
-    if (fetchedRef.current) return
-    fetchedRef.current = true
+    if (_voiceAgentCache) {
+      setAgents(_voiceAgentCache)
+      return
+    }
     setLoadingAgents(true)
-    setAgentError(null)
-    fetchElevenLabsAgents()
-      .then((data) => setAgents(data))
+    // Deduplicate: reuse in-flight promise if another instance already started
+    if (!_voiceAgentFetchPromise) {
+      _voiceAgentFetchPromise = fetchElevenLabsAgents()
+    }
+    _voiceAgentFetchPromise
+      .then((data) => {
+        _voiceAgentCache = data
+        setAgents(data)
+      })
       .catch((err: unknown) => {
         const msg = err instanceof Error ? err.message : 'Failed to load voice agents'
         setAgentError(msg)
-        fetchedRef.current = false // allow retry on re-mount
+        _voiceAgentFetchPromise = null // allow retry
       })
       .finally(() => setLoadingAgents(false))
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Resolve display name for the current value
+  const currentName = value
+    ? (agents.find((a) => a.agent_id === value)?.name ?? value.slice(0, 16) + '...')
+    : null
 
   return (
     <div className="flex flex-col gap-1 mt-3">
       <label className="font-body text-caption text-text-secondary flex items-center gap-1.5">
         <Volume2 className="w-3.5 h-3.5" />
-        voice_agent (ElevenLabs)
+        Voice Agent
+        {currentName && <span className="text-accent ml-1">({currentName})</span>}
       </label>
       <select
         value={value ?? ''}
@@ -407,14 +424,14 @@ function VoiceAgentField({ value, onChange }: { value: string | null; onChange: 
         className="font-body text-body-sm bg-base border border-border rounded px-2 py-1.5 text-text-primary focus:border-action focus:outline-none"
       >
         <option value="">(none)</option>
-        {loadingAgents && <option disabled>Loading agents...</option>}
+        {loadingAgents && <option disabled>Loading...</option>}
         {agentError && <option disabled>Error: {agentError}</option>}
         {agents.map((a) => (
           <option key={a.agent_id} value={a.agent_id}>{a.name}</option>
         ))}
         {/* Show current value even if not yet in the fetched list */}
         {value && !agents.find((a) => a.agent_id === value) && (
-          <option value={value}>{value} (saved)</option>
+          <option value={value}>{currentName ?? value}</option>
         )}
       </select>
     </div>

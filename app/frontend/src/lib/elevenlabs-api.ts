@@ -24,9 +24,15 @@ export interface ElevenLabsAgent {
 export async function fetchElevenLabsAgents(): Promise<ElevenLabsAgent[]> {
   const { data: { session } } = await supabase.auth.getSession()
   const token = session?.access_token
-  if (!token) throw new Error('Not authenticated')
+  if (!token) {
+    console.warn('[elevenlabs] No auth session — cannot fetch agents')
+    throw new Error('Not authenticated')
+  }
 
-  const resp = await fetch(`${API_BASE}/api/elevenlabs/agents`, {
+  const url = `${API_BASE}/api/elevenlabs/agents`
+  console.info('[elevenlabs] Fetching agents from', url)
+
+  const resp = await fetch(url, {
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
@@ -35,10 +41,12 @@ export async function fetchElevenLabsAgents(): Promise<ElevenLabsAgent[]> {
 
   if (!resp.ok) {
     const text = await resp.text()
+    console.error('[elevenlabs] Fetch failed:', resp.status, text)
     throw new Error(`Failed to fetch voice agents: ${resp.status} ${text}`)
   }
 
   const json = await resp.json()
-  // Backend returns APIResponse format: {data: {agents: [...]}}
-  return json.data?.agents || json.data || []
+  const agents = json.data?.agents || json.data || []
+  console.info('[elevenlabs] Fetched', agents.length, 'agents')
+  return agents
 }
