@@ -58,13 +58,20 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 | **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta | SPIKE |
 | **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | SPIKE |
 | **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch | SPIKE |
-| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, tiered delivery, single dispatch loop | SPIKE |
-| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI and AI↔Human via direct send_event | SPIKE |
-| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with queue depth, agent detail with full activity log | SPIKE |
+| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, three background loops (dispatch + auto-pulse + meeting monitor), parallel agent delivery | TESTED |
+| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI (turn-by-turn relay) and AI↔Human (monitor prompts AI to respond) | TESTED |
+| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, cost, activity. Agent detail with decisions, memories, meetings. | TESTED |
 
-> **Note:** M5.1-M5.5 were built as exploration/spike code. The managed agents architecture is validated but the implementation needs rebuilding to align with World Model v3.0 and canonical action names.
+**Architecture (2026-04-25):** Single-process, three async background loops:
+1. **Dispatch loop** — checks `agent_event_queue`, delivers events to IDLE agents in parallel (`asyncio.gather`). Tiers: 1=critical/3s, 2=urgent/5s, 3=routine/30s.
+2. **Auto-pulse loop** — during active Phase A, sends enriched round_pulse events (with recent events, pending items, country snapshot) at configurable intervals. Moderator controls pace (0-10 per round).
+3. **Meeting monitor** — every 10s checks for active meetings. AI-AI: launches ConversationRouter. AI-Human: prompts AI when human has spoken.
 
-**Architecture change (2026-04-22):** M5.4 changed from "Orchestrator" (dual-path: scheduled pulses + auto-pulse) to "Event Dispatcher" (single unified queue). All events flow through one queue, one dispatcher. Eliminates race conditions, lost events, stuck sessions. See `SPRINT_UNIFIED_QUEUE.md` for full design.
+**Phase B solicitation:** Two-phase wait pattern — waits for agents to START processing (leave IDLE), then waits for them to FINISH (return to IDLE). Enriched context includes full economic snapshot + exact field format for each batch action.
+
+**Stuck agent detection:** Agents in ACTING state for >3 minutes are forced back to IDLE (handles SSE stream hangs).
+
+**Schema-engine alignment (2026-04-25):** All 33 action schemas audited and corrected to match engine contracts exactly. See `AUDIT_SCHEMA_VS_ENGINE.md` for full report.
 
 ---
 

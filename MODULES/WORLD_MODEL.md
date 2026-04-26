@@ -379,6 +379,18 @@ System-wide settings stored in `ai_settings` table. Managed from the AI Settings
 
 **Auto-pulse system:** During active Phase A, the EventDispatcher sends periodic round_pulse events to all idle AI agents, evenly spaced across the phase duration. The moderator controls the pace via the "Pulses/rnd" control in the AI Participants Dashboard. Setting to 0 disables auto-pulses (manual pulse only). Changes take effect immediately — no reinitialization needed.
 
+**Per-pulse context (M5 SPEC D4):** Each pulse delivered to an AI agent includes:
+- Recent public events (last 5 non-AI events for situational awareness)
+- Pending items requiring response (transactions, agreements awaiting decision)
+- Country economic snapshot (GDP, treasury, stability, inflation)
+- Pulse number and total ("pulse 3 of 8")
+- Reminder to use tools (get_my_country, get_my_forces, get_relationships) for full details
+
+**Phase B solicitation context:** When batch decisions are requested, each agent receives:
+- Full economic snapshot (GDP, treasury, inflation, stability, military counts by branch, nuclear/AI levels, OPEC status)
+- Exact field format for each batch action (set_budget production/research structure, tariff levels, etc.)
+- One-chance reminder ("You will NOT get another chance this round")
+
 **UI note:** The AI Settings page should clearly indicate which settings require reinitialization and which take effect immediately.
 
 ### Participant Connection Flow

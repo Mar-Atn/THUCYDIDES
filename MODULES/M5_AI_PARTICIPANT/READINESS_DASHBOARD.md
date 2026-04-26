@@ -1,6 +1,6 @@
 # M5 AI Participant — Readiness Dashboard
 
-**Last updated:** 2026-04-25 (Sprint 6 complete — ALL 20/20 ✅)
+**Last updated:** 2026-04-25 (Sprints 1-8 complete, schema-engine alignment, enriched context)
 **Goal:** Mixed human+AI simulation where AI participants use ALL available actions, communicate with humans and each other, and the system orchestrates everything reliably.
 
 **Legend:** ✅ Proven working | 🔶 Partially tested / works with caveats | 🔴 Not tested / known gap | ➖ Not applicable
