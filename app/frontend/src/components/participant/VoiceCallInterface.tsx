@@ -123,10 +123,18 @@ function VoiceCallInner({
 
   const conversation = useConversation({
     onConnect: () => {
+      console.log('[voice] Connected to ElevenLabs')
       setStatus('active')
       startTimer()
     },
     onDisconnect: () => {
+      console.log('[voice] Disconnected from ElevenLabs')
+      // If we disconnect before ever connecting (error during setup), show error
+      if (status === 'connecting') {
+        setError('Voice agent disconnected during setup. Check ElevenLabs agent configuration — ensure "Allow prompt override" is enabled.')
+        setStatus('error')
+        return
+      }
       handleEnd()
     },
     onMessage: (message) => {
