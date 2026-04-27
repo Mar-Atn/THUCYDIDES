@@ -256,25 +256,8 @@ export function ParticipantDashboard() {
             ? row.participant_b_role_id as string
             : row.participant_a_role_id as string
 
-          let info = allRoleInfo[otherRoleId]
-
-          // Fallback: if role info not pre-loaded, fetch now
-          if (!info) {
-            const { data } = await supabase.from('roles')
-              .select('character_name,country_code,positions,elevenlabs_agent_id,is_ai_operated')
-              .eq('id', otherRoleId).eq('sim_run_id', simId).limit(1)
-            if (data?.[0]) {
-              const r = data[0]
-              const positions = (r.positions as string[]) || []
-              info = {
-                name: (r.character_name as string) || otherRoleId,
-                country: (r.country_code as string) || '',
-                position: positions.includes('head_of_state') ? 'Head of State' : positions[0] || '',
-                voiceAgentId: (r.elevenlabs_agent_id as string) || null,
-                isAi: !!(r.is_ai_operated),
-              }
-            }
-          }
+          const info = allRoleInfo[otherRoleId]
+          console.log('[meeting-autoopen] otherRole:', otherRoleId, 'info:', info ? { isAi: info.isAi, voiceAgentId: !!info.voiceAgentId } : 'NOT FOUND', 'roleInfoKeys:', Object.keys(allRoleInfo).length)
 
           if (info?.isAi) {
             // AI counterpart — show mode selection popup
