@@ -250,7 +250,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
     const [sessionsRes, logsRes, meetingsRes] = await Promise.allSettled([
       supabase
         .from('ai_agent_sessions')
-        .select('role_id,country_code,status,total_output_tokens,actions_submitted,tool_calls,last_active_at')
+        .select('role_id,country_code,status,agent_state,total_output_tokens,actions_submitted,tool_calls,last_active_at')
         .eq('sim_run_id', simId)
         .not('status', 'in', '("archived","terminated")'),
       supabase
@@ -325,12 +325,22 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
       }, () => { fetchDbData() })
       .subscribe()
 
+    // Realtime: auto-refresh on meetings changes (status, turn_count)
+    const meetingsChannel = supabase
+      .channel(`ai-meetings-${simId}`)
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'meetings',
+        filter: `sim_run_id=eq.${simId}`,
+      }, () => { fetchDbData() })
+      .subscribe()
+
     // Fallback poll every 15s (covers connection drops)
     const interval = setInterval(fetchDbData, 15000)
 
     return () => {
       supabase.removeChannel(sessionChannel)
       supabase.removeChannel(activityChannel)
+      supabase.removeChannel(meetingsChannel)
       clearInterval(interval)
     }
   }, [simId, fetchDbData])
@@ -559,8 +569,14 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             agentState = orchAgent.state
             actions = orchAgent.actions_submitted ?? orchAgent.round_stats?.actions ?? 0
           } else if (dbSession) {
-            const dbStatus = dbSession.status as string
-            agentState = dbStatus === 'ready' ? 'IDLE' : dbStatus === 'initializing' ? 'INITIALIZING' : dbStatus.toUpperCase()
+            // M5.8: read agent_state from DB (write-through from dispatcher)
+            const dbAgentState = dbSession.agent_state as string
+            if (dbAgentState && dbAgentState !== 'IDLE') {
+              agentState = dbAgentState
+            } else {
+              const dbStatus = dbSession.status as string
+              agentState = dbStatus === 'ready' ? 'IDLE' : dbStatus === 'initializing' ? 'INITIALIZING' : dbStatus.toUpperCase()
+            }
             actions = (dbSession.actions_submitted as number) || 0
           }
           // Active meetings count from DB (real-time, not from orchestrator)
