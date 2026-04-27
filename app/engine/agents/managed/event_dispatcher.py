@@ -743,6 +743,12 @@ class EventDispatcher:
             )
 
             if opening:
+                # Final dedup: check DB for existing messages before writing
+                existing = get_client().table("meeting_messages") \
+                    .select("id").eq("meeting_id", meeting_id).limit(1).execute()
+                if existing.data:
+                    logger.info("[meetings] Avatar opening skipped for %s — messages already exist", ai_role)
+                    return
                 send_message(meeting_id, ai_role, country, opening)
                 logger.info("[meetings] Avatar opening sent for %s in meeting %s", ai_role, meeting_id[:8])
         except Exception as e:
