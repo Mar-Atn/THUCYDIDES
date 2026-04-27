@@ -1327,14 +1327,17 @@ def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, act
 
     Batch decisions (budget, tariffs, sanctions, OPEC) are submitted during Phase A
     but only processed by the economic engine during Phase B.
+
+    DB-driven (M4.x): writes directly to the tables the engine reads from,
+    in addition to agent_decisions (audit trail). No in-memory passing needed.
     """
     role_id = action.get("role_id", "")
     country_code = action.get("country_code", "")
 
-    # Store in agent_decisions table for Phase B pickup
-    # Delete previous decision of same type for same country+round (last submission wins)
     try:
         client = get_client()
+
+        # 1. Audit trail: store in agent_decisions (last submission wins)
         client.table("agent_decisions").delete() \
             .eq("sim_run_id", sim_run_id) \
             .eq("round_num", round_num) \
@@ -1350,11 +1353,88 @@ def _queue_batch_decision(sim_run_id: str, round_num: int, action_type: str, act
             "action_payload": action,
             "validation_status": "valid",
         }).execute()
+
+        # 2. Write-through to engine tables (DB-driven batch, M4.x SPEC)
+        _write_batch_to_engine_tables(client, sim_run_id, round_num, country_code, action_type, action)
+
     except Exception as e:
         logger.warning("Failed to queue batch decision %s: %s", action_type, e)
         return {"success": True, "narrative": f"{action_type} recorded (queue write failed: {e})"}
 
     return {"success": True, "narrative": f"{action_type} by {role_id} ({country_code}) queued for Phase B processing"}
+
+
+def _write_batch_to_engine_tables(
+    client, sim_run_id: str, round_num: int,
+    country_code: str, action_type: str, action: dict,
+) -> None:
+    """Write batch decision directly to the tables the engine reads from.
+
+    The economic engine (round_tick.py) reads budgets from country_states_per_round,
+    tariffs from tariffs table, sanctions from sanctions table.
+    Writing here at submission time eliminates in-memory dict passing.
+    """
+    try:
+        if action_type == "set_budget":
+            # Write to country_states_per_round: budget_social_pct, budget_production, budget_research
+            update = {}
+            social = action.get("social_pct")
+            if social is not None:
+                update["budget_social_pct"] = float(social)
+            production = action.get("production")
+            if production:
+                update["budget_production"] = production
+            research = action.get("research")
+            if research:
+                update["budget_research"] = research
+            if update:
+                client.table("country_states_per_round").update(update) \
+                    .eq("sim_run_id", sim_run_id) \
+                    .eq("round_num", round_num) \
+                    .eq("country_code", country_code) \
+                    .execute()
+                logger.info("[batch] Budget written to DB for %s R%d: social=%.1f, prod=%s, research=%s",
+                            country_code, round_num,
+                            update.get("budget_social_pct", 1.0),
+                            update.get("budget_production", "-"),
+                            update.get("budget_research", "-"))
+
+        elif action_type == "set_tariffs":
+            target = action.get("target_country", "")
+            level = action.get("level", 0)
+            if target:
+                client.table("tariffs").upsert({
+                    "sim_run_id": sim_run_id,
+                    "imposer": country_code,
+                    "target": target,
+                    "level": level,
+                }, on_conflict="sim_run_id,imposer,target").execute()
+                logger.info("[batch] Tariff written: %s → %s level=%d", country_code, target, level)
+
+        elif action_type == "set_sanctions":
+            target = action.get("target_country", "")
+            level = action.get("level", 0)
+            if target:
+                client.table("sanctions").upsert({
+                    "sim_run_id": sim_run_id,
+                    "imposer": country_code,
+                    "target": target,
+                    "level": level,
+                }, on_conflict="sim_run_id,imposer,target").execute()
+                logger.info("[batch] Sanction written: %s → %s level=%d", country_code, target, level)
+
+        elif action_type == "set_opec":
+            prod_level = action.get("production", action.get("production_level", "normal"))
+            client.table("country_states_per_round").update({
+                "opec_production": prod_level,
+            }).eq("sim_run_id", sim_run_id) \
+              .eq("round_num", round_num) \
+              .eq("country_code", country_code) \
+              .execute()
+            logger.info("[batch] OPEC production written: %s = %s", country_code, prod_level)
+
+    except Exception as e:
+        logger.warning("[batch] Failed to write %s to engine tables for %s: %s", action_type, country_code, e)
 
 
 def _log_public_statement(sim_run_id: str, round_num: int, action: dict) -> dict:
