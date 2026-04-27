@@ -316,13 +316,14 @@ export function ParticipantDashboard() {
           counterpartName: counterpart.name,
           counterpartCountry: counterpart.country,
         })
+        console.log('[voice] Setting voice state:', { meetingId, voiceAgentId: counterpart.voiceAgentId })
         setActiveVoiceMeetingId(meetingId)
       } catch (err) {
         console.error('[voice] Failed to fetch avatar context:', err)
-        // Fallback to text chat if voice context fetch fails
         setActiveChatMeetingId(meetingId)
       }
     }
+    console.log('[mode-select] Clearing popup, setting mode:', mode)
     setPendingModeSelect(null)
   }
 
