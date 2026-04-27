@@ -247,11 +247,10 @@ export function ParticipantDashboard() {
           const row = payload.new as Record<string, unknown>
           if (row.sim_run_id !== simId) return
           const isMyMeeting = row.participant_a_role_id === myRole.id || row.participant_b_role_id === myRole.id
-          // Skip if already in a meeting/popup, OR if meeting was just opened by manual accept
+          // Skip if already in a meeting/popup, or if I'm the accepter
+          // (the accept handler in TabActions shows the popup via onOpenChat)
           if (!isMyMeeting || activeChatMeetingId || activeVoiceMeetingId || pendingModeSelect) return
-          // Also skip if this meeting was just created by our own accept action
-          // (the accept handler already opens the chat directly)
-          if (row.participant_b_role_id === myRole.id) return  // I'm the accepter — accept handler opens it
+          if (row.participant_b_role_id === myRole.id) return
 
           const otherRoleId = row.participant_a_role_id === myRole.id
             ? row.participant_b_role_id as string
@@ -671,7 +670,25 @@ export function ParticipantDashboard() {
                 nuclearActionsData={globalNuclearActions}
                 parentOrgIds={new Set(myOrgMemberships.map(m=>m.org_id))}
                 parentSimRun={simRun}
-                onOpenChat={setActiveChatMeetingId}/>
+                onOpenChat={async (meetingId: string) => {
+                  // Check if counterpart is AI — show mode popup if so
+                  const { data: mtg } = await supabase.from('meetings')
+                    .select('participant_a_role_id,participant_b_role_id')
+                    .eq('id', meetingId).limit(1)
+                  if (!mtg?.[0] || !myRole) { setActiveChatMeetingId(meetingId); return }
+                  const otherRoleId = mtg[0].participant_a_role_id === myRole.id
+                    ? mtg[0].participant_b_role_id as string
+                    : mtg[0].participant_a_role_id as string
+                  const info = allRoleInfo[otherRoleId]
+                  if (info?.isAi && info.voiceAgentId) {
+                    setPendingModeSelect({
+                      meetingId,
+                      counterpart: { name: info.name, country: info.country, position: info.position, voiceAgentId: info.voiceAgentId },
+                    })
+                  } else {
+                    setActiveChatMeetingId(meetingId)
+                  }
+                }}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
           supabase.from('artefacts').update({is_read:true}).eq('id',id).then(()=>{

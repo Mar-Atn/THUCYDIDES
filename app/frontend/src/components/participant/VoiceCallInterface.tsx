@@ -293,18 +293,18 @@ function VoiceCallInner({
 
   if (status === 'error') {
     return (
-      <div className="fixed inset-0 z-50 bg-[#0A0E1A] flex items-center justify-center p-6 md:relative md:inset-auto md:rounded-xl md:border md:border-red-500/30">
+      <div className="fixed inset-0 z-50 bg-white flex items-center justify-center p-6 md:relative md:inset-auto md:rounded-xl md:border md:border-red-500/30">
         <div className="text-center max-w-md">
           <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
             <PhoneOff className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="font-['Playfair_Display'] text-2xl text-red-400 mb-2">
+          <h2 className="font-heading text-2xl text-red-400 mb-2">
             Voice Connection Failed
           </h2>
-          <p className="text-gray-400 mb-6">{error}</p>
+          <p className="text-gray-500 mb-6">{error}</p>
           <button
             onClick={() => onEnd('')}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-gray-900 rounded-lg transition-colors"
           >
             Close
           </button>
@@ -316,16 +316,16 @@ function VoiceCallInner({
   /* ── Render: Main ────────────────────────────────────────────────────── */
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A0E1A] flex flex-col md:relative md:inset-auto md:rounded-xl md:border md:border-white/10 md:max-h-[700px]">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col md:relative md:inset-auto md:rounded-xl md:border md:border-gray-200 md:max-h-[700px]">
 
       {/* Header: counterpart name + timer */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-[#0A0E1A]/80 backdrop-blur">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white/80 backdrop-blur">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-['Playfair_Display'] font-bold text-lg">
+          <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-heading font-bold text-lg">
             {counterpartName.charAt(0)}
           </div>
           <div>
-            <div className="text-white font-['Playfair_Display'] text-lg leading-tight">
+            <div className="text-gray-900 font-heading text-lg leading-tight">
               {counterpartName}
             </div>
             <div className="text-gray-500 text-xs">
@@ -346,7 +346,7 @@ function VoiceCallInner({
           className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-colors"
           title="End call"
         >
-          <PhoneOff className="w-5 h-5 text-white" />
+          <PhoneOff className="w-5 h-5 text-gray-900" />
         </button>
       </div>
 
@@ -369,7 +369,7 @@ function VoiceCallInner({
                 ))}
               </div>
             </div>
-            <div className="text-gray-400 font-['DM_Sans'] text-sm">
+            <div className="text-gray-500 font-body text-sm">
               {status === 'active'
                 ? conversation.isSpeaking ? 'Speaking...' : 'Listening...'
                 : status === 'connecting' ? 'Establishing connection...' : 'Call ended'}
@@ -391,7 +391,7 @@ function VoiceCallInner({
                 <div
                   className={`max-w-[80%] px-3 py-2 rounded-lg text-sm font-['DM_Sans'] ${
                     entry.speaker === 'ai'
-                      ? 'bg-white/5 border border-white/10 text-gray-200'
+                      ? 'bg-gray-50 border border-gray-200 text-gray-600'
                       : 'bg-blue-600/20 border border-blue-500/20 text-blue-100'
                   }`}
                 >
@@ -411,14 +411,14 @@ function VoiceCallInner({
       </div>
 
       {/* Controls bar */}
-      <div className="flex items-center justify-center gap-4 px-4 py-4 border-t border-white/10 bg-[#0A0E1A]/80 backdrop-blur">
+      <div className="flex items-center justify-center gap-4 px-4 py-4 border-t border-gray-200 bg-white/80 backdrop-blur">
         {/* Mute */}
         <button
           onClick={toggleMute}
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
             muted
               ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-              : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
+              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
           }`}
           title={muted ? 'Unmute' : 'Mute'}
         >
@@ -431,7 +431,7 @@ function VoiceCallInner({
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
             phoneMode
               ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
+              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
           }`}
           title={phoneMode ? 'Speaker mode' : 'Phone mode'}
         >
@@ -444,7 +444,7 @@ function VoiceCallInner({
           className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
             showTranscript
               ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-              : 'bg-white/10 text-white border border-white/10 hover:bg-white/20'
+              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
           }`}
           title={showTranscript ? 'Hide transcript' : 'Show transcript'}
         >
@@ -457,7 +457,7 @@ function VoiceCallInner({
           className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-colors shadow-lg shadow-red-600/30"
           title="End voice call"
         >
-          <Phone className="w-6 h-6 text-white rotate-[135deg]" />
+          <Phone className="w-6 h-6 text-gray-900 rotate-[135deg]" />
         </button>
       </div>
     </div>
