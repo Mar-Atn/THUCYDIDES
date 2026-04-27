@@ -1377,27 +1377,33 @@ def _write_batch_to_engine_tables(
     try:
         if action_type == "set_budget":
             # Write to country_states_per_round: budget_social_pct, budget_production, budget_research
-            update = {}
+            # Use upsert — row may not exist yet (created during Phase B)
+            from engine.services.common import get_scenario_id
+            scenario_id = get_scenario_id(client, sim_run_id) or sim_run_id
+            row = {
+                "sim_run_id": sim_run_id,
+                "scenario_id": scenario_id,
+                "round_num": round_num,
+                "country_code": country_code,
+            }
             social = action.get("social_pct")
             if social is not None:
-                update["budget_social_pct"] = float(social)
+                row["budget_social_pct"] = float(social)
             production = action.get("production")
             if production:
-                update["budget_production"] = production
+                row["budget_production"] = production
             research = action.get("research")
             if research:
-                update["budget_research"] = research
-            if update:
-                client.table("country_states_per_round").update(update) \
-                    .eq("sim_run_id", sim_run_id) \
-                    .eq("round_num", round_num) \
-                    .eq("country_code", country_code) \
-                    .execute()
+                row["budget_research"] = research
+            if len(row) > 3:  # has at least one budget field
+                client.table("country_states_per_round").upsert(
+                    row, on_conflict="sim_run_id,round_num,country_code"
+                ).execute()
                 logger.info("[batch] Budget written to DB for %s R%d: social=%.1f, prod=%s, research=%s",
                             country_code, round_num,
-                            update.get("budget_social_pct", 1.0),
-                            update.get("budget_production", "-"),
-                            update.get("budget_research", "-"))
+                            row.get("budget_social_pct", 1.0),
+                            row.get("budget_production", "-"),
+                            row.get("budget_research", "-"))
 
         elif action_type == "set_tariffs":
             target = action.get("target_country", "")
@@ -1405,10 +1411,10 @@ def _write_batch_to_engine_tables(
             if target:
                 client.table("tariffs").upsert({
                     "sim_run_id": sim_run_id,
-                    "imposer": country_code,
-                    "target": target,
+                    "imposer_country_code": country_code,
+                    "target_country_code": target,
                     "level": level,
-                }, on_conflict="sim_run_id,imposer,target").execute()
+                }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                 logger.info("[batch] Tariff written: %s → %s level=%d", country_code, target, level)
 
         elif action_type == "set_sanctions":
@@ -1417,20 +1423,23 @@ def _write_batch_to_engine_tables(
             if target:
                 client.table("sanctions").upsert({
                     "sim_run_id": sim_run_id,
-                    "imposer": country_code,
-                    "target": target,
+                    "imposer_country_code": country_code,
+                    "target_country_code": target,
                     "level": level,
-                }, on_conflict="sim_run_id,imposer,target").execute()
+                }, on_conflict="sim_run_id,imposer_country_code,target_country_code").execute()
                 logger.info("[batch] Sanction written: %s → %s level=%d", country_code, target, level)
 
         elif action_type == "set_opec":
+            from engine.services.common import get_scenario_id
+            scenario_id = get_scenario_id(client, sim_run_id) or sim_run_id
             prod_level = action.get("production", action.get("production_level", "normal"))
-            client.table("country_states_per_round").update({
+            client.table("country_states_per_round").upsert({
+                "sim_run_id": sim_run_id,
+                "scenario_id": scenario_id,
+                "round_num": round_num,
+                "country_code": country_code,
                 "opec_production": prod_level,
-            }).eq("sim_run_id", sim_run_id) \
-              .eq("round_num", round_num) \
-              .eq("country_code", country_code) \
-              .execute()
+            }, on_conflict="sim_run_id,round_num,country_code").execute()
             logger.info("[batch] OPEC production written: %s = %s", country_code, prod_level)
 
     except Exception as e:
