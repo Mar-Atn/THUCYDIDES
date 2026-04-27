@@ -1,8 +1,8 @@
 # SPEC: M5.8 — Dispatcher Resilience & Auto-Recovery
 
-**Version:** 0.1 (DRAFT — for review)
+**Version:** 1.0
 **Date:** 2026-04-27
-**Status:** CONCEPT
+**Status:** DONE — Phase A+B implemented, auto-recovery verified (10 agents across 3 sims)
 **Depends on:** M5 (Managed Agents core)
 **Owner:** Team
 

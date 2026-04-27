@@ -1,8 +1,8 @@
 # SPEC: M5.7 — Avatar Conversation System
 
-**Version:** 0.1 (DRAFT — for discussion)
-**Date:** 2026-04-25
-**Status:** CONCEPT
+**Version:** 1.0
+**Date:** 2026-04-27
+**Status:** IN PROGRESS — Phase 1 (text chat) implemented, Phase 2 (voice) wired, testing active
 **Depends on:** M5 (Managed Agents), M4 (Sim Runner), M6 (Human Interface), M2 (Communication)
 **Reference:** KING voice architecture, ElevenLabs Conversational AI SDK
 
