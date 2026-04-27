@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useConversation } from '@elevenlabs/react'
+import { useConversation, ConversationProvider } from '@elevenlabs/react'
 import { supabase } from '@/lib/supabase'
 import {
   Mic, MicOff, Phone, PhoneOff, Eye, EyeOff, Volume2, Smartphone,
@@ -69,9 +69,17 @@ async function getToken(): Promise<string | null> {
   return session?.access_token ?? null
 }
 
-/* ── Component ────────────────────────────────────────────────────────── */
+/* ── Component (outer wrapper provides ConversationProvider context) ── */
 
-export function VoiceCallInterface({
+export function VoiceCallInterface(props: VoiceCallProps) {
+  return (
+    <ConversationProvider>
+      <VoiceCallInner {...props} />
+    </ConversationProvider>
+  )
+}
+
+function VoiceCallInner({
   meetingId,
   simId,
   voiceAgentId,
