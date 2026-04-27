@@ -565,6 +565,12 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
             update_payload["status"] = "accepted"
             update_payload["meeting_id"] = meeting_id
             logger.info("[meeting] Invitation %s accepted → meeting %s", inv_id, meeting_id)
+
+            # Transfer inviter's intent note from invitation to meeting metadata (SPEC 4.2)
+            inviter_intent = (inv.get("responses") or {}).get("_inviter_intent_note", "")
+            if inviter_intent:
+                from engine.services.meeting_service import update_meeting_metadata
+                update_meeting_metadata(meeting_id, {"intent_note_a": inviter_intent})
         except Exception as exc:
             logger.error("[meeting] Failed to create meeting for invitation %s: %s", inv_id, exc)
             return {"success": False, "narrative": "Accepted, but failed to create meeting channel."}
