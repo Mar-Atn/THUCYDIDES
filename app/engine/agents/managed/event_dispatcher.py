@@ -392,12 +392,30 @@ class EventDispatcher:
                         await asyncio.sleep(MEETING_CHECK_INTERVAL)
                         continue
 
-                # Find active meetings with turn_count=0 OR with unresponded messages
+                # Find active meetings
                 active_meetings = db.table("meetings") \
-                    .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status,metadata") \
+                    .select("id,participant_a_role_id,participant_a_country,participant_b_role_id,participant_b_country,agenda,turn_count,status,metadata,started_at") \
                     .eq("sim_run_id", self.sim_run_id) \
                     .eq("status", "active") \
                     .execute().data or []
+
+                # Auto-end meetings older than 15 minutes
+                from datetime import datetime, timezone
+                now = datetime.now(timezone.utc)
+                for meeting in list(active_meetings):
+                    started = meeting.get("started_at")
+                    if started:
+                        try:
+                            started_dt = datetime.fromisoformat(started.replace("Z", "+00:00"))
+                            age_minutes = (now - started_dt).total_seconds() / 60
+                            if age_minutes > 15:
+                                mid = meeting["id"]
+                                logger.info("[meetings] Auto-ending meeting %s (age=%.0f min)", mid[:8], age_minutes)
+                                from engine.services.meeting_service import end_meeting
+                                end_meeting(mid, meeting["participant_a_role_id"])
+                                active_meetings.remove(meeting)
+                        except (ValueError, TypeError):
+                            pass
 
                 for meeting in active_meetings:
                     mid = meeting["id"]
