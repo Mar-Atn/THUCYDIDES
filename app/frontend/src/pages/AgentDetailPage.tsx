@@ -691,8 +691,13 @@ export function AgentDetailPage() {
                 // Build human-readable summary of the decision
                 const p = dec.action_payload || {}
                 let summary = ''
-                if (dec.action_type === 'set_budget')
-                  summary = `social=${p.social_pct}× mil=${p.military_coins} tech=${p.tech_coins}`
+                if (dec.action_type === 'set_budget') {
+                  const prod = p.production as Record<string,number> | undefined
+                  const res = p.research as Record<string,number> | undefined
+                  const prodStr = prod ? Object.entries(prod).filter(([,v]) => v > 0).map(([k,v]) => `${k}=${v}`).join(',') : '-'
+                  const resStr = res ? `nuc=${res.nuclear_coins ?? 0} ai=${res.ai_coins ?? 0}` : '-'
+                  summary = `social=${p.social_pct}× prod=[${prodStr}] R&D=[${resStr}]`
+                }
                 else if (dec.action_type === 'set_tariffs')
                   summary = `→ ${p.target_country} level ${p.level}`
                 else if (dec.action_type === 'set_sanctions')
