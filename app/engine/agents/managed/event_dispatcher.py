@@ -783,8 +783,7 @@ class EventDispatcher:
             message = self._format_events(events)
             event_ids = [e["id"] for e in events]
 
-            has_chat = any(e["event_type"] == "chat_message" for e in events)
-            self.set_agent_state(role_id, IN_MEETING if has_chat else ACTING)
+            self.set_agent_state(role_id, ACTING)
             try:
                 transcript = await self.session_manager.send_event(ctx, message)
 
@@ -826,11 +825,8 @@ class EventDispatcher:
                     ctx.round_num, transcript,
                 )
 
-                for ev in events:
-                    if ev["event_type"] == "chat_message":
-                        meeting_id = (ev.get("metadata") or {}).get("meeting_id")
-                        if meeting_id and transcript:
-                            self._write_chat_response(role_id, meeting_id, transcript)
+                # Avatar handles all meeting messages (M5.7).
+                # Managed agent does NOT write to meeting_messages directly.
 
                 self.session_manager._update_token_counts(ctx)
 
@@ -862,57 +858,6 @@ class EventDispatcher:
             + "\n\n".join(lines)
             + "\n\nProcess these and respond."
         )
-
-    # -- Chat response writeback -------------------------------------------
-
-    def _write_chat_response(
-        self, role_id: str, meeting_id: str, transcript: list[dict]
-    ) -> None:
-        """Write AI agent's chat response to meeting_messages.
-
-        After the dispatcher delivers a chat_message event, the agent may
-        respond with text. We extract the LAST agent_message from the
-        transcript (most complete response) and write it as a meeting
-        message, after checking for duplicates.
-
-        STAYS SYNC — fast single write after send_event completes.
-        """
-        from engine.services.meeting_service import send_message
-
-        # Find the last agent_message (most complete response)
-        response_text = None
-        for entry in transcript:
-            if entry.get("type") == "agent_message" and entry.get("content"):
-                text = entry["content"].strip()
-                if text and len(text) > 3:
-                    response_text = text
-
-        if not response_text:
-            return
-
-        ctx = self.agents.get(role_id)
-        if not ctx:
-            return
-
-        # Dedup: check if we already wrote this exact message recently
-        try:
-            db = get_client()
-            recent = (
-                db.table("meeting_messages")
-                .select("content")
-                .eq("meeting_id", meeting_id)
-                .eq("role_id", role_id)
-                .order("created_at", desc=True)
-                .limit(1)
-                .execute()
-            )
-            if recent.data and recent.data[0]["content"] == response_text[:500]:
-                logger.debug("[dispatcher] Skipping duplicate chat response for %s", role_id)
-                return
-        except Exception as e:
-            logger.warning("[dispatcher] Dedup check failed, writing anyway: %s", e)
-
-        send_message(meeting_id, role_id, ctx.country_code, response_text[:500])
 
     # -- Status & helpers --------------------------------------------------
 
