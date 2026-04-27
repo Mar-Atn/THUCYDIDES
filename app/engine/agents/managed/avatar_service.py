@@ -8,6 +8,7 @@ Architecture: SPEC_M5_AVATAR_CONVERSATIONS.md
 """
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 
@@ -98,17 +99,20 @@ async def text_avatar_turn(
     system_prompt = build_avatar_system_prompt(avatar_identity, intent_note)
     client = _get_client()
 
-    response = await client.messages.create(
-        model=model,
-        max_tokens=300,
-        system=[
-            {
-                "type": "text",
-                "text": system_prompt,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=conversation_history,
+    response = await asyncio.wait_for(
+        client.messages.create(
+            model=model,
+            max_tokens=300,
+            system=[
+                {
+                    "type": "text",
+                    "text": system_prompt,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=conversation_history,
+        ),
+        timeout=30.0,
     )
 
     # Extract text from response

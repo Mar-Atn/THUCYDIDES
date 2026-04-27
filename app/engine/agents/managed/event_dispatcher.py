@@ -61,6 +61,7 @@ class EventDispatcher:
         self._state_since: dict[str, float] = {}  # role_id -> timestamp of last state change
         self._running = False
         self._tasks: list[asyncio.Task] = []
+        self._opening_sent: set[str] = set()  # meeting_ids where AI opening was sent
 
     # Max time an agent can stay in ACTING before forced back to IDLE (seconds)
     ACTING_TIMEOUT = 180  # 3 minutes
@@ -444,23 +445,21 @@ class EventDispatcher:
                     else:
                         # AI-Human meeting
                         # Human message responses are handled by the avatar-turn API
-                        # endpoint (Task #5). The monitor only handles AI-speaks-first.
+                        # endpoint. The monitor only handles AI-speaks-first (once).
                         ai_role = role_a if a_is_ai else role_b
-                        human_country = meeting["participant_b_country"] if a_is_ai else meeting["participant_a_country"]
-                        agenda = meeting.get("agenda", "Bilateral discussion")
 
-                        # Agent should be IN_MEETING (set at meeting creation)
-                        # Only check: no messages yet → AI needs to open the conversation
-                        msgs = db.table("meeting_messages") \
-                            .select("role_id") \
-                            .eq("meeting_id", mid) \
-                            .limit(1).execute().data or []
+                        # Only open if NO messages AND not already opening
+                        if turn_count == 0 and mid not in self._opening_sent:
+                            msgs = db.table("meeting_messages") \
+                                .select("role_id") \
+                                .eq("meeting_id", mid) \
+                                .limit(1).execute().data or []
 
-                        if not msgs:
-                            # No messages yet — AI speaks first via avatar service
-                            asyncio.create_task(
-                                self._avatar_opening_message(mid, ai_role, meeting)
-                            )
+                            if not msgs:
+                                self._opening_sent.add(mid)
+                                asyncio.create_task(
+                                    self._avatar_opening_message(mid, ai_role, meeting)
+                                )
 
                 await asyncio.sleep(MEETING_CHECK_INTERVAL)
 
