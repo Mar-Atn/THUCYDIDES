@@ -748,6 +748,33 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   // Use org IDs from parent (already loaded in loadData) — no duplicate fetch
   const myOrgIds = parentOrgIds ?? new Set<string>()
 
+  // Role name + position lookup for display in invitations and active meetings
+  const [roleInfo, setRoleInfo] = useState<Record<string, {name:string;country:string;position:string}>>({})
+  useEffect(() => {
+    supabase.from('roles').select('id,character_name,country_code,positions')
+      .eq('sim_run_id', simId).eq('status', 'active')
+      .then(({ data }) => {
+        if (!data) return
+        const map: Record<string, {name:string;country:string;position:string}> = {}
+        for (const r of data) {
+          const positions = (r.positions as string[]) || []
+          const pos = positions.includes('head_of_state') ? 'HoS'
+            : positions.includes('military') ? 'Military'
+            : positions.includes('diplomat') ? 'Diplomat'
+            : positions.includes('economy') ? 'Economy'
+            : positions.includes('security') ? 'Security'
+            : positions.includes('opposition') ? 'Opposition'
+            : ''
+          map[r.id as string] = {
+            name: (r.character_name as string) || (r.id as string),
+            country: (r.country_code as string) || '',
+            position: pos,
+          }
+        }
+        setRoleInfo(map)
+      })
+  }, [simId])
+
   /* Realtime: meeting invitations for this role */
   const { data: meetingInvitationsRaw } = useRealtimeTable<Record<string, unknown>>(
     'meeting_invitations', simId,
@@ -1757,7 +1784,12 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
               <div key={inv.id} className="bg-card border border-action/30 rounded-lg px-4 py-3">
                 <div className="font-body text-body-sm text-text-primary font-medium">
                   {inv.invitation_type === 'one_on_one'
-                    ? `Meeting request from ${inv.inviter_role_id}`
+                    ? <>Meeting request from <strong>{roleInfo[inv.inviter_role_id]?.name || inv.inviter_role_id}</strong>
+                        {roleInfo[inv.inviter_role_id]?.position && (
+                          <span className="text-action/70 ml-1 font-normal">{roleInfo[inv.inviter_role_id].position}</span>
+                        )}
+                        <span className="text-text-secondary/50 ml-1 font-normal uppercase text-[10px] tracking-wider">{inv.inviter_country_code}</span>
+                      </>
                     : `${inv.org_name || inv.org_id} meeting`}
                 </div>
                 {inv.message && <p className="font-body text-caption text-text-secondary mt-0.5">{inv.message}</p>}
@@ -1795,7 +1827,10 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 <div key={m.id} className="relative bg-base hover:bg-action/5 border border-action/30 hover:border-action/50 rounded-lg px-4 py-3 transition-colors group">
                   <button onClick={() => onOpenChat?.(m.id)} className="text-left w-full">
                     <span className="font-body text-body-sm text-text-primary group-hover:text-action block">
-                      {otherRole}
+                      {roleInfo[otherRole]?.name || otherRole}
+                      {roleInfo[otherRole]?.position && (
+                        <span className="text-action/60 ml-1 text-[10px] font-normal">{roleInfo[otherRole].position}</span>
+                      )}
                     </span>
                     <span className="font-body text-caption text-text-secondary block">
                       {otherCountry.toUpperCase()}

@@ -2558,7 +2558,7 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
 }) {
   const [loading, setLoading] = useState(true)
   const [meetingType, setMeetingType] = useState<'one_on_one'|'organization'>('one_on_one')
-  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_code:string}[]>([])
+  const [allRoles, setAllRoles] = useState<{id:string;character_name:string;country_code:string;positions:string[]}[]>([])
   const [myOrgs, setMyOrgs] = useState<{id:string;name:string}[]>([])
   const [countries, setCountries] = useState<{id:string;sim_name:string;color_ui:string}[]>([])
   const [targetRole, setTargetRole] = useState('')
@@ -2586,7 +2586,7 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
     const timeout = setTimeout(() => { if (!cancelled) setLoading(false) }, 5000)
     setLoading(true)
     Promise.all([
-      supabase.from('roles').select('id,character_name,country_code')
+      supabase.from('roles').select('id,character_name,country_code,positions')
         .eq('sim_run_id', simId).eq('status', 'active'),
       supabase.from('org_memberships').select('org_id')
         .eq('sim_run_id', simId).eq('country_code', countryId),
@@ -2721,6 +2721,17 @@ export function SetMeetingsForm({roleId,countryId,simId,onClose,onSubmitted}:{
                           <input type="radio" name="invite_role" value={r.id} checked={targetRole === r.id}
                             onChange={() => setTargetRole(r.id)} className="accent-action"/>
                           <span className="font-body text-body-sm text-text-primary">{r.character_name}</span>
+                          {r.positions?.length > 0 && (
+                            <span className="font-body text-[10px] text-text-secondary/60 ml-1">
+                              {r.positions.includes('head_of_state') ? 'HoS'
+                                : r.positions.includes('military') ? 'Mil'
+                                : r.positions.includes('diplomat') ? 'Dip'
+                                : r.positions.includes('economy') ? 'Econ'
+                                : r.positions.includes('security') ? 'Sec'
+                                : r.positions.includes('opposition') ? 'Opp'
+                                : r.positions[0]?.slice(0, 3)}
+                            </span>
+                          )}
                         </label>
                       ))}
                     </div>
