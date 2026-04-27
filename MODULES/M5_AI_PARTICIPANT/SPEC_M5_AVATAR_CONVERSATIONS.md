@@ -152,9 +152,9 @@ CHAT RULES:
 
 ### 5.2 Mode B: Voice Call (ElevenLabs)
 
-**When:** AI↔Human, when human clicks the Voice Call button inside an active text chat.
+**When:** AI-Human meetings, when human selects "Voice Call" in the mode selection popup (see 7.2).
 
-**How it starts:** Meeting always opens as text chat first. Inside the chat UI, a prominent **🎤 Voice Call** button is visible. When the human clicks it:
+**How it starts:** Human selects Voice Call before the meeting opens. The VoiceCallInterface renders directly — no text chat first. The **🎤 Voice Call** button is visible. When the human clicks it:
 1. Text chat avatar pauses (conversation context preserved)
 2. ElevenLabs voice session starts immediately with the SAME Avatar Identity + Intent Note
 3. Live voice conversation begins — no additional setup, no delay
@@ -219,7 +219,7 @@ Intent notes are already in place when the meeting is created — the agent gene
 When meeting is created (acceptance):
 1. Intent notes transferred from invitation/response to `meetings.metadata`
 2. AI participants set to `IN_MEETING` state (blocks other actions/events)
-3. Meeting mode = text chat (default, voice upgradable by human during chat)
+3. Human selects mode via popup: Text Chat or Voice Call (see 7.2)
 4. Avatar context assembled: Avatar Identity + Intent Note + conversation rules
 5. For AI-Human: meeting monitor detects active meeting, avatar sends opening message
 6. For AI-AI: meeting monitor detects both participants, runs `run_text_meeting()`
@@ -268,63 +268,55 @@ Two buttons: **Accept** | **Decline**
 
 (No mode selection at this point — meeting always starts as text chat.)
 
-### 7.2 Text Chat (default)
+### 7.2 Mode Selection (Human-AI meetings only)
+
+When a Human-AI meeting is created (either side accepted), the human sees a connection popup before the meeting interface opens:
+
+**Popup:** "Connecting you to [Name], [Country] - [Position]" with two buttons: **Text Chat** | **Voice Call**
+
+- **Text Chat** opens MeetingChat (Telegram-style, as implemented)
+- **Voice Call** opens VoiceCallInterface directly (with text transcript sidebar)
+- Voice Call button only visible if the AI counterpart has `elevenlabs_agent_id` assigned
+- **No live switching** during the meeting. To change mode: end meeting, request a new one
+- Human-Human meetings skip this popup (always text chat)
+- AI-AI meetings are always text chat (faster, cheaper)
+
+### 7.3 Text Chat Mode
 
 Meeting opens as familiar Telegram-style chat. AI responses arrive in 1-3 seconds (not 30+):
 - Message bubbles with typing indicator
 - Clean, fast, natural messaging feel
-- Prominent **🎤 Voice Call** button visible at top of chat (only if AI has voice assigned)
-- **📞 Phone Mode** toggle icon (appears only during voice call)
+- End meeting button in header
 
-### 7.3 Upgrading to Voice Call (in-chat)
+### 7.4 Voice Call Mode (REPLACES old 7.3-7.5)
 
-Inside the text chat, the human sees a large **🎤 Voice Call** button. One tap:
-1. Chat area transitions to voice call UI (immediately — no loading screen)
-2. Voice starts — AI greets based on conversation context so far
-3. Human speaks through device mic, hears AI through speakers
-
-**Voice Call UI (overlays/replaces chat):**
-- **Header:** Counterpart name + country + call duration timer
+Phone-call-like experience. AI responds sub-second via ElevenLabs:
+- **Header:** Counterpart name + country + position + call duration timer
 - **Center:** Waveform / speaking indicator
-- **Controls:** 🔇 Mute | 📱 Phone Mode | 💬 Show Transcript | 🔴 End Voice
-- **Phone mode toggle:** Switches audio from speaker → earpiece (like holding phone to ear). Toggle back for speakerphone. Mobile-native feel.
-- **Transcript panel:** Slides in from side/bottom when toggled — live text of what's being said
+- **Controls:** Mute | Phone Mode (earpiece/speaker) | Show Transcript | End Call
+- **Transcript panel:** Live text of what is being said (toggle on/off)
+- Voice messages written to `meeting_messages` with `channel='voice'`
+- On end: transcript saved, delivered to Managed Agent
 
-**Ending voice:** Click 🔴 End Voice → returns to text chat. Conversation can continue in text, or end the meeting entirely.
+### 7.5 Human-Human Chat
 
-### 7.4 Human↔Human Chat
+Same text chat UI. No mode selection, no voice. Direct message relay through `meeting_messages` table.
 
-Same text chat UI. No voice call button (humans use real phones/meet in person). Direct message relay through `meeting_messages` table. Already works.
-
-### 7.5 Seamless Text / Voice Switching (Conversation Continuity)
-
-The human can switch between text and voice **at any point** during a meeting. The conversation flows naturally across modes — no context lost.
-
-**Text to Voice (upgrade):**
-When human clicks Voice Call mid-conversation:
-1. Collect all text messages exchanged so far
-2. Include them in the ElevenLabs prompt override as conversation history
-3. Voice agent starts immediately — continues naturally from where text left off
-
-**Voice to Text (downgrade):**
-When human clicks End Voice (bad audio, preference, etc.):
-1. Collect voice transcript so far
-2. Forward to Claude text avatar as conversation context
-3. Text responses resume in 1-3 seconds — seamless continuation
-
-**The key:** Both avatars (Claude text + ElevenLabs voice) accept conversation history as part of their prompt. Each switch includes the FULL conversation so far. No information lost. The counterpart experiences one continuous conversation that changes medium.
-
-### 7.6 The Experience Gradient
+### 7.6 The Experience Flow
 
 ```
-INVITE → ACCEPT → TEXT CHAT (fast, 1-3s) → [optional] VOICE CALL (instant, sub-second)
-                         ���                              ↓
-                         └── END VOICE → back to text ──┘
-                                              ↓
-                                          END MEETING → transcript saved
+INVITE -> ACCEPT -> MODE POPUP -> [Text Chat] or [Voice Call]
+                                      |                |
+                                      v                v
+                                   MeetingChat    VoiceCallInterface
+                                      |                |
+                                      v                v
+                                 END MEETING -> transcript saved
 ```
 
-The human never has to choose upfront. Start chatting, try voice, switch back. One continuous conversation regardless of medium.
+Simple. Clear. One mode per meeting. Want to try the other mode? End and reconnect.
+
+**REMOVED:** Live text-to-voice switching (old 7.5). Too fragile across different LLM backends. Replaced with upfront mode choice.
 
 ---
 
@@ -334,7 +326,7 @@ The human never has to choose upfront. Start chatting, try voice, switch back. O
 |--------|-----------------|-----------------|
 | **M5 (Managed Agent)** | Strategic reasoning, memory, tools | Avatar Identity generation, Intent Note generation, transcript reflection |
 | **M4 (Sim Runner)** | Meeting lifecycle, phase control | Meeting creation, status transitions, moderator controls |
-| **M6 (Human Interface)** | Participant dashboard, action forms | Meeting chat UI, voice call UI, invitation accept/decline with mode selection |
+| **M6 (Human Interface)** | Participant dashboard, action forms | Meeting chat UI, voice call UI, mode selection popup |
 | **M9 (Sim Setup)** | Template management, role configuration | Voice agent assignment UI (template + simrun levels) |
 | **M2 (Communication)** | Realtime, event delivery | meeting_messages Realtime subscription, event queue for transcript delivery |
 
@@ -466,16 +458,18 @@ Compare with current system: ~$0.10-0.30 per managed agent meeting turn × 8 tur
 - Managed Agent does NOT write to meeting_messages (avatar only)
 - Auto-open chat when invitation accepted (Realtime subscription)
 
-### Phase 2: Voice Call Infrastructure — WIRED, needs end-to-end testing
-- `elevenlabs_agent_id` on roles table — DONE (DB column added)
+### Phase 2: Voice Call — IN PROGRESS
+- `elevenlabs_agent_id` on roles table — DONE
 - ElevenLabs agent list fetching — DONE (`GET /api/elevenlabs/agents` proxy)
-- Voice assignment UI — DONE (TabRoles.tsx dropdown, AIParticipantDashboard.tsx icon)
+- Voice assignment UI — DONE (TabRoles.tsx, AIParticipantDashboard.tsx)
 - Voice call UI component — DONE (`VoiceCallInterface.tsx`)
-- MeetingChat voice button — DONE (shows when counterpart has voice agent)
-- **REMAINING:** End-to-end test with real ElevenLabs agents, prompt override wiring, transcript capture from voice
+- **NEW: Mode selection popup** ��� build "Connecting you to..." popup with Text Chat / Voice Call choice
+- **NEW: Avatar context for voice** — fetch identity + intent note, pass as ElevenLabs prompt override
+- **NEW: Position tags** in meeting invitation UI (HoS, diplomat, etc.)
+- End-to-end test with real ElevenLabs agents
+- Voice transcript capture to meeting_messages (channel='voice')
 
-### Phase 3: Polish & Integration — NOT STARTED
-- Text↔Voice context continuity (code paths exist, needs testing)
+### Phase 3: Polish — NOT STARTED
 - Mobile-optimized voice UI
 - Avatar Identity auto-refresh on major events
 - Cost tracking per conversation
