@@ -109,15 +109,18 @@ function VoiceCallInner({
   const fullPrompt = [
     avatarIdentity,
     '',
-    '## Conversation Intent',
-    intentNote,
+    '## Meeting Context',
+    intentNote || '(No specific intent note provided.)',
     '',
-    '## Prior Text Conversation',
+    '## Prior Conversation',
     conversationHistory || '(No prior messages — this is the start of the conversation.)',
     '',
     '## Voice Behavior Rules',
     VOICE_RULES,
   ].join('\n')
+
+  console.log('[voice] Full prompt length:', fullPrompt.length, 'chars')
+  console.log('[voice] Identity length:', avatarIdentity.length, 'Intent:', intentNote.length)
 
   /* ── ElevenLabs hook ─────────────────────────────────────────────────── */
 
