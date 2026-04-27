@@ -282,6 +282,7 @@ export function ParticipantDashboard() {
 
   /** Handle mode selection from popup. */
   const handleModeSelect = async (mode: 'text' | 'voice') => {
+    console.log('[mode-select] Mode:', mode, 'pending:', !!pendingModeSelect, 'simId:', !!simId)
     if (!pendingModeSelect || !simId) return
     const { meetingId, counterpart } = pendingModeSelect
 
