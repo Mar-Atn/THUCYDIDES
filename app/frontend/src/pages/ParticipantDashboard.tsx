@@ -21,6 +21,7 @@ import {
   ActionForm, TransactionReview, ArrestedBanner, UnitIcon,
 } from '@/components/participant/ActionForms'
 import { MeetingChat } from '@/components/participant/MeetingChat'
+import { VoiceCallInterface } from '@/components/participant/VoiceCallInterface'
 import { getActiveMeetings, endMeeting, type MeetingData } from '@/lib/queries'
 
 /* ── Hex → Country lookup (canonical from map_config.py) ──────────────── */
@@ -169,6 +170,9 @@ export function ParticipantDashboard() {
   const [personalRels, setPersonalRels] = useState<{other_role:string;type:string;notes:string}[]>([])
   const [activeAction, setActiveAction] = useState<string|null>(null)
   const [activeChatMeetingId, setActiveChatMeetingId] = useState<string|null>(null)
+  const [activeVoiceMeetingId, setActiveVoiceMeetingId] = useState<string|null>(null)
+  const [pendingModeSelect, setPendingModeSelect] = useState<{meetingId:string; counterpart:{name:string;country:string;position:string;voiceAgentId:string|null}} | null>(null)
+  const [voiceContext, setVoiceContext] = useState<{identity:string;intentNote:string;voiceAgentId:string;counterpartName:string;counterpartCountry:string} | null>(null)
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
@@ -201,7 +205,7 @@ export function ParticipantDashboard() {
     return () => clearInterval(iv)
   }, [activeFlightAction?.id, activeFlightAction?.status])
 
-  /* Auto-open chat when a meeting is created for my outgoing invitation --- */
+  /* Auto-open meeting when created — show mode popup for AI counterpart --- */
   useEffect(() => {
     if (!simId || !myRole) return
     const ch = supabase
@@ -209,12 +213,46 @@ export function ParticipantDashboard() {
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'meetings' },
-        (payload) => {
+        async (payload) => {
           const row = payload.new as Record<string, unknown>
           if (row.sim_run_id !== simId) return
-          // Auto-open if I'm a participant and not already in a chat
           const isMyMeeting = row.participant_a_role_id === myRole.id || row.participant_b_role_id === myRole.id
-          if (isMyMeeting && !activeChatMeetingId) {
+          if (!isMyMeeting || activeChatMeetingId || activeVoiceMeetingId || pendingModeSelect) return
+
+          // Determine counterpart
+          const otherRoleId = row.participant_a_role_id === myRole.id
+            ? row.participant_b_role_id as string
+            : row.participant_a_role_id as string
+
+          // Fetch counterpart role info (name, position, voice agent)
+          const { data: roleData } = await supabase
+            .from('roles')
+            .select('character_name,country_code,positions,elevenlabs_agent_id,is_ai_operated')
+            .eq('id', otherRoleId)
+            .eq('sim_run_id', simId)
+            .limit(1)
+          const r = roleData?.[0]
+
+          if (r?.is_ai_operated && r?.elevenlabs_agent_id) {
+            // AI with voice — show mode selection popup
+            const positions = (r.positions as string[]) || []
+            const posLabel = positions.includes('head_of_state') ? 'Head of State'
+              : positions.includes('military') ? 'Military Chief'
+              : positions.includes('diplomat') ? 'Diplomat'
+              : positions.includes('economy') ? 'Economy Officer'
+              : positions.includes('security') ? 'Security'
+              : positions[0] || ''
+            setPendingModeSelect({
+              meetingId: row.id as string,
+              counterpart: {
+                name: (r.character_name as string) || otherRoleId,
+                country: (r.country_code as string) || '',
+                position: posLabel,
+                voiceAgentId: r.elevenlabs_agent_id as string,
+              },
+            })
+          } else {
+            // Human or AI without voice — go straight to text chat
             setActiveChatMeetingId(row.id as string)
           }
         },
@@ -222,6 +260,39 @@ export function ParticipantDashboard() {
       .subscribe()
     return () => { supabase.removeChannel(ch) }
   }, [simId, myRole?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /** Handle mode selection from popup. */
+  const handleModeSelect = async (mode: 'text' | 'voice') => {
+    if (!pendingModeSelect || !simId) return
+    const { meetingId, counterpart } = pendingModeSelect
+
+    if (mode === 'text') {
+      setActiveChatMeetingId(meetingId)
+    } else {
+      // Fetch avatar context for voice (identity + intent note)
+      const otherCountry = counterpart.country
+      const [identityRes, meetingRes] = await Promise.all([
+        supabase.from('agent_memories').select('content')
+          .eq('sim_run_id', simId).eq('country_code', otherCountry)
+          .eq('memory_key', 'avatar_identity').limit(1),
+        supabase.from('meetings').select('metadata,participant_a_role_id')
+          .eq('id', meetingId).limit(1),
+      ])
+      const identity = identityRes.data?.[0]?.content as string || ''
+      const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
+      // Determine which intent note belongs to the AI
+      const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
+      const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
+      setVoiceContext({
+        identity, intentNote,
+        voiceAgentId: counterpart.voiceAgentId || '',
+        counterpartName: counterpart.name,
+        counterpartCountry: counterpart.country,
+      })
+      setActiveVoiceMeetingId(meetingId)
+    }
+    setPendingModeSelect(null)
+  }
 
   /* Derive simState from the realtime sim_runs row ----------------------- */
   const simState: SimState | null = simRun ? {
@@ -583,7 +654,47 @@ export function ParticipantDashboard() {
         </div>}
       </main>
 
-      {/* Meeting Chat overlay */}
+      {/* Mode Selection Popup — Human-AI meetings only */}
+      {pendingModeSelect && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
+            <div className="text-center mb-6">
+              <div className="font-body text-body-sm text-gray-500 mb-2">Connecting you to</div>
+              <div className="font-heading text-h2 text-gray-900">{pendingModeSelect.counterpart.name}</div>
+              <div className="font-body text-body-sm text-gray-500 mt-1">
+                <span className="uppercase tracking-wider">{pendingModeSelect.counterpart.country}</span>
+                {pendingModeSelect.counterpart.position && (
+                  <span className="ml-2 text-blue-600 font-medium">{pendingModeSelect.counterpart.position}</span>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleModeSelect('text')}
+                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg font-body text-body font-medium transition-colors"
+              >
+                Text Chat
+              </button>
+              {pendingModeSelect.counterpart.voiceAgentId && (
+                <button
+                  onClick={() => handleModeSelect('voice')}
+                  className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-body text-body font-medium transition-colors"
+                >
+                  Voice Call
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setPendingModeSelect(null)}
+              className="w-full mt-3 py-2 text-gray-500 hover:text-gray-700 font-body text-caption transition-colors"
+            >
+              Not now
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Meeting Chat overlay (text mode) */}
       {activeChatMeetingId && myRole && (
         <MeetingChat
           meetingId={activeChatMeetingId}
@@ -592,6 +703,27 @@ export function ParticipantDashboard() {
           myCountryCode={myRole.country_code}
           myCharacterName={myRole.character_name}
           onClose={() => { setActiveChatMeetingId(null); setDataVersion(v => v + 1) }}
+        />
+      )}
+
+      {/* Voice Call overlay (voice mode) */}
+      {activeVoiceMeetingId && myRole && voiceContext && (
+        <VoiceCallInterface
+          meetingId={activeVoiceMeetingId}
+          simId={simId!}
+          voiceAgentId={voiceContext.voiceAgentId}
+          avatarIdentity={voiceContext.identity}
+          intentNote={voiceContext.intentNote}
+          conversationHistory=""
+          counterpartName={voiceContext.counterpartName}
+          counterpartCountry={voiceContext.counterpartCountry}
+          myRoleId={myRole.id}
+          myCountryCode={myRole.country_code}
+          onEnd={() => {
+            setActiveVoiceMeetingId(null)
+            setVoiceContext(null)
+            setDataVersion(v => v + 1)
+          }}
         />
       )}
     </div>
