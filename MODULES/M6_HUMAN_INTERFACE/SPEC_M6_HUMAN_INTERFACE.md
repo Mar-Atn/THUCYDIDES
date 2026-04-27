@@ -269,6 +269,7 @@ System-generated notifications that appear in "Actions Expected Now":
 | Transaction proposal | "Proposal from [Country]: [summary]" | Accept/reject/counter |
 | Agreement proposal | "Agreement proposed: [title]" | Review/sign |
 | Meeting invitation | "Meeting: [title] called by [role]" | Accept |
+| Meeting accepted | Auto-detected via Realtime subscription on `meetings` table | **Auto-opens chat** — when counterpart accepts the invitation, chat UI opens automatically for the inviter |
 | Election nomination | "Nominations open for [election]" | Self-nominate |
 | Vote required | "Cast your vote: [election/leadership]" | Vote |
 | Moderator broadcast | "[Message from moderator]" | Read |

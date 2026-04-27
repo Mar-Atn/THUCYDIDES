@@ -201,6 +201,28 @@ export function ParticipantDashboard() {
     return () => clearInterval(iv)
   }, [activeFlightAction?.id, activeFlightAction?.status])
 
+  /* Auto-open chat when a meeting is created for my outgoing invitation --- */
+  useEffect(() => {
+    if (!simId || !myRole) return
+    const ch = supabase
+      .channel(`meeting-autoopen:${myRole.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'meetings' },
+        (payload) => {
+          const row = payload.new as Record<string, unknown>
+          if (row.sim_run_id !== simId) return
+          // Auto-open if I'm a participant and not already in a chat
+          const isMyMeeting = row.participant_a_role_id === myRole.id || row.participant_b_role_id === myRole.id
+          if (isMyMeeting && !activeChatMeetingId) {
+            setActiveChatMeetingId(row.id as string)
+          }
+        },
+      )
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [simId, myRole?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   /* Derive simState from the realtime sim_runs row ----------------------- */
   const simState: SimState | null = simRun ? {
     status: simRun.status,
