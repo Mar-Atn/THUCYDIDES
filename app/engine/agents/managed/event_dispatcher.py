@@ -194,12 +194,146 @@ class EventDispatcher:
         )
 
     def set_agent_state(self, role_id: str, state: str) -> None:
-        """Update agent state (IDLE, ACTING, IN_MEETING, FROZEN)."""
+        """Update agent state (IDLE, ACTING, IN_MEETING, FROZEN).
+
+        Write-through: persists to ai_agent_sessions table (M5.8).
+        """
         old = self.agent_states.get(role_id)
         self.agent_states[role_id] = state
         self._state_since[role_id] = asyncio.get_event_loop().time()
         if old != state:
             logger.info("[dispatcher] Agent %s: %s -> %s", role_id, old, state)
+            # Write-through to DB (fire-and-forget)
+            try:
+                db = get_client()
+                db.table("ai_agent_sessions") \
+                    .update({"agent_state": state}) \
+                    .eq("sim_run_id", self.sim_run_id) \
+                    .eq("role_id", role_id) \
+                    .execute()
+            except Exception as e:
+                logger.warning("[dispatcher] Failed to persist state for %s: %s", role_id, e)
+
+    # -- Auto-Recovery (M5.8) ----------------------------------------------
+
+    async def recover_from_db(self) -> int:
+        """Recover dispatcher state from DB after server restart.
+
+        Reads ai_agent_sessions for active sessions, rebuilds agents dict,
+        health-checks Anthropic sessions, recreates dead ones.
+
+        Returns number of agents recovered.
+        """
+        import hashlib
+        from engine.agents.managed.system_prompt import build_system_prompt
+        from engine.agents.managed.tool_executor import ToolExecutor
+
+        db = get_client()
+        sessions = db.table("ai_agent_sessions") \
+            .select("*") \
+            .eq("sim_run_id", self.sim_run_id) \
+            .in_("status", ["ready", "active"]) \
+            .execute().data or []
+
+        if not sessions:
+            logger.info("[recovery] No active sessions found for sim %s", self.sim_run_id[:8])
+            return 0
+
+        logger.info("[recovery] Found %d active sessions for sim %s", len(sessions), self.sim_run_id[:8])
+        recovered = 0
+
+        for row in sessions:
+            role_id = row["role_id"]
+            country_code = row["country_code"]
+            round_num = row.get("round_num", 1)
+
+            # Build current prompt hash to compare with stored
+            try:
+                current_prompt = build_system_prompt(role_id, sim_run_id=self.sim_run_id)
+                current_hash = hashlib.md5(current_prompt.encode()).hexdigest()[:16]
+            except Exception:
+                current_hash = None
+            stored_hash = row.get("prompt_hash")
+
+            needs_recreation = (current_hash and stored_hash and current_hash != stored_hash)
+
+            if needs_recreation:
+                # Tool schemas or system prompt changed — must recreate
+                logger.info("[recovery] Prompt changed for %s — recreating session", role_id)
+                try:
+                    ctx = await self.session_manager.create_session(
+                        role_id=role_id,
+                        country_code=country_code,
+                        sim_run_id=self.sim_run_id,
+                        scenario_code=self.sim_run_id,
+                        round_num=round_num,
+                        model=row.get("model"),
+                    )
+                    # Send recovery message with memories
+                    memories = self.session_manager._load_agent_memories(self.sim_run_id, country_code)
+                    if memories:
+                        notes_text = "\n".join(
+                            f"- [{n['memory_key']}]: {n['content'][:200]}"
+                            for n in memories[:10]
+                        )
+                        await self.session_manager.send_event(ctx, (
+                            f"Your session was updated with new capabilities. "
+                            f"You are in Round {round_num}. Your saved notes:\n\n{notes_text}\n\n"
+                            f"Continue with your strategy."
+                        ))
+                except Exception as e:
+                    logger.error("[recovery] Failed to recreate session for %s: %s", role_id, e)
+                    continue
+            else:
+                # Same prompt — try to reconnect existing session
+                ctx = SessionContext(
+                    agent_id=row["agent_id"],
+                    agent_version=row.get("agent_version", 1),
+                    environment_id=row["environment_id"],
+                    session_id=row["session_id"],
+                    role_id=role_id,
+                    country_code=country_code,
+                    sim_run_id=self.sim_run_id,
+                    scenario_code=self.sim_run_id,
+                    model=row.get("model", "claude-sonnet-4-6"),
+                    round_num=round_num,
+                    tool_executor=ToolExecutor(
+                        country_code=country_code,
+                        scenario_code=self.sim_run_id,
+                        sim_run_id=self.sim_run_id,
+                        round_num=round_num,
+                        role_id=role_id,
+                    ),
+                    total_input_tokens=row.get("total_input_tokens", 0),
+                    total_output_tokens=row.get("total_output_tokens", 0),
+                    events_sent=row.get("events_sent", 0),
+                    actions_submitted=row.get("actions_submitted", 0),
+                    tool_calls=row.get("tool_calls", 0),
+                )
+
+                # Health-check the Anthropic session
+                health = await self.session_manager.health_check(ctx)
+                if health == "terminated":
+                    logger.info("[recovery] Session for %s is dead, recreating...", role_id)
+                    try:
+                        ctx = await self.session_manager.recover_session(ctx)
+                    except Exception as e:
+                        logger.error("[recovery] Failed to recover session for %s: %s", role_id, e)
+                        continue
+                else:
+                    # Session alive — register the SessionContext in session_manager cache
+                    self.session_manager._sessions[ctx.session_id] = ctx
+
+            # Register recovered agent
+            self.agents[role_id] = ctx
+            self.agent_states[role_id] = row.get("agent_state", IDLE)
+            self._state_since[role_id] = asyncio.get_event_loop().time()
+            recovered += 1
+            logger.info("[recovery] Recovered agent %s (state=%s, reconnect=%s)",
+                        role_id, self.agent_states[role_id],
+                        "reconnect" if not needs_recreation else "recreated")
+
+        return recovered
 
     # -- Dispatch Loop -----------------------------------------------------
 

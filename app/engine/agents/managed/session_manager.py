@@ -220,8 +220,11 @@ class ManagedSessionManager:
         )
         self._sessions[session.id] = ctx
 
-        # Persist to DB
+        # Persist to DB with prompt hash for smart recovery (M5.8)
+        import hashlib
+        prompt_hash = hashlib.md5(system_prompt.encode()).hexdigest()[:16]
         self._persist_session(ctx, status="ready")
+        self._update_session_field(ctx, prompt_hash=prompt_hash)
 
         return ctx
 
