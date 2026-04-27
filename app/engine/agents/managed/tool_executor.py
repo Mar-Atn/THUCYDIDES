@@ -887,16 +887,15 @@ class ToolExecutor:
                             client.table("agent_event_queue").insert({
                                 "sim_run_id": self.sim_run_id,
                                 "role_id": notify_role,
-                                "tier": 1,
+                                "tier": 2,
                                 "event_type": "meeting_started",
                                 "message": (
-                                    f"MEETING STARTED\n\n"
-                                    f"A bilateral meeting has been confirmed.\n"
-                                    f"Meeting ID: {meeting_id}\n"
+                                    f"MEETING CONFIRMED — your avatar will handle the conversation.\n"
                                     f"Agenda: {inv.get('message', 'Bilateral discussion')}\n"
                                     f"Participants: {inv.get('inviter_country_code', '')} and {self.country_code}\n\n"
-                                    f"The meeting will begin shortly. The conversation router will "
-                                    f"manage the turn-by-turn exchange."
+                                    f"Your Intent Note has been delivered to the avatar. "
+                                    f"You will receive the full transcript when the meeting ends. "
+                                    f"Do NOT send messages directly — the avatar represents you."
                                 ),
                                 "metadata": {
                                     "meeting_id": meeting_id,

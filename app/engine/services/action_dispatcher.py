@@ -598,16 +598,14 @@ def _respond_to_meeting(sim_run_id: str, action: dict) -> dict:
                 client.table("agent_event_queue").insert({
                     "sim_run_id": sim_run_id,
                     "role_id": notify_role,
-                    "tier": 1,
+                    "tier": 2,
                     "event_type": "meeting_started",
                     "message": (
-                        f"MEETING STARTED\n\n"
-                        f"A bilateral meeting has been confirmed.\n"
-                        f"Meeting ID: {meeting_id}\n"
+                        f"MEETING CONFIRMED — your avatar will handle the conversation.\n"
                         f"Agenda: {agenda}\n\n"
-                        f"Your avatar will handle the conversation using your Avatar Identity "
-                        f"and the Intent Note stored in the meeting metadata. "
-                        f"After the meeting, you'll receive the transcript for reflection."
+                        f"Your Intent Note has been delivered to the avatar. "
+                        f"You will receive the full transcript when the meeting ends. "
+                        f"Do NOT send messages directly — the avatar represents you."
                     ),
                     "metadata": {"meeting_id": meeting_id, "invitation_id": inv_id},
                 }).execute()
