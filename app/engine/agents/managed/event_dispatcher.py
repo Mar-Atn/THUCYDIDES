@@ -329,6 +329,12 @@ class EventDispatcher:
             self.agent_states[role_id] = row.get("agent_state", IDLE)
             self._state_since[role_id] = asyncio.get_event_loop().time()
             recovered += 1
+
+            # Check if avatar identity exists — regenerate if missing (e.g. after session recreation)
+            identity = self._fetch_avatar_identity(role_id)
+            if not identity or len(identity) < 50:
+                self._enqueue_avatar_identity_generation(role_id)
+
             logger.info("[recovery] Recovered agent %s (state=%s, reconnect=%s)",
                         role_id, self.agent_states[role_id],
                         "reconnect" if not needs_recreation else "recreated")

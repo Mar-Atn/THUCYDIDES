@@ -192,11 +192,16 @@ async def run_text_meeting(
     for turn_idx in range(max_turns):
         speaker = speakers[turn_idx % 2]
 
+        # First turn: seed with a user message (Claude API requires non-empty messages)
+        history = speaker["history"]
+        if not history:
+            history = [{"role": "user", "content": "The meeting has started. Begin the conversation."}]
+
         try:
             response_text = await text_avatar_turn(
                 avatar_identity=speaker["identity"],
                 intent_note=speaker["intent"],
-                conversation_history=speaker["history"],
+                conversation_history=history,
             )
         except Exception as e:
             logger.error(
