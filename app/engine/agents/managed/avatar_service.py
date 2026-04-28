@@ -54,6 +54,8 @@ def _get_client() -> AsyncAnthropic:
 def build_avatar_system_prompt(
     avatar_identity: str,
     intent_note: str,
+    counterpart_name: str = "",
+    counterpart_country: str = "",
     rules: str = TEXT_CHAT_RULES,
 ) -> str:
     """Assemble the full system prompt from avatar identity + intent note + rules.
@@ -61,13 +63,19 @@ def build_avatar_system_prompt(
     Args:
         avatar_identity: Persistent identity document (~500 words).
         intent_note: Per-meeting tactical briefing.
+        counterpart_name: Name of the person being met.
+        counterpart_country: Country of the counterpart.
         rules: Chat behavior rules (defaults to TEXT_CHAT_RULES).
 
     Returns:
         Combined system prompt string.
     """
+    meeting_with = ""
+    if counterpart_name and counterpart_country:
+        meeting_with = f"=== YOU ARE MEETING: {counterpart_name}, leader of {counterpart_country} ===\n\n"
     return (
         f"=== YOUR IDENTITY ===\n{avatar_identity}\n\n"
+        f"{meeting_with}"
         f"=== MEETING BRIEFING ===\n{intent_note}\n\n"
         f"=== RULES ===\n{rules}"
     )
@@ -78,6 +86,8 @@ async def text_avatar_turn(
     intent_note: str,
     conversation_history: list[dict[str, str]],
     model: str | None = None,
+    counterpart_name: str = "",
+    counterpart_country: str = "",
 ) -> str:
     """Execute a single conversation turn via the Claude Messages API.
 
@@ -89,6 +99,8 @@ async def text_avatar_turn(
         intent_note: Per-meeting tactical briefing.
         conversation_history: List of {"role": "user"|"assistant", "content": str}.
         model: Model ID override. Defaults to ai_config conversations model.
+        counterpart_name: Name of the person being met.
+        counterpart_country: Country of the counterpart.
 
     Returns:
         The avatar's response text.
@@ -96,7 +108,11 @@ async def text_avatar_turn(
     if model is None:
         model = get_ai_model("conversations")
 
-    system_prompt = build_avatar_system_prompt(avatar_identity, intent_note)
+    system_prompt = build_avatar_system_prompt(
+        avatar_identity, intent_note,
+        counterpart_name=counterpart_name,
+        counterpart_country=counterpart_country,
+    )
     client = _get_client()
 
     response = await asyncio.wait_for(

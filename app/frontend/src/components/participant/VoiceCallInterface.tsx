@@ -100,8 +100,10 @@ function VoiceCallInner({
   const fullPrompt = [
     avatarIdentity,
     '',
-    '## Meeting Context',
-    intentNote || '(No specific intent note provided.)',
+    `## You Are Meeting: ${counterpartName}, leader of ${counterpartCountry}`,
+    '',
+    '## Meeting Briefing',
+    intentNote || '(No specific briefing for this meeting.)',
     '',
     '## Prior Conversation',
     conversationHistory || '(No prior messages — this is the start of the conversation.)',
