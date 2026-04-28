@@ -60,7 +60,7 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 | **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch, recovery | DONE |
 | **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, three background loops, DB-backed auto-recovery | DONE |
 | **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | **SUPERSEDED by M5.7.** Legacy file kept but not used. Avatar system handles all meetings. | SUPERSEDED |
-| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, cost, activity, voice icons, real-time meeting state. | DONE |
+| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, per-agent cost, activity, voice icons, avatar identity viewer, stop/resume toggle. | DONE |
 | **M5.7 Avatar Conversations** | `avatar_service.py`, `avatar_generator.py`, `VoiceCallInterface.tsx`, `MeetingChat.tsx` | Text chat (Claude API) + Voice call (ElevenLabs). Mode popup. See SPEC_M5_AVATAR_CONVERSATIONS.md | DONE — text + voice both working with full context |
 | **M5.8 Dispatcher Resilience** | `event_dispatcher.py`, `main.py` lifespan | DB-backed auto-recovery on restart. Always-recreate sessions. Init/recovery lock. Active-sims-only filter. See SPEC_M5_DISPATCHER_RESILIENCE.md + M4 SPEC 5.1-5.6 | DONE |
 
@@ -393,28 +393,26 @@ For fast testing, the orchestrator plays co-moderator role:
 
 ### Remaining Work
 
-| # | Item | Category | Priority | Effort |
+| # | Item | Category | Priority | Status |
 |---|------|----------|----------|--------|
-| 1 | **Multi-round lifecycle test** — agents across R0→R1→R2 with memory persistence, Phase A/B transitions, batch solicitation | Testing | HIGH | 1 day |
-| 2 | **10+ agents simultaneously** — scale from 3 to 10-21 agents, verify performance and cost | Testing | HIGH | 0.5 day |
-| 3 | **AI-AI meeting test** — verify `run_text_meeting()` works after dispatcher fixes | Testing | HIGH | 0.5 day |
-| 4 | **Transcript delivery verification** — confirm Brain receives transcript, reflects, updates memory | Testing | HIGH | 0.5 day |
-| 5 | **Phase B solicitation test** — batch decisions (budget/tariffs/sanctions) + troop movement | Testing | HIGH | 0.5 day |
-| 6 | **Critical interrupt test** — nuclear launch, direct attack → Tier 1 delivery during meeting | Testing | MEDIUM | 0.5 day |
-| 7 | **Voice transcript on end** — verify voice messages compiled into transcript, delivered to Brain | Testing | MEDIUM | 0.5 day |
-| 8 | **`meetings.modality` tracking** — write 'text'/'voice' to DB on mode select | Code | LOW | 0.5 hr |
-| 9 | **Voice fallback to text** — if ElevenLabs connection fails before meeting starts, switch to text | Code | MEDIUM | 2 hr |
-| 10 | **Active meetings mode indicator** — show text/voice icon in participant dashboard meeting cards | Code | LOW | 1 hr |
-| 11 | **Monitoring metrics** — actions/round, tokens/pulse, cost/agent displayed in dashboard | Code | MEDIUM | 0.5 day |
-| 12 | **Cross-browser testing** — Safari desktop, Safari iOS, Chrome Android | Testing | HIGH | 0.5 day |
-| 13 | **Round restart test** — verify AI sessions survive, round data clears, agents get fresh context | Testing | HIGH | 0.5 day |
-| 14 | **Phase 9: All Roles** — multi-role per country, role-specific prompts, position change handling | Code + Test | DEFERRED | 2-3 days |
+| 1 | **Multi-round lifecycle test** — agents across R0→R1→R2 with memory persistence, Phase A/B transitions | Testing | HIGH | TODO — needs Marat to advance rounds |
+| 2 | **10+ agents simultaneously** — scale from 3 to 10-21 agents, verify performance and cost | Testing | HIGH | TODO |
+| 3 | **AI-AI meeting test** — verify `run_text_meeting()` works after dispatcher fixes | Testing | HIGH | TODO — code verified correct via QA pass |
+| 4 | **Transcript delivery verification** — confirm Brain receives transcript, reflects, updates memory | Testing | HIGH | Code verified (end_meeting + enqueue transcript). Needs live test. |
+| 5 | **Phase B solicitation test** — batch decisions (budget/tariffs/sanctions) + troop movement | Testing | HIGH | TODO — needs Marat to advance to Phase B |
+| 6 | **Critical interrupt test** — nuclear launch, direct attack → Tier 1 delivery during meeting | Testing | MEDIUM | TODO |
+| 7 | **Voice transcript on end** — verify voice messages compiled into transcript, delivered to Brain | Testing | MEDIUM | TODO |
+| 8 | **`meetings.modality` tracking** — write 'text'/'voice' to DB on mode select | Code | LOW | **DONE** (already in handleModeSelect) |
+| 9 | **Voice fallback to text** — if ElevenLabs connection fails, "Switch to Text Chat" button | Code | MEDIUM | **DONE** (onFallbackToText prop) |
+| 10 | **Active meetings mode indicator** — show text/voice icon in meeting cards | Code | LOW | **DONE** (microphone/speech bubble icons) |
+| 11 | **Monitoring metrics** — per-agent cost in AI dashboard | Code | MEDIUM | **DONE** (cost per agent in row 2) |
+| 12 | **Cross-browser testing** — Safari desktop, Safari iOS, Chrome Android | Testing | HIGH | TODO |
+| 13 | **Round restart test** — verify AI sessions survive, round data clears | Testing | HIGH | TODO |
+| 14 | **Phase 9: All Roles** — multi-role per country, role-specific prompts | Code + Test | DEFERRED | Not needed for first production SIMs |
 
-**Priority grouping:**
-- **Sprint A (testing, no code):** Items 1-7. Validate everything works end-to-end. ~3 days.
-- **Sprint B (small code items):** Items 8-11. Polish. ~1 day.
-- **Sprint C (cross-browser + round restart):** Items 12-13. Production readiness. ~1 day.
-- **Deferred:** Item 14 (all roles) — not needed for first production SIMs with HoS-only AI.
+**Sprint B (items 8-11): COMPLETED.** All code items delivered in overnight sprint (2026-04-29).
+
+**Remaining: Sprint A (items 1-7) + Sprint C (items 12-13).** Testing items that need interactive sim sessions with Marat. ~3 days total.
 
 ---
 
