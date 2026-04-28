@@ -482,11 +482,6 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             <span className="font-data text-caption bg-action/10 text-action px-2 py-0.5 rounded-full">
               {isActive ? agentCount : aiRoles.length}
             </span>
-            {isActive && status && (
-              <span className="font-data text-caption text-text-secondary">
-                ${status.total_cost_usd.toFixed(2)}
-              </span>
-            )}
           </div>
           <div className="flex items-center gap-3">
             {/* Pulses per round control */}
@@ -519,20 +514,23 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
             )}
             {isActive && (
               <>
-                <button
-                  onClick={handleResumeAll}
-                  disabled={actionLoading === 'resume-all'}
-                  className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
-                >
-                  {actionLoading === 'resume-all' ? '...' : 'Resume All'}
-                </button>
-                <button
-                  onClick={handleStopAll}
-                  disabled={actionLoading === 'stop-all'}
-                  className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors disabled:opacity-40"
-                >
-                  {actionLoading === 'stop-all' ? '...' : '⏹ Stop All'}
-                </button>
+                {countByState.frozen > 0 ? (
+                  <button
+                    onClick={handleResumeAll}
+                    disabled={actionLoading === 'resume-all'}
+                    className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 transition-colors disabled:opacity-40"
+                  >
+                    {actionLoading === 'resume-all' ? '...' : 'Resume All'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleStopAll}
+                    disabled={actionLoading === 'stop-all'}
+                    className="font-body text-caption font-medium bg-danger/10 text-danger px-3 py-1 rounded hover:bg-danger/20 transition-colors disabled:opacity-40"
+                  >
+                    {actionLoading === 'stop-all' ? '...' : 'Stop All'}
+                  </button>
+                )}
                 <button
                   onClick={handleShutdown}
                   disabled={actionLoading === 'shutdown'}
@@ -542,12 +540,11 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                 </button>
               </>
             )}
-            {/* Right-side stats */}
-            <span className="font-data text-caption text-text-secondary ml-2">
-              {isActive && status
-                ? `${totalActions} actions | R${status.round_num ?? '?'}`
-                : `${aiRoles.length} AI roles`}
-            </span>
+            {!isActive && (
+              <span className="font-data text-caption text-text-secondary ml-2">
+                {aiRoles.length} AI roles
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -669,6 +666,7 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
               <span>{countByState.idle} idle</span>
               <span>{countByState.meeting} in meeting</span>
               <span>{countByState.frozen} frozen</span>
+              {status && <span>${status.total_cost_usd.toFixed(2)}</span>}
             </>
           )}
         </div>
