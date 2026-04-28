@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
 
     # M5.8: Auto-recover dispatchers from DB on startup (BACKGROUND — don't block server)
     import asyncio
-    from engine.agents.managed.event_dispatcher import _dispatchers, create_dispatcher
+    from engine.agents.managed.event_dispatcher import _dispatchers, create_dispatcher, is_initializing
 
     async def _background_recovery():
         """Recover dispatchers in background so server can serve requests immediately."""
@@ -60,6 +60,9 @@ async def lifespan(app: FastAPI):
             if unique_sims:
                 logger.info("Auto-recovering %d sim(s) with active AI sessions...", len(unique_sims))
                 for sim_id in unique_sims:
+                    if is_initializing(sim_id):
+                        logger.info("Skipping recovery for sim %s — currently initializing", sim_id[:8])
+                        continue
                     dispatcher = create_dispatcher(sim_id)
                     count = await dispatcher.recover_from_db()
                     if count > 0:
@@ -1345,6 +1348,9 @@ async def sim_restart(sim_id: str, user: AuthUser = Depends(require_moderator)):
             clear_decisions=True,
         )
         logger.info("Sim %s AI cleanup: %s", sim_id, ai_summary)
+
+        # Clear AI role cache for this sim (M4 SPEC 5.1 step 9)
+        _ai_role_cache.clear()
 
         state = await asyncio.to_thread(restart_simulation, sim_id)
         logger.info("Sim %s RESTARTED (full cleanup) by %s", sim_id, user.id)

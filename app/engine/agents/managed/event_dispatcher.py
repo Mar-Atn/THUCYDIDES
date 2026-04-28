@@ -182,7 +182,26 @@ class EventDispatcher:
         self._enqueue_avatar_identity_generation(role_id)
 
     def _enqueue_avatar_identity_generation(self, role_id: str) -> None:
-        """Ask the managed agent to generate its Avatar Identity."""
+        """Ask the managed agent to generate its Avatar Identity.
+
+        Deduplicates: skips if an unprocessed avatar_identity_request
+        already exists in the queue for this role.
+        """
+        try:
+            db = get_client()
+            existing = db.table("agent_event_queue") \
+                .select("id") \
+                .eq("sim_run_id", self.sim_run_id) \
+                .eq("role_id", role_id) \
+                .eq("event_type", "avatar_identity_request") \
+                .is_("processed_at", "null") \
+                .limit(1).execute()
+            if existing.data:
+                logger.info("[dispatcher] Skipping duplicate avatar_identity_request for %s", role_id)
+                return
+        except Exception:
+            pass  # on error, enqueue anyway
+
         from engine.agents.managed.avatar_generator import build_avatar_identity_prompt
         self.enqueue(
             role_id=role_id,
@@ -217,8 +236,15 @@ class EventDispatcher:
     async def recover_from_db(self) -> int:
         """Recover dispatcher state from DB after server restart.
 
-        Reads ai_agent_sessions for active sessions, rebuilds agents dict,
-        health-checks Anthropic sessions, recreates dead ones.
+        SPEC: M4 Section 5.3 (Server Recovery).
+
+        For each active session in DB:
+        1. Health-check the Anthropic session (is it still alive?)
+        2. If alive and prompt unchanged → reconnect (instant)
+        3. If dead or prompt changed → recreate (new Anthropic session, ~10s)
+        4. Verify the session works (send a test retrieve)
+        5. Register as IDLE — old state is meaningless after restart
+        6. If session was recreated and agent has memories → send recovery pulse
 
         Returns number of agents recovered.
         """
@@ -245,19 +271,37 @@ class EventDispatcher:
             country_code = row["country_code"]
             round_num = row.get("round_num", 1)
 
-            # Build current prompt hash to compare with stored
+            # Step 1: Health-check the existing Anthropic session
+            old_session_id = row["session_id"]
+            session_alive = False
             try:
-                current_prompt = build_system_prompt(role_id, sim_run_id=self.sim_run_id)
-                current_hash = hashlib.md5(current_prompt.encode()).hexdigest()[:16]
-            except Exception:
-                current_hash = None
-            stored_hash = row.get("prompt_hash")
+                status = await self.session_manager.client.beta.sessions.retrieve(old_session_id)
+                session_status = getattr(status, "status", "unknown")
+                session_alive = session_status in ("idle", "running", "requires_action")
+                logger.info("[recovery] Session %s for %s: %s (alive=%s)",
+                            old_session_id[:20], role_id, session_status, session_alive)
+            except Exception as e:
+                logger.warning("[recovery] Cannot reach session %s for %s: %s",
+                               old_session_id[:20], role_id, e)
 
-            needs_recreation = (current_hash and stored_hash and current_hash != stored_hash)
+            # Step 2: Check if prompt changed
+            needs_recreation = not session_alive  # dead sessions always need recreation
+            if session_alive:
+                try:
+                    current_prompt = build_system_prompt(role_id, sim_run_id=self.sim_run_id)
+                    current_hash = hashlib.md5(current_prompt.encode()).hexdigest()[:16]
+                    stored_hash = row.get("prompt_hash")
+                    if current_hash and stored_hash and current_hash != stored_hash:
+                        needs_recreation = True
+                        logger.info("[recovery] Prompt changed for %s — will recreate", role_id)
+                except Exception:
+                    pass  # if we can't build prompt, reconnect with existing
 
+            # Step 3: Reconnect or recreate
+            ctx = None
+            was_recreated = False
             if needs_recreation:
-                # Tool schemas or system prompt changed — must recreate
-                logger.info("[recovery] Prompt changed for %s — recreating session", role_id)
+                logger.info("[recovery] Recreating session for %s...", role_id)
                 try:
                     ctx = await self.session_manager.create_session(
                         role_id=role_id,
@@ -267,23 +311,22 @@ class EventDispatcher:
                         round_num=round_num,
                         model=row.get("model"),
                     )
-                    # Send recovery message with memories
-                    memories = self.session_manager._load_agent_memories(self.sim_run_id, country_code)
-                    if memories:
-                        notes_text = "\n".join(
-                            f"- [{n['memory_key']}]: {n['content'][:200]}"
-                            for n in memories[:10]
-                        )
-                        await self.session_manager.send_event(ctx, (
-                            f"Your session was updated with new capabilities. "
-                            f"You are in Round {round_num}. Your saved notes:\n\n{notes_text}\n\n"
-                            f"Continue with your strategy."
-                        ))
+                    was_recreated = True
                 except Exception as e:
                     logger.error("[recovery] Failed to recreate session for %s: %s", role_id, e)
+                    # Archive the broken DB row so we don't retry forever
+                    try:
+                        db.table("ai_agent_sessions") \
+                            .update({"status": "archived"}) \
+                            .eq("sim_run_id", self.sim_run_id) \
+                            .eq("role_id", role_id) \
+                            .in_("status", ["ready", "active"]) \
+                            .execute()
+                    except Exception:
+                        pass
                     continue
             else:
-                # Same prompt — try to reconnect existing session
+                # Reconnect — build context from DB row
                 ctx = SessionContext(
                     agent_id=row["agent_id"],
                     agent_version=row.get("agent_version", 1),
@@ -308,37 +351,59 @@ class EventDispatcher:
                     actions_submitted=row.get("actions_submitted", 0),
                     tool_calls=row.get("tool_calls", 0),
                 )
+                self.session_manager._sessions[ctx.session_id] = ctx
 
-                # Health-check the Anthropic session
-                health = await self.session_manager.health_check(ctx)
-                if health == "terminated":
-                    logger.info("[recovery] Session for %s is dead, recreating...", role_id)
-                    try:
-                        ctx = await self.session_manager.recover_session(ctx)
-                    except Exception as e:
-                        logger.error("[recovery] Failed to recover session for %s: %s", role_id, e)
-                        continue
-                else:
-                    # Session alive — register the SessionContext in session_manager cache
-                    self.session_manager._sessions[ctx.session_id] = ctx
+            # Step 4: Verify the session works
+            try:
+                verify = await self.session_manager.client.beta.sessions.retrieve(ctx.session_id)
+                verify_status = getattr(verify, "status", "unknown")
+                if verify_status not in ("idle", "running", "requires_action"):
+                    raise ValueError(f"Session not usable: status={verify_status}")
+            except Exception as e:
+                logger.error("[recovery] Session verification failed for %s: %s — archiving", role_id, e)
+                try:
+                    db.table("ai_agent_sessions") \
+                        .update({"status": "archived"}) \
+                        .eq("sim_run_id", self.sim_run_id) \
+                        .eq("role_id", role_id) \
+                        .in_("status", ["ready", "active"]) \
+                        .execute()
+                except Exception:
+                    pass
+                continue
 
-            # Register recovered agent — always IDLE after recovery.
-            # Old state (ACTING/IN_MEETING) is meaningless after session recreation;
-            # the session is fresh with nothing in progress.
+            # Step 5: Register — always IDLE after recovery (M4 SPEC 5.3)
             self.agents[role_id] = ctx
             self.agent_states[role_id] = IDLE
-            self.set_agent_state(role_id, IDLE)  # write-through to DB
+            self.set_agent_state(role_id, IDLE)
             self._state_since[role_id] = asyncio.get_event_loop().time()
             recovered += 1
 
-            # Check if avatar identity exists — regenerate if missing (e.g. after session recreation)
+            # Step 6: Recovery pulse if recreated and agent has memories
+            if was_recreated:
+                memories = self.session_manager._load_agent_memories(self.sim_run_id, country_code)
+                if memories:
+                    notes_text = "\n".join(
+                        f"- [{n['memory_key']}]: {n['content'][:200]}"
+                        for n in memories[:10]
+                    )
+                    self.enqueue(
+                        role_id=role_id, tier=2,
+                        event_type="recovery_pulse",
+                        message=(
+                            f"Your session was recovered after a server restart. "
+                            f"You are in Round {round_num}. Your saved notes:\n\n{notes_text}\n\n"
+                            f"Read your full notes with read_notes, then continue with your strategy."
+                        ),
+                    )
+
+            # Check if avatar identity exists — regenerate if missing
             identity = self._fetch_avatar_identity(role_id)
             if not identity or len(identity) < 50:
                 self._enqueue_avatar_identity_generation(role_id)
 
-            logger.info("[recovery] Recovered agent %s (state=%s, reconnect=%s)",
-                        role_id, self.agent_states[role_id],
-                        "reconnect" if not needs_recreation else "recreated")
+            logger.info("[recovery] Recovered agent %s (%s)",
+                        role_id, "recreated" if was_recreated else "reconnected")
 
         return recovered
 
@@ -965,6 +1030,9 @@ class EventDispatcher:
         """
         logger.info("[dispatcher] Initializing all AI agents for sim %s", self.sim_run_id)
 
+        # Set initializing lock — prevents recovery from interfering (M4 SPEC 5.4)
+        _initializing_sims.add(self.sim_run_id)
+
         # Clear any previously registered agents (e.g., from auto-reconnect of stale sessions)
         if self.agents:
             logger.info("[dispatcher] Clearing %d stale in-memory agents before fresh init", len(self.agents))
@@ -1101,7 +1169,11 @@ class EventDispatcher:
                     logger.error("[dispatcher] %s", err)
 
         # Run all initializations concurrently (bounded by semaphore)
-        await asyncio.gather(*[_init_one(r) for r in roles])
+        try:
+            await asyncio.gather(*[_init_one(r) for r in roles])
+        finally:
+            # Clear initializing lock (M4 SPEC 5.4)
+            _initializing_sims.discard(self.sim_run_id)
 
         summary = {
             "agents_initialized": len(initialized),
@@ -1635,11 +1707,17 @@ def _find_hos_for_country(sim_run_id: str, country_code: str) -> str | None:
 
 # -- Global dispatcher registry -------------------------------------------
 _dispatchers: dict[str, EventDispatcher] = {}
+_initializing_sims: set[str] = set()  # sims currently being initialized (blocks recovery)
 
 
 def get_dispatcher(sim_run_id: str) -> EventDispatcher | None:
     """Get the dispatcher for a sim run, or None if not running."""
     return _dispatchers.get(sim_run_id)
+
+
+def is_initializing(sim_run_id: str) -> bool:
+    """Check if a sim is currently being initialized (blocks recovery)."""
+    return sim_run_id in _initializing_sims
 
 
 def create_dispatcher(sim_run_id: str) -> EventDispatcher:
