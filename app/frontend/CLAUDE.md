@@ -86,8 +86,11 @@ frontend/
 **Full specification:** `MODULES/M2_REALTIME/SPEC_REALTIME_DATA_STANDARDS.md` — the canonical source for all Realtime patterns, table requirements, connection resilience, and cross-browser testing requirements. Read it before writing any frontend code that displays data.
 
 **Key rules:**
+- **RPC Page Loader is the PRIMARY pattern** — each page gets ONE PostgreSQL function (`supabase.rpc()`) that returns all its data. 1 request, not 20.
+- **1-2 Realtime channels per page maximum** — consolidated channels with multiple table listeners. Realtime triggers RPC refetch, not individual state patches.
 - Every table the frontend reads MUST have `REPLICA IDENTITY FULL` + be in `supabase_realtime` publication
 - One-time fetches (`useEffect + fetch, [])`) are FORBIDDEN for changeable data
+- Multiple independent `useRealtimeTable` hooks on the same page are FORBIDDEN (use RPC + consolidated channel instead)
 - Every feature MUST be tested on Safari (desktop + iOS) for tab-switch resilience
 
 Every page that shows data which changes in the background MUST use Supabase Realtime:

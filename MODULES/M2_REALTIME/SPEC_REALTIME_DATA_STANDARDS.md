@@ -1,8 +1,8 @@
 # SPEC: Realtime Data Standards
 
-**Version:** 1.0
+**Version:** 2.0
 **Date:** 2026-04-28
-**Status:** APPROVED — ready for implementation
+**Status:** APPROVED — Phase 1-3 done, Phase 4-5 ready for implementation
 **Scope:** All frontend code that displays data from Supabase
 **Enforcement:** `app/frontend/CLAUDE.md` references this spec. All PRs checked against it.
 
@@ -10,12 +10,13 @@
 
 ## 1. The Problem
 
-Users must manually refresh pages to see updated data. This happens because:
-1. Many tables lack proper Realtime configuration (REPLICA IDENTITY, publication)
-2. WebSocket connections drop silently and never recover
-3. Most data is fetched once on mount and never refreshed
+Users must manually refresh pages to see updated data. Root causes:
+1. Too many concurrent queries on page load (20+ REST + 10+ Realtime channels)
+2. Browser HTTP/2 stream limit causes request queuing and hangs
+3. WebSocket connections drop silently on Safari/mobile
 
-This is the #1 UX issue. It affects all platforms: Chrome, Safari, mobile, tablet.
+**The core principle:**
+> The number of HTTP requests on page load should equal the number of **pages**, not the number of **database tables**.
 
 ---
 
@@ -23,238 +24,240 @@ This is the #1 UX issue. It affects all platforms: Chrome, Safari, mobile, table
 
 **Every piece of data displayed to the user MUST update automatically.**
 
-No manual refresh. No polling as primary mechanism. No "fetch once on mount."
+No manual refresh. No polling as primary mechanism. No "fetch once on mount." No 20+ independent queries competing for the same connection.
 
 ---
 
 ## 3. Database Requirements
 
-### 3.1 Every table the frontend reads MUST be in the Realtime publication
+### 3.1 REPLICA IDENTITY FULL on all tables
 
-```sql
-ALTER PUBLICATION supabase_realtime ADD TABLE {table_name};
-```
+Every table in the Realtime publication MUST have REPLICA IDENTITY FULL. Without this, UPDATE events only send the primary key — the frontend can't read new values.
 
-When adding a new table that the frontend will query: add it to the publication in the same migration.
+**Status:** DONE (2026-04-28) — all 31 tables set to FULL.
 
-### 3.2 Every table that receives UPDATEs MUST have REPLICA IDENTITY FULL
+### 3.2 Realtime Publication
 
-```sql
-ALTER TABLE {table_name} REPLICA IDENTITY FULL;
-```
+Every table the frontend reads MUST be in `supabase_realtime` publication.
 
-Without this, UPDATE events only contain the primary key — the frontend can't read the new values.
+**Status:** DONE (2026-04-28) — 31 tables including ai_agent_sessions, users, organizations.
 
-**Why:** Supabase Realtime sends change payloads based on replica identity. `DEFAULT` = only PK + changed columns. `FULL` = all columns. The frontend needs all columns to update state without a re-fetch.
+### 3.3 RPC Functions
 
-### 3.3 Table Registry
-
-Every table used by the frontend must be listed here with its configuration:
-
-| Table | In Publication | Replica Identity | Frontend Reads | Frontend Writes |
-|-------|:-:|:-:|:-:|:-:|
-| `sim_runs` | YES | FULL | All pages | Moderator |
-| `countries` | YES | FULL | Participant, Facilitator | Engine |
-| `roles` | YES | MUST BE FULL | Participant, Facilitator | Moderator |
-| `meetings` | YES | FULL | Participant, Facilitator | Engine |
-| `meeting_messages` | YES | MUST BE FULL | MeetingChat | Participant, Avatar |
-| `meeting_invitations` | YES | MUST BE FULL | Participant | Participant, AI |
-| `observatory_events` | YES | FULL | Facilitator | Engine |
-| `pending_actions` | YES | FULL | Facilitator | Engine |
-| `agreements` | YES | MUST BE FULL | Participant | Engine |
-| `exchange_transactions` | YES | MUST BE FULL | Participant | Engine |
-| `artefacts` | YES | MUST BE FULL | Participant | Engine |
-| `deployments` | YES | FULL | Map | Engine |
-| `relationships` | YES | FULL | Participant | Engine |
-| `sanctions` | YES | MUST BE FULL | Participant | Engine |
-| `tariffs` | YES | MUST BE FULL | Participant | Engine |
-| `leadership_votes` | YES | FULL | Participant | Engine |
-| `nuclear_actions` | YES | FULL | All | Engine |
-| `hex_control` | YES | MUST BE FULL | Map | Engine |
-| `role_actions` | YES | MUST BE FULL | Participant | Moderator |
-| `org_memberships` | YES | MUST BE FULL | Participant | Engine |
-| `world_state` | YES | MUST BE FULL | Facilitator | Engine |
-| `ai_agent_sessions` | MUST ADD | MUST BE FULL | AI Dashboard | Engine |
-| `users` | MUST ADD | MUST BE FULL | User Management | Auth |
-| `organizations` | MUST ADD | MUST BE FULL | Participant | Moderator |
-
-`MUST BE FULL` = currently DEFAULT, needs migration.
-`MUST ADD` = not yet in publication, needs migration.
+Each page gets a PostgreSQL function that returns ALL its data in one call. See Section 4.1.
 
 ---
 
 ## 4. Frontend Data Patterns
 
-### 4.1 Pattern A: Realtime Table (primary pattern)
+### 4.1 Pattern A: RPC Page Loader (PRIMARY — use for all pages)
 
-For lists of data scoped to a simrun:
+**One HTTP request per page load.** A PostgreSQL function returns all data the page needs as a JSON object. One DB round-trip, one HTTP request, atomic consistent snapshot.
 
-```typescript
-const { data, loading } = useRealtimeTable<Type>('table_name', simId, {
-  orderBy: 'created_at.desc',
-  limit: 100,
-  eq: { country_code: myCountryCode }, // optional filter
-})
+```sql
+-- Example: Participant Dashboard data loader
+CREATE OR REPLACE FUNCTION get_participant_data(
+  p_sim_id uuid, p_role_id text, p_country text
+) RETURNS json AS $$
+  SELECT json_build_object(
+    'country', (SELECT row_to_json(c) FROM countries c
+                WHERE sim_run_id = p_sim_id AND id = p_country),
+    'artefacts', (SELECT COALESCE(json_agg(a), '[]') FROM artefacts a
+                  WHERE sim_run_id = p_sim_id AND role_id = p_role_id),
+    'role_actions', (SELECT COALESCE(json_agg(ra.action_id), '[]') FROM role_actions ra
+                     WHERE sim_run_id = p_sim_id AND role_id = p_role_id),
+    'relationships', (SELECT COALESCE(json_agg(r), '[]') FROM relationships r
+                      WHERE sim_run_id = p_sim_id AND from_country_code = p_country),
+    'sanctions', (SELECT COALESCE(json_agg(s), '[]') FROM sanctions s
+                  WHERE sim_run_id = p_sim_id
+                  AND (target_country_code = p_country OR imposer_country_code = p_country)),
+    'tariffs', (SELECT COALESCE(json_agg(t), '[]') FROM tariffs t
+                WHERE sim_run_id = p_sim_id
+                AND (target_country_code = p_country OR imposer_country_code = p_country)),
+    'org_memberships', (SELECT COALESCE(json_agg(om), '[]') FROM org_memberships om
+                        WHERE sim_run_id = p_sim_id AND country_code = p_country),
+    'meetings', (SELECT COALESCE(json_agg(m), '[]') FROM meetings m
+                 WHERE sim_run_id = p_sim_id AND status = 'active'
+                 AND (participant_a_role_id = p_role_id OR participant_b_role_id = p_role_id)),
+    'invitations', (SELECT COALESCE(json_agg(mi), '[]') FROM meeting_invitations mi
+                    WHERE sim_run_id = p_sim_id AND status = 'pending'
+                    AND invitee_role_id = p_role_id)
+  );
+$$ LANGUAGE sql STABLE;
 ```
 
-**Use for:** observatory_events, meetings, pending_actions, artefacts, agreements, transactions, etc.
+Frontend:
+```typescript
+const { data } = await supabase.rpc('get_participant_data', {
+  p_sim_id: simId, p_role_id: roleId, p_country: countryCode
+})
+// data.country, data.artefacts, data.relationships, etc. — all available
+```
 
-**How it works:** Initial fetch + INSERT/UPDATE/DELETE streaming. State always current.
+**Benefits:**
+- 1 HTTP request instead of 9-20
+- 1 DB connection instead of 9-20
+- Atomic snapshot (all data from same point in time)
+- No request queue contention
+- Popup buttons never hang (Supabase client isn't overwhelmed)
 
-### 4.2 Pattern B: Realtime Row (single record)
+### 4.2 Pattern B: Consolidated Realtime Channel (for live updates)
 
-For a single record that changes:
+**One channel per page** with multiple table listeners. Realtime events trigger a re-call of the RPC function (Pattern A), not individual state patches.
+
+```typescript
+// ONE channel, multiple table listeners
+const channel = supabase.channel(`participant-${roleId}`)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'countries',
+    filter: `sim_run_id=eq.${simId}` }, refetch)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'artefacts',
+    filter: `sim_run_id=eq.${simId}` }, refetch)
+  .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings',
+    filter: `sim_run_id=eq.${simId}` }, refetch)
+  // ... all tables that affect this page
+  .subscribe()
+
+// refetch = debounced call to the RPC function
+function refetch() {
+  supabase.rpc('get_participant_data', { ... }).then(setPageData)
+}
+```
+
+**Benefits:**
+- 1-2 channels instead of 10+
+- Fewer WebSocket subscriptions = fewer disconnection issues
+- Consistent data on every update (full snapshot, not partial patch)
+
+### 4.3 Pattern C: useRealtimeTable (for standalone lists)
+
+Still valid for simple cases where a component needs ONE table with Realtime:
+
+```typescript
+const { data, loading } = useRealtimeTable<Type>('table_name', simId, options)
+```
+
+**Use sparingly** — only when a component is independent (e.g., FacilitatorDashboard events feed, MeetingChat messages). Do NOT use 7+ of these on the same page.
+
+### 4.4 Pattern D: useRealtimeRow (single record)
+
+For watching a single record:
 
 ```typescript
 const { data: simRun } = useRealtimeRow<SimRun>('sim_runs', simId)
 ```
 
-**Use for:** sim_runs (current state), specific meeting, specific role.
+**Use for:** sim_runs state (round, phase, status). One per page maximum.
 
-### 4.3 Pattern C: Realtime-triggered refetch (complex queries)
+### 4.5 Pattern E: Fallback poll (resilience only)
 
-When the query is too complex for Realtime filters (joins, aggregations):
+As SUPPLEMENT (not replacement). 15-30s minimum interval.
 
-```typescript
-const [data, setData] = useState(initialData)
-
-// Initial fetch
-useEffect(() => { fetchComplexData().then(setData) }, [simId])
-
-// Realtime trigger: refetch when source table changes
-useEffect(() => {
-  const ch = supabase.channel('trigger-key')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'source_table',
-      filter: `sim_run_id=eq.${simId}` }, () => fetchComplexData().then(setData))
-    .subscribe()
-  return () => { supabase.removeChannel(ch) }
-}, [simId])
-```
-
-**Use for:** Country aggregates, role+country joins, complex dashboard stats.
-
-### 4.4 Pattern D: Fallback poll (resilience only)
-
-As a SUPPLEMENT to Realtime (not replacement). Catches any events the WebSocket missed:
+### 4.6 FORBIDDEN Patterns
 
 ```typescript
-// ONLY as backup, with 15-30s minimum interval
-const interval = setInterval(() => refetch(), 15000)
-```
+// WRONG — 20 independent fetches competing for connection:
+useEffect(() => { fetchCountry() }, [])
+useEffect(() => { fetchArtefacts() }, [])
+useEffect(() => { fetchRelationships() }, [])
+// ... 17 more
 
-**Use for:** Critical displays (PublicScreen gauges, facilitator round timer).
-
-### 4.5 FORBIDDEN Pattern: One-time fetch
-
-```typescript
-// WRONG — stale on mount:
+// WRONG — one-time fetch, never refreshed:
 useEffect(() => { fetchData().then(setData) }, [])
 
-// WRONG — stale after initial load:
-useEffect(() => { fetchData().then(setData) }, [simId])
+// WRONG — 10 separate Realtime channels:
+useRealtimeTable('countries', simId)
+useRealtimeTable('artefacts', simId)
+useRealtimeTable('meetings', simId)
+// ... 7 more
 ```
-
-**This pattern MUST NOT be used** for any data that can change during the session. If you see this in code, fix it.
 
 ---
 
 ## 5. Connection Resilience
 
-### 5.1 ChannelManager Must Handle Disconnections
+### 5.1 ChannelManager Reconnect
 
-When a channel receives `CHANNEL_ERROR` or `TIMED_OUT`:
-1. Log the error
-2. Wait 2s (exponential backoff on retry)
-3. Remove the dead channel
-4. Re-subscribe with fresh channel
-5. Trigger a full refetch for all listeners on that channel
+**Status:** DONE (2026-04-28)
+- Exponential backoff on CHANNEL_ERROR/TIMED_OUT (2s base, max 10s, 5 retries)
+- Dead channels removed and recreated
+- All hooks notified to refetch on reconnect
 
 ### 5.2 Visibility Change Handler
 
-When the browser tab becomes visible again (`document.visibilitychange`):
-1. Check all active channels for health
-2. Force refetch on all active `useRealtimeTable` instances
-3. This handles Safari/iOS aggressive WebSocket cleanup
+**Status:** DONE (2026-04-28)
+- Tab becomes visible → force refetch all active data
+- Handles Safari/iOS aggressive WebSocket cleanup
 
 ### 5.3 Heartbeat Monitor
 
-Every 30s, verify the Supabase Realtime connection is alive:
-- If `supabase.realtime.isConnected()` returns false: force reconnect
-- After reconnect: refetch all active subscriptions
+**Status:** DONE (2026-04-28)
+- 30s periodic check, triggers refetch when tab is visible
 
 ### 5.4 Cross-Browser Requirements
 
 | Platform | Requirement |
 |----------|-------------|
 | Chrome desktop | Realtime works, visibility refetch handles tab switches |
-| Safari desktop | Visibility refetch critical (kills WebSocket after ~30s background) |
-| Safari iOS | Visibility refetch + heartbeat (OS kills WebSocket on lock) |
+| Safari desktop | Visibility refetch critical |
+| Safari iOS | Visibility refetch + heartbeat |
 | Chrome Android | Same as iOS Safari |
-| Tablets | Same as their OS browser |
-
-**Testing:** Every Realtime feature must be tested on Safari (desktop + iOS) in addition to Chrome.
 
 ---
 
-## 6. Component Responsibilities
+## 6. Page Data Architecture
 
 ### ParticipantDashboard
 
-| Data | Current Pattern | Required Pattern |
-|------|----------------|-----------------|
-| Country stats | One-time fetch in loadData | Pattern C: refetch on `countries` change |
-| Artefacts | One-time fetch in loadData | Pattern A: useRealtimeTable |
-| Role actions | One-time fetch in loadData | Pattern A: useRealtimeTable |
-| Relationships | One-time fetch in loadData | Pattern C: refetch on `relationships` change |
-| Sanctions/Tariffs | One-time fetch in loadData | Pattern C: refetch on table change |
-| Active meetings | Fetch on dataVersion | Pattern A: useRealtimeTable('meetings') |
-| Meeting invitations | useRealtimeTable | CORRECT (keep) |
-| Transactions/Agreements | useRealtimeTable | CORRECT (keep) |
-| Votes/Elections | useRealtimeTable | CORRECT (keep) |
-| roleInfo cache | One-time fetch | Pattern C: refetch on `roles` change |
+| Current (v1) | Target (v2) |
+|---|---|
+| `loadData()` with 9 parallel queries | `supabase.rpc('get_participant_data')` — 1 query |
+| 7 `useRealtimeTable` hooks (7 channels) | 1 consolidated channel triggering RPC refetch |
+| roleInfo one-time fetch | Included in RPC result |
+| activeMeetings separate fetch | Included in RPC result |
+| **Total: ~20 requests + 10 channels** | **Total: 1 request + 1-2 channels** |
 
 ### FacilitatorDashboard
 
-| Data | Current Pattern | Required Pattern |
-|------|----------------|-----------------|
-| Sim state | useRealtimeRow | CORRECT (keep) |
-| Events | useRealtimeTable | CORRECT (keep) |
-| Pending actions | useRealtimeTable | CORRECT (keep) |
-| AI agent status | Poll + Realtime | CORRECT (keep) |
+| Current | Target |
+|---|---|
+| useRealtimeTable for events, pending_actions | Keep as-is (only 3-4 hooks, manageable) |
+| AI status poll + Realtime | Keep as-is |
+| Consider `get_facilitator_data()` RPC if needed | Future |
 
 ### Dashboard (landing page)
 
-| Data | Current Pattern | Required Pattern |
-|------|----------------|-----------------|
-| Sim availability | One-time fetch | Pattern C: refetch on `sim_runs` change |
-| Role assignment | One-time fetch | Pattern C: refetch on `roles` change |
+| Current | Target |
+|---|---|
+| One-time fetch + Realtime subscription | Keep as-is (already fixed, simple) |
 
 ---
 
 ## 7. Implementation Phases
 
-### Phase 1: Database Foundation (30 min)
-- Set REPLICA IDENTITY FULL on all tables in registry
-- Add missing tables to publication
-- Zero code changes, immediate improvement
+### Phase 1: Database Foundation — DONE
+- REPLICA IDENTITY FULL on all 31 tables
+- 3 tables added to publication
 
-### Phase 2: Connection Resilience (1-2 hours)
-- ChannelManager: reconnect on error/timeout
-- Visibility change handler: refetch on tab focus
-- Heartbeat monitor: periodic connection check
+### Phase 2: Connection Resilience — DONE
+- ChannelManager reconnect with backoff
+- Visibility change handler + heartbeat
+- Hook refetch callback integration
 
-### Phase 3: Component Migration (3-4 hours)
-- Replace one-time fetches in ParticipantDashboard
-- Add Realtime to Dashboard landing page
-- Fix stale closures and remove dataVersion pattern
-- Create useSimData() shared hook if beneficial
+### Phase 3: Realtime-triggered Refetch — DONE
+- ParticipantDashboard: 6 tables trigger loadData()
+- Dashboard: Realtime subscription for sim/role changes
+- Debug log cleanup
 
-### Phase 4: Testing (1-2 hours)
-- Test on Chrome desktop
-- Test on Safari desktop (tab switch test)
-- Test on iOS Safari (lock screen test)
-- Test on Android Chrome
-- Test network drop recovery (DevTools throttle)
+### Phase 4: RPC Page Loaders — READY TO BUILD
+- Create `get_participant_data()` PostgreSQL function
+- Refactor ParticipantDashboard to use single RPC call
+- Replace 9 parallel queries + 7 useRealtimeTable hooks
+- 1 consolidated Realtime channel for invalidation
+
+### Phase 5: Channel Consolidation — READY TO BUILD
+- Merge per-table channels into 1-2 per page
+- Realtime events trigger RPC refetch (not individual state patches)
+- Remove unused useRealtimeTable instances
 
 ---
 
@@ -262,13 +265,15 @@ Every 30s, verify the Supabase Realtime connection is alive:
 
 Before any feature is marked DONE:
 
+- [ ] Page loads with 1-3 HTTP requests maximum (RPC functions)
+- [ ] Page has 1-2 Realtime channels maximum
 - [ ] All queried tables have REPLICA IDENTITY FULL
-- [ ] All queried tables are in supabase_realtime publication
 - [ ] No one-time fetches for changeable data
 - [ ] Tested: data updates without page refresh
 - [ ] Tested: tab switch + return shows current data (Safari)
-- [ ] Tested: network drop + recovery shows current data
+- [ ] Tested: popup/modal interactions don't hang
 
 ---
 
 *This spec is referenced by `app/frontend/CLAUDE.md` and enforced on all frontend code.*
+*Community best practices: Supabase GitHub Discussions #900, #884, #3646, #7193.*
