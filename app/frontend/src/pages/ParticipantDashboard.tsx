@@ -302,48 +302,39 @@ export function ParticipantDashboard() {
     } else {
       setActiveChatMeetingId(null)
       setActiveVoiceMeetingId(meetingId)
-      // Use pre-fetched avatar context (fetched when popup opened)
-      const prefetched = prefetchedVoiceCtxRef.current
-      if (prefetched?.identity) {
-        // Context ready — mount VoiceCallInterface immediately
+      setVoiceContext(null) // loading state — VoiceCallInterface won't mount yet
+
+      // Fetch avatar context directly (not from pre-fetch ref — too unreliable)
+      const otherCountry = counterpart.country
+      Promise.all([
+        supabase.from('agent_memories').select('content')
+          .eq('sim_run_id', simId).eq('country_code', otherCountry)
+          .eq('memory_key', 'avatar_identity').limit(1),
+        supabase.from('meetings').select('metadata,participant_a_role_id')
+          .eq('id', meetingId).limit(1),
+      ]).then(([identityRes, meetingRes]) => {
+        const identity = identityRes.data?.[0]?.content as string || ''
+        const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
+        const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
+        const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
+        console.error('[VOICE] Fetched context:', { identityLen: identity.length, intentLen: intentNote.length, otherCountry, aiIsA })
         setVoiceContext({
-          identity: prefetched.identity,
-          intentNote: prefetched.intentNote || '',
+          identity: identity || `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
+          intentNote,
           voiceAgentId: counterpart.voiceAgentId || '',
           counterpartName: counterpart.name,
           counterpartCountry: counterpart.country,
         })
-      } else {
-        // Pre-fetch still in progress — wait for it, then set context
-        setVoiceContext(null) // keeps VoiceCallInterface unmounted until ready
-        const waitForCtx = () => {
-          const check = setInterval(() => {
-            const ctx = prefetchedVoiceCtxRef.current
-            if (ctx) {
-              clearInterval(check)
-              setVoiceContext({
-                identity: ctx.identity || `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
-                intentNote: ctx.intentNote || '',
-                voiceAgentId: counterpart.voiceAgentId || '',
-                counterpartName: counterpart.name,
-                counterpartCountry: counterpart.country,
-              })
-            }
-          }, 100)
-          // Give up after 5s — use minimal fallback
-          setTimeout(() => {
-            clearInterval(check)
-            setVoiceContext(prev => prev || {
-              identity: `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
-              intentNote: '',
-              voiceAgentId: counterpart.voiceAgentId || '',
-              counterpartName: counterpart.name,
-              counterpartCountry: counterpart.country,
-            })
-          }, 5000)
-        }
-        waitForCtx()
-      }
+      }).catch((err) => {
+        console.error('[VOICE] Fetch failed:', err)
+        setVoiceContext({
+          identity: `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
+          intentNote: '',
+          voiceAgentId: counterpart.voiceAgentId || '',
+          counterpartName: counterpart.name,
+          counterpartCountry: counterpart.country,
+        })
+      })
     }
   }
 

@@ -166,6 +166,11 @@ export function MeetingChat({
 
           setMessages(prev => {
             if (prev.some(m => m.id === row.id)) return prev
+            // If this is our own message arriving from DB, replace the optimistic version
+            if (row.role_id === myRoleId) {
+              const withoutOptimistic = prev.filter(m => !m.id.startsWith('optimistic-'))
+              return [...withoutOptimistic, row]
+            }
             return [...prev, row]
           })
 
