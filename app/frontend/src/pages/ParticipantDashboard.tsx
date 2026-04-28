@@ -440,6 +440,46 @@ export function ParticipantDashboard() {
     prevRoundRef.current = newRound
   }, [simRun?.current_round, loadData])
 
+  // Realtime: reload data when key tables change (Pattern C from SPEC)
+  // This replaces the one-time fetch pattern — loadData re-runs on any change
+  // to: countries, artefacts, relationships, sanctions, tariffs, meetings
+  useEffect(() => {
+    if (!simId || !myRole) return
+    const cc = myRole.country_code
+    // Debounce: don't refetch more than once per 2 seconds
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null
+    const debouncedLoad = () => {
+      if (debounceTimer) return
+      debounceTimer = setTimeout(() => {
+        debounceTimer = null
+        loadData()
+      }, 2000)
+    }
+    const ch = supabase
+      .channel(`participant-data-${myRole.id}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'countries',
+        filter: `sim_run_id=eq.${simId}` }, (payload) => {
+        if ((payload.new as Record<string, unknown>)?.id === cc) debouncedLoad()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'artefacts',
+        filter: `sim_run_id=eq.${simId}` }, (payload) => {
+        if ((payload.new as Record<string, unknown>)?.role_id === myRole.id) debouncedLoad()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'relationships',
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sanctions',
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tariffs',
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings',
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      .subscribe()
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer)
+      supabase.removeChannel(ch)
+    }
+  }, [simId, myRole?.id, myRole?.country_code, loadData]) // eslint-disable-line react-hooks/exhaustive-deps
+
   /* Realtime: detect role status changes (arrest/release) --------------- */
   useEffect(() => {
     if (!myRole || !simId) return
@@ -808,7 +848,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
 
   // Role name + position lookup for display in invitations and active meetings
   const [roleInfo, setRoleInfo] = useState<Record<string, {name:string;country:string;position:string}>>({})
-  useEffect(() => {
+  const fetchRoleInfo = useCallback(() => {
     supabase.from('roles').select('id,character_name,country_code,positions')
       .eq('sim_run_id', simId).eq('status', 'active')
       .then(({ data }) => {
@@ -832,6 +872,16 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
         setRoleInfo(map)
       })
   }, [simId])
+  useEffect(() => { fetchRoleInfo() }, [fetchRoleInfo])
+  // Realtime: refresh roleInfo when roles change (arrests, reassignments)
+  useEffect(() => {
+    if (!simId) return
+    const ch = supabase.channel(`role-info-${simId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'roles',
+        filter: `sim_run_id=eq.${simId}` }, fetchRoleInfo)
+      .subscribe()
+    return () => { supabase.removeChannel(ch) }
+  }, [simId, fetchRoleInfo])
 
   /* Realtime: meeting invitations for this role */
   const { data: meetingInvitationsRaw } = useRealtimeTable<Record<string, unknown>>(
