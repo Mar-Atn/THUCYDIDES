@@ -1,7 +1,7 @@
 # M10.1 — Authentication Module SPEC
 
-**Version:** 1.1 | **Date:** 2026-04-13
-**Status:** DONE — Delivered and tested 2026-04-13
+**Version:** 1.2 | **Date:** 2026-04-28
+**Status:** DONE — Updated: GDPR consent for Google OAuth, auto-redirect for participants
 **KING source:** `/Users/marat/CODING/KING/app/src/contexts/AuthContext.tsx`, `pages/Login.tsx`, `pages/Register.tsx`, `components/ProtectedRoute.tsx`, `supabase/migrations/00001_*.sql`, `00006_rls_policies.sql`
 
 ---
@@ -46,14 +46,20 @@ If they choose **Participant** → account created immediately, redirected to pa
 
 If they choose **Moderator** → account created with status `pending_approval`. They see a waiting screen: *"Your moderator account is pending approval. An existing moderator will confirm your access."* An existing moderator sees them in User Management and can approve or reject.
 
-**Google sign-in option** available as alternative to email/password. Same role selection happens after Google auth completes.
+**Google sign-in option** available as alternative to email/password.
 
-**Data consent** — before the account is created, user must accept:
+**Data consent (GDPR)** — required for ALL sign-up paths:
 - Data storage and processing (Supabase)
 - AI processing of simulation data (Claude, Gemini)
 - Voice recording during the SIM (if applicable)
 
-This is a hard gate — no consent, no account.
+**Implementation (2026-04-28):**
+- DB trigger `handle_new_user` creates users with `data_consent=FALSE`
+- Standard registration: consent modal shown in Register form → `grantConsent()` called after sign-up
+- Google OAuth: user created without consent → `ProtectedRoute` consent gate shows `DataConsentModal` on first access → user accepts → `grantConsent()` writes TRUE to DB
+- If authenticated user has no `public.users` row (e.g. deleted then re-login): AuthContext auto-creates profile with `data_consent=FALSE` → consent flow triggers
+
+This is a hard gate — no consent, no access to any protected route.
 
 ### 3b. Sign In (returning user)
 
