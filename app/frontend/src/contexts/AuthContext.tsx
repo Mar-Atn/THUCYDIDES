@@ -97,8 +97,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (error) {
-        console.error('Profile fetch error:', error.message)
-        setProfile(null)
+        // Profile missing — may happen if user was deleted but auth record persists
+        // (e.g. Google OAuth re-login after deletion). Auto-create profile.
+        console.warn('Profile not found, creating:', error.message)
+        const { data: { user: authUser } } = await supabase.auth.getUser()
+        if (authUser) {
+          const { data: newProfile } = await supabase.from('users').upsert({
+            id: userId,
+            email: authUser.email || '',
+            display_name: authUser.user_metadata?.display_name || authUser.email?.split('@')[0] || 'User',
+            system_role: 'participant',
+            status: 'registered',
+            data_consent: false,
+          }, { onConflict: 'id' }).select().single()
+          setProfile(newProfile as UserProfile)
+        } else {
+          setProfile(null)
+        }
       } else {
         setProfile(data as UserProfile)
       }
