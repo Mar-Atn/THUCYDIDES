@@ -730,12 +730,14 @@ export function ParticipantDashboard() {
                     ? mtg[0].participant_b_role_id as string
                     : mtg[0].participant_a_role_id as string
                   const info = allRoleInfo[otherRoleId]
-                  if (info?.isAi && info.voiceAgentId) {
+                  if (info?.isAi) {
+                    // AI counterpart — show mode popup (SPEC 5.3)
                     setPendingModeSelect({
                       meetingId,
                       counterpart: { name: info.name, country: info.country, position: info.position, voiceAgentId: info.voiceAgentId },
                     })
                   } else {
+                    // Human counterpart — straight to text chat
                     setActiveChatMeetingId(meetingId)
                   }
                 }}/>
