@@ -171,7 +171,13 @@ export function ParticipantDashboard() {
   const [activeAction, setActiveAction] = useState<string|null>(null)
   const [activeChatMeetingId, setActiveChatMeetingId] = useState<string|null>(null)
   const [activeVoiceMeetingId, setActiveVoiceMeetingId] = useState<string|null>(null)
-  const [pendingModeSelect, setPendingModeSelect] = useState<{meetingId:string; counterpart:{name:string;country:string;position:string;voiceAgentId:string|null}} | null>(null)
+  const [pendingModeSelect, _setPendingModeSelect] = useState<{meetingId:string; counterpart:{name:string;country:string;position:string;voiceAgentId:string|null}} | null>(null)
+  const pendingModeRef = useRef(false) // Sync guard for Realtime handler race condition
+  // Wrapper: keeps ref in sync with state (ref is synchronous, state is batched)
+  const setPendingModeSelect = useCallback((val: typeof pendingModeSelect) => {
+    pendingModeRef.current = val !== null
+    _setPendingModeSelect(val)
+  }, [])
   const [voiceContext, setVoiceContext] = useState<{identity:string;intentNote:string;voiceAgentId:string;counterpartName:string;counterpartCountry:string} | null>(null)
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
@@ -248,8 +254,8 @@ export function ParticipantDashboard() {
           if (row.sim_run_id !== simId) return
           const isMyMeeting = row.participant_a_role_id === myRole.id || row.participant_b_role_id === myRole.id
           // Skip if already in a meeting/popup, or if I'm the accepter
-          // (the accept handler in TabActions shows the popup via onOpenChat)
-          if (!isMyMeeting || activeChatMeetingId || activeVoiceMeetingId || pendingModeSelect) return
+          // Uses ref (not state) to avoid race condition with batched React updates
+          if (!isMyMeeting || activeChatMeetingId || activeVoiceMeetingId || pendingModeRef.current) return
           if (row.participant_b_role_id === myRole.id) return
 
           const otherRoleId = row.participant_a_role_id === myRole.id
@@ -285,7 +291,11 @@ export function ParticipantDashboard() {
     const { meetingId, counterpart } = pendingModeSelect
 
     // Write modality to meetings table (SPEC 5.3)
-    await supabase.from('meetings').update({ modality: mode }).eq('id', meetingId)
+    try {
+      await supabase.from('meetings').update({ modality: mode }).eq('id', meetingId)
+    } catch {
+      // Non-blocking — modality is cosmetic, don't prevent meeting from opening
+    }
 
     // Mutual exclusion: clear the other mode's state
     if (mode === 'text') {
@@ -756,7 +766,7 @@ export function ParticipantDashboard() {
 
       {/* Mode Selection Popup — Human-AI meetings only */}
       {pendingModeSelect && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+        <div className="fixed inset-0 z-[60] bg-black/60 flex items-center justify-center backdrop-blur-sm">
           <div className="bg-card border border-border rounded-xl shadow-2xl p-6 max-w-sm w-full mx-4">
             <div className="text-center mb-6">
               <div className="font-body text-caption text-text-secondary mb-2">Connecting you to</div>
@@ -770,15 +780,17 @@ export function ParticipantDashboard() {
             </div>
             <div className="flex gap-3">
               <button
-                onClick={() => handleModeSelect('text')}
-                className="flex-1 py-3 px-4 bg-base hover:bg-action/10 text-text-primary border border-border hover:border-action/50 rounded-lg font-body text-body font-medium transition-colors"
+                onClick={(e) => { e.stopPropagation(); handleModeSelect('text') }}
+                type="button"
+                className="flex-1 py-3 px-4 bg-base hover:bg-action/10 text-text-primary border border-border hover:border-action/50 rounded-lg font-body text-body font-medium transition-colors cursor-pointer"
               >
                 Text Chat
               </button>
               {pendingModeSelect.counterpart.voiceAgentId && (
                 <button
-                  onClick={() => handleModeSelect('voice')}
-                  className="flex-1 py-3 px-4 bg-action hover:bg-action/80 text-white rounded-lg font-body text-body font-medium transition-colors"
+                  onClick={(e) => { e.stopPropagation(); handleModeSelect('voice') }}
+                  type="button"
+                  className="flex-1 py-3 px-4 bg-action hover:bg-action/80 text-white rounded-lg font-body text-body font-medium transition-colors cursor-pointer"
                 >
                   Voice Call
                 </button>
