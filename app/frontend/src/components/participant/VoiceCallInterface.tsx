@@ -1,9 +1,8 @@
 /**
  * VoiceCallInterface — ElevenLabs voice call UI for avatar conversations.
  *
- * Allows a human participant to speak with an AI avatar via ElevenLabs
- * Conversational AI. Text chat history and avatar identity are injected
- * as prompt overrides so the voice agent stays in character.
+ * Designed to look like MeetingChat with added voice controls.
+ * Same full-screen layout, same header, same message bubbles.
  *
  * M5.7 Avatar Conversation System
  */
@@ -11,9 +10,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useConversation, ConversationProvider } from '@elevenlabs/react'
 import { supabase } from '@/lib/supabase'
-import {
-  Mic, MicOff, Phone, PhoneOff, Eye, EyeOff, Volume2, Smartphone,
-} from 'lucide-react'
 
 /* ── Constants ────────────────────────────────────────────────────────── */
 
@@ -53,7 +49,6 @@ interface TranscriptEntry {
 
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
-/** Strip ElevenLabs voice annotations like [slow], [laugh] from display text. */
 function stripVoiceAnnotations(text: string): string {
   return text.replace(/\[[a-z\s]{1,20}\]/gi, '').replace(/\s{2,}/g, ' ').trim()
 }
@@ -64,12 +59,16 @@ function formatDuration(seconds: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+function fmtTime(d: Date): string {
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+}
+
 async function getToken(): Promise<string | null> {
   const { data: { session } } = await supabase.auth.getSession()
   return session?.access_token ?? null
 }
 
-/* ── Component (outer wrapper provides ConversationProvider context) ── */
+/* ── Outer wrapper (provides ConversationProvider context) ──────────── */
 
 export function VoiceCallInterface(props: VoiceCallProps) {
   return (
@@ -79,24 +78,16 @@ export function VoiceCallInterface(props: VoiceCallProps) {
   )
 }
 
+/* ── Inner component ────────────────────────────────────────────────── */
+
 function VoiceCallInner({
-  meetingId,
-  simId,
-  voiceAgentId,
-  avatarIdentity,
-  intentNote,
-  conversationHistory,
-  counterpartName,
-  counterpartCountry,
-  myRoleId,
-  myCountryCode,
-  onEnd,
+  meetingId, simId, voiceAgentId, avatarIdentity, intentNote,
+  conversationHistory, counterpartName, counterpartCountry,
+  myRoleId, myCountryCode, onEnd,
 }: VoiceCallProps) {
   const [status, setStatus] = useState<'connecting' | 'active' | 'ended' | 'error'>('connecting')
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([])
   const [muted, setMuted] = useState(false)
-  const [phoneMode, setPhoneMode] = useState(false)
-  const [showTranscript, setShowTranscript] = useState(true)
   const [elapsed, setElapsed] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
@@ -105,7 +96,7 @@ function VoiceCallInner({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const endingRef = useRef(false)
 
-  // Build the full prompt override: avatar identity + intent + history + voice rules
+  // Build prompt override
   const fullPrompt = [
     avatarIdentity,
     '',
@@ -119,19 +110,16 @@ function VoiceCallInner({
     VOICE_RULES,
   ].join('\n')
 
-  /* ── ElevenLabs hook ─────────────────────────────────────────────────── */
+  /* ── ElevenLabs hook ──────────────────────────────────────────────── */
 
   const conversation = useConversation({
     onConnect: () => {
-      // Connected to ElevenLabs
       setStatus('active')
       startTimer()
     },
     onDisconnect: () => {
-      // Disconnected from ElevenLabs
-      // If we disconnect before ever connecting (error during setup), show error
       if (status === 'connecting') {
-        setError('Voice agent disconnected during setup. Check ElevenLabs agent configuration — ensure "Allow prompt override" is enabled.')
+        setError('Voice agent disconnected during setup. Check ElevenLabs agent configuration.')
         setStatus('error')
         return
       }
@@ -145,8 +133,6 @@ function VoiceCallInner({
       }
       transcriptRef.current = [...transcriptRef.current, entry]
       setTranscript(transcriptRef.current)
-
-      // Write voice message to meeting_messages via backend
       writeVoiceMessage(entry)
     },
     onError: (err) => {
@@ -155,31 +141,23 @@ function VoiceCallInner({
     },
   })
 
-  /* ── Timer ───────────────────────────────────────────────────────────── */
+  /* ── Timer ────────────────────────────────────────────────────────── */
 
   function startTimer() {
-    timerRef.current = setInterval(() => {
-      setElapsed(prev => prev + 1)
-    }, 1000)
+    timerRef.current = setInterval(() => setElapsed(prev => prev + 1), 1000)
   }
 
   function stopTimer() {
-    if (timerRef.current) {
-      clearInterval(timerRef.current)
-      timerRef.current = null
-    }
+    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
   }
 
-  /* ── Start session on mount ──────────────────────────────────────────── */
+  /* ── Start session on mount ───────────────────────────────────────── */
 
   useEffect(() => {
     startSession()
-    return () => {
-      stopTimer()
-    }
-  }, [])
+    return () => { stopTimer() }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** Auto-scroll transcript. */
   useEffect(() => {
     transcriptEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [transcript])
@@ -190,16 +168,11 @@ function VoiceCallInner({
         agentId: voiceAgentId,
         clientTools: {},
         overrides: {
-          agent: {
-            prompt: {
-              prompt: fullPrompt,
-            },
-          },
+          agent: { prompt: { prompt: fullPrompt } },
         },
       })
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to start voice session'
-      setError(msg)
+      setError(err instanceof Error ? err.message : 'Failed to start voice session')
       setStatus('error')
     }
   }
@@ -209,7 +182,6 @@ function VoiceCallInner({
   async function writeVoiceMessage(entry: TranscriptEntry) {
     try {
       const token = await getToken()
-      const roleId = entry.speaker === 'human' ? myRoleId : undefined
       await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/message`, {
         method: 'POST',
         headers: {
@@ -217,23 +189,22 @@ function VoiceCallInner({
           ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
-          role_id: roleId ?? myRoleId,
+          role_id: myRoleId,
           country_code: myCountryCode,
           content: entry.text,
           channel: 'voice',
         }),
       })
     } catch {
-      // Non-critical — transcript is still captured locally
+      // Non-critical
     }
   }
 
-  /* ── End conversation ────────────────────────────────────────────────── */
+  /* ── End conversation ─────────────────────────────────────────────── */
 
   const handleEnd = useCallback(async () => {
     if (endingRef.current) return
     endingRef.current = true
-
     stopTimer()
     setStatus('ended')
 
@@ -248,76 +219,38 @@ function VoiceCallInner({
         },
         body: JSON.stringify({ role_id: myRoleId }),
       })
-    } catch {
-      // Best effort — meeting may already be ended
-    }
+    } catch { /* best effort */ }
 
-    // Build full transcript string
     const voiceTranscript = transcriptRef.current
       .map(e => `[${e.speaker === 'ai' ? counterpartName : 'You'}] ${e.text}`)
       .join('\n')
-
     onEnd(voiceTranscript)
   }, [simId, meetingId, myRoleId, counterpartName, onEnd])
 
-  async function endCall() {
-    if (conversation.status === 'connected') {
-      await conversation.endSession()
-      // handleEnd will fire via onDisconnect
-    } else {
-      handleEnd()
-    }
+  function endCall() {
+    try { conversation.endSession() } catch { /* ignore */ }
+    handleEnd()
   }
-
-  /* ── Mute toggle ─────────────────────────────────────────────────────── */
 
   function toggleMute() {
     setMuted(prev => {
       const next = !prev
-      if (next) {
-        conversation.setVolume({ volume: 0 })
-      } else {
-        conversation.setVolume({ volume: 1 })
-      }
+      if (next) { conversation.setVolume({ volume: 0 }) }
+      else { conversation.setVolume({ volume: 1 }) }
       return next
     })
   }
 
-  /* ── Phone mode (earpiece / speaker switch) ──────────────────────────── */
-
-  async function togglePhoneMode() {
-    setPhoneMode(prev => !prev)
-    // setSinkId is only available on some browsers — best-effort
-    try {
-      const audioElements = document.querySelectorAll('audio')
-      for (const el of audioElements) {
-        if ('setSinkId' in el) {
-          await (el as HTMLAudioElement & { setSinkId: (id: string) => Promise<void> })
-            .setSinkId(phoneMode ? '' : 'default')
-        }
-      }
-    } catch {
-      // Not supported — ignore
-    }
-  }
-
-  /* ── Render: Error ───────────────────────────────────────────────────── */
+  /* ── Render: Error ────────────────────────────────────────────────── */
 
   if (status === 'error') {
     return (
-      <div className="fixed inset-0 z-50 bg-white flex items-center justify-center p-6 md:relative md:inset-auto md:rounded-xl md:border md:border-red-500/30">
-        <div className="text-center max-w-md">
-          <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
-            <PhoneOff className="w-8 h-8 text-red-400" />
-          </div>
-          <h2 className="font-heading text-2xl text-red-400 mb-2">
-            Voice Connection Failed
-          </h2>
-          <p className="text-gray-500 mb-6">{error}</p>
-          <button
-            onClick={() => onEnd('')}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-gray-900 rounded-lg transition-colors"
-          >
+      <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
+        <div className="text-center max-w-md px-6">
+          <div className="font-heading text-h2 text-danger mb-2">Voice Connection Failed</div>
+          <p className="font-body text-body-sm text-gray-500 mb-6">{error}</p>
+          <button onClick={() => onEnd('')}
+            className="font-body text-body-sm font-medium bg-danger/10 text-danger px-6 py-2 rounded-lg hover:bg-danger/20 transition-colors">
             Close
           </button>
         </div>
@@ -325,152 +258,114 @@ function VoiceCallInner({
     )
   }
 
-  /* ── Render: Main ────────────────────────────────────────────────────── */
+  /* ── Render: Main (matches MeetingChat layout) ────────────────────── */
 
   return (
-    <div className="fixed inset-0 z-50 bg-white flex flex-col md:relative md:inset-auto md:rounded-xl md:border md:border-gray-200 md:max-h-[700px]">
+    <div className="fixed inset-0 z-50 bg-white flex flex-col md:items-center md:justify-center">
+      <div className="w-full h-full md:max-w-[600px] md:h-[85vh] md:rounded-xl md:border md:border-gray-200 md:shadow-2xl flex flex-col bg-white overflow-hidden">
 
-      {/* Header: counterpart name + timer */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white/80 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-heading font-bold text-lg">
-            {counterpartName.charAt(0)}
-          </div>
-          <div>
-            <div className="text-gray-900 font-heading text-lg leading-tight">
+        {/* ── Header (matches MeetingChat) ────────────────────────────── */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-200 bg-gray-50 shrink-0">
+          <button onClick={endCall} className="text-gray-500 hover:text-gray-900 transition-colors p-1" aria-label="Back">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+
+          <div className="flex-1 min-w-0">
+            <div className="font-heading text-h3 text-gray-900 truncate">
               {counterpartName}
             </div>
-            <div className="text-gray-500 text-xs">
-              {counterpartCountry}
-              {status === 'active' && (
-                <span className="ml-2 text-green-400">
-                  {formatDuration(elapsed)}
-                </span>
-              )}
-              {status === 'connecting' && (
-                <span className="ml-2 text-amber-400 animate-pulse">Connecting...</span>
-              )}
+            <div className="font-body text-caption text-gray-500 flex items-center gap-2">
+              <span className="uppercase tracking-wider">{counterpartCountry}</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-green-600">
+                {status === 'active' ? formatDuration(elapsed) : status === 'connecting' ? 'Connecting...' : 'Ended'}
+              </span>
             </div>
           </div>
-        </div>
-        <button
-          onClick={endCall}
-          className="w-10 h-10 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-colors"
-          title="End call"
-        >
-          <PhoneOff className="w-5 h-5 text-gray-900" />
-        </button>
-      </div>
 
-      {/* Center: waveform indicator */}
-      <div className="flex-1 flex flex-col items-center justify-center min-h-0">
-        {!showTranscript ? (
-          <div className="flex flex-col items-center gap-6">
-            <div className="w-28 h-28 rounded-full bg-amber-500/10 border-2 border-amber-500/30 flex items-center justify-center">
-              <div className={`flex items-end gap-1 h-12 ${status === 'active' ? '' : 'opacity-30'}`}>
-                {[1, 2, 3, 4, 5].map(i => (
-                  <div
-                    key={i}
-                    className="w-1.5 bg-amber-400 rounded-full"
-                    style={{
-                      height: status === 'active' ? `${12 + Math.random() * 36}px` : '8px',
-                      transition: 'height 0.15s ease',
-                      animation: status === 'active' ? `pulse ${0.4 + i * 0.1}s ease-in-out infinite alternate` : 'none',
-                    }}
-                  />
-                ))}
-              </div>
-            </div>
-            <div className="text-gray-500 font-body text-sm">
+          <button onClick={endCall}
+            className="font-body text-caption text-danger/70 hover:text-danger px-2 py-1 rounded border border-danger/20 hover:border-danger/40 transition-colors">
+            End
+          </button>
+        </div>
+
+        {/* ── Voice status bar ────────────────────────────────────────── */}
+        <div className="px-4 py-2 bg-gray-50/50 border-b border-gray-200 shrink-0 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${status === 'active' ? 'bg-green-500' : status === 'connecting' ? 'bg-amber-400 animate-pulse' : 'bg-gray-400'}`} />
+            <span className="font-body text-caption text-gray-500">
               {status === 'active'
                 ? conversation.isSpeaking ? 'Speaking...' : 'Listening...'
                 : status === 'connecting' ? 'Establishing connection...' : 'Call ended'}
-            </div>
+            </span>
           </div>
-        ) : (
-          /* Transcript view */
-          <div className="w-full flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-0">
-            {transcript.length === 0 && status === 'active' && (
-              <p className="text-center text-gray-500 text-sm mt-8">
-                Conversation starting...
-              </p>
-            )}
-            {transcript.map((entry, i) => (
-              <div
-                key={i}
-                className={`flex ${entry.speaker === 'human' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] px-3 py-2 rounded-lg text-sm font-['DM_Sans'] ${
-                    entry.speaker === 'ai'
-                      ? 'bg-gray-50 border border-gray-200 text-gray-600'
-                      : 'bg-blue-600/20 border border-blue-500/20 text-blue-100'
-                  }`}
-                >
-                  <div className="text-[10px] text-gray-500 mb-0.5">
-                    {entry.speaker === 'ai' ? counterpartName : 'You'}
-                    <span className="ml-2">
-                      {entry.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          <div className="flex items-center gap-2">
+            <button onClick={toggleMute}
+              className={`p-1.5 rounded-full transition-colors ${muted ? 'bg-danger/10 text-danger' : 'text-gray-400 hover:text-gray-600'}`}
+              title={muted ? 'Unmute' : 'Mute'}>
+              {muted ? <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2c0 .76-.13 1.49-.35 2.17"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                : <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>}
+            </button>
+          </div>
+        </div>
+
+        {/* ── Transcript (same style as MeetingChat messages) ─────────── */}
+        <div className="flex-1 overflow-y-auto px-3 py-4 space-y-1" style={{ overscrollBehavior: 'contain' }}>
+          {transcript.length === 0 && status === 'active' && (
+            <div className="text-center font-body text-body-sm text-gray-500/50 py-8">
+              Voice call started. Speak to begin...
+            </div>
+          )}
+          {status === 'connecting' && (
+            <div className="text-center font-body text-body-sm text-gray-500/50 py-8">
+              Connecting to voice agent...
+            </div>
+          )}
+
+          {transcript.map((entry, idx) => {
+            const isMe = entry.speaker === 'human'
+            const prevEntry = idx > 0 ? transcript[idx - 1] : null
+            const showSender = !prevEntry || prevEntry.speaker !== entry.speaker
+
+            return (
+              <div key={idx} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${showSender ? 'mt-3' : 'mt-0.5'}`}>
+                {showSender && (
+                  <div className={`font-body text-caption font-medium mb-1 px-2 ${isMe ? 'text-blue-600' : 'text-indigo-600'}`}>
+                    {isMe ? 'You' : counterpartName}
+                    <span className="text-gray-500/40 font-normal ml-1.5 uppercase tracking-wider text-[10px]">
+                      {isMe ? myCountryCode : counterpartCountry}
                     </span>
                   </div>
-                  <p>{stripVoiceAnnotations(entry.text)}</p>
+                )}
+                <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 shadow-sm ${
+                  isMe
+                    ? 'bg-blue-600/20 text-gray-900 rounded-br-md'
+                    : 'bg-gray-50 text-gray-900 rounded-bl-md border border-gray-200/50'
+                }`}>
+                  <div className="font-body text-body-sm whitespace-pre-wrap break-words leading-relaxed">
+                    {stripVoiceAnnotations(entry.text)}
+                  </div>
+                  <div className={`font-data text-[10px] mt-1 ${isMe ? 'text-blue-600/40' : 'text-gray-500/30'}`}>
+                    {fmtTime(entry.timestamp)}
+                  </div>
                 </div>
               </div>
-            ))}
-            <div ref={transcriptEndRef} />
+            )
+          })}
+          <div ref={transcriptEndRef} />
+        </div>
+
+        {/* ── End call bar (replaces input area) ─────────────────────── */}
+        <div className="px-3 py-3 border-t border-gray-200 bg-gray-50 shrink-0 safe-area-bottom">
+          <div className="flex items-center justify-center">
+            <button onClick={endCall}
+              className="px-8 py-2.5 bg-danger/10 text-danger hover:bg-danger/20 rounded-full font-body text-body-sm font-medium transition-colors border border-danger/20">
+              End Voice Call
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Controls bar */}
-      <div className="flex items-center justify-center gap-4 px-4 py-4 border-t border-gray-200 bg-white/80 backdrop-blur">
-        {/* Mute */}
-        <button
-          onClick={toggleMute}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            muted
-              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
-          }`}
-          title={muted ? 'Unmute' : 'Mute'}
-        >
-          {muted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-        </button>
-
-        {/* Phone mode */}
-        <button
-          onClick={togglePhoneMode}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            phoneMode
-              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
-          }`}
-          title={phoneMode ? 'Speaker mode' : 'Phone mode'}
-        >
-          {phoneMode ? <Smartphone className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-        </button>
-
-        {/* Show/hide transcript */}
-        <button
-          onClick={() => setShowTranscript(prev => !prev)}
-          className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors ${
-            showTranscript
-              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
-              : 'bg-gray-100 text-gray-700 border border-gray-300 hover:bg-gray-200'
-          }`}
-          title={showTranscript ? 'Hide transcript' : 'Show transcript'}
-        >
-          {showTranscript ? <Eye className="w-5 h-5" /> : <EyeOff className="w-5 h-5" />}
-        </button>
-
-        {/* End voice call */}
-        <button
-          onClick={endCall}
-          className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center transition-colors shadow-lg shadow-red-600/30"
-          title="End voice call"
-        >
-          <Phone className="w-6 h-6 text-gray-900 rotate-[135deg]" />
-        </button>
+        </div>
       </div>
     </div>
   )
