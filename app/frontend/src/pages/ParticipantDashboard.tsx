@@ -831,6 +831,16 @@ export function ParticipantDashboard() {
             setVoiceContext(null)
             setDataVersion(v => v + 1)
           }}
+          onFallbackToText={() => {
+            // Switch from voice to text chat (M5.7 SPEC 6.3 — voice fallback)
+            const mid = activeVoiceMeetingId
+            setActiveVoiceMeetingId(null)
+            setVoiceContext(null)
+            if (mid) {
+              supabase.from('meetings').update({ modality: 'text' }).eq('id', mid).then(() => {}).catch(() => {})
+              setActiveChatMeetingId(mid)
+            }
+          }}
         />
       )}
     </div>
@@ -1930,7 +1940,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                       {otherCountry.toUpperCase()}
                     </span>
                     <span className="font-body text-caption text-action/60 group-hover:text-action mt-0.5 block">
-                      {m.modality === 'voice' ? 'Voice Call' : 'Open Chat'}
+                      {m.modality === 'voice' ? '\uD83C\uDF99\uFE0F Voice Call' : '\uD83D\uDCAC Open Chat'}
                     </span>
                   </button>
                   <button

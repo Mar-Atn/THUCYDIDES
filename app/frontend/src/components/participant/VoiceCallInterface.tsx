@@ -39,6 +39,7 @@ export interface VoiceCallProps {
   myRoleId: string
   myCountryCode: string
   onEnd: (voiceTranscript: string) => void
+  onFallbackToText?: () => void
 }
 
 interface TranscriptEntry {
@@ -83,7 +84,7 @@ export function VoiceCallInterface(props: VoiceCallProps) {
 function VoiceCallInner({
   meetingId, simId, voiceAgentId, avatarIdentity, intentNote,
   conversationHistory, counterpartName, counterpartCountry,
-  myRoleId, myCountryCode, onEnd,
+  myRoleId, myCountryCode, onEnd, onFallbackToText,
 }: VoiceCallProps) {
   const [status, setStatus] = useState<'connecting' | 'active' | 'ended' | 'error'>('connecting')
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([])
@@ -269,10 +270,18 @@ function VoiceCallInner({
         <div className="text-center max-w-md px-6">
           <div className="font-heading text-h2 text-danger mb-2">Voice Connection Failed</div>
           <p className="font-body text-body-sm text-gray-500 mb-6">{error}</p>
-          <button onClick={() => onEnd('')}
-            className="font-body text-body-sm font-medium bg-danger/10 text-danger px-6 py-2 rounded-lg hover:bg-danger/20 transition-colors">
-            Close
-          </button>
+          <div className="flex gap-3 justify-center">
+            {onFallbackToText && (
+              <button onClick={onFallbackToText}
+                className="font-body text-body-sm font-medium bg-action/10 text-action px-6 py-2 rounded-lg hover:bg-action/20 transition-colors">
+                Switch to Text Chat
+              </button>
+            )}
+            <button onClick={() => onEnd('')}
+              className="font-body text-body-sm font-medium bg-danger/10 text-danger px-6 py-2 rounded-lg hover:bg-danger/20 transition-colors">
+              Close
+            </button>
+          </div>
         </div>
       </div>
     )

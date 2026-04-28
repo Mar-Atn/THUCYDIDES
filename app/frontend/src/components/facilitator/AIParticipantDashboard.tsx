@@ -645,12 +645,16 @@ export function AIParticipantDashboard({ simId }: { simId: string }) {
                   </button>
                 ) : <span />}
 
-                {/* Row 2: country below name */}
+                {/* Row 2: country + cost */}
                 <span />
                 <span className="font-body text-caption text-text-secondary -mt-1">
                   {country}
                 </span>
-                <span /><span /><span /><span /><span /><span />
+                <span />
+                <span className="font-data text-caption text-text-secondary/50 -mt-1">
+                  {orchAgent ? `$${orchAgent.cost.total_cost_usd.toFixed(3)}` : ''}
+                </span>
+                <span /><span /><span /><span />
               </div>
             </div>
           )
