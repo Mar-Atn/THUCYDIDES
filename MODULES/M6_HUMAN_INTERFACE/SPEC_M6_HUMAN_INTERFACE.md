@@ -256,6 +256,26 @@ Right side (persistent):
 
 ---
 
+## 5B. Participant Entry Flow
+
+Participants always enter via `/play` — the system auto-resolves to their assigned simulation.
+
+**Flow:**
+1. Participant logs in → Dashboard detects `system_role=participant` → redirects to `/play/{simId}`
+2. `/play` route (no simId) → queries `roles` table for user's active assignment → redirects to correct simrun
+3. If participant has stale URL (`/play/old-sim-id`) → ParticipantDashboard detects no role in this sim → redirects to `/play` → resolves correctly
+4. If participant not yet assigned to any simrun → redirects to latest active simrun (observer mode, no role)
+5. If no active simruns → shows "No Active Simulation" message
+
+**Key principle:** Participants never need to know or remember simrun IDs. They go to `/play` and the system handles the rest. Moderators share one URL: `/play`.
+
+**Implementation:**
+- `PlayRedirect.tsx` — `/play` route, queries DB, redirects
+- `ParticipantDashboard.tsx` — if no role found, redirects to `/play`
+- `Dashboard.tsx` — on login, participants auto-redirect to `/play/{simId}`
+
+---
+
 ## 6. Incoming Action Requests
 
 System-generated notifications that appear in "Actions Expected Now":
