@@ -63,9 +63,22 @@ export function PlayRedirect() {
         }
       }
 
-      if (active.length === 1) {
-        // Single active sim — redirect immediately
+      if (active.length >= 1) {
+        // Redirect to the most recent active sim (participants always have one)
         navigate(`/play/${active[0].simId}`, { replace: true })
+        return
+      }
+
+      // No assigned sim — find latest active simrun and go there unassigned
+      const { data: latestSims } = await supabase
+        .from('sim_runs')
+        .select('id,name')
+        .in('status', ['active', 'pre_start'])
+        .neq('id', '00000000-0000-0000-0000-000000000001')
+        .order('created_at', { ascending: false })
+        .limit(1)
+      if (latestSims?.[0]) {
+        navigate(`/play/${latestSims[0].id}`, { replace: true })
         return
       }
 

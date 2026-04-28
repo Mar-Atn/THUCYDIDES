@@ -398,7 +398,13 @@ export function ParticipantDashboard() {
         const tariffs = (trRes.data??[]).map((t:{imposer_country_code:string;target_country_code:string;level:number})=>({imposer:t.imposer_country_code,target:t.target_country_code,level:t.level}))
         setMyTariffs(tariffs)
 
-      } else { setTab('world') }
+      } else {
+        // No role in this simrun — redirect to /play to find the correct one
+        if (!proxyRoleId) {
+          window.location.href = '/play'
+          return
+        }
+      }
       setError(null)
     } catch(e) { setError(e instanceof Error?e.message:'Failed') }
     finally { setLoading(false); setDataVersion(v => v + 1) }
