@@ -840,6 +840,24 @@ export function AgentDetailPage() {
           )}
         </Section>
 
+        {/* Section: Avatar Identity (read-only, collapsed by default) */}
+        {(() => {
+          const avatarMem = memories.find(m => (m as unknown as Record<string, string>).memory_key === 'avatar_identity')
+          return (
+            <Section title="Avatar Identity" defaultOpen={false}>
+              {avatarMem ? (
+                <pre className="font-body text-body-sm text-text-primary whitespace-pre-wrap bg-base rounded p-4 max-h-[600px] overflow-y-auto">
+                  {avatarMem.content}
+                </pre>
+              ) : (
+                <p className="font-body text-caption text-text-secondary">
+                  No avatar identity generated yet. The agent creates this at initialization.
+                </p>
+              )}
+            </Section>
+          )
+        })()}
+
       </main>
     </div>
   )
