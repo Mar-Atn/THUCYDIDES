@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { DataConsentModal } from '@/components/DataConsentModal'
 
 export function Register() {
-  const { signUp, signInWithGoogle } = useAuth()
+  const { signUp, signInWithGoogle, grantConsent } = useAuth()
   const navigate = useNavigate()
 
   const [displayName, setDisplayName] = useState('')
@@ -65,6 +65,8 @@ export function Register() {
         const { supabase } = await import('@/lib/supabase')
         await supabase.auth.signInWithPassword({ email, password })
       }
+      // Grant consent (user accepted in this registration form)
+      await grantConsent()
       setSuccess(true)
       setTimeout(() => {
         navigate('/dashboard')
