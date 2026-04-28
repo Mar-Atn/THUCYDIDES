@@ -252,11 +252,17 @@ export function ParticipantDashboard() {
         (payload) => {
           const row = payload.new as Record<string, unknown>
           if (row.sim_run_id !== simId) return
-          const isMyMeeting = row.participant_a_role_id === myRole.id || row.participant_b_role_id === myRole.id
-          // Skip if already in a meeting/popup, or if I'm the accepter
-          // Uses ref (not state) to avoid race condition with batched React updates
-          if (!isMyMeeting || activeChatMeetingId || activeVoiceMeetingId || pendingModeRef.current) return
-          if (row.participant_b_role_id === myRole.id) return
+          // Only auto-open for meetings where I'm the INVITER (participant_a).
+          // When I'm the accepter (participant_b), the accept button handler (onOpenChat) shows the popup.
+          if (row.participant_a_role_id !== myRole.id) {
+            console.error('[DIAG-RT] Skipping: I am accepter (participant_b), onOpenChat handles this')
+            return
+          }
+          if (activeChatMeetingId || activeVoiceMeetingId || pendingModeRef.current) {
+            console.error('[DIAG-RT] Skipping: already in meeting/popup', { chat: !!activeChatMeetingId, voice: !!activeVoiceMeetingId, pending: pendingModeRef.current })
+            return
+          }
+          console.error('[DIAG-RT] Auto-opening popup for meeting', row.id)
 
           const otherRoleId = row.participant_a_role_id === myRole.id
             ? row.participant_b_role_id as string
