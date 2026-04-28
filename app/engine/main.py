@@ -2162,7 +2162,7 @@ async def send_meeting_message(
     if not result["success"]:
         raise HTTPException(status_code=400, detail=result["narrative"])
 
-    # Fast avatar response — call directly instead of routing through managed agent
+    # Fast avatar response — stateless, no dispatcher dependency (SPEC M5.7 Section 7)
     meeting = meeting_data["meeting"]
     other_role_id = (
         meeting["participant_b_role_id"]
@@ -2170,19 +2170,38 @@ async def send_meeting_message(
         else meeting["participant_a_role_id"]
     )
 
-    from engine.agents.managed.event_dispatcher import get_dispatcher
-    dispatcher = get_dispatcher(sim_id)
-    if dispatcher and other_role_id in (dispatcher.agents or {}):
-        # AI counterpart — trigger avatar response asynchronously
+    # Check if counterpart is an AI role via DB (not in-memory dispatcher)
+    _is_ai = _check_is_ai_role(sim_id, other_role_id)
+    if _is_ai:
         import asyncio
         logger.info("[meeting-msg] Triggering avatar response for %s in meeting %s", other_role_id, meeting_id[:8])
         asyncio.create_task(_avatar_respond_to_message(sim_id, meeting_id, other_role_id, meeting))
     else:
-        logger.info("[meeting-msg] No avatar trigger: dispatcher=%s, other_role=%s, agents=%s",
-                    bool(dispatcher), other_role_id,
-                    list(dispatcher.agents.keys())[:5] if dispatcher else "none")
+        logger.info("[meeting-msg] Counterpart %s is human — no avatar trigger", other_role_id)
 
     return APIResponse(data=result)
+
+
+# Cache: AI role check per (sim_id, role_id) — avoids repeated DB queries during a meeting
+_ai_role_cache: dict[tuple[str, str], bool] = {}
+
+def _check_is_ai_role(sim_id: str, role_id: str) -> bool:
+    """Check if a role is AI-operated (no user assigned). Uses DB, not dispatcher.
+
+    Cached per (sim_id, role_id) for the lifetime of the server process.
+    """
+    cache_key = (sim_id, role_id)
+    if cache_key in _ai_role_cache:
+        return _ai_role_cache[cache_key]
+    try:
+        role_row = db.get_client().table("roles").select("user_id") \
+            .eq("sim_run_id", sim_id).eq("id", role_id).limit(1).execute()
+        is_ai = bool(role_row.data and not role_row.data[0].get("user_id"))
+        _ai_role_cache[cache_key] = is_ai
+        return is_ai
+    except Exception as e:
+        logger.warning("[avatar] Failed to check AI role %s: %s", role_id, e)
+        return False
 
 
 _avatar_responding: set[str] = set()  # meeting_ids currently generating avatar response

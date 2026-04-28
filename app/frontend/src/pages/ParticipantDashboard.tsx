@@ -301,16 +301,49 @@ export function ParticipantDashboard() {
       setActiveChatMeetingId(meetingId)
     } else {
       setActiveChatMeetingId(null)
+      setActiveVoiceMeetingId(meetingId)
       // Use pre-fetched avatar context (fetched when popup opened)
       const prefetched = prefetchedVoiceCtxRef.current
-      setVoiceContext({
-        identity: prefetched?.identity || '',
-        intentNote: prefetched?.intentNote || '',
-        voiceAgentId: counterpart.voiceAgentId || '',
-        counterpartName: counterpart.name,
-        counterpartCountry: counterpart.country,
-      })
-      setActiveVoiceMeetingId(meetingId)
+      if (prefetched?.identity) {
+        // Context ready — mount VoiceCallInterface immediately
+        setVoiceContext({
+          identity: prefetched.identity,
+          intentNote: prefetched.intentNote || '',
+          voiceAgentId: counterpart.voiceAgentId || '',
+          counterpartName: counterpart.name,
+          counterpartCountry: counterpart.country,
+        })
+      } else {
+        // Pre-fetch still in progress — wait for it, then set context
+        setVoiceContext(null) // keeps VoiceCallInterface unmounted until ready
+        const waitForCtx = () => {
+          const check = setInterval(() => {
+            const ctx = prefetchedVoiceCtxRef.current
+            if (ctx) {
+              clearInterval(check)
+              setVoiceContext({
+                identity: ctx.identity || `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
+                intentNote: ctx.intentNote || '',
+                voiceAgentId: counterpart.voiceAgentId || '',
+                counterpartName: counterpart.name,
+                counterpartCountry: counterpart.country,
+              })
+            }
+          }, 100)
+          // Give up after 5s — use minimal fallback
+          setTimeout(() => {
+            clearInterval(check)
+            setVoiceContext(prev => prev || {
+              identity: `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
+              intentNote: '',
+              voiceAgentId: counterpart.voiceAgentId || '',
+              counterpartName: counterpart.name,
+              counterpartCountry: counterpart.country,
+            })
+          }, 5000)
+        }
+        waitForCtx()
+      }
     }
   }
 
@@ -772,6 +805,16 @@ export function ParticipantDashboard() {
           myCharacterName={myRole.character_name}
           onClose={() => { setActiveChatMeetingId(null); setDataVersion(v => v + 1) }}
         />
+      )}
+
+      {/* Voice Call overlay — loading state while context is fetched */}
+      {activeVoiceMeetingId && myRole && !voiceContext && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-3" />
+            <p className="text-gray-600">Preparing voice connection...</p>
+          </div>
+        </div>
       )}
 
       {/* Voice Call overlay (voice mode) */}
