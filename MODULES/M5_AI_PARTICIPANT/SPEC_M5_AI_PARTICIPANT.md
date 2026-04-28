@@ -1,8 +1,8 @@
 # SPEC: M5 — AI Participant Module
 
-**Version:** 1.2
-**Date:** 2026-04-24
-**Status:** PAUSED — Stage gate review in progress. Existing code is spike/iteration quality. Clean rebuild planned after Layer 2 documentation complete.
+**Version:** 2.0
+**Date:** 2026-04-28
+**Status:** ACTIVE — Core module tested. Avatar conversations (M5.7) functional. Dispatcher resilience (M5.8) done.
 **Depends on:** M1 (Engines), M2 (Communication), M3 (Data), M4 (Sim Runner)
 **Spike:** PASSED (2026-04-20) — Managed Agent played 2 rounds, 10 valid actions, $0.35
 **External Dependencies:** M6 chat interface (shared), game rules reference (shared M5/M6)
@@ -55,17 +55,19 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 
 | Sub-Module | Location | Responsibility | Status |
 |------------|----------|----------------|--------|
-| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta | SPIKE |
-| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 16 game tools (definitions + executor) | SPIKE |
-| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch | SPIKE |
-| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, three background loops (dispatch + auto-pulse + meeting monitor), parallel agent delivery | TESTED |
-| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | Bilateral meetings: AI↔AI (turn-by-turn relay) and AI↔Human (monitor prompts AI to respond) | TESTED |
-| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, cost, activity. Agent detail with decisions, memories, meetings. | TESTED |
+| **M5.1 Identity Builder** | `engine/agents/managed/system_prompt.py` | Build Layer 1 from DB role + country + rules + meta + avatar architecture | DONE |
+| **M5.2 Tool Interface** | `engine/agents/managed/tool_*.py` | 18 game tools (16 original + intent_note fields on meeting tools) | DONE |
+| **M5.3 Session Manager** | `engine/agents/managed/session_manager.py` | AsyncAnthropic: create/manage sessions, SSE streams, tool dispatch, recovery | DONE |
+| **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, three background loops, DB-backed auto-recovery | DONE |
+| **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | **SUPERSEDED by M5.7.** Legacy file kept but not used. Avatar system handles all meetings. | SUPERSEDED |
+| **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, cost, activity, voice icons, real-time meeting state. | DONE |
+| **M5.7 Avatar Conversations** | `avatar_service.py`, `avatar_generator.py`, `VoiceCallInterface.tsx`, `MeetingChat.tsx` | Text chat (Claude API) + Voice call (ElevenLabs). Mode popup. See SPEC_M5_AVATAR_CONVERSATIONS.md | DONE (text), FUNCTIONAL (voice) |
+| **M5.8 Dispatcher Resilience** | `event_dispatcher.py`, `main.py` lifespan | DB-backed auto-recovery on restart. Agent states write-through. Smart session recreation. See SPEC_M5_DISPATCHER_RESILIENCE.md | DONE |
 
 **Architecture (2026-04-25):** Single-process, three async background loops:
 1. **Dispatch loop** — checks `agent_event_queue`, delivers events to IDLE agents in parallel (`asyncio.gather`). Tiers: 1=critical/3s, 2=urgent/5s, 3=routine/30s.
 2. **Auto-pulse loop** — during active Phase A, sends enriched round_pulse events (with recent events, pending items, country snapshot) at configurable intervals. Moderator controls pace (0-10 per round).
-3. **Meeting monitor** — every 10s checks for active meetings. AI-AI: launches ConversationRouter. AI-Human: prompts AI when human has spoken.
+3. **Meeting monitor** — every 10s checks for active meetings. AI-AI: launches `run_text_meeting()` (avatar-based, ~60s for 16 turns). AI-Human: avatar responds via `_avatar_respond_to_message()` when human sends a message. 15-minute auto-end for stale meetings.
 
 **Phase B solicitation:** Two-phase wait pattern — waits for agents to START processing (leave IDLE), then waits for them to FINISH (return to IDLE). Enriched context includes full economic snapshot + exact field format for each batch action.
 
@@ -131,51 +133,52 @@ The system prompt adapts per role type (different powers, different action empha
 
 Meeting requests while busy → queued, delivered at next available pulse. This creates the same time-pressure tradeoffs humans face.
 
-### D6: Conversations — Same Infrastructure as Humans
+### D6: Conversations — Avatar System (M5.7)
 
-**Decision:** AI uses the SAME meeting/chat system as human players. No separate AI conversation channel.
+**Decision:** AI uses lightweight conversation avatars instead of full managed agent sessions for meetings. Same meeting/chat infrastructure as humans. See `SPEC_M5_AVATAR_CONVERSATIONS.md` for full details.
 
-**Flow:**
-1. Agent calls `request_meeting(country, agenda)` → same DB invitation record
-2. Counterpart receives invitation at next pulse → accepts/declines via tool
-3. Chat channel opens → same `meeting_messages` table
-4. Messages via `send_message` tool → same chat UI (observable!)
-5. Meeting ends → both agents reflect at next pulse
+**Key architecture:**
+- Managed Agent ("the mind") generates Avatar Identity at init + Intent Note per meeting
+- Conversation Avatar ("the mouth") handles dialogue via Claude API (text) or ElevenLabs (voice)
+- The Managed Agent NEVER writes to meeting_messages — only the avatar does
+- After meeting: transcript delivered to Managed Agent for reflection
 
-**Three conversation types — same interface, different execution:**
+**Three conversation types:**
 
-| Type | Chat | Voice | Notes |
-|------|:----:|:-----:|-------|
-| AI ↔ AI | Same chat UI (observable) | Not needed | Orchestrator relays between sessions |
-| AI ↔ Human | Same chat UI | v2: ElevenLabs avatar | Human types/speaks, AI responds |
-| Human ↔ Human | Same chat UI | Direct (outside system) | No M5 involvement |
+| Type | Mode | Execution | Who speaks first |
+|------|------|-----------|-----------------|
+| AI-AI | Text only | Automated turn-by-turn (`run_text_meeting`) | Avatar A |
+| AI-Human | Text or Voice (human chooses) | Human sends/speaks, avatar responds | Human |
+| Human-Human | Text only | Direct relay via `meeting_messages` | Either |
 
-**Communication style:** System prompt enforces natural language — short sentences, conversational idioms, occasional humor, appropriate emotions. No bullet points or headers in meetings. 1-3 sentences per turn.
+**Intent notes glued to invite/accept:** `request_meeting` requires `intent_note` field. `respond_to_invitation(accept)` includes `intent_note`. Generated in same cognitive cycle as the decision.
 
-**Chat UI:** Full-screen on mobile. Telegram-style simplicity. Typing animation (messages appear gradually, not as instant jumps).
+**No system-generated opening messages.** Human speaks first. Avatar responds.
 
-### D7: Voice Meetings — ElevenLabs Avatar Delegated by Managed Agent
+**No live mode switching.** Human selects Text Chat or Voice Call before meeting opens. End and reconnect to change mode.
 
-**Decision (v2, designed now):** KING architecture reused.
+### D7: Voice Calls — ElevenLabs (M5.7 Phase 2)
 
-**Two-tier delegation:**
+**Decision:** KING architecture adapted. Voice is a mode choice, not a layer on top of text.
+
+**Two-tier delegation — same as text but different delivery:**
 ```
 MANAGED AGENT ("The Mind")
-  → Generates intent notes: {goal, tone, tactics, boundaries}
-  → Passes cognitive summary to voice avatar
+  → Generates Avatar Identity (once at init)
+  → Generates Intent Note (per meeting, in invite/accept)
   → Receives transcript after meeting
   → Reflects and updates memory
 
 VOICE AVATAR (ElevenLabs, "The Mouth")
+  → Receives: Avatar Identity + Intent Note + VOICE_RULES as prompt override
   → Speaks naturally in character
-  → Follows intent notes
-  → Cannot commit outside boundaries
-  → Each character has unique voice profile
+  → Sub-second responses
+  → Each AI role has an assigned ElevenLabs agent (voice profile)
 ```
 
-**New tool:** `prepare_voice_meeting(counterpart, context)` → returns structured intent notes.
+**Mode selection:** Human sees popup before meeting opens — [Text Chat] | [Voice Call]. Voice button only visible if AI has `elevenlabs_agent_id`.
 
-**Human can drop to text anytime** — same chat interface, voice is an overlay. Text always available as fallback.
+**Ending:** Ending the voice call = ending the meeting. No reconnection. New call requires new meeting request.
 
 ### D8: Information Parity — Agent Sees What Humans See
 
@@ -236,18 +239,21 @@ NOT available during Phase A: set_budget, set_tariffs, set_sanctions, set_opec, 
 
 The tool_executor enforces these restrictions: attempting batch actions during Phase A returns a clear error message directing the agent to wait for Phase B solicitation.
 
-### D11: Session Recovery
+### D11: Session Recovery & Dispatcher Resilience (M5.8)
 
-**Decision:** Managed Agent sessions persist on Anthropic's side. Our server can crash and reconnect.
+**Decision:** DB-backed auto-recovery. See `SPEC_M5_DISPATCHER_RESILIENCE.md`.
 
-**Recovery strategy:**
-1. Load active session IDs from DB
-2. `sessions.retrieve(id)` → check status
-3. Idle → resume at next pulse
-4. Running → reconnect stream
-5. Terminated → create new session, feed agent's memory notes from `agent_memories` table as context recovery
+**On server restart:**
+1. `lifespan()` queries `ai_agent_sessions` for active sessions
+2. For each sim with active agents: creates dispatcher, calls `recover_from_db()`
+3. Compares `prompt_hash` — same hash: reconnect existing Anthropic session. Different hash: recreate with new tools/prompt.
+4. Dead Anthropic sessions auto-recreated with memory recovery
+5. Agent states restored from `agent_state` column (write-through from dispatcher)
+6. Dispatch + auto-pulse + meeting monitor loops restart automatically
 
-**Health check before every pulse.** Agent's `write_notes` is the ultimate safety net — self-authored memory in our DB survives any session failure.
+**No manual "Initialize AI Agents" needed after restart.** Moderator only clicks it once at SIM start. Subsequent restarts (deploy, crash) are transparent.
+
+**Verified:** 10 agents across 3 sims auto-recovered in ~25 seconds.
 
 ---
 
