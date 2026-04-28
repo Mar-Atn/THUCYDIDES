@@ -173,12 +173,31 @@ export function ParticipantDashboard() {
   const [activeVoiceMeetingId, setActiveVoiceMeetingId] = useState<string|null>(null)
   const [pendingModeSelect, _setPendingModeSelect] = useState<{meetingId:string; counterpart:{name:string;country:string;position:string;voiceAgentId:string|null}} | null>(null)
   const pendingModeRef = useRef(false) // Sync guard for Realtime handler race condition
-  // Wrapper: keeps ref in sync with state (ref is synchronous, state is batched)
+  // Wrapper: keeps ref in sync + pre-fetches voice context when popup shows
   const setPendingModeSelect = useCallback((val: typeof pendingModeSelect) => {
     pendingModeRef.current = val !== null
     _setPendingModeSelect(val)
-  }, [])
+    // Pre-fetch avatar context when popup shows (ready by the time user clicks Voice)
+    if (val && simId) {
+      prefetchedVoiceCtxRef.current = null
+      const otherCountry = val.counterpart.country
+      Promise.all([
+        supabase.from('agent_memories').select('content')
+          .eq('sim_run_id', simId).eq('country_code', otherCountry)
+          .eq('memory_key', 'avatar_identity').limit(1),
+        supabase.from('meetings').select('metadata,participant_a_role_id')
+          .eq('id', val.meetingId).limit(1),
+      ]).then(([identityRes, meetingRes]) => {
+        const identity = identityRes.data?.[0]?.content as string || ''
+        const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
+        const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
+        const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
+        prefetchedVoiceCtxRef.current = { identity, intentNote }
+      }).catch(() => {})
+    }
+  }, [simId, myRole?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   const [voiceContext, setVoiceContext] = useState<{identity:string;intentNote:string;voiceAgentId:string;counterpartName:string;counterpartCountry:string} | null>(null)
+  const prefetchedVoiceCtxRef = useRef<{identity:string;intentNote:string} | null>(null)
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
@@ -229,14 +248,14 @@ export function ParticipantDashboard() {
           // Only auto-open for meetings where I'm the INVITER (participant_a).
           // When I'm the accepter (participant_b), the accept button handler (onOpenChat) shows the popup.
           if (row.participant_a_role_id !== myRole.id) {
-            console.error('[DIAG-RT] Skipping: I am accepter (participant_b), onOpenChat handles this')
+            // I am accepter (participant_b) — onOpenChat handles popup
             return
           }
           if (activeChatMeetingId || activeVoiceMeetingId || pendingModeRef.current) {
-            console.error('[DIAG-RT] Skipping: already in meeting/popup', { chat: !!activeChatMeetingId, voice: !!activeVoiceMeetingId, pending: pendingModeRef.current })
+            // Already in a meeting or popup — skip
             return
           }
-          console.error('[DIAG-RT] Auto-opening popup for meeting', row.id)
+          // Auto-open popup for meeting where I'm the inviter
 
           const otherRoleId = row.participant_a_role_id === myRole.id
             ? row.participant_b_role_id as string
@@ -282,30 +301,16 @@ export function ParticipantDashboard() {
       setActiveChatMeetingId(meetingId)
     } else {
       setActiveChatMeetingId(null)
-      // Set voice context from allRoleInfo (synchronous, no DB query)
+      // Use pre-fetched avatar context (fetched when popup opened)
+      const prefetched = prefetchedVoiceCtxRef.current
       setVoiceContext({
-        identity: '',  // Will be fetched by VoiceCallInterface via prompt override
-        intentNote: '',
+        identity: prefetched?.identity || '',
+        intentNote: prefetched?.intentNote || '',
         voiceAgentId: counterpart.voiceAgentId || '',
         counterpartName: counterpart.name,
         counterpartCountry: counterpart.country,
       })
       setActiveVoiceMeetingId(meetingId)
-      // Fetch full avatar context in background — update voice context when ready
-      const otherCountry = counterpart.country
-      Promise.all([
-        supabase.from('agent_memories').select('content')
-          .eq('sim_run_id', simId).eq('country_code', otherCountry)
-          .eq('memory_key', 'avatar_identity').limit(1),
-        supabase.from('meetings').select('metadata,participant_a_role_id')
-          .eq('id', meetingId).limit(1),
-      ]).then(([identityRes, meetingRes]) => {
-        const identity = identityRes.data?.[0]?.content as string || ''
-        const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
-        const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
-        const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
-        setVoiceContext(prev => prev ? { ...prev, identity, intentNote } : prev)
-      }).catch(() => {})
     }
   }
 

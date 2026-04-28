@@ -228,8 +228,25 @@ function VoiceCallInner({
   }, [simId, meetingId, myRoleId, counterpartName, onEnd])
 
   function endCall() {
+    // End ElevenLabs session
     try { conversation.endSession() } catch { /* ignore */ }
-    handleEnd()
+    // Stop timer and update UI immediately (don't wait for API)
+    stopTimer()
+    setStatus('ended')
+    // End meeting API + callback — fire and forget
+    const voiceTranscript = transcriptRef.current
+      .map(e => `[${e.speaker === 'ai' ? counterpartName : 'You'}] ${e.text}`)
+      .join('\n')
+    // Call end_meeting API in background (don't await)
+    const token = getToken()
+    token.then(t => {
+      fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...(t ? { 'Authorization': `Bearer ${t}` } : {}) },
+        body: JSON.stringify({ role_id: myRoleId }),
+      }).catch(() => {})
+    }).catch(() => {})
+    onEnd(voiceTranscript)
   }
 
   function toggleMute() {
