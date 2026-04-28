@@ -2240,13 +2240,6 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
         is_ai_a = ai_role_id == meeting["participant_a_role_id"]
         ai_country = meeting["participant_a_country"] if is_ai_a else meeting["participant_b_country"]
 
-        # Determine counterpart info
-        counterpart_role_id = meeting["participant_b_role_id"] if is_ai_a else meeting["participant_a_role_id"]
-        counterpart_country = meeting["participant_b_country"] if is_ai_a else meeting["participant_a_country"]
-        # Fetch counterpart name
-        cp_row = _db.table("roles").select("character_name").eq("sim_run_id", sim_id).eq("id", counterpart_role_id).limit(1).execute()
-        counterpart_name = cp_row.data[0]["character_name"] if cp_row.data else counterpart_role_id
-
         # Fetch avatar identity (agent_memories keyed by country_code, not role_id)
         identity_row = _db.table("agent_memories").select("content") \
             .eq("sim_run_id", sim_id) \
@@ -2255,7 +2248,7 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
             .limit(1).execute()
         avatar_identity = identity_row.data[0]["content"] if identity_row.data else f"Head of state. Role: {ai_role_id}"
 
-        # Fetch intent note from meetings.metadata (written by Managed Agent per SPEC 4.2)
+        # Fetch intent note from meetings.metadata (includes counterpart info per M5.7 SPEC 3.2)
         meeting_row = _db.table("meetings").select("metadata").eq("id", meeting_id).limit(1).execute()
         metadata = (meeting_row.data[0].get("metadata") or {}) if meeting_row.data else {}
         intent_key = "intent_note_a" if is_ai_a else "intent_note_b"
@@ -2274,8 +2267,6 @@ async def _avatar_respond_to_message(sim_id: str, meeting_id: str, ai_role_id: s
             avatar_identity=avatar_identity,
             intent_note=intent_note,
             conversation_history=conversation_history,
-            counterpart_name=counterpart_name,
-            counterpart_country=counterpart_country,
         )
 
         send_message(meeting_id, ai_role_id, ai_country, response)

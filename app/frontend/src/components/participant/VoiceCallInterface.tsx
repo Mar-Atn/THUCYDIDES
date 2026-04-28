@@ -96,11 +96,9 @@ function VoiceCallInner({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const endingRef = useRef(false)
 
-  // Build prompt override
+  // Build prompt override — identity + intent note (which includes counterpart info) + rules
   const fullPrompt = [
     avatarIdentity,
-    '',
-    `## You Are Meeting: ${counterpartName}, leader of ${counterpartCountry}`,
     '',
     '## Meeting Briefing',
     intentNote || '(No specific briefing for this meeting.)',
