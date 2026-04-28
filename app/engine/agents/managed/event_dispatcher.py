@@ -322,9 +322,12 @@ class EventDispatcher:
                     # Session alive — register the SessionContext in session_manager cache
                     self.session_manager._sessions[ctx.session_id] = ctx
 
-            # Register recovered agent
+            # Register recovered agent — always IDLE after recovery.
+            # Old state (ACTING/IN_MEETING) is meaningless after session recreation;
+            # the session is fresh with nothing in progress.
             self.agents[role_id] = ctx
-            self.agent_states[role_id] = row.get("agent_state", IDLE)
+            self.agent_states[role_id] = IDLE
+            self.set_agent_state(role_id, IDLE)  # write-through to DB
             self._state_since[role_id] = asyncio.get_event_loop().time()
             recovered += 1
 

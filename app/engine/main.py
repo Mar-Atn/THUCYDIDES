@@ -45,11 +45,17 @@ async def lifespan(app: FastAPI):
         """Recover dispatchers in background so server can serve requests immediately."""
         try:
             _db = db.get_client()
+            # Only recover sims that are actually active or pre_start (not archived/completed)
+            active_sims = _db.table("sim_runs").select("id") \
+                .in_("status", ["active", "pre_start"]) \
+                .execute().data or []
+            active_sim_ids = {row["id"] for row in active_sims}
+
             active_rows = _db.table("ai_agent_sessions") \
                 .select("sim_run_id") \
                 .in_("status", ["ready", "active"]) \
                 .execute().data or []
-            unique_sims = set(row["sim_run_id"] for row in active_rows)
+            unique_sims = {row["sim_run_id"] for row in active_rows} & active_sim_ids
 
             if unique_sims:
                 logger.info("Auto-recovering %d sim(s) with active AI sessions...", len(unique_sims))
