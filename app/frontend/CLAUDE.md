@@ -83,6 +83,13 @@ frontend/
 
 **Users must NEVER need to refresh the page to see updated data.** This is a core UX requirement.
 
+**Full specification:** `MODULES/M2_REALTIME/SPEC_REALTIME_DATA_STANDARDS.md` — the canonical source for all Realtime patterns, table requirements, connection resilience, and cross-browser testing requirements. Read it before writing any frontend code that displays data.
+
+**Key rules:**
+- Every table the frontend reads MUST have `REPLICA IDENTITY FULL` + be in `supabase_realtime` publication
+- One-time fetches (`useEffect + fetch, [])`) are FORBIDDEN for changeable data
+- Every feature MUST be tested on Safari (desktop + iOS) for tab-switch resilience
+
 Every page that shows data which changes in the background MUST use Supabase Realtime:
 
 | Pattern | When to use | Hook |
