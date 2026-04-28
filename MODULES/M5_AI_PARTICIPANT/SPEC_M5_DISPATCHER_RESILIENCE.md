@@ -1,10 +1,12 @@
 # SPEC: M5.8 — Dispatcher Resilience & Auto-Recovery
 
-**Version:** 1.0
-**Date:** 2026-04-27
-**Status:** DONE — Phase A+B implemented, auto-recovery verified (10 agents across 3 sims)
+**Version:** 2.0
+**Date:** 2026-04-29
+**Status:** DONE — All phases implemented. Always-recreate strategy. See M4 SPEC 5.1-5.6 for full restart/recovery lifecycle.
 **Depends on:** M5 (Managed Agents core)
 **Owner:** Team
+
+> **Key change (v2.0):** Reconnecting old Anthropic sessions proved unreliable — zombie sessions pass health-check but never respond. Recovery now ALWAYS recreates sessions (~10s per agent). Prompt hash comparison kept for logging only. Init/recovery race prevention via `_initializing_sims` lock. Recovery only processes active/pre_start sims.
 
 ---
 

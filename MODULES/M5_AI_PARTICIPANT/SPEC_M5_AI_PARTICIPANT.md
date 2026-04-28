@@ -61,8 +61,8 @@ M5 makes AI countries play the simulation — same actions, same contracts, same
 | **M5.4 Event Dispatcher** | `engine/agents/managed/event_dispatcher.py` | **THE CORE** — unified event queue, three background loops, DB-backed auto-recovery | DONE |
 | **M5.5 Conversation Router** | `engine/agents/managed/conversations.py` | **SUPERSEDED by M5.7.** Legacy file kept but not used. Avatar system handles all meetings. | SUPERSEDED |
 | **M5.6 Observer** | Dashboard + Agent Detail Page | AI dashboard with status, cost, activity, voice icons, real-time meeting state. | DONE |
-| **M5.7 Avatar Conversations** | `avatar_service.py`, `avatar_generator.py`, `VoiceCallInterface.tsx`, `MeetingChat.tsx` | Text chat (Claude API) + Voice call (ElevenLabs). Mode popup. See SPEC_M5_AVATAR_CONVERSATIONS.md | DONE (text), FUNCTIONAL (voice) |
-| **M5.8 Dispatcher Resilience** | `event_dispatcher.py`, `main.py` lifespan | DB-backed auto-recovery on restart. Agent states write-through. Smart session recreation. See SPEC_M5_DISPATCHER_RESILIENCE.md | DONE |
+| **M5.7 Avatar Conversations** | `avatar_service.py`, `avatar_generator.py`, `VoiceCallInterface.tsx`, `MeetingChat.tsx` | Text chat (Claude API) + Voice call (ElevenLabs). Mode popup. See SPEC_M5_AVATAR_CONVERSATIONS.md | DONE — text + voice both working with full context |
+| **M5.8 Dispatcher Resilience** | `event_dispatcher.py`, `main.py` lifespan | DB-backed auto-recovery on restart. Always-recreate sessions. Init/recovery lock. Active-sims-only filter. See SPEC_M5_DISPATCHER_RESILIENCE.md + M4 SPEC 5.1-5.6 | DONE |
 
 **Architecture (2026-04-25):** Single-process, three async background loops:
 1. **Dispatch loop** — checks `agent_event_queue`, delivers events to IDLE agents in parallel (`asyncio.gather`). Tiers: 1=critical/3s, 2=urgent/5s, 3=routine/30s.
@@ -241,19 +241,20 @@ The tool_executor enforces these restrictions: attempting batch actions during P
 
 ### D11: Session Recovery & Dispatcher Resilience (M5.8)
 
-**Decision:** DB-backed auto-recovery. See `SPEC_M5_DISPATCHER_RESILIENCE.md`.
+**Decision:** DB-backed auto-recovery. See M4 SPEC Section 5.1-5.6 for full lifecycle.
 
 **On server restart:**
-1. `lifespan()` queries `ai_agent_sessions` for active sessions
-2. For each sim with active agents: creates dispatcher, calls `recover_from_db()`
-3. Compares `prompt_hash` — same hash: reconnect existing Anthropic session. Different hash: recreate with new tools/prompt.
-4. Dead Anthropic sessions auto-recreated with memory recovery
-5. Agent states restored from `agent_state` column (write-through from dispatcher)
+1. `lifespan()` queries `sim_runs` (active/pre_start only) + `ai_agent_sessions` (active/ready)
+2. For each qualifying sim: creates dispatcher, calls `recover_from_db()`
+3. **Always recreates** Anthropic sessions — reconnecting old sessions is unreliable (zombie sessions pass health-check but never respond). Recreation takes ~10s per agent.
+4. Recovery pulse sent with agent's saved memories: "Read your notes, continue your strategy"
+5. All agents set to IDLE after recovery — old state meaningless after restart
 6. Dispatch + auto-pulse + meeting monitor loops restart automatically
+7. Init/recovery race prevention via `_initializing_sims` lock
 
-**No manual "Initialize AI Agents" needed after restart.** Moderator only clicks it once at SIM start. Subsequent restarts (deploy, crash) are transparent.
+**No manual "Initialize AI Agents" needed after restart.** Moderator only clicks it once at SIM start.
 
-**Verified:** 10 agents across 3 sims auto-recovered in ~25 seconds.
+**Verified (2026-04-29):** 3 agents auto-recovered, dispatch loop delivering events, avatar conversations working after restart.
 
 ---
 
@@ -375,21 +376,45 @@ For fast testing, the orchestrator plays co-moderator role:
 
 ---
 
-## 10. Build Phases
+## 10. Build Status & Remaining Work
 
-| Phase | What | Depends On | Est. Effort |
-|-------|------|------------|-------------|
-| **Phase 1: Foundation** | Expand Layer 1 (game rules + meta context), expand to 16 tools, harden session manager with recovery | Spike (done) | 2-3 days |
-| **Phase 2: Orchestrator Core** | Pulse scheduling, event batching, busy state, multi-agent parallel execution, resource tracking | Phase 1 | 3-4 days |
-| **Phase 3: Solo Agent Full Lifecycle** | One agent through complete round (pulses, actions, mandatory inputs, reflection). Orchestrator as co-moderator for testing. | Phase 2 | 1-2 days |
-| **Phase 4: Multi-Agent** | 10-21 agents in parallel, independent (no conversations yet) | Phase 3 | 1-2 days |
-| **Phase 5: Conversations** | AI↔AI bilateral meetings via shared chat system. Requires chat backend (M6 dependency). | Phase 4 + M6 chat | 2-3 days |
-| **Phase 6: Mixed Mode** | AI + Human in same SIM, AI↔Human text chat | Phase 5 + M6 UI | 2-3 days |
-| **Phase 7: Observability** | AI dashboard, agent activity log, freeze/resume, moderator override | Phase 4 | 2-3 days |
-| **Phase 8: Voice** | ElevenLabs avatar integration, intent notes, transcript capture | Phase 6 + KING port | 3-4 days |
-| **Phase 9: All Roles** | Multi-role per country, role-specific prompts, position change handling | Phase 4 | 2-3 days |
+### Completed (Phases 1-8)
 
-**Critical path:** Phases 1→2→3→4 (foundation to multi-agent). Then 5+6 (conversations) and 7 (observability) can run in parallel.
+| Phase | Status | Date |
+|-------|--------|------|
+| Phase 1: Foundation (Layer 1, 16 tools, session manager) | DONE | 2026-04-21 |
+| Phase 2: Orchestrator Core (dispatch loop, pulses, busy state) | DONE | 2026-04-22 |
+| Phase 3: Solo Agent Lifecycle (1 agent, full round) | DONE | 2026-04-23 |
+| Phase 4: Multi-Agent (3 agents parallel) | DONE | 2026-04-25 |
+| Phase 5: Conversations (AI-AI text meetings) | DONE | 2026-04-27 |
+| Phase 6: Mixed Mode (AI-Human text chat) | DONE | 2026-04-28 |
+| Phase 7: Observability (dashboard, agent detail, freeze/resume) | DONE | 2026-04-28 |
+| Phase 8: Voice (ElevenLabs, mode popup, prompt override) | DONE | 2026-04-29 |
+
+### Remaining Work
+
+| # | Item | Category | Priority | Effort |
+|---|------|----------|----------|--------|
+| 1 | **Multi-round lifecycle test** — agents across R0→R1→R2 with memory persistence, Phase A/B transitions, batch solicitation | Testing | HIGH | 1 day |
+| 2 | **10+ agents simultaneously** — scale from 3 to 10-21 agents, verify performance and cost | Testing | HIGH | 0.5 day |
+| 3 | **AI-AI meeting test** — verify `run_text_meeting()` works after dispatcher fixes | Testing | HIGH | 0.5 day |
+| 4 | **Transcript delivery verification** — confirm Brain receives transcript, reflects, updates memory | Testing | HIGH | 0.5 day |
+| 5 | **Phase B solicitation test** — batch decisions (budget/tariffs/sanctions) + troop movement | Testing | HIGH | 0.5 day |
+| 6 | **Critical interrupt test** — nuclear launch, direct attack → Tier 1 delivery during meeting | Testing | MEDIUM | 0.5 day |
+| 7 | **Voice transcript on end** — verify voice messages compiled into transcript, delivered to Brain | Testing | MEDIUM | 0.5 day |
+| 8 | **`meetings.modality` tracking** — write 'text'/'voice' to DB on mode select | Code | LOW | 0.5 hr |
+| 9 | **Voice fallback to text** — if ElevenLabs connection fails before meeting starts, switch to text | Code | MEDIUM | 2 hr |
+| 10 | **Active meetings mode indicator** — show text/voice icon in participant dashboard meeting cards | Code | LOW | 1 hr |
+| 11 | **Monitoring metrics** — actions/round, tokens/pulse, cost/agent displayed in dashboard | Code | MEDIUM | 0.5 day |
+| 12 | **Cross-browser testing** — Safari desktop, Safari iOS, Chrome Android | Testing | HIGH | 0.5 day |
+| 13 | **Round restart test** — verify AI sessions survive, round data clears, agents get fresh context | Testing | HIGH | 0.5 day |
+| 14 | **Phase 9: All Roles** — multi-role per country, role-specific prompts, position change handling | Code + Test | DEFERRED | 2-3 days |
+
+**Priority grouping:**
+- **Sprint A (testing, no code):** Items 1-7. Validate everything works end-to-end. ~3 days.
+- **Sprint B (small code items):** Items 8-11. Polish. ~1 day.
+- **Sprint C (cross-browser + round restart):** Items 12-13. Production readiness. ~1 day.
+- **Deferred:** Item 14 (all roles) — not needed for first production SIMs with HoS-only AI.
 
 ---
 

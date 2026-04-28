@@ -355,23 +355,26 @@ Participant dashboard shows active meetings with:
 
 ## 12. Implementation Status
 
-| Feature | Status | Gap |
-|---------|--------|-----|
-| Avatar Identity at init (self-authored by Brain) | DONE | Identity prompt + write_notes flow working |
-| Brain knows avatar architecture (system prompt) | DONE | AVATAR_ARCHITECTURE in Layer 1 |
-| Intent Note in invite/accept (required field) | DONE | Tool definitions + transfer flow |
-| Text chat avatar service (Claude API) | DONE | avatar_service.py, stateless |
-| AI-AI text chat (run_text_meeting) | DONE | Automated 16-turn flow |
-| Voice call (ElevenLabs) | DONE | VoiceCallInterface + ConversationProvider |
-| Mode selection popup | DONE | Pre-fetch + synchronous handler |
+| Feature | Status | Verified |
+|---------|--------|----------|
+| Avatar Identity at init (self-authored by Brain) | DONE | 2026-04-29 — rich identities (8-10K chars) |
+| Brain knows avatar architecture (system prompt) | DONE | AVATAR_ARCHITECTURE constant in Layer 1 |
+| Intent Note in invite/accept (required field) | DONE | 2026-04-29 — rich notes with counterpart context |
+| Text chat (AI-Human via Claude API) | DONE | 2026-04-29 — full context, ~1-3s |
+| Text chat (AI-AI via run_text_meeting) | DONE | Needs re-test after dispatcher fixes |
+| Voice call (ElevenLabs prompt override) | DONE | 2026-04-29 — full context, strategic responses |
+| Voice call firstMessage suppression | DONE | `firstMessage: ''` in overrides |
+| Mode selection popup | DONE | 2026-04-29 |
+| Voice context fetch (direct, not pre-fetch) | DONE | 2026-04-29 — loading spinner until ready |
+| Avatar response: DB-based AI check | DONE | `_check_is_ai_role()` — no dispatcher dependency |
 | Voice agent assignment UI | DONE | Template editor + AI Dashboard |
-| Position tags in meeting UI | DONE | |
-| Transcript save + delivery | DONE | end_meeting compiles + delivers |
-| Dispatcher resilience / DB write-through (M5.8) | DONE | recover_from_db + set_agent_state |
-| **Avatar response: remove dispatcher dependency** | **TODO** | Replace `dispatcher.agents` check with DB check |
-| **Voice context: ensure loaded before session start** | **TODO** | Don't mount VoiceCallInterface until context ready |
-| `meetings.modality` tracking | TODO | |
-| Comprehensive end-to-end testing | TODO | |
+| Transcript save + delivery | DONE | Needs verification test |
+| Dispatcher resilience (M5.8) | DONE | Always-recreate, init lock, active-sims filter |
+| Chat message deduplication | DONE | Optimistic → Realtime replace |
+| Tool descriptions (counterpart context reminder) | DONE | Agent told avatar needs WHO in intent note |
+| `meetings.modality` tracking | TODO | Write 'text'/'voice' on mode select |
+| Voice fallback to text on failure | TODO | |
+| Active meetings mode indicator | TODO | |
 
 ---
 
