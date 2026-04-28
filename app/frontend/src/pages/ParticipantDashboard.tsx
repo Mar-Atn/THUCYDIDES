@@ -12,7 +12,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
-import { channelManager, type RealtimeListener } from '@/lib/channelManager'
+// channelManager import removed — consolidated channel uses supabase.channel() directly
 import { submitAction, getToken, type SimRun } from '@/lib/queries'
 import { requestQueue } from '@/lib/requestQueue'
 import { ArtefactRenderer } from '@/components/ArtefactRenderer'
@@ -182,6 +182,7 @@ export function ParticipantDashboard() {
   const [mySanctions, setMySanctions] = useState<{imposer:string;target:string;level:number}[]>([])
   const [myTariffs, setMyTariffs] = useState<{imposer:string;target:string;level:number}[]>([])
   const [fullCountry, setFullCountry] = useState<Record<string,unknown>|null>(null)
+  const [activeMeetings, setActiveMeetings] = useState<MeetingData[]>([])
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const prevRoundRef = useRef<number | null>(null)
   const [nuclearBannerDismissed, setNuclearBannerDismissed] = useState(false)
@@ -212,35 +213,8 @@ export function ParticipantDashboard() {
   }, [activeFlightAction?.id, activeFlightAction?.status])
 
   /* Auto-open meeting when created — show mode popup for AI counterpart --- */
-  // Pre-load role info for fast popup display (no fetch delay)
+  // Role info populated by RPC (get_participant_data → all_roles)
   const [allRoleInfo, setAllRoleInfo] = useState<Record<string, {name:string;country:string;position:string;voiceAgentId:string|null;isAi:boolean}>>({})
-  useEffect(() => {
-    if (!simId) return
-    supabase.from('roles').select('id,character_name,country_code,positions,elevenlabs_agent_id,is_ai_operated')
-      .eq('sim_run_id', simId)
-      .then(({ data }) => {
-        if (!data) return
-        const map: typeof allRoleInfo = {}
-        for (const r of data) {
-          const positions = (r.positions as string[]) || []
-          const pos = positions.includes('head_of_state') ? 'Head of State'
-            : positions.includes('military') ? 'Military Chief'
-            : positions.includes('diplomat') ? 'Diplomat'
-            : positions.includes('economy') ? 'Economy Officer'
-            : positions.includes('security') ? 'Security'
-            : positions.includes('opposition') ? 'Opposition'
-            : positions[0] || ''
-          map[r.id as string] = {
-            name: (r.character_name as string) || (r.id as string),
-            country: (r.country_code as string) || '',
-            position: pos,
-            voiceAgentId: (r.elevenlabs_agent_id as string) || null,
-            isAi: !!(r.is_ai_operated),
-          }
-        }
-        setAllRoleInfo(map)
-      })
-  }, [simId])
 
   useEffect(() => {
     if (!simId || !myRole) return
@@ -346,12 +320,12 @@ export function ParticipantDashboard() {
       : 3600,
   } : null
 
-  /* loadData — fetches role, country, artefacts, etc. Called once on mount
-     and again when the round changes (not on every sim_runs update). ------ */
+  /* loadData — fetches role via direct query, then calls get_participant_data RPC
+     for all remaining data. Called once on mount and on round changes. ------ */
   const loadData = useCallback(async () => {
     if (!simId || !user) return
     try {
-      // Load role: proxy mode uses role_id, normal mode uses user_id
+      // Step 1: Load role (proxy mode uses role_id, normal mode uses user_id)
       const roleQuery = supabase.from('roles')
         .select('id,character_name,country_code,position_type,positions,title,public_bio,confidential_brief,objectives,powers,status,status_detail')
         .eq('sim_run_id',simId)
@@ -362,52 +336,56 @@ export function ParticipantDashboard() {
         const role = roles[0] as RoleData; setMyRole(role)
         setObjectives(Array.isArray(role.objectives) ? role.objectives as string[] : [])
 
-        // Batch all independent queries into one Promise.all
-        // This reduces sequential wait from 13 round-trips to 1
-        const [countryRes, artsRes, raRes, relsRes, memsRes, prARes, prBRes, srRes, trRes] = await Promise.all([
-          supabase.from('countries').select('*')
-            .eq('sim_run_id',simId).eq('id',role.country_code).limit(1),
-          supabase.from('artefacts').select('*')
-            .eq('sim_run_id',simId).eq('role_id',role.id).order('round_delivered'),
-          supabase.from('role_actions').select('action_id')
-            .eq('sim_run_id',simId).eq('role_id',role.id),
-          supabase.from('relationships')
-            .select('to_country_code,relationship,status')
-            .eq('sim_run_id',simId).eq('from_country_code',role.country_code),
-          supabase.from('org_memberships')
-            .select('org_id,role_in_org,has_veto')
-            .eq('sim_run_id',simId).eq('country_code',role.country_code),
-          supabase.from('role_relationships')
-            .select('role_a_id,role_b_id,relationship_type,notes')
-            .eq('sim_run_id',simId).eq('role_a_id',role.id),
-          supabase.from('role_relationships')
-            .select('role_a_id,role_b_id,relationship_type,notes')
-            .eq('sim_run_id',simId).eq('role_b_id',role.id),
-          supabase.from('sanctions')
-            .select('imposer_country_code,target_country_code,level')
-            .eq('sim_run_id',simId).or(`target_country_code.eq.${role.country_code},imposer_country_code.eq.${role.country_code}`),
-          supabase.from('tariffs')
-            .select('imposer_country_code,target_country_code,level')
-            .eq('sim_run_id',simId).or(`target_country_code.eq.${role.country_code},imposer_country_code.eq.${role.country_code}`),
-        ])
+        // Step 2: Single RPC call replaces 9 parallel queries
+        const { data, error: rpcError } = await supabase.rpc('get_participant_data', {
+          p_sim_id: simId, p_role_id: role.id, p_country: role.country_code,
+        })
+        if (rpcError) throw rpcError
 
-        if (countryRes.data?.[0]) {
-          setMyCountry(countryRes.data[0] as CountryData)
-          setFullCountry(countryRes.data[0])
+        if (data) {
+          // Country
+          if (data.country) {
+            setMyCountry(data.country as CountryData)
+            setFullCountry(data.country as Record<string, unknown>)
+          }
+          // Artefacts
+          setArtefacts((data.artefacts || []) as Artefact[])
+          // Role actions
+          setRoleActions((data.role_actions || []) as string[])
+          // Relationships
+          setMyRelationships((data.relationships || []) as typeof myRelationships)
+          // Org memberships
+          setMyOrgMemberships((data.org_memberships || []) as typeof myOrgMemberships)
+          // Personal relationships
+          setPersonalRels((data.personal_rels || []) as typeof personalRels)
+          // Sanctions
+          setMySanctions((data.sanctions || []) as typeof mySanctions)
+          // Tariffs
+          setMyTariffs((data.tariffs || []) as typeof myTariffs)
+          // Active meetings
+          setActiveMeetings((data.active_meetings || []) as MeetingData[])
+
+          // Build allRoleInfo from all_roles
+          const roleInfoMap: Record<string, {name:string;country:string;position:string;voiceAgentId:string|null;isAi:boolean}> = {}
+          for (const r of (data.all_roles || []) as {id:string;character_name:string;country_code:string;positions:string[];is_ai_operated:boolean;elevenlabs_agent_id:string|null;status:string}[]) {
+            const positions = r.positions || []
+            const pos = positions.includes('head_of_state') ? 'Head of State'
+              : positions.includes('military') ? 'Military Chief'
+              : positions.includes('diplomat') ? 'Diplomat'
+              : positions.includes('economy') ? 'Economy Officer'
+              : positions.includes('security') ? 'Security'
+              : positions.includes('opposition') ? 'Opposition'
+              : positions[0] || ''
+            roleInfoMap[r.id] = {
+              name: r.character_name || r.id,
+              country: r.country_code || '',
+              position: pos,
+              voiceAgentId: r.elevenlabs_agent_id || null,
+              isAi: !!r.is_ai_operated,
+            }
+          }
+          setAllRoleInfo(roleInfoMap)
         }
-        setArtefacts((artsRes.data??[]) as Artefact[])
-        setRoleActions((raRes.data??[]).map((r:{action_id:string})=>r.action_id))
-        setMyRelationships((relsRes.data??[]) as typeof myRelationships)
-        setMyOrgMemberships((memsRes.data??[]) as typeof myOrgMemberships)
-        const pRels = [
-          ...((prARes.data??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_b_id,type:r.relationship_type,notes:r.notes||''}))),
-          ...((prBRes.data??[]).map((r:{role_a_id:string;role_b_id:string;relationship_type:string;notes:string})=>({other_role:r.role_a_id,type:r.relationship_type,notes:r.notes||''}))),
-        ]
-        setPersonalRels(pRels)
-        const sanctions = (srRes.data??[]).map((s:{imposer_country_code:string;target_country_code:string;level:number})=>({imposer:s.imposer_country_code,target:s.target_country_code,level:s.level}))
-        setMySanctions(sanctions)
-        const tariffs = (trRes.data??[]).map((t:{imposer_country_code:string;target_country_code:string;level:number})=>({imposer:t.imposer_country_code,target:t.target_country_code,level:t.level}))
-        setMyTariffs(tariffs)
 
       } else {
         // No role in this simrun — show observer mode (world + map tabs only)
@@ -422,26 +400,7 @@ export function ParticipantDashboard() {
   // Initial data load — once on mount
   useEffect(() => { loadData() }, [loadData])
 
-  // Realtime: auto-reload when moderator assigns a role to this user
-  useEffect(() => {
-    if (!user?.id || !simId || isProxyMode) return
-    const ch = supabase
-      .channel(`role-assign-${user.id}-${simId}`)
-      .on('postgres_changes', {
-        event: 'UPDATE', schema: 'public', table: 'roles',
-        filter: `sim_run_id=eq.${simId}`,
-      }, (payload) => {
-        const newRow = payload.new as Record<string, unknown>
-        if (newRow.user_id === user.id && !myRole) {
-          // Role just assigned to me — reload everything
-          loadData()
-        }
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(ch) }
-  }, [user?.id, simId, isProxyMode, myRole, loadData])
-
-  // Reload data when round changes (new round means new country stats, artefacts, etc.)
+  // Reload data when round changes
   useEffect(() => {
     if (simRun === null) return
     const newRound = simRun.current_round
@@ -451,16 +410,14 @@ export function ParticipantDashboard() {
     prevRoundRef.current = newRound
   }, [simRun?.current_round, loadData])
 
-  // Realtime: reload data when key tables change (Pattern C from SPEC)
-  // This replaces the one-time fetch pattern — loadData re-runs on any change
-  // to: countries, artefacts, relationships, sanctions, tariffs, meetings
+  // CONSOLIDATED Realtime channel (SPEC v2.0 Pattern B)
+  // ONE channel monitors ALL tables that affect participant view.
+  // On any change → debounced RPC refetch (not individual state patches).
+  // Replaces: role-assign, participant-data, role-status channels.
   useEffect(() => {
-    if (!simId || !myRole) return
-    const cc = myRole.country_code
-    // Debounce: don't refetch more than once per 2 seconds
+    if (!simId || !user?.id) return
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     const debouncedLoad = () => {
-      // Don't refetch while mode popup is showing — causes re-render that freezes popup
       if (debounceTimer || pendingModeRef.current) return
       debounceTimer = setTimeout(() => {
         debounceTimer = null
@@ -468,21 +425,28 @@ export function ParticipantDashboard() {
       }, 2000)
     }
     const ch = supabase
-      .channel(`participant-data-${myRole.id}`)
+      .channel(`participant-all-${user.id}-${simId}`)
+      // Role changes: assignment, arrest/release, status
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'roles',
+        filter: `sim_run_id=eq.${simId}` }, (payload) => {
+        const row = payload.new as Record<string, unknown>
+        // Role assigned to me OR my role status changed
+        if (row.user_id === user.id || row.id === myRole?.id) debouncedLoad()
+      })
+      // Country stats
       .on('postgres_changes', { event: '*', schema: 'public', table: 'countries',
-        filter: `sim_run_id=eq.${simId}` }, (payload) => {
-        if ((payload.new as Record<string, unknown>)?.id === cc) debouncedLoad()
-      })
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      // Artefacts (intel, cables)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'artefacts',
-        filter: `sim_run_id=eq.${simId}` }, (payload) => {
-        if ((payload.new as Record<string, unknown>)?.role_id === myRole.id) debouncedLoad()
-      })
+        filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      // Diplomacy
       .on('postgres_changes', { event: '*', schema: 'public', table: 'relationships',
         filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sanctions',
         filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'tariffs',
         filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
+      // Meetings
       .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings',
         filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
       .subscribe()
@@ -490,20 +454,7 @@ export function ParticipantDashboard() {
       if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(ch)
     }
-  }, [simId, myRole?.id, myRole?.country_code, loadData]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  /* Realtime: detect role status changes (arrest/release) --------------- */
-  useEffect(() => {
-    if (!myRole || !simId) return
-    const listener: RealtimeListener = (payload) => {
-      const newStatus = (payload.new as Record<string, unknown>)?.status as string
-      if (newStatus && newStatus !== myRole.status) {
-        setMyRole(prev => prev ? { ...prev, status: newStatus } : prev)
-      }
-    }
-    const key = channelManager.subscribeRow('roles', myRole.id, listener)
-    return () => { channelManager.unsubscribe(key, listener) }
-  }, [myRole?.id, myRole?.status, simId])
+  }, [simId, user?.id, myRole?.id, loadData]) // eslint-disable-line react-hooks/exhaustive-deps
 
   /* Timer countdown ------------------------------------------------------- */
   useEffect(() => {
@@ -732,6 +683,9 @@ export function ParticipantDashboard() {
                 nuclearActionsData={globalNuclearActions}
                 parentOrgIds={new Set(myOrgMemberships.map(m=>m.org_id))}
                 parentSimRun={simRun}
+                parentActiveMeetings={activeMeetings}
+                parentSetActiveMeetings={setActiveMeetings}
+                parentAllRoleInfo={allRoleInfo}
                 onOpenChat={(meetingId: string, counterpartRoleId?: string) => {
                   // If counterpart role ID provided, use it directly (no DB query needed)
                   const otherRoleId = counterpartRoleId
@@ -841,12 +795,15 @@ export function ParticipantDashboard() {
 
 /* ── Tab: Actions ──────────────────────────────────────────────────────── */
 
-function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion, nuclearActionsData, parentOrgIds, parentSimRun, onOpenChat}:{
+function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId, roleId, dataVersion, nuclearActionsData, parentOrgIds, parentSimRun, parentActiveMeetings, parentSetActiveMeetings, parentAllRoleInfo, onOpenChat}:{
   roleActions:string[]; currentPhase:string; onSelectAction:(id:string)=>void
   simId:string; countryId:string; roleId:string; dataVersion?:number
   nuclearActionsData?:Record<string, unknown>[]
   parentOrgIds?:Set<string>
   parentSimRun?:SimRun|null
+  parentActiveMeetings?:MeetingData[]
+  parentSetActiveMeetings?:(meetings:MeetingData[])=>void
+  parentAllRoleInfo?:Record<string, {name:string;country:string;position:string;voiceAgentId:string|null;isAi:boolean}>
   onOpenChat?:(meetingId:string, counterpartRoleId?:string)=>void
 }) {
   const avail = new Set(roleActions)
@@ -857,42 +814,20 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   // Use org IDs from parent (already loaded in loadData) — no duplicate fetch
   const myOrgIds = parentOrgIds ?? new Set<string>()
 
-  // Role name + position lookup for display in invitations and active meetings
-  const [roleInfo, setRoleInfo] = useState<Record<string, {name:string;country:string;position:string}>>({})
-  const fetchRoleInfo = useCallback(() => {
-    supabase.from('roles').select('id,character_name,country_code,positions')
-      .eq('sim_run_id', simId).eq('status', 'active')
-      .then(({ data }) => {
-        if (!data) return
-        const map: Record<string, {name:string;country:string;position:string}> = {}
-        for (const r of data) {
-          const positions = (r.positions as string[]) || []
-          const pos = positions.includes('head_of_state') ? 'HoS'
-            : positions.includes('military') ? 'Military'
-            : positions.includes('diplomat') ? 'Diplomat'
-            : positions.includes('economy') ? 'Economy'
-            : positions.includes('security') ? 'Security'
-            : positions.includes('opposition') ? 'Opposition'
-            : ''
-          map[r.id as string] = {
-            name: (r.character_name as string) || (r.id as string),
-            country: (r.country_code as string) || '',
-            position: pos,
-          }
-        }
-        setRoleInfo(map)
-      })
-  }, [simId])
-  useEffect(() => { fetchRoleInfo() }, [fetchRoleInfo])
-  // Realtime: refresh roleInfo when roles change (arrests, reassignments)
-  useEffect(() => {
-    if (!simId) return
-    const ch = supabase.channel(`role-info-${simId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'roles',
-        filter: `sim_run_id=eq.${simId}` }, fetchRoleInfo)
-      .subscribe()
-    return () => { supabase.removeChannel(ch) }
-  }, [simId, fetchRoleInfo])
+  // Role name + position lookup — derived from parent's allRoleInfo (loaded via RPC)
+  const roleInfo = useMemo(() => {
+    if (!parentAllRoleInfo) return {} as Record<string, {name:string;country:string;position:string}>
+    const map: Record<string, {name:string;country:string;position:string}> = {}
+    for (const [id, info] of Object.entries(parentAllRoleInfo)) {
+      // Shorten position labels for TabActions display
+      const pos = info.position === 'Head of State' ? 'HoS'
+        : info.position === 'Military Chief' ? 'Military'
+        : info.position === 'Economy Officer' ? 'Economy'
+        : info.position
+      map[id] = { name: info.name, country: info.country, position: pos }
+    }
+    return map
+  }, [parentAllRoleInfo])
 
   /* Realtime: meeting invitations for this role */
   const { data: meetingInvitationsRaw } = useRealtimeTable<Record<string, unknown>>(
@@ -949,11 +884,9 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
     finally { setMeetingSubmitting(false) }
   }
 
-  /* Active meetings for this role — for "Open Chat" buttons */
-  const [activeMeetings, setActiveMeetings] = useState<MeetingData[]>([])
-  useEffect(() => {
-    getActiveMeetings(simId, roleId).then(setActiveMeetings).catch(() => {})
-  }, [simId, roleId, dataVersion])
+  // Active meetings — from parent (loaded via RPC), with setter for local updates
+  const activeMeetings = parentActiveMeetings ?? []
+  const setActiveMeetings = parentSetActiveMeetings ?? (() => {})
 
   /* Realtime hooks replace 5s polling for pending transactions + agreements */
   const { data: pendingTxnsRaw } = useRealtimeTable<Record<string, unknown>>(
