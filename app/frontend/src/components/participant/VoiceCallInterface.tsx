@@ -119,19 +119,18 @@ function VoiceCallInner({
     VOICE_RULES,
   ].join('\n')
 
-  console.log('[voice] Full prompt length:', fullPrompt.length, 'chars')
-  console.log('[voice] Identity length:', avatarIdentity.length, 'Intent:', intentNote.length)
+  // Debug logs removed — prompt is Identity + Intent + Rules
 
   /* ── ElevenLabs hook ─────────────────────────────────────────────────── */
 
   const conversation = useConversation({
     onConnect: () => {
-      console.log('[voice] Connected to ElevenLabs')
+      // Connected to ElevenLabs
       setStatus('active')
       startTimer()
     },
     onDisconnect: () => {
-      console.log('[voice] Disconnected from ElevenLabs')
+      // Disconnected from ElevenLabs
       // If we disconnect before ever connecting (error during setup), show error
       if (status === 'connecting') {
         setError('Voice agent disconnected during setup. Check ElevenLabs agent configuration — ensure "Allow prompt override" is enabled.')
@@ -240,13 +239,28 @@ function VoiceCallInner({
     stopTimer()
     setStatus('ended')
 
+    // End the meeting via API (SPEC 5.5: voice ending = meeting ending)
+    try {
+      const token = await getToken()
+      await fetch(`${API_BASE}/api/sim/${simId}/meetings/${meetingId}/end`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ role_id: myRoleId }),
+      })
+    } catch {
+      // Best effort — meeting may already be ended
+    }
+
     // Build full transcript string
     const voiceTranscript = transcriptRef.current
       .map(e => `[${e.speaker === 'ai' ? counterpartName : 'You'}] ${e.text}`)
       .join('\n')
 
     onEnd(voiceTranscript)
-  }, [counterpartName, onEnd])
+  }, [simId, meetingId, myRoleId, counterpartName, onEnd])
 
   async function endCall() {
     if (conversation.status === 'connected') {

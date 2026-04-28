@@ -257,7 +257,6 @@ export function ParticipantDashboard() {
             : row.participant_a_role_id as string
 
           const info = allRoleInfo[otherRoleId]
-          console.log('[meeting-autoopen] otherRole:', otherRoleId, 'info:', info ? { isAi: info.isAi, voiceAgentId: !!info.voiceAgentId } : 'NOT FOUND', 'roleInfoKeys:', Object.keys(allRoleInfo).length)
 
           if (info?.isAi) {
             // AI counterpart — show mode selection popup
@@ -282,13 +281,19 @@ export function ParticipantDashboard() {
 
   /** Handle mode selection from popup. */
   const handleModeSelect = async (mode: 'text' | 'voice') => {
-    console.log('[mode-select] Mode:', mode, 'pending:', !!pendingModeSelect, 'simId:', !!simId)
     if (!pendingModeSelect || !simId) return
     const { meetingId, counterpart } = pendingModeSelect
 
+    // Write modality to meetings table (SPEC 5.3)
+    await supabase.from('meetings').update({ modality: mode }).eq('id', meetingId)
+
+    // Mutual exclusion: clear the other mode's state
     if (mode === 'text') {
+      setActiveVoiceMeetingId(null)
+      setVoiceContext(null)
       setActiveChatMeetingId(meetingId)
     } else {
+      setActiveChatMeetingId(null)
       // Fetch avatar context for voice (identity + intent note)
       try {
         const otherCountry = counterpart.country
@@ -303,27 +308,19 @@ export function ParticipantDashboard() {
         const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
         const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
         const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
-        console.log('[voice] Avatar context fetched:', {
-          identityLength: identity.length,
-          intentNoteLength: intentNote.length,
-          intentNotePreview: intentNote.slice(0, 100),
-          aiIsA,
-          metaKeys: Object.keys(meta),
-        })
         setVoiceContext({
           identity, intentNote,
           voiceAgentId: counterpart.voiceAgentId || '',
           counterpartName: counterpart.name,
           counterpartCountry: counterpart.country,
         })
-        console.log('[voice] Setting voice state:', { meetingId, voiceAgentId: counterpart.voiceAgentId })
         setActiveVoiceMeetingId(meetingId)
-      } catch (err) {
-        console.error('[voice] Failed to fetch avatar context:', err)
+      } catch {
+        // Voice context fetch failed — fallback to text
+        await supabase.from('meetings').update({ modality: 'text' }).eq('id', meetingId)
         setActiveChatMeetingId(meetingId)
       }
     }
-    console.log('[mode-select] Clearing popup, setting mode:', mode)
     setPendingModeSelect(null)
   }
 
@@ -1887,7 +1884,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                       {otherCountry.toUpperCase()}
                     </span>
                     <span className="font-body text-caption text-action/60 group-hover:text-action mt-0.5 block">
-                      Open Chat
+                      {m.modality === 'voice' ? 'Voice Call' : 'Open Chat'}
                     </span>
                   </button>
                   <button

@@ -61,7 +61,7 @@ class EventDispatcher:
         self._state_since: dict[str, float] = {}  # role_id -> timestamp of last state change
         self._running = False
         self._tasks: list[asyncio.Task] = []
-        self._opening_sent: set[str] = set()  # meeting_ids where AI opening was sent
+        # _opening_sent removed (M5.7 v2.0: human speaks first, no system opening)
 
     # Max time an agent can stay in ACTING before forced back to IDLE (seconds)
     ACTING_TIMEOUT = 180  # 3 minutes
@@ -596,22 +596,11 @@ class EventDispatcher:
                                 )
                     else:
                         # AI-Human meeting
-                        # Human message responses are handled by the avatar-turn API
-                        # endpoint. The monitor only handles AI-speaks-first (once).
-                        ai_role = role_a if a_is_ai else role_b
-
-                        # Only open if NO messages AND not already opening
-                        if turn_count == 0 and mid not in self._opening_sent:
-                            msgs = db.table("meeting_messages") \
-                                .select("role_id") \
-                                .eq("meeting_id", mid) \
-                                .limit(1).execute().data or []
-
-                            if not msgs:
-                                self._opening_sent.add(mid)
-                                asyncio.create_task(
-                                    self._avatar_opening_message(mid, ai_role, meeting)
-                                )
+                        # Human speaks first (M5.7 v2.0 SPEC 5.6).
+                        # Avatar responds via _avatar_respond_to_message (triggered by
+                        # send_meeting_message endpoint when human sends a message).
+                        # No system-generated opening message.
+                        pass
 
                 await asyncio.sleep(MEETING_CHECK_INTERVAL)
 
@@ -708,51 +697,7 @@ class EventDispatcher:
             return f"You are the leader of {ctx.country_code}. Role: {role_id}."
         return f"You are a head of state. Role: {role_id}."
 
-    async def _avatar_opening_message(
-        self, meeting_id: str, ai_role: str, meeting: dict,
-    ) -> None:
-        """Generate and send an AI opening message via avatar service.
-
-        Reads avatar identity + intent note from DB. Agent is already IN_MEETING
-        (set by tool_executor on meeting creation).
-        """
-        from engine.agents.managed.avatar_service import text_avatar_turn
-        from engine.services.meeting_service import send_message
-
-        try:
-            identity = self._fetch_avatar_identity(ai_role)
-            ctx = self.agents.get(ai_role)
-            country = ctx.country_code if ctx else ""
-
-            # Read intent note from meetings.metadata (written by Managed Agent per SPEC 4.2)
-            metadata = meeting.get("metadata") or {}
-            intent_key = "intent_note_a" if ai_role == meeting["participant_a_role_id"] else "intent_note_b"
-            intent_note = metadata.get(intent_key, "")
-            agenda = meeting.get("agenda", "Bilateral discussion")
-
-            if not intent_note:
-                # Minimal fallback — agent should have written this
-                intent_note = f"Meeting about: {agenda}. Speak first, introduce yourself."
-
-            opening = await text_avatar_turn(
-                avatar_identity=identity,
-                intent_note=intent_note,
-                conversation_history=[
-                    {"role": "user", "content": "The meeting has started. You speak first."},
-                ],
-            )
-
-            if opening:
-                # Final dedup: check DB for existing messages before writing
-                existing = get_client().table("meeting_messages") \
-                    .select("id").eq("meeting_id", meeting_id).limit(1).execute()
-                if existing.data:
-                    logger.info("[meetings] Avatar opening skipped for %s — messages already exist", ai_role)
-                    return
-                send_message(meeting_id, ai_role, country, opening)
-                logger.info("[meetings] Avatar opening sent for %s in meeting %s", ai_role, meeting_id[:8])
-        except Exception as e:
-            logger.error("[meetings] Avatar opening failed for %s: %s", ai_role, e)
+    # _avatar_opening_message REMOVED (M5.7 v2.0 SPEC 5.6: human speaks first)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.
