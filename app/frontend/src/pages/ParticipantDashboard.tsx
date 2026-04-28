@@ -399,11 +399,9 @@ export function ParticipantDashboard() {
         setMyTariffs(tariffs)
 
       } else {
-        // No role in this simrun — redirect to /play to find the correct one
-        if (!proxyRoleId) {
-          window.location.href = '/play'
-          return
-        }
+        // No role in this simrun — show observer mode (world + map tabs only)
+        // Don't redirect — user may be exploring before assignment
+        setTab('world')
       }
       setError(null)
     } catch(e) { setError(e instanceof Error?e.message:'Failed') }
@@ -469,13 +467,19 @@ export function ParticipantDashboard() {
   const hasRole = !!myRole
   const unread = artefacts.filter(a=>!a.is_read).length
 
-  const tabs:{id:TabId;label:string;badge?:number;off?:boolean}[] = [
-    {id:'actions',label:'Actions'},
-    {id:'confidential',label:'Confidential',badge:unread||undefined},
-    {id:'country',label:'Country'},
-    {id:'world',label:'World'},
-    {id:'map',label:'Map'},
-  ]
+  const tabs:{id:TabId;label:string;badge?:number;off?:boolean}[] = hasRole
+    ? [
+        {id:'actions',label:'Actions'},
+        {id:'confidential',label:'Confidential',badge:unread||undefined},
+        {id:'country',label:'Country'},
+        {id:'world',label:'World'},
+        {id:'map',label:'Map'},
+      ]
+    : [
+        // Unassigned: world + map only (observer mode)
+        {id:'world',label:'World'},
+        {id:'map',label:'Map'},
+      ]
 
   if (loading) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="w-8 h-8 border-2 border-action border-t-transparent rounded-full animate-spin"/></div>
   if (error||!simRun) return <div className="min-h-screen bg-base flex items-center justify-center"><div className="bg-card border border-danger/30 rounded-lg p-8"><p className="font-body text-body text-danger">{error??'Not found'}</p></div></div>
