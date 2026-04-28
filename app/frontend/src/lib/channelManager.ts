@@ -34,7 +34,20 @@ interface ManagedChannel {
   channel: RealtimeChannel
   refCount: number
   listeners: Set<RealtimeListener>
+  /** Config needed to recreate the channel on reconnect */
+  config: ChannelConfig
+  retryCount: number
+  retryTimer: ReturnType<typeof setTimeout> | null
 }
+
+interface ChannelConfig {
+  type: 'table' | 'row'
+  table: string
+  filterKey: string   // simId or rowId
+}
+
+/** Callback registered by hooks to re-fetch data on reconnect/visibility change */
+export type RefetchCallback = () => void
 
 // ---------------------------------------------------------------------------
 // ChannelManager class
@@ -44,6 +57,120 @@ const GLOBAL_CM_KEY = '__ttt_channel_manager__'
 
 class ChannelManager {
   private channels = new Map<string, ManagedChannel>()
+  private refetchCallbacks = new Set<RefetchCallback>()
+
+  private static readonly MAX_RETRIES = 5
+  private static readonly BASE_DELAY_MS = 2000
+
+  // -------------------------------------------------------------------------
+  // Refetch registry — hooks register callbacks for forceRefreshAll
+  // -------------------------------------------------------------------------
+
+  /** Register a refetch callback (called by useRealtimeTable on mount). */
+  registerRefetch(cb: RefetchCallback): void {
+    this.refetchCallbacks.add(cb)
+  }
+
+  /** Unregister a refetch callback (called by useRealtimeTable on unmount). */
+  unregisterRefetch(cb: RefetchCallback): void {
+    this.refetchCallbacks.delete(cb)
+  }
+
+  /** Force all active hooks to re-fetch their data (e.g., after tab becomes visible). */
+  forceRefreshAll(): void {
+    for (const cb of this.refetchCallbacks) {
+      try { cb() } catch { /* don't let one hook break others */ }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Reconnect logic
+  // -------------------------------------------------------------------------
+
+  /**
+   * Handle channel error — exponential backoff reconnect.
+   * Tears down the dead channel and recreates it with same config + listeners.
+   */
+  private handleChannelError(key: string): void {
+    const managed = this.channels.get(key)
+    if (!managed) return
+
+    if (managed.retryCount >= ChannelManager.MAX_RETRIES) {
+      console.error(`[ChannelManager] ${key}: giving up after ${ChannelManager.MAX_RETRIES} retries`)
+      return
+    }
+
+    // Don't double-schedule
+    if (managed.retryTimer) return
+
+    managed.retryCount++
+    const delay = ChannelManager.BASE_DELAY_MS * Math.min(managed.retryCount, 5)
+    console.warn(`[ChannelManager] ${key}: reconnecting in ${delay}ms (attempt ${managed.retryCount})`)
+
+    managed.retryTimer = setTimeout(() => {
+      const current = this.channels.get(key)
+      if (!current) return
+      current.retryTimer = null
+
+      // Tear down dead channel
+      supabase.removeChannel(current.channel)
+
+      // Recreate with same config
+      const newChannel = this.createChannel(key, current.config)
+      current.channel = newChannel
+
+      // Re-subscribe
+      newChannel.subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.info(`[ChannelManager] ${key}: reconnected`)
+          current.retryCount = 0
+          // Trigger refetch on all hooks so they pick up missed events
+          this.forceRefreshAll()
+        }
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn(`[ChannelManager] ${key}: ${status} (reconnect attempt)`)
+          this.handleChannelError(key)
+        }
+      })
+    }, delay)
+  }
+
+  /**
+   * Create a RealtimeChannel (without subscribing) for the given config.
+   * Wires up the postgres_changes listener that fans out to all registered listeners.
+   */
+  private createChannel(key: string, config: ChannelConfig): RealtimeChannel {
+    const event = config.type === 'row' ? 'UPDATE' : '*'
+    const filterCol = config.type === 'row' ? 'id' : 'sim_run_id'
+    const filterValue = config.filterKey
+
+    return supabase
+      .channel(key)
+      .on(
+        'postgres_changes',
+        {
+          event,
+          schema: 'public',
+          table: config.table,
+          filter: `${filterCol}=eq.${filterValue}`,
+        },
+        (payload) => {
+          const m = this.channels.get(key)
+          if (!m) return
+          for (const fn of m.listeners) {
+            try {
+              fn(payload as unknown as Parameters<RealtimeListener>[0])
+            } catch {
+              /* individual listener errors must not break others */
+            }
+          }
+        },
+      )
+  }
+
+  // -------------------------------------------------------------------------
+  // Subscribe / unsubscribe (table)
+  // -------------------------------------------------------------------------
 
   /**
    * Subscribe to Postgres Changes on a table filtered by sim_run_id.
@@ -62,36 +189,20 @@ class ChannelManager {
       return key
     }
 
-    // Create new channel
-    const channel = supabase
-      .channel(key)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: table,
-          filter: `sim_run_id=eq.${simId}`,
-        },
-        (payload) => {
-          const m = this.channels.get(key)
-          if (!m) return
-          for (const fn of m.listeners) {
-            try {
-              fn(payload as unknown as Parameters<RealtimeListener>[0])
-            } catch {
-              /* individual listener errors must not break others */
-            }
-          }
-        },
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn(`[ChannelManager] ${key}: ${status}`)
-        }
-      })
+    const config: ChannelConfig = { type: 'table', table, filterKey: simId }
+    const channel = this.createChannel(key, config)
 
-    managed = { channel, refCount: 1, listeners: new Set([listener]) }
+    channel.subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn(`[ChannelManager] ${key}: ${status}`)
+        this.handleChannelError(key)
+      }
+    })
+
+    managed = {
+      channel, refCount: 1, listeners: new Set([listener]),
+      config, retryCount: 0, retryTimer: null,
+    }
     this.channels.set(key, managed)
     return key
   }
@@ -107,10 +218,15 @@ class ChannelManager {
     managed.refCount--
 
     if (managed.refCount <= 0) {
+      if (managed.retryTimer) clearTimeout(managed.retryTimer)
       supabase.removeChannel(managed.channel)
       this.channels.delete(key)
     }
   }
+
+  // -------------------------------------------------------------------------
+  // Subscribe / unsubscribe (row)
+  // -------------------------------------------------------------------------
 
   /**
    * Subscribe to a single row by primary key (id column).
@@ -126,36 +242,27 @@ class ChannelManager {
       return key
     }
 
-    const channel = supabase
-      .channel(key)
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: table,
-          filter: `id=eq.${rowId}`,
-        },
-        (payload) => {
-          const m = this.channels.get(key)
-          if (!m) return
-          for (const fn of m.listeners) {
-            try {
-              fn(payload as unknown as Parameters<RealtimeListener>[0])
-            } catch { /* individual listener errors must not break others */ }
-          }
-        },
-      )
-      .subscribe((status) => {
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-          console.warn(`[ChannelManager] ${key}: ${status}`)
-        }
-      })
+    const config: ChannelConfig = { type: 'row', table, filterKey: rowId }
+    const channel = this.createChannel(key, config)
 
-    managed = { channel, refCount: 1, listeners: new Set([listener]) }
+    channel.subscribe((status) => {
+      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        console.warn(`[ChannelManager] ${key}: ${status}`)
+        this.handleChannelError(key)
+      }
+    })
+
+    managed = {
+      channel, refCount: 1, listeners: new Set([listener]),
+      config, retryCount: 0, retryTimer: null,
+    }
     this.channels.set(key, managed)
     return key
   }
+
+  // -------------------------------------------------------------------------
+  // Debug
+  // -------------------------------------------------------------------------
 
   /** Number of active channels (for debugging). */
   get activeChannels(): number {

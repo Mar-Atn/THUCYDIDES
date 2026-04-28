@@ -18,7 +18,6 @@ import {
   type MeetingMessage,
 } from '@/lib/queries'
 import { useTypingAnimation } from '@/hooks/useTypingAnimation'
-// Voice mode is selected before entering chat (mode popup in ParticipantDashboard)
 
 /* ── Props ─────────────────────────────────────────────────────────────── */
 
@@ -79,8 +78,6 @@ export function MeetingChat({
   const knownIdsRef = useRef<Set<string>>(new Set())
 
   // Voice call state
-  // Voice state removed — mode selected before entering chat (M5.7 v1.1)
-
   // Participant info lookup (loaded from roles table)
   const [roleNames, setRoleNames] = useState<Record<string, { name: string; country: string }>>({})
 

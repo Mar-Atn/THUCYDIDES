@@ -66,6 +66,19 @@ export function Dashboard() {
       }
     }
     findSim()
+
+    // Monitor for changes to sim_runs and roles — auto-update when moderator
+    // starts a sim or assigns a role
+    const simChannel = supabase.channel('dashboard-sim-monitor')
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'sim_runs',
+      }, () => findSim())
+      .on('postgres_changes', {
+        event: '*', schema: 'public', table: 'roles',
+      }, () => findSim())
+      .subscribe()
+
+    return () => { supabase.removeChannel(simChannel) }
   }, [user, profile, navigate])
 
   if (!profile) return null

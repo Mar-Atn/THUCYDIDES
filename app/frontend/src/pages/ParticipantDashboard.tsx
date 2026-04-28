@@ -867,7 +867,6 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       const result = await submitAction(simId, 'respond_meeting', roleId, countryId, {
         invitation_id: invId, response, message: msg,
       })
-      console.log('[meeting] respond result:', result)
       setRespondingTo(null)
       setMeetingMessage('')
       // Auto-open chat when accepting a meeting

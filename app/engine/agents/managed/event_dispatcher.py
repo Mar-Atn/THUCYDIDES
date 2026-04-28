@@ -61,8 +61,6 @@ class EventDispatcher:
         self._state_since: dict[str, float] = {}  # role_id -> timestamp of last state change
         self._running = False
         self._tasks: list[asyncio.Task] = []
-        # _opening_sent removed (M5.7 v2.0: human speaks first, no system opening)
-
     # Max time an agent can stay in ACTING before forced back to IDLE (seconds)
     ACTING_TIMEOUT = 180  # 3 minutes
 
@@ -702,8 +700,6 @@ class EventDispatcher:
         if ctx:
             return f"You are the leader of {ctx.country_code}. Role: {role_id}."
         return f"You are a head of state. Role: {role_id}."
-
-    # _avatar_opening_message REMOVED (M5.7 v2.0 SPEC 5.6: human speaks first)
 
     async def _check_and_deliver(self, max_tier: int) -> None:
         """Check queue for each idle agent and deliver events IN PARALLEL.

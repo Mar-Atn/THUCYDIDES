@@ -10,7 +10,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
-import { channelManager, type RealtimeListener } from '@/lib/channelManager'
+import { channelManager, type RealtimeListener, type RefetchCallback } from '@/lib/channelManager'
 import { requestQueue } from '@/lib/requestQueue'
 
 interface UseRealtimeTableOptions {
@@ -88,6 +88,10 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
     // Initial fetch
     fetchData()
 
+    // Register refetch callback so forceRefreshAll() can trigger re-fetch
+    const refetchCb: RefetchCallback = fetchData
+    channelManager.registerRefetch(refetchCb)
+
     // Subscribe via ChannelManager (deduplicated per table+simId)
     const listener: RealtimeListener = (payload) => {
       const { eventType, new: newRow, old: oldRow } = payload
@@ -154,6 +158,7 @@ export function useRealtimeTable<T extends Record<string, unknown>>(
     const channelKey = channelManager.subscribe(table, simId, listener)
 
     return () => {
+      channelManager.unregisterRefetch(refetchCb)
       channelManager.unsubscribe(channelKey, listener)
     }
   }, [simId, table, enabled, fetchData, idField, limit])
@@ -174,16 +179,25 @@ export function useRealtimeRow<T extends Record<string, unknown>>(
   const [data, setData] = useState<T | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    if (!id) { setLoading(false); return }
-
-    // Initial fetch (queued to prevent ERR_INSUFFICIENT_RESOURCES)
-    requestQueue.enqueue(() =>
+  const fetchRow = useCallback(async () => {
+    if (!id) return
+    await requestQueue.enqueue(() =>
       supabase.from(table).select(columns).eq('id', id).limit(1).then(({ data: rows }) => {
         if (rows?.[0]) setData(rows[0] as T)
         setLoading(false)
       })
     ).catch(() => {}).finally(() => setLoading(false))
+  }, [id, table, columns])
+
+  useEffect(() => {
+    if (!id) { setLoading(false); return }
+
+    // Initial fetch (queued to prevent ERR_INSUFFICIENT_RESOURCES)
+    fetchRow()
+
+    // Register refetch callback for forceRefreshAll()
+    const refetchCb: RefetchCallback = fetchRow
+    channelManager.registerRefetch(refetchCb)
 
     // Subscribe via ChannelManager (deduplicates across HMR and multiple callers)
     const listener: RealtimeListener = (payload) => {
@@ -191,8 +205,11 @@ export function useRealtimeRow<T extends Record<string, unknown>>(
     }
     const key = channelManager.subscribeRow(table, id, listener)
 
-    return () => { channelManager.unsubscribe(key, listener) }
-  }, [id, table, columns])
+    return () => {
+      channelManager.unregisterRefetch(refetchCb)
+      channelManager.unsubscribe(key, listener)
+    }
+  }, [id, table, columns, fetchRow])
 
   return { data, loading }
 }

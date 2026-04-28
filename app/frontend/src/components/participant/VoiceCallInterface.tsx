@@ -119,8 +119,6 @@ function VoiceCallInner({
     VOICE_RULES,
   ].join('\n')
 
-  // Debug logs removed — prompt is Identity + Intent + Rules
-
   /* ── ElevenLabs hook ─────────────────────────────────────────────────── */
 
   const conversation = useConversation({

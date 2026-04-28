@@ -2,6 +2,7 @@
  * App — root component with routing.
  */
 
+import '@/lib/realtimeHealth' // Side-effect: visibility handler + heartbeat
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { Login } from '@/pages/Login'
