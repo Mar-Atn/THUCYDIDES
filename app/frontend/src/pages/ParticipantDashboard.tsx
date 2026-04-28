@@ -317,7 +317,6 @@ export function ParticipantDashboard() {
         const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
         const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
         const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
-        console.error('[VOICE] Fetched context:', { identityLen: identity.length, intentLen: intentNote.length, otherCountry, aiIsA })
         setVoiceContext({
           identity: identity || `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
           intentNote,
@@ -325,8 +324,7 @@ export function ParticipantDashboard() {
           counterpartName: counterpart.name,
           counterpartCountry: counterpart.country,
         })
-      }).catch((err) => {
-        console.error('[VOICE] Fetch failed:', err)
+      }).catch(() => {
         setVoiceContext({
           identity: `Head of state of ${counterpart.country}. Role: ${counterpart.name}.`,
           intentNote: '',

@@ -163,18 +163,15 @@ function VoiceCallInner({
   }, [transcript])
 
   async function startSession() {
-    console.error('[VOICE-DEBUG] startSession called')
-    console.error('[VOICE-DEBUG] avatarIdentity length:', avatarIdentity?.length || 0)
-    console.error('[VOICE-DEBUG] intentNote length:', intentNote?.length || 0)
-    console.error('[VOICE-DEBUG] intentNote preview:', intentNote?.slice(0, 150) || 'EMPTY')
-    console.error('[VOICE-DEBUG] fullPrompt length:', fullPrompt?.length || 0)
-    console.error('[VOICE-DEBUG] voiceAgentId:', voiceAgentId)
     try {
       await conversation.startSession({
         agentId: voiceAgentId,
         clientTools: {},
         overrides: {
-          agent: { prompt: { prompt: fullPrompt } },
+          agent: {
+            prompt: { prompt: fullPrompt },
+            firstMessage: '',
+          },
         },
       })
     } catch (err: unknown) {
