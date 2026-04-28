@@ -373,7 +373,7 @@ class EventDispatcher:
                 self._enqueue_avatar_identity_generation(role_id)
 
             logger.info("[recovery] Recovered agent %s (%s)",
-                        role_id, "recreated" if was_recreated else "reconnected")
+                        role_id, "recreated")
 
         return recovered
 
