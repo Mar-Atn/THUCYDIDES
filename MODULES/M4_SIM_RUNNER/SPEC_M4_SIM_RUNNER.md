@@ -161,26 +161,101 @@ Transitions: `setup` → `pre_start` → `active` ⇄ `processing` (cycles per r
 - If facilitator refreshes, timer recalculates correctly (no drift)
 - Not persisted to DB as a ticking value — only start time + duration stored
 
-### Restart Principles
+### Restart & Recovery — Three Operations
 
-The system provides two levels of restart. Both must guarantee a **truly clean state** — no stale events, no orphaned sessions, no leftover data from prior execution. When any new runtime table is added to the system, it MUST be added to the appropriate restart cleanup.
+The system has three distinct lifecycle operations. They have **different goals** and must **never interfere with each other**. The fundamental invariant: after any of these operations, the three layers (Anthropic sessions, DB records, in-memory dispatcher) are in a consistent state.
 
-**Restart Simulation** (`POST /api/sim/{id}/restart`):
-- Returns to initial template state (pre_start, round 0)
-- Cleans ALL runtime data across ALL tables (26+ tables)
-- Archives AI sessions, stops dispatcher
-- Re-copies state tables from template (countries, deployments, relationships, etc.)
-- Resets sim_runs row (status, round, phase, election state, toggles)
-- Preserves: user-to-role assignments, AI/human flags
+#### 5.1 Restart Simulation (`POST /api/sim/{id}/restart`)
 
-**Restart Current Round** (`POST /api/sim/{id}/restart-round`):
-- Returns to start of current round (Phase A, fresh timer)
-- Cleans only THIS round's data (events, combat, meetings, decisions, snapshots)
-- Keeps prior rounds intact, AI sessions alive
-- Clears unprocessed agent events (agents get fresh start to the round)
-- Use case: testing, mid-game corrections, recovering from errors
+**Goal:** Return the simulation to its initial state. As if it was just created. Clean slate.
 
-**Maintenance rule:** When a new table is added that stores runtime data, update `restart_simulation()` in `sim_run_manager.py` to include it. When a new per-round table is added, update both `restart_simulation()` and `restart_current_round()`.
+**What the moderator expects:** "I pressed restart. Everything from the previous run is gone. I see a fresh sim with 'Initialize AI Agents' button."
+
+**The sequence (all steps mandatory, in order):**
+
+1. **Stop the dispatcher.** Cancel all background loops (dispatch, auto-pulse, meeting monitor). No more event delivery.
+2. **Terminate all AI sessions on Anthropic.** Archive every session and agent via the Anthropic API. Best-effort — if Anthropic is unreachable, proceed anyway (sessions expire on their own).
+3. **Archive all session records in DB.** Set `ai_agent_sessions.status = 'archived'` for this sim. This is the critical step �� it tells the system "no active AI agents."
+4. **Delete the event queue.** All events (processed and unprocessed) for this sim. Clean slate.
+5. **Delete agent memories.** Avatar identities, strategic notes, everything the agents wrote. They start fresh on next init.
+6. **Delete agent decisions.** Action history from the agents.
+7. **Delete observatory AI logs.** Agent activity feed.
+8. **Delete meetings, messages, invitations.** All conversation history.
+9. **Remove the dispatcher from memory.** `_dispatchers.pop(sim_id)`. No in-memory references survive.
+10. **Reset all game state tables.** Re-copy from template (countries, deployments, relationships, etc.).
+11. **Reset sim_runs row.** Status → pre_start, round → 0, phase → pre.
+
+**Preserves:** User-to-role assignments, AI/human flags, role definitions.
+
+**Post-condition:** DB has zero active AI sessions for this sim. No dispatcher in memory. No events in queue. Moderator sees "Initialize AI Agents" button. Clicking it creates fresh Anthropic sessions from scratch.
+
+#### 5.2 Restart Current Round (`POST /api/sim/{id}/restart-round`)
+
+**Goal:** Redo the current round from Phase A. Prior rounds untouched. AI sessions stay alive.
+
+**What the moderator expects:** "Round went badly. I want to replay it from the start."
+
+**The sequence:**
+1. Delete this round's runtime data (events, combat, meetings, decisions, snapshots).
+2. Clear unprocessed events from the agent queue (agents get a fresh start to the round).
+3. AI sessions remain active — agents continue with their existing memories and identity.
+4. Reset phase to A, restart timer.
+
+**Does NOT touch:** Prior rounds, AI sessions, agent memories, avatar identities.
+
+#### 5.3 Server Recovery (automatic on startup)
+
+**Goal:** Resume a running simulation after server restart (deploy, crash, reboot). The moderator did NOT ask to reset anything. The simulation is still "in progress."
+
+**What the moderator expects:** "I didn't do anything. The server restarted on its own. My agents should come back."
+
+**The sequence:**
+1. **Find active sims only.** Query `sim_runs` for status `active` or `pre_start`. Ignore completed, aborted, setup sims.
+2. **For each active sim:** find `ai_agent_sessions` with status `active` or `ready`. If none → skip (moderator hasn't initialized agents yet).
+3. **For each session:** Check if the Anthropic session is still alive (health-check). If alive → reconnect (instant). If dead → recreate (same prompt, same tools, ~10s).
+4. **Set all recovered agents to IDLE.** The old in-memory state (ACTING, IN_MEETING) is meaningless after restart — the session is fresh, nothing is in progress.
+5. **Start the dispatch loop.** Deliver any pending events from the queue.
+6. **Send recovery pulse** (if session was recreated): "Your session was recovered. Read your notes to restore context."
+
+**Critical rules:**
+- Recovery ONLY processes sims with `sim_runs.status IN ('active', 'pre_start')`.
+- Recovery ONLY processes sessions with `ai_agent_sessions.status IN ('active', 'ready')`.
+- If restart has archived the sessions (step 3 of 5.1), recovery skips them entirely. **This is how restart and recovery avoid conflicting.**
+- Recovered agents always start as IDLE — never inherit stale ACTING/IN_MEETING state from DB.
+
+#### 5.4 The Non-Interference Rule
+
+These three operations can never run simultaneously for the same sim. But they interact through shared DB state. The single rule that prevents conflict:
+
+> **The `ai_agent_sessions.status` column is the handshake.**
+> - `active`/`ready` = "this session should be running" → recovery will pick it up
+> - `archived` = "this session is dead" → recovery ignores it
+>
+> Restart sets all sessions to `archived` BEFORE deleting any data.
+> Recovery only touches `active`/`ready` sessions.
+> Therefore: if restart ran first, recovery has nothing to recover.
+
+#### 5.5 Initialize AI Agents (`POST /api/sim/{id}/ai/initialize`)
+
+**Goal:** Create fresh AI agent sessions from scratch. Only works when no agents are currently running.
+
+**Pre-condition:** No active dispatcher for this sim, OR dispatcher has zero agents.
+
+**The sequence:**
+1. If a dispatcher exists with agents → refuse ("already initialized").
+2. Archive any leftover sessions in DB (safety cleanup).
+3. Archive those sessions on Anthropic (best-effort).
+4. Load AI-operated roles from DB (`is_ai_operated = true`, `status = 'active'`).
+5. Create Anthropic sessions (agent + environment + session) for each role.
+6. Register each with the dispatcher. State = IDLE.
+7. Enqueue initialization event + avatar identity request for each.
+8. Start the dispatch loop.
+
+**Post-condition:** All AI agents are IDLE with pending initialization events. Dispatch loop delivers them within seconds.
+
+#### 5.6 Maintenance Rule
+
+When a new table is added that stores runtime data, update `restart_simulation()` in `sim_run_manager.py` to include it. When a new per-round table is added, update both `restart_simulation()` and `restart_current_round()`. When a new AI-related table is added, update `cleanup_sim_ai_state()` in `event_dispatcher.py`.
 
 ---
 
