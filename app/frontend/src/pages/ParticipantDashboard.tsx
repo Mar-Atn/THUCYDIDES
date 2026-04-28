@@ -736,26 +736,21 @@ export function ParticipantDashboard() {
                 nuclearActionsData={globalNuclearActions}
                 parentOrgIds={new Set(myOrgMemberships.map(m=>m.org_id))}
                 parentSimRun={simRun}
-                onOpenChat={async (meetingId: string) => {
-                  // Check if counterpart is AI — show mode popup if so
-                  const { data: mtg } = await supabase.from('meetings')
-                    .select('participant_a_role_id,participant_b_role_id')
-                    .eq('id', meetingId).limit(1)
-                  if (!mtg?.[0] || !myRole) { setActiveChatMeetingId(meetingId); return }
-                  const otherRoleId = mtg[0].participant_a_role_id === myRole.id
-                    ? mtg[0].participant_b_role_id as string
-                    : mtg[0].participant_a_role_id as string
-                  const info = allRoleInfo[otherRoleId]
-                  if (info?.isAi) {
-                    // AI counterpart — show mode popup (SPEC 5.3)
-                    setPendingModeSelect({
-                      meetingId,
-                      counterpart: { name: info.name, country: info.country, position: info.position, voiceAgentId: info.voiceAgentId },
-                    })
-                  } else {
-                    // Human counterpart — straight to text chat
-                    setActiveChatMeetingId(meetingId)
+                onOpenChat={(meetingId: string, counterpartRoleId?: string) => {
+                  // If counterpart role ID provided, use it directly (no DB query needed)
+                  const otherRoleId = counterpartRoleId
+                  if (otherRoleId) {
+                    const info = allRoleInfo[otherRoleId]
+                    if (info?.isAi) {
+                      setPendingModeSelect({
+                        meetingId,
+                        counterpart: { name: info.name, country: info.country, position: info.position, voiceAgentId: info.voiceAgentId },
+                      })
+                      return
+                    }
                   }
+                  // Human counterpart or unknown — straight to text chat
+                  setActiveChatMeetingId(meetingId)
                 }}/>
         )}
         {tab==='confidential'&&myRole&&<TabConf role={myRole} artefacts={artefacts} objectives={objectives} personalRels={personalRels} orgMemberships={myOrgMemberships} onRead={id=>{
@@ -856,7 +851,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   nuclearActionsData?:Record<string, unknown>[]
   parentOrgIds?:Set<string>
   parentSimRun?:SimRun|null
-  onOpenChat?:(meetingId:string)=>void
+  onOpenChat?:(meetingId:string, counterpartRoleId?:string)=>void
 }) {
   const avail = new Set(roleActions)
   const [reviewTxn, setReviewTxn] = useState<string|null>(null)
@@ -931,7 +926,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
   const [meetingMessage, setMeetingMessage] = useState('')
   const [meetingSubmitting, setMeetingSubmitting] = useState(false)
 
-  const handleMeetingResponse = async (invId: string, response: string, msg: string) => {
+  const handleMeetingResponse = async (invId: string, response: string, msg: string, inviterRoleId?: string) => {
     setMeetingSubmitting(true)
     try {
       const result = await submitAction(simId, 'respond_meeting', roleId, countryId, {
@@ -943,13 +938,12 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
       if (response === 'accept' && onOpenChat) {
         const meetingId = result?.meeting_id as string
         if (meetingId) {
-          onOpenChat(meetingId)
+          onOpenChat(meetingId, inviterRoleId)
         } else {
-          // Fallback: check the invitation for meeting_id
           const { data: inv } = await supabase.from('meeting_invitations')
             .select('meeting_id').eq('id', invId).limit(1)
           if (inv?.[0]?.meeting_id) {
-            onOpenChat(inv[0].meeting_id as string)
+            onOpenChat(inv[0].meeting_id as string, inviterRoleId)
           }
         }
         // Refresh active meetings list
@@ -1922,7 +1916,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
                 {inv.message && <p className="font-body text-caption text-text-secondary mt-0.5">{inv.message}</p>}
                 {inv.theme && <p className="font-body text-caption text-text-secondary mt-0.5">Theme: {inv.theme}</p>}
                 <div className="flex gap-2 mt-2">
-                  <button onClick={() => handleMeetingResponse(inv.id, 'accept', '')} disabled={meetingSubmitting}
+                  <button onClick={() => handleMeetingResponse(inv.id, 'accept', '', inv.inviter_role_id)} disabled={meetingSubmitting}
                     className="font-body text-caption font-medium bg-success/10 text-success px-3 py-1 rounded hover:bg-success/20 disabled:opacity-50 transition-colors">
                     Accept
                   </button>
@@ -1952,7 +1946,7 @@ function TabActions({roleActions, currentPhase, onSelectAction, simId, countryId
               const otherCountry = isA ? m.participant_b_country : m.participant_a_country
               return (
                 <div key={m.id} className="relative bg-base hover:bg-action/5 border border-action/30 hover:border-action/50 rounded-lg px-4 py-3 transition-colors group">
-                  <button onClick={() => onOpenChat?.(m.id)} className="text-left w-full">
+                  <button onClick={() => onOpenChat?.(m.id, otherRole)} className="text-left w-full">
                     <span className="font-body text-body-sm text-text-primary group-hover:text-action block">
                       {roleInfo[otherRole]?.name || otherRole}
                       {roleInfo[otherRole]?.position && (
