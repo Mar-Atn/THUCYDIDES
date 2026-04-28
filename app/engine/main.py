@@ -37,31 +37,36 @@ async def lifespan(app: FastAPI):
     logger.info("Anthropic: %s", "configured" if settings.has_anthropic else "NOT configured")
     logger.info("Gemini: %s", "configured" if settings.has_gemini else "NOT configured")
 
-    # M5.8: Auto-recover dispatchers from DB on startup
+    # M5.8: Auto-recover dispatchers from DB on startup (BACKGROUND — don't block server)
+    import asyncio
     from engine.agents.managed.event_dispatcher import _dispatchers, create_dispatcher
-    try:
-        _db = db.get_client()
-        active_rows = _db.table("ai_agent_sessions") \
-            .select("sim_run_id") \
-            .in_("status", ["ready", "active"]) \
-            .execute().data or []
-        unique_sims = set(row["sim_run_id"] for row in active_rows)
 
-        if unique_sims:
-            logger.info("Found %d sim(s) with active AI sessions — auto-recovering", len(unique_sims))
-            for sim_id in unique_sims:
-                dispatcher = create_dispatcher(sim_id)
-                count = await dispatcher.recover_from_db()
-                if count > 0:
-                    await dispatcher.start()
-                    logger.info("Auto-recovered %d agents for sim %s", count, sim_id[:8])
-                else:
-                    # No agents recovered — clean up empty dispatcher
-                    _dispatchers.pop(sim_id, None)
-        else:
-            logger.info("No active AI sessions found. Use dashboard to initialize agents.")
-    except Exception as e:
-        logger.error("Auto-recovery failed: %s. Manual initialization required.", e)
+    async def _background_recovery():
+        """Recover dispatchers in background so server can serve requests immediately."""
+        try:
+            _db = db.get_client()
+            active_rows = _db.table("ai_agent_sessions") \
+                .select("sim_run_id") \
+                .in_("status", ["ready", "active"]) \
+                .execute().data or []
+            unique_sims = set(row["sim_run_id"] for row in active_rows)
+
+            if unique_sims:
+                logger.info("Auto-recovering %d sim(s) with active AI sessions...", len(unique_sims))
+                for sim_id in unique_sims:
+                    dispatcher = create_dispatcher(sim_id)
+                    count = await dispatcher.recover_from_db()
+                    if count > 0:
+                        await dispatcher.start()
+                        logger.info("Auto-recovered %d agents for sim %s", count, sim_id[:8])
+                    else:
+                        _dispatchers.pop(sim_id, None)
+            else:
+                logger.info("No active AI sessions found. Use dashboard to initialize agents.")
+        except Exception as e:
+            logger.error("Auto-recovery failed: %s. Manual initialization required.", e)
+
+    asyncio.create_task(_background_recovery())
 
     yield
 
