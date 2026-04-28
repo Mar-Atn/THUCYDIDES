@@ -239,18 +239,16 @@ class EventDispatcher:
         SPEC: M4 Section 5.3 (Server Recovery).
 
         For each active session in DB:
-        1. Health-check the Anthropic session (is it still alive?)
-        2. If alive and prompt unchanged → reconnect (instant)
-        3. If dead or prompt changed → recreate (new Anthropic session, ~10s)
-        4. Verify the session works (send a test retrieve)
-        5. Register as IDLE — old state is meaningless after restart
-        6. If session was recreated and agent has memories → send recovery pulse
+        1. Health-check the Anthropic session (log status for diagnostics)
+        2. Always recreate — reconnection to old sessions is unreliable
+        3. Verify the new session works (retrieve status)
+        4. Register as IDLE — old state is meaningless after restart
+        5. Send recovery pulse if agent has saved memories
 
         Returns number of agents recovered.
         """
         import hashlib
         from engine.agents.managed.system_prompt import build_system_prompt
-        from engine.agents.managed.tool_executor import ToolExecutor
 
         db = get_client()
         sessions = db.table("ai_agent_sessions") \
@@ -284,74 +282,47 @@ class EventDispatcher:
                 logger.warning("[recovery] Cannot reach session %s for %s: %s",
                                old_session_id[:20], role_id, e)
 
-            # Step 2: Check if prompt changed
-            needs_recreation = not session_alive  # dead sessions always need recreation
+            # Step 2: Always recreate on server restart.
+            # Even "alive" sessions can become zombie (health-check passes but events
+            # are never processed). Recreation is ~10s per agent and guarantees a
+            # working session. Prompt hash comparison kept for logging only.
+            needs_recreation = True
             if session_alive:
                 try:
                     current_prompt = build_system_prompt(role_id, sim_run_id=self.sim_run_id)
                     current_hash = hashlib.md5(current_prompt.encode()).hexdigest()[:16]
                     stored_hash = row.get("prompt_hash")
-                    if current_hash and stored_hash and current_hash != stored_hash:
-                        needs_recreation = True
-                        logger.info("[recovery] Prompt changed for %s — will recreate", role_id)
+                    prompt_changed = (current_hash and stored_hash and current_hash != stored_hash)
+                    logger.info("[recovery] %s: session alive, prompt %s — recreating for reliability",
+                                role_id, "CHANGED" if prompt_changed else "unchanged")
                 except Exception:
-                    pass  # if we can't build prompt, reconnect with existing
+                    logger.info("[recovery] %s: session alive — recreating for reliability", role_id)
 
-            # Step 3: Reconnect or recreate
+            # Step 3: Recreate session (always — reconnection is unreliable)
             ctx = None
-            was_recreated = False
-            if needs_recreation:
-                logger.info("[recovery] Recreating session for %s...", role_id)
-                try:
-                    ctx = await self.session_manager.create_session(
-                        role_id=role_id,
-                        country_code=country_code,
-                        sim_run_id=self.sim_run_id,
-                        scenario_code=self.sim_run_id,
-                        round_num=round_num,
-                        model=row.get("model"),
-                    )
-                    was_recreated = True
-                except Exception as e:
-                    logger.error("[recovery] Failed to recreate session for %s: %s", role_id, e)
-                    # Archive the broken DB row so we don't retry forever
-                    try:
-                        db.table("ai_agent_sessions") \
-                            .update({"status": "archived"}) \
-                            .eq("sim_run_id", self.sim_run_id) \
-                            .eq("role_id", role_id) \
-                            .in_("status", ["ready", "active"]) \
-                            .execute()
-                    except Exception:
-                        pass
-                    continue
-            else:
-                # Reconnect — build context from DB row
-                ctx = SessionContext(
-                    agent_id=row["agent_id"],
-                    agent_version=row.get("agent_version", 1),
-                    environment_id=row["environment_id"],
-                    session_id=row["session_id"],
+            logger.info("[recovery] Recreating session for %s...", role_id)
+            try:
+                ctx = await self.session_manager.create_session(
                     role_id=role_id,
                     country_code=country_code,
                     sim_run_id=self.sim_run_id,
                     scenario_code=self.sim_run_id,
-                    model=row.get("model", "claude-sonnet-4-6"),
                     round_num=round_num,
-                    tool_executor=ToolExecutor(
-                        country_code=country_code,
-                        scenario_code=self.sim_run_id,
-                        sim_run_id=self.sim_run_id,
-                        round_num=round_num,
-                        role_id=role_id,
-                    ),
-                    total_input_tokens=row.get("total_input_tokens", 0),
-                    total_output_tokens=row.get("total_output_tokens", 0),
-                    events_sent=row.get("events_sent", 0),
-                    actions_submitted=row.get("actions_submitted", 0),
-                    tool_calls=row.get("tool_calls", 0),
+                    model=row.get("model"),
                 )
-                self.session_manager._sessions[ctx.session_id] = ctx
+            except Exception as e:
+                logger.error("[recovery] Failed to recreate session for %s: %s", role_id, e)
+                # Archive the broken DB row so we don't retry forever
+                try:
+                    db.table("ai_agent_sessions") \
+                        .update({"status": "archived"}) \
+                        .eq("sim_run_id", self.sim_run_id) \
+                        .eq("role_id", role_id) \
+                        .in_("status", ["ready", "active"]) \
+                        .execute()
+                except Exception:
+                    pass
+                continue
 
             # Step 4: Verify the session works
             try:
@@ -379,23 +350,22 @@ class EventDispatcher:
             self._state_since[role_id] = asyncio.get_event_loop().time()
             recovered += 1
 
-            # Step 6: Recovery pulse if recreated and agent has memories
-            if was_recreated:
-                memories = self.session_manager._load_agent_memories(self.sim_run_id, country_code)
-                if memories:
-                    notes_text = "\n".join(
-                        f"- [{n['memory_key']}]: {n['content'][:200]}"
-                        for n in memories[:10]
-                    )
-                    self.enqueue(
-                        role_id=role_id, tier=2,
-                        event_type="recovery_pulse",
-                        message=(
-                            f"Your session was recovered after a server restart. "
-                            f"You are in Round {round_num}. Your saved notes:\n\n{notes_text}\n\n"
-                            f"Read your full notes with read_notes, then continue with your strategy."
-                        ),
-                    )
+            # Step 6: Recovery pulse — tell agent to read its notes
+            memories = self.session_manager._load_agent_memories(self.sim_run_id, country_code)
+            if memories:
+                notes_text = "\n".join(
+                    f"- [{n['memory_key']}]: {n['content'][:200]}"
+                    for n in memories[:10]
+                )
+                self.enqueue(
+                    role_id=role_id, tier=2,
+                    event_type="recovery_pulse",
+                    message=(
+                        f"Your session was recovered after a server restart. "
+                        f"You are in Round {round_num}. Your saved notes:\n\n{notes_text}\n\n"
+                        f"Read your full notes with read_notes, then continue with your strategy."
+                    ),
+                )
 
             # Check if avatar identity exists — regenerate if missing
             identity = self._fetch_avatar_identity(role_id)
