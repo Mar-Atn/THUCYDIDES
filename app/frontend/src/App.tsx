@@ -18,6 +18,7 @@ import { TemplateEditor } from '@/pages/TemplateEditor'
 import { FacilitatorDashboard } from '@/pages/FacilitatorDashboard'
 import { PublicScreen } from '@/pages/PublicScreen'
 import { ParticipantDashboard } from '@/pages/ParticipantDashboard'
+import { PlayRedirect } from '@/pages/PlayRedirect'
 import { AgentDetailPage } from '@/pages/AgentDetailPage'
 
 export function App() {
@@ -117,7 +118,17 @@ export function App() {
         }
       />
 
-      {/* Participant dashboard */}
+      {/* Participant — auto-resolve to active simrun */}
+      <Route
+        path="/play"
+        element={
+          <ProtectedRoute>
+            <PlayRedirect />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Participant dashboard (with simId) */}
       <Route
         path="/play/:simId"
         element={
