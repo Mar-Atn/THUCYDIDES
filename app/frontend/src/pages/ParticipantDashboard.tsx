@@ -291,53 +291,48 @@ export function ParticipantDashboard() {
     return () => { supabase.removeChannel(ch) }
   }, [simId, myRole?.id, allRoleInfo]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** Handle mode selection from popup. */
-  const handleModeSelect = async (mode: 'text' | 'voice') => {
+  /** Handle mode selection from popup — FULLY SYNCHRONOUS (no awaits). */
+  const handleModeSelect = (mode: 'text' | 'voice') => {
     if (!pendingModeSelect || !simId) return
     const { meetingId, counterpart } = pendingModeSelect
 
-    // Write modality to meetings table (SPEC 5.3)
-    try {
-      await supabase.from('meetings').update({ modality: mode }).eq('id', meetingId)
-    } catch {
-      // Non-blocking — modality is cosmetic, don't prevent meeting from opening
-    }
+    // Write modality to DB — fire and forget (don't await, Supabase client may be busy)
+    supabase.from('meetings').update({ modality: mode }).eq('id', meetingId).then(() => {}).catch(() => {})
 
-    // Mutual exclusion: clear the other mode's state
+    // Clear popup FIRST
+    setPendingModeSelect(null)
+
     if (mode === 'text') {
       setActiveVoiceMeetingId(null)
       setVoiceContext(null)
       setActiveChatMeetingId(meetingId)
     } else {
       setActiveChatMeetingId(null)
-      // Fetch avatar context for voice (identity + intent note)
-      try {
-        const otherCountry = counterpart.country
-        const [identityRes, meetingRes] = await Promise.all([
-          supabase.from('agent_memories').select('content')
-            .eq('sim_run_id', simId).eq('country_code', otherCountry)
-            .eq('memory_key', 'avatar_identity').limit(1),
-          supabase.from('meetings').select('metadata,participant_a_role_id')
-            .eq('id', meetingId).limit(1),
-        ])
+      // Set voice context from allRoleInfo (synchronous, no DB query)
+      setVoiceContext({
+        identity: '',  // Will be fetched by VoiceCallInterface via prompt override
+        intentNote: '',
+        voiceAgentId: counterpart.voiceAgentId || '',
+        counterpartName: counterpart.name,
+        counterpartCountry: counterpart.country,
+      })
+      setActiveVoiceMeetingId(meetingId)
+      // Fetch full avatar context in background — update voice context when ready
+      const otherCountry = counterpart.country
+      Promise.all([
+        supabase.from('agent_memories').select('content')
+          .eq('sim_run_id', simId).eq('country_code', otherCountry)
+          .eq('memory_key', 'avatar_identity').limit(1),
+        supabase.from('meetings').select('metadata,participant_a_role_id')
+          .eq('id', meetingId).limit(1),
+      ]).then(([identityRes, meetingRes]) => {
         const identity = identityRes.data?.[0]?.content as string || ''
         const meta = (meetingRes.data?.[0]?.metadata as Record<string, string>) || {}
         const aiIsA = meetingRes.data?.[0]?.participant_a_role_id !== myRole?.id
         const intentNote = (aiIsA ? meta.intent_note_a : meta.intent_note_b) || ''
-        setVoiceContext({
-          identity, intentNote,
-          voiceAgentId: counterpart.voiceAgentId || '',
-          counterpartName: counterpart.name,
-          counterpartCountry: counterpart.country,
-        })
-        setActiveVoiceMeetingId(meetingId)
-      } catch {
-        // Voice context fetch failed — fallback to text
-        await supabase.from('meetings').update({ modality: 'text' }).eq('id', meetingId)
-        setActiveChatMeetingId(meetingId)
-      }
+        setVoiceContext(prev => prev ? { ...prev, identity, intentNote } : prev)
+      }).catch(() => {})
     }
-    setPendingModeSelect(null)
   }
 
   /* Derive simState from the realtime sim_runs row ----------------------- */
@@ -465,10 +460,11 @@ export function ParticipantDashboard() {
     // Debounce: don't refetch more than once per 2 seconds
     let debounceTimer: ReturnType<typeof setTimeout> | null = null
     const debouncedLoad = () => {
-      if (debounceTimer) return
+      // Don't refetch while mode popup is showing — causes re-render that freezes popup
+      if (debounceTimer || pendingModeRef.current) return
       debounceTimer = setTimeout(() => {
         debounceTimer = null
-        loadData()
+        if (!pendingModeRef.current) loadData()
       }, 2000)
     }
     const ch = supabase
