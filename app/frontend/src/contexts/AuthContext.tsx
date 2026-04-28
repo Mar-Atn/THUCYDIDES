@@ -125,79 +125,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  /* ---- Session initialization ---- */
+  /* ---- Effect 1: Auth state sync — NO async Supabase calls (deadlock prevention) ---- */
+  /* See: auth-js #762, supabase-js #2013, M2 SPEC Phase 6 */
+
+  const [authReady, setAuthReady] = useState(false)
 
   useEffect(() => {
-    let mounted = true
-
-    // 1. Direct session check — fast, works even if listener misses
-    const initSession = async () => {
-      try {
-        const { data: { session: s }, error: sessionError } = await supabase.auth.getSession()
-        if (!mounted) return
-
-        if (sessionError) {
-          // Corrupted session — clear it
-          console.warn('Session error, signing out:', sessionError.message)
-          await supabase.auth.signOut()
-          return
-        }
-
-        if (s?.user) {
-          setUser(s.user)
-          setSession(s)
-          await fetchProfile(s.user.id)
-
-          // If profile is still null after fetch, token may be invalid
-          // Give it a moment then check
-          setTimeout(async () => {
-            if (!mounted) return
-            // Re-verify the session is still valid
-            const { data: { user: verifiedUser } } = await supabase.auth.getUser()
-            if (!verifiedUser) {
-              console.warn('Session invalid after verification, signing out')
-              await supabase.auth.signOut()
-              setUser(null)
-              setSession(null)
-              setProfile(null)
-            }
-          }, 1000)
-        }
-      } catch (e) {
-        console.warn('getSession failed:', e)
-        // On any error, clear auth state to prevent stuck UI
-        try { await supabase.auth.signOut() } catch { /* ignore */ }
-      } finally {
-        if (mounted) setLoading(false)
+    // Initial session check (getSession is safe — runs before listener)
+    supabase.auth.getSession().then(({ data: { session: s }, error }) => {
+      if (error) {
+        console.warn('Session error:', error.message)
+        supabase.auth.signOut()
+        return
       }
-    }
+      setSession(s)
+      setUser(s?.user ?? null)
+      setAuthReady(true)
+    }).catch(() => {
+      setAuthReady(true)
+    })
 
-    initSession()
-
-    // 2. Listener for ongoing changes (sign in, sign out, token refresh)
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (!mounted) return
+    // Listener — sync state only, NEVER await Supabase calls here
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       setSession(newSession)
       setUser(newSession?.user ?? null)
-
+      if (!authReady) setAuthReady(true)
       if (event === 'SIGNED_OUT') {
         setProfile(null)
-      } else if (
-        newSession?.user &&
-        event !== 'INITIAL_SESSION' &&
-        event !== 'TOKEN_REFRESHED'
-      ) {
-        await fetchProfile(newSession.user.id)
       }
     })
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
+    return () => subscription.unsubscribe()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  /* ---- Effect 2: Reactive profile fetch — triggers when user changes ---- */
+
+  useEffect(() => {
+    if (!authReady) return
+    if (!user) {
+      setProfile(null)
+      setLoading(false)
+      return
     }
-  }, [fetchProfile])
+    let cancelled = false
+    setLoading(true)
+    fetchProfile(user.id).then(() => {
+      if (!cancelled) setLoading(false)
+    }).catch(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [user?.id, authReady, fetchProfile])
 
   /* ---- Auth methods ---- */
 

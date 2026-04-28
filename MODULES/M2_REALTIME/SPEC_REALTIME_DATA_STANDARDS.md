@@ -248,16 +248,57 @@ useRealtimeTable('meetings', simId)
 - Dashboard: Realtime subscription for sim/role changes
 - Debug log cleanup
 
-### Phase 4: RPC Page Loaders — READY TO BUILD
-- Create `get_participant_data()` PostgreSQL function
-- Refactor ParticipantDashboard to use single RPC call
-- Replace 9 parallel queries + 7 useRealtimeTable hooks
-- 1 consolidated Realtime channel for invalidation
+### Phase 4: RPC Page Loaders — DONE (ParticipantDashboard)
+- `get_participant_data()` PostgreSQL function — 1 RPC call replaces 9 queries
+- ParticipantDashboard refactored to RPC + consolidated channel
+- 1 consolidated Realtime channel triggers `loadData()` on any relevant table change
 
-### Phase 5: Channel Consolidation — READY TO BUILD
-- Merge per-table channels into 1-2 per page
-- Realtime events trigger RPC refetch (not individual state patches)
-- Remove unused useRealtimeTable instances
+### Phase 5: Channel Consolidation — PARTIALLY DONE
+- ParticipantDashboard: consolidated channel (done)
+- FacilitatorDashboard: multiple hooks (acceptable — 3-4 hooks only)
+- **Gap:** ParticipantDashboard's manual `supabase.channel()` is NOT managed by channelManager — no automatic reconnect on silent death
+
+### Phase 6: Auth Deadlock Fix — TODO
+
+**Root cause:** Known Supabase bug ([auth-js #762](https://github.com/supabase/auth-js/issues/762), [supabase-js #2013](https://github.com/supabase/supabase-js/issues/2013)): any `await supabase.from(...)` inside `onAuthStateChange` callback causes the Supabase client to deadlock. All subsequent API calls hang indefinitely.
+
+**TTT has this bug.** AuthContext.tsx line 192: `await fetchProfile(newSession.user.id)` runs inside `onAuthStateChange`. After fresh login, the next Supabase call anywhere in the app may hang.
+
+**The fix (community best practice):**
+
+Two-effect pattern — separate auth state sync (synchronous) from profile fetch (reactive):
+
+```typescript
+// Effect 1: Auth events — sync state only, NO async Supabase calls
+useEffect(() => {
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    setSession(session)
+    setUser(session?.user ?? null)
+    if (event === 'SIGNED_OUT') setProfile(null)
+  })
+  return () => subscription.unsubscribe()
+}, [])
+
+// Effect 2: Reactive profile fetch — triggers when user changes
+useEffect(() => {
+  if (!user) { setProfile(null); setLoading(false); return }
+  let cancelled = false
+  fetchProfile(user.id).then(data => {
+    if (!cancelled) { setProfile(data); setLoading(false) }
+  })
+  return () => { cancelled = true }
+}, [user?.id])
+```
+
+**Sources:**
+- Official: https://supabase.com/docs/guides/troubleshooting/why-is-my-supabase-api-call-not-returning-PGzXw0
+- auth-js #762: https://github.com/supabase/auth-js/issues/762
+
+### Phase 7: Manual Channel Resilience — TODO
+
+ParticipantDashboard uses a direct `supabase.channel()` (not channelManager) for its consolidated Realtime subscription. This channel has no reconnect logic — if the WebSocket dies silently (Safari tab switch, network drop), the page stops updating.
+
+**The fix:** Register a visibility-change refetch callback for the manual channel, same as channelManager does for managed channels.
 
 ---
 
@@ -270,10 +311,11 @@ Before any feature is marked DONE:
 - [ ] All queried tables have REPLICA IDENTITY FULL
 - [ ] No one-time fetches for changeable data
 - [ ] Tested: data updates without page refresh
+- [ ] Tested: fresh login → dashboard data appears without refresh
 - [ ] Tested: tab switch + return shows current data (Safari)
 - [ ] Tested: popup/modal interactions don't hang
 
 ---
 
 *This spec is referenced by `app/frontend/CLAUDE.md` and enforced on all frontend code.*
-*Community best practices: Supabase GitHub Discussions #900, #884, #3646, #7193.*
+*Community best practices: Supabase GitHub Discussions #900, #884, #3646, #7193, auth-js #762.*

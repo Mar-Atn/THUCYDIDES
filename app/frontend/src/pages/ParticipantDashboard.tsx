@@ -477,9 +477,16 @@ export function ParticipantDashboard() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'meetings',
         filter: `sim_run_id=eq.${simId}` }, debouncedLoad)
       .subscribe()
+    // Visibility refetch — when tab becomes visible, reload data (M2 SPEC Phase 7)
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') loadData()
+    }
+    document.addEventListener('visibilitychange', onVisible)
+
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer)
       supabase.removeChannel(ch)
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [simId, user?.id, myRole?.id, loadData]) // eslint-disable-line react-hooks/exhaustive-deps
 
