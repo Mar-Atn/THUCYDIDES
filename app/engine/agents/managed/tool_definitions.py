@@ -107,16 +107,22 @@ GET_MY_FORCES_SCHEMA: dict = {
 SUBMIT_ACTION_SCHEMA: dict = {
     "name": "submit_action",
     "description": (
-        "Execute a game action (REAL WRITE). action_type + rationale required. "
-        "MILITARY: ground_attack, air_strike, naval_combat, naval_bombardment, "
+        "Execute a game action. The 'action' parameter MUST be a JSON object "
+        "(not a string). Every action requires 'action_type' and 'rationale'.\n\n"
+        "Use get_action_rules(action_type) FIRST to see exact fields for any action.\n\n"
+        "EXAMPLES of correct format:\n"
+        '  {"action_type":"public_statement","content":"Your message","rationale":"Why"}\n'
+        '  {"action_type":"declare_war","target_country":"persia","rationale":"Why"}\n'
+        '  {"action_type":"intelligence","question":"What is X doing?","target_country":"cathay","rationale":"Why"}\n'
+        '  {"action_type":"set_tariffs","target_country":"columbia","level":2,"rationale":"Why"}\n'
+        '  {"action_type":"covert_operation","op_type":"sabotage","target_country":"persia","rationale":"Why"}\n'
+        '  {"action_type":"ground_attack","attacker_unit_codes":["SAR-G1"],"target_global_row":4,"target_global_col":11,"target_description":"Ruthenia position","rationale":"Why"}\n\n'
+        "AVAILABLE TYPES: ground_attack, air_strike, naval_combat, naval_bombardment, "
         "ground_move, move_units, naval_blockade, basing_rights, martial_law, "
-        "nuclear_test, nuclear_launch_initiate. "
-        "ECONOMIC: set_budget, set_tariffs, set_sanctions, set_opec. "
-        "COMMUNICATION: public_statement, call_org_meeting. "
-        "DIPLOMATIC: declare_war, propose_agreement, sign_agreement, "
-        "propose_transaction, accept_transaction. "
-        "COVERT: covert_operation (sabotage|propaganda), intelligence. "
-        "POLITICAL: arrest, assassination, change_leader, reassign_types, "
+        "nuclear_test, nuclear_launch_initiate, set_budget, set_tariffs, set_sanctions, "
+        "set_opec, public_statement, call_org_meeting, declare_war, propose_agreement, "
+        "sign_agreement, propose_transaction, accept_transaction, covert_operation, "
+        "intelligence, arrest, assassination, change_leader, reassign_types, "
         "self_nominate, cast_vote."
     ),
     "input_schema": {
@@ -125,17 +131,8 @@ SUBMIT_ACTION_SCHEMA: dict = {
             "action": {
                 "type": "object",
                 "description": (
-                    "MILITARY: ground_attack(attacker_unit_codes[],target_global_row,target_global_col), "
-                    "move_units(decision:change,changes.moves[]), "
-                    "naval_blockade(zone_id,imposer_units[]), nuclear_test(rationale). "
-                    "ECONOMIC: set_budget(social_pct:0.5-1.5,military_coins,tech_coins), "
-                    "set_tariffs(target_country,level:0-3), set_sanctions(target_country,level:-3 to +3), "
-                    "set_opec(production:min|low|normal|high|max). "
-                    "COMMS: public_statement(content). "
-                    "DIPLOMATIC: declare_war(target_country), "
-                    "propose_transaction(counterpart_country_code,offer,request), "
-                    "accept_transaction(transaction_id,response:accept|decline). "
-                    "COVERT: covert_operation(op_type:sabotage|propaganda,target_country)."
+                    "A JSON object with action_type, rationale, and type-specific fields. "
+                    "ALWAYS use get_action_rules(action_type) first to see required fields."
                 ),
             },
         },

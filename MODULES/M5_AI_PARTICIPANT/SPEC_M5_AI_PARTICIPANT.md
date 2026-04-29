@@ -283,6 +283,33 @@ The tool_executor enforces these restrictions: attempting batch actions during P
 
 **Note:** `get_action_rules` and `get_my_artefacts` depend on shared reference infrastructure with M6. Built when that infrastructure exists; agent uses Layer 1 game rules knowledge as fallback.
 
+### 5.1 submit_action Format Contract
+
+**Critical:** The `submit_action` tool takes a single `action` parameter which MUST be a **JSON object** (dict), never a string. The description and `get_action_rules` output must make this unambiguous.
+
+**Root cause of failures (discovered 2026-04-29):** Agents interpreted compact notation like `ground_attack(attacker_unit_codes[],target_global_row,target_global_col)` as function-call syntax and produced strings like `"action": "public_statement(content:\"text\")"` instead of `"action": {"action_type": "public_statement", "content": "text", "rationale": "reason"}`. ~40% of action attempts failed.
+
+**Required format (always a JSON object):**
+```json
+{
+  "action": {
+    "action_type": "public_statement",
+    "content": "The statement text here",
+    "rationale": "Why I'm making this statement"
+  }
+}
+```
+
+**Three requirements for reliable action submission:**
+
+1. **Tool description** must show explicit JSON examples, not compact notation. Every action type listed with its required fields as JSON keys.
+
+2. **`get_action_rules(action_type)`** must return field names, types, constraints AND a JSON example for each action type.
+
+3. **Defensive validation** in `_submit_action()` must handle the case where `action` is a string (agent error) — parse it if possible, reject with a clear format example if not.
+
+**Every action requires `action_type` + `rationale` at minimum.** Additional fields vary by type. The `get_action_rules` tool returns the exact schema from Pydantic models.
+
 ---
 
 ## 6. Layer 1 System Prompt — Four Sources (~5-8K tokens)

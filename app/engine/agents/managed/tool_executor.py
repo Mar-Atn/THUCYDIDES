@@ -100,6 +100,17 @@ class ToolExecutor:
 
         if tool_name == "submit_action":
             action = tool_input.get("action", {})
+            # Defensive: if agent passed action as a string, reject with clear guidance
+            if isinstance(action, str):
+                return {
+                    "success": False,
+                    "validation_status": "rejected",
+                    "validation_notes": (
+                        f"'action' must be a JSON object, not a string. You sent: \"{action[:80]}...\"\n"
+                        "Correct format: {\"action_type\": \"public_statement\", \"content\": \"...\", \"rationale\": \"...\"}\n"
+                        "Use get_action_rules(action_type) to see required fields for any action type."
+                    ),
+                }
             return self._submit_action(action)
 
         if tool_name == "write_notes":
@@ -660,10 +671,37 @@ class ToolExecutor:
 
         docstring = model_cls.__doc__ or ""
 
+        # Build a JSON example from required fields only (optional fields omitted for clarity)
+        example = {"action_type": action_type, "rationale": "Your reasoning here"}
+        for f in fields:
+            if f["name"] in ("action_type", "rationale"):
+                continue
+            if not f.get("required", False):
+                continue  # Skip optional fields in example
+            ftype = f.get("type", "string")
+            if f.get("fixed_value"):
+                example[f["name"]] = f["fixed_value"]
+            elif f.get("allowed_values"):
+                example[f["name"]] = f["allowed_values"][0]
+            elif ftype == "integer":
+                example[f["name"]] = 0
+            elif ftype == "number":
+                example[f["name"]] = 1.0
+            elif ftype == "boolean":
+                example[f["name"]] = True
+            elif ftype == "array":
+                example[f["name"]] = []
+            elif ftype == "object":
+                example[f["name"]] = {}
+            else:
+                example[f["name"]] = f"<{f['name']}>"
+
         return {
             "action_type": action_type,
             "description": docstring.strip(),
             "fields": fields,
+            "json_example": example,
+            "usage": f'submit_action(action={{"action_type": "{action_type}", ...}})',
         }
 
     def _request_meeting(self, target_country: str, agenda: str, intent_note: str = "") -> dict:
