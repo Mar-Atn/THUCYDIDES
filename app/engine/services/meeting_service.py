@@ -52,6 +52,23 @@ def create_meeting(
         "[meeting] Created meeting %s for invitation %s (%s vs %s)",
         meeting["id"], invitation_id, participant_a_role_id, participant_b_role_id,
     )
+
+    # Write observatory event for meeting creation (SIM events feed)
+    try:
+        from engine.services.common import write_event, get_scenario_id
+        scenario_id = get_scenario_id(client, sim_run_id)
+        write_event(
+            client, sim_run_id, scenario_id, round_num or 0,
+            participant_a_country,
+            "meeting_started",
+            f"Bilateral meeting: {participant_a_role_id} ({participant_a_country}) and {participant_b_role_id} ({participant_b_country})",
+            {"meeting_id": meeting["id"], "participants": [participant_a_role_id, participant_b_role_id],
+             "agenda": agenda or ""},
+            phase="A", category="diplomatic",
+        )
+    except Exception as e:
+        logger.warning("[meeting] Failed to write observatory event: %s", e)
+
     return meeting
 
 
@@ -161,6 +178,27 @@ def end_meeting(meeting_id: str, role_id: str) -> dict:
 
     logger.info("[meeting] Meeting %s ended by %s after %d turns",
                 meeting_id, role_id, meeting["turn_count"])
+
+    # Write observatory event for meeting completion
+    try:
+        from engine.services.common import write_event, get_scenario_id
+        sim_run_id = meeting["sim_run_id"]
+        scenario_id = get_scenario_id(client, sim_run_id)
+        a_role = meeting["participant_a_role_id"]
+        b_role = meeting["participant_b_role_id"]
+        a_country = meeting.get("participant_a_country", "")
+        turns = meeting["turn_count"]
+        write_event(
+            client, sim_run_id, scenario_id, meeting.get("round_num", 0),
+            a_country,
+            "meeting_completed",
+            f"Meeting ended: {a_role} and {b_role} ({turns} turns)",
+            {"meeting_id": meeting_id, "participants": [a_role, b_role],
+             "turns": turns, "ended_by": role_id},
+            phase="A", category="diplomatic",
+        )
+    except Exception as e:
+        logger.warning("[meeting] Failed to write completion event: %s", e)
 
     return {"success": True, "narrative": "Meeting ended."}
 

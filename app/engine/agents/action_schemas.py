@@ -114,14 +114,24 @@ class IntelligenceOrder(BaseModel):
 
 
 class TransactionOrder(BaseModel):
-    """Propose exchange transaction or agreement."""
+    """Propose exchange transaction or agreement.
+
+    For propose_transaction: offer and request use ONLY these asset keys:
+    - coins: integer (treasury amount)
+    - units: list of unit_code strings to transfer
+    - technology: dict like {"ai": true} or {"nuclear": true}
+    - basing_rights: dict like {"zone_id": "zone_name", "guest_country": "code"}
+
+    For propose_agreement: use terms (free text) + agreement_name + agreement_type.
+    Agreements are diplomatic (no asset transfer), transactions are economic (real assets).
+    """
     action_type: Literal["propose_transaction", "propose_agreement"]
     counterpart_country: str
-    terms: Optional[str] = None
-    offer: Optional[dict] = None
-    request: Optional[dict] = None
-    agreement_name: Optional[str] = None
-    agreement_type: Optional[str] = None
+    terms: Optional[str] = Field(None, description="Free-text terms (especially for propose_agreement)")
+    offer: Optional[dict] = Field(None, description="Assets you offer. Keys: coins, units, technology, basing_rights ONLY")
+    request: Optional[dict] = Field(None, description="Assets you request. Keys: coins, units, technology, basing_rights ONLY")
+    agreement_name: Optional[str] = Field(None, description="Name for the agreement (propose_agreement only)")
+    agreement_type: Optional[str] = Field(None, description="Type: diplomatic, trade, military, ceasefire (propose_agreement only)")
     visibility: Optional[str] = "public"
     rationale: str
 
